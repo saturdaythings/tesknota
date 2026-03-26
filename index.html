@@ -655,22 +655,22 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
       <div class="ipanel on" id="ip-link">
         <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px;line-height:1.7;">Paste any Fragrantica or retailer URL. The backend fetches and parses name, house, notes, rating, longevity, sillage, and price. You review before anything saves.</div>
-        <div class="linkrow"><input placeholder="https://www.fragrantica.com/perfume/..." id="linkIn"><button class="btn btn-blue" onclick="simLink()">Fetch Metadata</button></div>
-        <div class="lresult" id="linkRes">
+        <div class="linkrow"><input placeholder="https://www.fragrantica.com/perfume/..." id="linkIn"><button class="btn btn-blue" id="linkFetchBtn" onclick="fetchLink()">Fetch Metadata</button></div>
+        <div class="lresult" id="linkRes" style="display:none;">
           <div style="font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px;">Fetched — review and confirm</div>
-          <div class="lr-n">Baccarat Rouge 540 EDP</div>
-          <div class="lr-h">Maison Francis Kurkdjian</div>
+          <div class="lr-n" id="lr-name"></div>
+          <div class="lr-h" id="lr-house"></div>
           <div class="lr-g">
-            <div><div class="lrl">Community</div><div class="lrv">4.6 / 5.0</div></div>
-            <div><div class="lrl">Longevity</div><div class="lrv">12–24h</div></div>
-            <div><div class="lrl">Sillage</div><div class="lrv">Strong</div></div>
-            <div><div class="lrl">Avg Price</div><div class="lrv">~$380</div></div>
+            <div><div class="lrl">Community</div><div class="lrv" id="lr-comm">—</div></div>
+            <div><div class="lrl">Longevity</div><div class="lrv" id="lr-long">—</div></div>
+            <div><div class="lrl">Sillage</div><div class="lrv" id="lr-sill">—</div></div>
           </div>
-          <div class="lr-notes">Saffron · Amberwood · Ambergris · Fir Resin · Jasmine · Cedarwood · Musk</div>
+          <div class="lr-notes" id="lr-notes"></div>
+          <div id="lr-confidence" style="display:none;font-family:var(--mono);font-size:8px;color:var(--warm);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;"></div>
           <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;">Confirm and add personal details, or add directly to wishlist.</div>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-blue" onclick="importToCollection({name:'Baccarat Rouge 540 EDP',house:'Maison Francis Kurkdjian',communityRating:4.6,communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$380',notes:'Saffron, Amberwood, Ambergris, Fir Resin, Jasmine'})">Add to Collection</button>
-            <button class="btn btn-ghost" onclick="importToWishlist({name:'Baccarat Rouge 540 EDP',house:'Maison Francis Kurkdjian',communityRating:4.6,avgPrice:'~$380',notes:'Saffron, Amberwood, Ambergris, Fir Resin, Jasmine'})">Add to Wishlist</button>
+            <button class="btn btn-blue" onclick="importToCollection(window._fetchedFragData)">Add to Collection</button>
+            <button class="btn btn-ghost" onclick="importToWishlist(window._fetchedFragData)">Add to Wishlist</button>
             <button class="btn-bare" onclick="document.getElementById('linkRes').style.display='none';document.getElementById('linkIn').value=''">Discard</button>
           </div>
         </div>
@@ -2266,11 +2266,70 @@ function confirmBulkImport(){
   if(added>0) goPage('collection');
 }
 
-function simLink(){
-  const v=document.getElementById('linkIn').value.trim();
-  if(!v){toast('Paste a Fragrantica or retailer URL first');return;}
-  toast('Fetching metadata...');
-  setTimeout(()=>{document.getElementById('linkRes').style.display='block';toast('Review and confirm before saving');},800);
+async function fetchLink(){
+  var url=document.getElementById('linkIn').value.trim();
+  if(!url){toast('Paste a Fragrantica or retailer URL first');return;}
+  var workerUrl=window.__ENV__&&window.__ENV__.WORKER_URL?window.__ENV__.WORKER_URL:'';
+  if(!workerUrl){
+    var name=extractNameFromSlug(url);
+    var house=extractHouseFromSlug(url);
+    if(!name){toast('Could not parse URL — try searching by name instead');return;}
+    showLinkResult({name:name,house:house,parseConfidence:'slug-only',url:url});
+    return;
+  }
+  setSyncState('syncing');
+  var btn=document.getElementById('linkFetchBtn');
+  btn.textContent='Fetching...';btn.disabled=true;
+  try{
+    var res=await fetch(workerUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url})});
+    var data=await res.json();
+    if(data.error)throw new Error(data.error);
+    showLinkResult(data);
+    setSyncState('ok');
+  }catch(e){
+    toast('Could not fetch metadata: '+e.message);
+    setSyncState('error');
+    var n2=extractNameFromSlug(url);
+    var h2=extractHouseFromSlug(url);
+    if(n2)showLinkResult({name:n2,house:h2,parseConfidence:'slug-only',url:url});
+  }finally{
+    btn.textContent='Fetch Metadata';btn.disabled=false;
+  }
+}
+
+function extractNameFromSlug(url){
+  try{
+    var path=new URL(url).pathname;
+    var parts=path.split('/').filter(Boolean);
+    var last=parts[parts.length-1].replace(/\.html$/,'').replace(/-\d+$/,'');
+    return last.replace(/-/g,' ').trim();
+  }catch(e){return '';}
+}
+
+function extractHouseFromSlug(url){
+  try{
+    var path=new URL(url).pathname;
+    var parts=path.split('/').filter(Boolean);
+    return parts.length>=3?parts[1].replace(/-/g,' '):'';
+  }catch(e){return '';}
+}
+
+function showLinkResult(data){
+  document.getElementById('lr-name').textContent=data.name||'';
+  document.getElementById('lr-house').textContent=data.house||'';
+  document.getElementById('lr-comm').textContent=data.communityRating?data.communityRating+' / 5.0':'—';
+  document.getElementById('lr-long').textContent=data.communityLong||'—';
+  document.getElementById('lr-sill').textContent=data.communitySill||'—';
+  document.getElementById('lr-notes').textContent=data.allNotes||data.topNotes||'—';
+  var conf=document.getElementById('lr-confidence');
+  if(data.parseConfidence==='slug-only'){
+    conf.textContent='Parsed from URL — verify name before saving';
+    conf.style.display='block';
+  }else{
+    conf.style.display='none';
+  }
+  document.getElementById('linkRes').style.display='block';
+  window._fetchedFragData=data;
 }
 
 function simScan(){
