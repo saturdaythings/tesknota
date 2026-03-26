@@ -1150,6 +1150,58 @@ async function appendRow(tabName,row,headers){
   setSyncState('ok');
 }
 
+// ── Sheet ↔ Memory transformation helpers ─────────────────────────────────
+
+function fragToRow(f){
+  return {
+    id:f.id||'', userId:f.userId||'', name:f.name||'', house:f.house||'',
+    status:f.status||'', sizeOwned:(f.sizes||[]).join(', '),
+    communityRating:f.communityRating||'', communityLong:f.communityLong||'',
+    communitySill:f.communitySill||'', avgPrice:f.avgPrice||'', notes:f.notes||'',
+    personalRating:f.personalRating||'', statusRating:f.statusRating||'',
+    personalLong:f.personalLong||'', personalSill:f.personalSill||'',
+    whereBought:f.whereBought||'', purchaseDate:f.purchaseDate||'',
+    isDupe:f.isDupe?'true':'false', dupeFor:f.dupeFor||'',
+    personalNotes:f.personalNotes||'', createdAt:f.createdAt||new Date().toISOString(),
+  };
+}
+
+function rowToFrag(row){
+  return {
+    id:row.id, userId:row.userId, name:row.name, house:row.house, status:row.status,
+    sizes:row.sizeOwned ? row.sizeOwned.split(',').map(function(s){return s.trim();}).filter(Boolean) : [],
+    communityRating:row.communityRating||null, communityLong:row.communityLong||null,
+    communitySill:row.communitySill||null, avgPrice:row.avgPrice||null, notes:row.notes||'',
+    personalRating:row.personalRating ? parseInt(row.personalRating) : null,
+    statusRating:row.statusRating||null, personalLong:row.personalLong||null,
+    personalSill:row.personalSill||null, whereBought:row.whereBought||null,
+    purchaseDate:row.purchaseDate||null, isDupe:row.isDupe==='true',
+    dupeFor:row.dupeFor||'', personalNotes:row.personalNotes||'', createdAt:row.createdAt||'',
+  };
+}
+
+function compToRow(c){
+  return {
+    id:c.id||'', userId:c.userId||'',
+    primaryFragranceId:c.primaryFragId||'', primaryFragranceName:c.primaryFrag||'',
+    secondaryFragranceId:c.secondaryFragId||'', secondaryFragranceName:c.secondaryFrag||'',
+    complimenterGender:c.gender||'', relation:c.relation||'',
+    month:c.month||'', year:c.year||'', location:c.location||'',
+    notes:c.notes||'', createdAt:c.createdAt||new Date().toISOString(),
+  };
+}
+
+function rowToComp(row){
+  return {
+    id:row.id, userId:row.userId,
+    primaryFragId:row.primaryFragranceId, primaryFrag:row.primaryFragranceName,
+    secondaryFragId:row.secondaryFragranceId||null, secondaryFrag:row.secondaryFragranceName||null,
+    gender:row.complimenterGender||null, relation:row.relation,
+    month:row.month, year:row.year, location:row.location||null,
+    notes:row.notes||null, createdAt:row.createdAt||'',
+  };
+}
+
 async function loadAllData(){
   const results=await Promise.all([
     readSheet('users'),
@@ -1157,11 +1209,11 @@ async function loadAllData(){
     readSheet('compliments'),
   ]);
   USERS=results[0].length?results[0]:USERS;
-  FRAGRANCES=results[1];
-  COMPLIMENTS=results[2];
+  FRAGRANCES=results[1].map(rowToFrag);
+  COMPLIMENTS=results[2].map(rowToComp);
   // Recalculate ID counters from loaded data
-  FRAGRANCES.forEach(function(f){ var n=parseInt(f.id.replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
-  COMPLIMENTS.forEach(function(c){ var n=parseInt(c.id.replace(/\D/g,''))||0; if(n>=nextCompId)nextCompId=n+1; });
+  FRAGRANCES.forEach(function(f){ var n=parseInt((f.id||'').replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
+  COMPLIMENTS.forEach(function(c){ var n=parseInt((c.id||'').replace(/\D/g,''))||0; if(n>=nextCompId)nextCompId=n+1; });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1521,6 +1573,7 @@ document.getElementById('compFbar').addEventListener('click',e=>{
 
 function deleteCompliment(id){
   COMPLIMENTS = COMPLIMENTS.filter(c=>c.id!==id);
+  writeSheet('compliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   renderCompliments(document.querySelector('#compFbar .fc.on').dataset.filter);
   updateCounts();
   toast('Compliment removed');
@@ -1667,11 +1720,12 @@ function changeStatus(newStatus){
   const f = FRAGRANCES.find(x=>x.id===currentDetailId);
   if(!f)return;
   f.status = newStatus;
+  writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   document.getElementById('statusStrip').classList.remove('show');
   openDetail(currentDetailId); // re-render panel
   renderCurrentPage();
   updateCounts();
-  toast(`Moved to ${STATUS_LABELS[newStatus]}`);
+  toast('Moved to '+STATUS_LABELS[newStatus]);
 }
 
 function viewFragCompliments(){
@@ -1698,6 +1752,7 @@ function showRemoveConfirm(){
 function hideRemoveConfirm(){ document.getElementById('removeConfirm').style.display='none'; }
 function confirmRemove(){
   FRAGRANCES = FRAGRANCES.filter(f=>f.id!==currentDetailId);
+  writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   closeDetail();
   renderCurrentPage();
   updateCounts();
@@ -1877,12 +1932,17 @@ function saveFragrance(){
   };
   if(editingFragId){
     const idx = FRAGRANCES.findIndex(f=>f.id===editingFragId);
-    if(idx>=0){ FRAGRANCES[idx]={...FRAGRANCES[idx],...data}; toast('Fragrance updated'); }
+    if(idx>=0){
+      FRAGRANCES[idx]={...FRAGRANCES[idx],...data};
+      writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+      toast('Fragrance updated');
+    }
   } else {
     // Find metadata from DB
     const db = FRAG_DB.find(d=>d.n.toLowerCase()===name.toLowerCase());
-    const newFrag = { id:'f'+nextId++, communityRating:db?db.r:null, communityLong:db?db.l:null, communitySill:db?db.s:null, avgPrice:db?db.p:null, notes:db?db.notes.replace(/,/g,'·'):'', house:db?db.h:'', ...data };
+    const newFrag = { id:'f'+nextId++, userId:CURRENT_USER?CURRENT_USER.id:'u1', communityRating:db?db.r:null, communityLong:db?db.l:null, communitySill:db?db.s:null, avgPrice:db?db.p:null, notes:db?db.notes.replace(/,/g,'·'):'', house:db?db.h:'', ...data };
     FRAGRANCES.push(newFrag);
+    appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
     toast(name+' added to '+STATUS_LABELS[data.status]);
   }
   closeModal('addFragM');
@@ -1967,8 +2027,9 @@ function saveCompliment(){
   const f = FRAGRANCES.find(x=>x.id===fragId);
   const f2Id = document.getElementById('compFrag2').value;
   const f2 = f2Id ? FRAGRANCES.find(x=>x.id===f2Id) : null;
-  COMPLIMENTS.unshift({
+  var newComp = {
     id: genCompId(),
+    userId: CURRENT_USER?CURRENT_USER.id:'u1',
     primaryFragId: fragId,
     primaryFrag: f.name,
     secondaryFragId: f2?f2Id:null,
@@ -1978,7 +2039,9 @@ function saveCompliment(){
     month, year,
     location: document.getElementById('compLoc').value||null,
     notes: document.getElementById('compNotes').value||null,
-  });
+  };
+  COMPLIMENTS.unshift(newComp);
+  appendRow('compliments',compToRow(newComp),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   closeModal('addCompM');
   renderCurrentPage();
   updateCounts();
@@ -2009,13 +2072,14 @@ function importToWishlist(data){
   const exists = FRAGRANCES.find(f=>f.name.toLowerCase()===data.name.toLowerCase());
   if(exists){ toast(data.name+' is already in your collection'); return; }
   const newFrag = {
-    id:'f'+nextId++, name:data.name, house:data.house||'',
+    id:'f'+nextId++, userId:CURRENT_USER?CURRENT_USER.id:'u1', name:data.name, house:data.house||'',
     status:'WANT_TO_BUY', sizes:[], personalRating:null, statusRating:null,
     personalLong:null, personalSill:null, communityRating:data.communityRating||null,
     communityLong:null, communitySill:null, avgPrice:data.avgPrice||null,
     notes:data.notes||'', whereBought:null, purchaseDate:null, isDupe:false, dupeFor:'', personalNotes:'',
   };
   FRAGRANCES.push(newFrag);
+  appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   document.getElementById('linkRes').style.display='none';
   renderCurrentPage(); updateCounts();
   toast(data.name+' added to Wishlist');
@@ -2061,14 +2125,15 @@ function confirmBulkImport(){
   importQueueData.forEach((d,i)=>{
     const chk=document.getElementById('iqchk'+i);
     if(chk&&chk.checked&&!d.isDup){
-      FRAGRANCES.push({id:'f'+nextId++,name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:d.communityRating,communityLong:null,communitySill:null,avgPrice:null,notes:d.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
+      FRAGRANCES.push({id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:d.communityRating,communityLong:null,communitySill:null,avgPrice:null,notes:d.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
       added++;
     } else skipped++;
   });
+  if(added>0) writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   importQueueData=[];
   renderImportQueue();
   updateCounts();
-  toast(`${added} imported, ${skipped} skipped`);
+  toast(added+' imported, '+skipped+' skipped');
   if(added>0) goPage('collection');
 }
 
@@ -2717,6 +2782,7 @@ function palFlows() {
             personalNotes: answers.personalNotes || '',
           };
           FRAGRANCES.push(newFrag);
+          appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(answers.name + ' added');
@@ -2827,6 +2893,7 @@ function palFlows() {
           f.personalLong = answers.personalLong || null;
           f.personalSill = answers.personalSill || null;
           f.personalNotes = answers.personalNotes || f.personalNotes;
+          writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(f.name + ' updated');
@@ -2868,6 +2935,7 @@ function palFlows() {
           var f = FRAGRANCES.find(function(x) { return x.id === PAL.editTarget.id; });
           if (!f) return;
           f.status = answers.status;
+          writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(f.name + ' moved to ' + STATUS_LABELS[answers.status]);
@@ -2896,6 +2964,7 @@ function palFlows() {
           if (!PAL.editTarget) return;
           var name = PAL.editTarget.name;
           FRAGRANCES = FRAGRANCES.filter(function(f) { return f.id !== PAL.editTarget.id; });
+          writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(name + ' removed');
@@ -2988,7 +3057,7 @@ function palFlows() {
         saveLabel: 'Log Compliment',
         onSave: function(answers) {
           var dateParts = (answers.date || '').split(' ');
-          COMPLIMENTS.unshift({
+          var newComp = {
             id: genCompId(),
             userId: CURRENT_USER ? CURRENT_USER.id : 'u1',
             primaryFragId: answers.primaryFragId,
@@ -3001,7 +3070,9 @@ function palFlows() {
             year: dateParts[1] || String(new Date().getFullYear()),
             location: answers.location || null,
             notes: answers.notes ? '"' + answers.notes + '"' : null,
-          });
+          };
+          COMPLIMENTS.unshift(newComp);
+          appendRow('compliments',compToRow(newComp),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast('Compliment logged');
@@ -3066,6 +3137,7 @@ function palFlows() {
           c.relation = answers.relation || c.relation;
           c.location = answers.location || c.location;
           c.notes = answers.notes ? '"' + answers.notes + '"' : c.notes;
+          writeSheet('compliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           toast('Compliment updated');
         },
@@ -3092,6 +3164,7 @@ function palFlows() {
         onSave: function() {
           if (!PAL.editTarget) return;
           COMPLIMENTS = COMPLIMENTS.filter(function(c) { return c.id !== PAL.editTarget.id; });
+          writeSheet('compliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast('Compliment deleted');
@@ -3129,7 +3202,7 @@ function palFlows() {
           var db = FRAG_DB.find(function(d) { return d.n === answers.name; });
           var already = FRAGRANCES.find(function(f) { return f.name.toLowerCase() === answers.name.toLowerCase(); });
           if (already) { toast(answers.name + ' is already in your collection'); return; }
-          FRAGRANCES.push({
+          var wFrag = {
             id: 'f' + nextId++,
             userId: CURRENT_USER ? CURRENT_USER.id : 'u1',
             name: answers.name,
@@ -3145,7 +3218,9 @@ function palFlows() {
             personalLong: null, personalSill: null,
             whereBought: null, purchaseDate: null,
             isDupe: false, dupeFor: '', personalNotes: '',
-          });
+          };
+          FRAGRANCES.push(wFrag);
+          appendRow('fragrances',fragToRow(wFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(answers.name + ' added to Wishlist');
@@ -3208,6 +3283,7 @@ function palFlows() {
           if (answers.personalRating) f.personalRating = parseInt(answers.personalRating);
           if (answers.whereBought) f.whereBought = answers.whereBought;
           f.sizes = ['Full Bottle'];
+          writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(f.name + ' moved to Current Collection');
