@@ -444,33 +444,32 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 <body>
 
 <!-- ── IDENTITY SCREEN ── -->
-<div id="identityScreen" style="display:flex;position:fixed;inset:0;background:var(--blue3);z-index:1000;flex-direction:column;align-items:center;justify-content:center;padding:32px;padding-top:20vh;">
-  <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px;">
-    <!-- Wordmark block — exact sidebar .sb-top values, left-aligned as a unit -->
-    <div style="align-self:flex-start;margin-bottom:64px;">
-      <div style="font-family:var(--script);font-size:24px;font-style:italic;color:var(--warm2);letter-spacing:.02em;line-height:1;">tęsknota</div>
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:4px;">Fragrance Tracker</div>
-      <div style="font-family:'Cormorant Garamond',var(--script);font-size:13px;font-style:italic;color:rgba(200,185,154,.92);line-height:1.45;margin-top:10px;letter-spacing:.01em;">[ tɛsk-ˈnɔ-ta ] &nbsp;·&nbsp; a deep longing for what is absent or past</div>
+<div id="identityScreen" style="display:flex;position:fixed;inset:0;background:var(--blue3);z-index:1000;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px;padding-top:35vh;">
+  <!-- Hero wordmark — centered, larger than sidebar -->
+  <div style="text-align:center;margin-bottom:64px;">
+    <div style="font-family:var(--script);font-size:64px;font-style:italic;color:var(--warm2);letter-spacing:.02em;line-height:1;">tęsknota</div>
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:12px;">Fragrance Tracker</div>
+    <div style="height:20px;"></div>
+    <div style="font-family:'Cormorant Garamond',var(--script);font-size:15px;font-style:italic;color:rgba(200,185,154,.72);line-height:1.5;letter-spacing:.01em;">[ tɛsk-ˈnɔ-ta ] &nbsp;·&nbsp; a deep longing for what is absent or past</div>
+  </div>
+  <!-- Loading state -->
+  <div id="idLoading" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+    <div style="width:28px;height:28px;border:2px solid rgba(200,185,154,.25);border-top-color:var(--warm2);border-radius:50%;animation:spin .8s linear infinite;"></div>
+    <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.14em;text-transform:uppercase;">Loading your collection…</div>
+  </div>
+  <!-- Identity picker (shown after data loads) -->
+  <div id="idPicker" style="display:none;flex-direction:column;align-items:center;">
+    <div style="font-family:var(--body);font-size:14px;color:rgba(255,255,255,.7);margin-bottom:24px;letter-spacing:.04em;text-align:center;">Who are you?</div>
+    <div style="display:flex;gap:16px;">
+      <button style="min-width:160px;min-height:56px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--script);font-size:24px;font-style:italic;padding:0 44px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.28)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Kiana','u1')">Kiana</button>
+      <button style="min-width:160px;min-height:56px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--script);font-size:24px;font-style:italic;padding:0 44px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.28)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Sylvia','u2')">Sylvia</button>
     </div>
-    <!-- Loading state -->
-    <div id="idLoading" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
-      <div style="width:28px;height:28px;border:2px solid rgba(200,185,154,.25);border-top-color:var(--warm2);border-radius:50%;animation:spin .8s linear infinite;"></div>
-      <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.14em;text-transform:uppercase;">Loading your collection…</div>
-    </div>
-    <!-- Identity picker (shown after data loads) -->
-    <div id="idPicker" style="display:none;flex-direction:column;align-items:center;">
-      <div style="font-family:var(--body);font-size:14px;color:rgba(255,255,255,.7);margin-bottom:24px;letter-spacing:.04em;">Who are you?</div>
-      <div style="display:flex;gap:16px;">
-        <button style="min-width:160px;min-height:56px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--script);font-size:24px;font-style:italic;padding:0 44px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.28)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Kiana','u1')">Kiana</button>
-        <button style="min-width:160px;min-height:56px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--script);font-size:24px;font-style:italic;padding:0 44px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.28)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Sylvia','u2')">Sylvia</button>
-      </div>
-    </div>
-    <!-- Error state -->
-    <div id="idError" style="display:none;flex-direction:column;align-items:center;gap:12px;max-width:360px;text-align:center;">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--rose);letter-spacing:.14em;text-transform:uppercase;">Could not reach Google Sheets</div>
-      <div style="font-family:var(--body);font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;">Check the browser console for details. Your local data is intact — you can continue without sync.</div>
-      <button style="margin-top:8px;min-width:160px;min-height:44px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:0 24px;cursor:pointer;" onclick="document.getElementById('idError').style.display='none';document.getElementById('idPicker').style.display='flex';">Continue anyway</button>
-    </div>
+  </div>
+  <!-- Error state -->
+  <div id="idError" style="display:none;flex-direction:column;align-items:center;gap:12px;max-width:360px;text-align:center;">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--rose);letter-spacing:.14em;text-transform:uppercase;">Could not reach Google Sheets</div>
+    <div style="font-family:var(--body);font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;">Check the browser console for details. Your local data is intact — you can continue without sync.</div>
+    <button style="margin-top:8px;min-width:160px;min-height:44px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:0 24px;cursor:pointer;" onclick="document.getElementById('idError').style.display='none';document.getElementById('idPicker').style.display='flex';">Continue anyway</button>
   </div>
 </div>
 
