@@ -623,7 +623,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="fc" data-filter="Friend">Friends</div>
         <div class="fc" data-filter="Colleague / Client">Colleagues</div>
         <div class="fc" data-filter="Family">Family</div>
-        <div class="fc" data-filter="Significant Other">SO</div>
+        <div class="fc" data-filter="Significant Other">Significant Other</div>
       </div>
       <div class="cff-bar" id="compFragFilterBar" style="display:none;">
         Filtered: <span class="cff-name" id="cffName"></span>
@@ -1402,52 +1402,16 @@ const FRAG_DB = [
   {n:'Spicebomb Extreme',h:'Viktor & Rolf',r:'4.1',l:'6–12h',s:'Moderate',notes:'Tobacco, Lavender, Vanilla, Pepper',p:'~$95'},
 ];
 
-// FRAGRANCES — main collection (single source of truth)
-let FRAGRANCES = [
-  {id:'f1',userId:'u1',name:'Baccarat Rouge 540',house:'Maison Francis Kurkdjian',status:'CURRENT',sizes:['Full Bottle'],personalRating:5,statusRating:'Obsessed',personalLong:'12–24h',personalSill:'Strong',communityRating:'4.5',communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$320',notes:'Amberwood · Ambergris · Fir Resin · Jasmine · Cedarwood',whereBought:'FragranceNet',purchaseDate:'Jan 2025',isDupe:false,dupeFor:'',personalNotes:'My signature. The amberwood opens up on my skin after 30 mins — sweet but never cloying. Perfect for evening events.'},
-  {id:'f2',userId:'u1',name:'Tobacco Vanille',house:'Tom Ford',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'12–24h',personalSill:'Moderate',communityRating:'4.4',communityLong:'12–24h',communitySill:'Moderate',avgPrice:'~$280',notes:'Tobacco Leaf · Vanilla · Tonka Bean · Cacao · Vetiver',whereBought:'Jomashop',purchaseDate:'Sep 2024',isDupe:false,dupeFor:'',personalNotes:'Incredibly cozy. Perfect for fall and winter. Gets compliments almost every time I wear it to the office.'},
-  {id:'f3',userId:'u1',name:'Sauvage EDP',house:'Dior',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'8–12h',personalSill:'Strong',communityRating:'4.3',communityLong:'8–12h',communitySill:'Strong',avgPrice:'~$130',notes:'Bergamot · Pepper · Ambroxan · Lavender · Woody Notes',whereBought:'Sephora',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'The reliable choice for professional settings. Always delivers.'},
-  {id:'f4',userId:'u1',name:'Layton',house:'Parfums de Marly',status:'CURRENT',sizes:['Travel'],personalRating:5,statusRating:'Obsessed',personalLong:'12–24h',personalSill:'Moderate',communityRating:'4.5',communityLong:'12–24h',communitySill:'Moderate',avgPrice:'~$350',notes:'Apple · Violet · Cardamom · Sandalwood · Pepper · Geranium',whereBought:'FragranceNet',purchaseDate:'Nov 2024',isDupe:false,dupeFor:'',personalNotes:'Underrated gem. The apple-cardamom opening is stunning. I reach for this on weekends.'},
-  {id:'f5',userId:'u1',name:'Bleu de Chanel EDP',house:'Chanel',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'8–12h',personalSill:'Moderate',communityRating:'4.4',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$155',notes:'Citrus · Ginger · Jasmine · Sandalwood · Cedarwood',whereBought:'Sephora',purchaseDate:'Mar 2024',isDupe:false,dupeFor:'',personalNotes:'Versatile everyday option. Classic without being boring.'},
-  {id:'f6',userId:'u1',name:'Colonia Essenza',house:'Acqua di Parma',status:'CURRENT',sizes:['Sample'],personalRating:4,statusRating:'Like',personalLong:'4–6h',personalSill:'Soft',communityRating:'4.2',communityLong:'4–6h',communitySill:'Soft',avgPrice:'~$160',notes:'Citrus · Cedar · Vetiver · Tobacco',whereBought:'Brand Direct',purchaseDate:'Feb 2025',isDupe:false,dupeFor:'',personalNotes:'Light and refined. Great for summer and formal daytime.'},
-  {id:'f7',userId:'u1',name:'Eros EDP',house:'Versace',status:'PREVIOUSLY_OWNED',sizes:[],personalRating:3,statusRating:'Just OK',personalLong:'8–12h',personalSill:'Strong',communityRating:'4.0',communityLong:'8–12h',communitySill:'Strong',avgPrice:'~$85',notes:'Mint · Apple · Vanilla · Tonka Bean',whereBought:'Amazon',purchaseDate:'Jan 2023',isDupe:false,dupeFor:'',personalNotes:'Too sweet for my taste on dry down. Sold it after 6 months.'},
-  {id:'f8',userId:'u1',name:'Spicebomb Extreme',house:'Viktor & Rolf',status:'DONT_LIKE',sizes:['Sample'],personalRating:2,statusRating:"Don't Like",personalLong:'0–6h',personalSill:'Moderate',communityRating:'4.1',communityLong:'6–12h',communitySill:'Moderate',avgPrice:'~$95',notes:'Tobacco · Lavender · Vanilla · Pepper',whereBought:'Scentsplit',purchaseDate:'Nov 2023',isDupe:false,dupeFor:'',personalNotes:'Too heavy and medicinal on my skin. Community loves it but it doesn\'t work for me.'},
-  {id:'f9',userId:'u1',name:'Aventus',house:'Creed',status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.5',communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$435',notes:'Pineapple · Birch · Ambergris · Oakmoss',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''},
-  {id:'f10',userId:'u1',name:'Hacivat',house:'Nishane',status:'WANT_TO_SMELL',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.4',communityLong:'>24h',communitySill:'Strong',avgPrice:'~$185',notes:'Pineapple · Oakmoss · Amberwood · Jasmine',whereBought:null,purchaseDate:null,isDupe:true,dupeFor:'Baccarat Rouge 540',personalNotes:'Rumored BR540 dupe at less than half the price.'},
-  {id:'f11',userId:'u1',name:'Oud for Greatness',house:'Initio',status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.3',communityLong:'>24h',communitySill:'Enormous',avgPrice:'~$320',notes:'Oud · Saffron · Nutmeg · Musk',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''},
-  {id:'f12',userId:'u1',name:'Nio',house:'Xerjoff',status:'WANT_TO_SMELL',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.2',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$280',notes:'Bergamot · Yuzu · Musk · Sandalwood',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''},
-  // Sylvia (u2) — 6 fragrances; BR540 and Aventus overlap with Kiana for In Common / Compare
-  {id:'f13',userId:'u2',name:'Black Opium EDP',house:'YSL',status:'CURRENT',sizes:['Full Bottle'],personalRating:5,statusRating:'Obsessed',personalLong:'8–12h',personalSill:'Strong',communityRating:'4.3',communityLong:'8–12h',communitySill:'Strong',avgPrice:'~$130',notes:'Coffee · Vanilla · White Floral · Patchouli',whereBought:'Sephora',purchaseDate:'Oct 2024',isDupe:false,dupeFor:'',personalNotes:'My go-to for evenings out. Gets a compliment almost every time.'},
-  {id:'f14',userId:'u2',name:'Libre EDP',house:'YSL',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'8–12h',personalSill:'Moderate',communityRating:'4.2',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$155',notes:'Lavender · Vanilla · Musk · White Flowers',whereBought:'Nordstrom',purchaseDate:'Jan 2025',isDupe:false,dupeFor:'',personalNotes:'Modern feminine without being sweet. Office-appropriate and still interesting.'},
-  {id:'f15',userId:'u2',name:'Baccarat Rouge 540',house:'Maison Francis Kurkdjian',status:'CURRENT',sizes:['Travel'],personalRating:5,statusRating:'Obsessed',personalLong:'12–24h',personalSill:'Strong',communityRating:'4.5',communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$320',notes:'Amberwood · Ambergris · Fir Resin · Jasmine · Cedarwood',whereBought:'MFK Boutique',purchaseDate:'Dec 2024',isDupe:false,dupeFor:'',personalNotes:'The travel size was a gift. We basically have the same taste — not surprised we both ended up with this one.'},
-  {id:'f16',userId:'u2',name:'Roses Musk',house:'Montale',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'8–12h',personalSill:'Moderate',communityRating:'4.1',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$85',notes:'Rose · Musk · Oud · Amber',whereBought:'FragranceNet',purchaseDate:'Mar 2025',isDupe:false,dupeFor:'',personalNotes:'Surprisingly unisex. Soft and a little smoky.'},
-  {id:'f17',userId:'u2',name:'Good Girl',house:'Carolina Herrera',status:'PREVIOUSLY_OWNED',sizes:[],personalRating:3,statusRating:'Just OK',personalLong:'6–12h',personalSill:'Strong',communityRating:'4.1',communityLong:'6–12h',communitySill:'Strong',avgPrice:'~$120',notes:'Jasmine · Cocoa · Sandalwood · Tuberose',whereBought:'Sephora',purchaseDate:'Aug 2023',isDupe:false,dupeFor:'',personalNotes:'Loved the bottle, less sold on the dry down. Too sweet for me after a few months.'},
-  {id:'f18',userId:'u2',name:'Aventus',house:'Creed',status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.5',communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$435',notes:'Pineapple · Birch · Ambergris · Oakmoss',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:'On both our lists — we should split a bottle.'},
-];
+// FRAGRANCES — main collection (loaded from Google Sheets)
+let FRAGRANCES = [];
 
-// COMPLIMENTS — main compliment log
-let COMPLIMENTS = [
-  {id:'c1',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Mar',year:'2026',location:'Central Park, NYC',notes:'"What are you wearing? It smells incredible."'},
-  {id:'c2',userId:'u1',primaryFragId:'f2',primaryFrag:'Tobacco Vanille',secondaryFragId:'f1',secondaryFrag:'Baccarat Rouge 540',gender:'Male',relation:'Colleague / Client',month:'Feb',year:'2026',location:'Office, Denver CO',notes:'"Best you\'ve smelled. What\'s the combination?"'},
-  {id:'c3',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:null,relation:'Significant Other',month:'Jan',year:'2026',location:'Home',notes:'"You smell like a luxury hotel."'},
-  {id:'c4',userId:'u1',primaryFragId:'f4',primaryFrag:'Layton',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Jan',year:'2026',location:'Restaurant, Denver',notes:'"This is different from usual. I love it."'},
-  {id:'c5',userId:'u1',primaryFragId:'f3',primaryFrag:'Sauvage EDP',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Colleague / Client',month:'Dec',year:'2025',location:'Meeting Room, Denver',notes:'"Very professional. What is that?"'},
-  {id:'c6',userId:'u1',primaryFragId:'f5',primaryFrag:'Bleu de Chanel EDP',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'Dec',year:'2025',location:'Hotel Elevator',notes:'"Sir, that fragrance is perfect."'},
-  {id:'c7',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Nov',year:'2025',location:'Dinner, NYC',notes:'"Still your best one."'},
-  {id:'c8',userId:'u1',primaryFragId:'f2',primaryFrag:'Tobacco Vanille',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'Oct',year:'2025',location:'Bar, Denver',notes:'"That scent is incredible, what is it?"'},
-  {id:'c9',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Sep',year:'2025',location:'Coffee shop, NYC',notes:'"Excuse me, you smell amazing."'},
-  {id:'c10',userId:'u1',primaryFragId:'f4',primaryFrag:'Layton',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Family',month:'Aug',year:'2025',location:'Home visit',notes:'"You always smell so good these days."'},
-  // Sylvia (u2)
-  {id:'c11',userId:'u2',primaryFragId:'f13',primaryFrag:'Black Opium EDP',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Mar',year:'2026',location:'Coffee Shop, Denver',notes:'"This is such a good scent. What is it?"'},
-  {id:'c12',userId:'u2',primaryFragId:'f15',primaryFrag:'Baccarat Rouge 540',secondaryFragId:'f13',secondaryFrag:'Black Opium EDP',gender:'Male',relation:'Colleague / Client',month:'Feb',year:'2026',location:'Office, Denver',notes:'"You always smell amazing. What\'s the combination?"'},
-  {id:'c13',userId:'u2',primaryFragId:'f14',primaryFrag:'Libre EDP',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Jan',year:'2026',location:'Restaurant, NYC',notes:'"Is that Libre? I\'ve been wanting to try it."'},
-  {id:'c14',userId:'u2',primaryFragId:'f16',primaryFrag:'Roses Musk',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'Dec',year:'2025',location:'Street, New York',notes:'"That is stunning. What\'s the name?"'},
-];
+// COMPLIMENTS — main compliment log (loaded from Google Sheets)
+let COMPLIMENTS = [];
 
 // IMPORT QUEUE
 let importQueue = [];
-let nextId = 19; // next fragrance id (f1-f18 used in seed data)
-let nextCompId = 15; // next compliment id (c1-c14 used in seed data)
+let nextId = 1;
+let nextCompId = 1;
 let currentDetailId = null;
 let editingFragId = null;
 let prefetchedData = null;
@@ -1693,7 +1657,7 @@ function renderCompliments(filter='all'){
   document.querySelector('#compFbar .fc[data-filter="all"]').textContent='All ('+MC.length+')';
   rel.forEach(r=>{
     const el = document.querySelector('#compFbar .fc[data-filter="'+r+'"]');
-    if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'SO':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
+    if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'Significant Others':r==='Family'?'Family':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
   });
   const allEmpty = MC.length === 0;
   document.getElementById('compList').innerHTML = filtered.map(c=>`
