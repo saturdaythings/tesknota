@@ -397,12 +397,36 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   .pal-box{max-width:100%;max-height:88vh;border-radius:16px 16px 0 0;}
 }
 .pal-actions-label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--warm2);}
+/* compliment frag filter bar */
+.cff-bar{display:flex;align-items:center;gap:8px;padding:7px 0 10px;font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
+.cff-name{color:var(--blue);font-style:normal;}
+.cff-clear{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:13px;line-height:1;padding:0 2px;}
+.cff-clear:hover{color:var(--rose);}
+/* note filter active state */
+.fave-note-chip.on{background:rgba(74,111,165,.15);border-color:var(--blue);color:var(--blue);}
+.note-card.on .note-name{color:var(--blue);}
+.note-filter-bar{display:none;align-items:center;gap:8px;margin-bottom:12px;padding:7px 10px;background:rgba(74,111,165,.08);border:1px solid rgba(74,111,165,.2);font-family:var(--mono);font-size:10px;color:var(--ink2);letter-spacing:.06em;}
+.note-filter-bar.on{display:flex;}
+.note-filter-label{flex:1;}
+/* mobile search */
+.mob-srch-btn{display:none;background:none;border:none;cursor:pointer;color:var(--blue);font-size:19px;padding:0 2px;line-height:1;}
+.mob-srch-row{display:none;background:var(--off);border-bottom:1px solid var(--b2);padding:8px 16px;}
+.mob-srch-input{width:100%;height:34px;padding:0 12px;background:var(--off2);border:1px solid var(--b3);font-size:13px;font-family:var(--body);color:var(--ink);outline:none;}
+/* csv preview */
+.csv-preview{margin-top:14px;}
+.csv-preview table{width:100%;border-collapse:collapse;font-size:11px;}
+.csv-preview th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);padding:4px 6px;border-bottom:1px solid var(--b2);text-align:left;}
+.csv-preview td{padding:5px 6px;border-bottom:1px solid var(--b3);color:var(--ink2);font-size:12px;}
+.csv-preview .csv-dup{color:var(--warm);font-family:var(--mono);font-size:9px;}
+.csv-preview .csv-new{color:var(--green,#4a7c59);font-family:var(--mono);font-size:9px;}
 @media(max-width:768px){
   .sidebar{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%);}
   .sidebar.open{transform:translateX(0);}
   .mob-overlay.open{display:block;}
   .hbg{display:block;}
   .mob-nav{display:block;}
+  .mob-srch-btn{display:block;}
+  .mob-srch-row.on{display:block;}
   .content{padding:18px;padding-bottom:68px;}
   .stats{grid-template-columns:1fr 1fr;}
   .frow{grid-template-columns:1fr;}
@@ -492,7 +516,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="sdrop" id="gDrop"></div>
     </div>
     <div class="sync-wrap"><div class="sync-dot" id="syncDot"></div><span class="sync-txt" id="syncTxt"></span></div>
+    <button class="mob-srch-btn" onclick="toggleMobSearch()" title="Search">&#9906;</button>
     <button class="btn btn-blue" onclick="openAddFrag('CURRENT')" title="Add a new fragrance to your collection">Add Fragrance</button>
+  </div>
+  <div class="mob-srch-row" id="mobSrchRow">
+    <input class="mob-srch-input" id="mobSrch" placeholder="Search fragrances..." oninput="gSearch(this.value)" onblur="setTimeout(closeGS,180)" onkeydown="if(event.key==='Escape')toggleMobSearch()">
   </div>
 
   <div class="content">
@@ -526,6 +554,10 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <button class="btn btn-ghost btn-sm" id="btnGrid" onclick="setView('grid')">Grid</button>
         </div>
       </div>
+      <div class="note-filter-bar" id="noteFilterBar">
+        <span class="note-filter-label">Showing: <span id="noteFilterName"></span></span>
+        <button class="btn btn-ghost btn-sm" onclick="clearNoteFilter()">Clear filter</button>
+      </div>
       <div id="vTable">
         <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Size</th><th>Rating</th><th>Longevity</th><th>Notes</th><th>Dupe?</th><th></th></tr></thead>
         <tbody id="collBody"></tbody></table>
@@ -555,6 +587,10 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="fc" data-filter="Colleague / Client">Colleagues</div>
         <div class="fc" data-filter="Family">Family</div>
         <div class="fc" data-filter="Significant Other">SO</div>
+      </div>
+      <div class="cff-bar" id="compFragFilterBar" style="display:none;">
+        Filtered: <span class="cff-name" id="cffName"></span>
+        <button class="cff-clear" onclick="clearCompFragFilter()" title="Clear filter">×</button>
       </div>
       <div id="compList"></div>
     </div>
@@ -677,13 +713,23 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:8px;">Not working? <span style="color:var(--blue);cursor:pointer;" onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
       </div>
       <div class="ipanel" id="ip-csv">
-        <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.6;">Upload a spreadsheet to bulk import your collection.</p>
-        <input type="file" id="csvFileInput" accept=".csv,.xlsx,.xls" style="display:none;">
-        <div class="dropzone" onclick="document.getElementById('csvFileInput').click()">
-          <div class="dz-t">Drop your spreadsheet here</div>
-          <div class="dz-s">Supports .csv · .xlsx · .xls — or click to browse</div>
+        <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.6;">Upload a CSV to bulk import your collection.</p>
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSVFile(this.files[0])">
+        <div class="dropzone" id="csvDropzone" onclick="document.getElementById('csvFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--blue)'" ondragleave="this.style.borderColor=''" ondrop="event.preventDefault();this.style.borderColor='';handleCSVFile(event.dataTransfer.files[0])">
+          <div class="dz-t">Drop your CSV here</div>
+          <div class="dz-s">or click to browse · .csv</div>
         </div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;line-height:1.9;text-transform:uppercase;">Expected columns: Name · Brand · Status · Rating · Notes<br>Duplicate detection runs automatically.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;">Name · Brand · Status · Rating · Notes</div>
+          <button class="btn btn-ghost btn-sm" onclick="downloadCSVTemplate()">Download template</button>
+        </div>
+        <div class="csv-preview" id="csvPreview" style="display:none;">
+          <div id="csvPreviewTable"></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('csvPreview').style.display='none'">Cancel</button>
+            <button class="btn btn-blue btn-sm" onclick="importCSVSelected()">Import Selected</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -874,7 +920,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 <div class="overlay" id="addCompM">
   <div class="modal">
     <div class="mhd">
-      <div><div class="mtitle">Log a Compliment</div><div class="msub">Record who, where, and what you were wearing</div></div>
+      <div><div class="mtitle" id="addCompTitle">Log a Compliment</div><div class="msub" id="addCompSub">Record who, where, and what you were wearing</div></div>
       <button class="mx" onclick="closeModal('addCompM')">×</button>
     </div>
     <div class="mbody">
@@ -1549,7 +1595,13 @@ function promoteToOwned(fragId){
 
 function renderCompliments(filter='all'){
   var MC=myCompliments();
-  const filtered = filter==='all' ? MC : MC.filter(c=>c.relation===filter);
+  // Frag filter bar
+  var ffBar=document.getElementById('compFragFilterBar');
+  var ffName=document.getElementById('cffName');
+  if(ffBar){ ffBar.style.display=compFragFilter?'':'none'; if(ffName&&compFragFilter) ffName.textContent=compFragFilter.name; }
+  // Apply frag filter first, then relation filter
+  var base = compFragFilter ? MC.filter(function(c){return c.primaryFragId===compFragFilter.id;}) : MC;
+  const filtered = filter==='all' ? base : base.filter(c=>c.relation===filter);
   // Update counts in filter bar
   const rel=['Stranger','Friend','Colleague / Client','Family','Significant Other'];
   document.querySelector('#compFbar .fc[data-filter="all"]').textContent='All ('+MC.length+')';
@@ -1567,6 +1619,7 @@ function renderCompliments(filter='all'){
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;">
         <div class="cr-d">${c.month} ${c.year}</div>
+        <button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment('${c.id}')" title="Edit">✎</button>
         <button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment('${c.id}')">×</button>
       </div>
     </div>`).join('') || (allEmpty
@@ -1887,8 +1940,15 @@ function changeStatus(newStatus){
 function viewFragCompliments(){
   const f = FRAGRANCES.find(x=>x.id===currentDetailId);
   if(!f)return;
+  compFragFilter = f;
   closeDetail();
   goPage('compliments');
+  renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all');
+}
+
+function clearCompFragFilter(){
+  compFragFilter = null;
+  renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all');
 }
 
 function logComplimentForFrag(){
@@ -2139,27 +2199,40 @@ function pickAF(name){
 // ADD COMPLIMENT MODAL
 // ═══════════════════════════════════════════════════════
 
-function openAddComp(fragId){
+function openAddComp(fragId, prefill){
+  editingCompId = prefill ? prefill.id : null;
+  var title=document.getElementById('addCompTitle');
+  var sub=document.getElementById('addCompSub');
+  if(title) title.textContent = editingCompId ? 'Edit Compliment' : 'Log a Compliment';
+  if(sub) sub.textContent = editingCompId ? 'Update the details of this compliment' : 'Record who, where, and what you were wearing';
   // Populate fragrance dropdown with CURRENT + PREVIOUSLY_OWNED
   const eligible = myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
   const sel = document.getElementById('compFrag');
   sel.innerHTML='<option value="">— Select from collection —</option>';
   eligible.forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=f.name+(f.status==='PREVIOUSLY_OWNED'?' (prev. owned)':''); sel.appendChild(o); });
-  if(fragId){ for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===fragId){ sel.selectedIndex=i; break; } }
+  const fillFragId = prefill ? prefill.primaryFragId : fragId;
+  if(fillFragId){ for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===fillFragId){ sel.selectedIndex=i; break; } }
   // Populate secondary dropdown
   updateCompFrag2();
+  if(prefill&&prefill.secondaryFragId){ var s2=document.getElementById('compFrag2'); for(let i=0;i<s2.options.length;i++) if(s2.options[i].value===prefill.secondaryFragId){ s2.selectedIndex=i; break; } }
   sel.addEventListener('change', updateCompFrag2);
   // Reset errors
   document.getElementById('compFragErr').style.display='none';
   document.getElementById('compRelErr').style.display='none';
   document.getElementById('compDateErr').style.display='none';
-  document.getElementById('compRelation').value='';
-  document.getElementById('compGender').value='';
-  document.getElementById('compLoc').value='';
-  document.getElementById('compNotes').value='';
-  document.getElementById('compMonth').value='';
-  document.getElementById('compYear').value='2026';
+  document.getElementById('compRelation').value=prefill?prefill.relation:'';
+  document.getElementById('compGender').value=prefill?(prefill.gender||''):'';
+  document.getElementById('compLoc').value=prefill?(prefill.location||''):'';
+  document.getElementById('compNotes').value=prefill?(prefill.notes||''):'';
+  document.getElementById('compMonth').value=prefill?(prefill.month||''):'';
+  document.getElementById('compYear').value=prefill?(prefill.year||'2026'):'2026';
   openModal('addCompM');
+}
+
+function editCompliment(id){
+  const c = myCompliments().find(function(x){ return x.id===id; });
+  if(!c) return;
+  openAddComp(null, c);
 }
 
 function updateCompFrag2(){
@@ -2183,6 +2256,27 @@ function saveCompliment(){
   const f = FRAGRANCES.find(x=>x.id===fragId);
   const f2Id = document.getElementById('compFrag2').value;
   const f2 = f2Id ? FRAGRANCES.find(x=>x.id===f2Id) : null;
+  if(editingCompId){
+    // Update existing compliment
+    var idx = COMPLIMENTS.findIndex(function(x){ return x.id===editingCompId; });
+    if(idx>-1){
+      COMPLIMENTS[idx] = Object.assign({}, COMPLIMENTS[idx], {
+        primaryFragId: fragId, primaryFrag: f.name,
+        secondaryFragId: f2?f2Id:null, secondaryFrag: f2?f2.name:null,
+        gender: document.getElementById('compGender').value||null,
+        relation, month, year,
+        location: document.getElementById('compLoc').value||null,
+        notes: document.getElementById('compNotes').value||null,
+      });
+    }
+    writeSheet('compliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+    editingCompId = null;
+    closeModal('addCompM');
+    renderCurrentPage();
+    updateCounts();
+    toast('Compliment updated');
+    return;
+  }
   var newComp = {
     id: genCompId(),
     userId: CURRENT_USER?CURRENT_USER.id:'u1',
@@ -2240,6 +2334,11 @@ function importToWishlist(data){
   renderCurrentPage(); updateCounts();
   toast(data.name+' added to Wishlist');
 }
+
+let compFragFilter = null;
+let editingCompId = null;
+let activeNoteFilter = null;
+let csvParsedRows = [];
 
 let importQueueData = [
   {name:'Chanel No. 5 EDP',house:'Chanel',communityRating:'4.2',notes:'Ylang Ylang, Rose, Jasmine',isDup:false},
@@ -2503,9 +2602,98 @@ function setView(v){
 
 // Export
 function exportData(){
-  const rows=[['Name','House','Status','Personal Rating','Compliments'],...myFragrances().map(f=>[f.name,f.house,STATUS_LABELS[f.status],f.personalRating||'',getCompCount(f.id)])];
-  const csv=rows.map(r=>r.join(',')).join('\n');
-  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='tesknota-export.csv';a.click();
+  var esc=function(v){ var s=String(v||''); return s.includes(',')||s.includes('"')?'"'+s.replace(/"/g,'""')+'"':s; };
+  var fragRows=[['Name','House','Status','Personal Rating','Compliments'],
+    ...myFragrances().map(function(f){ return [esc(f.name),esc(f.house),STATUS_LABELS[f.status],f.personalRating||'',getCompCount(f.id)]; })];
+  var compRows=[[''],['Fragrance','Secondary','Relation','Gender','Month','Year','Location','Notes'],
+    ...myCompliments().map(function(c){ return [esc(c.primaryFrag),esc(c.secondaryFrag||''),c.relation||'',c.gender||'',c.month||'',c.year||'',esc(c.location||''),esc(c.notes||'')]; })];
+  var csv=fragRows.concat(compRows).map(function(r){ return r.join(','); }).join('\n');
+  var username=CURRENT_USER?CURRENT_USER.name.toLowerCase():'export';
+  var date=new Date().toISOString().split('T')[0];
+  var a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download='tesknota-export-'+username+'-'+date+'.csv';a.click();
+}
+
+function downloadCSVTemplate(){
+  var csv='Name,Brand,Status,Rating,Notes\nHacivat,Nishane,CURRENT,4.5,"Pineapple, Oakmoss"\n';
+  var a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);
+  a.download='tesknota-import-template.csv';a.click();
+}
+
+function parseCSV(text){
+  var lines=text.trim().split(/\r?\n/);
+  if(lines.length<2) return [];
+  var headers=lines[0].split(',').map(function(h){ return h.trim().toLowerCase().replace(/['"]/g,''); });
+  return lines.slice(1).filter(function(l){ return l.trim(); }).map(function(line){
+    var cols=[];var cur='';var inQ=false;
+    for(var i=0;i<line.length;i++){
+      var ch=line[i];
+      if(ch==='"'){ inQ=!inQ; }
+      else if(ch===','&&!inQ){ cols.push(cur.trim()); cur=''; }
+      else cur+=ch;
+    }
+    cols.push(cur.trim());
+    var row={};
+    headers.forEach(function(h,i){ row[h]=cols[i]||''; });
+    return {
+      name: row.name||row['fragrance name']||'',
+      house: row.brand||row.house||row.make||'',
+      status: row.status||'CURRENT',
+      rating: parseFloat(row.rating||row['personal rating'])||null,
+      notes: row.notes||'',
+    };
+  }).filter(function(r){ return r.name; });
+}
+
+function handleCSVFile(file){
+  if(!file||!file.name.endsWith('.csv')) return toast('Please select a .csv file');
+  var reader=new FileReader();
+  reader.onload=function(e){
+    csvParsedRows=parseCSV(e.target.result);
+    if(!csvParsedRows.length) return toast('No rows found in CSV');
+    var existing=new Set(myFragrances().map(function(f){ return f.name.toLowerCase(); }));
+    var html='<table><thead><tr><th></th><th>Name</th><th>Brand</th><th>Status</th><th>Rating</th><th></th></tr></thead><tbody>';
+    csvParsedRows.forEach(function(r,i){
+      var dup=existing.has(r.name.toLowerCase());
+      html+='<tr><td><input type="checkbox" id="csvck'+i+'"'+(dup?'':' checked')+'></td>'
+        +'<td>'+r.name+'</td><td>'+r.house+'</td><td>'+(r.status||'CURRENT')+'</td>'
+        +'<td>'+(r.rating||'—')+'</td>'
+        +'<td>'+(dup?'<span class="csv-dup">duplicate</span>':'<span class="csv-new">new</span>')+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    var preview=document.getElementById('csvPreview');
+    document.getElementById('csvPreviewTable').innerHTML=html;
+    if(preview) preview.style.display='';
+  };
+  reader.readAsText(file);
+}
+
+function importCSVSelected(){
+  var existing=new Set(myFragrances().map(function(f){ return f.name.toLowerCase(); }));
+  var added=0;
+  csvParsedRows.forEach(function(r,i){
+    var chk=document.getElementById('csvck'+i);
+    if(!chk||!chk.checked) return;
+    if(existing.has(r.name.toLowerCase())) return;
+    var valid=['CURRENT','PREVIOUSLY_OWNED','WANT_TO_BUY','WANT_TO_SMELL','DONT_LIKE'];
+    var status=valid.includes(r.status)?r.status:'CURRENT';
+    FRAGRANCES.push({id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:r.name,house:r.house,status:status,sizes:['Full Bottle'],personalRating:r.rating,statusRating:null,personalLong:null,personalSill:null,communityRating:null,communityLong:null,communitySill:null,avgPrice:null,notes:r.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
+    added++;
+  });
+  if(added>0) writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  csvParsedRows=[];
+  document.getElementById('csvPreview').style.display='none';
+  updateCounts();
+  toast(added+' imported');
+  if(added>0) goPage('collection');
+}
+
+function toggleMobSearch(){
+  var row=document.getElementById('mobSrchRow');
+  if(!row) return;
+  row.classList.toggle('on');
+  if(row.classList.contains('on')){ var inp=document.getElementById('mobSrch'); if(inp) inp.focus(); }
+  else { var inp=document.getElementById('mobSrch'); if(inp){ inp.value=''; closeGS(); } }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2564,6 +2752,7 @@ function renderNotesIntel(){
 }
 
 function filterCollByNote(note){
+  activeNoteFilter = note;
   goPage('collection');
   document.querySelectorAll('#collBody tr').forEach(row=>{
     const nc = row.querySelector('.tscript');
@@ -2571,7 +2760,30 @@ function filterCollByNote(note){
     row.style.display = nc.textContent.toLowerCase().includes(note.toLowerCase()) ? '' : 'none';
   });
   document.querySelectorAll('#collFbar .fc').forEach(c=>c.classList.remove('on'));
-  toast('Showing fragrances with: '+note);
+  // update chip active state
+  document.querySelectorAll('.fave-note-chip').forEach(function(chip){
+    chip.classList.toggle('on', chip.querySelector('span').textContent===note);
+  });
+  document.querySelectorAll('.note-card').forEach(function(card){
+    card.classList.toggle('on', card.querySelector('.note-name').textContent===note);
+  });
+  // show filter bar
+  var bar=document.getElementById('noteFilterBar');
+  var lbl=document.getElementById('noteFilterName');
+  if(bar){ bar.classList.add('on'); }
+  if(lbl){ lbl.textContent=note; }
+}
+
+function clearNoteFilter(){
+  activeNoteFilter = null;
+  document.querySelectorAll('#collBody tr').forEach(row=>{ row.style.display=''; });
+  document.querySelectorAll('.fave-note-chip').forEach(function(chip){ chip.classList.remove('on'); });
+  document.querySelectorAll('.note-card').forEach(function(card){ card.classList.remove('on'); });
+  var bar=document.getElementById('noteFilterBar');
+  if(bar) bar.classList.remove('on');
+  // restore active filter chip
+  var on=document.querySelector('#collFbar .fc.on');
+  if(!on){ document.querySelector('#collFbar .fc[data-filter="all"]').classList.add('on'); }
 }
 
 // ═══════════════════════════════════════════════════════
