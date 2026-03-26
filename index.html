@@ -22,6 +22,7 @@
   --sw:216px;--th:56px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
 html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;}
 .shell{display:flex;height:100vh;overflow:hidden;}
 
@@ -418,14 +419,28 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 </head>
 <body>
 
-<!-- ── IDENTITY SCREEN (shown on first visit, hidden after) ── -->
-<div id="identityScreen" style="display:none;position:fixed;inset:0;background:var(--blue3);z-index:1000;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+<!-- ── IDENTITY SCREEN ── -->
+<div id="identityScreen" style="display:flex;position:fixed;inset:0;background:var(--blue3);z-index:1000;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
   <div style="font-family:var(--script);font-size:48px;font-style:italic;color:var(--warm2);letter-spacing:.02em;margin-bottom:8px;">tęsknota</div>
   <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:48px;">Fragrance Tracker</div>
-  <div style="font-family:var(--body);font-size:14px;color:var(--muted);margin-bottom:24px;letter-spacing:.04em;">Who are you?</div>
-  <div style="display:flex;gap:16px;">
-    <button style="background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.3);color:var(--warm2);font-family:var(--script);font-size:22px;font-style:italic;padding:18px 40px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.25)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Kiana','u1')">Kiana</button>
-    <button style="background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.3);color:var(--warm2);font-family:var(--script);font-size:22px;font-style:italic;padding:18px 40px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.25)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Sylvia','u2')">Sylvia</button>
+  <!-- Loading state -->
+  <div id="idLoading" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+    <div style="width:28px;height:28px;border:2px solid rgba(200,185,154,.25);border-top-color:var(--warm2);border-radius:50%;animation:spin .8s linear infinite;"></div>
+    <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.14em;text-transform:uppercase;">Loading your collection…</div>
+  </div>
+  <!-- Identity picker (shown after data loads) -->
+  <div id="idPicker" style="display:none;flex-direction:column;align-items:center;">
+    <div style="font-family:var(--body);font-size:14px;color:var(--muted);margin-bottom:24px;letter-spacing:.04em;">Who are you?</div>
+    <div style="display:flex;gap:16px;">
+      <button style="background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.3);color:var(--warm2);font-family:var(--script);font-size:22px;font-style:italic;padding:18px 40px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.25)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Kiana','u1')">Kiana</button>
+      <button style="background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.3);color:var(--warm2);font-family:var(--script);font-size:22px;font-style:italic;padding:18px 40px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.25)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Sylvia','u2')">Sylvia</button>
+    </div>
+  </div>
+  <!-- Error state -->
+  <div id="idError" style="display:none;flex-direction:column;align-items:center;gap:12px;max-width:360px;text-align:center;">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--rose);letter-spacing:.14em;text-transform:uppercase;">Could not reach Google Sheets</div>
+    <div style="font-family:var(--body);font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;">Check the browser console for details. Your local data is intact — you can continue without sync.</div>
+    <button style="margin-top:8px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.3);color:var(--warm2);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:10px 24px;cursor:pointer;" onclick="document.getElementById('idError').style.display='none';document.getElementById('idPicker').style.display='flex';">Continue anyway</button>
   </div>
   <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.15);padding:12px 26px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
     <span style="font-family:var(--script);font-size:16px;font-style:italic;color:var(--warm2);">tęsknota</span>
@@ -448,17 +463,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   </div>
   <div class="sb-body">
     <div class="sb-label">My Space</div>
-    <div class="sb-link" data-page="dashboard">Dashboard</div>
-    <div class="sb-link" data-page="collection">My Collection <span class="sb-ct" id="ct-collection">0</span></div>
-    <div class="sb-link" data-page="wishlist">Wishlist <span class="sb-ct" id="ct-wishlist">0</span></div>
+    <div class="sb-link" data-page="dashboard" title="Your overview and top performers">Dashboard</div>
+    <div class="sb-link" data-page="collection" title="All fragrances you own or have owned">My Collection <span class="sb-ct" id="ct-collection">0</span></div>
+    <div class="sb-link" data-page="wishlist" title="Fragrances you want to try or buy">Wishlist <span class="sb-ct" id="ct-wishlist">0</span></div>
     <div class="sb-label">Experiences</div>
-    <div class="sb-link" data-page="compliments">Compliments <span class="sb-ct" id="ct-compliments">0</span></div>
-    <div class="sb-link" data-page="analytics">Analytics</div>
+    <div class="sb-link" data-page="compliments" title="Your logged compliment history">Compliments <span class="sb-ct" id="ct-compliments">0</span></div>
+    <div class="sb-link" data-page="analytics" title="Stats and insights from your compliments">Analytics</div>
     <div class="sb-label">Social</div>
-    <div class="sb-link" data-page="friend">Sylvia M. <span class="sb-ct" id="ct-friend">24</span></div>
+    <div class="sb-link" data-page="friend" title="Your friend's profile and shared data">Sylvia M. <span class="sb-ct" id="ct-friend">24</span></div>
     <div class="sb-label">Manage</div>
-    <div class="sb-link" data-page="import">Import</div>
-    <div class="sb-link" data-page="settings">Settings</div>
+    <div class="sb-link" data-page="import" title="Add fragrances via link, scan, or CSV">Import</div>
+    <div class="sb-link" data-page="settings" title="Account and preferences">Settings</div>
   </div>
   <div class="sb-foot">
     <div class="sb-who" onclick="goPage('settings')"><b>Kiana L.</b>Settings</div>
@@ -479,8 +494,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="sdrop" id="gDrop"></div>
     </div>
     <div class="sync-wrap"><div class="sync-dot" id="syncDot"></div><span class="sync-txt" id="syncTxt"></span></div>
-    <button class="btn btn-ghost btn-sm" onclick="goPage('import')">Import</button>
-    <button class="btn btn-blue" onclick="openAddFrag('CURRENT')">Add Fragrance</button>
+    <button class="btn btn-blue" onclick="openAddFrag('CURRENT')" title="Add a new fragrance to your collection">Add Fragrance</button>
   </div>
 
   <div class="content">
@@ -488,6 +502,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- DASHBOARD -->
     <div class="page on" id="page-dashboard">
       <div class="stats" id="dashStats"></div>
+      <div style="margin-bottom:20px;">
+        <button class="btn btn-warm" onclick="openAddComp(null)" title="Record a compliment you received">+ Log a Compliment</button>
+      </div>
       <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <table class="tbl" style="margin-bottom:28px;" id="dashTable">
         <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes to nose</th><th>Compliments</th><th></th></tr></thead>
@@ -578,41 +595,21 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
       <div class="fpanel on" id="ft-col">
         <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes</th><th>Compliments</th><th></th></tr></thead>
-        <tbody>
-          <tr><td><div class="tn">Black Opium EDP</div><div class="th_">YSL — Floral Gourmand</div></td><td><div class="ts s-cur">Current</div></td><td><div class="tstars">★★★★★</div></td><td class="tscript">Coffee, Vanilla, White Floral</td><td class="tmono">6</td><td><button class="btn-bare" onclick="openCompare('Black Opium EDP','Black Opium EDP')">Compare</button></td></tr>
-          <tr><td><div class="tn">Baccarat Rouge 540</div><div class="th_">MFK — Amberwood · Floral</div></td><td><div class="ts s-cur">Current</div></td><td><div class="tstars">★★★★★</div></td><td class="tscript">Amberwood, Ambergris, Jasmine</td><td class="tmono">5</td><td><button class="btn-bare" onclick="openCompare('Baccarat Rouge 540','f1')">Compare</button></td></tr>
-          <tr><td><div class="tn">Libre EDP</div><div class="th_">YSL — Floral Fougère</div></td><td><div class="ts s-cur">Current</div></td><td><div class="tstars">★★★★☆</div></td><td class="tscript">Lavender, Vanilla, Musk</td><td class="tmono">4</td><td><button class="btn-bare" onclick="openCompare('Libre EDP','Libre EDP')">Compare</button></td></tr>
-          <tr><td><div class="tn">Roses Musk</div><div class="th_">Montale — Floral Musk</div></td><td><div class="ts s-cur">Current</div></td><td><div class="tstars">★★★★☆</div></td><td class="tscript">Rose, Musk, Oud</td><td class="tmono">3</td><td><button class="btn-bare" onclick="openCompare('Roses Musk','Roses Musk')">Compare</button></td></tr>
-          <tr><td><div class="tn">Good Girl</div><div class="th_">Carolina Herrera — Floral Gourmand</div></td><td><div class="ts s-prv">Prev. Owned</div></td><td><div class="tstars">★★★☆☆</div></td><td class="tscript">Jasmine, Cocoa, Sandalwood</td><td class="tmono">2</td><td><button class="btn-bare" onclick="openCompare('Good Girl','Good Girl')">Compare</button></td></tr>
-        </tbody></table>
+        <tbody id="ft-col-body"></tbody></table>
         <div class="in-common" id="inCommon"></div>
       </div>
-      <div class="fpanel" id="ft-comp">
-        <div class="crow"><div><div class="cr-f">Black Opium EDP</div><div class="cr-m">Stranger · Female · Coffee Shop, Denver</div><div class="cr-n">"This is such a good scent. What is it?"</div></div><div class="cr-d">Mar 2025</div></div>
-        <div class="crow"><div><div class="cr-f">Baccarat Rouge 540</div><div class="cr-m">Colleague · Male · Office, Denver</div><div class="cr-n">"You always smell amazing."</div></div><div class="cr-d">Feb 2025</div></div>
-        <div class="crow"><div><div class="cr-f">Libre EDP</div><div class="cr-m">Friend · Female · Restaurant</div><div class="cr-n">"Is that Libre? I've been wanting to try it."</div></div><div class="cr-d">Jan 2025</div></div>
-        <div class="crow"><div><div class="cr-f">Roses Musk</div><div class="cr-m">Stranger · Male · Street, New York</div><div class="cr-n">"That is stunning. What's the name?"</div></div><div class="cr-d">Jan 2025</div></div>
-      </div>
+      <div class="fpanel" id="ft-comp"></div>
       <div class="fpanel" id="ft-wish">
         <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Community Rating</th><th>Avg Price</th></tr></thead>
-        <tbody>
-          <tr><td><div class="tn">Baccarat Rouge 540 EDP</div><div class="th_">MFK</div></td><td><div class="ts s-wnt">Want to Buy</div></td><td class="tmono" style="color:var(--warm)">4.6 / 5.0</td><td class="tmono">~$380</td></tr>
-          <tr><td><div class="tn">Santal 33</div><div class="th_">Le Labo</div></td><td><div class="ts" style="color:var(--ink2);font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;">Want to Smell</div></td><td class="tmono" style="color:var(--warm)">4.2 / 5.0</td><td class="tmono">~$220</td></tr>
-        </tbody></table>
+        <tbody id="ft-wish-body"></tbody></table>
         <div id="wishInCommon" style="margin-top:16px;"></div>
       </div>
       <div class="fpanel" id="ft-ana">
-        <div class="stats" style="margin-bottom:22px;">
-          <div class="sbox"><div class="snum">18</div><div class="slbl">Compliments</div></div>
-          <div class="sbox"><div class="snum">5</div><div class="slbl">Fragrances</div></div>
-          <div class="sbox"><div class="snum">44%</div><div class="slbl">From Strangers</div></div>
-          <div class="sbox"><div class="snum">4.3</div><div class="slbl">Avg Rating</div></div>
-        </div>
-        <div class="sh"><h2>Sylvia's top performers</h2></div>
+        <div class="stats" id="ft-ana-stats" style="margin-bottom:22px;"></div>
+        <div class="sh"><h2 id="ft-ana-title">Top performers</h2></div>
         <div class="bchart" id="bc-f"></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;margin-bottom:22px;">Black Opium · BR540 · Libre · Roses Musk · Good Girl</div>
-        <div class="ins"><div class="ins-t">Black Opium is Sylvia's signature</div><div class="ins-b">6 compliments — 33% of all. Primarily strangers and colleagues in coffee shop settings.</div></div>
-        <div class="ins" style="border-bottom:none"><div class="ins-t">You and Sylvia both love BR540</div><div class="ins-b">Identical ratings (★★★★★). Sylvia has 5 compliments on it vs your 8. Both primarily stranger-driven.</div></div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;margin-bottom:22px;" id="bc-f-legend"></div>
+        <div id="ft-ana-insights"></div>
       </div>
     </div>
 
@@ -947,7 +944,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 
 
 <!-- FLOATING ACTION BUTTON -->
-<button class="fab-btn" onclick="palOpen()" title="Open actions">
+<button class="fab-btn" onclick="palOpen()" title="Quick actions — add, edit, log, and manage">
   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
 </button>
 
@@ -1016,7 +1013,10 @@ function pemToBytes(pem){
 
 async function getAccessToken(){
   const now=Math.floor(Date.now()/1000);
-  if(_tokenCache.token&&now<_tokenCache.exp-60)return _tokenCache.token;
+  if(_tokenCache.token&&now<_tokenCache.exp-60){ console.log('[auth] using cached token'); return _tokenCache.token; }
+
+  if(!SA_EMAIL||!SA_KEY){ console.error('[auth] SA_EMAIL or SA_KEY missing — check config.js'); throw new Error('Missing credentials'); }
+  console.log('[auth] signing JWT for', SA_EMAIL);
 
   const header=b64url(new TextEncoder().encode(JSON.stringify({alg:'RS256',typ:'JWT'})));
   const claim=b64url(new TextEncoder().encode(JSON.stringify({
@@ -1028,16 +1028,22 @@ async function getAccessToken(){
   const keyBytes=pemToBytes(SA_KEY);
   const cryptoKey=await crypto.subtle.importKey(
     'pkcs8',keyBytes,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']
-  );
+  ).catch(function(e){ console.error('[auth] importKey failed:', e); throw e; });
   const sigBuf=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',cryptoKey,sigInput);
   const jwt=header+'.'+claim+'.'+b64url(sigBuf);
 
+  console.log('[auth] fetching OAuth token...');
   const res=await fetch('https://oauth2.googleapis.com/token',{
     method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
     body:'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+jwt
   });
-  if(!res.ok){const e=await res.json().catch(function(){return{};});throw new Error('Token error: '+(e.error_description||res.status));}
+  if(!res.ok){
+    const e=await res.json().catch(function(){return{};});
+    console.error('[auth] token request failed', res.status, e);
+    throw new Error('Token error: '+(e.error_description||res.status));
+  }
   const d=await res.json();
+  console.log('[auth] token obtained, expires in', d.expires_in, 's');
   _tokenCache={token:d.access_token,exp:now+d.expires_in};
   return d.access_token;
 }
@@ -1047,12 +1053,18 @@ async function getAccessToken(){
 // ═══════════════════════════════════════════════════════
 
 async function readSheet(tabName){
+  console.log('[sheets] reading tab:', tabName);
   const token=await getAccessToken();
-  const res=await fetch(SHEETS_BASE+'/values/'+tabName,{
-    headers:{Authorization:'Bearer '+token}
-  });
+  const url=SHEETS_BASE+'/values/'+encodeURIComponent(tabName);
+  const res=await fetch(url,{headers:{Authorization:'Bearer '+token}});
+  if(!res.ok){
+    const errBody=await res.json().catch(function(){return{};});
+    console.error('[sheets] fetch failed for tab "'+tabName+'":', res.status, errBody);
+    throw new Error('Sheet read error '+res.status+' for '+tabName);
+  }
   const data=await res.json();
   const rows=data.values||[];
+  console.log('[sheets] "'+tabName+'" returned', rows.length, 'rows (incl. header)');
   if(rows.length<2)return[];
   const headers=rows[0];
   return rows.slice(1).map(function(row){
@@ -1152,17 +1164,28 @@ function rowToComp(row){
 }
 
 async function loadAllData(){
-  const results=await Promise.all([
-    readSheet('users'),
-    readSheet('fragrances'),
-    readSheet('compliments'),
+  console.log('[loadAllData] starting — SPREADSHEET_ID:', SHEETS_BASE.split('/').pop());
+  const [usersRaw, fragsRaw, compsRaw] = await Promise.all([
+    readSheet('users').catch(function(e){ console.error('[loadAllData] users sheet error:', e); return []; }),
+    readSheet('fragrances').catch(function(e){ console.error('[loadAllData] fragrances sheet error:', e); return []; }),
+    readSheet('compliments').catch(function(e){ console.error('[loadAllData] compliments sheet error:', e); return []; }),
   ]);
-  USERS=results[0].length?results[0]:USERS;
-  FRAGRANCES=results[1].map(rowToFrag);
-  COMPLIMENTS=results[2].map(rowToComp);
+  console.log('[loadAllData] raw counts — users:', usersRaw.length, 'fragrances:', fragsRaw.length, 'compliments:', compsRaw.length);
+
+  // Only replace in-memory arrays when the sheet has real data
+  if(usersRaw.length) USERS=usersRaw;
+  else console.warn('[loadAllData] users sheet empty — keeping seed data');
+
+  if(fragsRaw.length){ FRAGRANCES=fragsRaw.map(rowToFrag); }
+  else console.warn('[loadAllData] fragrances sheet empty — keeping demo data (', FRAGRANCES.length, 'rows)');
+
+  if(compsRaw.length){ COMPLIMENTS=compsRaw.map(rowToComp); }
+  else console.warn('[loadAllData] compliments sheet empty — keeping demo data (', COMPLIMENTS.length, 'rows)');
+
   // Recalculate ID counters from loaded data
   FRAGRANCES.forEach(function(f){ var n=parseInt((f.id||'').replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
   COMPLIMENTS.forEach(function(c){ var n=parseInt((c.id||'').replace(/\D/g,''))||0; if(n>=nextCompId)nextCompId=n+1; });
+  console.log('[loadAllData] done — FRAGRANCES:', FRAGRANCES.length, 'COMPLIMENTS:', COMPLIMENTS.length);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1371,29 +1394,43 @@ function renderDashboard(){
     <div class="sbox"><div class="snum">${MF.filter(f=>f.status==='PREVIOUSLY_OWNED').length}</div><div class="slbl">Prev. Owned</div></div>`;
   // Recent 4 CURRENT fragrances
   const recent = MF.filter(f=>f.status==='CURRENT').slice(0,4);
-  document.getElementById('dashBody').innerHTML = recent.map(f=>`
-    <tr onclick="openDetail('${f.id}')">
-      <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
-      <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
-      <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
-      <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
-      <td class="tmono">${getCompCount(f.id)}</td>
-      <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
-    </tr>`).join('');
+  if(recent.length){
+    document.getElementById('dashBody').innerHTML = recent.map(f=>`
+      <tr onclick="openDetail('${f.id}')">
+        <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
+        <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
+        <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
+        <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
+        <td class="tmono">${getCompCount(f.id)}</td>
+        <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
+      </tr>`).join('');
+  } else {
+    const emptyTr = document.createElement('tr');
+    const emptyTd = document.createElement('td'); emptyTd.colSpan = 6; emptyTd.style.cssText = 'padding:32px 0;text-align:center;';
+    const emptyMsg = document.createElement('div'); emptyMsg.style.cssText = 'font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink3);margin-bottom:12px;'; emptyMsg.textContent = 'Add your first fragrance to get started';
+    const emptyBtn = document.createElement('button'); emptyBtn.className = 'btn btn-blue'; emptyBtn.textContent = 'Add Fragrance'; emptyBtn.onclick = function(){ openAddFrag('CURRENT'); };
+    emptyTd.appendChild(emptyMsg); emptyTd.appendChild(emptyBtn); emptyTr.appendChild(emptyTd);
+    const tbody = document.getElementById('dashBody'); tbody.textContent = ''; tbody.appendChild(emptyTr);
+  }
   // Top performers
   const byFrag = {};
   MC.forEach(c=>{ byFrag[c.primaryFragId]=(byFrag[c.primaryFragId]||0)+1; });
   const sorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  document.getElementById('dashPerformers').innerHTML = sorted.map(([id,cnt],i)=>{
-    const f = MF.find(x=>x.id===id); if(!f)return '';
-    const dist = getCompDist(id);
-    return `<div style="background:var(--off);padding:18px;cursor:pointer;" onclick="openDetail('${id}')">
-      <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;">No. ${i+1}</div>
-      <div style="font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:3px;">${f.name}</div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--warm);">${cnt} compliment${cnt>1?'s':''}</div>
-      <div style="font-size:11px;color:var(--ink2);margin-top:5px;">${dist}</div>
-    </div>`;
-  }).join('');
+  if(sorted.length){
+    document.getElementById('dashPerformers').innerHTML = sorted.map(([id,cnt],i)=>{
+      const f = MF.find(x=>x.id===id); if(!f)return '';
+      const dist = getCompDist(id);
+      return `<div style="background:var(--off);padding:18px;cursor:pointer;" onclick="openDetail('${id}')">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;">No. ${i+1}</div>
+        <div style="font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:3px;">${f.name}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--warm);">${cnt} compliment${cnt>1?'s':''}</div>
+        <div style="font-size:11px;color:var(--ink2);margin-top:5px;">${dist}</div>
+      </div>`;
+    }).join('');
+  } else {
+    const perfEl = document.getElementById('dashPerformers'); perfEl.textContent = '';
+    const perfMsg = document.createElement('div'); perfMsg.style.cssText = 'padding:24px;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;'; perfMsg.textContent = 'Log some compliments to see your top performers'; perfEl.appendChild(perfMsg);
+  }
 }
 
 function avgRating(){
@@ -1416,17 +1453,28 @@ function renderCollection(filter='all'){
   document.querySelector('#collFbar .fc[data-filter="PREVIOUSLY_OWNED"]').textContent=`Prev. Owned (${coll.filter(f=>f.status==='PREVIOUSLY_OWNED').length})`;
   document.querySelector('#collFbar .fc[data-filter="DONT_LIKE"]').textContent=`Don't Like (${coll.filter(f=>f.status==='DONT_LIKE').length})`;
   // Table
-  document.getElementById('collBody').innerHTML = filtered.map(f=>`
-    <tr data-s="${f.status}" onclick="openDetail('${f.id}')">
-      <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
-      <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
-      <td class="tmono">${f.sizes.join(', ')||'—'}</td>
-      <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
-      <td class="tmono">${f.personalLong||'—'}</td>
-      <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,2).join(', ')}</td>
-      <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
-      <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
-    </tr>`).join('');
+  const friendOwnsSet = new Set(friendFragrances().map(f=>f.name.toLowerCase()));
+  if(filtered.length){
+    document.getElementById('collBody').innerHTML = filtered.map(f=>{
+      const hasFriendMatch = friendOwnsSet.has(f.name.toLowerCase());
+      return `<tr data-s="${f.status}" onclick="openDetail('${f.id}')">
+        <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
+        <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
+        <td class="tmono">${f.sizes.join(', ')||'—'}</td>
+        <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
+        <td class="tmono">${f.personalLong||'—'}</td>
+        <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,2).join(', ')}</td>
+        <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
+        <td class="tact">
+          <button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button>
+          ${hasFriendMatch?`<button class="btn-bare" style="color:var(--warm);" onclick="event.stopPropagation();openCompare('${f.name}','${f.id}')" title="Compare with Sylvia">Compare</button>`:''}
+        </td>
+      </tr>`;
+    }).join('');
+  } else {
+    const emptyMsg = coll.length ? 'No fragrances in this category' : 'Your collection is empty — add a fragrance or import from Fragrantica';
+    document.getElementById('collBody').innerHTML = `<tr><td colspan="8" style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;text-align:center;">${emptyMsg}</td></tr>`;
+  }
   // Grid
   document.getElementById('collGrid').innerHTML = filtered.map(f=>`
     <div class="ccard" data-s="${f.status}" onclick="openDetail('${f.id}')">
@@ -1457,18 +1505,22 @@ function renderWishlist(filter='all'){
   document.querySelector('#wishFbar .fc[data-filter="all"]').textContent=`All (${wish.length})`;
   document.querySelector('#wishFbar .fc[data-filter="WANT_TO_SMELL"]').textContent=`Want to Smell (${wish.filter(f=>f.status==='WANT_TO_SMELL').length})`;
   document.querySelector('#wishFbar .fc[data-filter="WANT_TO_BUY"]').textContent=`Want to Buy (${wish.filter(f=>f.status==='WANT_TO_BUY').length})`;
-  document.getElementById('wishBody').innerHTML = filtered.map(f=>`
-    <tr onclick="openDetail('${f.id}')">
-      <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
-      <td><div class="ts s-wnt">${STATUS_LABELS[f.status]}</div></td>
-      <td class="tmono" style="color:var(--warm)">${f.communityRating} / 5.0</td>
-      <td class="tmono">${f.avgPrice||'—'}</td>
-      <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
-      <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
-      <td class="tact">
-        <button class="btn-bare" onclick="event.stopPropagation();promoteToOwned('${f.id}')">Mark as Owned</button>
-      </td>
-    </tr>`).join('');
+  if(filtered.length){
+    document.getElementById('wishBody').innerHTML = filtered.map(f=>`
+      <tr onclick="openDetail('${f.id}')">
+        <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
+        <td><div class="ts s-wnt">${STATUS_LABELS[f.status]}</div></td>
+        <td class="tmono" style="color:var(--warm)">${f.communityRating} / 5.0</td>
+        <td class="tmono">${f.avgPrice||'—'}</td>
+        <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
+        <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
+        <td class="tact">
+          <button class="btn-bare" onclick="event.stopPropagation();promoteToOwned('${f.id}')">Mark as Owned</button>
+        </td>
+      </tr>`).join('');
+  } else {
+    document.getElementById('wishBody').innerHTML = `<tr><td colspan="7" style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;text-align:center;">Nothing on your wishlist yet</td></tr>`;
+  }
 }
 
 document.getElementById('wishFbar').addEventListener('click',e=>{
@@ -1498,6 +1550,7 @@ function renderCompliments(filter='all'){
     const el = document.querySelector('#compFbar .fc[data-filter="'+r+'"]');
     if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'SO':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
   });
+  const allEmpty = MC.length === 0;
   document.getElementById('compList').innerHTML = filtered.map(c=>`
     <div class="crow" data-rel="${c.relation}">
       <div style="flex:1;">
@@ -1509,7 +1562,9 @@ function renderCompliments(filter='all'){
         <div class="cr-d">${c.month} ${c.year}</div>
         <button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment('${c.id}')">×</button>
       </div>
-    </div>`).join('') || '<div style="padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliments in this category yet</div>';
+    </div>`).join('') || (allEmpty
+      ? '<div style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliments logged yet — wear something great</div>'
+      : '<div style="padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliments in this category yet</div>');
 }
 
 document.getElementById('compFbar').addEventListener('click',e=>{
@@ -1534,6 +1589,12 @@ function deleteCompliment(id){
 function renderAnalytics(){
   var MC=myCompliments();
   const total = MC.length;
+  if(!total){
+    document.getElementById('anaStats').innerHTML = '<div class="sbox" style="grid-column:1/-1;"><div style="font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">Log some compliments to see your stats</div></div>';
+    document.getElementById('bc1').textContent = ''; document.getElementById('bc1-legend').textContent = '';
+    document.getElementById('bc2').textContent = ''; document.getElementById('insightsList').textContent = '';
+    return;
+  }
   const byFrag = {};
   MC.forEach(c=>{ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; });
   const fragSorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,6);
@@ -1671,22 +1732,33 @@ function renderFriend(){
     }
   }
 
-  // Analytics chart
+  // Analytics tab
   var byFrag={};
   FC.forEach(function(c){ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; });
   var fragSorted=Object.entries(byFrag).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+  var ftotal=FC.length;
+  var spct=ftotal?Math.round((FC.filter(function(c){return c.relation==='Stranger';}).length/ftotal)*100):0;
+  var ratedFF=FF.filter(function(f){return f.personalRating;});
+  var avgR=ratedFF.length?(ratedFF.reduce(function(a,f){return a+f.personalRating;},0)/ratedFF.length).toFixed(1):'—';
+  var anaStatsEl=document.getElementById('ft-ana-stats');
+  if(anaStatsEl){
+    anaStatsEl.innerHTML='<div class="sbox"><div class="snum">'+ftotal+'</div><div class="slbl">Compliments</div></div>'
+      +'<div class="sbox"><div class="snum">'+Object.keys(byFrag).length+'</div><div class="slbl">Fragrances</div></div>'
+      +'<div class="sbox"><div class="snum">'+spct+'%</div><div class="slbl">From Strangers</div></div>'
+      +'<div class="sbox"><div class="snum">'+avgR+'</div><div class="slbl">Avg Rating</div></div>';
+  }
+  var title=document.getElementById('ft-ana-title'); if(title) title.textContent=friend.name+"'s top performers";
   var maxV=fragSorted[0]?fragSorted[0][1]:1;
   bldChart('bc-f',fragSorted.map(function(e){return {l:e[0].split(' ')[0],v:e[1],h:Math.round((e[1]/maxV)*100)};}));
-  var anaStats=document.querySelector('#ft-ana .stats');
-  if(anaStats){
-    var snums=anaStats.querySelectorAll('.snum');
-    var total=FC.length;
-    if(snums[0]) snums[0].textContent=total;
-    if(snums[1]) snums[1].textContent=Object.keys(byFrag).length;
-    var spct=total?Math.round((FC.filter(function(c){return c.relation==='Stranger';}).length/total)*100):0;
-    if(snums[2]) snums[2].textContent=spct+'%';
-    var ratedFF=FF.filter(function(f){return f.personalRating;}), avgR=ratedFF.length?(ratedFF.reduce(function(a,f){return a+f.personalRating;},0)/ratedFF.length).toFixed(1):'—';
-    if(snums[3]) snums[3].textContent=avgR;
+  var legend=document.getElementById('bc-f-legend'); if(legend) legend.textContent=fragSorted.map(function(e){return e[0];}).join(' · ');
+  var insightsEl=document.getElementById('ft-ana-insights');
+  if(insightsEl){
+    if(fragSorted[0] && ftotal>0){
+      insightsEl.innerHTML='<div class="ins"><div class="ins-t">'+fragSorted[0][0]+' is '+friend.name+"'s top performer</div>"
+        +'<div class="ins-b">'+fragSorted[0][1]+' compliment'+(fragSorted[0][1]>1?'s':'')+' — '+Math.round((fragSorted[0][1]/ftotal)*100)+'% of total.</div></div>';
+    } else {
+      insightsEl.innerHTML='<div style="padding:16px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliment data yet</div>';
+    }
   }
 
   renderInCommon();
@@ -2572,28 +2644,20 @@ document.getElementById('compareOverlay').addEventListener('click', function(e){
 
 // ── INIT ──────────────────────────────────────────────────────────────────
 (async function init(){
-  try { await loadAllData(); } catch(e){ console.warn('loadAllData failed', e); }
-  // Always show identity screen on load
-  document.getElementById('identityScreen').style.display='flex';
+  // Identity screen is already visible with loading spinner
   document.querySelector('.shell').style.display='none';
-  if(false){
-    if(CURRENT_USER){
-      const who=document.querySelector('.sb-who');
-      if(who){
-        var b=document.createElement('b');
-        b.textContent=CURRENT_USER.name;
-        who.textContent='';
-        who.appendChild(b);
-        who.appendChild(document.createTextNode('Settings'));
-      }
-    }
-    renderDashboard();
-    renderImportQueue();
-    updateCounts();
+  var loadOk = true;
+  try {
+    await loadAllData();
+  } catch(e){
+    console.error('[init] loadAllData threw:', e);
+    loadOk = false;
+  }
+  document.getElementById('idLoading').style.display='none';
+  if(loadOk){
+    document.getElementById('idPicker').style.display='flex';
   } else {
-    // First visit — show identity picker, hide app shell
-    document.getElementById('identityScreen').style.display='flex';
-    document.querySelector('.shell').style.display='none';
+    document.getElementById('idError').style.display='flex';
   }
 })();
 
