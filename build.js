@@ -10,6 +10,8 @@ const email         = process.env.SA_EMAIL;
 const key           = (process.env.SA_KEY || '').replace(/\\n/g, '\n');
 const spreadsheetId = process.env.SPREADSHEET_ID;
 const anthropicKey  = process.env.ANTHROPIC_API_KEY || '';
+const workerUrl     = process.env.WORKER_URL || '';
+const visionKey     = process.env.VISION_API_KEY || '';
 
 if (!email || !key || !spreadsheetId) {
   console.error('Missing required env vars: SA_EMAIL, SA_KEY, SPREADSHEET_ID');
@@ -21,6 +23,8 @@ fs.writeFileSync('config.js', `window.__ENV__=${JSON.stringify({
   SA_KEY: key,
   SPREADSHEET_ID: spreadsheetId,
   ANTHROPIC_API_KEY: anthropicKey,
+  WORKER_URL: workerUrl,
+  VISION_API_KEY: visionKey,
 })};`);
 
 console.log('config.js written');
