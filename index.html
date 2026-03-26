@@ -1022,6 +1022,146 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 
 // ═══════════════════════════════════════════════════════
+// CREDENTIALS — injected by build.js from config.js
+// ═══════════════════════════════════════════════════════
+
+const SA_EMAIL = window.__ENV__&&window.__ENV__.SA_EMAIL ? window.__ENV__.SA_EMAIL : '';
+const SA_KEY   = window.__ENV__&&window.__ENV__.SA_KEY   ? window.__ENV__.SA_KEY   : '';
+const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/' + (window.__ENV__&&window.__ENV__.SPREADSHEET_ID ? window.__ENV__.SPREADSHEET_ID : '');
+
+// ═══════════════════════════════════════════════════════
+// HEADER CONSTANTS
+// ═══════════════════════════════════════════════════════
+
+const FRAG_HEADERS = [
+  'id','userId','name','house','status','sizeOwned',
+  'communityRating','communityLong','communitySill','avgPrice','notes',
+  'personalRating','statusRating','personalLong','personalSill',
+  'whereBought','purchaseDate','isDupe','dupeFor','personalNotes','createdAt'
+];
+
+const COMP_HEADERS = [
+  'id','userId','primaryFragranceId','primaryFragranceName',
+  'secondaryFragranceId','secondaryFragranceName','complimenterGender',
+  'relation','month','year','location','notes','createdAt'
+];
+
+const USER_HEADERS = ['id','name','createdAt'];
+
+// ═══════════════════════════════════════════════════════
+// AUTH — getAccessToken() copied verbatim from ATS-HRIS
+// ═══════════════════════════════════════════════════════
+
+let _tokenCache={token:null,exp:0};
+
+function b64url(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function pemToBytes(pem){
+  const b64=pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');
+  const bin=atob(b64);
+  return Uint8Array.from(bin,c=>c.charCodeAt(0));
+}
+
+async function getAccessToken(){
+  const now=Math.floor(Date.now()/1000);
+  if(_tokenCache.token&&now<_tokenCache.exp-60)return _tokenCache.token;
+
+  const header=b64url(new TextEncoder().encode(JSON.stringify({alg:'RS256',typ:'JWT'})));
+  const claim=b64url(new TextEncoder().encode(JSON.stringify({
+    iss:SA_EMAIL,scope:'https://www.googleapis.com/auth/spreadsheets',
+    aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600
+  })));
+  const sigInput=new TextEncoder().encode(header+'.'+claim);
+
+  const keyBytes=pemToBytes(SA_KEY);
+  const cryptoKey=await crypto.subtle.importKey(
+    'pkcs8',keyBytes,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']
+  );
+  const sigBuf=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',cryptoKey,sigInput);
+  const jwt=header+'.'+claim+'.'+b64url(sigBuf);
+
+  const res=await fetch('https://oauth2.googleapis.com/token',{
+    method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+jwt
+  });
+  if(!res.ok){const e=await res.json().catch(function(){return{};});throw new Error('Token error: '+(e.error_description||res.status));}
+  const d=await res.json();
+  _tokenCache={token:d.access_token,exp:now+d.expires_in};
+  return d.access_token;
+}
+
+// ═══════════════════════════════════════════════════════
+// GOOGLE SHEETS HELPERS — spec from README.md
+// ═══════════════════════════════════════════════════════
+
+async function readSheet(tabName){
+  const token=await getAccessToken();
+  const res=await fetch(SHEETS_BASE+'/values/'+tabName,{
+    headers:{Authorization:'Bearer '+token}
+  });
+  const data=await res.json();
+  const rows=data.values||[];
+  if(rows.length<2)return[];
+  const headers=rows[0];
+  return rows.slice(1).map(function(row){
+    var obj={};
+    headers.forEach(function(h,i){obj[h]=row[i]||'';});
+    return obj;
+  });
+}
+
+async function writeSheet(tabName,rows,headers){
+  setSyncState('syncing');
+  const token=await getAccessToken();
+  const authHeader={Authorization:'Bearer '+token,'Content-Type':'application/json'};
+  await fetch(SHEETS_BASE+'/values/'+tabName+':clear',{method:'POST',headers:authHeader});
+  if(!rows.length){setSyncState('ok');return;}
+  const values=[headers].concat(rows.map(function(row){
+    return headers.map(function(h){
+      var v=row[h];
+      if(v===null||v===undefined)return'';
+      if(typeof v==='object')return JSON.stringify(v);
+      return String(v);
+    });
+  }));
+  await fetch(SHEETS_BASE+'/values/'+tabName+'?valueInputOption=RAW',{
+    method:'PUT',headers:authHeader,body:JSON.stringify({values:values})
+  });
+  setSyncState('ok');
+}
+
+async function appendRow(tabName,row,headers){
+  setSyncState('syncing');
+  const token=await getAccessToken();
+  const values=[headers.map(function(h){
+    var v=row[h];
+    if(v===null||v===undefined)return'';
+    if(typeof v==='object')return JSON.stringify(v);
+    return String(v);
+  })];
+  await fetch(SHEETS_BASE+'/values/'+tabName+':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({values:values})
+  });
+  setSyncState('ok');
+}
+
+async function loadAllData(){
+  const results=await Promise.all([
+    readSheet('users'),
+    readSheet('fragrances'),
+    readSheet('compliments'),
+  ]);
+  USERS=results[0].length?results[0]:USERS;
+  FRAGRANCES=results[1];
+  COMPLIMENTS=results[2];
+}
+
+// ═══════════════════════════════════════════════════════
 // SYNC STATE (mirrors ATS-HRIS setSyncState pattern)
 // ═══════════════════════════════════════════════════════
 
