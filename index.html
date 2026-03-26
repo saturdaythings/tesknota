@@ -238,6 +238,44 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .lrl{font-family:var(--mono);font-size:10px;color:var(--ink3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.1em;}
 .lrv{font-size:12px;font-weight:500;color:var(--blue);}
 .lr-notes{font-family:var(--script);font-size:14px;font-style:italic;color:var(--ink2);border-top:1px solid var(--b2);padding-top:10px;margin-bottom:12px;}
+/* link result card editable fields */
+.lr-edit-wrap{margin-bottom:10px;}
+.lr-edit-wrap label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink3);display:block;margin-bottom:3px;}
+.lr-edit-wrap input,.lr-edit-wrap select{border:none;border-bottom:1px solid var(--b3);background:none;padding:5px 0;font-size:13px;font-family:var(--body);color:var(--ink);outline:none;width:100%;transition:border-color .14s;}
+.lr-edit-wrap input:focus,.lr-edit-wrap select:focus{border-color:var(--blue);}
+.lr-static{display:flex;align-items:center;gap:6px;}
+.lr-editbtn{background:none;border:none;cursor:pointer;font-family:var(--mono);font-size:8px;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;padding:0;}
+.lr-editbtn:hover{text-decoration:underline;}
+.lr-search-link{font-family:var(--mono);font-size:9px;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;text-decoration:none;display:inline-block;margin-top:8px;}
+.lr-search-link:hover{text-decoration:underline;}
+/* tag input / notes pyramid */
+.note-tiers{margin-top:8px;}
+.note-tier{margin-bottom:12px;}
+.note-tier-head{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin-bottom:4px;}
+.note-tier-desc{font-size:8px;opacity:.65;margin-left:6px;letter-spacing:.04em;text-transform:none;}
+.ti-container{position:relative;}
+.ti-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:34px;border-bottom:1px solid var(--b3);padding:3px 0;cursor:text;transition:border-color .14s;}
+.ti-wrap:focus-within{border-color:var(--blue);}
+.note-chip{display:inline-flex;align-items:center;gap:4px;background:var(--off2);border:1px solid var(--b2);padding:2px 8px;font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--ink2);}
+.nc-del{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:12px;padding:0;line-height:1;}
+.nc-del:hover{color:var(--rose);}
+.ti-input{border:none;outline:none;background:none;font-size:12px;font-family:var(--body);color:var(--ink);min-width:80px;flex:1;padding:2px 4px;}
+.ti-drop{position:absolute;left:0;right:0;background:var(--off);border:1px solid var(--b2);z-index:400;max-height:160px;overflow-y:auto;box-shadow:0 4px 16px rgba(26,46,92,.1);}
+.ti-opt{padding:7px 12px;font-size:12px;cursor:pointer;}
+.ti-opt:hover{background:var(--off2);}
+/* detail panel notes pyramid */
+.d-note-row{display:flex;align-items:baseline;gap:10px;padding:4px 0;}
+.d-note-tier{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);white-space:nowrap;min-width:44px;}
+.d-note-chips{display:flex;flex-wrap:wrap;gap:4px;}
+.d-note-chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--script);font-size:14px;font-style:italic;color:var(--ink2);padding:1px 0;}
+.d-note-chip .nc-del{display:none;font-size:10px;}
+.d-note-chip:hover .nc-del{display:inline;}
+/* settings: note manager */
+.note-manage-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid var(--b2);font-size:12px;}
+.note-manage-name{flex:1;cursor:pointer;color:var(--blue);}
+.note-manage-name:hover{text-decoration:underline;}
+.note-manage-ct{font-family:var(--mono);font-size:10px;color:var(--ink3);}
+.note-rename-inp{border:none;border-bottom:1px solid var(--blue);background:none;font-size:12px;font-family:var(--body);color:var(--ink);outline:none;flex:1;}
 .cam-box{border:1px solid var(--b2);overflow:hidden;margin-bottom:16px;}
 .cam-view{width:100%;height:220px;background:var(--blue3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
 .cam-view:hover{background:var(--blue2);}
@@ -659,20 +697,47 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.6;">Paste a Fragrantica or retailer URL to pull metadata.</p>
         <div class="linkrow"><input placeholder="https://www.fragrantica.com/perfume/..." id="linkIn"><button class="btn btn-blue" id="linkFetchBtn" onclick="fetchLink()">Fetch Metadata</button></div>
         <div class="lresult" id="linkRes" style="display:none;">
-          <div style="font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px;">Fetched — review and confirm</div>
-          <div class="lr-n" id="lr-name"></div>
-          <div class="lr-h" id="lr-house"></div>
-          <div class="lr-g">
-            <div><div class="lrl">Community</div><div class="lrv" id="lr-comm">—</div></div>
-            <div><div class="lrl">Longevity</div><div class="lrv" id="lr-long">—</div></div>
-            <div><div class="lrl">Sillage</div><div class="lrv" id="lr-sill">—</div></div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;">Fetched — review and edit before saving</div>
+          <div id="lr-confidence" style="display:none;font-family:var(--mono);font-size:8px;color:var(--warm);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+            <div class="lr-edit-wrap"><label>Fragrance name</label><input type="text" id="lr-name-inp" oninput="lrSync('name',this.value)"></div>
+            <div class="lr-edit-wrap"><label>Brand / House</label><input type="text" id="lr-house-inp" oninput="lrSync('house',this.value)"></div>
           </div>
-          <div class="lr-notes" id="lr-notes"></div>
-          <div id="lr-confidence" style="display:none;font-family:var(--mono);font-size:8px;color:var(--warm);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;"></div>
-          <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;">Confirm and add personal details, or add directly to wishlist.</div>
+          <div class="lr-g" style="grid-template-columns:repeat(4,1fr);">
+            <div>
+              <div class="lrl">Community rating</div>
+              <div class="lr-static" id="lrs-comm"><span class="lrv" id="lr-comm">—</span> <button class="lr-editbtn" onclick="lrEditField('comm')">edit</button></div>
+              <input type="number" id="lr-comm-inp" class="lr-edit-wrap" style="display:none;width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;" min="0" max="5" step="0.1" placeholder="0.0–5.0" oninput="lrSync('communityRating',this.value)">
+            </div>
+            <div>
+              <div class="lrl">Avg price</div>
+              <div class="lr-static" id="lrs-price"><span class="lrv" id="lr-price">—</span> <button class="lr-editbtn" onclick="lrEditField('price')">edit</button></div>
+              <input type="text" id="lr-price-inp" style="display:none;width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;" placeholder="~$280" oninput="lrSync('avgPrice',this.value)">
+            </div>
+            <div>
+              <div class="lrl">Longevity</div>
+              <div class="lr-static" id="lrs-long"><span class="lrv" id="lr-long">—</span> <button class="lr-editbtn" onclick="lrEditField('long')">edit</button></div>
+              <select id="lr-long-inp" style="display:none;width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;" onchange="lrSync('communityLong',this.value)"><option value="">—</option><option>0–6h</option><option>6–12h</option><option>12–24h</option><option>&gt;24h</option></select>
+            </div>
+            <div>
+              <div class="lrl">Sillage</div>
+              <div class="lr-static" id="lrs-sill"><span class="lrv" id="lr-sill">—</span> <button class="lr-editbtn" onclick="lrEditField('sill')">edit</button></div>
+              <select id="lr-sill-inp" style="display:none;width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;" onchange="lrSync('communitySill',this.value)"><option value="">—</option><option>Soft</option><option>Moderate</option><option>Strong</option><option>Enormous</option></select>
+            </div>
+          </div>
+          <!-- Notes pyramid for import card -->
+          <div style="border-top:1px solid var(--b2);padding-top:10px;margin-bottom:12px;">
+            <div class="note-tiers">
+              <div class="note-tier"><div class="note-tier-head">Top Notes <span class="note-tier-desc">first impression, 0–30 min</span></div><div class="ti-wrap" id="ti-lrTop" onclick="focusTi('lrTop')"></div></div>
+              <div class="note-tier"><div class="note-tier-head">Heart Notes <span class="note-tier-desc">core character, 30 min–4 hrs</span></div><div class="ti-wrap" id="ti-lrMiddle" onclick="focusTi('lrMiddle')"></div></div>
+              <div class="note-tier"><div class="note-tier-head">Base Notes <span class="note-tier-desc">dry down, 4+ hrs</span></div><div class="ti-wrap" id="ti-lrBase" onclick="focusTi('lrBase')"></div></div>
+            </div>
+          </div>
+          <a class="lr-search-link" id="lrSearchLink" href="#" target="_blank" rel="noopener">↗ Search on Fragrantica</a>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin:10px 0 12px;">Confirm and add personal details, or add directly to wishlist.</div>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-blue" onclick="importToCollection(window._fetchedFragData)">Add to Collection</button>
-            <button class="btn btn-ghost" onclick="importToWishlist(window._fetchedFragData)">Add to Wishlist</button>
+            <button class="btn btn-blue" onclick="lrImportToCollection()">Add to Collection</button>
+            <button class="btn btn-ghost" onclick="lrImportToWishlist()">Add to Wishlist</button>
             <button class="btn-bare" onclick="document.getElementById('linkRes').style.display='none';document.getElementById('linkIn').value=''">Discard</button>
           </div>
         </div>
@@ -741,6 +806,16 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <tr style="border-bottom:none"><td><div class="st-label">Account</div><div class="st-sub">Sign out and return to user picker</div></td><td><button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button></td></tr>
         </tbody>
       </table>
+      <div class="sh" style="margin-top:28px;"><h2>Manage Notes</h2><div class="sh-r"><span style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">Rename or merge across all fragrances</span></div></div>
+      <div id="noteManager"></div>
+      <div id="noteMergePanel" style="display:none;padding:14px;background:var(--blue4);border:1px solid var(--b2);margin-top:12px;">
+        <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink3);margin-bottom:10px;">Merge selected notes into:</div>
+        <div id="noteMergeOptions" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-blue btn-sm" id="noteMergeConfirmBtn" onclick="confirmMergeNotes()">Confirm merge</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelMergeNotes()">Cancel</button>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -771,7 +846,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
     </div>
     <div class="dsec"><div class="dsl">Notes</div>
-      <div style="font-family:var(--script);font-size:15px;font-style:italic;color:var(--ink2);line-height:1.8;" id="d-notes"></div>
+      <div id="d-notes"></div>
     </div>
     <div class="dsec"><div class="dsl">My experience</div>
       <div class="dgrid">
@@ -901,6 +976,14 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           </div>
           <div style="font-size:11px;color:var(--ink3);margin-top:4px;">A dupe smells similar to a more expensive original. e.g. Hacivat is often considered a dupe for BR540.</div>
         </div>
+        <div class="fg">
+          <label>Notes pyramid</label>
+          <div class="note-tiers">
+            <div class="note-tier"><div class="note-tier-head">Top Notes <span class="note-tier-desc">first impression, 0–30 min</span></div><div class="ti-wrap" id="ti-afTop" onclick="focusTi('afTop')"></div></div>
+            <div class="note-tier"><div class="note-tier-head">Heart Notes <span class="note-tier-desc">core character, 30 min–4 hrs</span></div><div class="ti-wrap" id="ti-afMiddle" onclick="focusTi('afMiddle')"></div></div>
+            <div class="note-tier"><div class="note-tier-head">Base Notes <span class="note-tier-desc">dry down, 4+ hrs</span></div><div class="ti-wrap" id="ti-afBase" onclick="focusTi('afBase')"></div></div>
+          </div>
+        </div>
         <div class="fg"><label>Personal notes</label>
           <textarea id="afNotes" placeholder="How does it smell on your skin? When do you wear it? Any context worth remembering?"></textarea>
         </div>
@@ -1025,6 +1108,7 @@ const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/' + (window._
 const FRAG_HEADERS = [
   'id','userId','name','house','status','sizeOwned',
   'communityRating','communityLong','communitySill','avgPrice','notes',
+  'topNotes','middleNotes','baseNotes',
   'personalRating','statusRating','personalLong','personalSill',
   'whereBought','purchaseDate','isDupe','dupeFor','personalNotes','createdAt'
 ];
@@ -1156,6 +1240,7 @@ function fragToRow(f){
     status:f.status||'', sizeOwned:(f.sizes||[]).join(', '),
     communityRating:f.communityRating||'', communityLong:f.communityLong||'',
     communitySill:f.communitySill||'', avgPrice:f.avgPrice||'', notes:f.notes||'',
+    topNotes:f.topNotes||'', middleNotes:f.middleNotes||'', baseNotes:f.baseNotes||'',
     personalRating:f.personalRating||'', statusRating:f.statusRating||'',
     personalLong:f.personalLong||'', personalSill:f.personalSill||'',
     whereBought:f.whereBought||'', purchaseDate:f.purchaseDate||'',
@@ -1170,6 +1255,7 @@ function rowToFrag(row){
     sizes:row.sizeOwned ? row.sizeOwned.split(',').map(function(s){return s.trim();}).filter(Boolean) : [],
     communityRating:row.communityRating||null, communityLong:row.communityLong||null,
     communitySill:row.communitySill||null, avgPrice:row.avgPrice||null, notes:row.notes||'',
+    topNotes:row.topNotes||'', middleNotes:row.middleNotes||'', baseNotes:row.baseNotes||'',
     personalRating:row.personalRating ? parseInt(row.personalRating) : null,
     statusRating:row.statusRating||null, personalLong:row.personalLong||null,
     personalSill:row.personalSill||null, whereBought:row.whereBought||null,
@@ -1421,6 +1507,7 @@ function goPage(id){
   if(id==='compliments') renderCompliments();
   if(id==='analytics') renderAnalytics();
   if(id==='friend') renderFriend();
+  if(id==='settings') renderNoteManager();
 }
 
 document.querySelectorAll('.sb-link[data-page]').forEach(l=>l.addEventListener('click',()=>goPage(l.dataset.page)));
@@ -1888,7 +1975,7 @@ function openDetail(fragId){
   document.getElementById('d-price').textContent = f.avgPrice||'—';
   document.getElementById('d-long').textContent = f.communityLong||'—';
   document.getElementById('d-sill').textContent = f.communitySill||'—';
-  document.getElementById('d-notes').textContent = f.notes;
+  renderDetailNotes(f);
   document.getElementById('d-mylong').textContent = f.personalLong||'—';
   document.getElementById('d-mysill').textContent = f.personalSill||'—';
   document.getElementById('d-where').textContent = f.whereBought||'—';
@@ -1907,6 +1994,157 @@ function openDetail(fragId){
 }
 
 function closeDetail(){ document.getElementById('detailP').classList.remove('on'); currentDetailId=null; }
+
+function renderDetailNotes(f){
+  var el=document.getElementById('d-notes'); if(!el) return;
+  var hasTiers=f.topNotes||f.middleNotes||f.baseNotes;
+  if(hasTiers){
+    el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px;">'
+      +(f.topNotes?'<div class="d-note-row"><span class="d-note-tier">TOP</span><span class="d-note-chips">'+buildDetailChips(f.topNotes,f.id,'top')+'</span></div>':'')
+      +(f.middleNotes?'<div class="d-note-row"><span class="d-note-tier">HEART</span><span class="d-note-chips">'+buildDetailChips(f.middleNotes,f.id,'middle')+'</span></div>':'')
+      +(f.baseNotes?'<div class="d-note-row"><span class="d-note-tier">BASE</span><span class="d-note-chips">'+buildDetailChips(f.baseNotes,f.id,'base')+'</span></div>':'')
+      +'</div>';
+  } else if(f.notes){
+    el.innerHTML='<div class="d-note-row"><span class="d-note-tier">NOTES</span><span class="d-note-chips">'+buildDetailChips(f.notes,f.id,'all')+'</span></div>';
+  } else {
+    el.innerHTML='<span style="font-size:12px;color:var(--ink3);">No notes recorded</span>';
+  }
+}
+
+function buildDetailChips(str, fragId, tier){
+  return str.split(/[,·]+/).map(function(s){return s.trim();}).filter(Boolean).map(function(n){
+    return '<span class="d-note-chip">'+n+'<button class="nc-del" onclick="removeNoteFromFrag(\''+fragId+'\',\''+tier+'\',\''+n.replace(/'/g,"\\'")+'\')" title="Remove note">×</button></span>';
+  }).join('');
+}
+
+function removeNoteFromFrag(fragId, tier, note){
+  var f=FRAGRANCES.find(function(x){return x.id===fragId;}); if(!f) return;
+  var field=tier==='top'?'topNotes':tier==='middle'?'middleNotes':tier==='base'?'baseNotes':'notes';
+  var updated=(f[field]||'').split(/[,·]+/).map(function(s){return s.trim();}).filter(function(n){return n&&n.toLowerCase()!==note.toLowerCase();}).join(', ');
+  f[field]=updated;
+  if(tier==='all') f.notes=updated;
+  writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  openDetail(fragId);
+}
+
+// ── NOTES MANAGER (GROUP 3) ───────────────────────────────
+function renderNoteManager(){
+  var counts={};
+  myFragrances().forEach(function(f){
+    ['topNotes','middleNotes','baseNotes','notes'].forEach(function(field){
+      if(f[field]){
+        f[field].split(/[,·]+/).map(function(s){return s.trim();}).filter(Boolean).forEach(function(n){
+          var k=n.toLowerCase();
+          if(!counts[k]) counts[k]={name:n,count:0};
+          counts[k].count++; counts[k].name=n;
+        });
+      }
+    });
+  });
+  var sorted=Object.values(counts).sort(function(a,b){return b.count-a.count;});
+  var el=document.getElementById('noteManager'); if(!el) return;
+  if(!sorted.length){ el.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);padding:12px 0;">No notes yet — add fragrances with note pyramids first</div>'; return; }
+  el.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'+sorted.length+' unique notes</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px;" id="notesList">'
+    +sorted.map(function(n){
+      var enc=n.name.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      return '<div class="note-manage-row" data-note="'+enc+'">'
+        +'<input type="checkbox" class="note-merge-chk" value="'+enc+'" onchange="toggleMergeSelect()">'
+        +' <span class="note-manage-name" ondblclick="startRenameNote(this,\''+enc+'\')">'+n.name+'</span>'
+        +' <span class="note-manage-ct">'+n.count+'</span>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    +'<button class="btn btn-ghost btn-sm" id="startMergeBtn" style="display:none;" onclick="startMergeNotes()">Merge selected</button>';
+}
+
+function toggleMergeSelect(){
+  var checked=document.querySelectorAll('.note-merge-chk:checked');
+  var btn=document.getElementById('startMergeBtn');
+  if(btn) btn.style.display=checked.length>=2?'':'none';
+}
+
+function startRenameNote(el, name){
+  var row=el.parentElement;
+  var inp=document.createElement('input');
+  inp.className='note-rename-inp'; inp.value=name;
+  inp.onkeydown=function(e){
+    if(e.key==='Enter'){ saveRenameNote(name, inp.value.trim()); }
+    else if(e.key==='Escape'){ renderNoteManager(); }
+  };
+  inp.onblur=function(){ if(inp.value.trim()&&inp.value.trim()!==name) saveRenameNote(name,inp.value.trim()); else renderNoteManager(); };
+  el.replaceWith(inp);
+  inp.focus(); inp.select();
+}
+
+function saveRenameNote(oldName, newName){
+  if(!newName||newName===oldName){ renderNoteManager(); return; }
+  var affected=[];
+  myFragrances().forEach(function(f){
+    var changed=false;
+    ['topNotes','middleNotes','baseNotes','notes'].forEach(function(field){
+      if(!f[field]) return;
+      var parts=f[field].split(/[,·]+/).map(function(s){return s.trim();});
+      var updated=parts.map(function(n){return n.toLowerCase()===oldName.toLowerCase()?newName:n;}).join(', ');
+      if(updated!==f[field]){ f[field]=updated; changed=true; }
+    });
+    if(changed) affected.push(f);
+  });
+  if(affected.length) writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  toast('Renamed "'+oldName+'" → "'+newName+'" across '+affected.length+' fragrance'+(affected.length!==1?'s':''));
+  renderNoteManager();
+}
+
+function startMergeNotes(){
+  var checked=[...document.querySelectorAll('.note-merge-chk:checked')].map(function(c){return c.value;});
+  if(checked.length<2){ toast('Select at least 2 notes to merge'); return; }
+  _noteMergeSelected=checked; _noteMergeKeep=null;
+  var panel=document.getElementById('noteMergePanel');
+  var opts=document.getElementById('noteMergeOptions');
+  if(!panel||!opts) return;
+  opts.innerHTML=checked.map(function(n){
+    return '<button class="btn btn-ghost btn-sm" style="border:2px solid transparent;" onclick="selectMergeKeep(this,\''+n.replace(/'/g,"\\'")+'\')" data-nm="'+n.replace(/"/g,'&quot;')+'">'+n+'</button>';
+  }).join('');
+  panel.style.display='';
+  var btn=document.getElementById('noteMergeConfirmBtn'); if(btn) btn.disabled=true;
+}
+
+function selectMergeKeep(el, name){
+  _noteMergeKeep=name;
+  document.querySelectorAll('#noteMergeOptions button').forEach(function(b){ b.style.borderColor=b.dataset.nm===name?'var(--blue)':'transparent'; });
+  var btn=document.getElementById('noteMergeConfirmBtn'); if(btn) btn.disabled=false;
+}
+
+function confirmMergeNotes(){
+  if(!_noteMergeKeep||!_noteMergeSelected.length){ toast('Pick which name to keep'); return; }
+  var toReplace=_noteMergeSelected.filter(function(n){return n!==_noteMergeKeep;});
+  var affected=[];
+  myFragrances().forEach(function(f){
+    var changed=false;
+    ['topNotes','middleNotes','baseNotes','notes'].forEach(function(field){
+      if(!f[field]) return;
+      var parts=f[field].split(/[,·]+/).map(function(s){return s.trim();});
+      var seen=new Set();
+      var updated=parts.map(function(n){
+        var lo=n.toLowerCase();
+        if(toReplace.some(function(r){return r.toLowerCase()===lo;})) return _noteMergeKeep;
+        return n;
+      }).filter(function(n){var k=n.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;}).join(', ');
+      if(updated!==f[field]){ f[field]=updated; changed=true; }
+    });
+    if(changed) affected.push(f);
+  });
+  if(affected.length) writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  toast('Merged '+toReplace.length+' note'+(toReplace.length!==1?'s':'')+' into "'+_noteMergeKeep+'" across '+affected.length+' fragrance'+(affected.length!==1?'s':''));
+  cancelMergeNotes();
+}
+
+function cancelMergeNotes(){
+  _noteMergeSelected=[]; _noteMergeKeep=null;
+  var panel=document.getElementById('noteMergePanel'); if(panel) panel.style.display='none';
+  document.querySelectorAll('.note-merge-chk').forEach(function(c){c.checked=false;});
+  var btn=document.getElementById('startMergeBtn'); if(btn) btn.style.display='none';
+}
 
 document.addEventListener('click',e=>{
   const p=document.getElementById('detailP');
@@ -2045,7 +2283,7 @@ function openEditFrag(fragId, forceStatus){
   const sel = document.getElementById('afStatus');
   for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===statusVal){ sel.selectedIndex=i; break; }
   // Pre-fill Step 2
-  prefetchedData = {sizes:f.sizes,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,personalSill:f.personalSill,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes};
+  prefetchedData = {sizes:f.sizes,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,personalSill:f.personalSill,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:f.topNotes||'',middleNotes:f.middleNotes||'',baseNotes:f.baseNotes||''};
   // Auto-advance to step 2 for edits
   afGoStep(2, true);
   openModal('addFragM');
@@ -2078,6 +2316,7 @@ function resetAFModal(){
   document.getElementById('dupeFor').style.display='none';
   document.getElementById('dupeFor').value='';
   document.getElementById('afNotes').value='';
+  tiInit('afTop',''); tiInit('afMiddle',''); tiInit('afBase','');
 }
 
 function afGoStep(n, skipValidation){
@@ -2105,6 +2344,7 @@ function afGoStep(n, skipValidation){
       if(d.purchaseDate){ const parts=d.purchaseDate.split(' '); if(parts[0]) document.getElementById('afMonth').value=parts[0]; if(parts[1]) document.getElementById('afYear').value=parts[1]; }
       if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeFor').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
       if(d.personalNotes) document.getElementById('afNotes').value=d.personalNotes;
+      tiInit('afTop',d.topNotes||''); tiInit('afMiddle',d.middleNotes||''); tiInit('afBase',d.baseNotes||'');
     }
   } else {
     document.getElementById('af-s1').style.display='block';
@@ -2134,6 +2374,8 @@ function saveFragrance(){
   const month = document.getElementById('afMonth').value;
   const year = document.getElementById('afYear').value;
   const isDupe = document.getElementById('dY').classList.contains('on');
+  var topN=tiGet('afTop'), midN=tiGet('afMiddle'), baseN=tiGet('afBase');
+  var combinedNotes=[topN,midN,baseN].filter(Boolean).join(' · ');
   const data = {
     name, status: document.getElementById('afStatus').value,
     sizes, personalRating: ratingEl?parseInt(ratingEl.dataset.v):null,
@@ -2144,7 +2386,9 @@ function saveFragrance(){
     purchaseDate: (month&&year)?month+' '+year:null,
     isDupe, dupeFor: isDupe?document.getElementById('dupeFor').value:'',
     personalNotes: document.getElementById('afNotes').value,
+    topNotes: topN, middleNotes: midN, baseNotes: baseN,
   };
+  if(combinedNotes) data.notes = combinedNotes;
   if(editingFragId){
     const idx = FRAGRANCES.findIndex(f=>f.id===editingFragId);
     if(idx>=0){
@@ -2314,7 +2558,7 @@ function importToCollection(data){
   document.getElementById('mpNotes').textContent=data.notes||'';
   document.getElementById('afPrev').style.display='block';
   // Store as pending prefetch
-  prefetchedData = {communityRating:data.communityRating,communityLong:data.communityLong,communitySill:data.communitySill,avgPrice:data.avgPrice,notes:data.notes,house:data.house,sizes:[],isDupe:false,dupeFor:'',personalNotes:''};
+  prefetchedData = {communityRating:data.communityRating,communityLong:data.communityLong,communitySill:data.communitySill,avgPrice:data.avgPrice,notes:data.notes,house:data.house,sizes:[],isDupe:false,dupeFor:'',personalNotes:'',topNotes:data.topNotes||'',middleNotes:data.middleNotes||'',baseNotes:data.baseNotes||''};
 }
 
 function importToWishlist(data){
@@ -2338,6 +2582,69 @@ let compFragFilter = null;
 let editingCompId = null;
 let activeNoteFilter = null;
 let csvParsedRows = [];
+let _noteMergeSelected = [];
+let _noteMergeKeep = null;
+
+// ── TAG INPUT SYSTEM ──────────────────────────────────────
+const NOTE_LIST = ['rose','vanilla','sandalwood','musk','oud','amber','bergamot','jasmine','cedar','vetiver','patchouli','iris','pepper','cardamom','ginger','lemon','grapefruit','neroli','ylang ylang','tobacco','leather','coffee','chocolate','caramel','coconut','peach','apple','fig','violet','lavender','oakmoss','incense','frankincense','myrrh','benzoin','tonka bean','orris','heliotrope','tuberose','gardenia','magnolia','lily','freesia','peony','saffron','cinnamon','clove','nutmeg','anise','mint','eucalyptus','pine','fir','hay','smoke','salt','marine','moss','earth','mushroom','ambergris','castoreum','civet','beeswax','honey'];
+const _tiValues = {};
+
+function tiInit(id, initial){
+  _tiValues[id] = new Set((initial||'').split(/[,·]+/).map(function(s){return s.trim().toLowerCase();}).filter(Boolean));
+  tiRender(id);
+}
+
+function tiRender(id){
+  var c=document.getElementById('ti-'+id);
+  if(!c) return;
+  var tags=[..._tiValues[id]||[]];
+  c.innerHTML=tags.map(function(t){
+    return '<span class="note-chip"><span>'+t+'</span><button class="nc-del" type="button" onmousedown="tiRemove(\''+id+'\',\''+t.replace(/'/g,"\\'")+'\')" title="Remove">×</button></span>';
+  }).join('')
+    +'<div class="ti-container"><input class="ti-input" id="ti-inp-'+id+'" type="text" placeholder="'+(tags.length?'':'Type a note...')+'" oninput="tiSearch(\''+id+'\',this.value)" onkeydown="tiKey(event,\''+id+'\')" onblur="setTimeout(function(){var d=document.getElementById(\'ti-drop-'+id+'\');if(d)d.style.display=\'none\';},160)"><div class="ti-drop" id="ti-drop-'+id+'" style="display:none;"></div></div>';
+}
+
+function tiAdd(id, val){
+  val=val.trim().toLowerCase(); if(!val) return;
+  if(!_tiValues[id]) _tiValues[id]=new Set();
+  _tiValues[id].add(val);
+  tiRender(id);
+  setTimeout(function(){var inp=document.getElementById('ti-inp-'+id);if(inp)inp.focus();},0);
+}
+
+function tiRemove(id, val){
+  if(_tiValues[id]) _tiValues[id].delete(val);
+  tiRender(id);
+}
+
+function tiKey(event, id){
+  var inp=document.getElementById('ti-inp-'+id); if(!inp) return;
+  var val=inp.value;
+  if(event.key==='Enter'||event.key===','){
+    event.preventDefault();
+    var v=val.replace(/,/g,'').trim(); if(v){tiAdd(id,v);inp.value='';var d=document.getElementById('ti-drop-'+id);if(d)d.style.display='none';}
+  } else if(event.key==='Backspace'&&!val){
+    var tags=[...(_tiValues[id]||[])]; if(tags.length) tiRemove(id,tags[tags.length-1]);
+  }
+}
+
+function tiSearch(id, q){
+  var drop=document.getElementById('ti-drop-'+id); if(!drop) return;
+  q=q.trim().toLowerCase(); if(!q){drop.style.display='none';return;}
+  var existing=_tiValues[id]||new Set();
+  var matches=NOTE_LIST.filter(function(n){return n.includes(q)&&!existing.has(n);}).slice(0,8);
+  if(!matches.length){drop.style.display='none';return;}
+  drop.innerHTML=matches.map(function(m){return '<div class="ti-opt" onmousedown="tiAdd(\''+id+'\',\''+m.replace(/'/g,"\\'")+'\')">'+m+'</div>';}).join('');
+  drop.style.display='';
+}
+
+function tiGet(id){
+  return [...(_tiValues[id]||[])].join(', ');
+}
+
+function focusTi(id){
+  var inp=document.getElementById('ti-inp-'+id); if(inp) inp.focus();
+}
 
 let importQueueData = [
   {name:'Chanel No. 5 EDP',house:'Chanel',communityRating:'4.2',notes:'Ylang Ylang, Rose, Jasmine',isDup:false},
@@ -2449,12 +2756,25 @@ function extractHouseFromSlug(url){
 }
 
 function showLinkResult(data){
-  document.getElementById('lr-name').textContent=data.name||'';
-  document.getElementById('lr-house').textContent=data.house||'';
-  document.getElementById('lr-comm').textContent=data.communityRating?data.communityRating+' / 5.0':'—';
-  document.getElementById('lr-long').textContent=data.communityLong||'—';
-  document.getElementById('lr-sill').textContent=data.communitySill||'—';
-  document.getElementById('lr-notes').textContent=data.allNotes||data.topNotes||'—';
+  window._fetchedFragData = data;
+  // Name + House: always editable
+  document.getElementById('lr-name-inp').value = data.name||'';
+  document.getElementById('lr-house-inp').value = data.house||'';
+  // Community Rating
+  lrSetField('comm', data.communityRating ? data.communityRating+' / 5.0' : null);
+  // Avg Price
+  lrSetField('price', data.avgPrice||null);
+  // Longevity
+  lrSetField('long', data.communityLong||null);
+  if(data.communityLong){ document.getElementById('lr-long-inp').value=data.communityLong; }
+  // Sillage
+  lrSetField('sill', data.communitySill||null);
+  if(data.communitySill){ document.getElementById('lr-sill-inp').value=data.communitySill; }
+  // Notes pyramid
+  tiInit('lrTop', data.topNotes||'');
+  tiInit('lrMiddle', data.middleNotes||'');
+  tiInit('lrBase', data.baseNotes||data.allNotes||'');
+  // Confidence
   var conf=document.getElementById('lr-confidence');
   if(data.parseConfidence==='slug-only'){
     conf.textContent='Parsed from URL — verify name before saving';
@@ -2462,8 +2782,61 @@ function showLinkResult(data){
   }else{
     conf.style.display='none';
   }
+  // Fragrantica search link
+  var sl=document.getElementById('lrSearchLink');
+  if(sl) sl.href='https://www.fragrantica.com/search/?query='+encodeURIComponent(data.name||'');
   document.getElementById('linkRes').style.display='block';
-  window._fetchedFragData=data;
+}
+
+function lrSetField(key, val){
+  var stat=document.getElementById('lrs-'+key);
+  var disp=document.getElementById('lr-'+key);
+  var inp=document.getElementById('lr-'+key+'-inp');
+  if(!stat||!disp) return;
+  if(val){
+    disp.textContent=val;
+    stat.style.display='flex';
+    if(inp) inp.style.display='none';
+  } else {
+    stat.style.display='none';
+    if(inp) inp.style.display='';
+  }
+}
+
+function lrEditField(key){
+  var stat=document.getElementById('lrs-'+key);
+  var inp=document.getElementById('lr-'+key+'-inp');
+  if(stat) stat.style.display='none';
+  if(inp){ inp.style.display=''; inp.focus(); }
+}
+
+function lrSync(field, val){
+  if(window._fetchedFragData) window._fetchedFragData[field]=val;
+}
+
+function lrImportToCollection(){
+  lrSyncAll();
+  importToCollection(window._fetchedFragData);
+}
+
+function lrImportToWishlist(){
+  lrSyncAll();
+  importToWishlist(window._fetchedFragData);
+}
+
+function lrSyncAll(){
+  if(!window._fetchedFragData) return;
+  var d=window._fetchedFragData;
+  d.name = document.getElementById('lr-name-inp').value.trim()||d.name;
+  d.house = document.getElementById('lr-house-inp').value.trim()||d.house;
+  var commInp=document.getElementById('lr-comm-inp'); if(commInp&&commInp.value) d.communityRating=commInp.value;
+  var priceInp=document.getElementById('lr-price-inp'); if(priceInp&&priceInp.value) d.avgPrice=priceInp.value;
+  var longInp=document.getElementById('lr-long-inp'); if(longInp&&longInp.value) d.communityLong=longInp.value;
+  var sillInp=document.getElementById('lr-sill-inp'); if(sillInp&&sillInp.value) d.communitySill=sillInp.value;
+  d.topNotes = tiGet('lrTop');
+  d.middleNotes = tiGet('lrMiddle');
+  d.baseNotes = tiGet('lrBase');
+  d.notes = [d.topNotes,d.middleNotes,d.baseNotes].filter(Boolean).join(' · ')||d.notes||'';
 }
 
 async function startScan(){
