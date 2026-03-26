@@ -1013,10 +1013,9 @@ function pemToBytes(pem){
 
 async function getAccessToken(){
   const now=Math.floor(Date.now()/1000);
-  if(_tokenCache.token&&now<_tokenCache.exp-60){ console.log('[auth] using cached token'); return _tokenCache.token; }
+  if(_tokenCache.token&&now<_tokenCache.exp-60)return _tokenCache.token;
 
   if(!SA_EMAIL||!SA_KEY){ console.error('[auth] SA_EMAIL or SA_KEY missing — check config.js'); throw new Error('Missing credentials'); }
-  console.log('[auth] signing JWT for', SA_EMAIL);
 
   const header=b64url(new TextEncoder().encode(JSON.stringify({alg:'RS256',typ:'JWT'})));
   const claim=b64url(new TextEncoder().encode(JSON.stringify({
@@ -1032,7 +1031,6 @@ async function getAccessToken(){
   const sigBuf=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',cryptoKey,sigInput);
   const jwt=header+'.'+claim+'.'+b64url(sigBuf);
 
-  console.log('[auth] fetching OAuth token...');
   const res=await fetch('https://oauth2.googleapis.com/token',{
     method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
     body:'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+jwt
@@ -1043,7 +1041,6 @@ async function getAccessToken(){
     throw new Error('Token error: '+(e.error_description||res.status));
   }
   const d=await res.json();
-  console.log('[auth] token obtained, expires in', d.expires_in, 's');
   _tokenCache={token:d.access_token,exp:now+d.expires_in};
   return d.access_token;
 }
@@ -1053,18 +1050,15 @@ async function getAccessToken(){
 // ═══════════════════════════════════════════════════════
 
 async function readSheet(tabName){
-  console.log('[sheets] reading tab:', tabName);
   const token=await getAccessToken();
-  const url=SHEETS_BASE+'/values/'+encodeURIComponent(tabName);
-  const res=await fetch(url,{headers:{Authorization:'Bearer '+token}});
+  const res=await fetch(SHEETS_BASE+'/values/'+encodeURIComponent(tabName),{headers:{Authorization:'Bearer '+token}});
   if(!res.ok){
     const errBody=await res.json().catch(function(){return{};});
-    console.error('[sheets] fetch failed for tab "'+tabName+'":', res.status, errBody);
+    console.error('[sheets] read failed for "'+tabName+'":', res.status, errBody);
     throw new Error('Sheet read error '+res.status+' for '+tabName);
   }
   const data=await res.json();
   const rows=data.values||[];
-  console.log('[sheets] "'+tabName+'" returned', rows.length, 'rows (incl. header)');
   if(rows.length<2)return[];
   const headers=rows[0];
   return rows.slice(1).map(function(row){
@@ -1164,28 +1158,31 @@ function rowToComp(row){
 }
 
 async function loadAllData(){
-  console.log('[loadAllData] starting — SPREADSHEET_ID:', SHEETS_BASE.split('/').pop());
   const [usersRaw, fragsRaw, compsRaw] = await Promise.all([
     readSheet('users').catch(function(e){ console.error('[loadAllData] users sheet error:', e); return []; }),
     readSheet('fragrances').catch(function(e){ console.error('[loadAllData] fragrances sheet error:', e); return []; }),
     readSheet('compliments').catch(function(e){ console.error('[loadAllData] compliments sheet error:', e); return []; }),
   ]);
-  console.log('[loadAllData] raw counts — users:', usersRaw.length, 'fragrances:', fragsRaw.length, 'compliments:', compsRaw.length);
 
-  // Only replace in-memory arrays when the sheet has real data
   if(usersRaw.length) USERS=usersRaw;
-  else console.warn('[loadAllData] users sheet empty — keeping seed data');
 
-  if(fragsRaw.length){ FRAGRANCES=fragsRaw.map(rowToFrag); }
-  else console.warn('[loadAllData] fragrances sheet empty — keeping demo data (', FRAGRANCES.length, 'rows)');
+  // Per-user merge: sheet data overrides seed for users who have sheet rows.
+  // Users with no sheet rows keep their seed data (so demo looks populated
+  // until real data is added).
+  if(fragsRaw.length){
+    var fragSheetIds=new Set(fragsRaw.map(function(r){return r.userId;}));
+    var fragSeed=FRAGRANCES.filter(function(f){return !fragSheetIds.has(f.userId);});
+    FRAGRANCES=fragSeed.concat(fragsRaw.map(rowToFrag));
+  }
+  if(compsRaw.length){
+    var compSheetIds=new Set(compsRaw.map(function(r){return r.userId;}));
+    var compSeed=COMPLIMENTS.filter(function(c){return !compSheetIds.has(c.userId);});
+    COMPLIMENTS=compSeed.concat(compsRaw.map(rowToComp));
+  }
 
-  if(compsRaw.length){ COMPLIMENTS=compsRaw.map(rowToComp); }
-  else console.warn('[loadAllData] compliments sheet empty — keeping demo data (', COMPLIMENTS.length, 'rows)');
-
-  // Recalculate ID counters from loaded data
+  // Recalculate ID counters so new entries don't collide with loaded data
   FRAGRANCES.forEach(function(f){ var n=parseInt((f.id||'').replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
   COMPLIMENTS.forEach(function(c){ var n=parseInt((c.id||'').replace(/\D/g,''))||0; if(n>=nextCompId)nextCompId=n+1; });
-  console.log('[loadAllData] done — FRAGRANCES:', FRAGRANCES.length, 'COMPLIMENTS:', COMPLIMENTS.length);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1290,6 +1287,13 @@ let FRAGRANCES = [
   {id:'f10',userId:'u1',name:'Hacivat',house:'Nishane',status:'WANT_TO_SMELL',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.4',communityLong:'>24h',communitySill:'Strong',avgPrice:'~$185',notes:'Pineapple · Oakmoss · Amberwood · Jasmine',whereBought:null,purchaseDate:null,isDupe:true,dupeFor:'Baccarat Rouge 540',personalNotes:'Rumored BR540 dupe at less than half the price.'},
   {id:'f11',userId:'u1',name:'Oud for Greatness',house:'Initio',status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.3',communityLong:'>24h',communitySill:'Enormous',avgPrice:'~$320',notes:'Oud · Saffron · Nutmeg · Musk',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''},
   {id:'f12',userId:'u1',name:'Nio',house:'Xerjoff',status:'WANT_TO_SMELL',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.2',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$280',notes:'Bergamot · Yuzu · Musk · Sandalwood',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''},
+  // Sylvia (u2) — 6 fragrances; BR540 and Aventus overlap with Kiana for In Common / Compare
+  {id:'f13',userId:'u2',name:'Black Opium EDP',house:'YSL',status:'CURRENT',sizes:['Full Bottle'],personalRating:5,statusRating:'Obsessed',personalLong:'8–12h',personalSill:'Strong',communityRating:'4.3',communityLong:'8–12h',communitySill:'Strong',avgPrice:'~$130',notes:'Coffee · Vanilla · White Floral · Patchouli',whereBought:'Sephora',purchaseDate:'Oct 2024',isDupe:false,dupeFor:'',personalNotes:'My go-to for evenings out. Gets a compliment almost every time.'},
+  {id:'f14',userId:'u2',name:'Libre EDP',house:'YSL',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'8–12h',personalSill:'Moderate',communityRating:'4.2',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$155',notes:'Lavender · Vanilla · Musk · White Flowers',whereBought:'Nordstrom',purchaseDate:'Jan 2025',isDupe:false,dupeFor:'',personalNotes:'Modern feminine without being sweet. Office-appropriate and still interesting.'},
+  {id:'f15',userId:'u2',name:'Baccarat Rouge 540',house:'Maison Francis Kurkdjian',status:'CURRENT',sizes:['Travel'],personalRating:5,statusRating:'Obsessed',personalLong:'12–24h',personalSill:'Strong',communityRating:'4.5',communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$320',notes:'Amberwood · Ambergris · Fir Resin · Jasmine · Cedarwood',whereBought:'MFK Boutique',purchaseDate:'Dec 2024',isDupe:false,dupeFor:'',personalNotes:'The travel size was a gift. We basically have the same taste — not surprised we both ended up with this one.'},
+  {id:'f16',userId:'u2',name:'Roses Musk',house:'Montale',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'8–12h',personalSill:'Moderate',communityRating:'4.1',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$85',notes:'Rose · Musk · Oud · Amber',whereBought:'FragranceNet',purchaseDate:'Mar 2025',isDupe:false,dupeFor:'',personalNotes:'Surprisingly unisex. Soft and a little smoky.'},
+  {id:'f17',userId:'u2',name:'Good Girl',house:'Carolina Herrera',status:'PREVIOUSLY_OWNED',sizes:[],personalRating:3,statusRating:'Just OK',personalLong:'6–12h',personalSill:'Strong',communityRating:'4.1',communityLong:'6–12h',communitySill:'Strong',avgPrice:'~$120',notes:'Jasmine · Cocoa · Sandalwood · Tuberose',whereBought:'Sephora',purchaseDate:'Aug 2023',isDupe:false,dupeFor:'',personalNotes:'Loved the bottle, less sold on the dry down. Too sweet for me after a few months.'},
+  {id:'f18',userId:'u2',name:'Aventus',house:'Creed',status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.5',communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$435',notes:'Pineapple · Birch · Ambergris · Oakmoss',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:'On both our lists — we should split a bottle.'},
 ];
 
 // COMPLIMENTS — main compliment log
@@ -1304,12 +1308,17 @@ let COMPLIMENTS = [
   {id:'c8',userId:'u1',primaryFragId:'f2',primaryFrag:'Tobacco Vanille',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'Oct',year:'2025',location:'Bar, Denver',notes:'"That scent is incredible, what is it?"'},
   {id:'c9',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Sep',year:'2025',location:'Coffee shop, NYC',notes:'"Excuse me, you smell amazing."'},
   {id:'c10',userId:'u1',primaryFragId:'f4',primaryFrag:'Layton',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Family',month:'Aug',year:'2025',location:'Home visit',notes:'"You always smell so good these days."'},
+  // Sylvia (u2)
+  {id:'c11',userId:'u2',primaryFragId:'f13',primaryFrag:'Black Opium EDP',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Mar',year:'2026',location:'Coffee Shop, Denver',notes:'"This is such a good scent. What is it?"'},
+  {id:'c12',userId:'u2',primaryFragId:'f15',primaryFrag:'Baccarat Rouge 540',secondaryFragId:'f13',secondaryFrag:'Black Opium EDP',gender:'Male',relation:'Colleague / Client',month:'Feb',year:'2026',location:'Office, Denver',notes:'"You always smell amazing. What\'s the combination?"'},
+  {id:'c13',userId:'u2',primaryFragId:'f14',primaryFrag:'Libre EDP',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Jan',year:'2026',location:'Restaurant, NYC',notes:'"Is that Libre? I\'ve been wanting to try it."'},
+  {id:'c14',userId:'u2',primaryFragId:'f16',primaryFrag:'Roses Musk',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'Dec',year:'2025',location:'Street, New York',notes:'"That is stunning. What\'s the name?"'},
 ];
 
 // IMPORT QUEUE
 let importQueue = [];
-let nextId = 13; // next fragrance id
-let nextCompId = 11;
+let nextId = 19; // next fragrance id (f1-f18 used in seed data)
+let nextCompId = 15; // next compliment id (c1-c14 used in seed data)
 let currentDetailId = null;
 let editingFragId = null;
 let prefetchedData = null;
@@ -2637,12 +2646,7 @@ document.getElementById('compareOverlay').addEventListener('click', function(e){
 
 // ═══════════════════════════════════════════════════════
 // INIT
-
 // ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-
-// ── INIT ──────────────────────────────────────────────────────────────────
 (async function init(){
   // Identity screen is already visible with loading spinner
   document.querySelector('.shell').style.display='none';
