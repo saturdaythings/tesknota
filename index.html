@@ -1181,7 +1181,7 @@ function setSyncState(state){
 // ═══════════════════════════════════════════════════════
 
 // USERS seed — mirrors users tab in Google Sheets
-const USERS = [
+let USERS = [
   {id:'u1', name:'Kiana', createdAt:'2025-01-01'},
   {id:'u2', name:'Sylvia', createdAt:'2025-01-01'},
 ];
@@ -1194,8 +1194,14 @@ function selectIdentity(name, id){
   document.getElementById('identityScreen').style.display='none';
   document.querySelector('.shell').style.display='flex';
   // Update sidebar username
-  const who = document.querySelector('.sb-who');
-  if(who) who.innerHTML=`<b>${CURRENT_USER.name}</b>My account`;
+  var who = document.querySelector('.sb-who');
+  if(who){
+    var nb=document.createElement('b');
+    nb.textContent=CURRENT_USER.name;
+    who.textContent='';
+    who.appendChild(nb);
+    who.appendChild(document.createTextNode('My account'));
+  }
   renderDashboard();
   renderImportQueue();
   updateCounts();
@@ -2469,16 +2475,21 @@ function handleChat(text){
 // ═══════════════════════════════════════════════════════
 
 // ── INIT ──────────────────────────────────────────────────────────────────
-// In production this is: await loadAllData() then checkIdentity()
-// In prototype: check localStorage, show identity screen or go straight to app
-(function init(){
+(async function init(){
+  try { await loadAllData(); } catch(e){ console.warn('loadAllData failed', e); }
   if(checkIdentity()){
     // Returning user — show app directly
     document.getElementById('identityScreen').style.display='none';
     document.querySelector('.shell').style.display='flex';
     if(CURRENT_USER){
       const who=document.querySelector('.sb-who');
-      if(who) who.innerHTML=`<b>${CURRENT_USER.name}</b>My account`;
+      if(who){
+        var b=document.createElement('b');
+        b.textContent=CURRENT_USER.name;
+        who.textContent='';
+        who.appendChild(b);
+        who.appendChild(document.createTextNode('My account'));
+      }
     }
     renderDashboard();
     renderImportQueue();
