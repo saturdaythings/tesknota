@@ -1593,7 +1593,13 @@ function renderAnalytics(){
   MC.forEach(c=>{ byRel[c.relation]=(byRel[c.relation]||0)+1; });
   const relSorted = Object.entries(byRel).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const strangerPct = Math.round((MC.filter(c=>c.relation==='Stranger').length/total)*100)||0;
-  const perMonth = (total/12).toFixed(1);
+  const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let monthSpan = 12;
+  if(total){
+    const dates=MC.map(function(c){return parseInt(c.year)*12+(MONTH_NAMES.indexOf(c.month)||0);}).filter(function(n){return n>0;});
+    if(dates.length){const mn=Math.min.apply(null,dates),mx=Math.max.apply(null,dates);monthSpan=Math.max(mx-mn+1,1);}
+  }
+  const perMonth = total ? (total/monthSpan).toFixed(1) : '0.0';
   document.getElementById('anaStats').innerHTML = `
     <div class="sbox"><div class="snum">${total}</div><div class="slbl">Total Compliments</div></div>
     <div class="sbox"><div class="snum">${Object.keys(byFrag).length}</div><div class="slbl">Fragrances</div></div>
@@ -2391,16 +2397,6 @@ function filterCollByNote(note){
 // COMPARE OVERLAY
 // ═══════════════════════════════════════════════════════
 
-const SYLVIA_COMPLIMENTS = [
-  {fragName:'Baccarat Rouge 540',relation:'Colleague / Client',gender:'Male',month:'Mar',year:'2026',location:'Office, Denver',notes:'"You always smell amazing."'},
-  {fragName:'Baccarat Rouge 540',relation:'Stranger',gender:'Female',month:'Jan',year:'2026',location:'Coffee shop',notes:'"What fragrance is that? Incredible."'},
-  {fragName:'Baccarat Rouge 540',relation:'Friend',gender:'Female',month:'Dec',year:'2025',location:'Dinner, NYC',notes:'"Still your best — what is it again?"'},
-  {fragName:'Black Opium EDP',relation:'Stranger',gender:'Female',month:'Mar',year:'2026',location:'Coffee shop, Denver',notes:'"This is such a good scent."'},
-  {fragName:'Black Opium EDP',relation:'Friend',gender:'Male',month:'Feb',year:'2026',location:'Dinner',notes:'"You smell like warm coffee and flowers."'},
-  {fragName:'Black Opium EDP',relation:'Colleague / Client',gender:'Female',month:'Jan',year:'2026',location:'Office',notes:'"So warm and cozy."'},
-  {fragName:'Libre EDP',relation:'Friend',gender:'Female',month:'Jan',year:'2026',location:'Restaurant',notes:'"Is that Libre? I\'ve been wanting to try it."'},
-  {fragName:'Roses Musk',relation:'Stranger',gender:'Male',month:'Jan',year:'2026',location:'Street, New York',notes:'"That is stunning — what\'s the name?"'},
-];
 
 function openCompare(fragName, myFragIdOrName){
   var friend=getFriend();
