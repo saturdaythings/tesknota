@@ -1,0 +1,3531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tęsknota</title>
+<!-- Credentials injected at build time by build.js -->
+<script src="config.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2B4480;--blue2:#3A5699;--blue3:#1A2E5C;--blue4:#EEF1F8;--blue5:#D4DCEE;
+  --off:#F4F2ED;--off2:#EAE7DF;--off3:#DDD9CF;
+  --warm:#C8B99A;--warm2:#E6D9C4;--warm3:#F2EBD9;
+  --muted:#7A8FAA;--rose:#B87068;--sage:#5E8A6E;
+  --ink:#1A2030;--ink2:#3D4A60;--ink3:#7A8799;
+  --b1:rgba(43,68,128,.07);--b2:rgba(43,68,128,.14);--b3:rgba(43,68,128,.24);
+  --serif:'Playfair Display',Georgia,serif;
+  --script:'Cormorant Garamond',Georgia,serif;
+  --mono:'DM Mono',monospace;
+  --body:'Jost',system-ui,sans-serif;
+  --sw:216px;--th:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;}
+.shell{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);flex-shrink:0;background:var(--blue3);display:flex;flex-direction:column;z-index:200;transition:transform .28s ease;}
+.sb-top{padding:28px 20px 22px;border-bottom:1px solid rgba(255,255,255,.07);}
+.sb-logo{font-family:var(--script);font-size:24px;font-style:italic;color:var(--warm2);letter-spacing:.02em;line-height:1;}
+.sb-sub{font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:4px;}
+.sb-body{flex:1;overflow-y:auto;padding:16px 0;}
+.sb-label{font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:0 20px;margin:14px 0 4px;}
+.sb-link{display:flex;align-items:center;justify-content:space-between;padding:9px 20px;cursor:pointer;color:rgba(255,255,255,.42);font-size:12px;letter-spacing:.02em;transition:all .14s;user-select:none;}
+.sb-link:hover{color:var(--warm2);background:rgba(255,255,255,.05);}
+.sb-link.on{color:var(--warm2);background:rgba(200,185,154,.14);border-right:2px solid var(--warm);}
+.sb-ct{font-family:var(--mono);font-size:10px;color:rgba(200,185,154,.6);}
+.sb-foot{padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);}
+.sb-who{font-size:11px;color:rgba(255,255,255,.25);}
+.sb-who b{display:block;font-weight:400;font-size:12px;color:rgba(255,255,255,.55);margin-bottom:1px;}
+
+/* TOPBAR */
+.topbar{height:var(--th);background:var(--off);border-bottom:1px solid var(--b2);display:flex;align-items:center;gap:12px;padding:0 26px;flex-shrink:0;z-index:100;}
+.tb-pg{flex:1;}
+.tb-cat{font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);}
+.tb-name{font-family:var(--serif);font-size:16px;font-weight:400;color:var(--ink);margin-top:1px;line-height:1;}
+.srchwrap{position:relative;}
+.srch{height:32px;padding:0 12px;background:var(--off2);border:1px solid var(--b3);font-size:12px;font-family:var(--body);color:var(--ink);outline:none;width:200px;transition:border-color .14s;}
+.srch:focus{border-color:var(--blue);}
+.srch::placeholder{color:var(--ink3);}
+.sdrop{position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1px solid var(--b3);z-index:400;display:none;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(26,46,92,.12);}
+.sdi{padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--b1);}
+.sdi:hover{background:var(--blue4);}
+.sdi-n{font-family:var(--serif);font-size:13px;color:var(--ink);}
+.sdi-h{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:1px;letter-spacing:.05em;}
+.hbg{display:none;background:none;border:none;cursor:pointer;color:var(--blue);font-size:20px;padding:0;}
+
+/* BUTTONS */
+.btn{height:32px;padding:0 16px;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;font-family:var(--body);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .14s;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-blue:hover{background:var(--blue2);}
+.btn-warm{background:var(--warm);color:#fff;}
+.btn-warm:hover{background:#b5a485;}
+.btn-ghost{background:none;border:1px solid var(--b3);color:var(--ink2);}
+.btn-ghost:hover{background:var(--off2);}
+.btn-bare{background:none;border:none;color:var(--ink3);cursor:pointer;font-family:var(--body);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;}
+.btn-bare:hover{color:var(--blue);}
+.btn-sm{height:26px;padding:0 10px;font-size:10px;}
+.btn-danger{background:none;border:1px solid rgba(184,112,104,.3);color:var(--rose);}
+.btn-danger:hover{background:rgba(184,112,104,.08);}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.content{flex:1;overflow-y:auto;padding:26px;}
+.page{display:none;}.page.on{display:block;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:1px;background:var(--b2);border:1px solid var(--b2);margin-bottom:28px;}
+.sbox{background:var(--off);padding:18px 20px;}
+.snum{font-family:var(--serif);font-size:34px;font-weight:400;line-height:1;color:var(--blue);}
+.slbl{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin-top:6px;}
+.sdelta{font-family:var(--mono);font-size:10px;color:var(--warm);margin-top:2px;}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--b2);padding-bottom:9px;margin-bottom:16px;}
+.sh h2{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--blue);font-style:italic;}
+.sh-r{display:flex;gap:8px;align-items:center;}
+
+/* FILTER BAR */
+.fbar{display:flex;border:1px solid var(--b3);width:fit-content;flex-wrap:wrap;margin-bottom:18px;}
+.fc{padding:5px 14px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;color:var(--ink3);border-right:1px solid var(--b2);transition:all .14s;user-select:none;white-space:nowrap;}
+.fc:last-child{border-right:none;}
+.fc:hover{color:var(--blue);background:var(--blue4);}
+.fc.on{background:var(--blue);color:var(--warm2);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl thead th{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);padding:7px 14px;border-bottom:1px solid var(--b2);text-align:left;font-weight:400;}
+.tbl tbody tr{border-bottom:1px solid var(--b1);cursor:pointer;transition:background .1s;}
+.tbl tbody tr:hover{background:var(--blue4);}
+.tbl td{padding:13px 14px;vertical-align:middle;}
+.tn{font-family:var(--serif);font-size:15px;color:var(--ink);}
+.th_{font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:2px;letter-spacing:.06em;text-transform:uppercase;}
+.ts{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;}
+.s-cur{color:var(--sage);}
+.s-wnt{color:var(--warm);}
+.s-prv{color:var(--ink3);}
+.s-no{color:var(--rose);}
+.tstars{font-size:11px;color:var(--warm);letter-spacing:1px;}
+.tmono{font-family:var(--mono);font-size:10px;color:var(--ink2);}
+.tscript{font-family:var(--script);font-size:13px;font-style:italic;color:var(--ink2);}
+.tact{opacity:0;transition:opacity .12s;white-space:nowrap;}
+.tbl tbody tr:hover .tact{opacity:1;}
+
+/* COMPLIMENT ROWS */
+.crow{display:flex;justify-content:space-between;align-items:flex-start;padding:15px 0;border-bottom:1px solid var(--b1);position:relative;}
+.crow:hover{background:var(--blue4);padding-left:8px;padding-right:8px;margin:0 -8px;}
+.cr-f{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--blue);margin-bottom:3px;cursor:pointer;}
+.cr-f:hover{text-decoration:underline;}
+.cr-m{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
+.cr-n{font-size:12px;color:var(--ink2);margin-top:4px;font-style:italic;}
+.cr-d{font-family:var(--mono);font-size:9px;color:var(--ink3);white-space:nowrap;margin-left:16px;letter-spacing:.06em;flex-shrink:0;}
+.crow-acts{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;transition:opacity .12s;}
+.crow:hover .crow-acts{opacity:1;}
+
+/* ANALYTICS */
+.bchart{display:flex;align-items:flex-end;gap:4px;height:140px;background:var(--off2);padding:12px 12px 0;margin-bottom:6px;}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.bval{font-family:var(--mono);font-size:9px;color:var(--blue);margin-bottom:3px;font-weight:400;}
+.bar{width:100%;background:var(--blue);transition:height .5s ease;cursor:pointer;min-height:2px;}
+.bar:hover{background:var(--warm);}
+.bl{font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:5px;text-align:center;letter-spacing:.05em;}
+.ins{padding:13px 0;border-bottom:1px solid var(--b1);}
+.ins-t{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:2px;}
+.ins-b{font-size:12px;color:var(--ink2);line-height:1.6;}
+
+/* FRIEND PROFILE */
+.f-banner{background:var(--blue3);padding:32px 26px 24px;margin:-26px -26px 28px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;}
+.fb-label{font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.fb-name{font-family:var(--serif);font-size:30px;font-style:italic;color:var(--warm2);line-height:1;}
+.fb-meta{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:7px;letter-spacing:.06em;text-transform:uppercase;}
+.fb-stats{display:flex;gap:22px;text-align:right;}
+.fb-stat .fsn{font-family:var(--serif);font-size:26px;color:var(--warm2);line-height:1;}
+.fb-stat .fsl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:3px;}
+.ftabs{display:flex;border-bottom:1px solid var(--b2);margin-bottom:22px;}
+.ftab{padding:9px 18px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;transition:all .14s;user-select:none;}
+.ftab:hover{color:var(--blue);}
+.ftab.on{color:var(--blue);border-bottom-color:var(--blue);}
+.fpanel{display:none;}.fpanel.on{display:block;}
+.in-common{background:var(--blue4);border:1px solid var(--blue5);padding:14px 16px;margin-top:16px;}
+.ic-label{font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px;}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(26,46,92,.55);display:flex;align-items:center;justify-content:center;z-index:600;padding:18px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.overlay.on{opacity:1;pointer-events:all;}
+.modal{background:var(--off);width:100%;max-width:540px;max-height:92vh;overflow-y:auto;transform:translateY(10px);transition:transform .2s;box-shadow:0 20px 60px rgba(26,46,92,.2);}
+.overlay.on .modal{transform:translateY(0);}
+.mhd{padding:24px 26px 0;display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:0;background:var(--off);z-index:1;padding-bottom:16px;border-bottom:1px solid var(--b2);}
+.mtitle{font-family:var(--serif);font-size:20px;font-style:italic;color:var(--blue);}
+.msub{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:3px;letter-spacing:.1em;text-transform:uppercase;}
+.mx{background:none;border:none;cursor:pointer;font-size:22px;color:var(--ink3);line-height:1;padding:0;}
+.mbody{padding:20px 26px;}
+.mfoot{padding:14px 26px;border-top:1px solid var(--b2);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--off);}
+
+/* CONFIRM DIALOG (inline in detail panel) */
+.confirm-box{background:rgba(184,112,104,.08);border:1px solid rgba(184,112,104,.25);padding:14px 16px;margin-top:12px;display:none;}
+.confirm-box p{font-size:12px;color:var(--ink2);margin-bottom:10px;line-height:1.5;}
+.confirm-box .btns{display:flex;gap:8px;}
+
+/* FORMS */
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;}
+.fg label{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);}
+.fg input,.fg select,.fg textarea{border:none;border-bottom:1px solid var(--b3);background:none;padding:7px 0;font-size:13px;font-family:var(--body);color:var(--ink);outline:none;transition:border-color .14s;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);}
+.fg textarea{resize:vertical;min-height:60px;border:1px solid var(--b2);padding:8px 10px;line-height:1.5;}
+.fg .err{font-family:var(--mono);font-size:9px;color:var(--rose);margin-top:2px;display:none;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.opts{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px;}
+.opt{padding:5px 11px;border:1px solid var(--b2);font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .13s;color:var(--ink3);user-select:none;}
+.opt:hover{border-color:var(--blue);color:var(--blue);}
+.opt.on{background:var(--blue);border-color:var(--blue);color:var(--warm2);}
+.acwrap{position:relative;}
+.acdrop{position:absolute;top:100%;left:0;right:0;background:white;z-index:300;border:1px solid var(--b3);max-height:190px;overflow-y:auto;display:none;box-shadow:0 8px 20px rgba(26,46,92,.1);}
+.aci{padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--b1);}
+.aci:hover{background:var(--blue4);}
+.aci-n{font-family:var(--serif);font-size:13px;color:var(--ink);}
+.aci-h{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:1px;letter-spacing:.05em;text-transform:uppercase;}
+.pips{display:flex;gap:4px;margin-bottom:20px;}
+.pip{height:2px;flex:1;background:var(--b2);transition:background .2s;}
+.pip.done{background:var(--sage);}
+.pip.active{background:var(--blue);}
+.mprev{border:1px solid var(--b2);padding:16px;margin-bottom:16px;background:var(--blue4);display:none;}
+.mp-n{font-family:var(--serif);font-size:17px;font-style:italic;color:var(--blue);}
+.mp-h{font-family:var(--mono);font-size:8px;color:var(--ink3);margin:3px 0 12px;letter-spacing:.12em;text-transform:uppercase;}
+.mp-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.mpl{font-family:var(--mono);font-size:8px;color:var(--ink3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.1em;}
+.mpv{font-size:12px;font-weight:500;color:var(--blue);}
+.mp-notes{margin-top:10px;font-family:var(--script);font-size:14px;font-style:italic;color:var(--ink2);border-top:1px solid var(--b2);padding-top:8px;}
+.date-row{display:flex;gap:8px;}
+.date-row select{flex:1;}
+
+/* STATUS CHANGE STRIP */
+.status-strip{display:none;flex-wrap:wrap;gap:6px;padding:10px 0;border-top:1px solid var(--b2);margin-top:8px;}
+.status-strip.show{display:flex;}
+
+/* IMPORT */
+.im-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--b2);margin-bottom:24px;}
+.imt{background:var(--off);padding:18px;text-align:center;cursor:pointer;transition:background .13s;}
+.imt:hover,.imt.on{background:var(--blue4);}
+.imt.on{border-bottom:2px solid var(--blue);}
+.imt-label{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--blue);margin-bottom:3px;}
+.imt-sub{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;}
+.ipanel{display:none;}.ipanel.on{display:block;}
+.dropzone{border:1px dashed var(--b3);padding:40px;text-align:center;cursor:pointer;transition:all .18s;margin-bottom:18px;}
+.dropzone:hover{border-color:var(--blue);background:var(--blue4);}
+.dz-t{font-family:var(--serif);font-size:17px;font-style:italic;color:var(--blue);margin-bottom:5px;}
+.dz-s{font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.12em;}
+.iq{border:1px solid var(--b2);}
+.iq-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--b1);}
+.iq-row:last-child{border-bottom:none;}
+.iq-chk{accent-color:var(--blue);width:14px;height:14px;cursor:pointer;flex-shrink:0;}
+.iq-n{font-family:var(--serif);font-size:13px;color:var(--ink);}
+.iq-h{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;}
+.badge{font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;flex-shrink:0;}
+.b-new{background:rgba(94,138,110,.12);color:var(--sage);}
+.b-dup{background:rgba(184,112,104,.12);color:var(--rose);}
+.linkrow{display:flex;gap:0;margin-bottom:18px;}
+.linkrow input{flex:1;border:1px solid var(--b3);border-right:none;padding:0 12px;height:36px;font-size:12px;font-family:var(--body);background:none;outline:none;color:var(--ink);}
+.linkrow input:focus{border-color:var(--blue);}
+.lresult{display:none;border:1px solid var(--b2);padding:18px;background:var(--blue4);margin-bottom:16px;}
+.lr-n{font-family:var(--serif);font-size:19px;font-style:italic;color:var(--blue);}
+.lr-h{font-family:var(--mono);font-size:8px;color:var(--ink3);margin:3px 0 12px;letter-spacing:.12em;text-transform:uppercase;}
+.lr-g{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.lrl{font-family:var(--mono);font-size:8px;color:var(--ink3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.1em;}
+.lrv{font-size:12px;font-weight:500;color:var(--blue);}
+.lr-notes{font-family:var(--script);font-size:14px;font-style:italic;color:var(--ink2);border-top:1px solid var(--b2);padding-top:10px;margin-bottom:12px;}
+.cam-box{border:1px solid var(--b2);overflow:hidden;margin-bottom:16px;}
+.cam-view{width:100%;height:220px;background:var(--blue3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
+.cam-view:hover{background:var(--blue2);}
+.cv-t{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--warm2);}
+.cv-s{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:3px;}
+.cam-res{display:none;padding:16px;background:var(--blue4);}
+.cam-label{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;}
+
+/* DETAIL PANEL */
+.detail{position:fixed;top:0;right:0;bottom:0;width:390px;max-width:100%;background:var(--off);border-left:1px solid var(--b2);z-index:300;transform:translateX(100%);transition:transform .28s ease;overflow-y:auto;box-shadow:-6px 0 28px rgba(26,46,92,.1);}
+.detail.on{transform:translateX(0);}
+.dhd{background:var(--blue3);}
+.dhd-inner{padding:26px 24px 20px;}
+.dhd-close{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);cursor:pointer;background:none;border:none;float:right;padding:0;}
+.dhd-close:hover{color:var(--warm2);}
+.d-house{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.d-name{font-family:var(--serif);font-size:24px;font-style:italic;color:var(--warm2);line-height:1.2;}
+.d-status-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.d-status{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,185,154,.6);}
+.dbody{padding:20px 24px;}
+.dsec{margin-bottom:20px;}
+.dsl{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);border-bottom:1px solid var(--b2);padding-bottom:5px;margin-bottom:10px;}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.di-l{font-family:var(--mono);font-size:8px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;}
+.di-v{font-size:13px;font-weight:500;color:var(--blue);margin-top:2px;}
+.notebox{font-family:var(--script);font-size:15px;font-style:italic;color:var(--ink2);line-height:1.7;padding:13px 0;border-top:1px solid var(--b2);border-bottom:1px solid var(--b2);}
+.d-actions{display:flex;gap:8px;margin-top:14px;}
+
+/* TOAST */
+.toasts{position:fixed;bottom:22px;right:22px;z-index:999;display:flex;flex-direction:column;gap:6px;}
+.toast{background:var(--blue3);color:var(--warm2);padding:10px 16px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;opacity:0;transform:translateY(8px);transition:all .22s;box-shadow:0 4px 16px rgba(26,46,92,.2);}
+.toast.on{opacity:1;transform:translateY(0);}
+
+/* MOBILE NAV */
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--blue3);border-top:1px solid rgba(255,255,255,.07);z-index:200;padding-bottom:env(safe-area-inset-bottom);}
+.mob-row{display:flex;}
+.mob-btn{flex:1;padding:11px 4px;background:none;border:none;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.28);cursor:pointer;text-align:center;}
+.mob-btn.on{color:var(--warm);}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(26,46,92,.55);z-index:150;}
+
+/* SETTINGS */
+.stbl{width:100%;border-collapse:collapse;max-width:460px;}
+.stbl td{padding:15px 0;border-bottom:1px solid var(--b1);vertical-align:middle;}
+.stbl td:last-child{text-align:right;}
+.st-label{font-size:13px;font-weight:500;color:var(--ink);}
+.st-sub{font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:3px;letter-spacing:.06em;text-transform:uppercase;line-height:1.7;}
+
+
+/* SYNC INDICATOR */
+.sync-wrap{display:flex;align-items:center;gap:5px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--sage);flex-shrink:0;}
+.sync-dot.syncing{background:var(--warm);animation:syncpulse 1s infinite;}
+.sync-dot.error{background:var(--rose);}
+.sync-txt{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);}
+@keyframes syncpulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* DEFINITION BAR */
+.def-bar{background:var(--blue3);padding:13px 26px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.05);flex-shrink:0;}
+.def-word{font-family:var(--script);font-size:17px;font-style:italic;color:var(--warm2);letter-spacing:.03em;}
+.def-phonetic{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.1em;}
+.def-pos{font-family:var(--mono);font-size:8px;color:var(--muted);font-style:italic;}
+.def-text{font-family:var(--script);font-size:13px;font-style:italic;color:rgba(200,185,154,.5);letter-spacing:.01em;}
+.def-sep{color:rgba(255,255,255,.1);margin:0 2px;}
+
+/* NOTES INTELLIGENCE */
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:1px;background:var(--b2);margin-bottom:20px;}
+.note-card{background:var(--off);padding:14px 16px;cursor:pointer;transition:background .12s;}
+.note-card:hover{background:var(--blue4);}
+.note-name{font-family:var(--script);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:3px;}
+.note-ct{font-family:var(--mono);font-size:9px;color:var(--warm);letter-spacing:.06em;}
+.note-comp{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:2px;}
+.note-bar-wrap{height:2px;background:var(--b2);margin-top:6px;}
+.note-bar-fill{height:2px;background:var(--warm);transition:width .5s ease;}
+.fave-note-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--b2);margin:3px;cursor:pointer;transition:all .13s;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);}
+.fave-note-chip:hover,.fave-note-chip.on{background:var(--blue);border-color:var(--blue);color:var(--warm2);}
+
+/* COMPARE OVERLAY */
+.compare-overlay{position:fixed;inset:0;background:rgba(26,46,92,.7);z-index:700;display:none;align-items:center;justify-content:center;padding:20px;}
+.compare-overlay.on{display:flex;}
+.compare-modal{background:var(--off);width:100%;max-width:820px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(26,46,92,.3);}
+.compare-hd{background:var(--blue3);padding:22px 28px;display:flex;justify-content:space-between;align-items:flex-start;}
+.compare-title{font-family:var(--serif);font-size:20px;font-style:italic;color:var(--warm2);}
+.compare-sub{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;letter-spacing:.1em;text-transform:uppercase;}
+.compare-body{padding:22px 28px;}
+.compare-cols{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b2);margin-bottom:20px;}
+.compare-col{background:var(--off);padding:18px;}
+.compare-col-head{font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
+.compare-col-name{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--blue);margin-bottom:12px;}
+.cs{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--b1);}
+.cs:last-child{border-bottom:none;}
+.cs-label{font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;}
+.cs-val{font-size:12px;font-weight:500;color:var(--blue);}
+.ct-head{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);border-bottom:1px solid var(--b2);padding-bottom:6px;margin-bottom:10px;}
+.ct-row{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--b1);}
+.ct-date{font-family:var(--mono);font-size:9px;color:var(--ink3);white-space:nowrap;min-width:52px;}
+.ct-tag{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;flex-shrink:0;}
+.ct-you{background:rgba(43,68,128,.12);color:var(--blue);}
+.ct-her{background:rgba(200,185,154,.18);color:var(--warm);}
+.ct-note{font-size:12px;color:var(--ink2);font-style:italic;}
+.ct-meta{font-family:var(--mono);font-size:8px;color:var(--ink3);}
+
+/* CHATBOT */
+.chatbot-btn{position:fixed;bottom:80px;right:22px;width:44px;height:44px;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:400;box-shadow:0 4px 16px rgba(26,46,92,.3);transition:all .15s;}
+.chatbot-btn:hover{background:var(--blue2);transform:scale(1.05);}
+.chatbot-btn svg{width:20px;height:20px;fill:white;}
+.chatbot-panel{position:fixed;bottom:136px;right:22px;width:340px;max-width:calc(100vw - 44px);background:var(--off);border:1px solid var(--b3);z-index:400;display:none;flex-direction:column;box-shadow:0 8px 32px rgba(26,46,92,.2);max-height:460px;}
+.chatbot-panel.on{display:flex;}
+.chat-hd{background:var(--blue3);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.chat-title{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--warm2);}
+.chat-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0;}
+.chat-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.chat-msg{display:flex;gap:8px;align-items:flex-start;}
+.chat-msg.user{flex-direction:row-reverse;}
+.chat-bubble{max-width:82%;padding:8px 12px;font-size:12px;line-height:1.5;}
+.chat-msg.bot .chat-bubble{background:var(--blue4);color:var(--ink);border-radius:0 8px 8px 8px;}
+.chat-msg.user .chat-bubble{background:var(--blue);color:white;border-radius:8px 0 8px 8px;}
+.chat-av{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;letter-spacing:.05em;}
+.chat-bot-av{background:var(--blue3);color:var(--warm2);}
+.chat-user-av{background:var(--warm);color:white;}
+.chat-sugs{display:flex;flex-wrap:wrap;gap:4px;padding:0 14px 10px;}
+.chat-sug{padding:4px 10px;border:1px solid var(--b3);font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--ink3);transition:all .13s;background:none;}
+.chat-sug:hover{border-color:var(--blue);color:var(--blue);}
+.chat-input-row{display:flex;border-top:1px solid var(--b2);flex-shrink:0;}
+.chat-input{flex:1;border:none;background:none;padding:10px 12px;font-size:12px;font-family:var(--body);color:var(--ink);outline:none;}
+.chat-send{background:var(--blue);border:none;color:white;padding:0 14px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;}
+.chat-send:hover{background:var(--blue2);}
+
+
+/* ── COMMAND PALETTE ────────────────────────────────────────── */
+.pal-overlay{position:fixed;inset:0;background:rgba(26,46,92,.6);z-index:800;display:none;align-items:flex-start;justify-content:center;padding-top:80px;}
+.pal-overlay.on{display:flex;}
+.pal-box{background:var(--off);width:100%;max-width:500px;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(26,46,92,.3);overflow:hidden;}
+.pal-header{padding:14px 18px;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.pal-title{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--blue);}
+.pal-step-count{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;}
+.pal-hint{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;}
+.pal-hint-text{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;padding:10px 18px 4px;flex-shrink:0;}
+.pal-search{border:none;border-bottom:1px solid var(--b2);padding:11px 18px;font-size:13px;font-family:var(--body);color:var(--ink);outline:none;background:none;width:100%;flex-shrink:0;}
+.pal-search:focus{border-color:var(--blue);}
+.pal-search::placeholder{color:var(--ink3);}
+.pal-list{flex:1;overflow-y:auto;padding:6px 0;}
+.pal-group{font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);padding:10px 18px 4px;border-top:1px solid var(--b1);}
+.pal-group:first-child{border-top:none;}
+.pal-item{padding:11px 18px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .1s;}
+.pal-item:hover,.pal-item-selected{background:var(--blue4);}
+.pal-item-label{font-size:13px;color:var(--ink);font-family:var(--body);}
+.pal-item-sub{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:2px;letter-spacing:.06em;text-transform:uppercase;}
+.pal-item-skip{font-family:var(--mono);font-size:9px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--b2);}
+.pal-item-freetext .pal-item-label{color:var(--blue);}
+.pal-item-check{font-family:var(--mono);font-size:9px;width:16px;flex-shrink:0;color:var(--blue);}
+.pal-item{display:flex;align-items:center;gap:10px;}
+.pal-item-label{flex:1;}
+.pal-input-wrap{padding:14px 18px;}
+.pal-input{width:100%;border:none;border-bottom:1px solid var(--b2);padding:8px 0;font-size:14px;font-family:var(--body);color:var(--ink);outline:none;background:none;}
+.pal-input:focus{border-color:var(--blue);}
+.pal-textarea{width:100%;border:1px solid var(--b2);padding:10px 12px;font-size:13px;font-family:var(--body);color:var(--ink);outline:none;background:none;resize:vertical;min-height:80px;line-height:1.5;}
+.pal-textarea:focus{border-color:var(--blue);}
+.pal-monthyear{display:flex;gap:10px;padding:14px 18px;}
+.pal-select{flex:1;border:none;border-bottom:1px solid var(--b2);padding:8px 0;font-size:13px;font-family:var(--body);color:var(--ink);outline:none;background:none;appearance:none;cursor:pointer;}
+.pal-select:focus{border-color:var(--blue);}
+.pal-skip-link{font-family:var(--mono);font-size:9px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;padding:0 18px 14px;cursor:pointer;}
+.pal-skip-link:hover{color:var(--blue2);}
+.pal-confirm-wrap{flex:1;overflow-y:auto;padding:14px 18px;}
+.pal-confirm-target{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--blue);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--b2);}
+.pal-confirm-warn{font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;}
+.pal-confirm-rows{}
+.pal-confirm-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--b1);}
+.pal-confirm-row:last-child{border-bottom:none;}
+.pal-confirm-key{font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;flex-shrink:0;width:130px;}
+.pal-confirm-val{font-size:12px;color:var(--blue);font-weight:500;text-align:right;}
+.pal-footer{padding:12px 18px;border-top:1px solid var(--b2);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+.pal-btn{height:32px;padding:0 16px;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;font-family:var(--body);display:inline-flex;align-items:center;transition:all .14s;}
+.pal-btn-ghost{background:none;color:var(--ink3);border:1px solid var(--b2);}
+.pal-btn-ghost:hover{background:var(--off2);color:var(--ink);}
+.pal-btn-cancel{background:none;color:var(--ink3);}
+.pal-btn-cancel:hover{color:var(--rose);}
+.pal-btn-next{background:var(--blue);color:var(--warm2);}
+.pal-btn-next:hover{background:var(--blue2);}
+.pal-btn-save{background:var(--blue);color:var(--warm2);}
+.pal-btn-save:hover{background:var(--blue2);}
+.pal-btn-danger{background:none;border:1px solid rgba(184,112,104,.4);color:var(--rose);}
+.pal-btn-danger:hover{background:rgba(184,112,104,.08);}
+.pal-trigger-btn{position:fixed;bottom:82px;left:22px;height:32px;padding:0 14px;background:var(--blue3);border:none;cursor:pointer;display:flex;align-items:center;gap:6px;z-index:400;box-shadow:0 4px 16px rgba(26,46,92,.25);}
+.pal-trigger-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--warm2);}
+.pal-trigger-kbd{font-family:var(--mono);font-size:9px;color:var(--muted);border:1px solid rgba(255,255,255,.15);padding:1px 5px;}
+@media(max-width:768px){
+  .pal-overlay{padding-top:0;align-items:flex-end;}
+  .pal-box{max-width:100%;max-height:88vh;border-radius:16px 16px 0 0;}
+  .pal-trigger-btn{bottom:68px;}
+}
+@media(max-width:768px){
+  .sidebar{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .mob-overlay.open{display:block;}
+  .hbg{display:block;}
+  .mob-nav{display:block;}
+  .content{padding:18px;padding-bottom:68px;}
+  .stats{grid-template-columns:1fr 1fr;}
+  .frow{grid-template-columns:1fr;}
+  .im-tabs{grid-template-columns:1fr;}
+  .detail{width:100%;}
+  .srchwrap{display:none;}
+  .topbar{padding:0 16px;}
+  .f-banner{flex-direction:column;}
+  .fb-stats{text-align:left;}
+  .lr-g{grid-template-columns:1fr 1fr;}
+  .mp-g{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── IDENTITY SCREEN (shown on first visit, hidden after) ── -->
+<div id="identityScreen" style="display:none;position:fixed;inset:0;background:var(--blue3);z-index:1000;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+  <div style="font-family:var(--script);font-size:48px;font-style:italic;color:var(--warm2);letter-spacing:.02em;margin-bottom:8px;">tęsknota</div>
+  <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-bottom:48px;">Fragrance Tracker</div>
+  <div style="font-family:var(--body);font-size:14px;color:var(--muted);margin-bottom:24px;letter-spacing:.04em;">Who are you?</div>
+  <div style="display:flex;gap:16px;">
+    <button style="background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.3);color:var(--warm2);font-family:var(--script);font-size:22px;font-style:italic;padding:18px 40px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.25)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Kiana','u1')">Kiana</button>
+    <button style="background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.3);color:var(--warm2);font-family:var(--script);font-size:22px;font-style:italic;padding:18px 40px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.25)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Sylvia','u2')">Sylvia</button>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.15);padding:12px 26px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;">
+    <span style="font-family:var(--script);font-size:16px;font-style:italic;color:var(--warm2);">tęsknota</span>
+    <span style="font-family:var(--mono);font-size:8px;color:var(--muted);">[ tɛsk-ˈnɔ-ta ]</span>
+    <span style="color:rgba(255,255,255,.1);">·</span>
+    <span style="font-family:var(--mono);font-size:8px;color:var(--muted);font-style:italic;">n. Polish</span>
+    <span style="color:rgba(255,255,255,.1);">·</span>
+    <span style="font-family:var(--script);font-size:12px;font-style:italic;color:rgba(200,185,154,.4);">a deep longing for something or someone; a nostalgic ache for what is absent, distant, or irretrievably past</span>
+  </div>
+</div>
+
+<div class="shell" style="display:none">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="SB">
+  <div class="sb-top">
+    <div class="sb-logo">tęsknota</div>
+    <div class="sb-sub">Fragrance Tracker</div>
+  </div>
+  <div class="sb-body">
+    <div class="sb-label">My Space</div>
+    <div class="sb-link" data-page="dashboard">Dashboard</div>
+    <div class="sb-link" data-page="collection">My Collection <span class="sb-ct" id="ct-collection">0</span></div>
+    <div class="sb-link" data-page="wishlist">Wishlist <span class="sb-ct" id="ct-wishlist">0</span></div>
+    <div class="sb-label">Experiences</div>
+    <div class="sb-link" data-page="compliments">Compliments <span class="sb-ct" id="ct-compliments">0</span></div>
+    <div class="sb-link" data-page="analytics">Analytics</div>
+    <div class="sb-label">Social</div>
+    <div class="sb-link" data-page="friend">Sylvia M. <span class="sb-ct" id="ct-friend">24</span></div>
+    <div class="sb-label">Manage</div>
+    <div class="sb-link" data-page="import">Import Collection</div>
+    <div class="sb-link" data-page="settings">Settings</div>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-who"><b>Kiana L.</b>My account</div>
+  </div>
+</div>
+<div class="mob-overlay" id="MO" onclick="closeSB()"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <button class="hbg" onclick="toggleSB()">&#9776;</button>
+    <div class="tb-pg">
+      <div class="tb-cat">tęsknota</div>
+      <div class="tb-name" id="pgName">Dashboard</div>
+    </div>
+    <div class="srchwrap">
+      <input class="srch" placeholder="Search fragrances..." id="gSrch" oninput="gSearch(this.value)" onblur="setTimeout(closeGS,180)" onkeydown="if(event.key==='Escape')closeGS()">
+      <div class="sdrop" id="gDrop"></div>
+    </div>
+    <div class="sync-wrap"><div class="sync-dot" id="syncDot"></div><span class="sync-txt" id="syncTxt"></span></div>
+    <button class="btn btn-ghost btn-sm" onclick="goPage('import')">Import</button>
+    <button class="btn btn-blue" onclick="openAddFrag('CURRENT')">Add Fragrance</button>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page on" id="page-dashboard">
+      <div class="stats" id="dashStats"></div>
+      <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
+      <table class="tbl" style="margin-bottom:28px;" id="dashTable">
+        <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes to nose</th><th>Compliments</th><th></th></tr></thead>
+        <tbody id="dashBody"></tbody>
+      </table>
+      <div class="sh"><h2>Top compliment performers</h2></div>
+      <div id="dashPerformers" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1px;background:var(--b2);"></div>
+    </div>
+
+    <!-- COLLECTION -->
+    <div class="page" id="page-collection">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <div class="fbar" id="collFbar">
+          <div class="fc on" data-filter="all">All</div>
+          <div class="fc" data-filter="CURRENT">Current</div>
+          <div class="fc" data-filter="PREVIOUSLY_OWNED">Prev. Owned</div>
+          <div class="fc" data-filter="DONT_LIKE">Don't Like</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" id="btnTable" onclick="setView('table')" style="color:var(--blue);">Table</button>
+          <button class="btn btn-ghost btn-sm" id="btnGrid" onclick="setView('grid')">Grid</button>
+        </div>
+      </div>
+      <div id="vTable">
+        <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Size</th><th>Rating</th><th>Longevity</th><th>Notes</th><th>Dupe?</th><th></th></tr></thead>
+        <tbody id="collBody"></tbody></table>
+      </div>
+      <div id="vGrid" style="display:none;"><div class="cgrid" id="collGrid"></div></div>
+    </div>
+
+    <!-- WISHLIST -->
+    <div class="page" id="page-wishlist">
+      <div class="sh"><h2>Wishlist</h2><div class="sh-r"><button class="btn btn-blue" onclick="openAddFrag('WANT_TO_BUY')">Add to Wishlist</button></div></div>
+      <div class="fbar" id="wishFbar">
+        <div class="fc on" data-filter="all">All</div>
+        <div class="fc" data-filter="WANT_TO_SMELL">Want to Smell</div>
+        <div class="fc" data-filter="WANT_TO_BUY">Want to Buy</div>
+      </div>
+      <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Community Rating</th><th>Avg Price</th><th>Notes</th><th>Dupe Candidate</th><th></th></tr></thead>
+      <tbody id="wishBody"></tbody></table>
+    </div>
+
+    <!-- COMPLIMENTS -->
+    <div class="page" id="page-compliments">
+      <div class="sh"><h2>Compliment Log</h2><div class="sh-r"><button class="btn btn-blue" onclick="openAddComp('')">Log Compliment</button></div></div>
+      <div class="fbar" id="compFbar">
+        <div class="fc on" data-filter="all">All</div>
+        <div class="fc" data-filter="Stranger">Strangers</div>
+        <div class="fc" data-filter="Friend">Friends</div>
+        <div class="fc" data-filter="Colleague / Client">Colleagues</div>
+        <div class="fc" data-filter="Family">Family</div>
+        <div class="fc" data-filter="Significant Other">SO</div>
+      </div>
+      <div id="compList"></div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="page" id="page-analytics">
+      <div class="stats" id="anaStats"></div>
+      <div class="sh"><h2>Compliments by fragrance</h2></div>
+      <div class="bchart" id="bc1"></div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;margin-bottom:26px;" id="bc1-legend"></div>
+      <div class="sh"><h2>By relation</h2></div>
+      <div class="bchart" id="bc2" style="margin-bottom:26px;"></div>
+      <div class="sh"><h2>Key insights</h2></div>
+      <div id="insightsList"></div>
+      <div class="sh" style="margin-top:24px;"><h2>Notes intelligence</h2><div class="sh-r"><span style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">Compliments per note</span></div></div>
+      <div id="notesIntel" class="notes-grid"></div>
+      <div class="sh"><h2>Your favourite notes</h2><div class="sh-r"><button class="btn-bare" onclick="toast('Fave notes filter applied to collection')">Filter collection by these</button></div></div>
+      <div id="faveNotes" style="margin-bottom:4px;"></div>
+    </div>
+
+    <!-- FRIEND PROFILE -->
+    <div class="page" id="page-friend">
+      <div class="f-banner">
+        <div><div class="fb-label">Friend profile</div><div class="fb-name">Sylvia M.</div><div class="fb-meta">Member since Jan 2025 · New York, NY</div></div>
+        <div class="fb-stats">
+          <div class="fb-stat"><div class="fsn">24</div><div class="fsl">Fragrances</div></div>
+          <div class="fb-stat"><div class="fsn">18</div><div class="fsl">Compliments</div></div>
+          <div class="fb-stat"><div class="fsn">5</div><div class="fsl">Wishlist</div></div>
+        </div>
+      </div>
+      <div class="ftabs" id="friendTabs">
+        <div class="ftab on" data-panel="ft-col">Collection</div>
+        <div class="ftab" data-panel="ft-comp">Compliments</div>
+        <div class="ftab" data-panel="ft-wish">Wishlist</div>
+        <div class="ftab" data-panel="ft-ana">Analytics</div>
+      </div>
+      <div class="fpanel on" id="ft-col">
+        <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes</th><th>Compliments</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="tn">Black Opium EDP</div><div class="th_">YSL — Floral Gourmand</div></td><td><div class="ts s-cur">Current</div></td><td><div class="tstars">★★★★★</div></td><td class="tscript">Coffee, Vanilla, White Floral</td><td class="tmono">6</td><td><button class="btn-bare" onclick="openCompare('Black Opium EDP','Black Opium EDP')">Compare</button></td></tr>
+          <tr><td><div class="tn">Baccarat Rouge 540</div><div class="th_">MFK — Amberwood · Floral</div></td><td><div class="ts s-cur">Current</div></td><td><div class="tstars">★★★★★</div></td><td class="tscript">Amberwood, Ambergris, Jasmine</td><td class="tmono">5</td><td><button class="btn-bare" onclick="openCompare('Baccarat Rouge 540','f1')">Compare</button></td></tr>
+          <tr><td><div class="tn">Libre EDP</div><div class="th_">YSL — Floral Fougère</div></td><td><div class="ts s-cur">Current</div></td><td><div class="tstars">★★★★☆</div></td><td class="tscript">Lavender, Vanilla, Musk</td><td class="tmono">4</td><td><button class="btn-bare" onclick="openCompare('Libre EDP','Libre EDP')">Compare</button></td></tr>
+          <tr><td><div class="tn">Roses Musk</div><div class="th_">Montale — Floral Musk</div></td><td><div class="ts s-cur">Current</div></td><td><div class="tstars">★★★★☆</div></td><td class="tscript">Rose, Musk, Oud</td><td class="tmono">3</td><td><button class="btn-bare" onclick="openCompare('Roses Musk','Roses Musk')">Compare</button></td></tr>
+          <tr><td><div class="tn">Good Girl</div><div class="th_">Carolina Herrera — Floral Gourmand</div></td><td><div class="ts s-prv">Prev. Owned</div></td><td><div class="tstars">★★★☆☆</div></td><td class="tscript">Jasmine, Cocoa, Sandalwood</td><td class="tmono">2</td><td><button class="btn-bare" onclick="openCompare('Good Girl','Good Girl')">Compare</button></td></tr>
+        </tbody></table>
+        <div class="in-common" id="inCommon"></div>
+      </div>
+      <div class="fpanel" id="ft-comp">
+        <div class="crow"><div><div class="cr-f">Black Opium EDP</div><div class="cr-m">Stranger · Female · Coffee Shop, Denver</div><div class="cr-n">"This is such a good scent. What is it?"</div></div><div class="cr-d">Mar 2025</div></div>
+        <div class="crow"><div><div class="cr-f">Baccarat Rouge 540</div><div class="cr-m">Colleague · Male · Office, Denver</div><div class="cr-n">"You always smell amazing."</div></div><div class="cr-d">Feb 2025</div></div>
+        <div class="crow"><div><div class="cr-f">Libre EDP</div><div class="cr-m">Friend · Female · Restaurant</div><div class="cr-n">"Is that Libre? I've been wanting to try it."</div></div><div class="cr-d">Jan 2025</div></div>
+        <div class="crow"><div><div class="cr-f">Roses Musk</div><div class="cr-m">Stranger · Male · Street, New York</div><div class="cr-n">"That is stunning. What's the name?"</div></div><div class="cr-d">Jan 2025</div></div>
+      </div>
+      <div class="fpanel" id="ft-wish">
+        <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Community Rating</th><th>Avg Price</th></tr></thead>
+        <tbody>
+          <tr><td><div class="tn">Baccarat Rouge 540 EDP</div><div class="th_">MFK</div></td><td><div class="ts s-wnt">Want to Buy</div></td><td class="tmono" style="color:var(--warm)">4.6 / 5.0</td><td class="tmono">~$380</td></tr>
+          <tr><td><div class="tn">Santal 33</div><div class="th_">Le Labo</div></td><td><div class="ts" style="color:var(--ink2);font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;">Want to Smell</div></td><td class="tmono" style="color:var(--warm)">4.2 / 5.0</td><td class="tmono">~$220</td></tr>
+        </tbody></table>
+        <div id="wishInCommon" style="margin-top:16px;"></div>
+      </div>
+      <div class="fpanel" id="ft-ana">
+        <div class="stats" style="margin-bottom:22px;">
+          <div class="sbox"><div class="snum">18</div><div class="slbl">Compliments</div></div>
+          <div class="sbox"><div class="snum">5</div><div class="slbl">Fragrances</div></div>
+          <div class="sbox"><div class="snum">44%</div><div class="slbl">From Strangers</div></div>
+          <div class="sbox"><div class="snum">4.3</div><div class="slbl">Avg Rating</div></div>
+        </div>
+        <div class="sh"><h2>Sylvia's top performers</h2></div>
+        <div class="bchart" id="bc-f"></div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;margin-bottom:22px;">Black Opium · BR540 · Libre · Roses Musk · Good Girl</div>
+        <div class="ins"><div class="ins-t">Black Opium is Sylvia's signature</div><div class="ins-b">6 compliments — 33% of all. Primarily strangers and colleagues in coffee shop settings.</div></div>
+        <div class="ins" style="border-bottom:none"><div class="ins-t">You and Sylvia both love BR540</div><div class="ins-b">Identical ratings (★★★★★). Sylvia has 5 compliments on it vs your 8. Both primarily stranger-driven.</div></div>
+      </div>
+    </div>
+
+    <!-- IMPORT -->
+    <div class="page" id="page-import">
+      <div class="sh"><h2>Import Collection</h2></div>
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:22px;max-width:500px;line-height:1.65;">Add fragrances without re-entering data. Paste a Fragrantica or retailer URL, scan a bottle, search by name, or drop a CSV — metadata pulls and you confirm before anything saves.</p>
+      <div class="im-tabs" id="imTabs">
+        <div class="imt on" data-panel="ip-link"><div class="imt-label">Paste a link</div><div class="imt-sub">Fragrantica · Sephora · Retailer</div></div>
+        <div class="imt" data-panel="ip-cam"><div class="imt-label">Scan / Photo</div><div class="imt-sub">Camera · Barcode · Label</div></div>
+        <div class="imt" data-panel="ip-csv"><div class="imt-label">CSV / Spreadsheet</div><div class="imt-sub">.csv · .xlsx · .xls</div></div>
+      </div>
+      <div class="ipanel on" id="ip-link">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px;line-height:1.7;">Paste any Fragrantica or retailer URL. The backend fetches and parses name, house, notes, rating, longevity, sillage, and price. You review before anything saves.</div>
+        <div class="linkrow"><input placeholder="https://www.fragrantica.com/perfume/..." id="linkIn"><button class="btn btn-blue" onclick="simLink()">Fetch Metadata</button></div>
+        <div class="lresult" id="linkRes">
+          <div style="font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px;">Fetched — review and confirm</div>
+          <div class="lr-n">Baccarat Rouge 540 EDP</div>
+          <div class="lr-h">Maison Francis Kurkdjian</div>
+          <div class="lr-g">
+            <div><div class="lrl">Community</div><div class="lrv">4.6 / 5.0</div></div>
+            <div><div class="lrl">Longevity</div><div class="lrv">12–24h</div></div>
+            <div><div class="lrl">Sillage</div><div class="lrv">Strong</div></div>
+            <div><div class="lrl">Avg Price</div><div class="lrv">~$380</div></div>
+          </div>
+          <div class="lr-notes">Saffron · Amberwood · Ambergris · Fir Resin · Jasmine · Cedarwood · Musk</div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;">Confirm and add personal details, or add directly to wishlist.</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-blue" onclick="importToCollection({name:'Baccarat Rouge 540 EDP',house:'Maison Francis Kurkdjian',communityRating:4.6,communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$380',notes:'Saffron, Amberwood, Ambergris, Fir Resin, Jasmine'})">Add to Collection</button>
+            <button class="btn btn-ghost" onclick="importToWishlist({name:'Baccarat Rouge 540 EDP',house:'Maison Francis Kurkdjian',communityRating:4.6,avgPrice:'~$380',notes:'Saffron, Amberwood, Ambergris, Fir Resin, Jasmine'})">Add to Wishlist</button>
+            <button class="btn-bare" onclick="document.getElementById('linkRes').style.display='none';document.getElementById('linkIn').value=''">Discard</button>
+          </div>
+        </div>
+        <div style="margin-top:24px;" class="sh"><h2>Bulk search queue</h2></div>
+        <div class="acwrap" style="margin-bottom:14px;"><input style="width:100%;border:1px solid var(--b3);padding:9px 12px;font-size:13px;font-family:var(--body);background:none;outline:none;color:var(--ink);" placeholder="Type fragrance name to queue for import..." id="qSrch" oninput="qSearch(this.value)"><div class="acdrop" id="qDrop"></div></div>
+        <div id="importQueue" style="margin-bottom:12px;"></div>
+        <div style="display:flex;justify-content:flex-end;"><button class="btn btn-blue btn-sm" onclick="confirmBulkImport()">Import Selected</button></div>
+      </div>
+      <div class="ipanel" id="ip-cam">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;line-height:1.7;">Point at a barcode or label. You confirm before anything saves.</div>
+        <div class="cam-box">
+          <div class="cam-view" id="camView" onclick="simScan()">
+            <div class="cv-t">Tap to scan a bottle</div>
+            <div class="cv-s">Barcode · Label · Bottle photo</div>
+          </div>
+          <div class="cam-res" id="camRes">
+            <div class="cam-label">Identified — confirm before saving</div>
+            <div style="font-family:var(--serif);font-size:17px;font-style:italic;color:var(--blue);">Tobacco Vanille</div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin:3px 0 12px;">Tom Ford · Oriental Spicy</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+              <div><div class="lrl">Community</div><div class="lrv">4.4 / 5.0</div></div>
+              <div><div class="lrl">Longevity</div><div class="lrv">12–24h</div></div>
+              <div><div class="lrl">Avg Price</div><div class="lrv">~$280</div></div>
+            </div>
+            <div style="font-family:var(--script);font-size:14px;font-style:italic;color:var(--ink2);margin-bottom:14px;">Tobacco Leaf · Vanilla · Tonka Bean · Cacao · Vetiver</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-blue" onclick="importToCollection({name:'Tobacco Vanille',house:'Tom Ford',communityRating:4.4,communityLong:'12–24h',communitySill:'Moderate',avgPrice:'~$280',notes:'Tobacco Leaf, Vanilla, Tonka Bean, Cacao, Vetiver'})">Add to Collection</button>
+              <button class="btn btn-ghost" onclick="importToWishlist({name:'Tobacco Vanille',house:'Tom Ford',communityRating:4.4,avgPrice:'~$280',notes:'Tobacco Leaf, Vanilla, Tonka Bean'});resetScan()">Add to Wishlist</button>
+              <button class="btn-bare" onclick="resetScan()">Rescan</button>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">Not identified? <span style="color:var(--blue);cursor:pointer;" onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
+      </div>
+      <div class="ipanel" id="ip-csv">
+        <div class="dropzone" onclick="toast('File picker opening...')">
+          <div class="dz-t">Drop your spreadsheet here</div>
+          <div class="dz-s">Supports .csv · .xlsx · .xls — or click to browse</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;line-height:1.9;text-transform:uppercase;">Expected columns: Name · Brand · Status · Rating · Notes<br>Duplicate detection runs automatically. <span style="color:var(--blue);cursor:pointer;" onclick="toast('Template downloading...')">Download template</span></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="sh"><h2>Settings</h2></div>
+      <table class="stbl">
+        <tbody>
+          <tr><td><div class="st-label">Profile</div><div class="st-sub">Kiana L. · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3d56545c535c7d4b494a52135e52">[email&#160;protected]</a></div></td><td><button class="btn btn-ghost btn-sm" onclick="toast('Edit profile')">Edit</button></td></tr>
+          <tr><td><div class="st-label">Friend connection</div><div class="st-sub">Sylvia M. · Connected · Full profile access</div></td><td><button class="btn btn-ghost btn-sm" onclick="toast('Friend settings')">Manage</button></td></tr>
+          <tr><td><div class="st-label">Data source</div><div class="st-sub">Fragrantica scrape · Sephora fallback · Updates on fetch</div></td><td><button class="btn btn-ghost btn-sm" onclick="toast('Data source settings')">Configure</button></td></tr>
+          <tr><td><div class="st-label">Camera &amp; scan</div><div class="st-sub">Enabled · Label recognition + barcode lookup</div></td><td><button class="btn btn-ghost btn-sm" onclick="toast('Camera settings')">Configure</button></td></tr>
+          <tr><td><div class="st-label">Location tracking</div><div class="st-sub">OpenStreetMap search · Enabled</div></td><td><button class="btn btn-ghost btn-sm" onclick="toast('Location settings')">Configure</button></td></tr>
+          <tr><td><div class="st-label">Export data</div><div class="st-sub">Download all fragrances and compliments as CSV</div></td><td><button class="btn btn-ghost btn-sm" onclick="exportData()">Export</button></td></tr>
+          <tr><td><div class="st-label">Account</div><div class="st-sub">Sign out and return to user picker</div></td><td><button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button></td></tr>
+          <tr style="border-bottom:none"><td colspan="2"><div class="st-label">Mobile — Add to Home Screen</div><div class="st-sub">iOS: Share → Add to Home Screen<br>Android: Menu → Install App</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail" id="detailP">
+  <div class="dhd">
+    <div class="dhd-inner">
+      <button class="dhd-close" onclick="closeDetail()">Close</button>
+      <div class="d-house" id="d-house"></div>
+      <div class="d-name" id="d-name"></div>
+      <div class="d-status-row">
+        <div class="d-status" id="d-status"></div>
+        <button class="btn-bare" style="color:var(--warm);font-size:9px;" onclick="toggleStatusStrip()">Change status</button>
+      </div>
+      <div class="status-strip" id="statusStrip"></div>
+    </div>
+  </div>
+  <div class="dbody">
+    <div class="dsec"><div class="dsl">Fragrance profile</div>
+      <div class="dgrid">
+        <div><div class="di-l">Community rating</div><div class="di-v" id="d-comm"></div></div>
+        <div><div class="di-l">Avg price</div><div class="di-v" id="d-price"></div></div>
+        <div><div class="di-l">Longevity (comm.)</div><div class="di-v" id="d-long"></div></div>
+        <div><div class="di-l">Sillage (comm.)</div><div class="di-v" id="d-sill"></div></div>
+      </div>
+    </div>
+    <div class="dsec"><div class="dsl">Notes</div>
+      <div style="font-family:var(--script);font-size:15px;font-style:italic;color:var(--ink2);line-height:1.8;" id="d-notes"></div>
+    </div>
+    <div class="dsec"><div class="dsl">My experience</div>
+      <div class="dgrid">
+        <div><div class="di-l">My longevity</div><div class="di-v" id="d-mylong"></div></div>
+        <div><div class="di-l">My sillage</div><div class="di-v" id="d-mysill"></div></div>
+        <div><div class="di-l">Where bought</div><div class="di-v" id="d-where"></div></div>
+        <div><div class="di-l">Added</div><div class="di-v" id="d-added"></div></div>
+      </div>
+    </div>
+    <div class="dsec" id="d-dupe-sec" style="display:none;"><div class="dsl">Dupe info</div>
+      <div class="di-v" id="d-dupe"></div>
+    </div>
+    <div class="dsec"><div class="dsl">Personal notes</div>
+      <div class="notebox" id="d-notebox"></div>
+    </div>
+    <div class="dsec">
+      <div class="dsl">Compliments — <span id="d-compct">0</span> total</div>
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px;" id="d-compdist"></div>
+      <div style="display:flex;flex-direction:column;gap:7px;">
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="viewFragCompliments()">View all compliments</button>
+        <button class="btn btn-blue" style="width:100%;justify-content:center;" onclick="logComplimentForFrag()">Log new compliment</button>
+      </div>
+    </div>
+    <div class="d-actions">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="editCurrentFrag()">Edit</button>
+      <button class="btn btn-danger" style="flex:1;justify-content:center;" onclick="showRemoveConfirm()">Remove</button>
+    </div>
+    <div class="confirm-box" id="removeConfirm">
+      <p>Remove <strong id="removeFragName"></strong> from your collection? Your compliment history for this fragrance will be preserved.</p>
+      <div class="btns">
+        <button class="btn btn-danger btn-sm" onclick="confirmRemove()">Remove</button>
+        <button class="btn btn-ghost btn-sm" onclick="hideRemoveConfirm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT FRAGRANCE MODAL -->
+<div class="overlay" id="addFragM">
+  <div class="modal">
+    <div class="mhd">
+      <div><div class="mtitle" id="afTitle">Add Fragrance</div><div class="msub" id="af-lbl">Step 1 of 2 — Search &amp; identify</div></div>
+      <button class="mx" onclick="closeModal('addFragM')">×</button>
+    </div>
+    <div class="mbody">
+      <div class="pips" id="afPips"><div class="pip active"></div><div class="pip"></div></div>
+      <div id="af-s1">
+        <div class="fg"><label>Search fragrance name</label>
+          <div class="acwrap">
+            <input id="afSrch" type="text" placeholder="e.g. Baccarat Rouge 540" oninput="afSearch(this.value)" autocomplete="off">
+            <div class="acdrop" id="afDrop"></div>
+          </div>
+          <div class="err" id="afSrchErr">Please search and select a fragrance first</div>
+        </div>
+        <div class="mprev" id="afPrev">
+          <div class="mp-n" id="mpN"></div><div class="mp-h" id="mpH"></div>
+          <div class="mp-g">
+            <div><div class="mpl">Community</div><div class="mpv" id="mpR"></div></div>
+            <div><div class="mpl">Longevity</div><div class="mpv" id="mpL"></div></div>
+            <div><div class="mpl">Avg Price</div><div class="mpv" id="mpP"></div></div>
+          </div>
+          <div class="mp-notes" id="mpNotes"></div>
+        </div>
+        <div class="fg"><label>Status</label>
+          <select id="afStatus">
+            <option value="CURRENT">Current Collection</option>
+            <option value="PREVIOUSLY_OWNED">Previously Owned</option>
+            <option value="WANT_TO_SMELL">Want to Smell</option>
+            <option value="WANT_TO_BUY">Want to Buy</option>
+            <option value="DONT_LIKE">Have Smelled — Don't Like</option>
+          </select>
+        </div>
+      </div>
+      <div id="af-s2" style="display:none;">
+        <div class="frow" style="margin-bottom:14px;">
+          <div class="fg" style="margin:0;"><label>Size owned</label>
+            <div class="opts" id="sizeOpts">
+              <div class="opt" onclick="togOpt(this)">Sample</div>
+              <div class="opt" onclick="togOpt(this)">Travel</div>
+              <div class="opt on" onclick="togOpt(this)">Full Bottle</div>
+              <div class="opt" onclick="togOpt(this)">Small</div>
+            </div>
+          </div>
+          <div class="fg" style="margin:0;"><label>Personal rating</label>
+            <div class="opts" id="rOpts">
+              <div class="opt" onclick="selOpt(this,'rOpts')" data-v="1">★</div>
+              <div class="opt" onclick="selOpt(this,'rOpts')" data-v="2">★★</div>
+              <div class="opt" onclick="selOpt(this,'rOpts')" data-v="3">★★★</div>
+              <div class="opt on" onclick="selOpt(this,'rOpts')" data-v="4">★★★★</div>
+              <div class="opt" onclick="selOpt(this,'rOpts')" data-v="5">★★★★★</div>
+            </div>
+          </div>
+        </div>
+        <div class="fg"><label>Status rating</label>
+          <div class="opts" id="sOpts">
+            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="Obsessed">Obsessed</div>
+            <div class="opt on" onclick="selOpt(this,'sOpts')" data-v="Love">Love</div>
+            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="Like">Like</div>
+            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="Just OK">Just OK</div>
+            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="Don't Like">Don't Like</div>
+            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="WTF">WTF</div>
+          </div>
+        </div>
+        <div class="frow" style="margin-bottom:14px;">
+          <div class="fg" style="margin:0;"><label>Personal longevity</label>
+            <select id="afLong"><option value="">Not sure</option><option value="0–6h">0–6h</option><option value="6–12h" selected>6–12h</option><option value="12–24h">12–24h</option><option value=">24h">&gt;24h</option></select>
+          </div>
+          <div class="fg" style="margin:0;"><label>Personal sillage</label>
+            <select id="afSill"><option value="Soft">Soft</option><option value="Moderate" selected>Moderate</option><option value="Strong">Strong</option><option value="Enormous">Enormous</option></select>
+          </div>
+        </div>
+        <div class="frow" style="margin-bottom:14px;">
+          <div class="fg" style="margin:0;"><label>Where bought</label>
+            <select id="afWhere"><option value="">— Select —</option><option>FragranceNet</option><option>Jomashop</option><option>Amazon</option><option>Scentsplit</option><option>Sephora</option><option>Brand Direct</option><option>Other</option></select>
+          </div>
+          <div class="fg" style="margin:0;"><label>Purchase date</label>
+            <div class="date-row">
+              <select id="afMonth"><option value="">Month</option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select>
+              <select id="afYear"><option value="">Year</option><option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="fg"><label>Dupe tracking</label>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <div class="opts"><div class="opt" id="dY" onclick="togDupe(true)">Dupe for:</div><div class="opt on" id="dN" onclick="togDupe(false)">Not a dupe</div></div>
+            <input type="text" id="dupeFor" placeholder="Type original fragrance name..." style="display:none;border:none;border-bottom:1px solid var(--b3);background:none;padding:6px 0;font-size:13px;font-family:var(--body);outline:none;flex:1;min-width:140px;">
+          </div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:4px;">A dupe smells similar to a more expensive original. e.g. Hacivat is often considered a dupe for BR540.</div>
+        </div>
+        <div class="fg"><label>Personal notes</label>
+          <textarea id="afNotes" placeholder="How does it smell on your skin? When do you wear it? Any context worth remembering?"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-ghost" id="afBack" style="display:none;" onclick="afGoStep(1)">Back</button>
+      <button class="btn btn-ghost" onclick="closeModal('addFragM')">Cancel</button>
+      <button class="btn btn-blue" id="afNext" onclick="afGoStep(2)">Next</button>
+      <button class="btn btn-warm" id="afSave" style="display:none;" onclick="saveFragrance()">Save Fragrance</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD COMPLIMENT MODAL -->
+<div class="overlay" id="addCompM">
+  <div class="modal">
+    <div class="mhd">
+      <div><div class="mtitle">Log a Compliment</div><div class="msub">Record who, where, and what you were wearing</div></div>
+      <button class="mx" onclick="closeModal('addCompM')">×</button>
+    </div>
+    <div class="mbody">
+      <div class="fg">
+        <label>Primary fragrance</label>
+        <select id="compFrag">
+          <option value="">— Select from collection —</option>
+        </select>
+        <div class="err" id="compFragErr">Please select a fragrance</div>
+      </div>
+      <div class="fg">
+        <label>Secondary fragrance — layering (optional)</label>
+        <select id="compFrag2"><option value="">None</option></select>
+      </div>
+      <div class="frow">
+        <div class="fg" style="margin:0;">
+          <label>Complimenter gender</label>
+          <select id="compGender"><option value="">— Select —</option><option>Male</option><option>Female</option><option>Non-binary</option><option>Unknown</option></select>
+        </div>
+        <div class="fg" style="margin:0;">
+          <label>Relation</label>
+          <select id="compRelation">
+            <option value="">— Select relation —</option>
+            <option>Stranger</option>
+            <option>Friend</option>
+            <option>Colleague / Client</option>
+            <option>Family</option>
+            <option>Significant Other</option>
+            <option>Acquaintance</option>
+            <option>Other</option>
+          </select>
+          <div class="err" id="compRelErr">Please select a relation</div>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg" style="margin:0;">
+          <label>Date</label>
+          <div class="date-row">
+            <select id="compMonth"><option value="">Month</option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select>
+            <select id="compYear"><option value="">Year</option><option selected>2026</option><option>2025</option><option>2024</option><option>2023</option></select>
+          </div>
+          <div class="err" id="compDateErr">Please select a date</div>
+        </div>
+        <div class="fg" style="margin:0;"><label>Location</label><input type="text" id="compLoc" placeholder="City, venue, context..."></div>
+      </div>
+      <div class="fg"><label>Notes (optional)</label><textarea id="compNotes" placeholder="What did they say? Any context worth remembering?"></textarea></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-ghost" onclick="closeModal('addCompM')">Cancel</button>
+      <button class="btn btn-blue" onclick="saveCompliment()">Save Compliment</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<div class="mob-nav">
+  <div class="mob-row">
+    <button class="mob-btn on" data-mob="dashboard">Home</button>
+    <button class="mob-btn" data-mob="collection">Collection</button>
+    <button class="mob-btn" onclick="openAddFrag('CURRENT')">Add</button>
+    <button class="mob-btn" data-mob="compliments">Compliments</button>
+    <button class="mob-btn" data-mob="friend">Sylvia</button>
+  </div>
+</div>
+
+<!-- DEFINITION BAR -->
+<div class="def-bar">
+  <span class="def-word">tęsknota</span>
+  <span class="def-phonetic">[ tɛsk-ˈnɔ-ta ]</span>
+  <span class="def-sep">·</span>
+  <span class="def-pos">n. Polish</span>
+  <span class="def-sep">·</span>
+  <span class="def-text">a deep longing for something or someone; a nostalgic ache for what is absent, distant, or irretrievably past</span>
+</div>
+
+<!-- CHATBOT BUTTON -->
+<button class="chatbot-btn" onclick="toggleChat()" title="Quick entry assistant">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.52 3.66 1.42 5.18L2 22l4.82-1.42A9.96 9.96 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.96 7.96 0 0 1-4.07-1.11l-.29-.17-3.01.89.85-3.06-.18-.29A8 8 0 1 1 12 20zm4.41-6.02c-.24-.12-1.43-.71-1.65-.79-.22-.08-.38-.12-.54.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.46-.39-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.43-.59 1.63-1.15.2-.56.2-1.04.14-1.15-.06-.1-.22-.16-.46-.28z"/></svg>
+</button>
+
+<!-- CHATBOT PANEL -->
+<div class="chatbot-panel" id="chatPanel">
+  <div class="chat-hd">
+    <div class="chat-title">Quick Entry</div>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-sugs" id="chatSugs"></div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" placeholder="Tell me about a compliment, rating, or new fragrance..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<!-- COMPARE OVERLAY -->
+<div class="compare-overlay" id="compareOverlay">
+  <div class="compare-modal">
+    <div class="compare-hd">
+      <div>
+        <div class="compare-title" id="compareTitle">Comparing fragrance</div>
+        <div class="compare-sub">You vs Sylvia — all compliments and notes</div>
+      </div>
+      <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;padding:0;" onclick="closeCompare()">×</button>
+    </div>
+    <div class="compare-body" id="compareBody"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="mob-overlay" id="MO2" onclick="closeSB()"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+
+// ═══════════════════════════════════════════════════════
+// SYNC STATE (mirrors ATS-HRIS setSyncState pattern)
+// ═══════════════════════════════════════════════════════
+
+function setSyncState(state){
+  const dot=document.getElementById('syncDot');
+  const txt=document.getElementById('syncTxt');
+  if(!dot)return;
+  dot.className='sync-dot'+(state==='syncing'?' syncing':state==='error'?' error':'');
+  txt.textContent=state==='syncing'?'Saving…':state==='error'?'Error':'Synced';
+  if(state==='ok') setTimeout(()=>{if(txt)txt.textContent='';},3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// IDENTITY — localStorage + users tab
+// In production: selectIdentity() writes to Google Sheets users tab
+// and stores {id, name} in localStorage.currentUser
+// ═══════════════════════════════════════════════════════
+
+// USERS seed — mirrors users tab in Google Sheets
+const USERS = [
+  {id:'u1', name:'Kiana', createdAt:'2025-01-01'},
+  {id:'u2', name:'Sylvia', createdAt:'2025-01-01'},
+];
+
+let CURRENT_USER = null;
+
+function selectIdentity(name, id){
+  CURRENT_USER = USERS.find(u=>u.id===id) || {id, name};
+  try { localStorage.setItem('currentUser', JSON.stringify(CURRENT_USER)); } catch(e){}
+  document.getElementById('identityScreen').style.display='none';
+  document.querySelector('.shell').style.display='flex';
+  // Update sidebar username
+  const who = document.querySelector('.sb-who');
+  if(who) who.innerHTML=`<b>${CURRENT_USER.name}</b>My account`;
+  renderDashboard();
+  renderImportQueue();
+  updateCounts();
+}
+
+function signOut(){
+  try { localStorage.removeItem('currentUser'); } catch(e){}
+  CURRENT_USER = null;
+  document.getElementById('identityScreen').style.display='flex';
+  document.querySelector('.shell').style.display='none';
+}
+
+function checkIdentity(){
+  try {
+    const stored = localStorage.getItem('currentUser');
+    if(stored){
+      CURRENT_USER = JSON.parse(stored);
+      return true;
+    }
+  } catch(e){}
+  return false;
+}
+
+
+// ═══════════════════════════════════════════════════════
+// SINGLE SOURCE OF TRUTH — ALL DATA LIVES HERE
+// ═══════════════════════════════════════════════════════
+
+// Fragrance database for search autocomplete
+const FRAG_DB = [
+  {n:'Baccarat Rouge 540',h:'Maison Francis Kurkdjian',r:'4.5',l:'12–24h',s:'Strong',notes:'Amberwood, Ambergris, Fir Resin, Jasmine, Cedarwood',p:'~$320'},
+  {n:'Baccarat Rouge 540 EDP',h:'Maison Francis Kurkdjian',r:'4.6',l:'12–24h',s:'Strong',notes:'Saffron, Amberwood, Ambergris, Fir Resin',p:'~$380'},
+  {n:'Tobacco Vanille',h:'Tom Ford',r:'4.4',l:'12–24h',s:'Moderate',notes:'Tobacco Leaf, Vanilla, Tonka Bean, Cacao, Vetiver',p:'~$280'},
+  {n:'Sauvage EDP',h:'Dior',r:'4.3',l:'8–12h',s:'Strong',notes:'Bergamot, Pepper, Ambroxan, Lavender',p:'~$130'},
+  {n:'Bleu de Chanel EDP',h:'Chanel',r:'4.4',l:'8–12h',s:'Moderate',notes:'Citrus, Ginger, Jasmine, Sandalwood',p:'~$155'},
+  {n:'Layton',h:'Parfums de Marly',r:'4.5',l:'12–24h',s:'Moderate',notes:'Apple, Violet, Cardamom, Sandalwood, Pepper',p:'~$350'},
+  {n:'Aventus',h:'Creed',r:'4.5',l:'12–24h',s:'Strong',notes:'Pineapple, Birch, Ambergris, Oakmoss',p:'~$435'},
+  {n:'Hacivat',h:'Nishane',r:'4.4',l:'>24h',s:'Strong',notes:'Pineapple, Oakmoss, Amberwood, Jasmine',p:'~$185'},
+  {n:'Oud for Greatness',h:'Initio',r:'4.3',l:'>24h',s:'Enormous',notes:'Oud, Saffron, Nutmeg, Musk',p:'~$320'},
+  {n:'Reflection Man',h:'Amouage',r:'4.5',l:'12–24h',s:'Strong',notes:'Neroli, Ylang Ylang, Sandalwood, Musk',p:'~$275'},
+  {n:'Colonia Essenza',h:'Acqua di Parma',r:'4.2',l:'4–6h',s:'Soft',notes:'Citrus, Cedar, Vetiver, Tobacco',p:'~$160'},
+  {n:'Chanel No. 5 EDP',h:'Chanel',r:'4.1',l:'6–12h',s:'Moderate',notes:'Ylang Ylang, Rose, Jasmine, Sandalwood',p:'~$155'},
+  {n:'Black Opium EDP',h:'YSL',r:'4.3',l:'8–12h',s:'Strong',notes:'Coffee, Vanilla, White Floral, Patchouli',p:'~$130'},
+  {n:'Nio',h:'Xerjoff',r:'4.2',l:'8–12h',s:'Moderate',notes:'Bergamot, Yuzu, Musk, Sandalwood',p:'~$280'},
+  {n:'Eros EDP',h:'Versace',r:'4.0',l:'8–12h',s:'Strong',notes:'Mint, Apple, Vanilla, Tonka Bean',p:'~$85'},
+  {n:'Spicebomb Extreme',h:'Viktor & Rolf',r:'4.1',l:'6–12h',s:'Moderate',notes:'Tobacco, Lavender, Vanilla, Pepper',p:'~$95'},
+];
+
+// FRAGRANCES — main collection (single source of truth)
+let FRAGRANCES = [
+  {id:'f1',userId:'u1',name:'Baccarat Rouge 540',house:'Maison Francis Kurkdjian',status:'CURRENT',sizes:['Full Bottle'],personalRating:5,statusRating:'Obsessed',personalLong:'12–24h',personalSill:'Strong',communityRating:'4.5',communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$320',notes:'Amberwood · Ambergris · Fir Resin · Jasmine · Cedarwood',whereBought:'FragranceNet',purchaseDate:'Jan 2025',isDupe:false,dupeFor:'',personalNotes:'My signature. The amberwood opens up on my skin after 30 mins — sweet but never cloying. Perfect for evening events.'},
+  {id:'f2',userId:'u1',name:'Tobacco Vanille',house:'Tom Ford',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'12–24h',personalSill:'Moderate',communityRating:'4.4',communityLong:'12–24h',communitySill:'Moderate',avgPrice:'~$280',notes:'Tobacco Leaf · Vanilla · Tonka Bean · Cacao · Vetiver',whereBought:'Jomashop',purchaseDate:'Sep 2024',isDupe:false,dupeFor:'',personalNotes:'Incredibly cozy. Perfect for fall and winter. Gets compliments almost every time I wear it to the office.'},
+  {id:'f3',userId:'u1',name:'Sauvage EDP',house:'Dior',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'8–12h',personalSill:'Strong',communityRating:'4.3',communityLong:'8–12h',communitySill:'Strong',avgPrice:'~$130',notes:'Bergamot · Pepper · Ambroxan · Lavender · Woody Notes',whereBought:'Sephora',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'The reliable choice for professional settings. Always delivers.'},
+  {id:'f4',userId:'u1',name:'Layton',house:'Parfums de Marly',status:'CURRENT',sizes:['Travel'],personalRating:5,statusRating:'Obsessed',personalLong:'12–24h',personalSill:'Moderate',communityRating:'4.5',communityLong:'12–24h',communitySill:'Moderate',avgPrice:'~$350',notes:'Apple · Violet · Cardamom · Sandalwood · Pepper · Geranium',whereBought:'FragranceNet',purchaseDate:'Nov 2024',isDupe:false,dupeFor:'',personalNotes:'Underrated gem. The apple-cardamom opening is stunning. I reach for this on weekends.'},
+  {id:'f5',userId:'u1',name:'Bleu de Chanel EDP',house:'Chanel',status:'CURRENT',sizes:['Full Bottle'],personalRating:4,statusRating:'Love',personalLong:'8–12h',personalSill:'Moderate',communityRating:'4.4',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$155',notes:'Citrus · Ginger · Jasmine · Sandalwood · Cedarwood',whereBought:'Sephora',purchaseDate:'Mar 2024',isDupe:false,dupeFor:'',personalNotes:'Versatile everyday option. Classic without being boring.'},
+  {id:'f6',userId:'u1',name:'Colonia Essenza',house:'Acqua di Parma',status:'CURRENT',sizes:['Sample'],personalRating:4,statusRating:'Like',personalLong:'4–6h',personalSill:'Soft',communityRating:'4.2',communityLong:'4–6h',communitySill:'Soft',avgPrice:'~$160',notes:'Citrus · Cedar · Vetiver · Tobacco',whereBought:'Brand Direct',purchaseDate:'Feb 2025',isDupe:false,dupeFor:'',personalNotes:'Light and refined. Great for summer and formal daytime.'},
+  {id:'f7',userId:'u1',name:'Eros EDP',house:'Versace',status:'PREVIOUSLY_OWNED',sizes:[],personalRating:3,statusRating:'Just OK',personalLong:'8–12h',personalSill:'Strong',communityRating:'4.0',communityLong:'8–12h',communitySill:'Strong',avgPrice:'~$85',notes:'Mint · Apple · Vanilla · Tonka Bean',whereBought:'Amazon',purchaseDate:'Jan 2023',isDupe:false,dupeFor:'',personalNotes:'Too sweet for my taste on dry down. Sold it after 6 months.'},
+  {id:'f8',userId:'u1',name:'Spicebomb Extreme',house:'Viktor & Rolf',status:'DONT_LIKE',sizes:['Sample'],personalRating:2,statusRating:"Don't Like",personalLong:'0–6h',personalSill:'Moderate',communityRating:'4.1',communityLong:'6–12h',communitySill:'Moderate',avgPrice:'~$95',notes:'Tobacco · Lavender · Vanilla · Pepper',whereBought:'Scentsplit',purchaseDate:'Nov 2023',isDupe:false,dupeFor:'',personalNotes:'Too heavy and medicinal on my skin. Community loves it but it doesn\'t work for me.'},
+  {id:'f9',userId:'u1',name:'Aventus',house:'Creed',status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.5',communityLong:'12–24h',communitySill:'Strong',avgPrice:'~$435',notes:'Pineapple · Birch · Ambergris · Oakmoss',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''},
+  {id:'f10',userId:'u1',name:'Hacivat',house:'Nishane',status:'WANT_TO_SMELL',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.4',communityLong:'>24h',communitySill:'Strong',avgPrice:'~$185',notes:'Pineapple · Oakmoss · Amberwood · Jasmine',whereBought:null,purchaseDate:null,isDupe:true,dupeFor:'Baccarat Rouge 540',personalNotes:'Rumored BR540 dupe at less than half the price.'},
+  {id:'f11',userId:'u1',name:'Oud for Greatness',house:'Initio',status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.3',communityLong:'>24h',communitySill:'Enormous',avgPrice:'~$320',notes:'Oud · Saffron · Nutmeg · Musk',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''},
+  {id:'f12',userId:'u1',name:'Nio',house:'Xerjoff',status:'WANT_TO_SMELL',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:'4.2',communityLong:'8–12h',communitySill:'Moderate',avgPrice:'~$280',notes:'Bergamot · Yuzu · Musk · Sandalwood',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''},
+];
+
+// COMPLIMENTS — main compliment log
+let COMPLIMENTS = [
+  {id:'c1',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Mar',year:'2026',location:'Central Park, NYC',notes:'"What are you wearing? It smells incredible."'},
+  {id:'c2',userId:'u1',primaryFragId:'f2',primaryFrag:'Tobacco Vanille',secondaryFragId:'f1',secondaryFrag:'Baccarat Rouge 540',gender:'Male',relation:'Colleague / Client',month:'Feb',year:'2026',location:'Office, Denver CO',notes:'"Best you\'ve smelled. What\'s the combination?"'},
+  {id:'c3',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:null,relation:'Significant Other',month:'Jan',year:'2026',location:'Home',notes:'"You smell like a luxury hotel."'},
+  {id:'c4',userId:'u1',primaryFragId:'f4',primaryFrag:'Layton',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Jan',year:'2026',location:'Restaurant, Denver',notes:'"This is different from usual. I love it."'},
+  {id:'c5',userId:'u1',primaryFragId:'f3',primaryFrag:'Sauvage EDP',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Colleague / Client',month:'Dec',year:'2025',location:'Meeting Room, Denver',notes:'"Very professional. What is that?"'},
+  {id:'c6',userId:'u1',primaryFragId:'f5',primaryFrag:'Bleu de Chanel EDP',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'Dec',year:'2025',location:'Hotel Elevator',notes:'"Sir, that fragrance is perfect."'},
+  {id:'c7',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Nov',year:'2025',location:'Dinner, NYC',notes:'"Still your best one."'},
+  {id:'c8',userId:'u1',primaryFragId:'f2',primaryFrag:'Tobacco Vanille',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'Oct',year:'2025',location:'Bar, Denver',notes:'"That scent is incredible, what is it?"'},
+  {id:'c9',userId:'u1',primaryFragId:'f1',primaryFrag:'Baccarat Rouge 540',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Sep',year:'2025',location:'Coffee shop, NYC',notes:'"Excuse me, you smell amazing."'},
+  {id:'c10',userId:'u1',primaryFragId:'f4',primaryFrag:'Layton',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Family',month:'Aug',year:'2025',location:'Home visit',notes:'"You always smell so good these days."'},
+];
+
+// IMPORT QUEUE
+let importQueue = [];
+let nextId = 13; // next fragrance id
+let nextCompId = 11;
+let currentDetailId = null;
+let editingFragId = null;
+let prefetchedData = null;
+
+// ═══════════════════════════════════════════════════════
+// UTILITY
+// ═══════════════════════════════════════════════════════
+
+function genId(prefix){ return prefix + (nextId++); }
+function genCompId(){ return 'c' + (nextCompId++); }
+const PAGES = {dashboard:'Dashboard',collection:'My Collection',wishlist:'Wishlist',compliments:'Compliments',analytics:'Analytics',friend:"Sylvia's Profile",import:'Import Collection',settings:'Settings'};
+const STATUS_LABELS = {CURRENT:'Current',PREVIOUSLY_OWNED:'Prev. Owned',WANT_TO_BUY:'Want to Buy',WANT_TO_SMELL:'Want to Smell',DONT_LIKE:"Don't Like"};
+const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt',WANT_TO_SMELL:'s-wnt',DONT_LIKE:'s-no'};
+
+function starsStr(n){ if(!n)return '—'; let s=''; for(let i=1;i<=5;i++) s+=i<=n?'★':'☆'; return s; }
+
+function getCompCount(fragId){ return COMPLIMENTS.filter(c=>c.primaryFragId===fragId||c.secondaryFragId===fragId).length; }
+function getCompDist(fragId){
+  const comps = COMPLIMENTS.filter(c=>c.primaryFragId===fragId);
+  const groups = {};
+  comps.forEach(c=>{ groups[c.relation]=(groups[c.relation]||0)+1; });
+  return Object.entries(groups).map(([k,v])=>`${k} (${v})`).join(' · ') || 'None logged';
+}
+
+function updateCounts(){
+  const owned = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE').length;
+  const wish = FRAGRANCES.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL').length;
+  const comps = COMPLIMENTS.length;
+  document.getElementById('ct-collection').textContent = owned;
+  document.getElementById('ct-wishlist').textContent = wish;
+  document.getElementById('ct-compliments').textContent = comps;
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  const pg=document.getElementById('page-'+id);
+  if(pg)pg.classList.add('on');
+  document.getElementById('pgName').textContent=PAGES[id]||id;
+  document.querySelectorAll('.sb-link[data-page]').forEach(l=>l.classList.toggle('on',l.dataset.page===id));
+  document.querySelectorAll('.mob-btn[data-mob]').forEach(b=>b.classList.toggle('on',b.dataset.mob===id));
+  closeSB();
+  if(id==='dashboard') renderDashboard();
+  if(id==='collection') renderCollection();
+  if(id==='wishlist') renderWishlist();
+  if(id==='compliments') renderCompliments();
+  if(id==='analytics') renderAnalytics();
+  if(id==='friend') renderFriend();
+}
+
+document.querySelectorAll('.sb-link[data-page]').forEach(l=>l.addEventListener('click',()=>goPage(l.dataset.page)));
+document.querySelectorAll('.mob-btn[data-mob]').forEach(b=>b.addEventListener('click',()=>goPage(b.dataset.mob)));
+document.querySelector('.sb-link[data-page="dashboard"]').classList.add('on');
+
+function toggleSB(){ document.getElementById('SB').classList.toggle('open'); document.getElementById('MO').classList.toggle('open'); }
+function closeSB(){ document.getElementById('SB').classList.remove('open'); document.getElementById('MO').classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════
+// RENDER — DASHBOARD
+// ═══════════════════════════════════════════════════════
+
+function renderDashboard(){
+  const owned = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE');
+  const wish = FRAGRANCES.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
+  document.getElementById('dashStats').innerHTML = `
+    <div class="sbox"><div class="snum">${owned.length}</div><div class="slbl">Owned</div></div>
+    <div class="sbox"><div class="snum">${wish.length}</div><div class="slbl">Wishlist</div></div>
+    <div class="sbox"><div class="snum">${COMPLIMENTS.length}</div><div class="slbl">Compliments</div></div>
+    <div class="sbox"><div class="snum">${avgRating()}</div><div class="slbl">Avg Rating</div></div>
+    <div class="sbox"><div class="snum">${FRAGRANCES.filter(f=>f.status==='PREVIOUSLY_OWNED').length}</div><div class="slbl">Prev. Owned</div></div>`;
+  // Recent 4 CURRENT fragrances
+  const recent = FRAGRANCES.filter(f=>f.status==='CURRENT').slice(0,4);
+  document.getElementById('dashBody').innerHTML = recent.map(f=>`
+    <tr onclick="openDetail('${f.id}')">
+      <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
+      <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
+      <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
+      <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
+      <td class="tmono">${getCompCount(f.id)}</td>
+      <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
+    </tr>`).join('');
+  // Top performers
+  const byFrag = {};
+  COMPLIMENTS.forEach(c=>{ byFrag[c.primaryFragId]=(byFrag[c.primaryFragId]||0)+1; });
+  const sorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  document.getElementById('dashPerformers').innerHTML = sorted.map(([id,cnt],i)=>{
+    const f = FRAGRANCES.find(x=>x.id===id); if(!f)return '';
+    const dist = getCompDist(id);
+    return `<div style="background:var(--off);padding:18px;cursor:pointer;" onclick="openDetail('${id}')">
+      <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;">No. ${i+1}</div>
+      <div style="font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:3px;">${f.name}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--warm);">${cnt} compliment${cnt>1?'s':''}</div>
+      <div style="font-size:11px;color:var(--ink2);margin-top:5px;">${dist}</div>
+    </div>`;
+  }).join('');
+}
+
+function avgRating(){
+  const rated = FRAGRANCES.filter(f=>f.personalRating);
+  if(!rated.length)return '—';
+  return (rated.reduce((a,f)=>a+f.personalRating,0)/rated.length).toFixed(1);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER — COLLECTION
+// ═══════════════════════════════════════════════════════
+
+function renderCollection(filter='all'){
+  const coll = FRAGRANCES.filter(f=>f.status!=='WANT_TO_BUY'&&f.status!=='WANT_TO_SMELL');
+  const filtered = filter==='all' ? coll : coll.filter(f=>f.status===filter);
+  // Update filter counts
+  document.querySelector('#collFbar .fc[data-filter="all"]').textContent=`All (${coll.length})`;
+  document.querySelector('#collFbar .fc[data-filter="CURRENT"]').textContent=`Current (${coll.filter(f=>f.status==='CURRENT').length})`;
+  document.querySelector('#collFbar .fc[data-filter="PREVIOUSLY_OWNED"]').textContent=`Prev. Owned (${coll.filter(f=>f.status==='PREVIOUSLY_OWNED').length})`;
+  document.querySelector('#collFbar .fc[data-filter="DONT_LIKE"]').textContent=`Don't Like (${coll.filter(f=>f.status==='DONT_LIKE').length})`;
+  // Table
+  document.getElementById('collBody').innerHTML = filtered.map(f=>`
+    <tr data-s="${f.status}" onclick="openDetail('${f.id}')">
+      <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
+      <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
+      <td class="tmono">${f.sizes.join(', ')||'—'}</td>
+      <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
+      <td class="tmono">${f.personalLong||'—'}</td>
+      <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,2).join(', ')}</td>
+      <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
+      <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
+    </tr>`).join('');
+  // Grid
+  document.getElementById('collGrid').innerHTML = filtered.map(f=>`
+    <div class="ccard" data-s="${f.status}" onclick="openDetail('${f.id}')">
+      <div class="cc-bar" style="background:${f.status==='CURRENT'?'var(--sage)':f.status==='PREVIOUSLY_OWNED'?'var(--ink3)':'var(--rose)'}"></div>
+      <div class="cc-h">${f.house}</div>
+      <div class="cc-n">${f.name}</div>
+      <div class="cc-notes">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</div>
+      <div class="cc-ft"><div class="cc-r">${starsStr(f.personalRating)}</div><div class="cc-c">${getCompCount(f.id)} compliments</div></div>
+    </div>`).join('');
+  updateCounts();
+}
+
+document.getElementById('collFbar').addEventListener('click',e=>{
+  const fc=e.target.closest('.fc');if(!fc)return;
+  document.querySelectorAll('#collFbar .fc').forEach(c=>c.classList.remove('on'));
+  fc.classList.add('on');
+  renderCollection(fc.dataset.filter);
+});
+
+// ═══════════════════════════════════════════════════════
+// RENDER — WISHLIST
+// ═══════════════════════════════════════════════════════
+
+function renderWishlist(filter='all'){
+  const wish = FRAGRANCES.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
+  const filtered = filter==='all' ? wish : wish.filter(f=>f.status===filter);
+  document.querySelector('#wishFbar .fc[data-filter="all"]').textContent=`All (${wish.length})`;
+  document.querySelector('#wishFbar .fc[data-filter="WANT_TO_SMELL"]').textContent=`Want to Smell (${wish.filter(f=>f.status==='WANT_TO_SMELL').length})`;
+  document.querySelector('#wishFbar .fc[data-filter="WANT_TO_BUY"]').textContent=`Want to Buy (${wish.filter(f=>f.status==='WANT_TO_BUY').length})`;
+  document.getElementById('wishBody').innerHTML = filtered.map(f=>`
+    <tr onclick="openDetail('${f.id}')">
+      <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
+      <td><div class="ts s-wnt">${STATUS_LABELS[f.status]}</div></td>
+      <td class="tmono" style="color:var(--warm)">${f.communityRating} / 5.0</td>
+      <td class="tmono">${f.avgPrice||'—'}</td>
+      <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
+      <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
+      <td class="tact">
+        <button class="btn-bare" onclick="event.stopPropagation();promoteToOwned('${f.id}')">Mark as Owned</button>
+      </td>
+    </tr>`).join('');
+}
+
+document.getElementById('wishFbar').addEventListener('click',e=>{
+  const fc=e.target.closest('.fc');if(!fc)return;
+  document.querySelectorAll('#wishFbar .fc').forEach(c=>c.classList.remove('on'));
+  fc.classList.add('on');
+  renderWishlist(fc.dataset.filter);
+});
+
+function promoteToOwned(fragId){
+  const f = FRAGRANCES.find(x=>x.id===fragId);
+  if(!f)return;
+  openEditFrag(fragId,'CURRENT');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER — COMPLIMENTS
+// ═══════════════════════════════════════════════════════
+
+function renderCompliments(filter='all'){
+  const filtered = filter==='all' ? COMPLIMENTS : COMPLIMENTS.filter(c=>c.relation===filter);
+  // Update counts in filter bar
+  const rel=['Stranger','Friend','Colleague / Client','Family','Significant Other'];
+  document.querySelector('#compFbar .fc[data-filter="all"]').textContent=`All (${COMPLIMENTS.length})`;
+  rel.forEach(r=>{
+    const el = document.querySelector(`#compFbar .fc[data-filter="${r}"]`);
+    if(el) el.textContent = `${r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'SO':r+'s'} (${COMPLIMENTS.filter(c=>c.relation===r).length})`;
+  });
+  document.getElementById('compList').innerHTML = filtered.map(c=>`
+    <div class="crow" data-rel="${c.relation}">
+      <div style="flex:1;">
+        <div class="cr-f" onclick="openDetail('${c.primaryFragId}')">${c.primaryFrag}${c.secondaryFrag?`<span style="font-family:var(--mono);font-size:9px;color:var(--ink3);"> + ${c.secondaryFrag}</span>`:''}</div>
+        <div class="cr-m">${c.relation}${c.gender?' · '+c.gender:''}${c.location?' · '+c.location:''}</div>
+        ${c.notes?`<div class="cr-n">${c.notes}</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;">
+        <div class="cr-d">${c.month} ${c.year}</div>
+        <button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment('${c.id}')">×</button>
+      </div>
+    </div>`).join('') || '<div style="padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliments in this category yet</div>';
+}
+
+document.getElementById('compFbar').addEventListener('click',e=>{
+  const fc=e.target.closest('.fc');if(!fc)return;
+  document.querySelectorAll('#compFbar .fc').forEach(c=>c.classList.remove('on'));
+  fc.classList.add('on');
+  renderCompliments(fc.dataset.filter);
+});
+
+function deleteCompliment(id){
+  COMPLIMENTS = COMPLIMENTS.filter(c=>c.id!==id);
+  renderCompliments(document.querySelector('#compFbar .fc.on').dataset.filter);
+  updateCounts();
+  toast('Compliment removed');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER — ANALYTICS
+// ═══════════════════════════════════════════════════════
+
+function renderAnalytics(){
+  const total = COMPLIMENTS.length;
+  const byFrag = {};
+  COMPLIMENTS.forEach(c=>{ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; });
+  const fragSorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const byRel = {};
+  COMPLIMENTS.forEach(c=>{ byRel[c.relation]=(byRel[c.relation]||0)+1; });
+  const relSorted = Object.entries(byRel).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const strangerPct = Math.round((COMPLIMENTS.filter(c=>c.relation==='Stranger').length/total)*100)||0;
+  const perMonth = (total/12).toFixed(1);
+  document.getElementById('anaStats').innerHTML = `
+    <div class="sbox"><div class="snum">${total}</div><div class="slbl">Total Compliments</div></div>
+    <div class="sbox"><div class="snum">${Object.keys(byFrag).length}</div><div class="slbl">Fragrances</div></div>
+    <div class="sbox"><div class="snum">${perMonth}</div><div class="slbl">Per Month Avg</div></div>
+    <div class="sbox"><div class="snum">${strangerPct}%</div><div class="slbl">From Strangers</div></div>`;
+  const maxFrag = fragSorted[0]?fragSorted[0][1]:1;
+  bldChart('bc1', fragSorted.map(([l,v])=>({l:l.split(' ')[0],v,h:Math.round((v/maxFrag)*100)})));
+  document.getElementById('bc1-legend').textContent = fragSorted.map(([l])=>l).join(' · ');
+  const maxRel = relSorted[0]?relSorted[0][1]:1;
+  bldChart('bc2', relSorted.map(([l,v])=>({l:l==='Colleague / Client'?'Colleagues':l,v,h:Math.round((v/maxRel)*100)})));
+  // Dynamic insights
+  const insights = [];
+  if(fragSorted[0]) insights.push({t:`${fragSorted[0][0]} is your top performer`,b:`${fragSorted[0][1]} compliments — ${Math.round((fragSorted[0][1]/total)*100)}% of total. ${strangerPct>50?'Predominantly from strangers — the strongest unprompted signal.':''}`});
+  const layered = COMPLIMENTS.filter(c=>c.secondaryFragId);
+  if(layered.length) insights.push({t:'Layering generates response',b:`${layered.length} of your ${total} compliments were while wearing two fragrances together.`});
+  const locs = {}; COMPLIMENTS.forEach(c=>{ if(c.location){const city=c.location.split(',').pop().trim();locs[city]=(locs[city]||0)+1;}});
+  const topCity=Object.entries(locs).sort((a,b)=>b[1]-a[1])[0];
+  if(topCity) insights.push({t:`${topCity[0]} is your best city`,b:`${topCity[1]} of ${total} compliments in ${topCity[0]}.`});
+  document.getElementById('insightsList').innerHTML = insights.map((ins,i)=>`<div class="ins"${i===insights.length-1?' style="border-bottom:none"':''}><div class="ins-t">${ins.t}</div><div class="ins-b">${ins.b}</div></div>`).join('');
+  renderNotesIntel();
+}
+
+function bldChart(id,data){
+  const el=document.getElementById(id);if(!el)return;
+  const max=Math.max(...data.map(d=>d.h),1);
+  el.innerHTML=data.map(d=>`<div class="bw"><div class="bval">${d.v}</div><div class="bar" style="height:${Math.max(d.h,2)}px" title="${d.l}: ${d.v}"></div><div class="bl">${d.l}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER — FRIEND
+// ═══════════════════════════════════════════════════════
+
+function renderFriend(){
+  bldChart('bc-f',[{l:'B.Opium',v:6,h:100},{l:'BR540',v:5,h:83},{l:'Libre',v:4,h:67},{l:'R.Musk',v:3,h:50},{l:'G.Girl',v:2,h:33}]);
+  renderInCommon();
+}
+
+function renderInCommon(){
+  const myNames = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED').map(f=>f.name.toLowerCase());
+  const sylviaOwned = ['Black Opium EDP','Baccarat Rouge 540','Libre EDP','Roses Musk','Good Girl'];
+  const shared = sylviaOwned.filter(n=>myNames.includes(n.toLowerCase()));
+  const ic = document.getElementById('inCommon');
+  if(!shared.length){ ic.innerHTML=''; return; }
+  ic.innerHTML = `<div class="ic-label">In common — ${shared.length} fragrance${shared.length>1?'s':''} you both own</div>` +
+    shared.map(name=>{
+      const mine = FRAGRANCES.find(f=>f.name.toLowerCase()===name.toLowerCase());
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b2);">
+        <div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);">${name}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);">You: ${starsStr(mine?.personalRating)} · Sylvia: ★★★★★</div>
+      </div>`;
+    }).join('');
+  // Wishlist in common
+  const myWish = FRAGRANCES.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL').map(f=>f.name.toLowerCase());
+  const sylviaWish = ['Baccarat Rouge 540 EDP','Santal 33'];
+  const wishShared = sylviaWish.filter(n=>myWish.includes(n.toLowerCase()));
+  const wic = document.getElementById('wishInCommon');
+  if(wishShared.length){
+    wic.innerHTML = `<div class="in-common"><div class="ic-label">Wishlist in common — ${wishShared.length} item${wishShared.length>1?'s':''} you both want</div>`+
+      wishShared.map(n=>`<div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);padding:6px 0;">${n}</div>`).join('')+'</div>';
+  }
+}
+
+document.getElementById('friendTabs').addEventListener('click',e=>{
+  const tab=e.target.closest('.ftab');if(!tab)return;
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.fpanel').forEach(p=>p.classList.remove('on'));
+  tab.classList.add('on');
+  const panel=document.getElementById(tab.dataset.panel);
+  if(panel){ panel.classList.add('on'); if(tab.dataset.panel==='ft-ana') bldChart('bc-f',[{l:'B.Opium',v:6,h:100},{l:'BR540',v:5,h:83},{l:'Libre',v:4,h:67},{l:'R.Musk',v:3,h:50},{l:'G.Girl',v:2,h:33}]);}
+});
+
+// ═══════════════════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════════════════
+
+function openDetail(fragId){
+  const f = FRAGRANCES.find(x=>x.id===fragId);
+  if(!f)return;
+  currentDetailId = fragId;
+  document.getElementById('d-house').textContent = f.house.toUpperCase();
+  document.getElementById('d-name').textContent = f.name;
+  document.getElementById('d-status').textContent = STATUS_LABELS[f.status] + (f.sizes.length?' · '+f.sizes.join(', '):'') + (f.personalRating?' · '+starsStr(f.personalRating):'') + (f.statusRating?' · '+f.statusRating:'');
+  document.getElementById('d-comm').textContent = f.communityRating ? f.communityRating+' / 5.0' : '—';
+  document.getElementById('d-price').textContent = f.avgPrice||'—';
+  document.getElementById('d-long').textContent = f.communityLong||'—';
+  document.getElementById('d-sill').textContent = f.communitySill||'—';
+  document.getElementById('d-notes').textContent = f.notes;
+  document.getElementById('d-mylong').textContent = f.personalLong||'—';
+  document.getElementById('d-mysill').textContent = f.personalSill||'—';
+  document.getElementById('d-where').textContent = f.whereBought||'—';
+  document.getElementById('d-added').textContent = f.purchaseDate||'—';
+  document.getElementById('d-notebox').textContent = f.personalNotes||'No personal notes yet.';
+  document.getElementById('d-compct').textContent = getCompCount(fragId);
+  document.getElementById('d-compdist').textContent = getCompDist(fragId);
+  // Dupe section
+  const dupeS = document.getElementById('d-dupe-sec');
+  if(f.isDupe && f.dupeFor){ dupeS.style.display='block'; document.getElementById('d-dupe').textContent='Dupe for: '+f.dupeFor; }
+  else { dupeS.style.display='none'; }
+  // Status change strip
+  document.getElementById('statusStrip').classList.remove('show');
+  hideRemoveConfirm();
+  document.getElementById('detailP').classList.add('on');
+}
+
+function closeDetail(){ document.getElementById('detailP').classList.remove('on'); currentDetailId=null; }
+
+document.addEventListener('click',e=>{
+  const p=document.getElementById('detailP');
+  if(!p.classList.contains('on'))return;
+  if(p.contains(e.target))return;
+  if(e.target.closest('.tbl tr')||e.target.closest('.ccard')||e.target.closest('.dashPerformers div[onclick]'))return;
+  closeDetail();
+});
+
+function toggleStatusStrip(){
+  const strip = document.getElementById('statusStrip');
+  if(strip.classList.contains('show')){ strip.classList.remove('show'); return; }
+  const statuses = ['CURRENT','PREVIOUSLY_OWNED','WANT_TO_BUY','WANT_TO_SMELL','DONT_LIKE'];
+  strip.innerHTML = statuses.map(s=>`<div class="opt${currentDetailId&&FRAGRANCES.find(f=>f.id===currentDetailId)?.status===s?' on':''}" onclick="changeStatus('${s}')">${STATUS_LABELS[s]}</div>`).join('');
+  strip.classList.add('show');
+}
+
+function changeStatus(newStatus){
+  const f = FRAGRANCES.find(x=>x.id===currentDetailId);
+  if(!f)return;
+  f.status = newStatus;
+  document.getElementById('statusStrip').classList.remove('show');
+  openDetail(currentDetailId); // re-render panel
+  renderCurrentPage();
+  updateCounts();
+  toast(`Moved to ${STATUS_LABELS[newStatus]}`);
+}
+
+function viewFragCompliments(){
+  const f = FRAGRANCES.find(x=>x.id===currentDetailId);
+  if(!f)return;
+  closeDetail();
+  goPage('compliments');
+}
+
+function logComplimentForFrag(){
+  const id = currentDetailId;
+  closeDetail();
+  openAddComp(id);
+}
+
+function editCurrentFrag(){ if(currentDetailId) openEditFrag(currentDetailId); }
+
+function showRemoveConfirm(){
+  const f = FRAGRANCES.find(x=>x.id===currentDetailId);
+  if(!f)return;
+  document.getElementById('removeFragName').textContent = f.name;
+  document.getElementById('removeConfirm').style.display='block';
+}
+function hideRemoveConfirm(){ document.getElementById('removeConfirm').style.display='none'; }
+function confirmRemove(){
+  FRAGRANCES = FRAGRANCES.filter(f=>f.id!==currentDetailId);
+  closeDetail();
+  renderCurrentPage();
+  updateCounts();
+  toast('Removed from collection');
+}
+
+function renderCurrentPage(){
+  const active = document.querySelector('.page.on');
+  if(!active)return;
+  const id = active.id.replace('page-','');
+  if(id==='dashboard') renderDashboard();
+  if(id==='collection') renderCollection(document.querySelector('#collFbar .fc.on')?.dataset.filter||'all');
+  if(id==='wishlist') renderWishlist(document.querySelector('#wishFbar .fc.on')?.dataset.filter||'all');
+  if(id==='compliments') renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all');
+  if(id==='analytics') renderAnalytics();
+}
+
+// ═══════════════════════════════════════════════════════
+// GLOBAL SEARCH
+// ═══════════════════════════════════════════════════════
+
+function gSearch(v){
+  const el=document.getElementById('gDrop');
+  if(v.length<2){el.style.display='none';return;}
+  const hits=FRAGRANCES.filter(f=>f.name.toLowerCase().includes(v.toLowerCase())||f.house.toLowerCase().includes(v.toLowerCase())).slice(0,6);
+  const dbHits=FRAG_DB.filter(f=>f.n.toLowerCase().includes(v.toLowerCase())).filter(d=>!FRAGRANCES.find(f=>f.name.toLowerCase()===d.n.toLowerCase())).slice(0,3);
+  if(!hits.length&&!dbHits.length){el.innerHTML='<div class="sdi"><div class="sdi-n" style="color:var(--ink3)">No results</div></div>';el.style.display='block';return;}
+  el.innerHTML=
+    hits.map(f=>`<div class="sdi" onmousedown="pickGS('${f.id}')"><div class="sdi-n">${f.name}</div><div class="sdi-h">${f.house} · ${STATUS_LABELS[f.status]}</div></div>`).join('')+
+    (dbHits.length?'<div style="padding:5px 14px;font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;border-top:1px solid var(--b1);">Not in collection</div>':'')+
+    dbHits.map(f=>`<div class="sdi" onmousedown="openAddFromSearch('${f.n.replace(/'/g,"\\'")}')"><div class="sdi-n">${f.n}</div><div class="sdi-h">${f.h} · Add to collection?</div></div>`).join('');
+  el.style.display='block';
+}
+function closeGS(){document.getElementById('gDrop').style.display='none';}
+function pickGS(fragId){ closeGS(); document.getElementById('gSrch').value=''; openDetail(fragId); }
+function openAddFromSearch(name){ closeGS(); document.getElementById('gSrch').value=''; openAddFrag('CURRENT',name); }
+
+// ═══════════════════════════════════════════════════════
+// ADD / EDIT FRAGRANCE MODAL
+// ═══════════════════════════════════════════════════════
+
+let _afStep=1;
+
+function openAddFrag(presetStatus, prefillName){
+  editingFragId = null;
+  prefetchedData = null;
+  resetAFModal();
+  document.getElementById('afTitle').textContent = 'Add Fragrance';
+  document.getElementById('afSave').textContent = 'Save Fragrance';
+  // Pre-select status
+  const sel = document.getElementById('afStatus');
+  for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===presetStatus){ sel.selectedIndex=i; break; }
+  if(prefillName){ document.getElementById('afSrch').value=prefillName; afSearchAndSelect(prefillName); }
+  openModal('addFragM');
+}
+
+function openEditFrag(fragId, forceStatus){
+  editingFragId = fragId;
+  const f = FRAGRANCES.find(x=>x.id===fragId);
+  if(!f)return;
+  resetAFModal();
+  document.getElementById('afTitle').textContent = 'Edit Fragrance';
+  document.getElementById('afSave').textContent = 'Update Fragrance';
+  // Pre-fill Step 1
+  document.getElementById('afSrch').value = f.name;
+  document.getElementById('mpN').textContent = f.name;
+  document.getElementById('mpH').textContent = f.house.toUpperCase();
+  document.getElementById('mpR').textContent = f.communityRating ? f.communityRating+' / 5' : '—';
+  document.getElementById('mpL').textContent = f.communityLong||'—';
+  document.getElementById('mpP').textContent = f.avgPrice||'—';
+  document.getElementById('mpNotes').textContent = f.notes;
+  document.getElementById('afPrev').style.display='block';
+  const statusVal = forceStatus||f.status;
+  const sel = document.getElementById('afStatus');
+  for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===statusVal){ sel.selectedIndex=i; break; }
+  // Pre-fill Step 2
+  prefetchedData = {sizes:f.sizes,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,personalSill:f.personalSill,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes};
+  // Auto-advance to step 2 for edits
+  afGoStep(2, true);
+  openModal('addFragM');
+}
+
+function resetAFModal(){
+  _afStep=1;
+  document.getElementById('af-s1').style.display='block';
+  document.getElementById('af-s2').style.display='none';
+  document.getElementById('afNext').style.display='inline-flex';
+  document.getElementById('afSave').style.display='none';
+  document.getElementById('afBack').style.display='none';
+  document.getElementById('af-lbl').textContent='Step 1 of 2 — Search & identify';
+  document.getElementById('afSrch').value='';
+  document.getElementById('afSrchErr').style.display='none';
+  document.getElementById('afPrev').style.display='none';
+  document.getElementById('afDrop').style.display='none';
+  updPips(1);
+  // Reset Step 2 to defaults
+  document.querySelectorAll('#sizeOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===2);});
+  document.querySelectorAll('#rOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===3);});
+  document.querySelectorAll('#sOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===1);});
+  document.getElementById('afLong').value='6–12h';
+  document.getElementById('afSill').value='Moderate';
+  document.getElementById('afWhere').value='';
+  document.getElementById('afMonth').value='';
+  document.getElementById('afYear').value='';
+  document.getElementById('dY').classList.remove('on');
+  document.getElementById('dN').classList.add('on');
+  document.getElementById('dupeFor').style.display='none';
+  document.getElementById('dupeFor').value='';
+  document.getElementById('afNotes').value='';
+}
+
+function afGoStep(n, skipValidation){
+  if(n===2){
+    if(!skipValidation && !document.getElementById('afSrch').value.trim()){
+      document.getElementById('afSrchErr').style.display='block'; return;
+    }
+    document.getElementById('afSrchErr').style.display='none';
+    document.getElementById('af-s1').style.display='none';
+    document.getElementById('af-s2').style.display='block';
+    document.getElementById('afNext').style.display='none';
+    document.getElementById('afSave').style.display='inline-flex';
+    document.getElementById('afBack').style.display='inline-flex';
+    document.getElementById('af-lbl').textContent='Step 2 of 2 — Personal details';
+    updPips(2); _afStep=2;
+    // If editing, pre-fill step 2 fields
+    if(prefetchedData){
+      const d = prefetchedData;
+      if(d.sizes){ document.querySelectorAll('#sizeOpts .opt').forEach(o=>o.classList.toggle('on',d.sizes.includes(o.textContent.trim()))); }
+      if(d.personalRating){ document.querySelectorAll('#rOpts .opt').forEach(o=>o.classList.toggle('on',parseInt(o.dataset.v)===d.personalRating)); }
+      if(d.statusRating){ document.querySelectorAll('#sOpts .opt').forEach(o=>o.classList.toggle('on',o.dataset.v===d.statusRating)); }
+      if(d.personalLong) document.getElementById('afLong').value=d.personalLong;
+      if(d.personalSill) document.getElementById('afSill').value=d.personalSill;
+      if(d.whereBought) document.getElementById('afWhere').value=d.whereBought;
+      if(d.purchaseDate){ const parts=d.purchaseDate.split(' '); if(parts[0]) document.getElementById('afMonth').value=parts[0]; if(parts[1]) document.getElementById('afYear').value=parts[1]; }
+      if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeFor').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
+      if(d.personalNotes) document.getElementById('afNotes').value=d.personalNotes;
+    }
+  } else {
+    document.getElementById('af-s1').style.display='block';
+    document.getElementById('af-s2').style.display='none';
+    document.getElementById('afNext').style.display='inline-flex';
+    document.getElementById('afSave').style.display='none';
+    document.getElementById('afBack').style.display='none';
+    document.getElementById('af-lbl').textContent='Step 1 of 2 — Search & identify';
+    updPips(1); _afStep=1;
+  }
+}
+
+function updPips(s){
+  document.querySelectorAll('#afPips .pip').forEach((p,i)=>{
+    p.classList.remove('active','done');
+    if(i<s-1)p.classList.add('done');
+    else if(i===s-1)p.classList.add('active');
+  });
+}
+
+function saveFragrance(){
+  const name = document.getElementById('afSrch').value.trim();
+  if(!name){ toast('No fragrance selected'); return; }
+  const sizes = [...document.querySelectorAll('#sizeOpts .opt.on')].map(o=>o.textContent.trim());
+  const ratingEl = document.querySelector('#rOpts .opt.on');
+  const sratingEl = document.querySelector('#sOpts .opt.on');
+  const month = document.getElementById('afMonth').value;
+  const year = document.getElementById('afYear').value;
+  const isDupe = document.getElementById('dY').classList.contains('on');
+  const data = {
+    name, status: document.getElementById('afStatus').value,
+    sizes, personalRating: ratingEl?parseInt(ratingEl.dataset.v):null,
+    statusRating: sratingEl?sratingEl.dataset.v:null,
+    personalLong: document.getElementById('afLong').value||null,
+    personalSill: document.getElementById('afSill').value||null,
+    whereBought: document.getElementById('afWhere').value||null,
+    purchaseDate: (month&&year)?month+' '+year:null,
+    isDupe, dupeFor: isDupe?document.getElementById('dupeFor').value:'',
+    personalNotes: document.getElementById('afNotes').value,
+  };
+  if(editingFragId){
+    const idx = FRAGRANCES.findIndex(f=>f.id===editingFragId);
+    if(idx>=0){ FRAGRANCES[idx]={...FRAGRANCES[idx],...data}; toast('Fragrance updated'); }
+  } else {
+    // Find metadata from DB
+    const db = FRAG_DB.find(d=>d.n.toLowerCase()===name.toLowerCase());
+    const newFrag = { id:'f'+nextId++, communityRating:db?db.r:null, communityLong:db?db.l:null, communitySill:db?db.s:null, avgPrice:db?db.p:null, notes:db?db.notes.replace(/,/g,'·'):'', house:db?db.h:'', ...data };
+    FRAGRANCES.push(newFrag);
+    toast(name+' added to '+STATUS_LABELS[data.status]);
+  }
+  closeModal('addFragM');
+  renderCurrentPage();
+  updateCounts();
+  prefetchedData = null;
+  editingFragId = null;
+}
+
+function afSearch(v){
+  const el=document.getElementById('afDrop');
+  if(v.length<2){el.style.display='none';document.getElementById('afPrev').style.display='none';return;}
+  const hits=FRAG_DB.filter(f=>f.n.toLowerCase().includes(v.toLowerCase())||f.h.toLowerCase().includes(v.toLowerCase())).slice(0,7);
+  if(!hits.length){el.innerHTML='<div class="aci"><div class="aci-n" style="color:var(--ink3)">No match — you can still enter manually</div></div>';el.style.display='block';return;}
+  el.innerHTML=hits.map(f=>`<div class="aci" onmousedown="pickAF(${JSON.stringify(f.n)})"><div class="aci-n">${f.n}</div><div class="aci-h">${f.h}</div></div>`).join('');
+  el.style.display='block';
+}
+
+function afSearchAndSelect(name){ const f=FRAG_DB.find(x=>x.n.toLowerCase()===name.toLowerCase()); if(f) pickAF(f.n); }
+
+function pickAF(name){
+  const f=FRAG_DB.find(x=>x.n===name);
+  document.getElementById('afSrch').value=name;
+  document.getElementById('afDrop').style.display='none';
+  document.getElementById('afSrchErr').style.display='none';
+  if(f){
+    document.getElementById('mpN').textContent=f.n;
+    document.getElementById('mpH').textContent=f.h.toUpperCase();
+    document.getElementById('mpR').textContent=f.r+' / 5';
+    document.getElementById('mpL').textContent=f.l;
+    document.getElementById('mpP').textContent=f.p;
+    document.getElementById('mpNotes').textContent=f.notes;
+  }
+  document.getElementById('afPrev').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════
+// ADD COMPLIMENT MODAL
+// ═══════════════════════════════════════════════════════
+
+function openAddComp(fragId){
+  // Populate fragrance dropdown with CURRENT + PREVIOUSLY_OWNED
+  const eligible = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
+  const sel = document.getElementById('compFrag');
+  sel.innerHTML='<option value="">— Select from collection —</option>';
+  eligible.forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=f.name+(f.status==='PREVIOUSLY_OWNED'?' (prev. owned)':''); sel.appendChild(o); });
+  if(fragId){ for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===fragId){ sel.selectedIndex=i; break; } }
+  // Populate secondary dropdown
+  updateCompFrag2();
+  sel.addEventListener('change', updateCompFrag2);
+  // Reset errors
+  document.getElementById('compFragErr').style.display='none';
+  document.getElementById('compRelErr').style.display='none';
+  document.getElementById('compDateErr').style.display='none';
+  document.getElementById('compRelation').value='';
+  document.getElementById('compGender').value='';
+  document.getElementById('compLoc').value='';
+  document.getElementById('compNotes').value='';
+  document.getElementById('compMonth').value='';
+  document.getElementById('compYear').value='2026';
+  openModal('addCompM');
+}
+
+function updateCompFrag2(){
+  const primaryId = document.getElementById('compFrag').value;
+  const sel2 = document.getElementById('compFrag2');
+  const eligible = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
+  sel2.innerHTML='<option value="">None</option>';
+  eligible.filter(f=>f.id!==primaryId).forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=f.name; sel2.appendChild(o); });
+}
+
+function saveCompliment(){
+  const fragId = document.getElementById('compFrag').value;
+  const relation = document.getElementById('compRelation').value;
+  const month = document.getElementById('compMonth').value;
+  const year = document.getElementById('compYear').value;
+  let valid = true;
+  if(!fragId){ document.getElementById('compFragErr').style.display='block'; valid=false; } else document.getElementById('compFragErr').style.display='none';
+  if(!relation){ document.getElementById('compRelErr').style.display='block'; valid=false; } else document.getElementById('compRelErr').style.display='none';
+  if(!month||!year){ document.getElementById('compDateErr').style.display='block'; valid=false; } else document.getElementById('compDateErr').style.display='none';
+  if(!valid)return;
+  const f = FRAGRANCES.find(x=>x.id===fragId);
+  const f2Id = document.getElementById('compFrag2').value;
+  const f2 = f2Id ? FRAGRANCES.find(x=>x.id===f2Id) : null;
+  COMPLIMENTS.unshift({
+    id: genCompId(),
+    primaryFragId: fragId,
+    primaryFrag: f.name,
+    secondaryFragId: f2?f2Id:null,
+    secondaryFrag: f2?f2.name:null,
+    gender: document.getElementById('compGender').value||null,
+    relation,
+    month, year,
+    location: document.getElementById('compLoc').value||null,
+    notes: document.getElementById('compNotes').value||null,
+  });
+  closeModal('addCompM');
+  renderCurrentPage();
+  updateCounts();
+  toast('Compliment logged');
+}
+
+// ═══════════════════════════════════════════════════════
+// IMPORT FLOWS
+// ═══════════════════════════════════════════════════════
+
+function importToCollection(data){
+  document.getElementById('linkRes').style.display='none';
+  openAddFrag('CURRENT');
+  // pre-fill
+  document.getElementById('afSrch').value=data.name;
+  document.getElementById('mpN').textContent=data.name;
+  document.getElementById('mpH').textContent=data.house.toUpperCase();
+  document.getElementById('mpR').textContent=data.communityRating?' '+data.communityRating+' / 5':'—';
+  document.getElementById('mpL').textContent=data.communityLong||'—';
+  document.getElementById('mpP').textContent=data.avgPrice||'—';
+  document.getElementById('mpNotes').textContent=data.notes||'';
+  document.getElementById('afPrev').style.display='block';
+  // Store as pending prefetch
+  prefetchedData = {communityRating:data.communityRating,communityLong:data.communityLong,communitySill:data.communitySill,avgPrice:data.avgPrice,notes:data.notes,house:data.house,sizes:[],isDupe:false,dupeFor:'',personalNotes:''};
+}
+
+function importToWishlist(data){
+  const exists = FRAGRANCES.find(f=>f.name.toLowerCase()===data.name.toLowerCase());
+  if(exists){ toast(data.name+' is already in your collection'); return; }
+  const newFrag = {
+    id:'f'+nextId++, name:data.name, house:data.house||'',
+    status:'WANT_TO_BUY', sizes:[], personalRating:null, statusRating:null,
+    personalLong:null, personalSill:null, communityRating:data.communityRating||null,
+    communityLong:null, communitySill:null, avgPrice:data.avgPrice||null,
+    notes:data.notes||'', whereBought:null, purchaseDate:null, isDupe:false, dupeFor:'', personalNotes:'',
+  };
+  FRAGRANCES.push(newFrag);
+  document.getElementById('linkRes').style.display='none';
+  renderCurrentPage(); updateCounts();
+  toast(data.name+' added to Wishlist');
+}
+
+let importQueueData = [
+  {name:'Chanel No. 5 EDP',house:'Chanel',communityRating:'4.2',notes:'Ylang Ylang, Rose, Jasmine',isDup:false},
+  {name:'Bleu de Chanel EDP',house:'Chanel',communityRating:'4.4',notes:'Citrus, Ginger, Sandalwood',isDup:true},
+  {name:'Reflection Man',house:'Amouage',communityRating:'4.5',notes:'Neroli, Ylang Ylang, Sandalwood',isDup:false},
+];
+
+function renderImportQueue(){
+  const el=document.getElementById('importQueue');
+  if(!importQueueData.length){el.innerHTML='';return;}
+  el.innerHTML=`<div style="font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:10px;">Queue — ${importQueueData.length} to import</div>
+  <div class="iq">`+importQueueData.map((d,i)=>`
+    <div class="iq-row">
+      <input type="checkbox" class="iq-chk" id="iqchk${i}" checked>
+      <div style="flex:1;"><div class="iq-n">${d.name}</div><div class="iq-h">${d.house} · Comm ${d.communityRating}</div></div>
+      <span class="badge ${d.isDup?'b-dup':'b-new'}">${d.isDup?'Already owned':'New'}</span>
+    </div>`).join('')+'</div>';
+}
+
+function qSearch(v){
+  const el=document.getElementById('qDrop');
+  if(v.length<2){el.style.display='none';return;}
+  const hits=FRAG_DB.filter(f=>f.n.toLowerCase().includes(v.toLowerCase())).slice(0,6);
+  el.innerHTML=hits.map(f=>`<div class="aci" onmousedown="addToImportQueue(${JSON.stringify({name:f.n,house:f.h,communityRating:f.r,notes:f.notes})})"><div class="aci-n">${f.n}</div><div class="aci-h">${f.h}</div></div>`).join('');
+  el.style.display=hits.length?'block':'none';
+}
+
+function addToImportQueue(data){
+  document.getElementById('qSrch').value='';
+  document.getElementById('qDrop').style.display='none';
+  const dup = !!FRAGRANCES.find(f=>f.name.toLowerCase()===data.name.toLowerCase());
+  importQueueData.push({...data,isDup:dup});
+  renderImportQueue();
+  toast(data.name+(dup?' already in collection — flagged':''+' added to queue'));
+}
+
+function confirmBulkImport(){
+  let added=0,skipped=0;
+  importQueueData.forEach((d,i)=>{
+    const chk=document.getElementById('iqchk'+i);
+    if(chk&&chk.checked&&!d.isDup){
+      FRAGRANCES.push({id:'f'+nextId++,name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:d.communityRating,communityLong:null,communitySill:null,avgPrice:null,notes:d.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
+      added++;
+    } else skipped++;
+  });
+  importQueueData=[];
+  renderImportQueue();
+  updateCounts();
+  toast(`${added} imported, ${skipped} skipped`);
+  if(added>0) goPage('collection');
+}
+
+function simLink(){
+  const v=document.getElementById('linkIn').value.trim();
+  if(!v){toast('Paste a Fragrantica or retailer URL first');return;}
+  toast('Fetching metadata...');
+  setTimeout(()=>{document.getElementById('linkRes').style.display='block';toast('Review and confirm before saving');},800);
+}
+
+function simScan(){
+  document.getElementById('camView').style.display='none';
+  setTimeout(()=>{document.getElementById('camRes').style.display='block';toast('Bottle identified');},1000);
+}
+function resetScan(){
+  document.getElementById('camRes').style.display='none';
+  document.getElementById('camView').style.display='flex';
+}
+
+function selIM(m){
+  ['link','cam','csv'].forEach(id=>{
+    document.getElementById('im-'+id).classList.toggle('on',id===m);
+    document.getElementById('ip-'+id).classList.toggle('on',id===m);
+  });
+}
+
+document.getElementById('imTabs').addEventListener('click',e=>{
+  const imt=e.target.closest('.imt');if(!imt)return;
+  document.querySelectorAll('#imTabs .imt').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.ipanel').forEach(p=>p.classList.remove('on'));
+  imt.classList.add('on');
+  const panel=document.getElementById(imt.dataset.panel);
+  if(panel)panel.classList.add('on');
+});
+
+// ═══════════════════════════════════════════════════════
+// MODAL + FORM HELPERS
+// ═══════════════════════════════════════════════════════
+
+function openModal(id){document.getElementById(id).classList.add('on');}
+function closeModal(id){document.getElementById(id).classList.remove('on');editingFragId=null;prefetchedData=null;}
+function togOpt(el){el.classList.toggle('on');}
+function selOpt(el,id){document.querySelectorAll('#'+id+' .opt').forEach(o=>o.classList.remove('on'));el.classList.add('on');}
+function togDupe(yes){
+  document.getElementById('dY').classList.toggle('on',yes);
+  document.getElementById('dN').classList.toggle('on',!yes);
+  document.getElementById('dupeFor').style.display=yes?'block':'none';
+}
+
+// View toggle
+function setView(v){
+  document.getElementById('vTable').style.display=v==='table'?'block':'none';
+  document.getElementById('vGrid').style.display=v==='grid'?'block':'none';
+  document.getElementById('btnTable').style.color=v==='table'?'var(--blue)':'';
+  document.getElementById('btnGrid').style.color=v==='grid'?'var(--blue)':'';
+}
+
+// Export
+function exportData(){
+  const rows=[['Name','House','Status','Personal Rating','Compliments'],...FRAGRANCES.map(f=>[f.name,f.house,STATUS_LABELS[f.status],f.personalRating||'',getCompCount(f.id)])];
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='tesknota-export.csv';a.click();
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+
+function toast(msg){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  c.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('on')));
+  setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},2600);
+}
+
+
+// ═══════════════════════════════════════════════════════
+// NOTES INTELLIGENCE
+// ═══════════════════════════════════════════════════════
+
+function computeNotesIntel(){
+  const noteMap = {};
+  FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED').forEach(f=>{
+    const notes = f.notes.split(/[·,]/).map(n=>n.trim()).filter(n=>n.length>1);
+    const compCount = getCompCount(f.id);
+    notes.forEach(note=>{
+      if(!noteMap[note]) noteMap[note]={name:note,frags:0,totalComps:0};
+      noteMap[note].frags++;
+      noteMap[note].totalComps+=compCount;
+    });
+  });
+  return Object.values(noteMap).sort((a,b)=>b.totalComps-a.totalComps);
+}
+
+function renderNotesIntel(){
+  const notes = computeNotesIntel().slice(0,12);
+  const maxComps = notes[0]?notes[0].totalComps:1;
+  const el = document.getElementById('notesIntel');
+  if(!el)return;
+  el.innerHTML = notes.map(n=>`
+    <div class="note-card" onclick="filterCollByNote('${n.name.replace(/'/g,"\\'")}')">
+      <div class="note-name">${n.name}</div>
+      <div class="note-ct">${n.totalComps} compliment${n.totalComps!==1?'s':''}</div>
+      <div class="note-comp">${n.frags} fragrance${n.frags!==1?'s':''}</div>
+      <div class="note-bar-wrap"><div class="note-bar-fill" style="width:${Math.round((n.totalComps/maxComps)*100)}%"></div></div>
+    </div>`).join('');
+  const faveEl = document.getElementById('faveNotes');
+  if(!faveEl)return;
+  const byFrag = {};
+  FRAGRANCES.filter(f=>f.status==='CURRENT').forEach(f=>{
+    f.notes.split(/[·,]/).map(n=>n.trim()).filter(n=>n.length>1).forEach(n=>{
+      byFrag[n]=(byFrag[n]||0)+1;
+    });
+  });
+  const sorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,16);
+  faveEl.innerHTML = sorted.map(([name,ct])=>`<span class="fave-note-chip" onclick="filterCollByNote('${name.replace(/'/g,"\\'")}')"><span>${name}</span><span class="chip-ct">${ct}</span></span>`).join('');
+}
+
+function filterCollByNote(note){
+  goPage('collection');
+  document.querySelectorAll('#collBody tr').forEach(row=>{
+    const nc = row.querySelector('.tscript');
+    if(!nc){ row.style.display=''; return; }
+    row.style.display = nc.textContent.toLowerCase().includes(note.toLowerCase()) ? '' : 'none';
+  });
+  document.querySelectorAll('#collFbar .fc').forEach(c=>c.classList.remove('on'));
+  toast('Showing fragrances with: '+note);
+}
+
+// ═══════════════════════════════════════════════════════
+// COMPARE OVERLAY
+// ═══════════════════════════════════════════════════════
+
+const SYLVIA_COMPLIMENTS = [
+  {fragName:'Baccarat Rouge 540',relation:'Colleague / Client',gender:'Male',month:'Mar',year:'2026',location:'Office, Denver',notes:'"You always smell amazing."'},
+  {fragName:'Baccarat Rouge 540',relation:'Stranger',gender:'Female',month:'Jan',year:'2026',location:'Coffee shop',notes:'"What fragrance is that? Incredible."'},
+  {fragName:'Baccarat Rouge 540',relation:'Friend',gender:'Female',month:'Dec',year:'2025',location:'Dinner, NYC',notes:'"Still your best — what is it again?"'},
+  {fragName:'Black Opium EDP',relation:'Stranger',gender:'Female',month:'Mar',year:'2026',location:'Coffee shop, Denver',notes:'"This is such a good scent."'},
+  {fragName:'Black Opium EDP',relation:'Friend',gender:'Male',month:'Feb',year:'2026',location:'Dinner',notes:'"You smell like warm coffee and flowers."'},
+  {fragName:'Black Opium EDP',relation:'Colleague / Client',gender:'Female',month:'Jan',year:'2026',location:'Office',notes:'"So warm and cozy."'},
+  {fragName:'Libre EDP',relation:'Friend',gender:'Female',month:'Jan',year:'2026',location:'Restaurant',notes:'"Is that Libre? I\'ve been wanting to try it."'},
+  {fragName:'Roses Musk',relation:'Stranger',gender:'Male',month:'Jan',year:'2026',location:'Street, New York',notes:'"That is stunning — what\'s the name?"'},
+];
+
+function openCompare(fragName, myFragIdOrName){
+  const mine = FRAGRANCES.find(f=>f.id===myFragIdOrName||f.name===myFragIdOrName||f.name===fragName);
+  const myComps = mine ? COMPLIMENTS.filter(c=>c.primaryFragId===mine.id) : [];
+  const herComps = SYLVIA_COMPLIMENTS.filter(c=>c.fragName===fragName);
+  document.getElementById('compareTitle').textContent = fragName;
+  const myByRel={},herByRel={};
+  myComps.forEach(c=>{ myByRel[c.relation]=(myByRel[c.relation]||0)+1; });
+  herComps.forEach(c=>{ herByRel[c.relation]=(herByRel[c.relation]||0)+1; });
+  const allRels=[...new Set([...Object.keys(myByRel),...Object.keys(herByRel)])];
+  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const allEvents=[
+    ...myComps.map(c=>({...c,who:'you',sortKey:c.year+'-'+String(MONTHS.indexOf(c.month)).padStart(2,'0')})),
+    ...herComps.map(c=>({relation:c.relation,gender:c.gender,month:c.month,year:c.year,location:c.location,notes:c.notes,who:'sylvia',sortKey:c.year+'-'+String(MONTHS.indexOf(c.month)).padStart(2,'0')})),
+  ].sort((a,b)=>b.sortKey.localeCompare(a.sortKey));
+
+  document.getElementById('compareBody').innerHTML = `
+    <div class="compare-cols">
+      <div class="compare-col">
+        <div class="compare-col-head">You — Kiana</div>
+        <div class="compare-col-name">${mine?mine.name:fragName}</div>
+        <div class="cs"><div class="cs-label">Your rating</div><div class="cs-val">${starsStr(mine?mine.personalRating:null)}</div></div>
+        <div class="cs"><div class="cs-label">Your feel</div><div class="cs-val">${mine?mine.statusRating||'—':'—'}</div></div>
+        <div class="cs"><div class="cs-label">Total compliments</div><div class="cs-val">${myComps.length}</div></div>
+        <div class="cs"><div class="cs-label">From strangers</div><div class="cs-val">${myComps.filter(c=>c.relation==='Stranger').length}</div></div>
+        <div class="cs"><div class="cs-label">My longevity</div><div class="cs-val">${mine?mine.personalLong||'—':'—'}</div></div>
+        <div class="cs"><div class="cs-label">My sillage</div><div class="cs-val">${mine?mine.personalSill||'—':'—'}</div></div>
+        ${mine&&mine.personalNotes?`<div style="margin-top:10px;font-family:var(--script);font-size:13px;font-style:italic;color:var(--ink2);line-height:1.5;padding-top:10px;border-top:1px solid var(--b2);">${mine.personalNotes}</div>`:''}
+      </div>
+      <div class="compare-col">
+        <div class="compare-col-head">Sylvia</div>
+        <div class="compare-col-name">${fragName}</div>
+        <div class="cs"><div class="cs-label">Her rating</div><div class="cs-val">★★★★★</div></div>
+        <div class="cs"><div class="cs-label">Her feel</div><div class="cs-val">Obsessed</div></div>
+        <div class="cs"><div class="cs-label">Total compliments</div><div class="cs-val">${herComps.length}</div></div>
+        <div class="cs"><div class="cs-label">From strangers</div><div class="cs-val">${herComps.filter(c=>c.relation==='Stranger').length}</div></div>
+        <div class="cs"><div class="cs-label">Her longevity</div><div class="cs-val">—</div></div>
+        <div class="cs"><div class="cs-label">Her sillage</div><div class="cs-val">—</div></div>
+      </div>
+    </div>
+    ${allRels.length?`<div style="margin-bottom:20px;">
+      <div class="ct-head">Compliments by relation — side by side</div>
+      ${allRels.map(r=>`<div class="cs">
+        <div class="cs-label">${r}</div>
+        <div style="display:flex;gap:16px;">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--blue);">You: ${myByRel[r]||0}</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--warm);">Sylvia: ${herByRel[r]||0}</span>
+        </div>
+      </div>`).join('')}
+    </div>`:''}
+    ${allEvents.length?`<div>
+      <div class="ct-head">Combined compliment timeline</div>
+      ${allEvents.map(e=>`<div class="ct-row">
+        <div class="ct-date">${e.month} ${e.year}</div>
+        <div class="ct-tag ${e.who==='you'?'ct-you':'ct-her'}">${e.who==='you'?'You':'Sylvia'}</div>
+        <div style="flex:1;">
+          <div class="ct-meta">${e.relation||''}${e.gender?' · '+e.gender:''}${e.location?' · '+e.location:''}</div>
+          ${e.notes?`<div class="ct-note">${e.notes}</div>`:''}
+        </div>
+      </div>`).join('')}
+    </div>`:'<div style="padding:12px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliment data to compare yet.</div>'}
+  `;
+  document.getElementById('compareOverlay').classList.add('on');
+}
+
+function closeCompare(){ document.getElementById('compareOverlay').classList.remove('on'); }
+
+document.getElementById('compareOverlay').addEventListener('click', function(e){
+  if(e.target===this) closeCompare();
+});
+
+// ═══════════════════════════════════════════════════════
+// CHATBOT
+// ═══════════════════════════════════════════════════════
+
+const CHAT_BASE_SUGS = ['Log a compliment','Add a fragrance','Update a rating','My top notes','How many compliments?','Change a status'];
+let chatState = 'idle';
+let chatContext = {};
+
+function toggleChat(){
+  const p = document.getElementById('chatPanel');
+  p.classList.toggle('on');
+  if(p.classList.contains('on') && document.getElementById('chatMessages').children.length===0) initChat();
+}
+
+function initChat(){
+  chatState='idle'; chatContext={};
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML='';
+  botMsg('Hey — I\'m your quick entry assistant. I can log compliments, add fragrances, update ratings, or answer questions about your collection. What would you like to do?');
+  showSugs(CHAT_BASE_SUGS);
+}
+
+function botMsg(text){
+  const m=document.getElementById('chatMessages');
+  const d=document.createElement('div');
+  d.className='chat-msg bot';
+  d.innerHTML=`<div class="chat-av chat-bot-av">T</div><div class="chat-bubble">${text}</div>`;
+  m.appendChild(d); m.scrollTop=m.scrollHeight;
+}
+function userMsg(text){
+  const m=document.getElementById('chatMessages');
+  const d=document.createElement('div');
+  d.className='chat-msg user';
+  d.innerHTML=`<div class="chat-bubble">${text}</div><div class="chat-av chat-user-av">K</div>`;
+  m.appendChild(d); m.scrollTop=m.scrollHeight;
+}
+function showSugs(sugs){
+  document.getElementById('chatSugs').innerHTML=sugs.map(s=>`<button class="chat-sug" onclick="handleSug(${JSON.stringify(s)})">${s}</button>`).join('');
+}
+function handleSug(t){ document.getElementById('chatInput').value=t; sendChat(); }
+
+function sendChat(){
+  const inp=document.getElementById('chatInput');
+  const t=inp.value.trim(); if(!t)return;
+  userMsg(t); inp.value='';
+  document.getElementById('chatSugs').innerHTML='';
+  setTimeout(()=>handleChat(t.toLowerCase()), 320);
+}
+
+function handleChat(text){
+  // STATE: logging compliment — step 1: which fragrance
+  if(chatState==='comp_frag'){
+    const match=FRAGRANCES.find(f=>
+      text.includes(f.name.toLowerCase()) ||
+      f.name.toLowerCase().split(' ').some(w=>w.length>3&&text.includes(w))
+    );
+    if(match){
+      chatContext.fragId=match.id; chatContext.fragName=match.name;
+      chatState='comp_who';
+      botMsg(`Got it — <em>${match.name}</em>. Who gave you the compliment?`);
+      showSugs(['Stranger','Friend','Colleague','Significant Other','Family']);
+    } else {
+      botMsg('Which fragrance? Pick one or type the name:');
+      showSugs(FRAGRANCES.filter(f=>f.status==='CURRENT').slice(0,5).map(f=>f.name));
+    }
+    return;
+  }
+  // STATE: logging compliment — step 2: relation
+  if(chatState==='comp_who'){
+    const rels={'stranger':'Stranger','friend':'Friend','colleague':'Colleague / Client','client':'Colleague / Client','so':'Significant Other','significant other':'Significant Other','family':'Family','acquaintance':'Acquaintance','other':'Other'};
+    const rel=Object.entries(rels).find(([k])=>text.includes(k));
+    if(rel){
+      chatContext.relation=rel[1]; chatState='comp_notes';
+      botMsg(`${rel[1]} — noted. What did they say? (or say <em>skip</em> to save now)`);
+    } else {
+      botMsg('Who was it? Stranger, friend, colleague, SO, or family?');
+      showSugs(['Stranger','Friend','Colleague','SO','Family']);
+    }
+    return;
+  }
+  // STATE: logging compliment — step 3: notes then save
+  if(chatState==='comp_notes'){
+    const notes = (text==='skip'||text==='no'||text==='nope') ? null : `"${text}"`;
+    const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const now=new Date();
+    COMPLIMENTS.unshift({
+      id:genCompId(),
+      primaryFragId:chatContext.fragId,
+      primaryFrag:chatContext.fragName,
+      secondaryFragId:null,secondaryFrag:null,
+      gender:null,
+      relation:chatContext.relation,
+      month:MONTHS[now.getMonth()],
+      year:String(now.getFullYear()),
+      location:null,
+      notes,
+    });
+    renderCurrentPage(); updateCounts();
+    chatState='idle'; chatContext={};
+    botMsg(`Compliment logged for <em>${chatContext.fragName||'your fragrance'}</em>. Anything else?`);
+    showSugs(CHAT_BASE_SUGS);
+    return;
+  }
+  // STATE: adding fragrance — step 1: name
+  if(chatState==='add_frag_name'){
+    const db=FRAG_DB.find(f=>f.n.toLowerCase().includes(text)||text.includes(f.n.toLowerCase().split(' ')[0]));
+    if(db){
+      chatContext.fragData=db; chatState='add_frag_status';
+      botMsg(`Found <em>${db.n}</em> by ${db.h} — community rating ${db.r}/5.<br>Adding to which list?`);
+      showSugs(['Current Collection','Want to Buy','Want to Smell','Previously Owned']);
+    } else {
+      botMsg('I don\'t recognise that name. Try the full name, or use Add Fragrance in the topbar for manual entry.');
+      chatState='idle'; showSugs(CHAT_BASE_SUGS);
+    }
+    return;
+  }
+  // STATE: adding fragrance — step 2: status
+  if(chatState==='add_frag_status'){
+    const sm={'current':'CURRENT','want to buy':'WANT_TO_BUY','want to smell':'WANT_TO_SMELL','previously':'PREVIOUSLY_OWNED',"don't like":'DONT_LIKE'};
+    const match=Object.entries(sm).find(([k])=>text.includes(k));
+    const status=match?match[1]:'CURRENT';
+    const db=chatContext.fragData;
+    const exists=FRAGRANCES.find(f=>f.name.toLowerCase()===db.n.toLowerCase());
+    if(exists){
+      botMsg(`${db.n} is already in your collection as "${STATUS_LABELS[exists.status]}". Want to update its status?`);
+      showSugs(['Yes, update it','No thanks']);
+      chatContext.existingId=exists.id;
+      chatState='add_frag_update_existing';
+    } else {
+      FRAGRANCES.push({id:'f'+nextId++,name:db.n,house:db.h,status,sizes:status==='CURRENT'?['Full Bottle']:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:db.r,communityLong:db.l,communitySill:db.s,avgPrice:db.p,notes:db.notes,whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
+      renderCurrentPage(); updateCounts();
+      botMsg(`Done — <em>${db.n}</em> added to ${STATUS_LABELS[status]}. Tap it in your collection to add personal details.`);
+      chatState='idle'; chatContext={};
+      showSugs(CHAT_BASE_SUGS);
+    }
+    return;
+  }
+  if(chatState==='add_frag_update_existing'){
+    if(text.includes('yes')||text.includes('update')){
+      chatState='add_frag_status'; chatContext.fragData={n:FRAGRANCES.find(f=>f.id===chatContext.existingId).name,h:'',r:'',l:'',s:'',notes:'',p:''};
+      botMsg('Move it to which status?');
+      showSugs(['Current Collection','Want to Buy','Want to Smell','Previously Owned',"Don't Like"]);
+    } else {
+      chatState='idle'; chatContext={}; botMsg('No problem. Anything else?'); showSugs(CHAT_BASE_SUGS);
+    }
+    return;
+  }
+  // STATE: updating rating
+  if(chatState==='rate_frag'){
+    const match=FRAGRANCES.find(f=>text.includes(f.name.toLowerCase())||f.name.toLowerCase().split(' ').some(w=>w.length>3&&text.includes(w)));
+    if(match){
+      chatContext.fragId=match.id; chatContext.fragName=match.name;
+      chatState='rate_val';
+      botMsg(`Rating <em>${match.name}</em>. New star rating? (1–5)`);
+      showSugs(['1 star','2 stars','3 stars','4 stars','5 stars']);
+    } else {
+      botMsg('Which fragrance?');
+      showSugs(FRAGRANCES.filter(f=>f.status==='CURRENT').slice(0,5).map(f=>f.name));
+    }
+    return;
+  }
+  if(chatState==='rate_val'){
+    const num=parseInt(text.match(/\d/)?.[0]);
+    if(num>=1&&num<=5){
+      const f=FRAGRANCES.find(x=>x.id===chatContext.fragId);
+      if(f){ f.personalRating=num; renderCurrentPage(); }
+      botMsg(`<em>${chatContext.fragName}</em> updated to ${starsStr(num)}. Anything else?`);
+    } else { botMsg('Please give a number 1 to 5.'); return; }
+    chatState='idle'; chatContext={}; showSugs(CHAT_BASE_SUGS);
+    return;
+  }
+  // IDLE — intent detection
+  if(text.includes('compliment')||text.includes('got a compliment')||text.includes('someone said')||text.includes('log')){
+    chatState='comp_frag';
+    botMsg('Which fragrance were you wearing?');
+    showSugs(FRAGRANCES.filter(f=>f.status==='CURRENT').slice(0,5).map(f=>f.name));
+  } else if(text.includes('add')||text.includes('found')||text.includes('new fragrance')||text.includes('picked up')){
+    chatState='add_frag_name';
+    botMsg('What\'s the fragrance name?');
+  } else if(text.includes('rate')||text.includes('rating')||text.includes('update')||text.includes('stars')){
+    chatState='rate_frag';
+    botMsg('Which fragrance do you want to re-rate?');
+    showSugs(FRAGRANCES.filter(f=>f.status==='CURRENT').slice(0,5).map(f=>f.name));
+  } else if(text.includes('top note')||text.includes('favourite note')||text.includes('best note')||text.includes('notes')){
+    const intel=computeNotesIntel().slice(0,4);
+    botMsg('Your top compliment-correlated notes are:<br>'+intel.map(n=>`<strong>${n.name}</strong> (${n.totalComps} compliments across ${n.frags} fragrances)`).join('<br>'));
+    showSugs(CHAT_BASE_SUGS);
+  } else if(text.includes('how many')||text.includes('total')||text.includes('this month')||text.includes('count')){
+    const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const mon=MONTHS[new Date().getMonth()]; const yr=String(new Date().getFullYear());
+    const thisMonth=COMPLIMENTS.filter(c=>c.month===mon&&c.year===yr).length;
+    botMsg(`Total compliments: <strong>${COMPLIMENTS.length}</strong><br>${mon} ${yr} so far: <strong>${thisMonth}</strong><br>Collection size: <strong>${FRAGRANCES.filter(f=>f.status==='CURRENT').length}</strong> current`);
+    showSugs(CHAT_BASE_SUGS);
+  } else if(text.includes('status')||text.includes('move')||text.includes('bought')||text.includes('purchased')){
+    chatState='idle';
+    botMsg('Open the fragrance from your collection, tap the detail panel, and hit "Change status" in the header — or I can do it for you. Which fragrance?');
+    showSugs(FRAGRANCES.filter(f=>f.status==='CURRENT').slice(0,4).map(f=>f.name));
+  } else {
+    botMsg('I can help with: logging compliments, adding fragrances, updating ratings, or answering questions about your collection. What would you like?');
+    showSugs(CHAT_BASE_SUGS);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+// In production this is: await loadAllData() then checkIdentity()
+// In prototype: check localStorage, show identity screen or go straight to app
+(function init(){
+  if(checkIdentity()){
+    // Returning user — show app directly
+    document.getElementById('identityScreen').style.display='none';
+    document.querySelector('.shell').style.display='flex';
+    if(CURRENT_USER){
+      const who=document.querySelector('.sb-who');
+      if(who) who.innerHTML=`<b>${CURRENT_USER.name}</b>My account`;
+    }
+    renderDashboard();
+    renderImportQueue();
+    updateCounts();
+  } else {
+    // First visit — show identity picker, hide app shell
+    document.getElementById('identityScreen').style.display='flex';
+    document.querySelector('.shell').style.display='none';
+  }
+})();
+
+// ═══════════════════════════════════════════════════════
+// COMMAND PALETTE
+// Trigger: Cmd+K / floating button / palette-btn
+// Pattern: trigger → pick record → fields one at a time
+//          → confirm summary → save and close
+// Purely additive — no existing code modified
+// ═══════════════════════════════════════════════════════
+
+// ── State ─────────────────────────────────────────────
+var PAL = {
+  open: false,
+  flow: null,       // current flow definition
+  step: 0,          // current step index
+  answers: {},      // collected field values
+  editTarget: null, // fragrance or compliment being edited
+};
+
+// ── Flow definitions ──────────────────────────────────
+// Each flow is an array of steps.
+// Step types: 'pick', 'search', 'select', 'multiselect',
+//             'text', 'textarea', 'monthyear', 'confirm'
+
+function palFlows() {
+  var myFrags = FRAGRANCES.filter(function(f) {
+    return f.status === 'CURRENT' || f.status === 'PREVIOUSLY_OWNED';
+  });
+  var allMyFrags = FRAGRANCES.slice();
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var currentYear = String(new Date().getFullYear());
+  var years = [currentYear, String(new Date().getFullYear()-1), String(new Date().getFullYear()-2), String(new Date().getFullYear()-3)];
+
+  return {
+
+    // ── FRAGRANCE: ADD ──────────────────────────────
+    'frag-add': [
+      {
+        id: 'name',
+        type: 'search',
+        label: 'Which fragrance?',
+        hint: 'Search by name or house',
+        source: FRAG_DB,
+        searchKey: 'n',
+        houseKey: 'h',
+        allowFreetext: true,
+      },
+      {
+        id: 'status',
+        type: 'select',
+        label: 'What is its status?',
+        options: [
+          {v:'CURRENT',        l:'Current Collection'},
+          {v:'PREVIOUSLY_OWNED',l:'Previously Owned'},
+          {v:'WANT_TO_BUY',    l:'Want to Buy'},
+          {v:'WANT_TO_SMELL',  l:'Want to Smell'},
+          {v:'DONT_LIKE',      l:"Have Smelled — Don't Like"},
+        ],
+      },
+      {
+        id: 'personalRating',
+        type: 'select',
+        label: 'Your personal rating',
+        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
+        options: [
+          {v:'1',l:'1 star'},
+          {v:'2',l:'2 stars'},
+          {v:'3',l:'3 stars'},
+          {v:'4',l:'4 stars'},
+          {v:'5',l:'5 stars'},
+        ],
+      },
+      {
+        id: 'statusRating',
+        type: 'select',
+        label: 'How do you feel about it?',
+        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
+        options: [
+          {v:'Obsessed', l:'Obsessed'},
+          {v:'Love',     l:'Love'},
+          {v:'Like',     l:'Like'},
+          {v:'Just OK',  l:'Just OK'},
+          {v:"Don't Like",l:"Don't Like"},
+          {v:'WTF',      l:'WTF'},
+        ],
+      },
+      {
+        id: 'sizes',
+        type: 'multiselect',
+        label: 'Size owned',
+        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
+        options: ['Sample','Travel','Full Bottle','Large'],
+      },
+      {
+        id: 'personalLong',
+        type: 'select',
+        label: 'How long does it last on you?',
+        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
+        optional: true,
+        options: [
+          {v:'',      l:'Not sure'},
+          {v:'0–6h',  l:'0–6 hours'},
+          {v:'6–12h', l:'6–12 hours'},
+          {v:'12–24h',l:'12–24 hours'},
+          {v:'>24h',  l:'Over 24 hours'},
+        ],
+      },
+      {
+        id: 'personalSill',
+        type: 'select',
+        label: 'Sillage (how far it projects)',
+        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
+        optional: true,
+        options: [
+          {v:'',        l:'Not sure'},
+          {v:'Soft',    l:'Soft — close to skin'},
+          {v:'Moderate',l:'Moderate'},
+          {v:'Strong',  l:'Strong'},
+          {v:'Enormous',l:'Enormous'},
+        ],
+      },
+      {
+        id: 'whereBought',
+        type: 'select',
+        label: 'Where did you get it?',
+        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
+        optional: true,
+        options: [
+          {v:'',            l:'— Skip —'},
+          {v:'FragranceNet',l:'FragranceNet'},
+          {v:'Jomashop',    l:'Jomashop'},
+          {v:'Amazon',      l:'Amazon'},
+          {v:'Scentsplit',  l:'Scentsplit'},
+          {v:'Sephora',     l:'Sephora'},
+          {v:'Brand Direct',l:'Brand Direct'},
+          {v:'Other',       l:'Other'},
+        ],
+      },
+      {
+        id: 'purchaseDate',
+        type: 'monthyear',
+        label: 'When did you get it?',
+        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
+        optional: true,
+        months: months,
+        years: years,
+      },
+      {
+        id: 'isDupe',
+        type: 'select',
+        label: 'Is this a dupe for another fragrance?',
+        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
+        options: [
+          {v:'no', l:'No'},
+          {v:'yes',l:'Yes — it smells like another fragrance'},
+        ],
+      },
+      {
+        id: 'dupeFor',
+        type: 'text',
+        label: 'Which fragrance is it a dupe for?',
+        skipIf: function(a) { return a.isDupe !== 'yes'; },
+        placeholder: 'e.g. Baccarat Rouge 540',
+      },
+      {
+        id: 'personalNotes',
+        type: 'textarea',
+        label: 'Personal notes',
+        optional: true,
+        placeholder: 'How does it smell on your skin? When do you wear it?',
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Review and save',
+        saveLabel: 'Add to Collection',
+        onSave: function(answers) {
+          var db = FRAG_DB.find(function(d) { return d.n === answers.name; });
+          var newFrag = {
+            id: 'f' + nextId++,
+            userId: CURRENT_USER ? CURRENT_USER.id : 'u1',
+            name: answers.name,
+            house: db ? db.h : (answers.house || ''),
+            status: answers.status,
+            sizes: answers.sizes || [],
+            communityRating: db ? db.r : null,
+            communityLong: db ? db.l : null,
+            communitySill: db ? db.s : null,
+            avgPrice: db ? db.p : null,
+            notes: db ? db.notes : '',
+            personalRating: answers.personalRating ? parseInt(answers.personalRating) : null,
+            statusRating: answers.statusRating || null,
+            personalLong: answers.personalLong || null,
+            personalSill: answers.personalSill || null,
+            whereBought: answers.whereBought || null,
+            purchaseDate: answers.purchaseDate || null,
+            isDupe: answers.isDupe === 'yes',
+            dupeFor: answers.dupeFor || '',
+            personalNotes: answers.personalNotes || '',
+          };
+          FRAGRANCES.push(newFrag);
+          renderCurrentPage();
+          updateCounts();
+          toast(answers.name + ' added');
+        },
+      },
+    ],
+
+    // ── FRAGRANCE: EDIT ─────────────────────────────
+    'frag-edit': [
+      {
+        id: '_pick',
+        type: 'pick',
+        label: 'Which fragrance to edit?',
+        source: function() { return allMyFrags; },
+        display: function(f) { return f.name + ' — ' + f.house; },
+        sub: function(f) { return STATUS_LABELS[f.status]; },
+        onPick: function(f) { PAL.editTarget = f; },
+      },
+      {
+        id: 'status',
+        type: 'select',
+        label: 'Status',
+        prefill: function() { return PAL.editTarget ? PAL.editTarget.status : ''; },
+        options: [
+          {v:'CURRENT',         l:'Current Collection'},
+          {v:'PREVIOUSLY_OWNED',l:'Previously Owned'},
+          {v:'WANT_TO_BUY',     l:'Want to Buy'},
+          {v:'WANT_TO_SMELL',   l:'Want to Smell'},
+          {v:'DONT_LIKE',       l:"Don't Like"},
+        ],
+      },
+      {
+        id: 'personalRating',
+        type: 'select',
+        label: 'Personal rating',
+        prefill: function() { return PAL.editTarget ? String(PAL.editTarget.personalRating || '') : ''; },
+        optional: true,
+        options: [
+          {v:'',l:'— Clear —'},
+          {v:'1',l:'1 star'},{v:'2',l:'2 stars'},{v:'3',l:'3 stars'},
+          {v:'4',l:'4 stars'},{v:'5',l:'5 stars'},
+        ],
+      },
+      {
+        id: 'statusRating',
+        type: 'select',
+        label: 'How do you feel about it?',
+        prefill: function() { return PAL.editTarget ? (PAL.editTarget.statusRating || '') : ''; },
+        optional: true,
+        options: [
+          {v:'',         l:'— Clear —'},
+          {v:'Obsessed', l:'Obsessed'},
+          {v:'Love',     l:'Love'},
+          {v:'Like',     l:'Like'},
+          {v:'Just OK',  l:'Just OK'},
+          {v:"Don't Like",l:"Don't Like"},
+          {v:'WTF',      l:'WTF'},
+        ],
+      },
+      {
+        id: 'personalLong',
+        type: 'select',
+        label: 'Longevity on your skin',
+        prefill: function() { return PAL.editTarget ? (PAL.editTarget.personalLong || '') : ''; },
+        optional: true,
+        options: [
+          {v:'',      l:'— Clear —'},
+          {v:'0–6h',  l:'0–6 hours'},
+          {v:'6–12h', l:'6–12 hours'},
+          {v:'12–24h',l:'12–24 hours'},
+          {v:'>24h',  l:'Over 24 hours'},
+        ],
+      },
+      {
+        id: 'personalSill',
+        type: 'select',
+        label: 'Sillage',
+        prefill: function() { return PAL.editTarget ? (PAL.editTarget.personalSill || '') : ''; },
+        optional: true,
+        options: [
+          {v:'',        l:'— Clear —'},
+          {v:'Soft',    l:'Soft'},
+          {v:'Moderate',l:'Moderate'},
+          {v:'Strong',  l:'Strong'},
+          {v:'Enormous',l:'Enormous'},
+        ],
+      },
+      {
+        id: 'personalNotes',
+        type: 'textarea',
+        label: 'Personal notes',
+        prefill: function() { return PAL.editTarget ? (PAL.editTarget.personalNotes || '') : ''; },
+        optional: true,
+        placeholder: 'How does it smell on your skin? When do you wear it?',
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Review changes',
+        saveLabel: 'Save Changes',
+        onSave: function(answers) {
+          if (!PAL.editTarget) return;
+          var f = FRAGRANCES.find(function(x) { return x.id === PAL.editTarget.id; });
+          if (!f) return;
+          f.status = answers.status || f.status;
+          f.personalRating = answers.personalRating ? parseInt(answers.personalRating) : null;
+          f.statusRating = answers.statusRating || null;
+          f.personalLong = answers.personalLong || null;
+          f.personalSill = answers.personalSill || null;
+          f.personalNotes = answers.personalNotes || f.personalNotes;
+          renderCurrentPage();
+          updateCounts();
+          toast(f.name + ' updated');
+        },
+      },
+    ],
+
+    // ── FRAGRANCE: CHANGE STATUS ────────────────────
+    'frag-status': [
+      {
+        id: '_pick',
+        type: 'pick',
+        label: 'Which fragrance?',
+        source: function() { return allMyFrags; },
+        display: function(f) { return f.name + ' — ' + f.house; },
+        sub: function(f) { return 'Currently: ' + STATUS_LABELS[f.status]; },
+        onPick: function(f) { PAL.editTarget = f; },
+      },
+      {
+        id: 'status',
+        type: 'select',
+        label: 'New status',
+        prefill: function() { return PAL.editTarget ? PAL.editTarget.status : ''; },
+        options: [
+          {v:'CURRENT',         l:'Current Collection'},
+          {v:'PREVIOUSLY_OWNED',l:'Previously Owned'},
+          {v:'WANT_TO_BUY',     l:'Want to Buy'},
+          {v:'WANT_TO_SMELL',   l:'Want to Smell'},
+          {v:'DONT_LIKE',       l:"Don't Like"},
+        ],
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Confirm status change',
+        saveLabel: 'Change Status',
+        onSave: function(answers) {
+          if (!PAL.editTarget) return;
+          var f = FRAGRANCES.find(function(x) { return x.id === PAL.editTarget.id; });
+          if (!f) return;
+          f.status = answers.status;
+          renderCurrentPage();
+          updateCounts();
+          toast(f.name + ' moved to ' + STATUS_LABELS[answers.status]);
+        },
+      },
+    ],
+
+    // ── FRAGRANCE: DELETE ───────────────────────────
+    'frag-delete': [
+      {
+        id: '_pick',
+        type: 'pick',
+        label: 'Which fragrance to remove?',
+        source: function() { return allMyFrags; },
+        display: function(f) { return f.name + ' — ' + f.house; },
+        sub: function(f) { return STATUS_LABELS[f.status]; },
+        onPick: function(f) { PAL.editTarget = f; },
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Confirm removal',
+        saveLabel: 'Remove Fragrance',
+        dangerSave: true,
+        onSave: function() {
+          if (!PAL.editTarget) return;
+          var name = PAL.editTarget.name;
+          FRAGRANCES = FRAGRANCES.filter(function(f) { return f.id !== PAL.editTarget.id; });
+          renderCurrentPage();
+          updateCounts();
+          toast(name + ' removed');
+        },
+      },
+    ],
+
+    // ── COMPLIMENT: LOG ─────────────────────────────
+    'comp-log': [
+      {
+        id: 'primaryFragId',
+        type: 'pick',
+        label: 'Which fragrance were you wearing?',
+        source: function() { return myFrags; },
+        display: function(f) { return f.name; },
+        sub: function(f) { return f.house; },
+        onPick: function(f) {
+          PAL.answers.primaryFragId = f.id;
+          PAL.answers.primaryFrag = f.name;
+        },
+      },
+      {
+        id: 'secondaryFragId',
+        type: 'pick',
+        label: 'Were you layering with another fragrance?',
+        optional: true,
+        skipLabel: 'No layering',
+        source: function() {
+          return myFrags.filter(function(f) { return f.id !== PAL.answers.primaryFragId; });
+        },
+        display: function(f) { return f.name; },
+        sub: function(f) { return f.house; },
+        onPick: function(f) {
+          PAL.answers.secondaryFragId = f.id;
+          PAL.answers.secondaryFrag = f.name;
+        },
+      },
+      {
+        id: 'relation',
+        type: 'select',
+        label: 'Who gave the compliment?',
+        options: [
+          {v:'Stranger',         l:'Stranger'},
+          {v:'Friend',           l:'Friend'},
+          {v:'Colleague / Client',l:'Colleague or Client'},
+          {v:'Family',           l:'Family'},
+          {v:'Significant Other',l:'Significant Other'},
+          {v:'Acquaintance',     l:'Acquaintance'},
+          {v:'Other',            l:'Other'},
+        ],
+      },
+      {
+        id: 'gender',
+        type: 'select',
+        label: 'Their gender',
+        optional: true,
+        options: [
+          {v:'',          l:'— Skip —'},
+          {v:'Male',      l:'Male'},
+          {v:'Female',    l:'Female'},
+          {v:'Non-binary',l:'Non-binary'},
+          {v:'Unknown',   l:'Unknown'},
+        ],
+      },
+      {
+        id: 'date',
+        type: 'monthyear',
+        label: 'When did this happen?',
+        months: months,
+        years: years,
+      },
+      {
+        id: 'location',
+        type: 'text',
+        label: 'Where were you?',
+        optional: true,
+        placeholder: 'e.g. Office, Denver / Coffee shop, NYC',
+      },
+      {
+        id: 'notes',
+        type: 'textarea',
+        label: 'What did they say?',
+        optional: true,
+        placeholder: 'Their exact words or a paraphrase',
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Review and save',
+        saveLabel: 'Log Compliment',
+        onSave: function(answers) {
+          var dateParts = (answers.date || '').split(' ');
+          COMPLIMENTS.unshift({
+            id: genCompId(),
+            userId: CURRENT_USER ? CURRENT_USER.id : 'u1',
+            primaryFragId: answers.primaryFragId,
+            primaryFrag: answers.primaryFrag,
+            secondaryFragId: answers.secondaryFragId || null,
+            secondaryFrag: answers.secondaryFrag || null,
+            gender: answers.gender || null,
+            relation: answers.relation,
+            month: dateParts[0] || '',
+            year: dateParts[1] || String(new Date().getFullYear()),
+            location: answers.location || null,
+            notes: answers.notes ? '"' + answers.notes + '"' : null,
+          });
+          renderCurrentPage();
+          updateCounts();
+          toast('Compliment logged');
+        },
+      },
+    ],
+
+    // ── COMPLIMENT: EDIT ────────────────────────────
+    'comp-edit': [
+      {
+        id: '_pick',
+        type: 'pick',
+        label: 'Which compliment to edit?',
+        source: function() { return COMPLIMENTS.slice(0, 20); },
+        display: function(c) { return c.primaryFrag; },
+        sub: function(c) { return c.relation + ' — ' + c.month + ' ' + c.year + (c.location ? ' — ' + c.location : ''); },
+        onPick: function(c) { PAL.editTarget = c; },
+      },
+      {
+        id: 'relation',
+        type: 'select',
+        label: 'Relation',
+        prefill: function() { return PAL.editTarget ? PAL.editTarget.relation : ''; },
+        options: [
+          {v:'Stranger',          l:'Stranger'},
+          {v:'Friend',            l:'Friend'},
+          {v:'Colleague / Client',l:'Colleague or Client'},
+          {v:'Family',            l:'Family'},
+          {v:'Significant Other', l:'Significant Other'},
+          {v:'Acquaintance',      l:'Acquaintance'},
+          {v:'Other',             l:'Other'},
+        ],
+      },
+      {
+        id: 'location',
+        type: 'text',
+        label: 'Location',
+        prefill: function() { return PAL.editTarget ? (PAL.editTarget.location || '') : ''; },
+        optional: true,
+        placeholder: 'e.g. Office, Denver',
+      },
+      {
+        id: 'notes',
+        type: 'textarea',
+        label: 'What did they say?',
+        prefill: function() {
+          if (!PAL.editTarget) return '';
+          return (PAL.editTarget.notes || '').replace(/^"|"$/g, '');
+        },
+        optional: true,
+        placeholder: 'Their exact words',
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Review changes',
+        saveLabel: 'Save Changes',
+        onSave: function(answers) {
+          if (!PAL.editTarget) return;
+          var c = COMPLIMENTS.find(function(x) { return x.id === PAL.editTarget.id; });
+          if (!c) return;
+          c.relation = answers.relation || c.relation;
+          c.location = answers.location || c.location;
+          c.notes = answers.notes ? '"' + answers.notes + '"' : c.notes;
+          renderCurrentPage();
+          toast('Compliment updated');
+        },
+      },
+    ],
+
+    // ── COMPLIMENT: DELETE ──────────────────────────
+    'comp-delete': [
+      {
+        id: '_pick',
+        type: 'pick',
+        label: 'Which compliment to delete?',
+        source: function() { return COMPLIMENTS.slice(0, 20); },
+        display: function(c) { return c.primaryFrag; },
+        sub: function(c) { return c.relation + ' — ' + c.month + ' ' + c.year; },
+        onPick: function(c) { PAL.editTarget = c; },
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Confirm deletion',
+        saveLabel: 'Delete Compliment',
+        dangerSave: true,
+        onSave: function() {
+          if (!PAL.editTarget) return;
+          COMPLIMENTS = COMPLIMENTS.filter(function(c) { return c.id !== PAL.editTarget.id; });
+          renderCurrentPage();
+          updateCounts();
+          toast('Compliment deleted');
+        },
+      },
+    ],
+
+    // ── WISHLIST: ADD ───────────────────────────────
+    'wish-add': [
+      {
+        id: 'name',
+        type: 'search',
+        label: 'Which fragrance to add to wishlist?',
+        hint: 'Search by name or house',
+        source: FRAG_DB,
+        searchKey: 'n',
+        houseKey: 'h',
+        allowFreetext: true,
+      },
+      {
+        id: 'status',
+        type: 'select',
+        label: 'Wishlist type',
+        options: [
+          {v:'WANT_TO_BUY',  l:'Want to Buy'},
+          {v:'WANT_TO_SMELL',l:'Want to Smell first'},
+        ],
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Review and save',
+        saveLabel: 'Add to Wishlist',
+        onSave: function(answers) {
+          var db = FRAG_DB.find(function(d) { return d.n === answers.name; });
+          var already = FRAGRANCES.find(function(f) { return f.name.toLowerCase() === answers.name.toLowerCase(); });
+          if (already) { toast(answers.name + ' is already in your collection'); return; }
+          FRAGRANCES.push({
+            id: 'f' + nextId++,
+            userId: CURRENT_USER ? CURRENT_USER.id : 'u1',
+            name: answers.name,
+            house: db ? db.h : '',
+            status: answers.status,
+            sizes: [],
+            communityRating: db ? db.r : null,
+            communityLong: db ? db.l : null,
+            communitySill: db ? db.s : null,
+            avgPrice: db ? db.p : null,
+            notes: db ? db.notes : '',
+            personalRating: null, statusRating: null,
+            personalLong: null, personalSill: null,
+            whereBought: null, purchaseDate: null,
+            isDupe: false, dupeFor: '', personalNotes: '',
+          });
+          renderCurrentPage();
+          updateCounts();
+          toast(answers.name + ' added to Wishlist');
+        },
+      },
+    ],
+
+    // ── WISHLIST: PROMOTE TO OWNED ──────────────────
+    'wish-promote': [
+      {
+        id: '_pick',
+        type: 'pick',
+        label: 'Which wishlist item did you buy?',
+        source: function() {
+          return FRAGRANCES.filter(function(f) {
+            return f.status === 'WANT_TO_BUY' || f.status === 'WANT_TO_SMELL';
+          });
+        },
+        display: function(f) { return f.name + ' — ' + f.house; },
+        sub: function(f) { return STATUS_LABELS[f.status]; },
+        onPick: function(f) { PAL.editTarget = f; },
+      },
+      {
+        id: 'personalRating',
+        type: 'select',
+        label: 'Your initial rating',
+        optional: true,
+        options: [
+          {v:'',l:'— Skip —'},
+          {v:'1',l:'1 star'},{v:'2',l:'2 stars'},{v:'3',l:'3 stars'},
+          {v:'4',l:'4 stars'},{v:'5',l:'5 stars'},
+        ],
+      },
+      {
+        id: 'whereBought',
+        type: 'select',
+        label: 'Where did you buy it?',
+        optional: true,
+        options: [
+          {v:'',            l:'— Skip —'},
+          {v:'FragranceNet',l:'FragranceNet'},
+          {v:'Jomashop',    l:'Jomashop'},
+          {v:'Amazon',      l:'Amazon'},
+          {v:'Scentsplit',  l:'Scentsplit'},
+          {v:'Sephora',     l:'Sephora'},
+          {v:'Brand Direct',l:'Brand Direct'},
+          {v:'Other',       l:'Other'},
+        ],
+      },
+      {
+        id: 'confirm',
+        type: 'confirm',
+        label: 'Confirm purchase',
+        saveLabel: 'Move to Current Collection',
+        onSave: function(answers) {
+          if (!PAL.editTarget) return;
+          var f = FRAGRANCES.find(function(x) { return x.id === PAL.editTarget.id; });
+          if (!f) return;
+          f.status = 'CURRENT';
+          if (answers.personalRating) f.personalRating = parseInt(answers.personalRating);
+          if (answers.whereBought) f.whereBought = answers.whereBought;
+          f.sizes = ['Full Bottle'];
+          renderCurrentPage();
+          updateCounts();
+          toast(f.name + ' moved to Current Collection');
+        },
+      },
+    ],
+
+  };
+}
+
+// ── Action menu items ────────────────────────────────
+var PAL_ACTIONS = [
+  { key: 'frag-add',     label: 'Add fragrance to collection',  group: 'Fragrances' },
+  { key: 'frag-edit',    label: 'Edit a fragrance',             group: 'Fragrances' },
+  { key: 'frag-status',  label: 'Change fragrance status',      group: 'Fragrances' },
+  { key: 'frag-delete',  label: 'Remove a fragrance',           group: 'Fragrances' },
+  { key: 'comp-log',     label: 'Log a compliment',             group: 'Compliments' },
+  { key: 'comp-edit',    label: 'Edit a compliment',            group: 'Compliments' },
+  { key: 'comp-delete',  label: 'Delete a compliment',          group: 'Compliments' },
+  { key: 'wish-add',     label: 'Add to wishlist',              group: 'Wishlist' },
+  { key: 'wish-promote', label: 'Mark wishlist item as bought', group: 'Wishlist' },
+];
+
+// ── Open / close ─────────────────────────────────────
+function palOpen() {
+  PAL.open = true;
+  PAL.flow = null;
+  PAL.step = 0;
+  PAL.answers = {};
+  PAL.editTarget = null;
+  palRenderMenu();
+  document.getElementById('palOverlay').classList.add('on');
+  setTimeout(function() {
+    var si = document.getElementById('palSearch');
+    if (si) si.focus();
+  }, 80);
+}
+
+function palClose() {
+  PAL.open = false;
+  document.getElementById('palOverlay').classList.remove('on');
+}
+
+// ── Render: action menu ──────────────────────────────
+function palRenderMenu() {
+  var el = document.getElementById('palBox');
+  var groups = {};
+  PAL_ACTIONS.forEach(function(a) {
+    if (!groups[a.group]) groups[a.group] = [];
+    groups[a.group].push(a);
+  });
+  var html = '<div class="pal-header">'
+    + '<div class="pal-title">Command Palette</div>'
+    + '<div class="pal-hint">Cmd+K to toggle</div>'
+    + '</div>'
+    + '<input class="pal-search" id="palSearch" placeholder="Search actions..." oninput="palFilter(this.value)" />'
+    + '<div class="pal-list" id="palList">';
+  Object.keys(groups).forEach(function(g) {
+    html += '<div class="pal-group">' + g + '</div>';
+    groups[g].forEach(function(a) {
+      html += '<div class="pal-item" data-key="' + a.key + '" onclick="palStartFlow(\'' + a.key + '\')">'
+        + '<span class="pal-item-label">' + a.label + '</span>'
+        + '</div>';
+    });
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function palFilter(q) {
+  var items = document.querySelectorAll('#palList .pal-item');
+  var groups = document.querySelectorAll('#palList .pal-group');
+  var ql = q.toLowerCase();
+  items.forEach(function(item) {
+    var match = item.querySelector('.pal-item-label').textContent.toLowerCase().indexOf(ql) > -1;
+    item.style.display = match ? '' : 'none';
+  });
+  // hide group headers if all their items are hidden
+  groups.forEach(function(g) {
+    var next = g.nextSibling;
+    var anyVisible = false;
+    while (next && !next.classList.contains('pal-group')) {
+      if (next.style && next.style.display !== 'none') anyVisible = true;
+      next = next.nextSibling;
+    }
+    g.style.display = anyVisible ? '' : 'none';
+  });
+}
+
+// ── Start a flow ──────────────────────────────────────
+function palStartFlow(key) {
+  var flows = palFlows();
+  PAL.flow = flows[key];
+  PAL.step = 0;
+  PAL.answers = {};
+  PAL.editTarget = null;
+  palRenderStep();
+}
+
+// ── Compute active (non-skipped) steps ───────────────
+function palActiveSteps() {
+  if (!PAL.flow) return [];
+  return PAL.flow.filter(function(step) {
+    if (typeof step.skipIf === 'function') return !step.skipIf(PAL.answers);
+    return true;
+  });
+}
+
+// ── Render current step ──────────────────────────────
+function palRenderStep() {
+  var active = palActiveSteps();
+  if (PAL.step >= active.length) return;
+  var step = active[PAL.step];
+  var total = active.length;
+  var current = PAL.step + 1;
+
+  // Apply prefill if editing
+  if (typeof step.prefill === 'function' && !PAL.answers[step.id]) {
+    PAL.answers[step.id] = step.prefill();
+  }
+
+  var el = document.getElementById('palBox');
+  var html = '<div class="pal-header">'
+    + '<div class="pal-title">' + step.label + '</div>'
+    + '<div class="pal-step-count">Step ' + current + ' of ' + total + '</div>'
+    + '</div>';
+
+  if (step.type === 'pick' || (step.type === 'search' && step.source)) {
+    html += palRenderPick(step);
+  } else if (step.type === 'select') {
+    html += palRenderSelect(step);
+  } else if (step.type === 'multiselect') {
+    html += palRenderMultiselect(step);
+  } else if (step.type === 'text') {
+    html += palRenderText(step);
+  } else if (step.type === 'textarea') {
+    html += palRenderTextarea(step);
+  } else if (step.type === 'monthyear') {
+    html += palRenderMonthYear(step);
+  } else if (step.type === 'confirm') {
+    html += palRenderConfirm(step);
+  }
+
+  html += palRenderFooter(step, current, total);
+  el.innerHTML = html;
+
+  // Focus first input
+  var inp = el.querySelector('input, select, textarea');
+  if (inp) setTimeout(function() { inp.focus(); }, 60);
+}
+
+// ── Step renderers ────────────────────────────────────
+
+function palRenderPick(step) {
+  var items = typeof step.source === 'function' ? step.source() : step.source;
+  var html = '';
+  if (step.hint) html += '<div class="pal-hint-text">' + step.hint + '</div>';
+  if (step.type === 'search') {
+    html += '<input class="pal-search" id="palPickSearch" placeholder="Type to filter..." oninput="palPickFilter(this.value)" />';
+  } else {
+    html += '<input class="pal-search" id="palPickSearch" placeholder="Filter..." oninput="palPickFilter(this.value)" />';
+  }
+  html += '<div class="pal-list" id="palPickList">';
+  if (step.optional) {
+    html += '<div class="pal-item pal-item-skip" onclick="palSkipStep()">' + (step.skipLabel || 'Skip this step') + '</div>';
+  }
+  items.forEach(function(item, i) {
+    var label = typeof step.display === 'function' ? step.display(item) : (item.n || item.name || item);
+    var sub   = typeof step.sub    === 'function' ? step.sub(item)     : (item.h || item.house || '');
+    html += '<div class="pal-item" data-idx="' + i + '" onclick="palPickItem(' + i + ')">'
+      + '<div class="pal-item-label">' + label + '</div>'
+      + (sub ? '<div class="pal-item-sub">' + sub + '</div>' : '')
+      + '</div>';
+  });
+  if (step.allowFreetext) {
+    html += '<div class="pal-item pal-item-freetext" id="palFreetextItem" style="display:none" onclick="palPickFreetext()">'
+      + '<div class="pal-item-label" id="palFreetextLabel">Add as new entry</div>'
+      + '</div>';
+  }
+  html += '</div>';
+  // Store items for filter access
+  html += '<script>window._palPickItems = ' + JSON.stringify(items.map(function(item, i) {
+    var label = typeof step.display === 'function' ? step.display(item) : (item.n || item.name || item);
+    return { i: i, label: label };
+  })) + ';</' + 'script>';
+  return html;
+}
+
+function palPickFilter(q) {
+  var ql = q.toLowerCase();
+  var items = document.querySelectorAll('#palPickList .pal-item:not(.pal-item-skip):not(.pal-item-freetext)');
+  items.forEach(function(item) {
+    var label = item.querySelector('.pal-item-label').textContent.toLowerCase();
+    var sub = item.querySelector('.pal-item-sub');
+    var subText = sub ? sub.textContent.toLowerCase() : '';
+    item.style.display = (label.indexOf(ql) > -1 || subText.indexOf(ql) > -1) ? '' : 'none';
+  });
+  // Show freetext option if no exact match
+  var ft = document.getElementById('palFreetextItem');
+  var ftLabel = document.getElementById('palFreetextLabel');
+  if (ft && q.trim()) {
+    ft.style.display = '';
+    if (ftLabel) ftLabel.textContent = 'Add "' + q.trim() + '" as new entry';
+    ft.setAttribute('data-freetext', q.trim());
+  } else if (ft) {
+    ft.style.display = 'none';
+  }
+}
+
+function palPickItem(idx) {
+  var active = palActiveSteps();
+  var step = active[PAL.step];
+  var items = typeof step.source === 'function' ? step.source() : step.source;
+  var item = items[idx];
+  if (!item) return;
+  if (typeof step.onPick === 'function') step.onPick(item);
+  // Store answer
+  PAL.answers[step.id] = item.n || item.name || item.id || item;
+  palNext();
+}
+
+function palPickFreetext() {
+  var ft = document.getElementById('palFreetextItem');
+  if (!ft) return;
+  var val = ft.getAttribute('data-freetext');
+  if (!val) return;
+  var active = palActiveSteps();
+  var step = active[PAL.step];
+  PAL.answers[step.id] = val;
+  palNext();
+}
+
+function palRenderSelect(step) {
+  var current = PAL.answers[step.id] || '';
+  var html = '<div class="pal-list" id="palSelectList">';
+  if (step.optional) {
+    html += '<div class="pal-item pal-item-skip" onclick="palSkipStep()">Skip</div>';
+  }
+  step.options.forEach(function(opt) {
+    var v = typeof opt === 'string' ? opt : opt.v;
+    var l = typeof opt === 'string' ? opt : opt.l;
+    var sel = current === v ? ' pal-item-selected' : '';
+    html += '<div class="pal-item' + sel + '" onclick="palSelectItem(\'' + v.replace(/'/g, "\\'") + '\')">'
+      + '<div class="pal-item-label">' + l + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function palSelectItem(val) {
+  var active = palActiveSteps();
+  var step = active[PAL.step];
+  PAL.answers[step.id] = val;
+  palNext();
+}
+
+function palRenderMultiselect(step) {
+  var current = PAL.answers[step.id] || [];
+  var html = '<div class="pal-hint-text">Select all that apply. Press Next when done.</div>';
+  html += '<div class="pal-list" id="palMultiList">';
+  step.options.forEach(function(opt) {
+    var v = typeof opt === 'string' ? opt : opt.v;
+    var l = typeof opt === 'string' ? opt : opt.l;
+    var sel = current.indexOf(v) > -1 ? ' pal-item-selected' : '';
+    html += '<div class="pal-item' + sel + '" onclick="palMultiToggle(\'' + v.replace(/'/g, "\\'") + '\')">'
+      + '<div class="pal-item-check">' + (current.indexOf(v) > -1 ? 'x' : '') + '</div>'
+      + '<div class="pal-item-label">' + l + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function palMultiToggle(val) {
+  var active = palActiveSteps();
+  var step = active[PAL.step];
+  var current = PAL.answers[step.id] || [];
+  var idx = current.indexOf(val);
+  if (idx > -1) current.splice(idx, 1);
+  else current.push(val);
+  PAL.answers[step.id] = current;
+  // Re-render just the list
+  var items = document.querySelectorAll('#palMultiList .pal-item');
+  items.forEach(function(item) {
+    var lbl = item.querySelector('.pal-item-label').textContent;
+    var chk = item.querySelector('.pal-item-check');
+    var isSelected = current.indexOf(lbl) > -1 || step.options.some(function(o) {
+      return (typeof o === 'string' ? o : o.v) === val && (typeof o === 'string' ? o : o.l) === lbl;
+    });
+    item.classList.toggle('pal-item-selected', current.indexOf(
+      (function() {
+        var found = step.options.find(function(o) { return (typeof o === 'string' ? o : o.l) === lbl; });
+        return found ? (typeof found === 'string' ? found : found.v) : lbl;
+      })()
+    ) > -1);
+    if (chk) chk.textContent = item.classList.contains('pal-item-selected') ? 'x' : '';
+  });
+}
+
+function palRenderText(step) {
+  var current = PAL.answers[step.id] || '';
+  var html = '<div class="pal-input-wrap">'
+    + '<input class="pal-input" id="palTextInput" type="text" value="' + current.replace(/"/g, '&quot;') + '"'
+    + ' placeholder="' + (step.placeholder || '') + '"'
+    + ' oninput="PAL.answers[\'' + step.id + '\']=this.value"'
+    + ' onkeydown="if(event.key===\'Enter\')palNext()" />'
+    + '</div>';
+  if (step.optional) {
+    html += '<div class="pal-skip-link" onclick="palSkipStep()">Skip this field</div>';
+  }
+  return html;
+}
+
+function palRenderTextarea(step) {
+  var current = PAL.answers[step.id] || '';
+  var html = '<div class="pal-input-wrap">'
+    + '<textarea class="pal-textarea" id="palTextareaInput" rows="4"'
+    + ' placeholder="' + (step.placeholder || '') + '"'
+    + ' oninput="PAL.answers[\'' + step.id + '\']=this.value">'
+    + current
+    + '</textarea>'
+    + '</div>';
+  if (step.optional) {
+    html += '<div class="pal-skip-link" onclick="palSkipStep()">Skip this field</div>';
+  }
+  return html;
+}
+
+function palRenderMonthYear(step) {
+  var current = PAL.answers[step.id] || '';
+  var parts = current.split(' ');
+  var selMonth = parts[0] || '';
+  var selYear = parts[1] || String(new Date().getFullYear());
+  var html = '<div class="pal-monthyear">';
+  html += '<select class="pal-select" id="palMonth" onchange="palUpdateDate()">'
+    + '<option value="">Month</option>';
+  step.months.forEach(function(m) {
+    html += '<option value="' + m + '"' + (selMonth === m ? ' selected' : '') + '>' + m + '</option>';
+  });
+  html += '</select>';
+  html += '<select class="pal-select" id="palYear" onchange="palUpdateDate()">'
+    + '<option value="">Year</option>';
+  step.years.forEach(function(y) {
+    html += '<option value="' + y + '"' + (selYear === y ? ' selected' : '') + '>' + y + '</option>';
+  });
+  html += '</select></div>';
+  if (step.optional) {
+    html += '<div class="pal-skip-link" onclick="palSkipStep()">Skip this field</div>';
+  }
+  return html;
+}
+
+function palUpdateDate() {
+  var m = document.getElementById('palMonth');
+  var y = document.getElementById('palYear');
+  if (!m || !y) return;
+  var active = palActiveSteps();
+  var step = active[PAL.step];
+  PAL.answers[step.id] = (m.value + ' ' + y.value).trim();
+}
+
+function palRenderConfirm(step) {
+  var lines = [];
+  var active = palActiveSteps();
+  active.forEach(function(s) {
+    if (s.type === 'confirm' || s.type === 'pick' || s.id === '_pick') return;
+    var val = PAL.answers[s.id];
+    if (!val || val === '' || (Array.isArray(val) && !val.length)) return;
+    var displayVal = Array.isArray(val) ? val.join(', ') : val;
+    // Map status codes to labels
+    if (s.id === 'status') {
+      displayVal = STATUS_LABELS[val] || val;
+    }
+    lines.push({ label: s.label, val: displayVal });
+  });
+
+  // Show the record being acted on
+  var targetLabel = '';
+  if (PAL.editTarget) {
+    targetLabel = PAL.editTarget.name || (PAL.editTarget.primaryFrag + ' — ' + PAL.editTarget.relation);
+  } else if (PAL.answers.name) {
+    targetLabel = PAL.answers.name;
+  }
+
+  var html = '<div class="pal-confirm-wrap">';
+  if (targetLabel) {
+    html += '<div class="pal-confirm-target">' + targetLabel + '</div>';
+  }
+  if (step.dangerSave) {
+    html += '<div class="pal-confirm-warn">This cannot be undone.</div>';
+  }
+  html += '<div class="pal-confirm-rows">';
+  lines.forEach(function(l) {
+    html += '<div class="pal-confirm-row">'
+      + '<div class="pal-confirm-key">' + l.label + '</div>'
+      + '<div class="pal-confirm-val">' + l.val + '</div>'
+      + '</div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function palRenderFooter(step, current, total) {
+  var isConfirm = step.type === 'confirm';
+  var isFirst   = current === 1;
+  var html = '<div class="pal-footer">';
+  if (!isFirst) {
+    html += '<button class="pal-btn pal-btn-ghost" onclick="palBack()">Back</button>';
+  }
+  html += '<button class="pal-btn pal-btn-cancel" onclick="palClose()">Cancel</button>';
+  if (isConfirm) {
+    var cls = step.dangerSave ? 'pal-btn pal-btn-danger' : 'pal-btn pal-btn-save';
+    html += '<button class="' + cls + '" onclick="palSave()">' + (step.saveLabel || 'Save') + '</button>';
+  } else if (step.type !== 'pick' && step.type !== 'select' && step.type !== 'search') {
+    html += '<button class="pal-btn pal-btn-next" onclick="palNext()">Next</button>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ── Navigation ────────────────────────────────────────
+function palNext() {
+  var active = palActiveSteps();
+  // Re-evaluate skip conditions — some may have changed
+  PAL.step++;
+  // Skip any steps whose skipIf now returns true
+  while (PAL.step < active.length - 1) {
+    var s = active[PAL.step];
+    if (typeof s.skipIf === 'function' && s.skipIf(PAL.answers)) PAL.step++;
+    else break;
+  }
+  if (PAL.step >= active.length) { palClose(); return; }
+  palRenderStep();
+}
+
+function palBack() {
+  if (PAL.step > 0) {
+    PAL.step--;
+    palRenderStep();
+  } else {
+    PAL.flow = null;
+    PAL.step = 0;
+    PAL.answers = {};
+    PAL.editTarget = null;
+    palRenderMenu();
+  }
+}
+
+function palSkipStep() {
+  var active = palActiveSteps();
+  var step = active[PAL.step];
+  PAL.answers[step.id] = step.type === 'multiselect' ? [] : '';
+  palNext();
+}
+
+function palSave() {
+  var active = palActiveSteps();
+  var confirmStep = active[active.length - 1];
+  if (typeof confirmStep.onSave === 'function') {
+    confirmStep.onSave(PAL.answers);
+  }
+  palClose();
+}
+
+// ── Keyboard shortcut ─────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    if (PAL.open) palClose(); else palOpen();
+  }
+  if (e.key === 'Escape' && PAL.open) palClose();
+});
+
+</script>
+
+<!-- ── COMMAND PALETTE ── -->
+<div class="pal-overlay" id="palOverlay" onclick="if(event.target===this)palClose()">
+  <div class="pal-box" id="palBox"></div>
+</div>
+
+<!-- Floating trigger button -->
+<button class="pal-trigger-btn" onclick="palOpen()" title="Command Palette (Cmd+K)">
+  <span class="pal-trigger-label">Actions</span>
+  <span class="pal-trigger-kbd">Cmd K</span>
+</button>
+
+</body>
+</html>
