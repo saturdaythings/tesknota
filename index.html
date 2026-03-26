@@ -1627,32 +1627,155 @@ function bldChart(id,data){
 // ═══════════════════════════════════════════════════════
 
 function renderFriend(){
-  bldChart('bc-f',[{l:'B.Opium',v:6,h:100},{l:'BR540',v:5,h:83},{l:'Libre',v:4,h:67},{l:'R.Musk',v:3,h:50},{l:'G.Girl',v:2,h:33}]);
+  var friend=getFriend();
+  if(!friend)return;
+  var FF=friendFragrances(), FC=friendCompliments();
+  var friendOwned=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+  var friendWish=FF.filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
+
+  // Banner
+  var bn=document.querySelector('.fb-name'); if(bn) bn.textContent=friend.name;
+  var fsns=document.querySelectorAll('.fb-stat .fsn');
+  if(fsns[0]) fsns[0].textContent=FF.length;
+  if(fsns[1]) fsns[1].textContent=FC.length;
+  if(fsns[2]) fsns[2].textContent=friendWish.length;
+  document.getElementById('ct-friend').textContent=FC.length;
+  var sl=document.querySelector('.sb-link[data-page="friend"]');
+  if(sl&&sl.childNodes[0]) sl.childNodes[0].textContent=friend.name+' ';
+
+  // Collection table
+  var collBody=document.querySelector('#ft-col tbody');
+  if(collBody){
+    while(collBody.firstChild) collBody.removeChild(collBody.firstChild);
+    friendOwned.forEach(function(f){
+      var tr=document.createElement('tr');
+      var td1=document.createElement('td');
+      var dn=document.createElement('div'); dn.className='tn'; dn.textContent=f.name; td1.appendChild(dn);
+      var dh=document.createElement('div'); dh.className='th_'; dh.textContent=f.house; td1.appendChild(dh);
+      tr.appendChild(td1);
+      var td2=document.createElement('td');
+      var ds=document.createElement('div'); ds.className='ts '+(STATUS_CSS[f.status]||''); ds.textContent=STATUS_LABELS[f.status]||f.status; td2.appendChild(ds); tr.appendChild(td2);
+      var td3=document.createElement('td');
+      var dr=document.createElement('div'); dr.className='tstars'; dr.textContent=starsStr(f.personalRating); td3.appendChild(dr); tr.appendChild(td3);
+      var td4=document.createElement('td'); td4.className='tscript'; td4.textContent=f.notes.replace(/·/g,',').split(',').slice(0,2).join(', '); tr.appendChild(td4);
+      var td5=document.createElement('td'); td5.className='tmono'; td5.textContent=getCompCount(f.id); tr.appendChild(td5);
+      var td6=document.createElement('td'); td6.className='tact';
+      var btn=document.createElement('button'); btn.className='btn-bare'; btn.textContent='Compare';
+      (function(fn){ btn.onclick=function(){ openCompare(fn,fn); }; })(f.name);
+      td6.appendChild(btn); tr.appendChild(td6);
+      collBody.appendChild(tr);
+    });
+    if(!friendOwned.length){
+      var etr=document.createElement('tr'); var etd=document.createElement('td'); etd.colSpan=6;
+      etd.style.cssText='padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
+      etd.textContent='No fragrances yet'; etr.appendChild(etd); collBody.appendChild(etr);
+    }
+  }
+
+  // Compliments tab
+  var compPanel=document.getElementById('ft-comp');
+  if(compPanel){
+    while(compPanel.firstChild) compPanel.removeChild(compPanel.firstChild);
+    FC.slice(0,10).forEach(function(c){
+      var row=document.createElement('div'); row.className='crow';
+      var left=document.createElement('div'); left.style.flex='1';
+      var cf=document.createElement('div'); cf.className='cr-f'; cf.textContent=c.primaryFrag; left.appendChild(cf);
+      var cm=document.createElement('div'); cm.className='cr-m';
+      cm.textContent=c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:''); left.appendChild(cm);
+      if(c.notes){ var cn=document.createElement('div'); cn.className='cr-n'; cn.textContent=c.notes; left.appendChild(cn); }
+      row.appendChild(left);
+      var right=document.createElement('div'); right.style.cssText='display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;';
+      var cd=document.createElement('div'); cd.className='cr-d'; cd.textContent=c.month+' '+c.year; right.appendChild(cd);
+      row.appendChild(right); compPanel.appendChild(row);
+    });
+    if(!FC.length){
+      var em=document.createElement('div'); em.style.cssText='padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
+      em.textContent='No compliments yet'; compPanel.appendChild(em);
+    }
+  }
+
+  // Wishlist tab
+  var wishBody=document.querySelector('#ft-wish tbody');
+  if(wishBody){
+    while(wishBody.firstChild) wishBody.removeChild(wishBody.firstChild);
+    friendWish.forEach(function(f){
+      var tr=document.createElement('tr');
+      var td1=document.createElement('td');
+      var dn=document.createElement('div'); dn.className='tn'; dn.textContent=f.name; td1.appendChild(dn);
+      var dh=document.createElement('div'); dh.className='th_'; dh.textContent=f.house; td1.appendChild(dh); tr.appendChild(td1);
+      var td2=document.createElement('td');
+      var ds=document.createElement('div'); ds.className='ts s-wnt'; ds.textContent=STATUS_LABELS[f.status]; td2.appendChild(ds); tr.appendChild(td2);
+      var td3=document.createElement('td'); td3.className='tmono'; td3.style.color='var(--warm)';
+      td3.textContent=(f.communityRating||'—')+' / 5.0'; tr.appendChild(td3);
+      var td4=document.createElement('td'); td4.className='tmono'; td4.textContent=f.avgPrice||'—'; tr.appendChild(td4);
+      wishBody.appendChild(tr);
+    });
+    if(!friendWish.length){
+      var etr=document.createElement('tr'); var etd=document.createElement('td'); etd.colSpan=4;
+      etd.style.cssText='padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
+      etd.textContent='No wishlist items yet'; etr.appendChild(etd); wishBody.appendChild(etr);
+    }
+  }
+
+  // Analytics chart
+  var byFrag={};
+  FC.forEach(function(c){ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; });
+  var fragSorted=Object.entries(byFrag).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+  var maxV=fragSorted[0]?fragSorted[0][1]:1;
+  bldChart('bc-f',fragSorted.map(function(e){return {l:e[0].split(' ')[0],v:e[1],h:Math.round((e[1]/maxV)*100)};}));
+  var anaStats=document.querySelector('#ft-ana .stats');
+  if(anaStats){
+    var snums=anaStats.querySelectorAll('.snum');
+    var total=FC.length;
+    if(snums[0]) snums[0].textContent=total;
+    if(snums[1]) snums[1].textContent=Object.keys(byFrag).length;
+    var spct=total?Math.round((FC.filter(function(c){return c.relation==='Stranger';}).length/total)*100):0;
+    if(snums[2]) snums[2].textContent=spct+'%';
+    var ratedFF=FF.filter(function(f){return f.personalRating;}), avgR=ratedFF.length?(ratedFF.reduce(function(a,f){return a+f.personalRating;},0)/ratedFF.length).toFixed(1):'—';
+    if(snums[3]) snums[3].textContent=avgR;
+  }
+
   renderInCommon();
 }
 
 function renderInCommon(){
-  const myNames = myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED').map(f=>f.name.toLowerCase());
-  const sylviaOwned = ['Black Opium EDP','Baccarat Rouge 540','Libre EDP','Roses Musk','Good Girl'];
-  const shared = sylviaOwned.filter(n=>myNames.includes(n.toLowerCase()));
-  const ic = document.getElementById('inCommon');
-  if(!shared.length){ ic.innerHTML=''; return; }
-  ic.innerHTML = `<div class="ic-label">In common — ${shared.length} fragrance${shared.length>1?'s':''} you both own</div>` +
-    shared.map(name=>{
-      const mine = myFragrances().find(f=>f.name.toLowerCase()===name.toLowerCase());
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b2);">
-        <div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);">${name}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);">You: ${starsStr(mine?.personalRating)} · Sylvia: ★★★★★</div>
-      </div>`;
-    }).join('');
-  // Wishlist in common
-  const myWish = myFragrances().filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL').map(f=>f.name.toLowerCase());
-  const sylviaWish = ['Baccarat Rouge 540 EDP','Santal 33'];
-  const wishShared = sylviaWish.filter(n=>myWish.includes(n.toLowerCase()));
-  const wic = document.getElementById('wishInCommon');
-  if(wishShared.length){
-    wic.innerHTML = `<div class="in-common"><div class="ic-label">Wishlist in common — ${wishShared.length} item${wishShared.length>1?'s':''} you both want</div>`+
-      wishShared.map(n=>`<div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);padding:6px 0;">${n}</div>`).join('')+'</div>';
+  var friend=getFriend();
+  var FF=friendFragrances();
+  var friendOwnedNames=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';}).map(function(f){return f.name.toLowerCase();});
+  var friendWishNames=FF.filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';}).map(function(f){return f.name.toLowerCase();});
+  var myOwned=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+  var myWishList=myFragrances().filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
+  var shared=myOwned.filter(function(f){return friendOwnedNames.indexOf(f.name.toLowerCase())>=0;});
+  var wishShared=myWishList.filter(function(f){return friendWishNames.indexOf(f.name.toLowerCase())>=0;});
+
+  var ic=document.getElementById('inCommon');
+  if(ic){
+    while(ic.firstChild) ic.removeChild(ic.firstChild);
+    if(shared.length){
+      var lbl=document.createElement('div'); lbl.className='ic-label';
+      lbl.textContent='In common — '+shared.length+' fragrance'+(shared.length>1?'s':'')+' you both own'; ic.appendChild(lbl);
+      shared.forEach(function(mine){
+        var hers=FF.find(function(f){return f.name.toLowerCase()===mine.name.toLowerCase();});
+        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b2);';
+        var nm=document.createElement('div'); nm.style.cssText='font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);'; nm.textContent=mine.name; row.appendChild(nm);
+        var rt=document.createElement('div'); rt.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);';
+        rt.textContent='You: '+starsStr(mine.personalRating)+' · '+(friend?friend.name:'Friend')+': '+starsStr(hers?hers.personalRating:null); row.appendChild(rt);
+        ic.appendChild(row);
+      });
+    }
+  }
+  var wic=document.getElementById('wishInCommon');
+  if(wic){
+    while(wic.firstChild) wic.removeChild(wic.firstChild);
+    if(wishShared.length){
+      var con=document.createElement('div'); con.className='in-common';
+      var wlbl=document.createElement('div'); wlbl.className='ic-label';
+      wlbl.textContent='Wishlist in common — '+wishShared.length+' item'+(wishShared.length>1?'s':'')+' you both want'; con.appendChild(wlbl);
+      wishShared.forEach(function(f){
+        var item=document.createElement('div'); item.style.cssText='font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);padding:6px 0;'; item.textContent=f.name; con.appendChild(item);
+      });
+      wic.appendChild(con);
+    }
   }
 }
 
@@ -1662,7 +1785,7 @@ document.getElementById('friendTabs').addEventListener('click',e=>{
   document.querySelectorAll('.fpanel').forEach(p=>p.classList.remove('on'));
   tab.classList.add('on');
   const panel=document.getElementById(tab.dataset.panel);
-  if(panel){ panel.classList.add('on'); if(tab.dataset.panel==='ft-ana') bldChart('bc-f',[{l:'B.Opium',v:6,h:100},{l:'BR540',v:5,h:83},{l:'Libre',v:4,h:67},{l:'R.Musk',v:3,h:50},{l:'G.Girl',v:2,h:33}]);}
+  if(panel){ panel.classList.add('on'); if(tab.dataset.panel==='ft-ana'){ var FC2=friendCompliments(),byF2={}; FC2.forEach(function(c){byF2[c.primaryFrag]=(byF2[c.primaryFrag]||0)+1;}); var fs2=Object.entries(byF2).sort(function(a,b){return b[1]-a[1];}).slice(0,5),mx2=fs2[0]?fs2[0][1]:1; bldChart('bc-f',fs2.map(function(e){return {l:e[0].split(' ')[0],v:e[1],h:Math.round((e[1]/mx2)*100)};})); }}
 });
 
 // ═══════════════════════════════════════════════════════
@@ -2280,9 +2403,11 @@ const SYLVIA_COMPLIMENTS = [
 ];
 
 function openCompare(fragName, myFragIdOrName){
-  const mine = FRAGRANCES.find(f=>f.id===myFragIdOrName||f.name===myFragIdOrName||f.name===fragName);
-  const myComps = mine ? COMPLIMENTS.filter(c=>c.primaryFragId===mine.id) : [];
-  const herComps = SYLVIA_COMPLIMENTS.filter(c=>c.fragName===fragName);
+  var friend=getFriend();
+  const mine = myFragrances().find(f=>f.id===myFragIdOrName||f.name===myFragIdOrName||f.name===fragName);
+  const myComps = mine ? myCompliments().filter(c=>c.primaryFragId===mine.id) : [];
+  const herComps = friendCompliments().filter(c=>c.primaryFrag===fragName);
+  var herFrag = friendFragrances().find(function(f){return f.name===fragName;});
   document.getElementById('compareTitle').textContent = fragName;
   const myByRel={},herByRel={};
   myComps.forEach(c=>{ myByRel[c.relation]=(myByRel[c.relation]||0)+1; });
@@ -2291,13 +2416,13 @@ function openCompare(fragName, myFragIdOrName){
   const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const allEvents=[
     ...myComps.map(c=>({...c,who:'you',sortKey:c.year+'-'+String(MONTHS.indexOf(c.month)).padStart(2,'0')})),
-    ...herComps.map(c=>({relation:c.relation,gender:c.gender,month:c.month,year:c.year,location:c.location,notes:c.notes,who:'sylvia',sortKey:c.year+'-'+String(MONTHS.indexOf(c.month)).padStart(2,'0')})),
+    ...herComps.map(c=>({relation:c.relation,gender:c.gender,month:c.month,year:c.year,location:c.location,notes:c.notes,who:'friend',sortKey:c.year+'-'+String(MONTHS.indexOf(c.month)).padStart(2,'0')})),
   ].sort((a,b)=>b.sortKey.localeCompare(a.sortKey));
 
   document.getElementById('compareBody').innerHTML = `
     <div class="compare-cols">
       <div class="compare-col">
-        <div class="compare-col-head">You — Kiana</div>
+        <div class="compare-col-head">You${CURRENT_USER?' — '+CURRENT_USER.name:''}</div>
         <div class="compare-col-name">${mine?mine.name:fragName}</div>
         <div class="cs"><div class="cs-label">Your rating</div><div class="cs-val">${starsStr(mine?mine.personalRating:null)}</div></div>
         <div class="cs"><div class="cs-label">Your feel</div><div class="cs-val">${mine?mine.statusRating||'—':'—'}</div></div>
@@ -2308,14 +2433,14 @@ function openCompare(fragName, myFragIdOrName){
         ${mine&&mine.personalNotes?`<div style="margin-top:10px;font-family:var(--script);font-size:13px;font-style:italic;color:var(--ink2);line-height:1.5;padding-top:10px;border-top:1px solid var(--b2);">${mine.personalNotes}</div>`:''}
       </div>
       <div class="compare-col">
-        <div class="compare-col-head">Sylvia</div>
+        <div class="compare-col-head">${friend?friend.name:'Friend'}</div>
         <div class="compare-col-name">${fragName}</div>
-        <div class="cs"><div class="cs-label">Her rating</div><div class="cs-val">★★★★★</div></div>
-        <div class="cs"><div class="cs-label">Her feel</div><div class="cs-val">Obsessed</div></div>
+        <div class="cs"><div class="cs-label">Their rating</div><div class="cs-val">${starsStr(herFrag?herFrag.personalRating:null)}</div></div>
+        <div class="cs"><div class="cs-label">Their feel</div><div class="cs-val">${herFrag&&herFrag.statusRating?herFrag.statusRating:'—'}</div></div>
         <div class="cs"><div class="cs-label">Total compliments</div><div class="cs-val">${herComps.length}</div></div>
         <div class="cs"><div class="cs-label">From strangers</div><div class="cs-val">${herComps.filter(c=>c.relation==='Stranger').length}</div></div>
-        <div class="cs"><div class="cs-label">Her longevity</div><div class="cs-val">—</div></div>
-        <div class="cs"><div class="cs-label">Her sillage</div><div class="cs-val">—</div></div>
+        <div class="cs"><div class="cs-label">Their longevity</div><div class="cs-val">${herFrag&&herFrag.personalLong?herFrag.personalLong:'—'}</div></div>
+        <div class="cs"><div class="cs-label">Their sillage</div><div class="cs-val">${herFrag&&herFrag.personalSill?herFrag.personalSill:'—'}</div></div>
       </div>
     </div>
     ${allRels.length?`<div style="margin-bottom:20px;">
@@ -2324,7 +2449,7 @@ function openCompare(fragName, myFragIdOrName){
         <div class="cs-label">${r}</div>
         <div style="display:flex;gap:16px;">
           <span style="font-family:var(--mono);font-size:10px;color:var(--blue);">You: ${myByRel[r]||0}</span>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--warm);">Sylvia: ${herByRel[r]||0}</span>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--warm);">${friend?friend.name:'Friend'}: ${herByRel[r]||0}</span>
         </div>
       </div>`).join('')}
     </div>`:''}
@@ -2332,7 +2457,7 @@ function openCompare(fragName, myFragIdOrName){
       <div class="ct-head">Combined compliment timeline</div>
       ${allEvents.map(e=>`<div class="ct-row">
         <div class="ct-date">${e.month} ${e.year}</div>
-        <div class="ct-tag ${e.who==='you'?'ct-you':'ct-her'}">${e.who==='you'?'You':'Sylvia'}</div>
+        <div class="ct-tag ${e.who==='you'?'ct-you':'ct-her'}">${e.who==='you'?'You':(friend?friend.name:'Friend')}</div>
         <div style="flex:1;">
           <div class="ct-meta">${e.relation||''}${e.gender?' · '+e.gender:''}${e.location?' · '+e.location:''}</div>
           ${e.notes?`<div class="ct-note">${e.notes}</div>`:''}
@@ -3086,7 +3211,7 @@ function palFlows() {
         id: '_pick',
         type: 'pick',
         label: 'Which compliment to edit?',
-        source: function() { return COMPLIMENTS.slice(0, 20); },
+        source: function() { return myCompliments().slice(0, 20); },
         display: function(c) { return c.primaryFrag; },
         sub: function(c) { return c.relation + ' — ' + c.month + ' ' + c.year + (c.location ? ' — ' + c.location : ''); },
         onPick: function(c) { PAL.editTarget = c; },
