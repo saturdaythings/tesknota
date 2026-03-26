@@ -1159,6 +1159,9 @@ async function loadAllData(){
   USERS=results[0].length?results[0]:USERS;
   FRAGRANCES=results[1];
   COMPLIMENTS=results[2];
+  // Recalculate ID counters from loaded data
+  FRAGRANCES.forEach(function(f){ var n=parseInt(f.id.replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
+  COMPLIMENTS.forEach(function(c){ var n=parseInt(c.id.replace(/\D/g,''))||0; if(n>=nextCompId)nextCompId=n+1; });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1300,6 +1303,13 @@ const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt'
 
 function starsStr(n){ if(!n)return '—'; let s=''; for(let i=1;i<=5;i++) s+=i<=n?'★':'☆'; return s; }
 
+// ── Per-user accessors ─────────────────────────────────────────────────────
+function myFragrances(){ return FRAGRANCES.filter(function(f){ return CURRENT_USER && f.userId===CURRENT_USER.id; }); }
+function friendFragrances(){ var fr=getFriend(); return fr ? FRAGRANCES.filter(function(f){ return f.userId===fr.id; }) : []; }
+function myCompliments(){ return COMPLIMENTS.filter(function(c){ return CURRENT_USER && c.userId===CURRENT_USER.id; }); }
+function friendCompliments(){ var fr=getFriend(); return fr ? COMPLIMENTS.filter(function(c){ return c.userId===fr.id; }) : []; }
+function getFriend(){ return USERS.find(function(u){ return !CURRENT_USER || u.id!==CURRENT_USER.id; }); }
+
 function getCompCount(fragId){ return COMPLIMENTS.filter(c=>c.primaryFragId===fragId||c.secondaryFragId===fragId).length; }
 function getCompDist(fragId){
   const comps = COMPLIMENTS.filter(c=>c.primaryFragId===fragId);
@@ -1309,9 +1319,10 @@ function getCompDist(fragId){
 }
 
 function updateCounts(){
-  const owned = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE').length;
-  const wish = FRAGRANCES.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL').length;
-  const comps = COMPLIMENTS.length;
+  var MF=myFragrances(), MC=myCompliments();
+  const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE').length;
+  const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL').length;
+  const comps = MC.length;
   document.getElementById('ct-collection').textContent = owned;
   document.getElementById('ct-wishlist').textContent = wish;
   document.getElementById('ct-compliments').textContent = comps;
@@ -1349,16 +1360,17 @@ function closeSB(){ document.getElementById('SB').classList.remove('open'); docu
 // ═══════════════════════════════════════════════════════
 
 function renderDashboard(){
-  const owned = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE');
-  const wish = FRAGRANCES.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
+  var MF=myFragrances(), MC=myCompliments();
+  const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE');
+  const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
   document.getElementById('dashStats').innerHTML = `
     <div class="sbox"><div class="snum">${owned.length}</div><div class="slbl">Owned</div></div>
     <div class="sbox"><div class="snum">${wish.length}</div><div class="slbl">Wishlist</div></div>
-    <div class="sbox"><div class="snum">${COMPLIMENTS.length}</div><div class="slbl">Compliments</div></div>
+    <div class="sbox"><div class="snum">${MC.length}</div><div class="slbl">Compliments</div></div>
     <div class="sbox"><div class="snum">${avgRating()}</div><div class="slbl">Avg Rating</div></div>
-    <div class="sbox"><div class="snum">${FRAGRANCES.filter(f=>f.status==='PREVIOUSLY_OWNED').length}</div><div class="slbl">Prev. Owned</div></div>`;
+    <div class="sbox"><div class="snum">${MF.filter(f=>f.status==='PREVIOUSLY_OWNED').length}</div><div class="slbl">Prev. Owned</div></div>`;
   // Recent 4 CURRENT fragrances
-  const recent = FRAGRANCES.filter(f=>f.status==='CURRENT').slice(0,4);
+  const recent = MF.filter(f=>f.status==='CURRENT').slice(0,4);
   document.getElementById('dashBody').innerHTML = recent.map(f=>`
     <tr onclick="openDetail('${f.id}')">
       <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
@@ -1370,10 +1382,10 @@ function renderDashboard(){
     </tr>`).join('');
   // Top performers
   const byFrag = {};
-  COMPLIMENTS.forEach(c=>{ byFrag[c.primaryFragId]=(byFrag[c.primaryFragId]||0)+1; });
+  MC.forEach(c=>{ byFrag[c.primaryFragId]=(byFrag[c.primaryFragId]||0)+1; });
   const sorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,3);
   document.getElementById('dashPerformers').innerHTML = sorted.map(([id,cnt],i)=>{
-    const f = FRAGRANCES.find(x=>x.id===id); if(!f)return '';
+    const f = MF.find(x=>x.id===id); if(!f)return '';
     const dist = getCompDist(id);
     return `<div style="background:var(--off);padding:18px;cursor:pointer;" onclick="openDetail('${id}')">
       <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;">No. ${i+1}</div>
@@ -1385,7 +1397,7 @@ function renderDashboard(){
 }
 
 function avgRating(){
-  const rated = FRAGRANCES.filter(f=>f.personalRating);
+  const rated = myFragrances().filter(f=>f.personalRating);
   if(!rated.length)return '—';
   return (rated.reduce((a,f)=>a+f.personalRating,0)/rated.length).toFixed(1);
 }
@@ -1395,7 +1407,8 @@ function avgRating(){
 // ═══════════════════════════════════════════════════════
 
 function renderCollection(filter='all'){
-  const coll = FRAGRANCES.filter(f=>f.status!=='WANT_TO_BUY'&&f.status!=='WANT_TO_SMELL');
+  var MF=myFragrances();
+  const coll = MF.filter(f=>f.status!=='WANT_TO_BUY'&&f.status!=='WANT_TO_SMELL');
   const filtered = filter==='all' ? coll : coll.filter(f=>f.status===filter);
   // Update filter counts
   document.querySelector('#collFbar .fc[data-filter="all"]').textContent=`All (${coll.length})`;
@@ -1438,7 +1451,8 @@ document.getElementById('collFbar').addEventListener('click',e=>{
 // ═══════════════════════════════════════════════════════
 
 function renderWishlist(filter='all'){
-  const wish = FRAGRANCES.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
+  var MF=myFragrances();
+  const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
   const filtered = filter==='all' ? wish : wish.filter(f=>f.status===filter);
   document.querySelector('#wishFbar .fc[data-filter="all"]').textContent=`All (${wish.length})`;
   document.querySelector('#wishFbar .fc[data-filter="WANT_TO_SMELL"]').textContent=`Want to Smell (${wish.filter(f=>f.status==='WANT_TO_SMELL').length})`;
@@ -1475,13 +1489,14 @@ function promoteToOwned(fragId){
 // ═══════════════════════════════════════════════════════
 
 function renderCompliments(filter='all'){
-  const filtered = filter==='all' ? COMPLIMENTS : COMPLIMENTS.filter(c=>c.relation===filter);
+  var MC=myCompliments();
+  const filtered = filter==='all' ? MC : MC.filter(c=>c.relation===filter);
   // Update counts in filter bar
   const rel=['Stranger','Friend','Colleague / Client','Family','Significant Other'];
-  document.querySelector('#compFbar .fc[data-filter="all"]').textContent=`All (${COMPLIMENTS.length})`;
+  document.querySelector('#compFbar .fc[data-filter="all"]').textContent='All ('+MC.length+')';
   rel.forEach(r=>{
-    const el = document.querySelector(`#compFbar .fc[data-filter="${r}"]`);
-    if(el) el.textContent = `${r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'SO':r+'s'} (${COMPLIMENTS.filter(c=>c.relation===r).length})`;
+    const el = document.querySelector('#compFbar .fc[data-filter="'+r+'"]');
+    if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'SO':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
   });
   document.getElementById('compList').innerHTML = filtered.map(c=>`
     <div class="crow" data-rel="${c.relation}">
@@ -1516,14 +1531,15 @@ function deleteCompliment(id){
 // ═══════════════════════════════════════════════════════
 
 function renderAnalytics(){
-  const total = COMPLIMENTS.length;
+  var MC=myCompliments();
+  const total = MC.length;
   const byFrag = {};
-  COMPLIMENTS.forEach(c=>{ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; });
+  MC.forEach(c=>{ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; });
   const fragSorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const byRel = {};
-  COMPLIMENTS.forEach(c=>{ byRel[c.relation]=(byRel[c.relation]||0)+1; });
+  MC.forEach(c=>{ byRel[c.relation]=(byRel[c.relation]||0)+1; });
   const relSorted = Object.entries(byRel).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const strangerPct = Math.round((COMPLIMENTS.filter(c=>c.relation==='Stranger').length/total)*100)||0;
+  const strangerPct = Math.round((MC.filter(c=>c.relation==='Stranger').length/total)*100)||0;
   const perMonth = (total/12).toFixed(1);
   document.getElementById('anaStats').innerHTML = `
     <div class="sbox"><div class="snum">${total}</div><div class="slbl">Total Compliments</div></div>
@@ -1538,9 +1554,9 @@ function renderAnalytics(){
   // Dynamic insights
   const insights = [];
   if(fragSorted[0]) insights.push({t:`${fragSorted[0][0]} is your top performer`,b:`${fragSorted[0][1]} compliments — ${Math.round((fragSorted[0][1]/total)*100)}% of total. ${strangerPct>50?'Predominantly from strangers — the strongest unprompted signal.':''}`});
-  const layered = COMPLIMENTS.filter(c=>c.secondaryFragId);
+  const layered = MC.filter(c=>c.secondaryFragId);
   if(layered.length) insights.push({t:'Layering generates response',b:`${layered.length} of your ${total} compliments were while wearing two fragrances together.`});
-  const locs = {}; COMPLIMENTS.forEach(c=>{ if(c.location){const city=c.location.split(',').pop().trim();locs[city]=(locs[city]||0)+1;}});
+  const locs = {}; MC.forEach(c=>{ if(c.location){const city=c.location.split(',').pop().trim();locs[city]=(locs[city]||0)+1;}});
   const topCity=Object.entries(locs).sort((a,b)=>b[1]-a[1])[0];
   if(topCity) insights.push({t:`${topCity[0]} is your best city`,b:`${topCity[1]} of ${total} compliments in ${topCity[0]}.`});
   document.getElementById('insightsList').innerHTML = insights.map((ins,i)=>`<div class="ins"${i===insights.length-1?' style="border-bottom:none"':''}><div class="ins-t">${ins.t}</div><div class="ins-b">${ins.b}</div></div>`).join('');
@@ -1563,21 +1579,21 @@ function renderFriend(){
 }
 
 function renderInCommon(){
-  const myNames = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED').map(f=>f.name.toLowerCase());
+  const myNames = myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED').map(f=>f.name.toLowerCase());
   const sylviaOwned = ['Black Opium EDP','Baccarat Rouge 540','Libre EDP','Roses Musk','Good Girl'];
   const shared = sylviaOwned.filter(n=>myNames.includes(n.toLowerCase()));
   const ic = document.getElementById('inCommon');
   if(!shared.length){ ic.innerHTML=''; return; }
   ic.innerHTML = `<div class="ic-label">In common — ${shared.length} fragrance${shared.length>1?'s':''} you both own</div>` +
     shared.map(name=>{
-      const mine = FRAGRANCES.find(f=>f.name.toLowerCase()===name.toLowerCase());
+      const mine = myFragrances().find(f=>f.name.toLowerCase()===name.toLowerCase());
       return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b2);">
         <div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);">${name}</div>
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);">You: ${starsStr(mine?.personalRating)} · Sylvia: ★★★★★</div>
       </div>`;
     }).join('');
   // Wishlist in common
-  const myWish = FRAGRANCES.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL').map(f=>f.name.toLowerCase());
+  const myWish = myFragrances().filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL').map(f=>f.name.toLowerCase());
   const sylviaWish = ['Baccarat Rouge 540 EDP','Santal 33'];
   const wishShared = sylviaWish.filter(n=>myWish.includes(n.toLowerCase()));
   const wic = document.getElementById('wishInCommon');
@@ -1706,8 +1722,9 @@ function renderCurrentPage(){
 function gSearch(v){
   const el=document.getElementById('gDrop');
   if(v.length<2){el.style.display='none';return;}
-  const hits=FRAGRANCES.filter(f=>f.name.toLowerCase().includes(v.toLowerCase())||f.house.toLowerCase().includes(v.toLowerCase())).slice(0,6);
-  const dbHits=FRAG_DB.filter(f=>f.n.toLowerCase().includes(v.toLowerCase())).filter(d=>!FRAGRANCES.find(f=>f.name.toLowerCase()===d.n.toLowerCase())).slice(0,3);
+  var MF=myFragrances();
+  const hits=MF.filter(f=>f.name.toLowerCase().includes(v.toLowerCase())||f.house.toLowerCase().includes(v.toLowerCase())).slice(0,6);
+  const dbHits=FRAG_DB.filter(f=>f.n.toLowerCase().includes(v.toLowerCase())).filter(d=>!MF.find(f=>f.name.toLowerCase()===d.n.toLowerCase())).slice(0,3);
   if(!hits.length&&!dbHits.length){el.innerHTML='<div class="sdi"><div class="sdi-n" style="color:var(--ink3)">No results</div></div>';el.style.display='block';return;}
   el.innerHTML=
     hits.map(f=>`<div class="sdi" onmousedown="pickGS('${f.id}')"><div class="sdi-n">${f.name}</div><div class="sdi-h">${f.house} · ${STATUS_LABELS[f.status]}</div></div>`).join('')+
@@ -1908,7 +1925,7 @@ function pickAF(name){
 
 function openAddComp(fragId){
   // Populate fragrance dropdown with CURRENT + PREVIOUSLY_OWNED
-  const eligible = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
+  const eligible = myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
   const sel = document.getElementById('compFrag');
   sel.innerHTML='<option value="">— Select from collection —</option>';
   eligible.forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=f.name+(f.status==='PREVIOUSLY_OWNED'?' (prev. owned)':''); sel.appendChild(o); });
@@ -1932,7 +1949,7 @@ function openAddComp(fragId){
 function updateCompFrag2(){
   const primaryId = document.getElementById('compFrag').value;
   const sel2 = document.getElementById('compFrag2');
-  const eligible = FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
+  const eligible = myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
   sel2.innerHTML='<option value="">None</option>';
   eligible.filter(f=>f.id!==primaryId).forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=f.name; sel2.appendChild(o); });
 }
@@ -2111,7 +2128,7 @@ function setView(v){
 
 // Export
 function exportData(){
-  const rows=[['Name','House','Status','Personal Rating','Compliments'],...FRAGRANCES.map(f=>[f.name,f.house,STATUS_LABELS[f.status],f.personalRating||'',getCompCount(f.id)])];
+  const rows=[['Name','House','Status','Personal Rating','Compliments'],...myFragrances().map(f=>[f.name,f.house,STATUS_LABELS[f.status],f.personalRating||'',getCompCount(f.id)])];
   const csv=rows.map(r=>r.join(',')).join('\n');
   const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='tesknota-export.csv';a.click();
 }
@@ -2135,7 +2152,7 @@ function toast(msg){
 
 function computeNotesIntel(){
   const noteMap = {};
-  FRAGRANCES.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED').forEach(f=>{
+  myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED').forEach(f=>{
     const notes = f.notes.split(/[·,]/).map(n=>n.trim()).filter(n=>n.length>1);
     const compCount = getCompCount(f.id);
     notes.forEach(note=>{
@@ -2162,7 +2179,7 @@ function renderNotesIntel(){
   const faveEl = document.getElementById('faveNotes');
   if(!faveEl)return;
   const byFrag = {};
-  FRAGRANCES.filter(f=>f.status==='CURRENT').forEach(f=>{
+  myFragrances().filter(f=>f.status==='CURRENT').forEach(f=>{
     f.notes.split(/[·,]/).map(n=>n.trim()).filter(n=>n.length>1).forEach(n=>{
       byFrag[n]=(byFrag[n]||0)+1;
     });
