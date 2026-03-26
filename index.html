@@ -651,7 +651,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- FRIEND PROFILE -->
     <div class="page" id="page-friend">
       <div class="f-banner">
-        <div><div class="fb-label">Friend profile</div><div class="fb-name">Sylvia M.</div><div class="fb-meta">Member since Jan 2025 · New York, NY</div></div>
+        <div><div class="fb-label">Friend profile</div><div class="fb-name" id="fbName"></div><div class="fb-meta" id="fbMeta"></div></div>
         <div class="fb-stats">
           <div class="fb-stat"><div class="fsn">24</div><div class="fsl">Fragrances</div></div>
           <div class="fb-stat"><div class="fsn">18</div><div class="fsl">Compliments</div></div>
@@ -1759,7 +1759,16 @@ function renderFriend(){
   var friendWish=FF.filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
 
   // Banner
-  var bn=document.querySelector('.fb-name'); if(bn) bn.textContent=friend.name;
+  var bn=document.getElementById('fbName'); if(bn) bn.textContent=friend.name;
+  var bm=document.getElementById('fbMeta');
+  if(bm){
+    var sinceStr='';
+    if(friend.createdAt){
+      var d=new Date(friend.createdAt);
+      sinceStr='Member since '+d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+    }
+    bm.textContent=sinceStr;
+  }
   var fsns=document.querySelectorAll('.fb-stat .fsn');
   if(fsns[0]) fsns[0].textContent=FF.length;
   if(fsns[1]) fsns[1].textContent=FC.length;
