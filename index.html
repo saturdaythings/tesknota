@@ -2637,6 +2637,15 @@ function initChat(){
   chatState='idle'; chatContext={};
   const msgs = document.getElementById('chatMessages');
   msgs.innerHTML='';
+  const hasKey=window.__ENV__&&window.__ENV__.ANTHROPIC_API_KEY;
+  const inp=document.getElementById('chatInput');
+  if(!hasKey){
+    botMsg('Quick Entry assistant coming soon. Add your Anthropic API key in config.js to enable.');
+    inp.disabled=true;
+    document.getElementById('chatSugs').innerHTML='';
+    return;
+  }
+  inp.disabled=false;
   botMsg('Hey — I\'m your quick entry assistant. I can log compliments, add fragrances, update ratings, or answer questions about your collection. What would you like to do?');
   showSugs(CHAT_BASE_SUGS);
 }
@@ -2809,8 +2818,9 @@ function handleChat(text){
   } else if(text.includes('how many')||text.includes('total')||text.includes('this month')||text.includes('count')){
     const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const mon=MONTHS[new Date().getMonth()]; const yr=String(new Date().getFullYear());
-    const thisMonth=COMPLIMENTS.filter(c=>c.month===mon&&c.year===yr).length;
-    botMsg(`Total compliments: <strong>${COMPLIMENTS.length}</strong><br>${mon} ${yr} so far: <strong>${thisMonth}</strong><br>Collection size: <strong>${FRAGRANCES.filter(f=>f.status==='CURRENT').length}</strong> current`);
+    var MC2=myCompliments(), MF2=myFragrances();
+    const thisMonth=MC2.filter(c=>c.month===mon&&c.year===yr).length;
+    botMsg(`Total compliments: <strong>${MC2.length}</strong><br>${mon} ${yr} so far: <strong>${thisMonth}</strong><br>Collection size: <strong>${MF2.filter(f=>f.status==='CURRENT').length}</strong> current`);
     showSugs(CHAT_BASE_SUGS);
   } else if(text.includes('status')||text.includes('move')||text.includes('bought')||text.includes('purchased')){
     chatState='idle';
@@ -2820,6 +2830,38 @@ function handleChat(text){
     botMsg('I can help with: logging compliments, adding fragrances, updating ratings, or answering questions about your collection. What would you like?');
     showSugs(CHAT_BASE_SUGS);
   }
+}
+
+// callAnthropic — stub. Uncomment body to enable AI-powered chat intent parsing.
+// Requires ANTHROPIC_API_KEY in config.js.
+async function callAnthropic(userMessage){
+  /*
+  const key = window.__ENV__.ANTHROPIC_API_KEY;
+  if (!key) return { action: 'ANSWER', data: { reply: 'Anthropic key not configured.' } };
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 256,
+      system: 'You are a quick-entry assistant for tesknota, a private fragrance tracker. Parse the user message and return ONLY valid JSON, no preamble, no markdown. Actions: LOG_COMPLIMENT {fragrance,relation,notes?,gender?,location?} | ADD_FRAGRANCE {name,status} | UPDATE_RATING {fragrance,rating} | CHANGE_STATUS {fragrance,newStatus} | ANSWER {reply}.',
+      messages: [{ role: 'user', content: userMessage }],
+    }),
+  });
+  const data = await res.json();
+  const text = (data.content && data.content[0] && data.content[0].text) || '{}';
+  try {
+    return JSON.parse(text.replace(/```json|```/g, '').trim());
+  } catch (e) {
+    return { action: 'ANSWER', data: { reply: text }, reply: text };
+  }
+  */
+  return { action: 'ANSWER', data: { reply: 'Anthropic API not yet wired. Add ANTHROPIC_API_KEY to config.js.' } };
 }
 
 // ═══════════════════════════════════════════════════════
