@@ -680,30 +680,34 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div style="display:flex;justify-content:flex-end;"><button class="btn btn-blue btn-sm" onclick="confirmBulkImport()">Import Selected</button></div>
       </div>
       <div class="ipanel" id="ip-cam">
-        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;line-height:1.7;">Point at a barcode or label. You confirm before anything saves.</div>
+        <div class="cam-instruction" style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;line-height:1.7;">Point your camera at the fragrance label. Tap Capture when the label is clearly visible. Works best with good lighting and a flat label.</div>
         <div class="cam-box">
-          <div class="cam-view" id="camView" onclick="simScan()">
-            <div class="cv-t">Tap to scan a bottle</div>
-            <div class="cv-s">Barcode · Label · Bottle photo</div>
+          <div class="cam-view" id="camView" onclick="startScan()">
+            <div class="cv-t">Tap to open camera</div>
+            <div class="cv-s">Label recognition · Text detection</div>
           </div>
-          <div class="cam-res" id="camRes">
-            <div class="cam-label">Identified — confirm before saving</div>
-            <div style="font-family:var(--serif);font-size:17px;font-style:italic;color:var(--blue);">Tobacco Vanille</div>
-            <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin:3px 0 12px;">Tom Ford · Oriental Spicy</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
-              <div><div class="lrl">Community</div><div class="lrv">4.4 / 5.0</div></div>
-              <div><div class="lrl">Longevity</div><div class="lrv">12–24h</div></div>
-              <div><div class="lrl">Avg Price</div><div class="lrv">~$280</div></div>
+          <video id="camVideo" autoplay playsinline style="display:none;width:100%;"></video>
+          <button class="btn btn-blue" id="camCaptureBtn" style="display:none;width:100%;margin-top:8px;" onclick="captureAndIdentify()">Tap to capture label</button>
+          <div class="cam-res" id="camRes" style="display:none;">
+            <div class="cam-label">Identified from label — confirm before saving</div>
+            <div class="lr-n" id="scan-name"></div>
+            <div class="lr-h" id="scan-house"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+              <div><div class="lrl">Community</div><div class="lrv" id="scan-comm"></div></div>
+              <div><div class="lrl">Notes</div><div class="lrv" id="scan-notes" style="font-size:11px;"></div></div>
             </div>
-            <div style="font-family:var(--script);font-size:14px;font-style:italic;color:var(--ink2);margin-bottom:14px;">Tobacco Leaf · Vanilla · Tonka Bean · Cacao · Vetiver</div>
             <div style="display:flex;gap:8px;">
-              <button class="btn btn-blue" onclick="importToCollection({name:'Tobacco Vanille',house:'Tom Ford',communityRating:4.4,communityLong:'12–24h',communitySill:'Moderate',avgPrice:'~$280',notes:'Tobacco Leaf, Vanilla, Tonka Bean, Cacao, Vetiver'})">Add to Collection</button>
-              <button class="btn btn-ghost" onclick="importToWishlist({name:'Tobacco Vanille',house:'Tom Ford',communityRating:4.4,avgPrice:'~$280',notes:'Tobacco Leaf, Vanilla, Tonka Bean'});resetScan()">Add to Wishlist</button>
+              <button class="btn btn-blue" onclick="importToCollection(window._scannedFragData)">Add to Collection</button>
+              <button class="btn btn-ghost" onclick="importToWishlist(window._scannedFragData);resetScan()">Add to Wishlist</button>
               <button class="btn-bare" onclick="resetScan()">Rescan</button>
             </div>
           </div>
+          <div id="camNotFound" style="display:none;padding:16px;">
+            <div style="font-size:12px;color:var(--ink3);margin-bottom:8px;">Could not identify. Text detected:</div>
+            <div id="camRawText" style="font-family:var(--mono);font-size:10px;color:var(--ink2);"></div>
+          </div>
         </div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">Not identified? <span style="color:var(--blue);cursor:pointer;" onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:8px;">Not working? <span style="color:var(--blue);cursor:pointer;" onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
       </div>
       <div class="ipanel" id="ip-csv">
         <div class="dropzone" onclick="toast('File picker opening...')">
@@ -2332,13 +2336,99 @@ function showLinkResult(data){
   window._fetchedFragData=data;
 }
 
-function simScan(){
-  document.getElementById('camView').style.display='none';
-  setTimeout(()=>{document.getElementById('camRes').style.display='block';toast('Bottle identified');},1000);
+async function startScan(){
+  var visionKey=window.__ENV__&&window.__ENV__.VISION_API_KEY?window.__ENV__.VISION_API_KEY:'';
+  if(!visionKey){toast('Bottle scan requires a Google Vision API key. Go to Settings → Configure Scan to set it up.');return;}
+  var stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});}
+  catch(e){toast('Camera access denied — please allow camera in browser settings');return;}
+  var video=document.getElementById('camVideo');
+  var captureBtn=document.getElementById('camCaptureBtn');
+  var scanView=document.getElementById('camView');
+  video.srcObject=stream;
+  video.style.display='block';
+  scanView.style.display='none';
+  captureBtn.style.display='block';
+  captureBtn.textContent='Tap to capture label';
+  window._camStream=stream;
 }
+
+async function captureAndIdentify(){
+  var video=document.getElementById('camVideo');
+  if(!video.srcObject)return;
+  var canvas=document.createElement('canvas');
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  var base64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
+  stopCamera();
+  var captureBtn=document.getElementById('camCaptureBtn');
+  captureBtn.textContent='Identifying...';captureBtn.disabled=true;
+  try{
+    var visionKey=window.__ENV__&&window.__ENV__.VISION_API_KEY?window.__ENV__.VISION_API_KEY:'';
+    var res=await fetch('https://vision.googleapis.com/v1/images:annotate?key='+visionKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({requests:[{image:{content:base64},features:[{type:'TEXT_DETECTION',maxResults:1},{type:'LOGO_DETECTION',maxResults:3}]}]})
+    });
+    var data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    var fullText=(data.responses[0]&&data.responses[0].fullTextAnnotation?data.responses[0].fullTextAnnotation.text:'')||'';
+    var logoLabels=(data.responses[0]&&data.responses[0].logoAnnotations?data.responses[0].logoAnnotations:[]).map(function(l){return l.description;});
+    var identified=identifyFragranceFromText(fullText,logoLabels);
+    if(identified){
+      showScanResult(identified);
+    }else{
+      document.getElementById('camNotFound').style.display='block';
+      document.getElementById('camRawText').textContent=fullText.slice(0,200);
+      toast('Could not identify — try searching by name');
+    }
+  }catch(e){
+    toast('Vision API error: '+e.message);
+    document.getElementById('camView').style.display='flex';
+    captureBtn.textContent='Tap to capture label';captureBtn.disabled=false;
+  }
+}
+
+function identifyFragranceFromText(rawText,logoLabels){
+  if(!rawText&&!logoLabels.length)return null;
+  var allText=(rawText+' '+logoLabels.join(' ')).toLowerCase();
+  var bestMatch=null,bestScore=0;
+  FRAG_DB.forEach(function(frag){
+    var nameWords=frag.n.toLowerCase().split(' ');
+    var houseWords=frag.h.toLowerCase().split(' ');
+    var score=0;
+    nameWords.forEach(function(w){if(w.length>2&&allText.includes(w))score+=2;});
+    houseWords.forEach(function(w){if(w.length>2&&allText.includes(w))score+=1;});
+    if(score>bestScore){bestScore=score;bestMatch=frag;}
+  });
+  if(bestScore<2)return null;
+  return {name:bestMatch.n,house:bestMatch.h,communityRating:bestMatch.r,communityLong:bestMatch.l,communitySill:bestMatch.s,avgPrice:bestMatch.p,allNotes:bestMatch.notes,parseConfidence:'vision',rawText:rawText.slice(0,200)};
+}
+
+function showScanResult(data){
+  document.getElementById('camVideo').style.display='none';
+  document.getElementById('camCaptureBtn').style.display='none';
+  document.getElementById('camView').style.display='none';
+  document.getElementById('scan-name').textContent=data.name;
+  document.getElementById('scan-house').textContent=data.house;
+  document.getElementById('scan-comm').textContent=data.communityRating?data.communityRating+' / 5.0':'—';
+  document.getElementById('scan-notes').textContent=data.allNotes||'—';
+  document.getElementById('camRes').style.display='block';
+  window._scannedFragData=data;
+}
+
+function stopCamera(){
+  if(window._camStream){window._camStream.getTracks().forEach(function(t){t.stop();});window._camStream=null;}
+  var v=document.getElementById('camVideo');v.srcObject=null;v.style.display='none';
+}
+
 function resetScan(){
+  stopCamera();
   document.getElementById('camRes').style.display='none';
   document.getElementById('camView').style.display='flex';
+  document.getElementById('camNotFound').style.display='none';
+  var btn=document.getElementById('camCaptureBtn');btn.textContent='Tap to capture label';btn.disabled=false;
+  window._scannedFragData=null;
 }
 
 function selIM(m){
