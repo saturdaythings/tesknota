@@ -392,6 +392,15 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .panel-inset{padding:14px;background:var(--blue4);border:1px solid var(--b2);margin-top:12px;}
 .video-fullwidth{width:100%;display:block;}
 
+/* SMART WEARING SUGGESTER */
+.dash-suggest{background:var(--off);border:1px solid var(--b2);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+.suggest-body{}
+.suggest-label{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
+.suggest-name{font-family:var(--serif);font-size:17px;font-style:italic;color:var(--blue);margin-bottom:2px;}
+.suggest-house{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;}
+.suggest-meta{font-family:var(--mono);font-size:10px;color:var(--warm);margin-top:4px;}
+.suggest-reason{font-size:11px;color:var(--ink3);margin-top:3px;}
+
 /* PERFORMER CARDS */
 .card-performer{background:var(--off);padding:18px;cursor:pointer;}
 .card-performer:hover{background:var(--off2);}
@@ -681,6 +690,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- DASHBOARD -->
     <div class="page on" id="page-dashboard">
       <div class="stats" id="dashStats"></div>
+      <div id="dashSuggest"></div>
       <div class="mb-20">
         <button class="btn btn-warm" onclick="openAddComp(null)" title="Record a compliment you received">+ Log a Compliment</button>
       </div>
@@ -2006,8 +2016,56 @@ function closeSB(){ document.getElementById('SB').classList.remove('open'); docu
 // RENDER — DASHBOARD
 // ═══════════════════════════════════════════════════════
 
+function getDailySuggestion(){
+  var MF = myFragrances().filter(function(f){ return f.status==='CURRENT'; });
+  if(!MF.length) return null;
+  // Check localStorage for today's persisted pick
+  var today = new Date().toISOString().slice(0,10);
+  var lsKey = 'dashWearPick_' + today;
+  try {
+    var saved = localStorage.getItem(lsKey);
+    if(saved){ var found = MF.find(function(f){ return f.id===saved; }); if(found) return found; }
+  } catch(e){}
+  // Score each frag: compliments × 3 + personal_rating
+  var MC = myCompliments();
+  var season = (function(){ var mo=new Date().getMonth(); return mo<2||mo===11?'winter':mo<5?'spring':mo<8?'summer':'fall'; })();
+  var seasonFamilies = {winter:['Woody','Oriental','Leather','Spicy'],spring:['Floral','Fresh'],summer:['Fresh','Citrus','Aquatic','Floral'],fall:['Oriental','Spicy','Woody','Amber']};
+  var scored = MF.map(function(f){
+    var comps = MC.filter(function(c){ return c.primaryFragId===f.id||c.secondaryFragId===f.id; }).length;
+    var score = comps*3 + (f.personalRating||0);
+    return {f:f, score:score, comps:comps};
+  });
+  scored.sort(function(a,b){ return b.score-a.score; });
+  // If scores tied at top, use seasonal preference as tiebreaker
+  var topScore = scored[0].score;
+  var candidates = scored.filter(function(x){ return x.score===topScore; });
+  var winner;
+  if(candidates.length>1){
+    var seasonal = candidates.filter(function(x){
+      var fam = (x.f.family||'').toLowerCase();
+      return (seasonFamilies[season]||[]).some(function(s){ return fam.includes(s.toLowerCase()); });
+    });
+    winner = (seasonal.length?seasonal:candidates)[0];
+  } else {
+    winner = candidates[0];
+  }
+  try{ localStorage.setItem(lsKey, winner.f.id); }catch(e){}
+  return winner;
+}
+
 function renderDashboard(){
   var MF=myFragrances(), MC=myCompliments();
+  // Smart wearing suggester
+  var suggestEl=document.getElementById('dashSuggest');
+  if(suggestEl){
+    var pick=getDailySuggestion();
+    if(pick){
+      var reason=pick.comps>0?pick.comps+' compliment'+(pick.comps>1?'s':''):((function(){ var mo=new Date().getMonth(); return mo<2||mo===11?'Winter pick':mo<5?'Spring pick':mo<8?'Summer pick':'Fall pick'; })());
+      suggestEl.innerHTML='<div class="dash-suggest"><div class="suggest-body"><div class="suggest-label">Today\'s Pick</div><div class="suggest-name">'+pick.f.name+'</div><div class="suggest-house">'+pick.f.house+'</div><div class="suggest-meta">'+reason+'</div></div><button class="btn btn-warm" onclick="openAddComp(\''+pick.f.id+'\')">+ Log Compliment</button></div>';
+    } else {
+      suggestEl.innerHTML='';
+    }
+  }
   const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE');
   const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
   document.getElementById('dashStats').innerHTML = `
