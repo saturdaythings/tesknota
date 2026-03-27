@@ -109,6 +109,20 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .ts{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;}
 .s-cur{color:var(--sage);}
 .s-wnt{color:#7A6040;}
+.s-unk{color:#9088C0;}
+.cam-detected-hint{font-family:var(--mono);font-size:10px;color:var(--ink3);padding:8px 12px;letter-spacing:.06em;cursor:pointer;}
+.cam-detected-hint span{text-decoration:underline;cursor:pointer;}
+.cam-match-list{padding:8px;}
+.cam-match-item{padding:10px 12px;border-bottom:1px solid var(--b2);cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
+.cam-match-item:hover{background:var(--off2);}
+.cam-match-n{font-family:var(--serif);font-size:14px;color:var(--ink);}
+.cam-match-h{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.06em;}
+.cam-match-src{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.06em;}
+.cam-search-bar{padding:10px 12px 0;position:relative;}
+.cam-search-bar input{width:100%;box-sizing:border-box;height:34px;padding:0 12px;background:var(--off2);border:1px solid var(--b3);font-size:12px;font-family:var(--body);color:var(--ink);outline:none;}
+.cam-search-drop{position:absolute;top:100%;left:12px;right:12px;background:var(--off);border:1px solid var(--b2);border-top:none;z-index:20;max-height:240px;overflow-y:auto;}
+.cam-search-drop .sdi{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--b2);}
+.cam-search-drop .sdi:hover{background:var(--off2);}
 .s-prv{color:var(--ink3);}
 .s-no{color:var(--rose);}
 .tstars{font-size:11px;color:var(--warm);letter-spacing:1px;}
@@ -832,12 +846,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="queue-end"><button class="btn btn-blue btn-sm" onclick="confirmBulkImport()">Import Selected</button></div>
       </div>
       <div class="ipanel" id="ip-cam">
+        <div class="cam-search-bar">
+          <input type="text" id="camSearchInput" placeholder="Or search by name…" autocomplete="off" oninput="camSearchType(this.value)">
+          <div class="cam-search-drop" id="camSearchDrop" style="display:none;"></div>
+        </div>
         <div id="camInitPanel"></div>
         <div class="cam-box" id="camBox" style="display:none;">
           <video id="camVideo" autoplay playsinline class="video-fullwidth"></video>
           <div class="cam-guide" id="camGuide"></div>
           <div class="cam-loading" id="camLoading"><div class="cam-loading-spin"></div><div class="cam-loading-txt">Identifying&hellip;</div></div>
           <button class="btn btn-blue cam-capture-btn" id="camCaptureBtn" onclick="captureAndIdentify()">Capture</button>
+          <div id="camDetectedHint" style="display:none;" class="cam-detected-hint"></div>
           <div class="cam-res" id="camRes" style="display:none;">
             <div class="cam-label">Identified from label — confirm before saving</div>
             <div class="lr-n" id="scan-name"></div>
@@ -852,13 +871,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
               <button class="btn-bare" onclick="resetScan()">Rescan</button>
             </div>
           </div>
+          <div id="camMatchList" style="display:none;" class="cam-match-list"></div>
           <div id="camNotFound" style="display:none;padding:16px;">
-            <div class="caption-error">Could not identify. Text detected:</div>
+            <div class="caption-error" id="camNotFoundMsg">Could not identify. Text detected:</div>
             <div id="camRawText" class="code-output"></div>
+            <div class="btn-row" style="margin-top:10px;">
+              <button class="btn btn-ghost btn-sm" onclick="resetScan();startScan()">Try Again</button>
+              <button class="btn-bare" onclick="saveUnknownScan()">Save to identify later</button>
+            </div>
           </div>
         </div>
         <input type="file" id="camFileInput" accept="image/*" style="display:none;" onchange="handleCamFile(this.files[0])">
-        <div class="scan-footer-link">Not working? <span onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
       </div>
       <div class="ipanel" id="ip-csv">
         <p class="intro-text">Upload a CSV to bulk import your collection.</p>
@@ -1001,6 +1024,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <option value="WANT_TO_SMELL">Want to Smell</option>
             <option value="WANT_TO_BUY">Want to Buy</option>
             <option value="DONT_LIKE">Have Smelled — Don't Like</option>
+            <option value="WANT_TO_IDENTIFY">Save to Identify Later</option>
           </select>
         </div>
       </div>
@@ -1888,8 +1912,8 @@ let prefetchedData = null;
 function genId(prefix){ return prefix + (nextId++); }
 function genCompId(){ return 'c' + (nextCompId++); }
 const PAGES = {dashboard:'Dashboard',collection:'My Collection',wishlist:'Wishlist',compliments:'Compliments',analytics:'Analytics',friend:"Sylvia's Profile",import:'Import',settings:'Settings'};
-const STATUS_LABELS = {CURRENT:'Current',PREVIOUSLY_OWNED:'Prev. Owned',WANT_TO_BUY:'Want to Buy',WANT_TO_SMELL:'Want to Smell',DONT_LIKE:"Don't Like"};
-const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt',WANT_TO_SMELL:'s-wnt',DONT_LIKE:'s-no'};
+const STATUS_LABELS = {CURRENT:'Current',PREVIOUSLY_OWNED:'Prev. Owned',WANT_TO_BUY:'Want to Buy',WANT_TO_SMELL:'Want to Smell',DONT_LIKE:"Don't Like",WANT_TO_IDENTIFY:'Identify Later'};
+const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt',WANT_TO_SMELL:'s-wnt',DONT_LIKE:'s-no',WANT_TO_IDENTIFY:'s-unk'};
 
 function starsStr(n){ if(!n)return '—'; let s=''; for(let i=1;i<=5;i++) s+=i<=n?'★':'☆'; return s; }
 
@@ -3158,6 +3182,114 @@ function confirmBulkImport(){
   if(added>0) goPage('collection');
 }
 
+// ── Notes parsing + family deduction ─────────────────────────────────────────
+
+const NOTE_PYRAMID_HINTS={
+  bergamot:'top',lemon:'top',grapefruit:'top',lime:'top',orange:'top',mandarin:'top',
+  neroli:'top',petitgrain:'top',basil:'top',mint:'top',eucalyptus:'top',marine:'top',
+  'pink pepper':'top',cardamom:'top',ginger:'top',aldehydes:'top',ozone:'top',
+  aldehydic:'top',yuzu:'top',elemi:'top',
+  rose:'middle',jasmine:'middle',iris:'middle',violet:'middle',peony:'middle',
+  lily:'middle',ylangylang:'middle','ylang ylang':'middle',lavender:'middle',
+  geranium:'middle',cinnamon:'middle',clove:'middle',nutmeg:'middle',saffron:'middle',
+  tuberose:'middle',gardenia:'middle',magnolia:'middle',freesia:'middle',
+  heliotrope:'middle',orris:'middle',pepper:'middle',osmanthus:'middle',
+  sandalwood:'base',cedarwood:'base',vetiver:'base',patchouli:'base',musk:'base',
+  amber:'base',ambergris:'base',vanilla:'base',tonka:'base',benzoin:'base',
+  frankincense:'base',myrrh:'base',oud:'base',leather:'base',tobacco:'base',
+  labdanum:'base',oakmoss:'base',castoreum:'base',civet:'base',beeswax:'base',
+  honey:'base',coumarin:'base',incense:'base',resin:'base','tonka bean':'base',
+  musks:'base','white musk':'base',amberwood:'base',woody:'base',
+};
+
+function normalizeNoteName(n){
+  var r=n.trim().toLowerCase()
+    .replace(/\btonka\b(?! bean)/g,'Tonka Bean')
+    .replace(/\bmusks\b/g,'Musk')
+    .replace(/\bylang-ylang\b|\bylang ylang\b/gi,'Ylang Ylang')
+    .replace(/\bamberwood\b/gi,'Amberwood')
+    .replace(/\bwhite musk\b/gi,'White Musk')
+    .replace(/\s*(accord|absolute|extract|oil|essence)\b/gi,'')
+    .trim();
+  return r.replace(/\b\w/g,function(c){return c.toUpperCase();});
+}
+
+function parseAndAssignNotes(raw){
+  if(!raw) return {topNotes:'',middleNotes:'',baseNotes:'',allNotes:''};
+  var s=String(raw);
+
+  // Check for labeled sections
+  var topM   =s.match(/(?:top\s*notes?|head\s*notes?|opening)[:\s]*([^|\n\r]+)/i);
+  var midM   =s.match(/(?:heart\s*notes?|middle\s*notes?|mid\s*notes?|core\s*notes?)[:\s]*([^|\n\r]+)/i);
+  var baseM  =s.match(/(?:base\s*notes?|bottom\s*notes?|dry\s*down|foundation)[:\s]*([^|\n\r]+)/i);
+
+  if(topM||midM||baseM){
+    function parseList(m){
+      if(!m) return '';
+      return (m[1]||'').split(/[,·•\|\/]+/).map(function(n){return normalizeNoteName(n);}).filter(Boolean).slice(0,10).join(', ');
+    }
+    var top=parseList(topM),mid=parseList(midM),base=parseList(baseM);
+    return {topNotes:top,middleNotes:mid,baseNotes:base,allNotes:[top,mid,base].filter(Boolean).join(', ')};
+  }
+
+  // No labels — split into individual notes and assign by position hints
+  var notes=s.split(/[,·•\|\n\/]+/).map(function(n){return n.trim();}).filter(function(n){return n.length>1;});
+  var top=[],mid=[],base=[],unassigned=[];
+  notes.forEach(function(n){
+    var key=n.toLowerCase().replace(/\s+/g,' ');
+    var hint=NOTE_PYRAMID_HINTS[key];
+    if(!hint){
+      // Try partial match
+      for(var k in NOTE_PYRAMID_HINTS){if(key.includes(k)||k.includes(key)){hint=NOTE_PYRAMID_HINTS[k];break;}}
+    }
+    var nn=normalizeNoteName(n);
+    if(hint==='top') top.push(nn);
+    else if(hint==='middle') mid.push(nn);
+    else if(hint==='base') base.push(nn);
+    else unassigned.push(nn);
+  });
+  // Distribute unassigned evenly: first 1/3 → top if empty, last 1/3 → base
+  var third=Math.ceil(unassigned.length/3);
+  if(!top.length) top=top.concat(unassigned.slice(0,third));
+  if(!base.length) base=base.concat(unassigned.slice(-third));
+  mid=mid.concat(unassigned.slice(top.length===0?third:0, unassigned.length-(base.length===0?third:0)));
+  var t=top.slice(0,5).join(', '),m=mid.slice(0,5).join(', '),b=base.slice(0,5).join(', ');
+  return {topNotes:t,middleNotes:m,baseNotes:b,allNotes:[t,m,b].filter(Boolean).join(', ')};
+}
+
+const FAMILY_WEIGHTS={
+  'Floral':{rose:3,jasmine:3,iris:3,violet:3,peony:2,tuberose:3,gardenia:2,lily:2,magnolia:2,freesia:2,ylangylang:2,geranium:1,heliotrope:1,osmanthus:2},
+  'Oriental':{amber:3,ambergris:3,vanilla:2,tonka:2,benzoin:2,labdanum:3,frankincense:2,myrrh:2,oud:2,saffron:2,incense:2,resin:2,musk:1},
+  'Woody':{sandalwood:3,cedarwood:3,vetiver:3,patchouli:2,oud:3,oakmoss:2,pine:2,fir:2,leather:1,woody:2},
+  'Fresh':{bergamot:3,lemon:3,grapefruit:3,lime:2,orange:2,mandarin:2,neroli:2,marine:2,ozone:2,mint:2,eucalyptus:2},
+  'Gourmand':{vanilla:3,chocolate:3,caramel:3,coffee:3,honey:2,tonka:2,coconut:2,praline:3,almond:2,hazelnut:2,sugar:2},
+  'Musk':{musk:3,musks:3,ambrette:2,cashmere:2,'white musk':3},
+  'Spicy':{pepper:3,'pink pepper':3,cardamom:3,cinnamon:2,clove:2,nutmeg:2,ginger:2,saffron:2,chili:3},
+  'Leather':{leather:3,suede:3,castoreum:3,birch:2,tobacco:2,smoke:2},
+  'Aromatic':{lavender:3,rosemary:3,basil:2,thyme:2,sage:2,herbal:2},
+  'Aquatic':{marine:3,ocean:3,aquatic:3,sea:3,ozone:2,salt:2},
+};
+
+function deduceFamily(topNotes,middleNotes,baseNotes){
+  var allNotes=[topNotes,middleNotes,baseNotes].join(',').toLowerCase().split(',').map(function(n){return n.trim();}).filter(Boolean);
+  var scores={};
+  Object.keys(FAMILY_WEIGHTS).forEach(function(fam){
+    scores[fam]=0;
+    var weights=FAMILY_WEIGHTS[fam];
+    allNotes.forEach(function(note){
+      Object.keys(weights).forEach(function(key){
+        if(note.includes(key)||key.includes(note)) scores[fam]+=weights[key];
+      });
+    });
+  });
+  var sorted=Object.entries(scores).filter(function(e){return e[1]>=3;}).sort(function(a,b){return b[1]-a[1];});
+  if(!sorted.length) return null;
+  if(sorted.length>=2&&sorted[1][1]>=sorted[0][1]*0.65){
+    return sorted[0][0]+' '+sorted[1][0];
+  }
+  return sorted[0][0];
+}
+
 // ─── Fragrance search (layered: Layer 0 community → Layer 1 FRAG_DB) ──────────
 
 function normStr(s){
@@ -3457,22 +3589,12 @@ async function captureAndIdentify(){
     var visionKey=window.__ENV__&&window.__ENV__.VISION_API_KEY?window.__ENV__.VISION_API_KEY:'';
     var res=await fetch('https://vision.googleapis.com/v1/images:annotate?key='+visionKey,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({requests:[{image:{content:base64},features:[{type:'TEXT_DETECTION',maxResults:1},{type:'LOGO_DETECTION',maxResults:3}]}]})
+      body:JSON.stringify({requests:[{image:{content:base64},features:[{type:'TEXT_DETECTION',maxResults:1},{type:'WEB_DETECTION',maxResults:5},{type:'LOGO_DETECTION',maxResults:3}]}]})
     });
     var data=await res.json();
     if(data.error)throw new Error(data.error.message);
-    var fullText=(data.responses[0]&&data.responses[0].fullTextAnnotation?data.responses[0].fullTextAnnotation.text:'')||'';
-    var logoLabels=(data.responses[0]&&data.responses[0].logoAnnotations?data.responses[0].logoAnnotations:[]).map(function(l){return l.description;});
-    var identified=identifyFragranceFromText(fullText,logoLabels);
     if(loading)loading.style.display='none';
-    if(identified){
-      showScanResult(identified);
-    }else{
-      document.getElementById('camNotFound').style.display='block';
-      document.getElementById('camRawText').textContent=fullText.slice(0,200);
-      toast('Could not identify \u2014 try searching by name');
-      initCamPanel();
-    }
+    await processVisionResponse(data);
   }catch(e){
     if(loading)loading.style.display='none';
     var isBilling=/billing|BILLING_DISABLED|quota/i.test(e.message);
@@ -3486,21 +3608,160 @@ async function captureAndIdentify(){
   }
 }
 
-function identifyFragranceFromText(rawText,logoLabels){
-  if(!rawText&&!logoLabels.length)return null;
-  var allText=(rawText+' '+logoLabels.join(' ')).toLowerCase();
-  var bestMatch=null,bestScore=0;
-  FRAG_DB.forEach(function(frag){
-    var nameWords=frag.n.toLowerCase().split(' ');
-    var houseWords=frag.h.toLowerCase().split(' ');
-    var score=0;
-    nameWords.forEach(function(w){if(w.length>2&&allText.includes(w))score+=2;});
-    houseWords.forEach(function(w){if(w.length>2&&allText.includes(w))score+=1;});
-    if(score>bestScore){bestScore=score;bestMatch=frag;}
+// ── Vision response processing ────────────────────────────────────────────────
+
+async function processVisionResponse(data){
+  var resp=data.responses&&data.responses[0]||{};
+  var fullText=(resp.fullTextAnnotation?resp.fullTextAnnotation.text:'')||'';
+  var logoLabels=(resp.logoAnnotations||[]).map(function(l){return l.description;});
+  var webData=resp.webDetection||{};
+  var webEntities=(webData.webEntities||[]).filter(function(e){return e.score>0.5;}).map(function(e){return e.description||'';}).filter(Boolean);
+  var bestGuess=(webData.bestGuessLabels&&webData.bestGuessLabels[0]&&webData.bestGuessLabels[0].label)||'';
+
+  // Build candidate name from best available signal (in priority order)
+  var candidateName=extractVisionName(fullText,logoLabels,webEntities,bestGuess);
+  var isLowConf=!candidateName||(webEntities.length===0&&fullText.length<10);
+
+  if(isLowConf){
+    var hint=document.getElementById('camDetectedHint');
+    if(hint){hint.style.display='none';}
+    document.getElementById('camNotFound').style.display='block';
+    document.getElementById('camNotFoundMsg').textContent='Label not clear — try again with better lighting';
+    document.getElementById('camRawText').textContent=fullText.slice(0,200)||'(no text detected)';
+    return;
+  }
+
+  // Show detected hint
+  var detectedStr=[candidateName].filter(Boolean).join(' · ').toUpperCase();
+  var hint=document.getElementById('camDetectedHint');
+  if(hint){hint.textContent='Detected: '+detectedStr;hint.style.display='block';}
+  window._lastVisionRaw={fullText:fullText,candidateName:candidateName};
+
+  await autoSearchAfterVision(candidateName);
+}
+
+function extractVisionName(fullText,logoLabels,webEntities,bestGuess){
+  // Clean helper — strip ml/oz, generic words, normalize spaces
+  function cleanCandidate(s){
+    return (s||'')
+      .replace(/\b\d+\s*(?:ml|oz|fl\.?\s*oz)\b/gi,'')
+      .replace(/\b(?:perfume|parfum|cologne|spray|fragrance|eau de|edp|edt|extrait)\b/gi,'')
+      .replace(/\s+/g,' ').trim();
+  }
+  // Try webEntities first — best signal for branded products
+  var entityName=webEntities.filter(function(e){return e.length>5;}).slice(0,3).join(' ');
+  if(entityName.length>4) return cleanCandidate(entityName);
+  // Try bestGuess label
+  if(bestGuess.length>4) return cleanCandidate(bestGuess);
+  // Try logo labels
+  if(logoLabels.length) return cleanCandidate(logoLabels[0]);
+  // Fall back to first line of OCR text
+  var firstLine=(fullText||'').split('\n')[0];
+  return cleanCandidate(firstLine);
+}
+
+async function autoSearchAfterVision(candidateName){
+  if(!candidateName) return;
+
+  // Step 1: fuzzy FRAG_DB / community search
+  var results=fragSearch(candidateName,8);
+
+  if(results.length>0){
+    showScanMatchList(results,candidateName);
+    return;
+  }
+
+  // Step 2: Parfumo worker query if available
+  var workerUrl=window.__ENV__&&window.__ENV__.WORKER_URL?window.__ENV__.WORKER_URL:'';
+  if(workerUrl){
+    var hint=document.getElementById('camDetectedHint');
+    if(hint) hint.textContent+=' — searching online…';
+    try{
+      var res=await fetch(workerUrl,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({query:candidateName})
+      });
+      var parfumoData=await res.json();
+      if(parfumoData&&!parfumoData.error&&parfumoData.name){
+        showScanMatchList([{n:parfumoData.name,h:parfumoData.house,r:parfumoData.communityRating,l:parfumoData.communityLong,s:parfumoData.communitySill,p:parfumoData.avgPrice,top:parfumoData.topNotes,mid:parfumoData.middleNotes,base:parfumoData.baseNotes,src:'parfumo'}],candidateName);
+        return;
+      }
+    }catch(e){}
+  }
+
+  // Step 3: nothing found — show editable card pre-filled
+  var house='';
+  var nameParts=candidateName.split(' ');
+  // Simple heuristic: if 3+ words, first word(s) might be house name
+  showScanNotFound(candidateName,house);
+}
+
+function showScanMatchList(results,detectedName){
+  document.getElementById('camMatchList').style.display='block';
+  document.getElementById('camRes').style.display='none';
+  var list=document.getElementById('camMatchList');
+  list.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);padding:8px 12px;letter-spacing:.06em;">MATCHES FOR: '+detectedName.toUpperCase()+'</div>';
+  results.forEach(function(f){
+    var item=document.createElement('div');item.className='cam-match-item';
+    var left=document.createElement('div');
+    var n=document.createElement('div');n.className='cam-match-n';n.textContent=f.n||f.name||'';
+    var h=document.createElement('div');h.className='cam-match-h';h.textContent=(f.h||f.house||'').toUpperCase();
+    left.appendChild(n);left.appendChild(h);
+    var src=document.createElement('div');src.className='cam-match-src';src.textContent=f.src==='community'?'community':f.src==='parfumo'?'parfumo':'local db';
+    item.appendChild(left);item.appendChild(src);
+    item.onclick=(function(frag){return function(){confirmScanMatch(frag);};})(f);
+    list.appendChild(item);
   });
-  if(bestScore<2)return null;
-  var allNotes=[bestMatch.top||'',bestMatch.mid||'',bestMatch.base||''].filter(Boolean).join(', ')||bestMatch.notes||'';
-  return {name:bestMatch.n,house:bestMatch.h,communityRating:bestMatch.r,communityLong:bestMatch.l,communitySill:bestMatch.s,avgPrice:bestMatch.p,topNotes:bestMatch.top||'',middleNotes:bestMatch.mid||'',baseNotes:bestMatch.base||'',allNotes:allNotes,parseConfidence:'vision',rawText:rawText.slice(0,200)};
+  // Add "None of these" option
+  var none=document.createElement('div');none.className='cam-match-item';
+  none.innerHTML='<div class="cam-match-n" style="color:var(--ink3);">None of these</div>';
+  none.onclick=function(){
+    document.getElementById('camMatchList').style.display='none';
+    showScanNotFound(detectedName,'');
+  };
+  list.appendChild(none);
+}
+
+function confirmScanMatch(frag){
+  var allNotes=[frag.top||frag.topNotes||'',frag.mid||frag.middleNotes||'',frag.base||frag.baseNotes||''].filter(Boolean).join(', ')||frag.notes||'';
+  var result={name:frag.n||frag.name||'',house:frag.h||frag.house||'',communityRating:frag.r||frag.communityRating||null,communityLong:frag.l||frag.communityLong||null,communitySill:frag.s||frag.communitySill||null,avgPrice:frag.p||frag.avgPrice||null,topNotes:frag.top||frag.topNotes||'',middleNotes:frag.mid||frag.middleNotes||'',baseNotes:frag.base||frag.baseNotes||'',allNotes:allNotes,parseConfidence:'vision',src:frag.src||'local'};
+  document.getElementById('camMatchList').style.display='none';
+  showScanResult(result);
+}
+
+function showScanNotFound(nameHint,houseHint){
+  document.getElementById('camNotFound').style.display='block';
+  document.getElementById('camNotFoundMsg').textContent='No match found — edit and save if correct:';
+  document.getElementById('camRawText').textContent=nameHint||(window._lastVisionRaw&&window._lastVisionRaw.fullText||'').slice(0,200);
+  window._scannedFragData={name:nameHint,house:houseHint||'',topNotes:'',middleNotes:'',baseNotes:'',allNotes:'',parseConfidence:'low'};
+}
+
+function saveUnknownScan(){
+  var rawText=document.getElementById('camRawText').textContent||'Unknown Fragrance';
+  var d=window._scannedFragData||{};
+  var newFrag={
+    id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',
+    name:d.name||rawText.split('\n')[0].slice(0,60)||'Unknown Fragrance',
+    house:d.house||'',status:'WANT_TO_IDENTIFY',sizes:[],
+    personalRating:null,statusRating:null,personalLong:null,personalSill:null,
+    communityRating:null,communityLong:null,communitySill:null,avgPrice:null,
+    notes:'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''
+  };
+  FRAGRANCES.push(newFrag);
+  appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  renderCurrentPage();updateCounts();
+  resetScan();
+  toast(newFrag.name+' saved — tap to edit when you have more info');
+}
+
+function identifyFragranceFromText(rawText,logoLabels){
+  // Legacy wrapper — now delegates to fragSearch
+  var allText=(rawText+' '+(logoLabels||[]).join(' ')).toLowerCase();
+  var results=fragSearch(allText,1);
+  if(!results||!results.length) return null;
+  var f=results[0];
+  var allNotes=[f.top||'',f.mid||'',f.base||''].filter(Boolean).join(', ')||f.notes||'';
+  return {name:f.n,house:f.h,communityRating:f.r,communityLong:f.l,communitySill:f.s,avgPrice:f.p,topNotes:f.top||'',middleNotes:f.mid||'',baseNotes:f.base||'',allNotes:allNotes,parseConfidence:'vision',rawText:rawText.slice(0,200)};
 }
 
 function showScanResult(data){
@@ -3525,7 +3786,10 @@ function resetScan(){
   stopCamera();
   document.getElementById('camRes').style.display='none';
   document.getElementById('camNotFound').style.display='none';
+  document.getElementById('camMatchList').style.display='none';
+  var hint=document.getElementById('camDetectedHint');if(hint)hint.style.display='none';
   window._scannedFragData=null;
+  window._lastVisionRaw=null;
   initCamPanel();
 }
 
@@ -3566,6 +3830,29 @@ function initCamPanel(){
     },80);
   }
   el.appendChild(grid);
+  // Focus search bar as fallback
+  var si=document.getElementById('camSearchInput');if(si)si.value='';
+}
+
+function camSearchType(val){
+  var drop=document.getElementById('camSearchDrop');
+  if(!drop) return;
+  var q=(val||'').trim();
+  if(q.length<2){drop.style.display='none';return;}
+  var results=fragSearch(q,8);
+  if(!results.length){drop.style.display='none';return;}
+  drop.innerHTML='';
+  results.forEach(function(f){
+    var d=document.createElement('div');d.className='sdi';
+    d.innerHTML='<div class="sdi-n">'+f.n+'</div><div class="sdi-h">'+(f.h||'').toUpperCase()+'</div>';
+    d.onclick=function(){
+      drop.style.display='none';
+      document.getElementById('camSearchInput').value='';
+      confirmScanMatch(f);
+    };
+    drop.appendChild(d);
+  });
+  drop.style.display='block';
 }
 
 function handleCamFile(file){
@@ -3579,21 +3866,11 @@ function handleCamFile(file){
     if(loading)loading.style.display='flex';
     fetch('https://vision.googleapis.com/v1/images:annotate?key='+visionKey,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({requests:[{image:{content:base64},features:[{type:'TEXT_DETECTION',maxResults:1},{type:'LOGO_DETECTION',maxResults:3}]}]})
+      body:JSON.stringify({requests:[{image:{content:base64},features:[{type:'TEXT_DETECTION',maxResults:1},{type:'WEB_DETECTION',maxResults:5},{type:'LOGO_DETECTION',maxResults:3}]}]})
     }).then(function(res){return res.json();}).then(function(data){
       if(loading)loading.style.display='none';
       if(data.error)throw new Error(data.error.message);
-      var fullText=(data.responses[0]&&data.responses[0].fullTextAnnotation?data.responses[0].fullTextAnnotation.text:'')||'';
-      var logoLabels=(data.responses[0]&&data.responses[0].logoAnnotations?data.responses[0].logoAnnotations:[]).map(function(l){return l.description;});
-      var identified=identifyFragranceFromText(fullText,logoLabels);
-      if(identified){
-        showScanResult(identified);
-      }else{
-        document.getElementById('camNotFound').style.display='block';
-        document.getElementById('camRawText').textContent=fullText.slice(0,200);
-        toast('Could not identify \u2014 try searching by name');
-        initCamPanel();
-      }
+      return processVisionResponse(data);
     }).catch(function(err){
       if(loading)loading.style.display='none';
       var isBilling=/billing|BILLING_DISABLED|quota/i.test(err.message);

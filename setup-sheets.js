@@ -162,14 +162,14 @@ async function main() {
   console.log('\nNext step: node verify-setup.js\n');
 }
 
-if (process.argv[2] !== 'community_frags') {
+if (!process.argv.includes('--community-only')) {
   main().catch(e => { console.error('\nFATAL:', e.message); process.exit(1); });
 }
 
 // ── community_frags only ───────────────────────────────────────────────────────
-// Run: node setup-sheets.js community_frags
+// Run: node setup-sheets.js --community-only
 // Creates only the community_frags tab without touching existing data.
-async function setupCommunityFragsOnly() {
+async function setupCommunityFragsTab() {
   console.log('\n── community_frags tab setup ────────────────────────────');
   console.log('Sheet :', SHEET_ID);
   console.log('Authenticating...');
@@ -205,6 +205,6 @@ async function setupCommunityFragsOnly() {
   console.log('\nSheet: https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit\n');
 }
 
-if (process.argv[2] === 'community_frags') {
-  setupCommunityFragsOnly().catch(e => { console.error('\nFATAL:', e.message); process.exit(1); });
+if (process.argv.includes('--community-only')) {
+  setupCommunityFragsTab().catch(e => { console.error('\nFATAL:', e.message); process.exit(1); });
 }
