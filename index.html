@@ -427,6 +427,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .di-l{font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;}
 .di-v{font-size:13px;font-weight:500;color:var(--blue);margin-top:2px;}
+.d-add-details{background:none;border:none;color:var(--blue1);font-family:var(--body);font-size:12px;cursor:pointer;padding:6px 0 0;opacity:.7;}
+.d-add-details:hover{opacity:1;}
 .notebox{font-family:var(--script);font-size:15px;font-style:italic;color:var(--ink2);line-height:1.7;padding:13px 0;border-top:1px solid var(--b2);border-bottom:1px solid var(--b2);}
 .d-actions{display:flex;gap:8px;margin-top:14px;}
 
@@ -971,24 +973,25 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     </div>
   </div>
   <div class="dbody">
-    <div class="dsec"><div class="dsl">Fragrance profile</div>
+    <div class="dsec" id="dsec-profile"><div class="dsl">Fragrance profile</div>
       <div class="dgrid">
-        <div><div class="di-l">Community rating</div><div class="di-v" id="d-comm"></div></div>
-        <div><div class="di-l">Avg price</div><div class="di-v" id="d-price"></div></div>
-        <div><div class="di-l">Longevity (comm.)</div><div class="di-v" id="d-long"></div></div>
-        <div><div class="di-l">Sillage (comm.)</div><div class="di-v" id="d-sill"></div></div>
+        <div id="drow-comm"><div class="di-l">Community rating</div><div class="di-v" id="d-comm"></div></div>
+        <div id="drow-price"><div class="di-l">Avg price</div><div class="di-v" id="d-price"></div></div>
+        <div id="drow-long"><div class="di-l">Longevity (comm.)</div><div class="di-v" id="d-long"></div></div>
+        <div id="drow-sill"><div class="di-l">Sillage (comm.)</div><div class="di-v" id="d-sill"></div></div>
       </div>
     </div>
     <div class="dsec"><div class="dsl">Notes</div>
       <div id="d-notes"></div>
     </div>
-    <div class="dsec"><div class="dsl">My experience</div>
+    <div class="dsec" id="dsec-experience"><div class="dsl">My experience</div>
       <div class="dgrid">
-        <div><div class="di-l">My longevity</div><div class="di-v" id="d-mylong"></div></div>
-        <div><div class="di-l">My sillage</div><div class="di-v" id="d-mysill"></div></div>
-        <div><div class="di-l">Where bought</div><div class="di-v" id="d-where"></div></div>
-        <div><div class="di-l">Added</div><div class="di-v" id="d-added"></div></div>
+        <div id="drow-mylong"><div class="di-l">My longevity</div><div class="di-v" id="d-mylong"></div></div>
+        <div id="drow-mysill"><div class="di-l">My sillage</div><div class="di-v" id="d-mysill"></div></div>
+        <div id="drow-where"><div class="di-l">Where bought</div><div class="di-v" id="d-where"></div></div>
+        <div id="drow-added"><div class="di-l">Added</div><div class="di-v" id="d-added"></div></div>
       </div>
+      <button class="d-add-details" id="d-add-experience" style="display:none" onclick="editCurrentFrag()">+ Add details</button>
     </div>
     <div class="dsec" id="d-dupe-sec" style="display:none;"><div class="dsl">Dupe info</div>
       <div class="di-v" id="d-dupe"></div>
@@ -2525,15 +2528,28 @@ function openDetail(fragId){
   document.getElementById('d-house').textContent = f.house.toUpperCase();
   document.getElementById('d-name').textContent = f.name;
   document.getElementById('d-status').textContent = STATUS_LABELS[f.status] + (f.sizes.length?' · '+f.sizes.join(', '):'') + (f.personalRating?' · '+starsStr(f.personalRating):'') + (f.statusRating?' · '+f.statusRating:'');
-  document.getElementById('d-comm').textContent = f.communityRating ? f.communityRating+' / 5.0' : '—';
-  document.getElementById('d-price').textContent = f.avgPrice||'—';
-  document.getElementById('d-long').textContent = f.communityLong||'—';
-  document.getElementById('d-sill').textContent = f.communitySill||'—';
+  // Detail fields — hide row when empty
+  function setDRow(rowId, valId, val){
+    var row=document.getElementById(rowId), el=document.getElementById(valId);
+    if(!el||!row) return;
+    if(val){ el.textContent=val; row.style.display=''; }
+    else { el.textContent=''; row.style.display='none'; }
+  }
+  setDRow('drow-comm','d-comm', f.communityRating?(f.communityRating+' / 5.0'):null);
+  setDRow('drow-price','d-price', f.avgPrice||null);
+  setDRow('drow-long','d-long', f.communityLong||null);
+  setDRow('drow-sill','d-sill', f.communitySill||null);
   renderDetailNotes(f);
-  document.getElementById('d-mylong').textContent = f.personalLong||'—';
-  document.getElementById('d-mysill').textContent = f.personalSill||'—';
-  document.getElementById('d-where').textContent = f.whereBought||'—';
-  document.getElementById('d-added').textContent = f.purchaseDate||'—';
+  setDRow('drow-mylong','d-mylong', f.personalLong||null);
+  setDRow('drow-mysill','d-mysill', f.personalSill||null);
+  setDRow('drow-where','d-where', f.whereBought||null);
+  setDRow('drow-added','d-added', f.purchaseDate||null);
+  // Show "Add details" if My experience section is entirely empty
+  var expAddBtn=document.getElementById('d-add-experience');
+  if(expAddBtn){
+    var expEmpty=!f.personalLong&&!f.personalSill&&!f.whereBought&&!f.purchaseDate;
+    expAddBtn.style.display=expEmpty?'block':'none';
+  }
   document.getElementById('d-notebox').textContent = f.personalNotes||'No personal notes yet.';
   document.getElementById('d-compct').textContent = getCompCount(fragId);
   document.getElementById('d-compdist').textContent = getCompDist(fragId);
