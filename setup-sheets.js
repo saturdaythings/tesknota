@@ -52,6 +52,14 @@ const TABS = {
     ],
     rows: [],
   },
+  community_frags: {
+    headers: [
+      'name','house','topNotes','middleNotes','baseNotes',
+      'concentration','family','communityRating','avgPrice',
+      'communityLong','communitySill','addedBy','addedAt',
+    ],
+    rows: [],
+  },
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -154,4 +162,49 @@ async function main() {
   console.log('\nNext step: node verify-setup.js\n');
 }
 
-main().catch(e => { console.error('\nFATAL:', e.message); process.exit(1); });
+if (process.argv[2] !== 'community_frags') {
+  main().catch(e => { console.error('\nFATAL:', e.message); process.exit(1); });
+}
+
+// ── community_frags only ───────────────────────────────────────────────────────
+// Run: node setup-sheets.js community_frags
+// Creates only the community_frags tab without touching existing data.
+async function setupCommunityFragsOnly() {
+  console.log('\n── community_frags tab setup ────────────────────────────');
+  console.log('Sheet :', SHEET_ID);
+  console.log('Authenticating...');
+  const token = await getToken();
+  console.log('✓ Authenticated\n');
+
+  const meta = await req('GET', BASE, null, auth(token));
+  if (meta.error) { console.error('✗ Cannot access sheet:', meta.error.message); process.exit(1); }
+
+  const existing = (meta.sheets || []).map(s => s.properties.title);
+  console.log('Existing tabs:', existing.join(', '));
+
+  if (existing.includes('community_frags')) {
+    console.log('\n✓ community_frags tab already exists — nothing to do');
+    return;
+  }
+
+  const headers = TABS.community_frags.headers;
+  process.stdout.write('\nCreating community_frags tab... ');
+  const r = await req('POST', `${BASE}:batchUpdate`,
+    JSON.stringify({ requests: [{ addSheet: { properties: { title: 'community_frags' } } }] }),
+    auth(token));
+  if (r.error) throw new Error('Cannot create tab: ' + r.error.message);
+  console.log('created');
+
+  process.stdout.write('Writing headers... ');
+  await req('PUT', `${BASE}/values/community_frags?valueInputOption=RAW`,
+    JSON.stringify({ values: [headers] }), auth(token));
+  console.log('✓');
+
+  console.log('\n── Done ─────────────────────────────────────────────────');
+  console.log('✓ community_frags tab created:', headers.join(', '));
+  console.log('\nSheet: https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit\n');
+}
+
+if (process.argv[2] === 'community_frags') {
+  setupCommunityFragsOnly().catch(e => { console.error('\nFATAL:', e.message); process.exit(1); });
+}
