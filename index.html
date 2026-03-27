@@ -278,11 +278,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .note-manage-name:hover{text-decoration:underline;}
 .note-manage-ct{font-family:var(--mono);font-size:10px;color:var(--ink3);}
 .note-rename-inp{border:none;border-bottom:1px solid var(--blue);background:none;font-size:12px;font-family:var(--body);color:var(--ink);outline:none;flex:1;}
-.cam-box{border:1px solid var(--b2);overflow:hidden;margin-bottom:16px;}
+.cam-box{position:relative;border:1px solid var(--b2);overflow:hidden;margin-bottom:16px;}
 .cam-view{width:100%;height:220px;background:var(--blue3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
 .cam-view:hover{background:var(--blue2);}
 .cv-t{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--warm2);}
 .cv-s{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.65);letter-spacing:.14em;text-transform:uppercase;margin-top:3px;}
+.cam-guide{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;aspect-ratio:3/2;border:2px solid rgba(244,242,237,.5);border-radius:12px;pointer-events:none;display:none;z-index:5;}
+.cam-loading{position:absolute;inset:0;background:rgba(26,32,48,.6);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:10;}
+.cam-loading-spin{width:28px;height:28px;border:2px solid rgba(244,242,237,.25);border-top-color:rgba(244,242,237,.9);border-radius:50%;animation:camSpin .7s linear infinite;}
+.cam-loading-txt{font-family:var(--mono);font-size:10px;color:rgba(244,242,237,.8);letter-spacing:.12em;text-transform:uppercase;}
+@keyframes camSpin{to{transform:rotate(360deg);}}
+.cam-capture-btn{display:none;width:100%;height:56px;font-size:13px;margin-top:12px;}
 .cam-res{display:none;padding:16px;background:var(--blue4);}
 .cam-label{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;}
 
@@ -753,7 +759,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="cam-box">
           <div id="camInitPanel"></div>
           <video id="camVideo" autoplay playsinline style="display:none;width:100%;"></video>
-          <button class="btn btn-blue" id="camCaptureBtn" style="display:none;width:100%;margin-top:8px;" onclick="captureAndIdentify()">Tap to capture label</button>
+          <div class="cam-guide" id="camGuide"></div>
+          <div class="cam-loading" id="camLoading"><div class="cam-loading-spin"></div><div class="cam-loading-txt">Identifying&hellip;</div></div>
+          <button class="btn btn-blue cam-capture-btn" id="camCaptureBtn" onclick="captureAndIdentify()">Capture</button>
           <div class="cam-res" id="camRes" style="display:none;">
             <div class="cam-label">Identified from label — confirm before saving</div>
             <div class="lr-n" id="scan-name"></div>
@@ -2837,22 +2845,28 @@ async function startScan(){
   video.srcObject=stream;
   video.style.display='block';
   captureBtn.style.display='block';
-  captureBtn.textContent='Tap to capture label';
   captureBtn.disabled=false;
+  var guide=document.getElementById('camGuide');
+  if(guide)guide.style.display='block';
   window._camStream=stream;
 }
 
 async function captureAndIdentify(){
   var video=document.getElementById('camVideo');
   if(!video.srcObject)return;
+  var captureBtn=document.getElementById('camCaptureBtn');
+  if(captureBtn.disabled)return;
   var canvas=document.createElement('canvas');
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
   canvas.getContext('2d').drawImage(video,0,0);
   var base64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
+  captureBtn.disabled=true;
+  var guide=document.getElementById('camGuide');
+  if(guide)guide.style.display='none';
+  var loading=document.getElementById('camLoading');
+  if(loading)loading.style.display='flex';
   stopCamera();
-  var captureBtn=document.getElementById('camCaptureBtn');
-  captureBtn.textContent='Identifying...';captureBtn.disabled=true;
   try{
     var visionKey=window.__ENV__&&window.__ENV__.VISION_API_KEY?window.__ENV__.VISION_API_KEY:'';
     var res=await fetch('https://vision.googleapis.com/v1/images:annotate?key='+visionKey,{
@@ -2864,17 +2878,24 @@ async function captureAndIdentify(){
     var fullText=(data.responses[0]&&data.responses[0].fullTextAnnotation?data.responses[0].fullTextAnnotation.text:'')||'';
     var logoLabels=(data.responses[0]&&data.responses[0].logoAnnotations?data.responses[0].logoAnnotations:[]).map(function(l){return l.description;});
     var identified=identifyFragranceFromText(fullText,logoLabels);
+    if(loading)loading.style.display='none';
     if(identified){
       showScanResult(identified);
     }else{
       document.getElementById('camNotFound').style.display='block';
       document.getElementById('camRawText').textContent=fullText.slice(0,200);
-      toast('Could not identify — try searching by name');
+      toast('Could not identify \u2014 try searching by name');
       initCamPanel();
     }
   }catch(e){
-    toast('Vision API error: '+e.message);
-    captureBtn.textContent='Tap to capture label';captureBtn.disabled=false;
+    if(loading)loading.style.display='none';
+    var isBilling=/billing|BILLING_DISABLED|quota/i.test(e.message);
+    if(isBilling){
+      toast('Vision API requires billing to be enabled in Google Cloud Console. Visit console.cloud.google.com \u2192 Billing to set up \u2014 it\u2019s free under 1,000 scans per month.');
+    }else{
+      toast('Vision API error: '+e.message);
+    }
+    captureBtn.disabled=false;
     initCamPanel();
   }
 }
@@ -2926,6 +2947,9 @@ function initCamPanel(){
   if(!el)return;
   el.style.display='';
   while(el.firstChild)el.removeChild(el.firstChild);
+  var guide=document.getElementById('camGuide'); if(guide)guide.style.display='none';
+  var loading=document.getElementById('camLoading'); if(loading)loading.style.display='none';
+  var captureBtn=document.getElementById('camCaptureBtn'); if(captureBtn){captureBtn.style.display='none';captureBtn.disabled=false;}
   var isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
   var camViewDiv=document.createElement('div');
   camViewDiv.className='cam-view';
@@ -2987,18 +3011,13 @@ function handleCamFile(file){
   var reader=new FileReader();
   reader.onload=function(e){
     var base64=e.target.result.split(',')[1];
-    var initPanel=document.getElementById('camInitPanel');
-    if(initPanel){
-      while(initPanel.firstChild)initPanel.removeChild(initPanel.firstChild);
-      var loadDiv=document.createElement('div');
-      loadDiv.style.cssText='padding:24px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
-      loadDiv.textContent='Identifying\u2026';
-      initPanel.appendChild(loadDiv);
-    }
+    var loading=document.getElementById('camLoading');
+    if(loading)loading.style.display='flex';
     fetch('https://vision.googleapis.com/v1/images:annotate?key='+visionKey,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({requests:[{image:{content:base64},features:[{type:'TEXT_DETECTION',maxResults:1},{type:'LOGO_DETECTION',maxResults:3}]}]})
     }).then(function(res){return res.json();}).then(function(data){
+      if(loading)loading.style.display='none';
       if(data.error)throw new Error(data.error.message);
       var fullText=(data.responses[0]&&data.responses[0].fullTextAnnotation?data.responses[0].fullTextAnnotation.text:'')||'';
       var logoLabels=(data.responses[0]&&data.responses[0].logoAnnotations?data.responses[0].logoAnnotations:[]).map(function(l){return l.description;});
@@ -3012,7 +3031,13 @@ function handleCamFile(file){
         initCamPanel();
       }
     }).catch(function(err){
-      toast('Vision API error: '+err.message);
+      if(loading)loading.style.display='none';
+      var isBilling=/billing|BILLING_DISABLED|quota/i.test(err.message);
+      if(isBilling){
+        toast('Vision API requires billing to be enabled in Google Cloud Console. Visit console.cloud.google.com \u2192 Billing to set up \u2014 it\u2019s free under 1,000 scans per month.');
+      }else{
+        toast('Vision API error: '+err.message);
+      }
       initCamPanel();
     });
   };
