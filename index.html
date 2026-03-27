@@ -602,11 +602,10 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <button class="btn-identity" onclick="selectIdentity('Sylvia','u2')">Sylvia</button>
     </div>
   </div>
-  <!-- Error state -->
+  <!-- Sync warning (shown below picker when sheets unreachable — non-blocking) -->
   <div id="idError" class="idscreen-error-wrap">
-    <div class="idscreen-error-lbl">Could not reach Google Sheets</div>
-    <div class="idscreen-error-msg">Check the browser console for details. Your local data is intact — you can continue without sync.</div>
-    <button class="btn-identity-alt" onclick="document.getElementById('idError').style.display='none';document.getElementById('idPicker').style.display='flex';">Continue anyway</button>
+    <div class="idscreen-error-lbl">Sheets sync unavailable</div>
+    <div class="idscreen-error-msg">Could not reach Google Sheets. Your local data is intact — changes won't save until sync is restored.</div>
   </div>
 </div>
 
@@ -1395,10 +1394,11 @@ function rowToComp(row){
 }
 
 async function loadAllData(){
+  var sheetsOk = true;
   const [usersRaw, fragsRaw, compsRaw, communityRaw] = await Promise.all([
-    readSheet('users').catch(function(e){ console.error('[loadAllData] users sheet error:', e); return []; }),
-    readSheet('fragrances').catch(function(e){ console.error('[loadAllData] fragrances sheet error:', e); return []; }),
-    readSheet('compliments').catch(function(e){ console.error('[loadAllData] compliments sheet error:', e); return []; }),
+    readSheet('users').catch(function(e){ console.error('[loadAllData] users sheet error:', e); sheetsOk=false; return []; }),
+    readSheet('fragrances').catch(function(e){ console.error('[loadAllData] fragrances sheet error:', e); sheetsOk=false; return []; }),
+    readSheet('compliments').catch(function(e){ console.error('[loadAllData] compliments sheet error:', e); sheetsOk=false; return []; }),
     readSheet('community_frags').catch(function(){ return []; }), // graceful if tab not yet created
   ]);
 
@@ -1423,6 +1423,7 @@ async function loadAllData(){
   // Recalculate ID counters so new entries don't collide with loaded data
   FRAGRANCES.forEach(function(f){ var n=parseInt((f.id||'').replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
   COMPLIMENTS.forEach(function(c){ var n=parseInt((c.id||'').replace(/\D/g,''))||0; if(n>=nextCompId)nextCompId=n+1; });
+  return sheetsOk;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4194,18 +4195,20 @@ document.getElementById('compareOverlay').addEventListener('click', function(e){
 (async function init(){
   // Identity screen is already visible with loading spinner
   document.querySelector('.shell').style.display='none';
-  var loadOk = true;
+  var sheetsOk = true;
   try {
-    await loadAllData();
+    sheetsOk = await loadAllData();
   } catch(e){
     console.error('[init] loadAllData threw:', e);
-    loadOk = false;
+    sheetsOk = false;
   }
   document.getElementById('idLoading').style.display='none';
-  if(loadOk){
-    document.getElementById('idPicker').style.display='flex';
-  } else {
+  // Always show the picker — never block the user due to a sync failure
+  document.getElementById('idPicker').style.display='flex';
+  if(!sheetsOk){
+    // Show soft warning below the picker and set persistent error indicator
     document.getElementById('idError').style.display='flex';
+    setSyncState('error');
   }
 })();
 
