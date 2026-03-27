@@ -291,6 +291,14 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .cam-capture-btn{display:none;width:100%;height:56px;font-size:13px;margin-top:12px;}
 .cam-res{display:none;padding:16px;background:var(--blue4);}
 .cam-label{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;}
+.scan-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.scan-card{background:#fff;border:1px solid var(--b2);padding:20px;display:flex;flex-direction:column;gap:6px;}
+.scan-card-t{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink);margin-bottom:2px;}
+.scan-card-s{font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.12em;flex:1;line-height:1.6;}
+.scan-card-qr{margin:8px 0;}
+.scan-footer-link{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:10px;text-align:center;}
+.scan-footer-link span{color:var(--blue);cursor:pointer;}
+@media(max-width:640px){.scan-cards{grid-template-columns:1fr;}}
 
 /* DETAIL PANEL */
 .detail{position:fixed;top:0;right:0;bottom:0;width:390px;max-width:100%;background:var(--off);border-left:1px solid var(--b2);z-index:300;transform:translateX(100%);transition:transform .28s ease;overflow-y:auto;box-shadow:-6px 0 28px rgba(26,46,92,.1);}
@@ -755,10 +763,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div style="display:flex;justify-content:flex-end;"><button class="btn btn-blue btn-sm" onclick="confirmBulkImport()">Import Selected</button></div>
       </div>
       <div class="ipanel" id="ip-cam">
-        <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.6;">Point your camera at a label to identify the fragrance.</p>
-        <div class="cam-box">
-          <div id="camInitPanel"></div>
-          <video id="camVideo" autoplay playsinline style="display:none;width:100%;"></video>
+        <div id="camInitPanel"></div>
+        <div class="cam-box" id="camBox" style="display:none;">
+          <video id="camVideo" autoplay playsinline style="width:100%;display:block;"></video>
           <div class="cam-guide" id="camGuide"></div>
           <div class="cam-loading" id="camLoading"><div class="cam-loading-spin"></div><div class="cam-loading-txt">Identifying&hellip;</div></div>
           <button class="btn btn-blue cam-capture-btn" id="camCaptureBtn" onclick="captureAndIdentify()">Capture</button>
@@ -782,7 +789,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           </div>
         </div>
         <input type="file" id="camFileInput" accept="image/*" style="display:none;" onchange="handleCamFile(this.files[0])">
-        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:8px;">Not working? <span style="color:var(--blue);cursor:pointer;" onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
+        <div class="scan-footer-link">Not working? <span onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
       </div>
       <div class="ipanel" id="ip-csv">
         <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.6;">Upload a CSV to bulk import your collection.</p>
@@ -2840,8 +2847,8 @@ async function startScan(){
   catch(e){toast('Camera access denied — please allow camera in browser settings');return;}
   var video=document.getElementById('camVideo');
   var captureBtn=document.getElementById('camCaptureBtn');
-  var initPanel=document.getElementById('camInitPanel');
-  if(initPanel)initPanel.style.display='none';
+  var camBox=document.getElementById('camBox');
+  if(camBox)camBox.style.display='block';
   video.srcObject=stream;
   video.style.display='block';
   captureBtn.style.display='block';
@@ -2950,51 +2957,27 @@ function initCamPanel(){
   var guide=document.getElementById('camGuide'); if(guide)guide.style.display='none';
   var loading=document.getElementById('camLoading'); if(loading)loading.style.display='none';
   var captureBtn=document.getElementById('camCaptureBtn'); if(captureBtn){captureBtn.style.display='none';captureBtn.disabled=false;}
+  var camBox=document.getElementById('camBox'); if(camBox)camBox.style.display='none';
   var isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-  var camViewDiv=document.createElement('div');
-  camViewDiv.className='cam-view';
-  camViewDiv.style.cursor='pointer';
-  camViewDiv.onclick=startScan;
-  var cvT=document.createElement('div'); cvT.className='cv-t';
-  var cvS=document.createElement('div'); cvS.className='cv-s';
+  var grid=document.createElement('div'); grid.className='scan-cards';
+  function makeCard(title,sub,btnText,btnAction){
+    var card=document.createElement('div'); card.className='scan-card';
+    var t=document.createElement('div'); t.className='scan-card-t'; t.textContent=title; card.appendChild(t);
+    var s=document.createElement('div'); s.className='scan-card-s'; s.textContent=sub; card.appendChild(s);
+    var btn=document.createElement('button'); btn.className='btn btn-ghost btn-sm'; btn.textContent=btnText; btn.onclick=btnAction; card.appendChild(btn);
+    return card;
+  }
   if(isMobile){
-    cvT.textContent='Open Camera';
-    cvS.textContent='Rear camera \u00b7 Label recognition';
-    camViewDiv.appendChild(cvT); camViewDiv.appendChild(cvS);
-    el.appendChild(camViewDiv);
-    var btnWrap=document.createElement('div');
-    btnWrap.style.cssText='text-align:center;padding:12px 0;';
-    var fileBtn=document.createElement('button');
-    fileBtn.className='btn btn-ghost';
-    fileBtn.textContent='Choose from Photos';
-    fileBtn.onclick=function(){document.getElementById('camFileInput').click();};
-    btnWrap.appendChild(fileBtn);
-    el.appendChild(btnWrap);
+    grid.appendChild(makeCard('Open Camera','Rear camera \u00b7 Label recognition','Open Camera',startScan));
+    grid.appendChild(makeCard('Choose from Photos','Browse your camera roll or files','Choose Photo',function(){document.getElementById('camFileInput').click();}));
   } else {
-    cvT.textContent='Open Webcam';
-    cvS.textContent='Use this device\u2019s camera';
-    camViewDiv.appendChild(cvT); camViewDiv.appendChild(cvS);
-    el.appendChild(camViewDiv);
-    var row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:flex-start;gap:24px;padding:16px 0 8px;';
-    var qrWrap=document.createElement('div'); qrWrap.style.flex='1';
-    var qrLbl=document.createElement('div');
-    qrLbl.style.cssText='font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;';
-    qrLbl.textContent='Or scan with your phone';
-    var qrDiv=document.createElement('div'); qrDiv.id='scanQrCode';
-    var qrNote=document.createElement('div');
-    qrNote.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:6px;letter-spacing:.06em;';
-    qrNote.textContent='Opens scanner on mobile';
-    qrWrap.appendChild(qrLbl); qrWrap.appendChild(qrDiv); qrWrap.appendChild(qrNote);
-    var actWrap=document.createElement('div');
-    actWrap.style.cssText='display:flex;flex-direction:column;justify-content:center;gap:8px;padding-top:32px;';
-    var uploadBtn=document.createElement('button');
-    uploadBtn.className='btn btn-ghost';
-    uploadBtn.textContent='Upload a Photo';
-    uploadBtn.onclick=function(){document.getElementById('camFileInput').click();};
-    actWrap.appendChild(uploadBtn);
-    row.appendChild(qrWrap); row.appendChild(actWrap);
-    el.appendChild(row);
+    grid.appendChild(makeCard('Open Webcam','Use your device camera','Open Webcam',startScan));
+    var phoneCard=document.createElement('div'); phoneCard.className='scan-card';
+    var pt=document.createElement('div'); pt.className='scan-card-t'; pt.textContent='Scan with Phone'; phoneCard.appendChild(pt);
+    var qrDiv=document.createElement('div'); qrDiv.className='scan-card-qr'; qrDiv.id='scanQrCode'; phoneCard.appendChild(qrDiv);
+    var ps=document.createElement('div'); ps.className='scan-card-s'; ps.textContent='Opens scanner on mobile'; phoneCard.appendChild(ps);
+    grid.appendChild(phoneCard);
+    grid.appendChild(makeCard('Upload a Photo','From camera roll or files','Upload Photo',function(){document.getElementById('camFileInput').click();}));
     setTimeout(function(){
       var qrEl=document.getElementById('scanQrCode');
       if(qrEl&&typeof QRCode!=='undefined'){
@@ -3002,6 +2985,7 @@ function initCamPanel(){
       }
     },80);
   }
+  el.appendChild(grid);
 }
 
 function handleCamFile(file){
