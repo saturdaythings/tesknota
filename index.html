@@ -219,6 +219,19 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .date-row{display:flex;gap:8px;}
 .date-row select{flex:1;}
 
+/* COMPLIMENT MODAL — redesigned UX */
+.comp-frag-sticky{display:none;background:rgba(107,154,242,.1);border:1px solid rgba(107,154,242,.22);border-radius:8px;padding:9px 13px;margin-bottom:16px;position:sticky;top:0;z-index:1;}
+.comp-sticky-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(107,154,242,.6);margin-bottom:2px;}
+.comp-sticky-name{font-family:var(--body);font-size:13px;color:var(--blue1);font-weight:600;}
+.comp-rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px;}
+.comp-rel-btn{padding:7px 10px;border:1px solid var(--b3);border-radius:6px;background:transparent;color:var(--ink2);font-family:var(--body);font-size:12px;cursor:pointer;transition:all .14s;text-align:center;}
+.comp-rel-btn:hover{border-color:var(--blue1);color:var(--blue1);}
+.comp-rel-btn.active{border-color:var(--blue1);background:rgba(107,154,242,.15);color:var(--blue1);}
+.comp-season-hint{font-size:10px;color:var(--ink3);font-family:var(--mono);letter-spacing:.08em;margin-left:6px;text-transform:none;}
+.comp-layer-toggle{background:none;border:none;color:var(--blue1);font-family:var(--body);font-size:12px;cursor:pointer;padding:0;letter-spacing:.02em;opacity:.8;}
+.comp-layer-toggle:hover{opacity:1;}
+.comp-save-banner{display:none;background:rgba(60,180,90,.85);color:#fff;text-align:center;padding:11px 20px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;border-top:1px solid rgba(60,180,90,.4);}
+
 /* STATUS CHANGE STRIP */
 .status-strip{display:none;flex-wrap:wrap;gap:6px;padding:10px 0;border-top:1px solid var(--b2);margin-top:8px;}
 .status-strip.show{display:flex;}
@@ -1113,6 +1126,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <button class="mx" onclick="closeModal('addCompM')">×</button>
     </div>
     <div class="mbody">
+      <!-- Sticky header — appears when primary fragrance is selected -->
+      <div class="comp-frag-sticky" id="compFragSticky">
+        <div class="comp-sticky-lbl">Wearing</div>
+        <div class="comp-sticky-name" id="compFragStickyName"></div>
+      </div>
       <div class="fg">
         <label>Primary fragrance</label>
         <select id="compFrag">
@@ -1120,33 +1138,28 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         </select>
         <div class="err" id="compFragErr">Please select a fragrance</div>
       </div>
-      <div class="fg">
-        <label>Secondary fragrance — layering (optional)</label>
-        <select id="compFrag2"><option value="">None</option></select>
-      </div>
-      <div class="frow" style="margin-top:20px;">
+      <div class="frow" style="margin-top:4px;">
         <div class="fg" style="margin:0;">
           <label>Complimenter gender</label>
           <select id="compGender"><option value="">— Select —</option><option>Male</option><option>Female</option><option>Non-binary</option><option>Unknown</option></select>
         </div>
         <div class="fg" style="margin:0;">
           <label>Relation</label>
-          <select id="compRelation">
-            <option value="">— Select relation —</option>
-            <option>Stranger</option>
-            <option>Friend</option>
-            <option>Colleague / Client</option>
-            <option>Family</option>
-            <option>Significant Other</option>
-            <option>Acquaintance</option>
-            <option>Other</option>
-          </select>
+          <div class="comp-rel-grid">
+            <button type="button" class="comp-rel-btn" data-val="Stranger" onclick="setCompRelation(this.dataset.val)">Stranger</button>
+            <button type="button" class="comp-rel-btn" data-val="Friend" onclick="setCompRelation(this.dataset.val)">Friend</button>
+            <button type="button" class="comp-rel-btn" data-val="Colleague / Client" onclick="setCompRelation(this.dataset.val)">Colleague</button>
+            <button type="button" class="comp-rel-btn" data-val="Family" onclick="setCompRelation(this.dataset.val)">Family</button>
+            <button type="button" class="comp-rel-btn" data-val="Significant Other" onclick="setCompRelation(this.dataset.val)">Partner</button>
+            <button type="button" class="comp-rel-btn" data-val="Acquaintance" onclick="setCompRelation(this.dataset.val)">Acquaintance</button>
+          </div>
+          <input type="hidden" id="compRelation">
           <div class="err" id="compRelErr">Please select a relation</div>
         </div>
       </div>
       <div class="frow" style="margin-top:20px;">
         <div class="fg" style="margin:0;">
-          <label>Date</label>
+          <label>Date <span class="comp-season-hint" id="compSeasonHint"></span></label>
           <div class="date-row">
             <select id="compMonth"><option value="">Month</option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select>
             <select id="compYear"><option value="">Year</option><option selected>2026</option><option>2025</option><option>2024</option><option>2023</option></select>
@@ -1155,8 +1168,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         </div>
         <div class="fg" style="margin:0;"><label>Location</label><input type="text" id="compLoc" placeholder="City, venue, context..."></div>
       </div>
-      <div class="fg" style="margin-top:20px;"><label>Notes (optional)</label><textarea id="compNotes" placeholder="What did they say? Any context worth remembering?"></textarea></div>
+      <!-- Layering (secondary) — expandable -->
+      <div class="fg" style="margin-top:4px;margin-bottom:0;">
+        <button type="button" class="comp-layer-toggle" id="compLayerToggle" onclick="toggleCompLayer()">+ Add layering fragrance</button>
+        <div id="compLayerWrap" style="display:none;margin-top:10px;">
+          <select id="compFrag2"><option value="">None</option></select>
+        </div>
+      </div>
+      <div class="fg" style="margin-top:16px;"><label>Notes (optional)</label><textarea id="compNotes" placeholder="What did they say? Any context worth remembering?"></textarea></div>
     </div>
+    <!-- Satisfaction banner — shown briefly after save, then modal closes -->
+    <div class="comp-save-banner" id="compSaveBanner">Compliment logged ✓</div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeModal('addCompM')">Cancel</button>
       <button class="btn btn-blue" onclick="saveCompliment()">Save Compliment</button>
@@ -2947,18 +2969,80 @@ function openAddComp(fragId, prefill){
   // Populate secondary dropdown
   updateCompFrag2();
   if(prefill&&prefill.secondaryFragId){ var s2=document.getElementById('compFrag2'); for(let i=0;i<s2.options.length;i++) if(s2.options[i].value===prefill.secondaryFragId){ s2.selectedIndex=i; break; } }
-  sel.onchange = updateCompFrag2;
+  sel.onchange = function(){ updateCompFrag2(); updateCompStickyHeader(); };
   // Reset errors
   document.getElementById('compFragErr').style.display='none';
   document.getElementById('compRelErr').style.display='none';
   document.getElementById('compDateErr').style.display='none';
-  document.getElementById('compRelation').value=prefill?prefill.relation:'';
+  // Relation — tap buttons
+  setCompRelation(prefill?prefill.relation:'');
   document.getElementById('compGender').value=prefill?(prefill.gender||''):'';
   document.getElementById('compLoc').value=prefill?(prefill.location||''):'';
   document.getElementById('compNotes').value=prefill?(prefill.notes||''):'';
-  document.getElementById('compMonth').value=prefill?(prefill.month||''):'';
-  document.getElementById('compYear').value=prefill?(prefill.year||'2026'):'2026';
+  // Auto-fill current month/year (if not editing)
+  if(prefill&&prefill.month){
+    document.getElementById('compMonth').value=prefill.month;
+    document.getElementById('compYear').value=prefill.year||'2026';
+  } else {
+    var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var now=new Date();
+    document.getElementById('compMonth').value=months[now.getMonth()];
+    document.getElementById('compYear').value=String(now.getFullYear());
+  }
+  // Seasonal hint
+  var seasonHint=document.getElementById('compSeasonHint');
+  if(seasonHint){
+    var mo=new Date().getMonth();
+    var seasons=['Winter','Winter','Spring','Spring','Spring','Summer','Summer','Summer','Fall','Fall','Fall','Winter'];
+    seasonHint.textContent='('+seasons[mo]+')';
+  }
+  // Sticky header
+  updateCompStickyHeader();
+  // Reset layering panel
+  var layerWrap=document.getElementById('compLayerWrap');
+  var layerToggle=document.getElementById('compLayerToggle');
+  if(prefill&&prefill.secondaryFragId){
+    if(layerWrap) layerWrap.style.display='block';
+    if(layerToggle) layerToggle.textContent='− Remove layering';
+  } else {
+    if(layerWrap) layerWrap.style.display='none';
+    if(layerToggle) layerToggle.textContent='+ Add layering fragrance';
+  }
+  // Reset save banner
+  var banner=document.getElementById('compSaveBanner');
+  if(banner) banner.style.display='none';
   openModal('addCompM');
+}
+
+function setCompRelation(val){
+  document.getElementById('compRelation').value=val||'';
+  document.querySelectorAll('.comp-rel-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.val===val);
+  });
+}
+
+function updateCompStickyHeader(){
+  var sel=document.getElementById('compFrag');
+  var sticky=document.getElementById('compFragSticky');
+  var stickyName=document.getElementById('compFragStickyName');
+  if(!sticky||!stickyName) return;
+  var opt=sel.options[sel.selectedIndex];
+  if(sel.value&&opt){
+    stickyName.textContent=opt.textContent;
+    sticky.style.display='block';
+  } else {
+    sticky.style.display='none';
+  }
+}
+
+function toggleCompLayer(){
+  var wrap=document.getElementById('compLayerWrap');
+  var toggle=document.getElementById('compLayerToggle');
+  if(!wrap) return;
+  var open=wrap.style.display==='block';
+  wrap.style.display=open?'none':'block';
+  toggle.textContent=open?'+ Add layering fragrance':'− Remove layering';
+  if(open){ var s2=document.getElementById('compFrag2'); if(s2) s2.value=''; }
 }
 
 function editCompliment(id){
@@ -3024,10 +3108,12 @@ function saveCompliment(){
   };
   COMPLIMENTS.unshift(newComp);
   appendRow('compliments',compToRow(newComp),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
-  closeModal('addCompM');
   renderCurrentPage();
   updateCounts();
-  toast('Compliment logged');
+  // Show satisfaction banner, then close
+  var banner=document.getElementById('compSaveBanner');
+  if(banner){ banner.style.display='block'; setTimeout(function(){ banner.style.display='none'; closeModal('addCompM'); },1500); }
+  else { closeModal('addCompM'); toast('Compliment logged'); }
 }
 
 // ═══════════════════════════════════════════════════════
