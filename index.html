@@ -159,6 +159,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .bval{font-family:var(--mono);font-size:11px;color:var(--blue);margin-bottom:3px;font-weight:400;}
 .bar{width:100%;background:var(--blue);transition:height .5s ease;cursor:pointer;min-height:2px;}
 .bar:hover{background:var(--warm);}
+.bar-preview{background:var(--b2)!important;}
+.ana-preview-hint{font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;padding:10px 0 14px;text-align:center;}
 .bl{font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:5px;text-align:center;letter-spacing:.05em;}
 .ins{padding:13px 0;border-bottom:1px solid var(--b1);}
 .ins-t{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:2px;}
@@ -813,11 +815,14 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- ANALYTICS -->
     <div class="page" id="page-analytics">
       <div class="stats" id="anaStats"></div>
+      <div id="anaPreviewHint"></div>
       <div class="sh"><h2>Compliments by fragrance</h2></div>
       <div class="bchart" id="bc1"></div>
       <div class="chart-legend" id="bc1-legend"></div>
       <div class="sh"><h2>By relation</h2></div>
       <div class="bchart" id="bc2" style="margin-bottom:26px;"></div>
+      <div class="sh"><h2>By season</h2></div>
+      <div class="bchart" id="bc-season" style="margin-bottom:26px;"></div>
       <div class="sh"><h2>Key insights</h2></div>
       <div id="insightsList"></div>
       <div class="sh sh-spaced"><h2>Notes intelligence</h2><div class="sh-r"><span class="sh-sub">Compliments per note</span></div></div>
@@ -2397,12 +2402,19 @@ function deleteCompliment(id){
 function renderAnalytics(){
   var MC=myCompliments();
   const total = MC.length;
+  var previewHint=document.getElementById('anaPreviewHint');
   if(!total){
-    document.getElementById('anaStats').innerHTML = '<div class="sbox" style="grid-column:1/-1;"><div style="font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">Log some compliments to see your stats</div></div>';
-    document.getElementById('bc1').textContent = ''; document.getElementById('bc1-legend').textContent = '';
-    document.getElementById('bc2').textContent = ''; document.getElementById('insightsList').textContent = '';
+    // Preview state — ghost charts to show what analytics looks like
+    if(previewHint) previewHint.innerHTML='<div class="ana-preview-hint">Log compliments to unlock your analytics</div>';
+    document.getElementById('anaStats').innerHTML = '<div class="sbox"><div class="snum">0</div><div class="slbl">Total Compliments</div></div><div class="sbox"><div class="snum">0</div><div class="slbl">Fragrances</div></div><div class="sbox"><div class="snum">0.0</div><div class="slbl">Per Month Avg</div></div><div class="sbox"><div class="snum">0%</div><div class="slbl">From Strangers</div></div>';
+    var ghostData=[{l:'—',v:0,h:75},{l:'—',v:0,h:55},{l:'—',v:0,h:40},{l:'—',v:0,h:30},{l:'—',v:0,h:20}];
+    bldChartPreview('bc1',ghostData); document.getElementById('bc1-legend').textContent='';
+    bldChartPreview('bc2',ghostData.slice(0,4));
+    bldChartPreview('bc-season',[{l:'Spring',v:0,h:60},{l:'Summer',v:0,h:80},{l:'Fall',v:0,h:50},{l:'Winter',v:0,h:40}]);
+    document.getElementById('insightsList').innerHTML='<div class="lbl-empty">Insights appear after you log at least one compliment</div>';
     return;
   }
+  if(previewHint) previewHint.innerHTML='';
   const byFrag = {};
   MC.forEach(c=>{ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; if(c.secondaryFrag) byFrag[c.secondaryFrag]=(byFrag[c.secondaryFrag]||0)+1; });
   const fragSorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,6);
@@ -2436,7 +2448,18 @@ function renderAnalytics(){
   const topCity=Object.entries(locs).sort((a,b)=>b[1]-a[1])[0];
   if(topCity) insights.push({t:`${topCity[0]} is your best city`,b:`${topCity[1]} of ${total} compliments in ${topCity[0]}.`});
   document.getElementById('insightsList').innerHTML = insights.map((ins,i)=>`<div class="ins"${i===insights.length-1?' style="border-bottom:none"':''}><div class="ins-t">${ins.t}</div><div class="ins-b">${ins.b}</div></div>`).join('');
+  // Season breakdown
+  var seasonMap={Jan:'Winter',Feb:'Winter',Mar:'Spring',Apr:'Spring',May:'Spring',Jun:'Summer',Jul:'Summer',Aug:'Summer',Sep:'Fall',Oct:'Fall',Nov:'Fall',Dec:'Winter'};
+  var bySeason={Spring:0,Summer:0,Fall:0,Winter:0};
+  MC.forEach(function(c){ var s=seasonMap[c.month]; if(s) bySeason[s]++; });
+  var maxSeason=Math.max.apply(null,Object.values(bySeason))||1;
+  bldChart('bc-season',Object.entries(bySeason).map(function(e){ return {l:e[0],v:e[1],h:Math.round((e[1]/maxSeason)*100)}; }));
   renderNotesIntel();
+}
+
+function bldChartPreview(id,data){
+  var el=document.getElementById(id); if(!el)return;
+  el.innerHTML=data.map(function(d){ return '<div class="bw"><div class="bval" style="color:var(--ink3)">—</div><div class="bar bar-preview" style="height:'+Math.max(d.h,8)+'px"></div><div class="bl" style="color:var(--ink3)">'+d.l+'</div></div>'; }).join('');
 }
 
 function bldChart(id,data){
