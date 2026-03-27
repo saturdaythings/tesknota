@@ -122,6 +122,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .crow:hover{background:var(--blue4);padding-left:8px;padding-right:8px;margin:0 -8px;}
 .cr-f{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--blue);margin-bottom:3px;cursor:pointer;}
 .cr-f:hover{text-decoration:underline;}
+.cr-layer{font-family:var(--mono);font-size:9px;font-style:normal;color:#9A7040;letter-spacing:.04em;}
 .cr-m{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
 .cr-n{font-size:12px;color:var(--ink2);margin-top:4px;font-style:italic;}
 .cr-d{font-family:var(--mono);font-size:11px;color:var(--ink3);white-space:nowrap;margin-left:16px;letter-spacing:.06em;flex-shrink:0;}
@@ -1448,7 +1449,7 @@ function getFriend(){ return USERS.find(function(u){ return !CURRENT_USER || u.i
 
 function getCompCount(fragId){ return COMPLIMENTS.filter(c=>c.primaryFragId===fragId||c.secondaryFragId===fragId).length; }
 function getCompDist(fragId){
-  const comps = COMPLIMENTS.filter(c=>c.primaryFragId===fragId);
+  const comps = COMPLIMENTS.filter(c=>c.primaryFragId===fragId||c.secondaryFragId===fragId);
   const groups = {};
   comps.forEach(c=>{ groups[c.relation]=(groups[c.relation]||0)+1; });
   return Object.entries(groups).map(([k,v])=>`${k} (${v})`).join(' · ') || 'None logged';
@@ -1528,7 +1529,7 @@ function renderDashboard(){
   }
   // Top performers
   const byFrag = {};
-  MC.forEach(c=>{ byFrag[c.primaryFragId]=(byFrag[c.primaryFragId]||0)+1; });
+  MC.forEach(c=>{ byFrag[c.primaryFragId]=(byFrag[c.primaryFragId]||0)+1; if(c.secondaryFragId) byFrag[c.secondaryFragId]=(byFrag[c.secondaryFragId]||0)+1; });
   const sorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,3);
   if(sorted.length){
     document.getElementById('dashPerformers').innerHTML = sorted.map(([id,cnt],i)=>{
@@ -1661,7 +1662,7 @@ function renderCompliments(filter='all'){
   var ffName=document.getElementById('cffName');
   if(ffBar){ ffBar.style.display=compFragFilter?'':'none'; if(ffName&&compFragFilter) ffName.textContent=compFragFilter.name; }
   // Apply frag filter first, then relation filter
-  var base = compFragFilter ? MC.filter(function(c){return c.primaryFragId===compFragFilter.id;}) : MC;
+  var base = compFragFilter ? MC.filter(function(c){return c.primaryFragId===compFragFilter.id||c.secondaryFragId===compFragFilter.id;}) : MC;
   const filtered = filter==='all' ? base : base.filter(c=>c.relation===filter);
   // Update counts in filter bar
   const rel=['Stranger','Friend','Colleague / Client','Family','Significant Other'];
@@ -1674,7 +1675,7 @@ function renderCompliments(filter='all'){
   document.getElementById('compList').innerHTML = filtered.map(c=>`
     <div class="crow" data-rel="${c.relation}">
       <div style="flex:1;">
-        <div class="cr-f" onclick="openDetail('${c.primaryFragId}')">${c.primaryFrag}${c.secondaryFrag?`<span style="font-family:var(--mono);font-size:9px;color:var(--ink3);"> + ${c.secondaryFrag}</span>`:''}</div>
+        <div class="cr-f" onclick="openDetail('${c.primaryFragId}')">${c.primaryFrag}${c.secondaryFrag ? '<span class="cr-layer"> + ' + c.secondaryFrag + '</span>' : ''}</div>
         <div class="cr-m">${c.relation}${c.gender?' · '+c.gender:''}${c.location?' · '+c.location:''}</div>
         ${c.notes?`<div class="cr-n">${c.notes}</div>`:''}
       </div>
@@ -1717,7 +1718,7 @@ function renderAnalytics(){
     return;
   }
   const byFrag = {};
-  MC.forEach(c=>{ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; });
+  MC.forEach(c=>{ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; if(c.secondaryFrag) byFrag[c.secondaryFrag]=(byFrag[c.secondaryFrag]||0)+1; });
   const fragSorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const byRel = {};
   MC.forEach(c=>{ byRel[c.relation]=(byRel[c.relation]||0)+1; });
@@ -1824,7 +1825,9 @@ function renderFriend(){
     FC.slice(0,10).forEach(function(c){
       var row=document.createElement('div'); row.className='crow';
       var left=document.createElement('div'); left.style.flex='1';
-      var cf=document.createElement('div'); cf.className='cr-f'; cf.textContent=c.primaryFrag; left.appendChild(cf);
+      var cf=document.createElement('div'); cf.className='cr-f'; cf.textContent=c.primaryFrag;
+      if(c.secondaryFrag){ var cfl=document.createElement('span'); cfl.className='cr-layer'; cfl.textContent=' + '+c.secondaryFrag; cf.appendChild(cfl); }
+      left.appendChild(cf);
       var cm=document.createElement('div'); cm.className='cr-m';
       cm.textContent=c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:''); left.appendChild(cm);
       if(c.notes){ var cn=document.createElement('div'); cn.className='cr-n'; cn.textContent=c.notes; left.appendChild(cn); }
@@ -1864,7 +1867,7 @@ function renderFriend(){
 
   // Analytics tab
   var byFrag={};
-  FC.forEach(function(c){ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; });
+  FC.forEach(function(c){ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; if(c.secondaryFrag) byFrag[c.secondaryFrag]=(byFrag[c.secondaryFrag]||0)+1; });
   var fragSorted=Object.entries(byFrag).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
   var ftotal=FC.length;
   var spct=ftotal?Math.round((FC.filter(function(c){return c.relation==='Stranger';}).length/ftotal)*100):0;
@@ -2442,7 +2445,7 @@ function openAddComp(fragId, prefill){
   // Populate secondary dropdown
   updateCompFrag2();
   if(prefill&&prefill.secondaryFragId){ var s2=document.getElementById('compFrag2'); for(let i=0;i<s2.options.length;i++) if(s2.options[i].value===prefill.secondaryFragId){ s2.selectedIndex=i; break; } }
-  sel.addEventListener('change', updateCompFrag2);
+  sel.onchange = updateCompFrag2;
   // Reset errors
   document.getElementById('compFragErr').style.display='none';
   document.getElementById('compRelErr').style.display='none';
