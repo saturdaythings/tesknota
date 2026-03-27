@@ -38,8 +38,16 @@ export default {
     }
 
     const url = body.url;
+    const query = body.query;
+
+    // ── Query mode: Parfumo name search ──────────────────────────────────────
+    if (!url && query) {
+      const result = await searchParfumo(query);
+      return json(result, 200, corsHeaders);
+    }
+
     if (!url) {
-      return json({ error: 'Missing url field in request body' }, 400, corsHeaders);
+      return json({ error: 'Missing url or query field in request body' }, 400, corsHeaders);
     }
 
     // Only allow known fragrance sites
@@ -72,6 +80,22 @@ export default {
     let result;
     if (url.includes('fragrantica.com')) {
       result = parseFragrantica(html, url);
+      // If Fragrantica was blocked or returned minimal data, supplement with Parfumo
+      if (result.parseConfidence === 'slug-only' || (!result.topNotes && !result.allNotes)) {
+        const searchName = result.name || extractFromSlug(url);
+        if (searchName) {
+          const parfumoData = await searchParfumo(searchName).catch(() => null);
+          if (parfumoData && !parfumoData.error) {
+            result = Object.assign(parfumoData, {
+              name: result.name || parfumoData.name,
+              house: result.house || parfumoData.house,
+              url: url,
+              source: 'parfumo',
+              parseConfidence: parfumoData.topNotes ? 'high' : 'slug-only',
+            });
+          }
+        }
+      }
     } else if (url.includes('sephora.com')) {
       result = parseSephora(html, url);
     } else {
@@ -274,6 +298,142 @@ function cleanName(name, house) {
   // Remove " by Brand" suffix
   name = name.replace(/\s+by\s+.+$/i, '').trim();
   return name;
+}
+
+// ── Parfumo search ────────────────────────────────────────────────────────────
+
+async function searchParfumo(query) {
+  const searchUrl = 'https://www.parfumo.com/search?q=' + encodeURIComponent(query);
+
+  let html;
+  try {
+    const resp = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    });
+    if (!resp.ok) {
+      return { error: 'Parfumo search returned HTTP ' + resp.status };
+    }
+    html = await resp.text();
+  } catch (e) {
+    return { error: 'Parfumo fetch failed: ' + e.message };
+  }
+
+  // Extract first result detail URL — links look like: /Perfumes/Brand/Name
+  const resultLinkMatch = html.match(/href="(\/Perfumes\/[^"]+)"/);
+  if (!resultLinkMatch) {
+    return { error: 'No Parfumo results found for: ' + query };
+  }
+
+  const detailUrl = 'https://www.parfumo.com' + resultLinkMatch[1];
+
+  let detailHtml;
+  try {
+    const resp2 = await fetch(detailUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    });
+    if (!resp2.ok) {
+      return { error: 'Parfumo detail page returned HTTP ' + resp2.status };
+    }
+    detailHtml = await resp2.text();
+  } catch (e) {
+    return { error: 'Parfumo detail fetch failed: ' + e.message };
+  }
+
+  return parseParfumo(detailHtml, detailUrl);
+}
+
+function parseParfumo(html, url) {
+  const name  = extractMeta(html, 'og:title') || extractH1(html) || '';
+
+  // House: brand link pattern
+  const houseMatch = html.match(/\/[Bb]rands?\/[^"]*"[^>]*>([^<]+)<\/a>/);
+  const house = houseMatch ? houseMatch[1].trim() : '';
+
+  // Rating
+  const ratingMatch =
+    html.match(/class="[^"]*rating[^"]*"[^>]*>\s*([0-9]+(?:\.[0-9]+)?)\s*</) ||
+    html.match(/"ratingValue"[^>]*content="([0-9.]+)"/) ||
+    html.match(/itemprop="ratingValue"[^>]*content="([0-9.]+)"/);
+  const rating = ratingMatch ? parseFloat(ratingMatch[1]) : null;
+
+  const topNotes    = extractParfumoNotes(html, ['Top Notes', 'Top', 'Head Notes']);
+  const middleNotes = extractParfumoNotes(html, ['Heart Notes', 'Middle Notes', 'Heart', 'Middle']);
+  const baseNotes   = extractParfumoNotes(html, ['Base Notes', 'Base', 'Bottom Notes']);
+
+  const concMatch = html.match(/(?:Eau de Parfum|Eau de Toilette|Parfum|Extrait|Cologne|EDT|EDP|EDC)/i);
+  const concentration = concMatch ? normalizeConcentration(concMatch[0]) : '';
+
+  const familyMatch = html.match(/(?:Floral|Woody|Oriental|Fresh|Citrus|Chypre|Fougere|Gourmand|Aquatic|Leather|Musk|Amber|Spicy)/i);
+  const family = familyMatch ? familyMatch[0] : '';
+
+  const cleanedName = cleanName(name, house);
+
+  return {
+    name:            cleanedName || name,
+    house:           house,
+    communityRating: rating,
+    topNotes:        topNotes,
+    middleNotes:     middleNotes,
+    baseNotes:       baseNotes,
+    allNotes:        [topNotes, middleNotes, baseNotes].filter(Boolean).join(', '),
+    concentration:   concentration,
+    family:          family,
+    communityLong:   null,
+    communitySill:   null,
+    url:             url,
+    source:          'parfumo',
+    parseConfidence: (cleanedName && (topNotes || middleNotes || baseNotes)) ? 'high' : cleanedName ? 'medium' : 'low',
+  };
+}
+
+function extractParfumoNotes(html, labelVariants) {
+  for (var i = 0; i < labelVariants.length; i++) {
+    var label = labelVariants[i];
+    var idx = html.indexOf(label);
+    if (idx === -1) continue;
+    var chunk = html.slice(idx, idx + 2000);
+
+    // Parfumo puts note names in title or alt attributes on ingredient images
+    var matches = [];
+    var reTit = /title="([^"]{2,40})"/g;
+    var reAlt = /alt="([^"]{2,40})"/g;
+    var m;
+
+    while ((m = reTit.exec(chunk)) !== null) {
+      var note = m[1].trim();
+      if (note && note.toLowerCase().indexOf('parfumo') === -1 && note.indexOf('http') === -1) {
+        matches.push(note);
+      }
+    }
+    if (matches.length === 0) {
+      while ((m = reAlt.exec(chunk)) !== null) {
+        var note2 = m[1].trim();
+        if (note2 && note2.toLowerCase().indexOf('parfumo') === -1 && note2.indexOf('http') === -1) {
+          matches.push(note2);
+        }
+      }
+    }
+
+    if (matches.length > 0) return matches.slice(0, 10).join(', ');
+  }
+  return '';
+}
+
+function normalizeConcentration(raw) {
+  var r = raw.toLowerCase();
+  if (r.indexOf('extrait') !== -1 || r === 'parfum') return 'Extrait de Parfum';
+  if (r.indexOf('eau de parfum') !== -1 || r === 'edp') return 'Eau de Parfum';
+  if (r.indexOf('eau de toilette') !== -1 || r === 'edt') return 'Eau de Toilette';
+  if (r.indexOf('cologne') !== -1 || r === 'edc') return 'Eau de Cologne';
+  return raw;
 }
 
 function json(data, status, headers) {
