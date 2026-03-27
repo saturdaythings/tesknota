@@ -58,6 +58,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .sdi:hover{background:var(--blue4);}
 .sdi-n{font-family:var(--serif);font-size:13px;color:var(--ink);}
 .sdi-h{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:1px;letter-spacing:.05em;}
+/* SEARCH TWO-TAB MODE */
+.sdrop-tabs{display:flex;border-bottom:1px solid var(--b2);background:white;position:sticky;top:0;z-index:1;}
+.sdrop-tab{flex:1;padding:7px 10px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;text-align:center;color:var(--ink3);transition:all .13s;}
+.sdrop-tab:hover{color:var(--blue1);}
+.sdrop-tab.on{color:var(--blue1);border-bottom:2px solid var(--blue1);}
 .hbg{display:none;background:none;border:none;cursor:pointer;color:var(--blue);font-size:20px;padding:0;}
 
 /* BUTTONS */
@@ -3050,22 +3055,34 @@ function renderCurrentPage(){
 // GLOBAL SEARCH
 // ═══════════════════════════════════════════════════════
 
+var gSearchTab = 'collection';
+function setGSTab(tab){
+  gSearchTab=tab;
+  var v=document.getElementById('gSrch').value||document.getElementById('mobSrch').value;
+  gSearch(v);
+}
 function gSearch(v){
   const el=document.getElementById('gDrop');
   if(v.length<2){el.style.display='none';return;}
   var MF=myFragrances();
-  // Collection matches (exact includes for owned items)
-  const hits=MF.filter(f=>f.name.toLowerCase().includes(v.toLowerCase())||f.house.toLowerCase().includes(v.toLowerCase())).slice(0,6);
-  // DB/community fuzzy matches not already in collection
-  const dbHits=fragSearch(v,5).filter(function(d){return !MF.find(function(f){return normStr(f.name)===normStr(d.n);});}).slice(0,4);
-  if(!hits.length&&!dbHits.length){el.innerHTML='<div class="sdi"><div class="sdi-n" style="color:var(--ink3)">No results</div></div>';el.style.display='block';return;}
-  el.innerHTML=
-    hits.map(f=>`<div class="sdi" onmousedown="pickGS('${f.id}')"><div class="sdi-n">${f.name}</div><div class="sdi-h">${f.house} · ${STATUS_LABELS[f.status]}</div></div>`).join('')+
-    (dbHits.length?'<div style="padding:5px 14px;font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;border-top:1px solid var(--b1);">Not in collection</div>':'')+
-    dbHits.map(function(f){
-      var badge=f.src==='community'?'community':'database';
-      return '<div class="sdi" onmousedown="openAddFromSearch(\''+f.n.replace(/'/g,"\\'")+'\')">'+'<div class="sdi-n">'+f.n+'</div><div class="sdi-h">'+f.h+' · Add to collection? <span style="font-size:9px;opacity:.6">'+badge+'</span></div></div>';
-    }).join('');
+  var tabsHtml='<div class="sdrop-tabs"><div class="sdrop-tab'+(gSearchTab==='collection'?' on':'')+'" onmousedown="event.preventDefault();setGSTab(\'collection\')">My Collection</div><div class="sdrop-tab'+(gSearchTab==='all'?' on':'')+'" onmousedown="event.preventDefault();setGSTab(\'all\')">All Fragrances</div></div>';
+  var resultsHtml;
+  if(gSearchTab==='collection'){
+    const hits=MF.filter(f=>f.name.toLowerCase().includes(v.toLowerCase())||f.house.toLowerCase().includes(v.toLowerCase())).slice(0,8);
+    resultsHtml=hits.length
+      ? hits.map(f=>'<div class="sdi" onmousedown="pickGS(\''+f.id+'\')"><div class="sdi-n">'+f.name+'</div><div class="sdi-h">'+f.house+' · '+STATUS_LABELS[f.status]+'</div></div>').join('')
+      : '<div class="sdi"><div class="sdi-n" style="color:var(--ink3)">Not in your collection</div><div class="sdi-h">Switch to "All Fragrances" to add it</div></div>';
+  } else {
+    const dbHits=fragSearch(v,8);
+    resultsHtml=dbHits.length
+      ? dbHits.map(function(f){
+          var inColl=MF.find(function(mf){return normStr(mf.name)===normStr(f.n);});
+          var badge=f.src==='community'?'community':'database';
+          return '<div class="sdi" onmousedown="'+(inColl?'pickGS(\''+inColl.id+'\')':'openAddFromSearch(\''+f.n.replace(/'/g,"\\'")+'\')')+'"><div class="sdi-n">'+f.n+(inColl?'<span style="font-size:9px;color:var(--sage);margin-left:6px;">✓ In collection</span>':'')+'</div><div class="sdi-h">'+f.h+(inColl?'':' · <span style="opacity:.6">'+badge+'</span>')+'</div></div>';
+        }).join('')
+      : '<div class="sdi"><div class="sdi-n" style="color:var(--ink3)">No results found</div></div>';
+  }
+  el.innerHTML=tabsHtml+resultsHtml;
   el.style.display='block';
 }
 function closeGS(){document.getElementById('gDrop').style.display='none';}
