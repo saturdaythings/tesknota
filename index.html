@@ -389,6 +389,15 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .intro-text{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:18px;}
 .sh-sub{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;}
 .sh.sh-spaced{margin-top:24px;}
+/* DISCOVERY SECTION */
+.disc-group{margin-bottom:22px;}
+.disc-group-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
+.disc-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1px;background:var(--b2);}
+.disc-card{background:var(--off);padding:14px;display:flex;flex-direction:column;gap:4px;}
+.disc-card-house{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;}
+.disc-card-name{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);line-height:1.2;}
+.disc-card-meta{font-family:var(--mono);font-size:10px;color:var(--warm);margin-bottom:4px;}
+.disc-card-reason{font-size:10px;color:var(--ink3);margin-bottom:6px;}
 .sh.sh-spaced-lg{margin-top:28px;}
 .chart-legend{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;margin-bottom:24px;}
 .link-result-status{font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;}
@@ -802,6 +811,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
       <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Community Rating</th><th>Avg Price</th><th>Notes</th><th>Dupe Candidate</th><th></th></tr></thead>
       <tbody id="wishBody"></tbody></table>
+      <div id="wishDiscover"></div>
     </div>
 
     <!-- COMPLIMENTS -->
@@ -2338,6 +2348,58 @@ function renderWishlist(filter='all'){
   } else {
     document.getElementById('wishBody').innerHTML = `<tr><td colspan="7" style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;text-align:center;">Nothing on your wishlist yet</td></tr>`;
   }
+  renderDiscovery();
+}
+
+function renderDiscovery(){
+  var discEl=document.getElementById('wishDiscover'); if(!discEl) return;
+  var MF=myFragrances();
+  var myNames=new Set(MF.map(function(f){return normStr(f.name);}));
+  var myWishNames=new Set(MF.filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';}).map(function(f){return normStr(f.name);}));
+  var alreadyHave=function(n){ return myNames.has(normStr(n))||myWishNames.has(normStr(n)); };
+
+  function discCard(d){ return '<div class="disc-card"><div class="disc-card-house">'+(d.h||'').toUpperCase()+'</div><div class="disc-card-name">'+d.n+'</div><div class="disc-card-meta">'+(d.r?d.r+' ★':'')+(d.p?' · $'+d.p:'')+'</div><div class="disc-card-reason">'+d.reason+'</div><button class="btn btn-ghost btn-sm" onclick="quickAddWishlist(\''+d.n.replace(/'/g,"\\'")+'\',' +'\''+d.h.replace(/'/g,"\\'")+'\')" style="margin-top:4px;">+ Wishlist</button></div>'; }
+  function discGroup(lbl, items){
+    if(!items.length) return '';
+    return '<div class="disc-group"><div class="disc-group-lbl">'+lbl+'</div><div class="disc-cards">'+items.map(discCard).join('')+'</div></div>';
+  }
+
+  // 1. Friend signals: friend owns, I don't
+  var friendSigs=friendFragrances().filter(function(f){return f.status==='CURRENT'&&!alreadyHave(f.name);}).slice(0,3).map(function(f){ return {n:f.name,h:f.house,r:f.communityRating,p:f.avgPrice,reason:'In Sylvia\'s collection'}; });
+
+  // 2. Note-based: extract notes from my top-rated frags, find DB matches
+  var myTopNotes={};
+  MF.filter(function(f){return f.status==='CURRENT'&&(f.personalRating||0)>=4;}).forEach(function(f){
+    (f.notes||'').replace(/·/g,',').split(',').forEach(function(n){ n=normStr(n.trim()); if(n) myTopNotes[n]=(myTopNotes[n]||0)+1; });
+  });
+  var noteMatches=FRAG_DB.filter(function(d){
+    if(alreadyHave(d.n)) return false;
+    var dbNotes=((d.top||'')+','+(d.mid||'')+','+(d.base||'')).toLowerCase();
+    return Object.keys(myTopNotes).some(function(n){ return dbNotes.includes(n); });
+  }).sort(function(a,b){return (b.r||0)-(a.r||0);}).slice(0,3).map(function(d){ return {n:d.n,h:d.h,r:d.r,p:d.p,reason:'Matches your top notes'}; });
+
+  // 3. Quality picks: high-rated from DB not owned
+  var qualityPicks=FRAG_DB.filter(function(d){ return !alreadyHave(d.n)&&(d.r||0)>=4.3; }).sort(function(a,b){return (b.r||0)-(a.r||0);}).slice(0,3).map(function(d){ return {n:d.n,h:d.h,r:d.r,p:d.p,reason:'Highly rated'}; });
+
+  var html='';
+  if(friendSigs.length||noteMatches.length||qualityPicks.length){
+    html='<div class="sh sh-spaced"><h2>Discover</h2></div>';
+    html+=discGroup('From Sylvia\'s collection', friendSigs);
+    html+=discGroup('Matches your top notes', noteMatches);
+    html+=discGroup('Quality picks', qualityPicks);
+  }
+  discEl.innerHTML=html;
+}
+
+function quickAddWishlist(name, house){
+  var db=FRAG_DB.find(function(d){return normStr(d.n)===normStr(name)&&normStr(d.h)===normStr(house);})||{};
+  var allNotes=[db.top||'',db.mid||'',db.base||''].filter(Boolean).join(', ')||'';
+  var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:name,house:house,status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:db.r||null,communityLong:db.l||null,communitySill:db.s||null,avgPrice:db.p||null,notes:allNotes,topNotes:db.top||'',middleNotes:db.mid||'',baseNotes:db.base||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''};
+  FRAGRANCES.push(newFrag);
+  appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  renderWishlist();
+  updateCounts();
+  toast(name+' added to wishlist');
 }
 
 document.getElementById('wishFbar').addEventListener('click',e=>{
