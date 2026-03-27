@@ -1307,7 +1307,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <button class="mob-btn" data-mob="collection">Collection</button>
     <button class="mob-btn" onclick="openAddFrag('CURRENT')">Add</button>
     <button class="mob-btn" data-mob="compliments">Compliments</button>
-    <button class="mob-btn" data-mob="friend">Sylvia</button>
+    <button class="mob-btn" data-mob="friend" id="mobFriendBtn">Friend</button>
   </div>
 </div>
 
@@ -1323,7 +1323,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <div class="compare-hd">
       <div>
         <div class="compare-title" id="compareTitle">Comparing fragrance</div>
-        <div class="compare-sub">You vs Sylvia — all compliments and notes</div>
+        <div class="compare-sub" id="compareSub">You vs Sylvia — all compliments and notes</div>
       </div>
       <button class="btn-close" onclick="closeCompare()">×</button>
     </div>
@@ -2048,7 +2048,7 @@ let prefetchedData = null;
 
 function genId(prefix){ return prefix + (nextId++); }
 function genCompId(){ return 'c' + (nextCompId++); }
-const PAGES = {dashboard:'Dashboard',collection:'My Collection',wishlist:'Wishlist',compliments:'Compliments',analytics:'Analytics',friend:"Sylvia's Profile",import:'Import',settings:'Settings'};
+const PAGES = {dashboard:'Dashboard',collection:'My Collection',wishlist:'Wishlist',compliments:'Compliments',analytics:'Analytics',import:'Import',settings:'Settings'};
 const STATUS_LABELS = {CURRENT:'Current',PREVIOUSLY_OWNED:'Prev. Owned',WANT_TO_BUY:'Want to Buy',WANT_TO_SMELL:'Want to Smell',DONT_LIKE:"Don't Like",WANT_TO_IDENTIFY:'Identify Later'};
 const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt',WANT_TO_SMELL:'s-wnt',DONT_LIKE:'s-no',WANT_TO_IDENTIFY:'s-unk'};
 
@@ -2087,7 +2087,8 @@ function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   const pg=document.getElementById('page-'+id);
   if(pg)pg.classList.add('on');
-  document.getElementById('pgName').textContent=PAGES[id]||id;
+  var pageName=id==='friend'?(getFriend().name+'\'s Profile'):(PAGES[id]||id);
+  document.getElementById('pgName').textContent=pageName;
   document.querySelectorAll('.sb-link[data-page]').forEach(l=>l.classList.toggle('on',l.dataset.page===id));
   document.querySelectorAll('.mob-btn[data-mob]').forEach(b=>b.classList.toggle('on',b.dataset.mob===id));
   closeSB();
@@ -2313,7 +2314,7 @@ function renderCollection(filter='all'){
         <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
         <td class="tact">
           <button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button>
-          ${hasFriendMatch?`<button class="btn-bare" style="color:var(--warm);" onclick="event.stopPropagation();openCompare('${f.name}','${f.id}')" title="Compare with Sylvia">Compare</button>`:''}
+          ${hasFriendMatch?`<button class="btn-bare" style="color:var(--warm);" onclick="event.stopPropagation();openCompare('${f.name}','${f.id}')" title="Compare with friend">Compare</button>`:''}
         </td>
       </tr>`;
     }).join('');
@@ -2384,7 +2385,8 @@ function renderDiscovery(){
   }
 
   // 1. Friend signals: friend owns, I don't
-  var friendSigs=friendFragrances().filter(function(f){return f.status==='CURRENT'&&!alreadyHave(f.name);}).slice(0,3).map(function(f){ return {n:f.name,h:f.house,r:f.communityRating,p:f.avgPrice,reason:'In Sylvia\'s collection'}; });
+  var friendName=(getFriend()||{name:'your friend'}).name;
+  var friendSigs=friendFragrances().filter(function(f){return f.status==='CURRENT'&&!alreadyHave(f.name);}).slice(0,3).map(function(f){ return {n:f.name,h:f.house,r:f.communityRating,p:f.avgPrice,reason:'In '+friendName+'\'s collection'}; });
 
   // 2. Note-based: extract notes from my top-rated frags, find DB matches
   var myTopNotes={};
@@ -2403,7 +2405,7 @@ function renderDiscovery(){
   var html='';
   if(friendSigs.length||noteMatches.length||qualityPicks.length){
     html='<div class="sh sh-spaced"><h2>Discover</h2></div>';
-    html+=discGroup('From Sylvia\'s collection', friendSigs);
+    html+=discGroup('From '+friendName+'\'s collection', friendSigs);
     html+=discGroup('Matches your top notes', noteMatches);
     html+=discGroup('Quality picks', qualityPicks);
   }
@@ -2600,6 +2602,11 @@ function renderFriend(){
   document.getElementById('ct-friend').textContent=FC.length;
   var sl=document.querySelector('.sb-link[data-page="friend"]');
   if(sl&&sl.childNodes[0]) sl.childNodes[0].textContent=friend.name+' ';
+  // Update all dynamic friend name references
+  var mobFriendBtn=document.getElementById('mobFriendBtn');
+  if(mobFriendBtn) mobFriendBtn.textContent=friend.name;
+  var compareSub=document.getElementById('compareSub');
+  if(compareSub) compareSub.textContent='You vs '+friend.name+' — all compliments and notes';
   // Activity dot — show if friend has any compliments or fragrances
   var actDot=document.getElementById('friendActivityDot');
   if(actDot) actDot.style.display=(FC.length||FF.length)?'inline-block':'none';
@@ -3832,7 +3839,7 @@ async function contributeToCommmunity(data){
   COMMUNITY_FRAGS.push(row);
   try{
     await appendRow('community_frags',row,COMMUNITY_FRAG_HEADERS);
-    toast('Saved to community database — Kiana and Sylvia will benefit from this!');
+    toast('Saved to community database — '+(getFriend()?getFriend().name:'your friend')+' will benefit from this!');
   }catch(e){
     // community_frags tab may not exist yet — silently ignore
     COMMUNITY_FRAGS.pop();
@@ -3940,7 +3947,7 @@ function showLinkResult(data){
   var confMsg={
     'slug-only':'Parsed from URL only — verify name and add notes before saving',
     'local-db':'Data from local database',
-    'community':'Data contributed by Kiana or Sylvia',
+    'community':'Data contributed by the community',
     'high':'',
     'vision':''
   }[data.parseConfidence]||'';
