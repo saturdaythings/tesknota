@@ -152,6 +152,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .cr-d{font-family:var(--mono);font-size:11px;color:var(--ink3);white-space:nowrap;margin-left:16px;letter-spacing:.06em;flex-shrink:0;}
 .crow-acts{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;transition:opacity .12s;}
 .crow:hover .crow-acts{opacity:1;}
+/* COMPLIMENT TIMELINE VIEW */
+.tl-month-hd{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--warm);padding:16px 0 8px;border-bottom:1px solid var(--b2);margin-bottom:2px;}
+.tl-month-hd:first-child{padding-top:4px;}
 
 /* ANALYTICS */
 .bchart{display:flex;align-items:flex-end;gap:4px;height:140px;background:var(--off2);padding:12px 12px 0;margin-bottom:6px;}
@@ -796,7 +799,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 
     <!-- COMPLIMENTS -->
     <div class="page" id="page-compliments">
-      <div class="sh"><h2>Compliment Log</h2><div class="sh-r"><button class="btn btn-blue" onclick="openAddComp('')">Log Compliment</button></div></div>
+      <div class="sh"><h2>Compliment Log</h2><div class="sh-r"><div class="btn-row"><button class="btn btn-ghost btn-sm" id="compViewList" onclick="setCompView('list')" style="color:var(--blue);">List</button><button class="btn btn-ghost btn-sm" id="compViewTimeline" onclick="setCompView('timeline')">Timeline</button><button class="btn btn-blue" onclick="openAddComp('')">Log Compliment</button></div></div></div>
       <div class="fbar" id="compFbar">
         <div class="fc on" data-filter="all">All</div>
         <div class="fc" data-filter="Stranger">Strangers</div>
@@ -2346,6 +2349,15 @@ function promoteToOwned(fragId){
 // RENDER — COMPLIMENTS
 // ═══════════════════════════════════════════════════════
 
+var compView = 'list';
+function setCompView(v){
+  compView=v;
+  document.getElementById('compViewList').style.color=v==='list'?'var(--blue)':'';
+  document.getElementById('compViewTimeline').style.color=v==='timeline'?'var(--blue)':'';
+  var fc=document.querySelector('#compFbar .fc.on');
+  renderCompliments(fc?fc.dataset.filter:'all');
+}
+
 function renderCompliments(filter='all'){
   var MC=myCompliments();
   // Frag filter bar
@@ -2363,21 +2375,23 @@ function renderCompliments(filter='all'){
     if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'Significant Others':r==='Family'?'Family':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
   });
   const allEmpty = MC.length === 0;
-  document.getElementById('compList').innerHTML = filtered.map(c=>`
-    <div class="crow" data-rel="${c.relation}">
-      <div style="flex:1;">
-        <div class="cr-f" onclick="openDetail('${c.primaryFragId}')">${c.primaryFrag}${c.secondaryFrag ? '<span class="cr-layer"> + ' + c.secondaryFrag + '</span>' : ''}</div>
-        <div class="cr-m">${c.relation}${c.gender?' · '+c.gender:''}${c.location?' · '+c.location:''}</div>
-        ${c.notes?`<div class="cr-n">${c.notes}</div>`:''}
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;">
-        <div class="cr-d">${c.month} ${c.year}</div>
-        <button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment('${c.id}')" title="Edit">✎</button>
-        <button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment('${c.id}')">×</button>
-      </div>
-    </div>`).join('') || (allEmpty
+  function crowHtml(c){ return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+c.primaryFrag+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div><div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+c.month+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
+  var listHtml;
+  if(compView==='timeline'&&filtered.length){
+    // Group by month+year, newest first
+    var groups={}; var groupOrder=[];
+    filtered.forEach(function(c){
+      var key=(c.month||'?')+' '+(c.year||'?');
+      if(!groups[key]){ groups[key]=[]; groupOrder.push(key); }
+      groups[key].push(c);
+    });
+    listHtml=groupOrder.map(function(key){ return '<div class="tl-month-hd">'+key+'</div>'+groups[key].map(crowHtml).join(''); }).join('');
+  } else {
+    listHtml=filtered.map(crowHtml).join('') || (allEmpty
       ? '<div style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliments logged yet — wear something great</div>'
       : '<div style="padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliments in this category yet</div>');
+  }
+  document.getElementById('compList').innerHTML=listHtml;
 }
 
 document.getElementById('compFbar').addEventListener('click',e=>{
