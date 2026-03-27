@@ -232,6 +232,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .comp-layer-toggle:hover{opacity:1;}
 .comp-save-banner{display:none;background:rgba(60,180,90,.85);color:#fff;text-align:center;padding:11px 20px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;border-top:1px solid rgba(60,180,90,.4);}
 
+/* ADD FRAGRANCE STEP 2 — progressive disclosure */
+.af-more-toggle{background:none;border:none;color:var(--blue1);font-family:var(--body);font-size:12px;cursor:pointer;padding:8px 0 4px;letter-spacing:.02em;opacity:.8;display:block;width:100%;}
+.af-more-toggle:hover{opacity:1;}
+.af-more-wrap{padding-top:4px;}
+
 /* STATUS CHANGE STRIP */
 .status-strip{display:none;flex-wrap:wrap;gap:6px;padding:10px 0;border-top:1px solid var(--b2);margin-top:8px;}
 .status-strip.show{display:flex;}
@@ -1070,6 +1075,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <div class="opt" onclick="selOpt(this,'sOpts')" data-v="WTF">WTF</div>
           </div>
         </div>
+        <!-- "More details" toggle — expands remaining fields -->
+        <button type="button" class="af-more-toggle" id="afMoreToggle" onclick="toggleAFMore()">+ More details</button>
+        <div class="af-more-wrap" id="afMoreWrap" style="display:none;">
         <div class="frow" style="margin-bottom:14px;">
           <div class="fg" style="margin:0;"><label>Personal longevity</label>
             <select id="afLong"><option value="">Not sure</option><option value="0–6h">0–6h</option><option value="6–12h" selected>6–12h</option><option value="12–24h">12–24h</option><option value=">24h">&gt;24h</option></select>
@@ -1107,6 +1115,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="fg"><label>Personal notes</label>
           <textarea id="afNotes" placeholder="How does it smell on your skin? When do you wear it? Any context worth remembering?"></textarea>
         </div>
+        </div><!-- /afMoreWrap -->
       </div>
     </div>
     <div class="mfoot">
@@ -2824,6 +2833,7 @@ function afGoStep(n, skipValidation){
     document.getElementById('afBack').style.display='inline-flex';
     document.getElementById('af-lbl').textContent='Step 2 of 2 — Personal details';
     updPips(2); _afStep=2;
+    initAFMoreState();
     // If editing, pre-fill step 2 fields
     if(prefetchedData){
       const d = prefetchedData;
@@ -2855,6 +2865,26 @@ function updPips(s){
     if(i<s-1)p.classList.add('done');
     else if(i===s-1)p.classList.add('active');
   });
+}
+
+function toggleAFMore(){
+  var wrap=document.getElementById('afMoreWrap');
+  var toggle=document.getElementById('afMoreToggle');
+  if(!wrap) return;
+  var open=wrap.style.display!=='none';
+  wrap.style.display=open?'none':'block';
+  toggle.textContent=open?'+ More details':'− Less details';
+  try{ localStorage.setItem('afStep2Expanded', open?'0':'1'); }catch(e){}
+}
+
+function initAFMoreState(){
+  var wrap=document.getElementById('afMoreWrap');
+  var toggle=document.getElementById('afMoreToggle');
+  if(!wrap||!toggle) return;
+  var expanded=false;
+  try{ expanded=localStorage.getItem('afStep2Expanded')==='1'; }catch(e){}
+  wrap.style.display=expanded?'block':'none';
+  toggle.textContent=expanded?'− Less details':'+ More details';
 }
 
 function saveFragrance(){
