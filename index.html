@@ -6,6 +6,7 @@
 <title>tęsknota</title>
 <!-- Credentials injected at build time by build.js -->
 <script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -623,7 +624,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="fc" data-filter="Friend">Friends</div>
         <div class="fc" data-filter="Colleague / Client">Colleagues</div>
         <div class="fc" data-filter="Family">Family</div>
-        <div class="fc" data-filter="Significant Other">Significant Other</div>
+        <div class="fc" data-filter="Significant Other">Significant Others</div>
       </div>
       <div class="cff-bar" id="compFragFilterBar" style="display:none;">
         Filtered: <span class="cff-name" id="cffName"></span>
@@ -653,9 +654,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="f-banner">
         <div><div class="fb-label">Friend profile</div><div class="fb-name" id="fbName"></div><div class="fb-meta" id="fbMeta"></div></div>
         <div class="fb-stats">
-          <div class="fb-stat"><div class="fsn">24</div><div class="fsl">Fragrances</div></div>
-          <div class="fb-stat"><div class="fsn">18</div><div class="fsl">Compliments</div></div>
-          <div class="fb-stat"><div class="fsn">5</div><div class="fsl">Wishlist</div></div>
+          <div class="fb-stat"><div class="fsn" id="fb-stat-frags">0</div><div class="fsl">Fragrances</div></div>
+          <div class="fb-stat"><div class="fsn" id="fb-stat-comps">0</div><div class="fsl">Compliments</div></div>
+          <div class="fb-stat"><div class="fsn" id="fb-stat-wish">0</div><div class="fsl">Wishlist</div></div>
         </div>
       </div>
       <div class="ftabs" id="friendTabs">
@@ -749,10 +750,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="ipanel" id="ip-cam">
         <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.6;">Point your camera at a label to identify the fragrance.</p>
         <div class="cam-box">
-          <div class="cam-view" id="camView" onclick="startScan()">
-            <div class="cv-t">Tap to open camera</div>
-            <div class="cv-s">Label recognition · Text detection</div>
-          </div>
+          <div id="camInitPanel"></div>
           <video id="camVideo" autoplay playsinline style="display:none;width:100%;"></video>
           <button class="btn btn-blue" id="camCaptureBtn" style="display:none;width:100%;margin-top:8px;" onclick="captureAndIdentify()">Tap to capture label</button>
           <div class="cam-res" id="camRes" style="display:none;">
@@ -774,6 +772,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <div id="camRawText" style="font-family:var(--mono);font-size:10px;color:var(--ink2);"></div>
           </div>
         </div>
+        <input type="file" id="camFileInput" accept="image/*" style="display:none;" onchange="handleCamFile(this.files[0])">
         <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:8px;">Not working? <span style="color:var(--blue);cursor:pointer;" onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
       </div>
       <div class="ipanel" id="ip-csv">
@@ -1357,6 +1356,18 @@ function selectIdentity(name, id){
   renderDashboard();
   renderImportQueue();
   updateCounts();
+  // Auto-navigate to scan tab if ?scan=1 is in URL
+  if(new URLSearchParams(window.location.search).get('scan')==='1'){
+    goPage('import');
+    document.querySelectorAll('#imTabs .imt').forEach(function(t){t.classList.remove('on');});
+    document.querySelectorAll('.ipanel').forEach(function(p){p.classList.remove('on');});
+    var scanTab=document.querySelector('#imTabs .imt[data-panel="ip-cam"]');
+    var scanPanel=document.getElementById('ip-cam');
+    if(scanTab)scanTab.classList.add('on');
+    if(scanPanel)scanPanel.classList.add('on');
+    initCamPanel();
+    setTimeout(startScan,400);
+  }
 }
 
 function signOut(){
@@ -1764,15 +1775,15 @@ function renderFriend(){
   if(bm){
     var sinceStr='';
     if(friend.createdAt){
-      var d=new Date(friend.createdAt);
+      var dp=friend.createdAt.split('-');
+      var d=dp.length>=2?new Date(parseInt(dp[0]),parseInt(dp[1])-1,parseInt(dp[2]||1)):new Date(friend.createdAt);
       sinceStr='Member since '+d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
     }
     bm.textContent=sinceStr;
   }
-  var fsns=document.querySelectorAll('.fb-stat .fsn');
-  if(fsns[0]) fsns[0].textContent=FF.length;
-  if(fsns[1]) fsns[1].textContent=FC.length;
-  if(fsns[2]) fsns[2].textContent=friendWish.length;
+  var sfEl=document.getElementById('fb-stat-frags'); if(sfEl) sfEl.textContent=FF.length;
+  var scEl=document.getElementById('fb-stat-comps'); if(scEl) scEl.textContent=FC.length;
+  var swEl=document.getElementById('fb-stat-wish'); if(swEl) swEl.textContent=friendWish.length;
   document.getElementById('ct-friend').textContent=FC.length;
   var sl=document.querySelector('.sb-link[data-page="friend"]');
   if(sl&&sl.childNodes[0]) sl.childNodes[0].textContent=friend.name+' ';
@@ -2619,11 +2630,7 @@ function focusTi(id){
   var inp=document.getElementById('ti-inp-'+id); if(inp) inp.focus();
 }
 
-let importQueueData = [
-  {name:'Chanel No. 5 EDP',house:'Chanel',communityRating:'4.2',notes:'Ylang Ylang, Rose, Jasmine',isDup:false},
-  {name:'Bleu de Chanel EDP',house:'Chanel',communityRating:'4.4',notes:'Citrus, Ginger, Sandalwood',isDup:true},
-  {name:'Reflection Man',house:'Amouage',communityRating:'4.5',notes:'Neroli, Ylang Ylang, Sandalwood',isDup:false},
-];
+let importQueueData = [];
 
 function renderImportQueue(){
   const el=document.getElementById('importQueue');
@@ -2814,18 +2821,21 @@ function lrSyncAll(){
 
 async function startScan(){
   var visionKey=window.__ENV__&&window.__ENV__.VISION_API_KEY?window.__ENV__.VISION_API_KEY:'';
-  if(!visionKey){toast('Bottle scan requires a Google Vision API key. Go to Settings → Configure Scan to set it up.');return;}
+  if(!visionKey){toast('Bottle scan requires a Google Vision API key. Go to Settings to configure.');return;}
+  var isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  var facingMode=isMobile?'environment':'user';
   var stream;
-  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});}
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facingMode}});}
   catch(e){toast('Camera access denied — please allow camera in browser settings');return;}
   var video=document.getElementById('camVideo');
   var captureBtn=document.getElementById('camCaptureBtn');
-  var scanView=document.getElementById('camView');
+  var initPanel=document.getElementById('camInitPanel');
+  if(initPanel)initPanel.style.display='none';
   video.srcObject=stream;
   video.style.display='block';
-  scanView.style.display='none';
   captureBtn.style.display='block';
   captureBtn.textContent='Tap to capture label';
+  captureBtn.disabled=false;
   window._camStream=stream;
 }
 
@@ -2857,11 +2867,12 @@ async function captureAndIdentify(){
       document.getElementById('camNotFound').style.display='block';
       document.getElementById('camRawText').textContent=fullText.slice(0,200);
       toast('Could not identify — try searching by name');
+      initCamPanel();
     }
   }catch(e){
     toast('Vision API error: '+e.message);
-    document.getElementById('camView').style.display='flex';
     captureBtn.textContent='Tap to capture label';captureBtn.disabled=false;
+    initCamPanel();
   }
 }
 
@@ -2884,7 +2895,7 @@ function identifyFragranceFromText(rawText,logoLabels){
 function showScanResult(data){
   document.getElementById('camVideo').style.display='none';
   document.getElementById('camCaptureBtn').style.display='none';
-  document.getElementById('camView').style.display='none';
+  var camInit=document.getElementById('camInitPanel');if(camInit)camInit.style.display='none';
   document.getElementById('scan-name').textContent=data.name;
   document.getElementById('scan-house').textContent=data.house;
   document.getElementById('scan-comm').textContent=data.communityRating?data.communityRating+' / 5.0':'—';
@@ -2895,16 +2906,115 @@ function showScanResult(data){
 
 function stopCamera(){
   if(window._camStream){window._camStream.getTracks().forEach(function(t){t.stop();});window._camStream=null;}
-  var v=document.getElementById('camVideo');v.srcObject=null;v.style.display='none';
+  var v=document.getElementById('camVideo');if(v){v.srcObject=null;v.style.display='none';}
+  var cb=document.getElementById('camCaptureBtn');if(cb)cb.style.display='none';
 }
 
 function resetScan(){
   stopCamera();
   document.getElementById('camRes').style.display='none';
-  document.getElementById('camView').style.display='flex';
   document.getElementById('camNotFound').style.display='none';
-  var btn=document.getElementById('camCaptureBtn');btn.textContent='Tap to capture label';btn.disabled=false;
   window._scannedFragData=null;
+  initCamPanel();
+}
+
+function initCamPanel(){
+  var el=document.getElementById('camInitPanel');
+  if(!el)return;
+  el.style.display='';
+  while(el.firstChild)el.removeChild(el.firstChild);
+  var isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  var camViewDiv=document.createElement('div');
+  camViewDiv.className='cam-view';
+  camViewDiv.style.cursor='pointer';
+  camViewDiv.onclick=startScan;
+  var cvT=document.createElement('div'); cvT.className='cv-t';
+  var cvS=document.createElement('div'); cvS.className='cv-s';
+  if(isMobile){
+    cvT.textContent='Open Camera';
+    cvS.textContent='Rear camera \u00b7 Label recognition';
+    camViewDiv.appendChild(cvT); camViewDiv.appendChild(cvS);
+    el.appendChild(camViewDiv);
+    var btnWrap=document.createElement('div');
+    btnWrap.style.cssText='text-align:center;padding:12px 0;';
+    var fileBtn=document.createElement('button');
+    fileBtn.className='btn btn-ghost';
+    fileBtn.textContent='Choose from Photos';
+    fileBtn.onclick=function(){document.getElementById('camFileInput').click();};
+    btnWrap.appendChild(fileBtn);
+    el.appendChild(btnWrap);
+  } else {
+    cvT.textContent='Open Webcam';
+    cvS.textContent='Use this device\u2019s camera';
+    camViewDiv.appendChild(cvT); camViewDiv.appendChild(cvS);
+    el.appendChild(camViewDiv);
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:flex-start;gap:24px;padding:16px 0 8px;';
+    var qrWrap=document.createElement('div'); qrWrap.style.flex='1';
+    var qrLbl=document.createElement('div');
+    qrLbl.style.cssText='font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;';
+    qrLbl.textContent='Or scan with your phone';
+    var qrDiv=document.createElement('div'); qrDiv.id='scanQrCode';
+    var qrNote=document.createElement('div');
+    qrNote.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:6px;letter-spacing:.06em;';
+    qrNote.textContent='Opens scanner on mobile';
+    qrWrap.appendChild(qrLbl); qrWrap.appendChild(qrDiv); qrWrap.appendChild(qrNote);
+    var actWrap=document.createElement('div');
+    actWrap.style.cssText='display:flex;flex-direction:column;justify-content:center;gap:8px;padding-top:32px;';
+    var uploadBtn=document.createElement('button');
+    uploadBtn.className='btn btn-ghost';
+    uploadBtn.textContent='Upload a Photo';
+    uploadBtn.onclick=function(){document.getElementById('camFileInput').click();};
+    actWrap.appendChild(uploadBtn);
+    row.appendChild(qrWrap); row.appendChild(actWrap);
+    el.appendChild(row);
+    setTimeout(function(){
+      var qrEl=document.getElementById('scanQrCode');
+      if(qrEl&&typeof QRCode!=='undefined'){
+        new QRCode(qrEl,{text:'https://tesknota.pages.dev?scan=1',width:120,height:120,colorDark:'#1A2E5C',colorLight:'#F4F2ED'});
+      }
+    },80);
+  }
+}
+
+function handleCamFile(file){
+  if(!file)return;
+  var visionKey=window.__ENV__&&window.__ENV__.VISION_API_KEY?window.__ENV__.VISION_API_KEY:'';
+  if(!visionKey){toast('Bottle scan requires a Google Vision API key.');return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var base64=e.target.result.split(',')[1];
+    var initPanel=document.getElementById('camInitPanel');
+    if(initPanel){
+      while(initPanel.firstChild)initPanel.removeChild(initPanel.firstChild);
+      var loadDiv=document.createElement('div');
+      loadDiv.style.cssText='padding:24px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
+      loadDiv.textContent='Identifying\u2026';
+      initPanel.appendChild(loadDiv);
+    }
+    fetch('https://vision.googleapis.com/v1/images:annotate?key='+visionKey,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({requests:[{image:{content:base64},features:[{type:'TEXT_DETECTION',maxResults:1},{type:'LOGO_DETECTION',maxResults:3}]}]})
+    }).then(function(res){return res.json();}).then(function(data){
+      if(data.error)throw new Error(data.error.message);
+      var fullText=(data.responses[0]&&data.responses[0].fullTextAnnotation?data.responses[0].fullTextAnnotation.text:'')||'';
+      var logoLabels=(data.responses[0]&&data.responses[0].logoAnnotations?data.responses[0].logoAnnotations:[]).map(function(l){return l.description;});
+      var identified=identifyFragranceFromText(fullText,logoLabels);
+      if(identified){
+        showScanResult(identified);
+      }else{
+        document.getElementById('camNotFound').style.display='block';
+        document.getElementById('camRawText').textContent=fullText.slice(0,200);
+        toast('Could not identify \u2014 try searching by name');
+        initCamPanel();
+      }
+    }).catch(function(err){
+      toast('Vision API error: '+err.message);
+      initCamPanel();
+    });
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('camFileInput').value='';
 }
 
 function selIM(m){
@@ -2921,6 +3031,7 @@ document.getElementById('imTabs').addEventListener('click',e=>{
   imt.classList.add('on');
   const panel=document.getElementById(imt.dataset.panel);
   if(panel)panel.classList.add('on');
+  if(imt.dataset.panel==='ip-cam')initCamPanel();
 });
 
 // ═══════════════════════════════════════════════════════
