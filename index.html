@@ -97,6 +97,16 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .fc:last-child{border-right:none;}
 .fc:hover{color:var(--blue);background:var(--blue4);}
 .fc.on{background:var(--blue);color:var(--warm2);}
+/* COLLECTION SORT + FAMILY FILTER */
+.coll-sort-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.coll-sort-lbl{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;}
+.coll-sort-select{font-family:var(--mono);font-size:10px;letter-spacing:.08em;background:var(--off);border:1px solid var(--b2);color:var(--ink);padding:4px 8px;cursor:pointer;}
+.fam-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.fam-chip{padding:3px 10px;border:1px solid var(--b3);border-radius:12px;font-family:var(--mono);font-size:10px;color:var(--ink3);cursor:pointer;transition:all .14s;letter-spacing:.06em;}
+.fam-chip:hover{border-color:var(--blue1);color:var(--blue1);}
+.fam-chip.on{border-color:var(--blue1);background:rgba(107,154,242,.15);color:var(--blue1);}
+.active-filter-bar{display:none;align-items:center;gap:8px;padding:6px 10px;background:var(--blue4);border:1px solid rgba(107,154,242,.2);margin-bottom:12px;font-family:var(--mono);font-size:10px;color:var(--blue1);}
+.active-filter-bar.show{display:flex;}
 
 /* TABLE */
 .tbl{width:100%;border-collapse:collapse;}
@@ -730,6 +740,34 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <button class="btn btn-ghost btn-sm" id="btnTable" onclick="setView('table')" style="color:var(--blue);">Table</button>
           <button class="btn btn-ghost btn-sm" id="btnGrid" onclick="setView('grid')">Grid</button>
         </div>
+      </div>
+      <!-- Sort bar -->
+      <div class="coll-sort-bar">
+        <span class="coll-sort-lbl">Sort</span>
+        <select class="coll-sort-select" id="collSort" onchange="setCollSort(this.value)">
+          <option value="nameAZ">Name A–Z</option>
+          <option value="nameZA">Name Z–A</option>
+          <option value="ratingHL">Rating High–Low</option>
+          <option value="comps">Most Compliments</option>
+          <option value="recent">Recently Added</option>
+        </select>
+      </div>
+      <!-- Family filter chips -->
+      <div class="fam-chips" id="famChips">
+        <span class="coll-sort-lbl" style="margin-right:2px;">Family</span>
+        <div class="fam-chip" data-fam="Floral" onclick="toggleFamChip(this)">Floral</div>
+        <div class="fam-chip" data-fam="Woody" onclick="toggleFamChip(this)">Woody</div>
+        <div class="fam-chip" data-fam="Oriental" onclick="toggleFamChip(this)">Oriental</div>
+        <div class="fam-chip" data-fam="Fresh" onclick="toggleFamChip(this)">Fresh</div>
+        <div class="fam-chip" data-fam="Citrus" onclick="toggleFamChip(this)">Citrus</div>
+        <div class="fam-chip" data-fam="Chypre" onclick="toggleFamChip(this)">Chypre</div>
+        <div class="fam-chip" data-fam="Fougere" onclick="toggleFamChip(this)">Fougère</div>
+        <div class="fam-chip" data-fam="Gourmand" onclick="toggleFamChip(this)">Gourmand</div>
+      </div>
+      <!-- Active filter summary bar -->
+      <div class="active-filter-bar" id="activeFilterBar">
+        <span id="activeFilterText"></span>
+        <button class="btn btn-ghost btn-sm" onclick="clearFamFilter()" style="margin-left:auto;">Clear</button>
       </div>
       <div class="note-filter-bar" id="noteFilterBar">
         <span class="note-filter-label">Showing: <span id="noteFilterName"></span></span>
@@ -2155,10 +2193,61 @@ function avgRating(){
 // RENDER — COLLECTION
 // ═══════════════════════════════════════════════════════
 
+var collSort = 'nameAZ';
+var collFamFilter = [];
+
+function getFragFamily(frag){
+  var db=FRAG_DB.find(function(d){ return normStr(d.n)===normStr(frag.name)&&normStr(d.h)===normStr(frag.house); });
+  return db?db.fam:null;
+}
+
+function setCollSort(val){
+  collSort=val;
+  var activeFilter=document.querySelector('#collFbar .fc.on');
+  renderCollection(activeFilter?activeFilter.dataset.filter:'all');
+}
+
+function toggleFamChip(el){
+  el.classList.toggle('on');
+  collFamFilter=Array.from(document.querySelectorAll('#famChips .fam-chip.on')).map(function(c){return c.dataset.fam;});
+  var activeFilter=document.querySelector('#collFbar .fc.on');
+  renderCollection(activeFilter?activeFilter.dataset.filter:'all');
+}
+
+function clearFamFilter(){
+  collFamFilter=[];
+  document.querySelectorAll('#famChips .fam-chip').forEach(function(c){c.classList.remove('on');});
+  var activeFilter=document.querySelector('#collFbar .fc.on');
+  renderCollection(activeFilter?activeFilter.dataset.filter:'all');
+}
+
 function renderCollection(filter='all'){
   var MF=myFragrances();
   const coll = MF.filter(f=>f.status!=='WANT_TO_BUY'&&f.status!=='WANT_TO_SMELL');
-  const filtered = filter==='all' ? coll : coll.filter(f=>f.status===filter);
+  var filtered = filter==='all' ? coll : coll.filter(f=>f.status===filter);
+  // Apply family filter
+  if(collFamFilter.length){
+    filtered=filtered.filter(function(f){
+      var fam=getFragFamily(f);
+      return fam&&collFamFilter.some(function(cf){return fam.toLowerCase().includes(cf.toLowerCase());});
+    });
+  }
+  // Active filter bar
+  var aBar=document.getElementById('activeFilterBar');
+  var aTxt=document.getElementById('activeFilterText');
+  if(aBar&&aTxt){
+    if(collFamFilter.length){ aBar.classList.add('show'); aTxt.textContent='Family: '+collFamFilter.join(', '); }
+    else { aBar.classList.remove('show'); aTxt.textContent=''; }
+  }
+  // Apply sort
+  var MC=myCompliments();
+  filtered=filtered.slice().sort(function(a,b){
+    if(collSort==='nameZA') return b.name.localeCompare(a.name);
+    if(collSort==='ratingHL') return (b.personalRating||0)-(a.personalRating||0);
+    if(collSort==='comps'){ var ca=MC.filter(function(c){return c.primaryFragId===a.id;}).length; var cb=MC.filter(function(c){return c.primaryFragId===b.id;}).length; return cb-ca; }
+    if(collSort==='recent') return parseInt((b.id||'0').replace(/\D/g,''))-parseInt((a.id||'0').replace(/\D/g,''));
+    return a.name.localeCompare(b.name); // nameAZ default
+  });
   // Update filter counts
   document.querySelector('#collFbar .fc[data-filter="all"]').textContent=`All (${coll.length})`;
   document.querySelector('#collFbar .fc[data-filter="CURRENT"]').textContent=`Current (${coll.filter(f=>f.status==='CURRENT').length})`;
