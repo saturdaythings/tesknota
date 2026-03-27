@@ -300,6 +300,75 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .scan-footer-link span{color:var(--blue);cursor:pointer;}
 @media(max-width:640px){.scan-cards{grid-template-columns:1fr;}}
 
+/* IDENTITY SCREEN */
+.idscreen-hero{text-align:center;margin-bottom:64px;}
+.idscreen-title{font-family:var(--script);font-size:64px;font-style:italic;color:var(--warm2);letter-spacing:.02em;line-height:1;}
+.idscreen-sub{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:12px;}
+.idscreen-spacer{height:20px;}
+.idscreen-motto{font-family:'Cormorant Garamond',var(--script);font-size:15px;font-style:italic;color:rgba(200,185,154,.72);line-height:1.5;letter-spacing:.01em;}
+.idscreen-loading{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.id-spinner{width:28px;height:28px;border:2px solid rgba(200,185,154,.25);border-top-color:var(--warm2);border-radius:50%;animation:spin .8s linear infinite;}
+.idscreen-status{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.14em;text-transform:uppercase;}
+.idscreen-picker{display:none;flex-direction:column;align-items:center;}
+.idscreen-prompt{font-family:var(--body);font-size:14px;color:rgba(255,255,255,.7);margin-bottom:24px;letter-spacing:.04em;text-align:center;}
+.idscreen-btn-group{display:flex;gap:16px;}
+.btn-identity{min-width:160px;min-height:56px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--script);font-size:24px;font-style:italic;padding:0 44px;cursor:pointer;letter-spacing:.04em;transition:all .18s;}
+.btn-identity:hover{background:rgba(200,185,154,.28);}
+.idscreen-error-wrap{display:none;flex-direction:column;align-items:center;gap:12px;max-width:360px;text-align:center;}
+.idscreen-error-lbl{font-family:var(--mono);font-size:10px;color:var(--rose);letter-spacing:.14em;text-transform:uppercase;}
+.idscreen-error-msg{font-family:var(--body);font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;}
+.btn-identity-alt{margin-top:8px;min-width:160px;min-height:44px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:0 24px;cursor:pointer;transition:all .18s;}
+.btn-identity-alt:hover{background:rgba(200,185,154,.28);}
+
+/* TYPOGRAPHY SYSTEM */
+.intro-text{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:18px;}
+.sh-sub{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;}
+.sh.sh-spaced{margin-top:24px;}
+.sh.sh-spaced-lg{margin-top:28px;}
+.chart-legend{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;margin-bottom:24px;}
+.link-result-status{font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;}
+.lr-confidence-badge{font-family:var(--mono);font-size:8px;color:var(--warm);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+.caption-text{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin:10px 0 12px;}
+.hint-text{font-size:11px;color:var(--ink3);margin-top:4px;}
+.caption-error{font-size:12px;color:var(--ink3);margin-bottom:8px;}
+.code-output{font-family:var(--mono);font-size:10px;color:var(--ink2);}
+.csv-header-hint{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
+.compdist-text{font-size:12px;color:var(--ink2);margin-bottom:12px;}
+.merge-instruction{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink3);margin-bottom:10px;}
+.divider-section{border-top:1px solid var(--b2);padding-top:10px;margin-bottom:12px;}
+.search-input{width:100%;border:1px solid var(--b3);padding:9px 12px;font-size:13px;font-family:var(--body);background:none;outline:none;color:var(--ink);}
+.input-editable{width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;}
+
+/* BUTTON VARIANTS */
+.btn-bare-warm{color:var(--warm);font-size:9px;}
+.btn-fullwidth{width:100%;justify-content:center;}
+.btn-flex-equal{flex:1;justify-content:center;}
+.btn-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;padding:0;}
+.tbl.tbl-spaced{margin-bottom:28px;}
+.mt-16{margin-top:16px;}
+.mb-20{margin-bottom:20px;}
+
+/* LAYOUT */
+.performer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1px;background:var(--b2);}
+.controls-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.btn-row{display:flex;gap:8px;}
+.btn-col{display:flex;flex-direction:column;gap:7px;}
+.queue-end{display:flex;justify-content:flex-end;}
+.grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+.grid-2col-gap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.merge-options{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.panel-inset{padding:14px;background:var(--blue4);border:1px solid var(--b2);margin-top:12px;}
+.video-fullwidth{width:100%;display:block;}
+
+/* PERFORMER CARDS */
+.card-performer{background:var(--off);padding:18px;cursor:pointer;}
+.card-performer:hover{background:var(--off2);}
+.card-num{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;}
+.card-pfrag{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:3px;}
+.card-pcount{font-family:var(--mono);font-size:10px;color:var(--warm);}
+.card-pdist{font-size:11px;color:var(--ink2);margin-top:5px;}
+.lbl-empty{padding:24px;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;}
+
 /* DETAIL PANEL */
 .detail{position:fixed;top:0;right:0;bottom:0;width:390px;max-width:100%;background:var(--off);border-left:1px solid var(--b2);z-index:300;transform:translateX(100%);transition:transform .28s ease;overflow-y:auto;box-shadow:-6px 0 28px rgba(26,46,92,.1);}
 .detail.on{transform:translateX(0);}
@@ -500,30 +569,30 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 <!-- ── IDENTITY SCREEN ── -->
 <div id="identityScreen" style="display:flex;position:fixed;inset:0;background:var(--blue3);z-index:1000;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px;padding-top:35vh;">
   <!-- Hero wordmark — centered, larger than sidebar -->
-  <div style="text-align:center;margin-bottom:64px;">
-    <div style="font-family:var(--script);font-size:64px;font-style:italic;color:var(--warm2);letter-spacing:.02em;line-height:1;">tęsknota</div>
-    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:12px;">Fragrance Tracker</div>
-    <div style="height:20px;"></div>
-    <div style="font-family:'Cormorant Garamond',var(--script);font-size:15px;font-style:italic;color:rgba(200,185,154,.72);line-height:1.5;letter-spacing:.01em;">[ tɛsk-ˈnɔ-ta ] &nbsp;·&nbsp; a deep longing for what is absent or past</div>
+  <div class="idscreen-hero">
+    <div class="idscreen-title">tęsknota</div>
+    <div class="idscreen-sub">Fragrance Tracker</div>
+    <div class="idscreen-spacer"></div>
+    <div class="idscreen-motto">[ tɛsk-ˈnɔ-ta ] &nbsp;·&nbsp; a deep longing for what is absent or past</div>
   </div>
   <!-- Loading state -->
-  <div id="idLoading" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
-    <div style="width:28px;height:28px;border:2px solid rgba(200,185,154,.25);border-top-color:var(--warm2);border-radius:50%;animation:spin .8s linear infinite;"></div>
-    <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.45);letter-spacing:.14em;text-transform:uppercase;">Loading your collection…</div>
+  <div id="idLoading" class="idscreen-loading">
+    <div class="id-spinner"></div>
+    <div class="idscreen-status">Loading your collection…</div>
   </div>
   <!-- Identity picker (shown after data loads) -->
-  <div id="idPicker" style="display:none;flex-direction:column;align-items:center;">
-    <div style="font-family:var(--body);font-size:14px;color:rgba(255,255,255,.7);margin-bottom:24px;letter-spacing:.04em;text-align:center;">Who are you?</div>
-    <div style="display:flex;gap:16px;">
-      <button style="min-width:160px;min-height:56px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--script);font-size:24px;font-style:italic;padding:0 44px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.28)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Kiana','u1')">Kiana</button>
-      <button style="min-width:160px;min-height:56px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--script);font-size:24px;font-style:italic;padding:0 44px;cursor:pointer;letter-spacing:.04em;transition:all .18s;" onmouseover="this.style.background='rgba(200,185,154,.28)'" onmouseout="this.style.background='rgba(200,185,154,.15)'" onclick="selectIdentity('Sylvia','u2')">Sylvia</button>
+  <div id="idPicker" class="idscreen-picker">
+    <div class="idscreen-prompt">Who are you?</div>
+    <div class="idscreen-btn-group">
+      <button class="btn-identity" onclick="selectIdentity('Kiana','u1')">Kiana</button>
+      <button class="btn-identity" onclick="selectIdentity('Sylvia','u2')">Sylvia</button>
     </div>
   </div>
   <!-- Error state -->
-  <div id="idError" style="display:none;flex-direction:column;align-items:center;gap:12px;max-width:360px;text-align:center;">
-    <div style="font-family:var(--mono);font-size:10px;color:var(--rose);letter-spacing:.14em;text-transform:uppercase;">Could not reach Google Sheets</div>
-    <div style="font-family:var(--body);font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;">Check the browser console for details. Your local data is intact — you can continue without sync.</div>
-    <button style="margin-top:8px;min-width:160px;min-height:44px;background:rgba(200,185,154,.15);border:1px solid rgba(200,185,154,.35);color:rgba(230,217,196,.92);font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:0 24px;cursor:pointer;" onclick="document.getElementById('idError').style.display='none';document.getElementById('idPicker').style.display='flex';">Continue anyway</button>
+  <div id="idError" class="idscreen-error-wrap">
+    <div class="idscreen-error-lbl">Could not reach Google Sheets</div>
+    <div class="idscreen-error-msg">Check the browser console for details. Your local data is intact — you can continue without sync.</div>
+    <button class="btn-identity-alt" onclick="document.getElementById('idError').style.display='none';document.getElementById('idPicker').style.display='flex';">Continue anyway</button>
   </div>
 </div>
 
@@ -581,28 +650,28 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- DASHBOARD -->
     <div class="page on" id="page-dashboard">
       <div class="stats" id="dashStats"></div>
-      <div style="margin-bottom:20px;">
+      <div class="mb-20">
         <button class="btn btn-warm" onclick="openAddComp(null)" title="Record a compliment you received">+ Log a Compliment</button>
       </div>
       <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
-      <table class="tbl" style="margin-bottom:28px;" id="dashTable">
+      <table class="tbl tbl-spaced" id="dashTable">
         <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes to nose</th><th>Compliments</th><th></th></tr></thead>
         <tbody id="dashBody"></tbody>
       </table>
       <div class="sh"><h2>Top compliment performers</h2></div>
-      <div id="dashPerformers" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1px;background:var(--b2);"></div>
+      <div id="dashPerformers" class="performer-grid"></div>
     </div>
 
     <!-- COLLECTION -->
     <div class="page" id="page-collection">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <div class="controls-bar">
         <div class="fbar" id="collFbar">
           <div class="fc on" data-filter="all">All</div>
           <div class="fc" data-filter="CURRENT">Current</div>
           <div class="fc" data-filter="PREVIOUSLY_OWNED">Prev. Owned</div>
           <div class="fc" data-filter="DONT_LIKE">Don't Like</div>
         </div>
-        <div style="display:flex;gap:8px;">
+        <div class="btn-row">
           <button class="btn btn-ghost btn-sm" id="btnTable" onclick="setView('table')" style="color:var(--blue);">Table</button>
           <button class="btn btn-ghost btn-sm" id="btnGrid" onclick="setView('grid')">Grid</button>
         </div>
@@ -653,12 +722,12 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="stats" id="anaStats"></div>
       <div class="sh"><h2>Compliments by fragrance</h2></div>
       <div class="bchart" id="bc1"></div>
-      <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;margin-bottom:26px;" id="bc1-legend"></div>
+      <div class="chart-legend" id="bc1-legend"></div>
       <div class="sh"><h2>By relation</h2></div>
       <div class="bchart" id="bc2" style="margin-bottom:26px;"></div>
       <div class="sh"><h2>Key insights</h2></div>
       <div id="insightsList"></div>
-      <div class="sh" style="margin-top:24px;"><h2>Notes intelligence</h2><div class="sh-r"><span style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">Compliments per note</span></div></div>
+      <div class="sh sh-spaced"><h2>Notes intelligence</h2><div class="sh-r"><span class="sh-sub">Compliments per note</span></div></div>
       <div id="notesIntel" class="notes-grid"></div>
       <div class="sh"><h2>Your favourite notes</h2></div>
       <div id="faveNotes" style="margin-bottom:4px;"></div>
@@ -689,13 +758,13 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="fpanel" id="ft-wish">
         <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Community Rating</th><th>Avg Price</th></tr></thead>
         <tbody id="ft-wish-body"></tbody></table>
-        <div id="wishInCommon" style="margin-top:16px;"></div>
+        <div id="wishInCommon" class="mt-16"></div>
       </div>
       <div class="fpanel" id="ft-ana">
         <div class="stats" id="ft-ana-stats" style="margin-bottom:22px;"></div>
         <div class="sh"><h2 id="ft-ana-title">Top performers</h2></div>
         <div class="bchart" id="bc-f"></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;margin-bottom:22px;" id="bc-f-legend"></div>
+        <div class="chart-legend" id="bc-f-legend"></div>
         <div id="ft-ana-insights"></div>
       </div>
     </div>
@@ -703,46 +772,46 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- IMPORT -->
     <div class="page" id="page-import">
       <div class="sh"><h2>Import</h2></div>
-      <p style="font-size:13px;color:var(--ink2);margin-bottom:22px;max-width:500px;line-height:1.65;">Add fragrances without re-entering data. Paste a URL, scan a bottle, or drop a CSV — metadata pulls and you confirm before anything saves.</p>
+      <p class="intro-text" style="margin-bottom:22px;max-width:500px;">Add fragrances without re-entering data. Paste a URL, scan a bottle, or drop a CSV — metadata pulls and you confirm before anything saves.</p>
       <div class="im-tabs" id="imTabs">
         <div class="imt on" data-panel="ip-link"><div class="imt-label">Paste a Link</div><div class="imt-sub">Fragrantica · Sephora · Retailer</div></div>
         <div class="imt" data-panel="ip-cam"><div class="imt-label">Scan a Bottle</div><div class="imt-sub">Camera · Barcode · Label</div></div>
         <div class="imt" data-panel="ip-csv"><div class="imt-label">CSV</div><div class="imt-sub">.csv · .xlsx · .xls</div></div>
       </div>
       <div class="ipanel on" id="ip-link">
-        <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.6;">Paste a Fragrantica or retailer URL to pull metadata.</p>
+        <p class="intro-text">Paste a Fragrantica or retailer URL to pull metadata.</p>
         <div class="linkrow"><input placeholder="https://www.fragrantica.com/perfume/..." id="linkIn"><button class="btn btn-blue" id="linkFetchBtn" onclick="fetchLink()">Fetch Metadata</button></div>
         <div class="lresult" id="linkRes" style="display:none;">
-          <div style="font-family:var(--mono);font-size:8px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;">Fetched — review and edit before saving</div>
-          <div id="lr-confidence" style="display:none;font-family:var(--mono);font-size:8px;color:var(--warm);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;"></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+          <div class="link-result-status">Fetched — review and edit before saving</div>
+          <div id="lr-confidence" class="lr-confidence-badge" style="display:none;"></div>
+          <div class="grid-2col">
             <div class="lr-edit-wrap"><label>Fragrance name</label><input type="text" id="lr-name-inp" oninput="lrSync('name',this.value)"></div>
             <div class="lr-edit-wrap"><label>Brand / House</label><input type="text" id="lr-house-inp" oninput="lrSync('house',this.value)"></div>
           </div>
-          <div class="lr-g" style="grid-template-columns:repeat(4,1fr);">
+          <div class="lr-g">
             <div>
               <div class="lrl">Community rating</div>
               <div class="lr-static" id="lrs-comm"><span class="lrv" id="lr-comm">—</span> <button class="lr-editbtn" onclick="lrEditField('comm')">edit</button></div>
-              <input type="number" id="lr-comm-inp" class="lr-edit-wrap" style="display:none;width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;" min="0" max="5" step="0.1" placeholder="0.0–5.0" oninput="lrSync('communityRating',this.value)">
+              <input type="number" id="lr-comm-inp" class="input-editable" style="display:none;" min="0" max="5" step="0.1" placeholder="0.0–5.0" oninput="lrSync('communityRating',this.value)">
             </div>
             <div>
               <div class="lrl">Avg price</div>
               <div class="lr-static" id="lrs-price"><span class="lrv" id="lr-price">—</span> <button class="lr-editbtn" onclick="lrEditField('price')">edit</button></div>
-              <input type="text" id="lr-price-inp" style="display:none;width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;" placeholder="~$280" oninput="lrSync('avgPrice',this.value)">
+              <input type="text" id="lr-price-inp" class="input-editable" style="display:none;" placeholder="~$280" oninput="lrSync('avgPrice',this.value)">
             </div>
             <div>
               <div class="lrl">Longevity</div>
               <div class="lr-static" id="lrs-long"><span class="lrv" id="lr-long">—</span> <button class="lr-editbtn" onclick="lrEditField('long')">edit</button></div>
-              <select id="lr-long-inp" style="display:none;width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;" onchange="lrSync('communityLong',this.value)"><option value="">—</option><option>0–6h</option><option>6–12h</option><option>12–24h</option><option>&gt;24h</option></select>
+              <select id="lr-long-inp" class="input-editable" style="display:none;" onchange="lrSync('communityLong',this.value)"><option value="">—</option><option>0–6h</option><option>6–12h</option><option>12–24h</option><option>&gt;24h</option></select>
             </div>
             <div>
               <div class="lrl">Sillage</div>
               <div class="lr-static" id="lrs-sill"><span class="lrv" id="lr-sill">—</span> <button class="lr-editbtn" onclick="lrEditField('sill')">edit</button></div>
-              <select id="lr-sill-inp" style="display:none;width:100%;border:none;border-bottom:1px solid var(--b3);background:none;padding:4px 0;font-size:12px;outline:none;" onchange="lrSync('communitySill',this.value)"><option value="">—</option><option>Soft</option><option>Moderate</option><option>Strong</option><option>Enormous</option></select>
+              <select id="lr-sill-inp" class="input-editable" style="display:none;" onchange="lrSync('communitySill',this.value)"><option value="">—</option><option>Soft</option><option>Moderate</option><option>Strong</option><option>Enormous</option></select>
             </div>
           </div>
           <!-- Notes pyramid for import card -->
-          <div style="border-top:1px solid var(--b2);padding-top:10px;margin-bottom:12px;">
+          <div class="divider-section">
             <div class="note-tiers">
               <div class="note-tier"><div class="note-tier-head">Top Notes <span class="note-tier-desc">first impression, 0–30 min</span></div><div class="ti-wrap" id="ti-lrTop" onclick="focusTi('lrTop')"></div></div>
               <div class="note-tier"><div class="note-tier-head">Heart Notes <span class="note-tier-desc">core character, 30 min–4 hrs</span></div><div class="ti-wrap" id="ti-lrMiddle" onclick="focusTi('lrMiddle')"></div></div>
@@ -750,22 +819,22 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             </div>
           </div>
           <a class="lr-search-link" id="lrSearchLink" href="#" target="_blank" rel="noopener">↗ Search on Fragrantica</a>
-          <div style="font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin:10px 0 12px;">Confirm and add personal details, or add directly to wishlist.</div>
-          <div style="display:flex;gap:8px;">
+          <div class="caption-text">Confirm and add personal details, or add directly to wishlist.</div>
+          <div class="btn-row">
             <button class="btn btn-blue" onclick="lrImportToCollection()">Add to Collection</button>
             <button class="btn btn-ghost" onclick="lrImportToWishlist()">Add to Wishlist</button>
             <button class="btn-bare" onclick="document.getElementById('linkRes').style.display='none';document.getElementById('linkIn').value=''">Discard</button>
           </div>
         </div>
-        <div style="margin-top:24px;" class="sh"><h2>Bulk search queue</h2></div>
-        <div class="acwrap" style="margin-bottom:14px;"><input style="width:100%;border:1px solid var(--b3);padding:9px 12px;font-size:13px;font-family:var(--body);background:none;outline:none;color:var(--ink);" placeholder="Type fragrance name to queue for import..." id="qSrch" oninput="qSearch(this.value)"><div class="acdrop" id="qDrop"></div></div>
+        <div class="sh sh-spaced"><h2>Bulk search queue</h2></div>
+        <div class="acwrap" style="margin-bottom:14px;"><input class="search-input" placeholder="Type fragrance name to queue for import..." id="qSrch" oninput="qSearch(this.value)"><div class="acdrop" id="qDrop"></div></div>
         <div id="importQueue" style="margin-bottom:12px;"></div>
-        <div style="display:flex;justify-content:flex-end;"><button class="btn btn-blue btn-sm" onclick="confirmBulkImport()">Import Selected</button></div>
+        <div class="queue-end"><button class="btn btn-blue btn-sm" onclick="confirmBulkImport()">Import Selected</button></div>
       </div>
       <div class="ipanel" id="ip-cam">
         <div id="camInitPanel"></div>
         <div class="cam-box" id="camBox" style="display:none;">
-          <video id="camVideo" autoplay playsinline style="width:100%;display:block;"></video>
+          <video id="camVideo" autoplay playsinline class="video-fullwidth"></video>
           <div class="cam-guide" id="camGuide"></div>
           <div class="cam-loading" id="camLoading"><div class="cam-loading-spin"></div><div class="cam-loading-txt">Identifying&hellip;</div></div>
           <button class="btn btn-blue cam-capture-btn" id="camCaptureBtn" onclick="captureAndIdentify()">Capture</button>
@@ -773,33 +842,33 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <div class="cam-label">Identified from label — confirm before saving</div>
             <div class="lr-n" id="scan-name"></div>
             <div class="lr-h" id="scan-house"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div class="grid-2col-gap">
               <div><div class="lrl">Community</div><div class="lrv" id="scan-comm"></div></div>
               <div><div class="lrl">Notes</div><div class="lrv" id="scan-notes" style="font-size:11px;"></div></div>
             </div>
-            <div style="display:flex;gap:8px;">
+            <div class="btn-row">
               <button class="btn btn-blue" onclick="importToCollection(window._scannedFragData)">Add to Collection</button>
               <button class="btn btn-ghost" onclick="importToWishlist(window._scannedFragData);resetScan()">Add to Wishlist</button>
               <button class="btn-bare" onclick="resetScan()">Rescan</button>
             </div>
           </div>
           <div id="camNotFound" style="display:none;padding:16px;">
-            <div style="font-size:12px;color:var(--ink3);margin-bottom:8px;">Could not identify. Text detected:</div>
-            <div id="camRawText" style="font-family:var(--mono);font-size:10px;color:var(--ink2);"></div>
+            <div class="caption-error">Could not identify. Text detected:</div>
+            <div id="camRawText" class="code-output"></div>
           </div>
         </div>
         <input type="file" id="camFileInput" accept="image/*" style="display:none;" onchange="handleCamFile(this.files[0])">
         <div class="scan-footer-link">Not working? <span onclick="selIM('link');document.getElementById('qSrch').focus()">Search by name instead</span></div>
       </div>
       <div class="ipanel" id="ip-csv">
-        <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;line-height:1.6;">Upload a CSV to bulk import your collection.</p>
+        <p class="intro-text">Upload a CSV to bulk import your collection.</p>
         <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSVFile(this.files[0])">
         <div class="dropzone" id="csvDropzone" onclick="document.getElementById('csvFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--blue)'" ondragleave="this.style.borderColor=''" ondrop="event.preventDefault();this.style.borderColor='';handleCSVFile(event.dataTransfer.files[0])">
           <div class="dz-t">Drop your CSV here</div>
           <div class="dz-s">or click to browse · .csv</div>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;">
-          <div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;">Name · Brand · Status · Rating · Notes</div>
+        <div class="controls-bar" style="margin-top:10px;">
+          <div class="csv-header-hint">Name · Brand · Status · Rating · Notes</div>
           <button class="btn btn-ghost btn-sm" onclick="downloadCSVTemplate()">Download template</button>
         </div>
         <div class="csv-preview" id="csvPreview" style="display:none;">
@@ -821,12 +890,12 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <tr style="border-bottom:none"><td><div class="st-label">Account</div><div class="st-sub">Sign out and return to user picker</div></td><td><button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button></td></tr>
         </tbody>
       </table>
-      <div class="sh" style="margin-top:28px;"><h2>Manage Notes</h2><div class="sh-r"><span style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;">Rename or merge across all fragrances</span></div></div>
+      <div class="sh sh-spaced-lg"><h2>Manage Notes</h2><div class="sh-r"><span class="sh-sub">Rename or merge across all fragrances</span></div></div>
       <div id="noteManager"></div>
-      <div id="noteMergePanel" style="display:none;padding:14px;background:var(--blue4);border:1px solid var(--b2);margin-top:12px;">
-        <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink3);margin-bottom:10px;">Merge selected notes into:</div>
-        <div id="noteMergeOptions" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
-        <div style="display:flex;gap:8px;">
+      <div id="noteMergePanel" class="panel-inset" style="display:none;">
+        <div class="merge-instruction">Merge selected notes into:</div>
+        <div id="noteMergeOptions" class="merge-options"></div>
+        <div class="btn-row">
           <button class="btn btn-blue btn-sm" id="noteMergeConfirmBtn" onclick="confirmMergeNotes()">Confirm merge</button>
           <button class="btn btn-ghost btn-sm" onclick="cancelMergeNotes()">Cancel</button>
         </div>
@@ -846,7 +915,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="d-name" id="d-name"></div>
       <div class="d-status-row">
         <div class="d-status" id="d-status"></div>
-        <button class="btn-bare" style="color:var(--warm);font-size:9px;" onclick="toggleStatusStrip()">Change status</button>
+        <button class="btn-bare btn-bare-warm" onclick="toggleStatusStrip()">Change status</button>
       </div>
       <div class="status-strip" id="statusStrip"></div>
     </div>
@@ -879,15 +948,15 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     </div>
     <div class="dsec">
       <div class="dsl">Compliments — <span id="d-compct">0</span> total</div>
-      <div style="font-size:12px;color:var(--ink2);margin-bottom:12px;" id="d-compdist"></div>
-      <div style="display:flex;flex-direction:column;gap:7px;">
-        <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="viewFragCompliments()">View all compliments</button>
-        <button class="btn btn-blue" style="width:100%;justify-content:center;" onclick="logComplimentForFrag()">Log new compliment</button>
+      <div class="compdist-text" id="d-compdist"></div>
+      <div class="btn-col">
+        <button class="btn btn-ghost btn-fullwidth" onclick="viewFragCompliments()">View all compliments</button>
+        <button class="btn btn-blue btn-fullwidth" onclick="logComplimentForFrag()">Log new compliment</button>
       </div>
     </div>
     <div class="d-actions">
-      <button class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="editCurrentFrag()">Edit</button>
-      <button class="btn btn-danger" style="flex:1;justify-content:center;" onclick="showRemoveConfirm()">Remove</button>
+      <button class="btn btn-ghost btn-flex-equal" onclick="editCurrentFrag()">Edit</button>
+      <button class="btn btn-danger btn-flex-equal" onclick="showRemoveConfirm()">Remove</button>
     </div>
     <div class="confirm-box" id="removeConfirm">
       <p>Remove <strong id="removeFragName"></strong> from your collection? Your compliment history for this fragrance will be preserved.</p>
@@ -987,9 +1056,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="fg"><label>Dupe tracking</label>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
             <div class="opts"><div class="opt" id="dY" onclick="togDupe(true)">Dupe for:</div><div class="opt on" id="dN" onclick="togDupe(false)">Not a dupe</div></div>
-            <input type="text" id="dupeFor" placeholder="Type original fragrance name..." style="display:none;border:none;border-bottom:1px solid var(--b3);background:none;padding:6px 0;font-size:13px;font-family:var(--body);outline:none;flex:1;min-width:140px;">
+            <input type="text" id="dupeFor" placeholder="Type original fragrance name..." class="input-editable" style="display:none;flex:1;min-width:140px;">
           </div>
-          <div style="font-size:11px;color:var(--ink3);margin-top:4px;">A dupe smells similar to a more expensive original. e.g. Hacivat is often considered a dupe for BR540.</div>
+          <div class="hint-text">A dupe smells similar to a more expensive original. e.g. Hacivat is often considered a dupe for BR540.</div>
         </div>
         <div class="fg">
           <label>Notes pyramid</label>
@@ -1097,7 +1166,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="compare-title" id="compareTitle">Comparing fragrance</div>
         <div class="compare-sub">You vs Sylvia — all compliments and notes</div>
       </div>
-      <button style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;padding:0;" onclick="closeCompare()">×</button>
+      <button class="btn-close" onclick="closeCompare()">×</button>
     </div>
     <div class="compare-body" id="compareBody"></div>
   </div>
@@ -1550,16 +1619,16 @@ function renderDashboard(){
     document.getElementById('dashPerformers').innerHTML = sorted.map(([id,cnt],i)=>{
       const f = MF.find(x=>x.id===id); if(!f)return '';
       const dist = getCompDist(id);
-      return `<div style="background:var(--off);padding:18px;cursor:pointer;" onclick="openDetail('${id}')">
-        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;">No. ${i+1}</div>
-        <div style="font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:3px;">${f.name}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--warm);">${cnt} compliment${cnt>1?'s':''}</div>
-        <div style="font-size:11px;color:var(--ink2);margin-top:5px;">${dist}</div>
-      </div>`;
+      return '<div class="card-performer" onclick="openDetail(\'' + id + '\')">' +
+        '<div class="card-num">No. ' + (i+1) + '</div>' +
+        '<div class="card-pfrag">' + f.name + '</div>' +
+        '<div class="card-pcount">' + cnt + ' compliment' + (cnt>1?'s':'') + '</div>' +
+        '<div class="card-pdist">' + dist + '</div>' +
+        '</div>';
     }).join('');
   } else {
     const perfEl = document.getElementById('dashPerformers'); perfEl.textContent = '';
-    const perfMsg = document.createElement('div'); perfMsg.style.cssText = 'padding:24px;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;'; perfMsg.textContent = 'Log some compliments to see your top performers'; perfEl.appendChild(perfMsg);
+    const perfMsg = document.createElement('div'); perfMsg.className = 'lbl-empty'; perfMsg.textContent = 'Log some compliments to see your top performers'; perfEl.appendChild(perfMsg);
   }
 }
 
