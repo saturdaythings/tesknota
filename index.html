@@ -627,6 +627,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .csv-preview td{padding:5px 6px;border-bottom:1px solid var(--b3);color:var(--ink2);font-size:12px;}
 .csv-preview .csv-dup{color:var(--warm);font-family:var(--mono);font-size:9px;}
 .csv-preview .csv-new{color:var(--green,#4a7c59);font-family:var(--mono);font-size:9px;}
+/* MOBILE WEARING CHIP */
+.mob-wear-chip{display:none;font-family:var(--mono);font-size:10px;background:rgba(107,154,242,.15);border:1px solid rgba(107,154,242,.25);padding:3px 8px;border-radius:10px;color:var(--blue1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
 @media(max-width:768px){
   .sidebar{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%);}
   .sidebar.open{transform:translateX(0);}
@@ -646,6 +648,14 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   .fb-stats{text-align:left;}
   .lr-g{grid-template-columns:1fr 1fr;}
   .mp-g{grid-template-columns:1fr 1fr;}
+  /* Fix 1: hide table view on mobile, show grid */
+  #vTable{display:none!important;}
+  #vGrid{display:block!important;}
+  #btnTable,#btnGrid{display:none;}
+  /* Fix 2: FAB above mobile nav */
+  .fab-btn{bottom:78px;}
+  /* Fix 3: wearing chip visible on mobile */
+  .mob-wear-chip{display:block;}
 }
 </style>
 </head>
@@ -722,6 +732,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="sdrop" id="gDrop"></div>
     </div>
     <div class="sync-wrap"><div class="sync-dot" id="syncDot"></div><span class="sync-txt" id="syncTxt"></span></div>
+    <div class="mob-wear-chip" id="mobWearChip" title="Today's suggested fragrance"></div>
     <button class="mob-srch-btn" onclick="toggleMobSearch()" title="Search">&#9906;</button>
     <button class="btn btn-blue" onclick="openAddFrag('CURRENT')" title="Add a new fragrance to your collection">Add Fragrance</button>
   </div>
@@ -2141,6 +2152,9 @@ function renderDashboard(){
     if(pick){
       var reason=pick.comps>0?pick.comps+' compliment'+(pick.comps>1?'s':''):((function(){ var mo=new Date().getMonth(); return mo<2||mo===11?'Winter pick':mo<5?'Spring pick':mo<8?'Summer pick':'Fall pick'; })());
       suggestEl.innerHTML='<div class="dash-suggest"><div class="suggest-body"><div class="suggest-label">Today\'s Pick</div><div class="suggest-name">'+pick.f.name+'</div><div class="suggest-house">'+pick.f.house+'</div><div class="suggest-meta">'+reason+'</div></div><button class="btn btn-warm" onclick="openAddComp(\''+pick.f.id+'\')">+ Log Compliment</button></div>';
+      // Update mobile topbar wearing chip
+      var mobChip=document.getElementById('mobWearChip');
+      if(mobChip) mobChip.textContent=pick.f.name.split(' ').slice(0,2).join(' ');
     } else {
       suggestEl.innerHTML='';
     }
