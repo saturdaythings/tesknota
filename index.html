@@ -232,6 +232,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .comp-layer-toggle:hover{opacity:1;}
 .comp-save-banner{display:none;background:rgba(60,180,90,.85);color:#fff;text-align:center;padding:11px 20px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;border-top:1px solid rgba(60,180,90,.4);}
 
+/* DASHBOARD ONBOARDING */
+.dash-onboard{padding:28px 20px;border:1px solid var(--b2);margin-bottom:24px;}
+.dash-onboard-title{font-family:var(--serif);font-size:19px;font-style:italic;color:var(--blue);margin-bottom:5px;}
+.dash-onboard-sub{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:22px;}
+.dash-step{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--b2);}
+.dash-step:last-child{border-bottom:none;}
+.dash-step-num{width:26px;height:26px;border-radius:50%;background:var(--blue4);border:1px solid rgba(107,154,242,.4);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--blue1);flex-shrink:0;}
+.dash-step-body{flex:1;}
+.dash-step-title{font-size:13px;color:var(--ink);margin-bottom:2px;}
+.dash-step-desc{font-size:11px;color:var(--ink3);}
+
 /* ADD FRAGRANCE STEP 2 — progressive disclosure */
 .af-more-toggle{background:none;border:none;color:var(--blue1);font-family:var(--body);font-size:12px;cursor:pointer;padding:8px 0 4px;letter-spacing:.02em;opacity:.8;display:block;width:100%;}
 .af-more-toggle:hover{opacity:1;}
@@ -692,6 +703,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- DASHBOARD -->
     <div class="page on" id="page-dashboard">
       <div class="stats" id="dashStats"></div>
+      <div id="dashOnboard" style="display:none"></div>
       <div id="dashSuggest"></div>
       <div class="mb-20">
         <button class="btn btn-warm" onclick="openAddComp(null)" title="Record a compliment you received">+ Log a Compliment</button>
@@ -2067,6 +2079,21 @@ function renderDashboard(){
       suggestEl.innerHTML='<div class="dash-suggest"><div class="suggest-body"><div class="suggest-label">Today\'s Pick</div><div class="suggest-name">'+pick.f.name+'</div><div class="suggest-house">'+pick.f.house+'</div><div class="suggest-meta">'+reason+'</div></div><button class="btn btn-warm" onclick="openAddComp(\''+pick.f.id+'\')">+ Log Compliment</button></div>';
     } else {
       suggestEl.innerHTML='';
+    }
+  }
+  // Onboarding guide — show when no CURRENT fragrances
+  var onboardEl=document.getElementById('dashOnboard');
+  var hasCurrent=MF.filter(function(f){return f.status==='CURRENT';}).length>0;
+  if(onboardEl){
+    if(!hasCurrent){
+      onboardEl.style.display='block';
+      onboardEl.innerHTML='<div class="dash-onboard"><div class="dash-onboard-title">Welcome to tęsknota</div><div class="dash-onboard-sub">Your fragrance journey starts here</div>'
+        +'<div class="dash-step"><div class="dash-step-num">1</div><div class="dash-step-body"><div class="dash-step-title">Add your first fragrance</div><div class="dash-step-desc">Search by name, scan a bottle, or import from a spreadsheet</div></div><button class="btn btn-blue" onclick="openAddFrag(\'CURRENT\')">Add Fragrance</button></div>'
+        +'<div class="dash-step"><div class="dash-step-num">2</div><div class="dash-step-body"><div class="dash-step-title">Log your first compliment</div><div class="dash-step-desc">Record who complimented you, when, and what you were wearing</div></div><button class="btn btn-ghost" onclick="openAddComp(null)">Log Compliment</button></div>'
+        +'</div>';
+    } else {
+      onboardEl.style.display='none';
+      onboardEl.innerHTML='';
     }
   }
   const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE');
