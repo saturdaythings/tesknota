@@ -211,8 +211,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .perf-rank{font-family:var(--mono);font-size:11px;color:var(--ink3);width:24px;flex-shrink:0;}
 .perf-name{font-family:var(--serif);font-size:15px;color:var(--blue);font-style:italic;}
 .perf-house{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
-.perf-count{font-family:var(--serif);font-size:22px;color:var(--blue);width:40px;text-align:right;flex-shrink:0;}
-.perf-meta{font-family:var(--mono);font-size:9px;color:var(--ink3);text-align:right;letter-spacing:.06em;text-transform:uppercase;}
+.perf-count{font-family:var(--serif);font-size:22px;color:var(--blue);text-align:right;line-height:1;}
+.perf-meta{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-align:right;text-transform:uppercase;margin-top:3px;}
 
 /* FRIEND PROFILE */
 .f-banner{background:var(--blue3);padding:32px 26px 24px;margin:-26px -26px 28px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;}
@@ -3626,7 +3626,7 @@ function renderAnalytics(){
         var pname=document.createElement('div'); pname.className='perf-name'; pname.innerHTML=fragDisplayName(frag);
         var phouse=document.createElement('div'); phouse.className='perf-house'; phouse.textContent=frag.house;
         nameWrap.appendChild(pname); nameWrap.appendChild(phouse);
-        var countWrap=document.createElement('div'); countWrap.style.cssText='text-align:right;flex-shrink:0;';
+        var countWrap=document.createElement('div'); countWrap.style.cssText='text-align:right;flex-shrink:0;min-width:120px;';
         var pcount=document.createElement('div'); pcount.className='perf-count'; pcount.textContent=cnt;
         var pmeta=document.createElement('div'); pmeta.className='perf-meta'; pmeta.textContent=topRelFrag;
         countWrap.appendChild(pcount); countWrap.appendChild(pmeta);
