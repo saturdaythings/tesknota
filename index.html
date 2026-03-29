@@ -1656,11 +1656,17 @@ async function loadAllData(){
     var fragSeed=FRAGRANCES.filter(function(f){return !fragSheetIds.has(f.userId);});
     FRAGRANCES=fragSeed.concat(fragsRaw.map(rowToFrag));
   }
+  var _sheetCompIds=new Set(compsRaw.map(function(r){return r.id;}));
   if(compsRaw.length){
-    var compSheetIds=new Set(compsRaw.map(function(r){return r.userId;}));
-    var compSeed=COMPLIMENTS.filter(function(c){return !compSheetIds.has(c.userId);});
-    COMPLIMENTS=compSeed.concat(compsRaw.map(rowToComp));
+    var seedOnly=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
+    COMPLIMENTS=seedOnly.concat(compsRaw.map(rowToComp));
   }
+  // Write any seed compliments missing from Sheets so they persist
+  COMPLIMENTS.forEach(function(c){
+    if(!_sheetCompIds.has(c.id)){
+      appendRow('compliments',compToRow(c),COMP_HEADERS).catch(function(e){console.error('[syncSeedCompliments] write failed:',e);});
+    }
+  });
 
   // Recalculate ID counters so new entries don't collide with loaded data
   FRAGRANCES.forEach(function(f){ var n=parseInt((f.id||'').replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
