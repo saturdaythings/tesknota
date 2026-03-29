@@ -2885,7 +2885,7 @@ document.addEventListener('click',function(e){
   var sSel=document.getElementById('collStatus');
   if(sSel){
     sSel.innerHTML='';
-    [['','Status'],['CURRENT','Current'],['PREVIOUSLY_OWNED','Prev. Owned'],['DONT_LIKE',"Don't Like"]].forEach(function(p){
+    [['','Status'],['CURRENT','Current'],['PREVIOUSLY_OWNED','Prev. Owned']].forEach(function(p){
       var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; sSel.appendChild(o);
     });
   }
