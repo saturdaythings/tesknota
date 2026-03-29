@@ -113,12 +113,19 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .active-filter-bar{display:none;align-items:center;gap:8px;padding:6px 10px;background:var(--blue4);border:1px solid rgba(107,154,242,.2);margin-bottom:12px;font-family:var(--mono);font-size:10px;color:var(--blue1);}
 .active-filter-bar.show{display:flex;}
 /* COLLECTION NEW FILTER ROW */
-.coll-filters{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
-.coll-filters input{flex:1;min-width:160px;height:32px;padding:0 10px;border:1px solid var(--b3);background:var(--off);font-family:var(--body);font-size:12px;color:var(--ink);outline:none;}
+.coll-filters{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.coll-filters input{flex:1;min-width:180px;max-width:280px;height:32px;padding:0 10px;border:1px solid var(--b3);background:var(--off);font-family:var(--body);font-size:12px;color:var(--ink);outline:none;border-radius:0;}
 .coll-filters input:focus{border-color:var(--blue);}
-.coll-filters select{height:32px;padding:0 8px;border:1px solid var(--b3);background:var(--off);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;}
-.filter-btn{height:32px;padding:0 10px;border:1px solid var(--b3);background:var(--off);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;white-space:nowrap;}
-.filter-btn.active{background:var(--blue);color:var(--warm2);border-color:var(--blue);}
+.coll-filters select,.coll-filters .filter-btn{appearance:none;-webkit-appearance:none;height:32px;padding:0 28px 0 10px;border:1px solid var(--b3);background:var(--off) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E") no-repeat right 10px center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;outline:none;border-radius:0;}
+.coll-filters select:hover,.coll-filters select:focus,.coll-filters .filter-btn:hover{border-color:var(--blue);}
+.filter-btn{appearance:none;-webkit-appearance:none;height:32px;padding:0 28px 0 10px;border:1px solid var(--b3);background:var(--off) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E") no-repeat right 10px center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;outline:none;border-radius:0;white-space:nowrap;}
+.filter-btn:hover{border-color:var(--blue);}
+.filter-btn.active{border-color:var(--blue);color:var(--blue);}
+#collHouse,#wishHouse{width:160px;}
+#collRating{width:160px;}
+#collStatus{width:140px;}
+#collSort,.coll-sort-select{width:160px;}
+#familyFilterWrap,#wishFamilyFilterWrap{flex-shrink:0;}
 .filter-drop-panel{position:absolute;top:calc(100% + 4px);left:0;background:var(--off);border:1px solid var(--b3);padding:10px 14px;z-index:300;min-width:180px;box-shadow:0 8px 24px rgba(26,46,92,.12);}
 #familyFilterWrap,#wishFamilyFilterWrap{position:relative;}
 
@@ -777,7 +784,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     </div>
     <div class="sync-wrap"><div class="sync-dot" id="syncDot"></div><span class="sync-txt" id="syncTxt"></span></div>
     <button class="mob-srch-btn" onclick="toggleMobSearch()" title="Search">&#9906;</button>
-    <button class="btn btn-blue" id="topbarAddBtn" onclick="openAddFrag('CURRENT')" title="Add a new fragrance to your collection">Add Fragrance</button>
   </div>
   <div class="mob-srch-row" id="mobSrchRow">
     <input class="mob-srch-input" id="mobSrch" placeholder="Search fragrances..." oninput="gSearch(this.value)" onblur="setTimeout(closeGS,180)" onkeydown="if(event.key==='Escape')toggleMobSearch()">
@@ -791,15 +797,14 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div id="dashOnboard" style="display:none"></div>
       <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <table class="tbl tbl-spaced" id="dashTable">
-        <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes to nose</th><th>Compliments</th><th></th></tr></thead>
+        <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Top Notes</th><th>Compliments</th><th></th></tr></thead>
         <tbody id="dashBody"></tbody>
       </table>
-      <div class="sh"><h2>Top compliment performers</h2></div>
-      <div id="dashPerformers" class="performer-grid"></div>
     </div>
 
     <!-- COLLECTION -->
     <div class="page" id="page-collection">
+      <div class="sh"><h2>My Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="openAddFrag('CURRENT')">+ Add</button></div></div>
       <div class="coll-filters">
         <input type="text" id="collSearch" placeholder="Search fragrances..." />
         <select id="collHouse"><option value="">All houses</option></select>
@@ -1645,7 +1650,6 @@ function selectIdentity(name, id){
     who.appendChild(document.createTextNode('Settings'));
   }
   renderDashboard();
-  var _initAddBtn=document.getElementById('topbarAddBtn');if(_initAddBtn)_initAddBtn.style.display='none';
   renderImportQueue();
   updateCounts();
   // Silent audit on load — only warns if failures found
@@ -2353,8 +2357,6 @@ function goPage(id){
   document.getElementById('pgName').textContent=pageName;
   document.querySelectorAll('.sb-link[data-page]').forEach(l=>l.classList.toggle('on',l.dataset.page===id));
   document.querySelectorAll('.mob-btn[data-mob]').forEach(b=>b.classList.toggle('on',b.dataset.mob===id));
-  var topbarAddBtn=document.getElementById('topbarAddBtn');
-  if(topbarAddBtn) topbarAddBtn.style.display=(id==='dashboard')?'none':'';
   closeSB();
   if(id==='dashboard') renderDashboard();
   if(id==='collection') renderCollection();
@@ -2416,25 +2418,6 @@ function renderDashboard(){
   } else {
     document.getElementById('dashBody').innerHTML = '<tr><td colspan="6"><div class="empty-state">Your collection is empty.</div></td></tr>';
   }
-  // Top performers
-  const byFrag = {};
-  MC.forEach(c=>{ byFrag[c.primaryFragId]=(byFrag[c.primaryFragId]||0)+1; if(c.secondaryFragId) byFrag[c.secondaryFragId]=(byFrag[c.secondaryFragId]||0)+1; });
-  const sorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  if(sorted.length){
-    document.getElementById('dashPerformers').innerHTML = sorted.map(([id,cnt],i)=>{
-      const f = MF.find(x=>x.id===id); if(!f)return '';
-      const dist = getCompDist(id);
-      return '<div class="card-performer" onclick="openDetail(\'' + id + '\')">' +
-        '<div class="card-num">No. ' + (i+1) + '</div>' +
-        '<div class="card-pfrag">' + fragDisplayName(f) + '</div>' +
-        '<div class="th_">' + (f.house||'').toUpperCase() + '</div>' +
-        '<div class="card-pcount">' + cnt + ' compliment' + (cnt>1?'s':'') + '</div>' +
-        '<div class="card-pdist">' + dist + '</div>' +
-        '</div>';
-    }).join('');
-  } else {
-    document.getElementById('dashPerformers').innerHTML = '<div class="empty-state">No compliment data yet.</div>';
-  }
 }
 
 function avgRating(){
@@ -2478,20 +2461,36 @@ function buildHouseFilter(){
 function buildFamilyFilter(){
   var panel=document.getElementById('familyDropPanel'); if(!panel) return;
   panel.innerHTML='';
+  panel.style.cssText='position:absolute;top:calc(100% + 2px);left:0;background:var(--off);border:1px solid var(--b3);z-index:400;min-width:160px;box-shadow:0 4px 16px rgba(26,46,92,.12);padding:0;';
   SCENT_FAMILIES.forEach(function(fam){
-    var label=document.createElement('label');
-    label.style.cssText='display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-family:var(--body);font-size:12px;color:var(--ink);';
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:7px 14px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .1s;';
+    row.onmouseenter=function(){this.style.background='var(--blue4)';};
+    row.onmouseleave=function(){this.style.background='';};
     var cb=document.createElement('input'); cb.type='checkbox'; cb.value=fam;
     cb.checked=collFamilyVals.includes(fam);
-    cb.style.accentColor='var(--blue)';
+    cb.style.cssText='width:14px;height:14px;flex-shrink:0;accent-color:var(--blue);cursor:pointer;';
     cb.addEventListener('change',function(){
       if(this.checked){ collFamilyVals.push(fam); }
       else { collFamilyVals=collFamilyVals.filter(function(f){ return f!==fam; }); }
       updateFamilyLabel(); renderCollection();
     });
-    label.appendChild(cb); label.appendChild(document.createTextNode(fam));
-    panel.appendChild(label);
+    row.addEventListener('click',function(e){ if(e.target!==cb) cb.click(); });
+    var lbl=document.createElement('span');
+    lbl.textContent=fam;
+    lbl.style.cssText='font-family:var(--body);font-size:13px;color:var(--ink);user-select:none;';
+    row.appendChild(cb); row.appendChild(lbl);
+    panel.appendChild(row);
   });
+  var clearRow=document.createElement('div');
+  clearRow.style.cssText='padding:7px 14px;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;text-align:center;';
+  clearRow.textContent='Clear';
+  clearRow.onclick=function(){
+    collFamilyVals=[];
+    panel.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=false;});
+    updateFamilyLabel(); renderCollection();
+  };
+  panel.appendChild(clearRow);
 }
 
 function updateFamilyLabel(){
@@ -2573,12 +2572,14 @@ document.addEventListener('click',function(e){
 (function initCollFilters(){
   var rSel=document.getElementById('collRating');
   if(rSel){
+    rSel.innerHTML='';
     [['','All ratings'],['5','★★★★★  Obsessed'],['4','★★★★☆  Love'],['3','★★★☆☆  Like'],['2','★★☆☆☆  Just OK'],['1',"★☆☆☆☆  Don't Like"]].forEach(function(p){
       var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; rSel.appendChild(o);
     });
   }
   var sSel=document.getElementById('collStatus');
   if(sSel){
+    sSel.innerHTML='';
     [['','All statuses'],['CURRENT','Current'],['PREVIOUSLY_OWNED','Prev. Owned'],['DONT_LIKE',"Don't Like"],['WANT_TO_BUY','Want to Buy'],['WANT_TO_SMELL','Want to Smell']].forEach(function(p){
       var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; sSel.appendChild(o);
     });
@@ -3986,13 +3987,29 @@ function saveFragrance(){
     if(duplicate){toast('You already have '+newFrag.name+' in your collection.');return;}
     FRAGRANCES.push(newFrag);
     appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
-    toast(name+' added to '+STATUS_LABELS[data.status]);
+    showPostSaveToast(name,STATUS_LABELS[data.status]);
   }
   closeModal('addFragM');
   renderCurrentPage();
   updateCounts();
   prefetchedData = null;
   editingFragId = null;
+}
+
+function showPostSaveToast(fragName,statusLabel){
+  var c=document.getElementById('toasts');
+  if(!c){toast(fragName+' added to '+statusLabel);return;}
+  var t=document.createElement('div');t.className='toast';
+  var msg=document.createElement('span');
+  msg.textContent=fragName+' added to '+statusLabel+'. ';
+  var link=document.createElement('span');
+  link.textContent='Import more \u2192';
+  link.style.cssText='color:var(--warm2);cursor:pointer;text-decoration:underline;margin-left:4px;';
+  link.onclick=function(){goPage('import');var li=document.getElementById('linkIn');if(li)setTimeout(function(){li.focus();},200);};
+  t.appendChild(msg);t.appendChild(link);
+  c.appendChild(t);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('on');});});
+  setTimeout(function(){t.classList.remove('on');setTimeout(function(){t.remove();},300);},4000);
 }
 
 function afSearch(v){
