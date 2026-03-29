@@ -1374,8 +1374,21 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
       <div class="frow" style="margin-top:8px;">
         <div class="fg" style="margin:0;"><label>City</label><input type="text" id="compCity" placeholder="City" /></div>
-        <div class="fg" style="margin:0;"><label>State</label><input type="text" id="compState" placeholder="State" /></div>
-        <div class="fg" style="margin:0;"><label>Country</label><select id="compCountry"><option value="US">United States</option><option value="UK">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="Other">Other</option></select></div>
+        <div class="fg" style="margin:0;">
+          <label>State</label>
+          <div id="compStateWrap">
+            <div style="position:relative;">
+              <button type="button" id="compStateBtn" onclick="toggleCompStateDrop()" style="width:100%;text-align:left;background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px;color:#374151;display:flex;justify-content:space-between;align-items:center;"><span id="compStateBtnText">Select state...</span><span style="font-size:10px;color:#9ca3af;">▼</span></button>
+              <div id="compStatePanel" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:9999;background:#fff;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);max-height:220px;overflow:hidden;margin-top:2px;">
+                <input type="text" id="compStateSearch" placeholder="Search states..." oninput="buildCompStatePanel(this.value)" style="width:100%;padding:8px 12px;border:none;border-bottom:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;outline:none;" />
+                <div id="compStateList" style="overflow-y:auto;max-height:168px;"></div>
+              </div>
+            </div>
+          </div>
+          <input type="text" id="compStateText" placeholder="State / Province / Region" style="display:none;width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;" />
+          <input type="hidden" id="compState" value="" />
+        </div>
+        <div class="fg" style="margin:0;"><label>Country</label><select id="compCountry" onchange="toggleCompStateMode()"><option value="US">United States</option><option value="UK">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="Other">Other</option></select></div>
       </div>
       <!-- Layering (secondary) — expandable -->
       <div class="fg" style="margin-top:4px;margin-bottom:0;">
@@ -4601,8 +4614,16 @@ function openAddComp(fragId, prefill){
   document.getElementById('compGender').value=prefill?(prefill.gender||''):'Female';
   document.getElementById('compLoc').value=prefill?(prefill.location||''):'';
   document.getElementById('compCity').value=prefill?(prefill.city||''):'';
-  document.getElementById('compState').value=prefill?(prefill.state||''):'';
   document.getElementById('compCountry').value=prefill?(prefill.country||'US'):'US';
+  // State picker: US → custom dropdown, non-US → free text
+  var _stateVal=prefill?(prefill.state||''):'';
+  var _country=prefill?(prefill.country||'US'):'US';
+  document.getElementById('compState').value=_stateVal;
+  var _stateBtn=document.getElementById('compStateBtnText');
+  if(_stateBtn) _stateBtn.textContent=_stateVal||'Select state...';
+  var _stateText=document.getElementById('compStateText');
+  if(_stateText) _stateText.value=_country!=='US'?_stateVal:'';
+  toggleCompStateMode();
   document.getElementById('compNotes').value=prefill?(prefill.notes||''):'';
   // Auto-fill current month/year (if not editing)
   if(prefill&&prefill.month){
@@ -4670,6 +4691,62 @@ function toggleCompLayer(){
   if(open){ var s2=document.getElementById('compFrag2'); if(s2) s2.value=''; }
 }
 
+var US_STATES=['Alabama','Alaska','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Ohio','Oklahoma','Oregon','Pennsylvania','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virginia','Washington','West Virginia','Wisconsin','Wyoming','Washington D.C.'];
+
+function toggleCompStateDrop(){
+  var panel=document.getElementById('compStatePanel');
+  if(!panel) return;
+  var open=panel.style.display==='block';
+  if(open){ panel.style.display='none'; return; }
+  panel.style.display='block';
+  var search=document.getElementById('compStateSearch');
+  if(search){ search.value=''; search.focus(); }
+  buildCompStatePanel('');
+}
+
+function buildCompStatePanel(filter){
+  var list=document.getElementById('compStateList');
+  if(!list) return;
+  var q=(filter||'').toLowerCase();
+  var matches=US_STATES.filter(function(s){ return s.toLowerCase().indexOf(q)>=0; });
+  list.innerHTML=matches.map(function(s){
+    return '<div onclick="selectCompState(\''+s+'\')" style="padding:8px 12px;cursor:pointer;font-size:14px;color:#374151;" onmouseover="this.style.background=\'#f9fafb\'" onmouseout="this.style.background=\'\'">'+s+'</div>';
+  }).join('')||'<div style="padding:8px 12px;font-size:13px;color:#9ca3af;">No matches</div>';
+}
+
+function selectCompState(state){
+  document.getElementById('compState').value=state;
+  var btn=document.getElementById('compStateBtnText');
+  if(btn) btn.textContent=state;
+  var panel=document.getElementById('compStatePanel');
+  if(panel) panel.style.display='none';
+}
+
+function toggleCompStateMode(){
+  var country=document.getElementById('compCountry').value;
+  var wrap=document.getElementById('compStateWrap');
+  var text=document.getElementById('compStateText');
+  var hidden=document.getElementById('compState');
+  if(country==='US'){
+    if(wrap) wrap.style.display='';
+    if(text){ text.style.display='none'; text.value=''; }
+  } else {
+    if(wrap) wrap.style.display='none';
+    if(text) text.style.display='';
+    if(hidden) hidden.value='';
+    var btn=document.getElementById('compStateBtnText');
+    if(btn) btn.textContent='Select state...';
+  }
+}
+
+document.addEventListener('click',function(e){
+  var panel=document.getElementById('compStatePanel');
+  var wrap=document.getElementById('compStateWrap');
+  if(panel&&panel.style.display==='block'&&wrap&&!wrap.contains(e.target)){
+    panel.style.display='none';
+  }
+});
+
 function editCompliment(id){
   const c = myCompliments().find(function(x){ return x.id===id; });
   if(!c) return;
@@ -4712,7 +4789,7 @@ function saveCompliment(){
         relation, month, year,
         location: document.getElementById('compLoc').value.trim()||null,
         city: document.getElementById('compCity').value.trim()||null,
-        state: document.getElementById('compState').value.trim()||null,
+        state: (document.getElementById('compCountry').value==='US' ? document.getElementById('compState').value.trim() : document.getElementById('compStateText').value.trim())||null,
         country: document.getElementById('compCountry').value||'US',
         notes: document.getElementById('compNotes').value||null,
       });
@@ -4737,7 +4814,7 @@ function saveCompliment(){
     month, year,
     location: document.getElementById('compLoc').value.trim()||null,
     city: document.getElementById('compCity').value.trim()||null,
-    state: document.getElementById('compState').value.trim()||null,
+    state: (document.getElementById('compCountry').value==='US' ? document.getElementById('compState').value.trim() : document.getElementById('compStateText').value.trim())||null,
     country: document.getElementById('compCountry').value||'US',
     notes: document.getElementById('compNotes').value||null,
   };
