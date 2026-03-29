@@ -823,7 +823,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <input type="text" id="collSearch" placeholder="Search fragrances..." />
         <select id="collHouse"><option value="">All houses</option></select>
         <div id="familyFilterWrap">
-          <button class="filter-btn" onclick="toggleFamilyDrop()">Family <span id="familyFilterLabel"></span> ▾</button>
+          <button class="filter-btn" onclick="toggleFamilyDrop()">Accords <span id="familyFilterLabel"></span> ▾</button>
           <div class="filter-drop-panel" id="familyDropPanel" style="display:none;"></div>
         </div>
         <select id="collRating"><option value="">All ratings</option></select>
@@ -862,7 +862,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <input type="text" id="wishSearch" placeholder="Search wishlist..." />
         <select id="wishHouse"><option value="">All houses</option></select>
         <div id="wishFamilyFilterWrap">
-          <button class="filter-btn" onclick="toggleWishFamilyDrop()">Family <span id="wishFamilyFilterLabel"></span> ▾</button>
+          <button class="filter-btn" onclick="toggleWishFamilyDrop()">Accords <span id="wishFamilyFilterLabel"></span> ▾</button>
           <div class="filter-drop-panel" id="wishFamilyDropPanel" style="display:none;"></div>
         </div>
       </div>
@@ -880,7 +880,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="fc" data-filter="Stranger">Strangers</div>
         <div class="fc" data-filter="Friend">Friends</div>
         <div class="fc" data-filter="Colleague / Client">Colleagues</div>
-        <div class="fc" data-filter="Family">Family</div>
+        <div class="fc" data-filter="Accords">Accords</div>
         <div class="fc" data-filter="Significant Other">Significant Others</div>
       </div>
       <div class="cff-bar" id="compFragFilterBar" style="display:none;">
@@ -2451,7 +2451,7 @@ function avgRating(){
 var collSort = 'nameAZ';
 var collSearchVal = '';
 var collHouseVal = '';
-var collFamilyVals = [];
+var collAccordVals = [];
 var collRatingVal = '';
 var collStatusVal = '';
 
@@ -2628,11 +2628,11 @@ function buildFamilyFilter(){
     row.onmouseenter=function(){this.style.background='var(--blue4)';};
     row.onmouseleave=function(){this.style.background='';};
     var cb=document.createElement('input'); cb.type='checkbox'; cb.value=fam;
-    cb.checked=collFamilyVals.includes(fam);
+    cb.checked=collAccordVals.includes(fam);
     cb.style.cssText='width:14px;height:14px;flex-shrink:0;accent-color:var(--blue);cursor:pointer;';
     cb.addEventListener('change',function(){
-      if(this.checked){ collFamilyVals.push(fam); }
-      else { collFamilyVals=collFamilyVals.filter(function(f){ return f!==fam; }); }
+      if(this.checked){ collAccordVals.push(fam); }
+      else { collAccordVals=collAccordVals.filter(function(f){ return f!==fam; }); }
       updateFamilyLabel(); renderCollection();
     });
     row.addEventListener('click',function(e){ if(e.target!==cb) cb.click(); });
@@ -2646,7 +2646,7 @@ function buildFamilyFilter(){
   clearRow.style.cssText='padding:7px 14px;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;text-align:center;';
   clearRow.textContent='Clear';
   clearRow.onclick=function(){
-    collFamilyVals=[];
+    collAccordVals=[];
     panel.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=false;});
     updateFamilyLabel(); renderCollection();
   };
@@ -2656,8 +2656,8 @@ function buildFamilyFilter(){
 function updateFamilyLabel(){
   var lbl=document.getElementById('familyFilterLabel');
   var btn=document.querySelector('#familyFilterWrap .filter-btn');
-  if(lbl) lbl.textContent=collFamilyVals.length?'('+collFamilyVals.length+')':'';
-  if(btn) btn.classList.toggle('active',collFamilyVals.length>0);
+  if(lbl) lbl.textContent=collAccordVals.length?'('+collAccordVals.length+')':'';
+  if(btn) btn.classList.toggle('active',collAccordVals.length>0);
 }
 
 function toggleFamilyDrop(){
@@ -2666,7 +2666,7 @@ function toggleFamilyDrop(){
 }
 
 function hasActiveFilter(){
-  return !!(collSearchVal||collHouseVal||collFamilyVals.length||collRatingVal||collStatusVal);
+  return !!(collSearchVal||collHouseVal||collAccordVals.length||collRatingVal||collStatusVal);
 }
 
 function statusChip(status){
@@ -2779,10 +2779,10 @@ function renderCollection(){
   // House
   if(collHouseVal){ frags=frags.filter(function(f){ return f.house===collHouseVal; }); }
   // Family — AND logic: every selected family must appear in accords
-  if(collFamilyVals.length){
+  if(collAccordVals.length){
     frags=frags.filter(function(f){
       var fragAccords=getAccords(f);
-      return collFamilyVals.every(function(fam){
+      return collAccordVals.every(function(fam){
         return fragAccords.some(function(a){
           return a.toLowerCase()===fam.toLowerCase();
         });
@@ -2841,7 +2841,7 @@ function renderCollection(){
       clear.style.cssText='color:var(--blue);cursor:pointer;margin-left:4px;';
       clear.onclick=function(){
         collSearchVal=collHouseVal=collRatingVal=collStatusVal='';
-        collFamilyVals=[];
+        collAccordVals=[];
         var el;
         el=document.getElementById('collSearch'); if(el) el.value='';
         el=document.getElementById('collHouse'); if(el) el.value='';
@@ -5546,7 +5546,7 @@ function filterCollByNote(note){
   // Clear all other filters first
   collSearchVal='';
   collHouseVal='';
-  collFamilyVals=[];
+  collAccordVals=[];
   collRatingVal='';
   collStatusVal='';
   var search=document.getElementById('collSearch');
