@@ -714,6 +714,14 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   /* Fix 2: FAB above mobile nav */
   .fab-btn{bottom:78px;}
 }
+.sort-arrow {
+  font-size: 10px;
+  margin-left: 2px;
+  color: var(--blue);
+}
+.tbl thead th[data-sort]:hover {
+  color: var(--blue);
+}
 </style>
 </head>
 <body>
@@ -835,7 +843,15 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <span class="note-filter-label">Showing: <span id="noteFilterName"></span></span>
         <button class="btn btn-ghost btn-sm" onclick="clearNoteFilter()">Clear filter</button>
       </div>
-      <table class="tbl"><thead><tr><th>Fragrance</th><th>Rating</th><th>Notes</th><th>Compliments</th><th></th></tr></thead>
+      <table class="tbl" id="collTable"><thead id="collThead"><tr>
+    <th data-sort="nameAZ">Fragrance <span class="sort-arrow"></span></th>
+    <th data-sort="ratingHL">Rating <span class="sort-arrow"></span></th>
+    <th data-sort="long">Longevity <span class="sort-arrow"></span></th>
+    <th data-sort="added">Added <span class="sort-arrow"></span></th>
+    <th>Top Notes</th>
+    <th data-sort="comps">Compliments <span class="sort-arrow"></span></th>
+    <th></th>
+  </tr></thead>
       <tbody id="collBody"></tbody></table>
     </div>
 
@@ -2536,7 +2552,63 @@ function getFragFamily(frag){
   return db?db.fam:null;
 }
 
-function setCollSort(val){ collSort=val; renderCollection(); }
+function initCollectionSort() {
+  var thead = document.getElementById('collThead');
+  if (!thead) return;
+  thead.querySelectorAll('th[data-sort]').forEach(function(th) {
+    th.style.cursor = 'pointer';
+    th.style.userSelect = 'none';
+    th.addEventListener('click', function() {
+      var val = th.dataset.sort;
+      if (collSort === val) {
+        if (val === 'nameAZ')        val = 'nameZA';
+        else if (val === 'nameZA')   val = 'nameAZ';
+        else if (val === 'ratingHL') val = 'ratingLH';
+        else if (val === 'ratingLH') val = 'ratingHL';
+        else if (val === 'comps')    val = 'compsAsc';
+        else if (val === 'compsAsc') val = 'comps';
+        else if (val === 'long')     val = 'longDesc';
+        else if (val === 'longDesc') val = 'long';
+        else if (val === 'added')    val = 'addedOld';
+        else if (val === 'addedOld') val = 'added';
+      }
+      setCollSort(val);
+      updateSortArrows();
+    });
+    th.addEventListener('mouseenter', function() {
+      this.style.color = 'var(--blue)';
+    });
+    th.addEventListener('mouseleave', function() {
+      this.style.color = '';
+    });
+  });
+}
+
+function updateSortArrows() {
+  var thead = document.getElementById('collThead');
+  if (!thead) return;
+  var sortToCol = {
+    'nameAZ': 'nameAZ', 'nameZA': 'nameAZ',
+    'ratingHL': 'ratingHL', 'ratingLH': 'ratingHL',
+    'comps': 'comps', 'compsAsc': 'comps',
+    'long': 'long', 'longDesc': 'long',
+    'added': 'added', 'addedOld': 'added'
+  };
+  var ascSorts = ['nameAZ', 'ratingHL', 'comps', 'long', 'added'];
+  thead.querySelectorAll('th[data-sort]').forEach(function(th) {
+    var arrow = th.querySelector('.sort-arrow');
+    if (!arrow) return;
+    var colGroup = sortToCol[collSort];
+    if (th.dataset.sort === colGroup) {
+      arrow.textContent = ascSorts.includes(collSort) ? ' ↑' : ' ↓';
+      arrow.style.color = 'var(--blue)';
+    } else {
+      arrow.textContent = '';
+    }
+  });
+}
+
+function setCollSort(val){ collSort=val; renderCollection(); updateSortArrows(); }
 
 function buildHouseFilter(){
   var houses=[...new Set(myFragrances().map(function(f){return f.house||'';}).filter(Boolean))].sort();
@@ -2736,6 +2808,28 @@ function renderCollection(){
     if(collSort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
     return a.name.localeCompare(b.name);
   });
+  if (collSort === 'long' || collSort === 'longDesc') {
+    var lo = {'0–6h':1,'6–12h':2,'12–24h':3,'>24h':4};
+    frags.sort(function(a,b){
+      var av = lo[a.personalLong]||lo[a.communityLong]||0;
+      var bv = lo[b.personalLong]||lo[b.communityLong]||0;
+      return collSort==='long' ? av-bv : bv-av;
+    });
+  }
+  if (collSort === 'added' || collSort === 'addedOld') {
+    frags.sort(function(a,b){
+      var av = (parseInt(a.purchaseYear)||0)*12+(parseInt(a.purchaseMonth)||0);
+      var bv = (parseInt(b.purchaseYear)||0)*12+(parseInt(b.purchaseMonth)||0);
+      return collSort==='added' ? bv-av : av-bv;
+    });
+  }
+  if (collSort === 'compsAsc') {
+    frags.sort(function(a,b){
+      var av = MC.filter(function(c){return c.primaryFragId===a.id;}).length;
+      var bv = MC.filter(function(c){return c.primaryFragId===b.id;}).length;
+      return av-bv;
+    });
+  }
   // Count + clear link
   var countEl=document.getElementById('collCount');
   if(countEl){
@@ -2763,12 +2857,29 @@ function renderCollection(){
   // Table
   var friendOwnsSet=new Set(friendFragrances().map(function(f){return f.name.toLowerCase();}));
   if(frags.length){
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     document.getElementById('collBody').innerHTML=frags.map(function(f){
       var hasFriendMatch=friendOwnsSet.has(f.name.toLowerCase());
       var compCount=getCompCount(f.id);
+      var longVal = f.personalLong || f.communityLong || '';
+      var longTdHtml = longVal
+        ? '<span style="font-family:var(--mono);font-size:11px;color:' + (f.personalLong ? 'var(--ink2)' : 'var(--ink3)') + ';">' + longVal + '</span>'
+        : '<span style="color:var(--ink3);">—</span>';
+      var addedTdHtml;
+      if (f.purchaseYear) {
+        var mo = f.purchaseMonth ? months[parseInt(f.purchaseMonth)-1] + ' ' : '';
+        addedTdHtml = '<span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">' + mo + f.purchaseYear + '</span>';
+      } else if (f.createdAt) {
+        var d = new Date(f.createdAt);
+        addedTdHtml = '<span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">' + months[d.getMonth()] + ' ' + d.getFullYear() + '</span>';
+      } else {
+        addedTdHtml = '<span style="color:var(--ink3);">—</span>';
+      }
       return '<tr onclick="openDetail(\''+f.id+'\')">'
         +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
         +'<td><div class="tstars">'+renderStars(f.statusRating)+'</div></td>'
+        +'<td>'+longTdHtml+'</td>'
+        +'<td>'+addedTdHtml+'</td>'
         +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,2).map(function(n){return noteDisplayName(n);}).join(', ')+'</td>'
         +'<td class="tmono">'+compCount+'</td>'
         +'<td class="tact">'
@@ -2779,7 +2890,7 @@ function renderCollection(){
     }).join('');
   } else {
     var msg=hasActiveFilter()?'No fragrances match your filters.':'Your collection is empty \u2014 <span onclick="openAddFrag(\'CURRENT\')">add your first one</span>.';
-    document.getElementById('collBody').innerHTML='<tr><td colspan="5"><div class="empty-state">'+msg+'</div></td></tr>';
+    document.getElementById('collBody').innerHTML='<tr><td colspan="7"><div class="empty-state">'+msg+'</div></td></tr>';
   }
   updateCounts();
 }
@@ -5767,6 +5878,7 @@ window.auditData=auditDataIntegrity;
   fixPhlurVanillaSkin();
   migrateFragranceTypes();
   cleanFragranceNames();
+  initCollectionSort();
   document.getElementById('idLoading').style.display='none';
   // Always show the picker — never block the user due to a sync failure
   document.getElementById('idPicker').style.display='flex';
