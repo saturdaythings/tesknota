@@ -879,15 +879,25 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- ANALYTICS -->
     <div class="page" id="page-analytics">
       <div class="ana-wrap">
-        <div class="ana-header">
-          <div id="anaInsight"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid var(--b2);padding-bottom:0;">
+          <div class="ftabs" id="anaTabs" style="border-bottom:none;margin-bottom:0;">
+            <div class="ftab on" onclick="setAnaTab('collection',this)">Collection</div>
+            <div class="ftab" onclick="setAnaTab('compliments',this)">Compliments</div>
+          </div>
           <button class="btn btn-ghost btn-sm" id="sylviaToggle" onclick="toggleSylviaOverlay()">Compare with Sylvia</button>
         </div>
-        <div id="anaPills" class="ana-pills"></div>
-        <div class="ana-section" id="anaNotesSection"></div>
-        <div class="ana-section" id="anaMapSection"></div>
-        <div class="ana-section" id="anaPerformersSection"></div>
-        <div class="ana-section" id="anaCollectionSection"></div>
+        <div id="anaCollection" class="fpanel on">
+          <div class="ana-section" id="anaCollectionSection"></div>
+          <div class="ana-section" id="anaNotesSection"></div>
+        </div>
+        <div id="anaCompliments" class="fpanel">
+          <div class="ana-header" style="margin-bottom:8px;">
+            <div id="anaInsight"></div>
+          </div>
+          <div id="anaPills" class="ana-pills"></div>
+          <div class="ana-section" id="anaPerformersSection"></div>
+          <div class="ana-section" id="anaMapSection"></div>
+        </div>
       </div>
     </div>
 
@@ -2896,6 +2906,15 @@ function deleteCompliment(id){
 // ═══════════════════════════════════════════════════════
 
 var showSylviaOverlay = false;
+
+function setAnaTab(tab, el){
+  document.querySelectorAll('#anaTabs .ftab').forEach(function(t){ t.classList.remove('on'); });
+  if(el) el.classList.add('on');
+  var cEl=document.getElementById('anaCollection');
+  var comEl=document.getElementById('anaCompliments');
+  if(cEl) cEl.classList.toggle('on', tab==='collection');
+  if(comEl) comEl.classList.toggle('on', tab==='compliments');
+}
 
 function toggleSylviaOverlay(){
   showSylviaOverlay = !showSylviaOverlay;
