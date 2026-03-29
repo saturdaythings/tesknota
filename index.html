@@ -3718,7 +3718,7 @@ function bldChartPreview(id,data){
 function bldChart(id,data){
   const el=document.getElementById(id);if(!el)return;
   const max=Math.max(...data.map(d=>d.h),1);
-  el.innerHTML=data.map(d=>`<div class="bw"><div class="bval">${d.v}</div><div class="bar" style="height:${Math.max(d.h,2)}px" title="${d.l}: ${d.v}"></div><div class="bl">${d.l}</div></div>`).join('');
+  el.innerHTML=data.map(d=>`<div class="bw"><div class="bval">${d.v}</div><div class="bar" style="height:${Math.max(d.h,2)}px" title="${d.l}: ${d.v}"></div></div>`).join('');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3853,7 +3853,7 @@ function renderFriend(){
   var title=document.getElementById('ft-ana-title'); if(title) title.textContent=friend.name+"'s top performers";
   var maxV=fragSorted[0]?fragSorted[0][1]:1;
   bldChart('bc-f',fragSorted.map(function(e){return {l:e[0].split(' ')[0],v:e[1],h:Math.round((e[1]/maxV)*100)};}));
-  var legend=document.getElementById('bc-f-legend'); if(legend) legend.textContent=fragSorted.map(function(e){return e[0];}).join(' · ');
+  var legend=document.getElementById('bc-f-legend'); if(legend) legend.textContent='';
   var insightsEl=document.getElementById('ft-ana-insights');
   if(insightsEl){
     if(fragSorted[0] && ftotal>0){
