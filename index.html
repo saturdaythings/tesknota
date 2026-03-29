@@ -271,9 +271,28 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .dash-step-desc{font-size:11px;color:var(--ink3);}
 
 /* ADD FRAGRANCE STEP 2 — progressive disclosure */
-.af-more-toggle{background:none;border:none;color:var(--blue1);font-family:var(--body);font-size:12px;cursor:pointer;padding:8px 0 4px;letter-spacing:.02em;opacity:.8;display:block;width:100%;}
+.af-more-toggle{background:none;border:none;color:var(--ink2);font-family:var(--mono);font-size:10px;cursor:pointer;padding:8px 0 4px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;display:block;width:100%;text-align:left;}
 .af-more-toggle:hover{opacity:1;}
 .af-more-wrap{padding-top:4px;}
+
+/* STAR RATING */
+.star-row{display:flex;gap:2px;margin-top:4px;}
+.star-glyph{font-size:22px;cursor:pointer;color:var(--b2);transition:color .1s;line-height:1;}
+.star-glyph.lit{color:var(--warm);}
+.star-word{font-size:10px;color:var(--ink3);margin-top:3px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;}
+
+/* FRAG SUFFIX (EDP / EDT / Spray) */
+.frag-suffix{font-size:.82em;opacity:.45;font-weight:400;}
+
+/* CUSTOM NOTE ADD OPTION */
+.ti-opt-add{color:var(--blue1);font-style:italic;}
+
+/* ANALYTICS INSIGHT CARDS */
+.ana-insight-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;}
+.ana-icard{background:var(--card);border-radius:10px;padding:14px 16px;border:1px solid var(--b2);}
+.ana-icard-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);font-family:var(--mono);margin-bottom:6px;}
+.ana-icard-val{font-family:var(--head);font-size:18px;color:var(--ink);margin-bottom:3px;}
+.ana-icard-sub{font-size:11px;color:var(--ink3);}
 
 /* STATUS CHANGE STRIP */
 .status-strip{display:none;flex-wrap:wrap;gap:6px;padding:10px 0;border-top:1px solid var(--b2);margin-top:8px;}
@@ -864,6 +883,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div id="notesIntel" class="notes-grid"></div>
       <div class="sh"><h2>Your favourite notes</h2></div>
       <div id="faveNotes" style="margin-bottom:4px;"></div>
+      <div class="sh"><h2>Collection insights</h2></div>
+      <div class="ana-insight-grid" id="anaInsightGrid"></div>
     </div>
 
     <!-- FRIEND PROFILE -->
@@ -947,9 +968,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <!-- Notes pyramid for import card -->
           <div class="divider-section">
             <div class="note-tiers">
-              <div class="note-tier"><div class="note-tier-head">Top Notes <span class="note-tier-desc">first impression, 0–30 min</span></div><div class="ti-wrap" id="ti-lrTop" onclick="focusTi('lrTop')"></div></div>
-              <div class="note-tier"><div class="note-tier-head">Heart Notes <span class="note-tier-desc">core character, 30 min–4 hrs</span></div><div class="ti-wrap" id="ti-lrMiddle" onclick="focusTi('lrMiddle')"></div></div>
-              <div class="note-tier"><div class="note-tier-head">Base Notes <span class="note-tier-desc">dry down, 4+ hrs</span></div><div class="ti-wrap" id="ti-lrBase" onclick="focusTi('lrBase')"></div></div>
+              <div class="note-tier"><div class="note-tier-head">Top Notes</div><div class="ti-wrap" id="ti-lrTop" onclick="focusTi('lrTop')"></div></div>
+              <div class="note-tier"><div class="note-tier-head">Heart Notes</div><div class="ti-wrap" id="ti-lrMiddle" onclick="focusTi('lrMiddle')"></div></div>
+              <div class="note-tier"><div class="note-tier-head">Base Notes</div><div class="ti-wrap" id="ti-lrBase" onclick="focusTi('lrBase')"></div></div>
             </div>
           </div>
           <a class="lr-search-link" id="lrSearchLink" href="#" target="_blank" rel="noopener">↗ Search on Fragrantica</a>
@@ -1160,18 +1181,19 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             </div>
           </div>
         </div>
-        <div class="fg"><label>Status rating</label>
-          <div class="opts" id="sOpts">
-            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="Obsessed">Obsessed</div>
-            <div class="opt on" onclick="selOpt(this,'sOpts')" data-v="Love">Love</div>
-            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="Like">Like</div>
-            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="Just OK">Just OK</div>
-            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="Don't Like">Don't Like</div>
-            <div class="opt" onclick="selOpt(this,'sOpts')" data-v="WTF">WTF</div>
+        <div class="fg"><label>Rating</label>
+          <input type="hidden" id="afRating" value="3">
+          <div class="star-row" id="starRow" onmouseleave="starHover(0)">
+            <span class="star-glyph" data-v="1" onclick="starPick(1)" onmouseenter="starHover(1)">★</span>
+            <span class="star-glyph" data-v="2" onclick="starPick(2)" onmouseenter="starHover(2)">★</span>
+            <span class="star-glyph" data-v="3" onclick="starPick(3)" onmouseenter="starHover(3)">★</span>
+            <span class="star-glyph" data-v="4" onclick="starPick(4)" onmouseenter="starHover(4)">★</span>
+            <span class="star-glyph" data-v="5" onclick="starPick(5)" onmouseenter="starHover(5)">★</span>
           </div>
+          <div class="star-word" id="starWord">Like</div>
         </div>
         <!-- "More details" toggle — expands remaining fields -->
-        <button type="button" class="af-more-toggle" id="afMoreToggle" onclick="toggleAFMore()">+ More details</button>
+        <button type="button" class="af-more-toggle" id="afMoreToggle" onclick="toggleAFMore()">+ MORE DETAILS</button>
         <div class="af-more-wrap" id="afMoreWrap" style="display:none;">
         <div class="frow" style="margin-bottom:14px;">
           <div class="fg" style="margin:0;"><label>Personal longevity</label>
@@ -1197,14 +1219,13 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <div class="opts"><div class="opt" id="dY" onclick="togDupe(true)">Dupe for:</div><div class="opt on" id="dN" onclick="togDupe(false)">Not a dupe</div></div>
             <input type="text" id="dupeFor" placeholder="Type original fragrance name..." class="input-editable" style="display:none;flex:1;min-width:140px;">
           </div>
-          <div class="hint-text">A dupe smells similar to a more expensive original. e.g. Hacivat is often considered a dupe for BR540.</div>
         </div>
         <div class="fg">
           <label>Notes pyramid</label>
           <div class="note-tiers">
-            <div class="note-tier"><div class="note-tier-head">Top Notes <span class="note-tier-desc">first impression, 0–30 min</span></div><div class="ti-wrap" id="ti-afTop" onclick="focusTi('afTop')"></div></div>
-            <div class="note-tier"><div class="note-tier-head">Heart Notes <span class="note-tier-desc">core character, 30 min–4 hrs</span></div><div class="ti-wrap" id="ti-afMiddle" onclick="focusTi('afMiddle')"></div></div>
-            <div class="note-tier"><div class="note-tier-head">Base Notes <span class="note-tier-desc">dry down, 4+ hrs</span></div><div class="ti-wrap" id="ti-afBase" onclick="focusTi('afBase')"></div></div>
+            <div class="note-tier"><div class="note-tier-head">Top Notes</div><div class="ti-wrap" id="ti-afTop" onclick="focusTi('afTop')"></div></div>
+            <div class="note-tier"><div class="note-tier-head">Heart Notes</div><div class="ti-wrap" id="ti-afMiddle" onclick="focusTi('afMiddle')"></div></div>
+            <div class="note-tier"><div class="note-tier-head">Base Notes</div><div class="ti-wrap" id="ti-afBase" onclick="focusTi('afBase')"></div></div>
           </div>
         </div>
         <div class="fg"><label>Personal notes</label>
@@ -2133,6 +2154,20 @@ const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt'
 
 function starsStr(n){ if(!n)return '—'; let s=''; for(let i=1;i<=5;i++) s+=i<=n?'★':'☆'; return s; }
 
+const STAR_WORDS={1:"Don't Like",2:'Just OK',3:'Like',4:'Love',5:'Obsessed'};
+function starPick(n){ document.getElementById('afRating').value=n; starRender(n); }
+function starHover(n){ var val=n||parseInt(document.getElementById('afRating').value)||3; starRender(val); }
+function starRender(n){
+  document.querySelectorAll('#starRow .star-glyph').forEach(function(s,i){ s.classList.toggle('lit',i<n); });
+  var word=document.getElementById('starWord'); if(word) word.textContent=STAR_WORDS[n]||'';
+}
+
+function fragNameHtml(name){
+  var m=name.match(/^(.*?)\s+(EDP|EDT|Spray)$/);
+  if(m) return m[1]+' <span class="frag-suffix">'+m[2]+'</span>';
+  return name;
+}
+
 // ── Per-user accessors ─────────────────────────────────────────────────────
 function myFragrances(){ return FRAGRANCES.filter(function(f){ return CURRENT_USER && f.userId===CURRENT_USER.id; }); }
 function friendFragrances(){ var fr=getFriend(); return fr ? FRAGRANCES.filter(function(f){ return f.userId===fr.id; }) : []; }
@@ -2274,7 +2309,7 @@ function renderDashboard(){
   if(recent.length){
     document.getElementById('dashBody').innerHTML = recent.map(f=>`
       <tr onclick="openDetail('${f.id}')">
-        <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
+        <td><div class="tn">${fragNameHtml(f.name)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
         <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
@@ -2380,13 +2415,13 @@ function renderCollection(filter='all'){
     document.getElementById('collBody').innerHTML = filtered.map(f=>{
       const hasFriendMatch = friendOwnsSet.has(f.name.toLowerCase());
       return `<tr data-s="${f.status}" onclick="openDetail('${f.id}')">
-        <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
+        <td><div class="tn">${fragNameHtml(f.name)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td class="tmono">${f.sizes.join(', ')||'—'}</td>
-        <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
+        <td><div class="tstars">${starsStr(f.statusRating)}</div></td>
         <td class="tmono">${f.personalLong||'—'}</td>
         <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,2).join(', ')}</td>
-        <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
+        <td class="tmono" style="color:var(--warm);">${f.isDupe?'≈ '+f.dupeFor:''}</td>
         <td class="tact">
           <button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button>
           ${hasFriendMatch?`<button class="btn-bare" style="color:var(--warm);" onclick="event.stopPropagation();openCompare('${f.name}','${f.id}')" title="Compare with friend">Compare</button>`:''}
@@ -2638,6 +2673,54 @@ function renderAnalytics(){
   var maxSeason=Math.max.apply(null,Object.values(bySeason))||1;
   bldChart('bc-season',Object.entries(bySeason).map(function(e){ return {l:e[0],v:e[1],h:Math.round((e[1]/maxSeason)*100)}; }));
   renderNotesIntel();
+  // Collection insight cards
+  var MF2=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+  var anaGrid=document.getElementById('anaInsightGrid');
+  if(anaGrid){
+    var icards=[];
+    // Top Note across collection
+    var noteCounts={};
+    MF2.forEach(function(f){
+      var allN=[f.topNotes,f.middleNotes,f.baseNotes].filter(Boolean).join(', ');
+      allN.split(/,\s*|·/).forEach(function(n){n=n.trim();if(n)noteCounts[n]=(noteCounts[n]||0)+1;});
+    });
+    var topNote=Object.entries(noteCounts).sort(function(a,b){return b[1]-a[1];})[0];
+    icards.push({title:'Top Note',val:topNote?topNote[0]:'—',sub:topNote?topNote[1]+' fragrances':''});
+    // Most complimented note
+    var noteCompCounts={};
+    MC.forEach(function(c){
+      var frag=FRAGRANCES.find(function(f){return f.id===c.primaryFragId;});
+      if(frag){[frag.topNotes,frag.middleNotes,frag.baseNotes].filter(Boolean).join(', ').split(/,\s*|·/).forEach(function(n){n=n.trim();if(n)noteCompCounts[n]=(noteCompCounts[n]||0)+1;});}
+    });
+    var topCompNote=Object.entries(noteCompCounts).sort(function(a,b){return b[1]-a[1];})[0];
+    icards.push({title:'Most Complimented Note',val:topCompNote?topCompNote[0]:'—',sub:topCompNote?topCompNote[1]+' compliments':''});
+    // Notes by season (best season for compliments)
+    var topSeason=Object.entries(bySeason).sort(function(a,b){return b[1]-a[1];})[0];
+    icards.push({title:'Notes by Season',val:topSeason&&topSeason[1]>0?topSeason[0]:'—',sub:topSeason&&topSeason[1]>0?topSeason[1]+' compliments':''});
+    // Average spend
+    var prices=MF2.map(function(f){var m=(f.personalNotes||'').match(/\$(\d+(?:\.\d+)?)/);return m?parseFloat(m[1]):null;}).filter(Boolean);
+    var avgSpend=prices.length?(prices.reduce(function(a,b){return a+b;},0)/prices.length).toFixed(0):'—';
+    icards.push({title:'Avg Spend',val:prices.length?'$'+avgSpend:'—',sub:prices.length?prices.length+' priced':''});
+    // Collection by house
+    var houseCounts={};
+    MF2.forEach(function(f){if(f.house)houseCounts[f.house]=(houseCounts[f.house]||0)+1;});
+    var topHouse=Object.entries(houseCounts).sort(function(a,b){return b[1]-a[1];})[0];
+    icards.push({title:'Top House',val:topHouse?topHouse[0]:'—',sub:topHouse?topHouse[1]+' fragrances':''});
+    // Rating distribution
+    var rated=MF2.filter(function(f){return f.statusRating;});
+    var avgRat=rated.length?(rated.reduce(function(a,f){return a+(f.statusRating||0);},0)/rated.length).toFixed(1):'—';
+    icards.push({title:'Avg Rating',val:avgRat!=='—'?starsStr(Math.round(parseFloat(avgRat))):'—',sub:avgRat!=='—'?avgRat+' / 5':''});
+    // Render
+    anaGrid.innerHTML='';
+    icards.forEach(function(c){
+      var div=document.createElement('div'); div.className='ana-icard';
+      var t=document.createElement('div'); t.className='ana-icard-title'; t.textContent=c.title;
+      var v=document.createElement('div'); v.className='ana-icard-val'; v.textContent=c.val;
+      var s=document.createElement('div'); s.className='ana-icard-sub'; s.textContent=c.sub;
+      div.appendChild(t); div.appendChild(v); div.appendChild(s);
+      anaGrid.appendChild(div);
+    });
+  }
 }
 
 function bldChartPreview(id,data){
@@ -3234,7 +3317,7 @@ function resetAFModal(){
   updPips(1);
   // Reset Step 2 to defaults
   document.querySelectorAll('#sizeOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===2);});
-  document.querySelectorAll('#sOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===1);});
+  document.getElementById('afRating').value=3; starRender(3);
   document.getElementById('afLong').value='6–12h';
   document.getElementById('afSill').value='Moderate';
   document.getElementById('afWhere').value='';
@@ -3267,7 +3350,7 @@ function afGoStep(n, skipValidation){
       const d = prefetchedData;
       if(d.sizes){ document.querySelectorAll('#sizeOpts .opt').forEach(o=>o.classList.toggle('on',d.sizes.includes(o.textContent.trim()))); }
       if(d.personalRating){ document.querySelectorAll('#rOpts .opt').forEach(o=>o.classList.toggle('on',parseInt(o.dataset.v)===d.personalRating)); }
-      if(d.statusRating){ document.querySelectorAll('#sOpts .opt').forEach(o=>o.classList.toggle('on',o.dataset.v===d.statusRating)); }
+      if(d.statusRating){ var numRat=typeof d.statusRating==='number'?d.statusRating:({Obsessed:5,Love:4,Like:3,'Just OK':2,"Don't Like":1}[d.statusRating]||3); document.getElementById('afRating').value=numRat; starRender(numRat); }
       if(d.personalLong) document.getElementById('afLong').value=d.personalLong;
       if(d.personalSill) document.getElementById('afSill').value=d.personalSill;
       if(d.whereBought) document.getElementById('afWhere').value=d.whereBought;
@@ -3301,7 +3384,7 @@ function toggleAFMore(){
   if(!wrap) return;
   var open=wrap.style.display!=='none';
   wrap.style.display=open?'none':'block';
-  toggle.textContent=open?'+ More details':'− Less details';
+  toggle.textContent=open?'+ MORE DETAILS':'— LESS DETAILS';
   try{ localStorage.setItem('afStep2Expanded', open?'0':'1'); }catch(e){}
 }
 
@@ -3312,7 +3395,7 @@ function initAFMoreState(){
   var expanded=false;
   try{ expanded=localStorage.getItem('afStep2Expanded')==='1'; }catch(e){}
   wrap.style.display=expanded?'block':'none';
-  toggle.textContent=expanded?'− Less details':'+ More details';
+  toggle.textContent=expanded?'— LESS DETAILS':'+ MORE DETAILS';
 }
 
 function saveFragrance(){
@@ -3320,7 +3403,6 @@ function saveFragrance(){
   if(!name){ toast('No fragrance selected'); return; }
   const sizes = [...document.querySelectorAll('#sizeOpts .opt.on')].map(o=>o.textContent.trim());
   const ratingEl = document.querySelector('#rOpts .opt.on');
-  const sratingEl = document.querySelector('#sOpts .opt.on');
   const month = document.getElementById('afMonth').value;
   const year = document.getElementById('afYear').value;
   const isDupe = document.getElementById('dY').classList.contains('on');
@@ -3329,7 +3411,7 @@ function saveFragrance(){
   const data = {
     name, status: document.getElementById('afStatus').value,
     sizes, personalRating: ratingEl?parseInt(ratingEl.dataset.v):null,
-    statusRating: sratingEl?sratingEl.dataset.v:null,
+    statusRating: parseInt(document.getElementById('afRating').value)||null,
     personalLong: document.getElementById('afLong').value||null,
     personalSill: document.getElementById('afSill').value||null,
     whereBought: document.getElementById('afWhere').value||null,
@@ -3741,12 +3823,24 @@ function tiKey(event, id){
 
 function tiSearch(id, q){
   var drop=document.getElementById('ti-drop-'+id); if(!drop) return;
-  q=q.trim().toLowerCase(); if(!q){drop.style.display='none';return;}
+  q=q.trim(); if(!q){drop.style.display='none';return;}
+  var ql=q.toLowerCase();
   var existing=_tiValues[id]||new Set();
-  var matches=NOTE_LIST.filter(function(n){return n.includes(q)&&!existing.has(n);}).slice(0,8);
-  if(!matches.length){drop.style.display='none';return;}
-  drop.innerHTML=matches.map(function(m){return '<div class="ti-opt" onmousedown="tiAdd(\''+id+'\',\''+m.replace(/'/g,"\\'")+'\')">'+m+'</div>';}).join('');
+  var customNotes=[]; try{customNotes=JSON.parse(localStorage.getItem('customNotes')||'[]');}catch(e){}
+  var allNotes=NOTE_LIST.concat(customNotes.filter(function(n){return NOTE_LIST.indexOf(n)<0;}));
+  var matches=allNotes.filter(function(n){return n.toLowerCase().includes(ql)&&!existing.has(n);}).slice(0,8);
+  var items=matches.map(function(m){return '<div class="ti-opt" onmousedown="tiAdd(\''+id+'\',\''+m.replace(/'/g,"\\'")+'\')">'+m+'</div>';});
+  var exactMatch=allNotes.some(function(n){return n.toLowerCase()===ql;});
+  if(!exactMatch){var display=q.charAt(0).toUpperCase()+q.slice(1);items.push('<div class="ti-opt ti-opt-add" onmousedown="tiAddCustom(\''+id+'\',\''+display.replace(/'/g,"\\'")+'\')">+ Add "'+display+'"</div>');}
+  if(!items.length){drop.style.display='none';return;}
+  drop.innerHTML=items.join('');
   drop.style.display='';
+}
+
+function tiAddCustom(id, note){
+  var customNotes=[]; try{customNotes=JSON.parse(localStorage.getItem('customNotes')||'[]');}catch(e){}
+  if(customNotes.indexOf(note)<0){customNotes.push(note);try{localStorage.setItem('customNotes',JSON.stringify(customNotes));}catch(e){}}
+  tiAdd(id,note);
 }
 
 function tiGet(id){
