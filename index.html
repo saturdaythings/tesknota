@@ -3829,7 +3829,8 @@ function renderFriend(){
       if(c.notes){ var cn=document.createElement('div'); cn.className='cr-n'; cn.textContent=c.notes; left.appendChild(cn); }
       row.appendChild(left);
       var right=document.createElement('div'); right.style.cssText='display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;';
-      var cd=document.createElement('div'); cd.className='cr-d'; cd.textContent=c.month+' '+c.year; right.appendChild(cd);
+      var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var cd=document.createElement('div'); cd.className='cr-d'; cd.textContent=(_MN[parseInt(c.month)-1]||c.month)+' '+c.year; right.appendChild(cd);
       row.appendChild(right); compPanel.appendChild(row);
     });
     if(!FC.length){
