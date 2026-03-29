@@ -112,6 +112,15 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .fam-chip.on{border-color:var(--blue1);background:rgba(107,154,242,.15);color:var(--blue1);}
 .active-filter-bar{display:none;align-items:center;gap:8px;padding:6px 10px;background:var(--blue4);border:1px solid rgba(107,154,242,.2);margin-bottom:12px;font-family:var(--mono);font-size:10px;color:var(--blue1);}
 .active-filter-bar.show{display:flex;}
+/* COLLECTION NEW FILTER ROW */
+.coll-filters{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;}
+.coll-filters input{flex:1;min-width:160px;height:32px;padding:0 10px;border:1px solid var(--b3);background:var(--off);font-family:var(--body);font-size:12px;color:var(--ink);outline:none;}
+.coll-filters input:focus{border-color:var(--blue);}
+.coll-filters select{height:32px;padding:0 8px;border:1px solid var(--b3);background:var(--off);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;}
+.filter-btn{height:32px;padding:0 10px;border:1px solid var(--b3);background:var(--off);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;white-space:nowrap;}
+.filter-btn.active{background:var(--blue);color:var(--warm2);border-color:var(--blue);}
+.filter-drop-panel{position:absolute;top:calc(100% + 4px);left:0;background:var(--off);border:1px solid var(--b3);padding:10px 14px;z-index:300;min-width:180px;box-shadow:0 8px 24px rgba(26,46,92,.12);}
+#familyFilterWrap,#wishFamilyFilterWrap{position:relative;}
 
 /* TABLE */
 .tbl{width:100%;border-collapse:collapse;}
@@ -698,10 +707,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   .fb-stats{text-align:left;}
   .lr-g{grid-template-columns:1fr 1fr;}
   .mp-g{grid-template-columns:1fr 1fr;}
-  /* Fix 1: hide table view on mobile, show grid */
-  #vTable{display:none!important;}
-  #vGrid{display:block!important;}
-  #btnTable,#btnGrid{display:none;}
   /* Fix 2: FAB above mobile nav */
   .fab-btn{bottom:78px;}
   /* Fix 3: wearing chip visible on mobile */
@@ -808,72 +813,46 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 
     <!-- COLLECTION -->
     <div class="page" id="page-collection">
-      <div class="controls-bar">
-        <div class="fbar" id="collFbar">
-          <div class="fc on" data-filter="all">All</div>
-          <div class="fc" data-filter="CURRENT">Current</div>
-          <div class="fc" data-filter="PREVIOUSLY_OWNED">Prev. Owned</div>
-          <div class="fc" data-filter="DONT_LIKE">Don't Like</div>
+      <div class="coll-filters">
+        <input type="text" id="collSearch" placeholder="Search fragrances..." />
+        <select id="collHouse"><option value="">All houses</option></select>
+        <div id="familyFilterWrap">
+          <button class="filter-btn" onclick="toggleFamilyDrop()">Family <span id="familyFilterLabel"></span> ▾</button>
+          <div class="filter-drop-panel" id="familyDropPanel" style="display:none;"></div>
         </div>
-        <div class="fbar" id="typeFilter" style="display:none;margin-bottom:12px;">
-          <div class="fc on" data-type="all" onclick="setTypeFilter(this,'all')">All Types</div>
-          <div class="fc" data-type="Eau de Parfum" onclick="setTypeFilter(this,'Eau de Parfum')">EDP</div>
-          <div class="fc" data-type="Eau de Toilette" onclick="setTypeFilter(this,'Eau de Toilette')">EDT</div>
-          <div class="fc" data-type="Body Spray" onclick="setTypeFilter(this,'Body Spray')">Body Spray</div>
-          <div class="fc" data-type="Perfume Oil" onclick="setTypeFilter(this,'Perfume Oil')">Oil</div>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-ghost btn-sm" id="btnTable" onclick="setView('table')" style="color:var(--blue);">Table</button>
-          <button class="btn btn-ghost btn-sm" id="btnGrid" onclick="setView('grid')">Grid</button>
-        </div>
-      </div>
-      <!-- Sort bar -->
-      <div class="coll-sort-bar">
-        <span class="coll-sort-lbl">Sort</span>
+        <select id="collRating"><option value="">All ratings</option></select>
+        <select id="collStatus"><option value="">All statuses</option></select>
         <select class="coll-sort-select" id="collSort" onchange="setCollSort(this.value)">
           <option value="nameAZ">Name A–Z</option>
           <option value="nameZA">Name Z–A</option>
           <option value="ratingHL">Rating High–Low</option>
-          <option value="comps">Most Compliments</option>
+          <option value="ratingLH">Rating Low–High</option>
           <option value="recent">Recently Added</option>
+          <option value="houseAZ">House A–Z</option>
+          <option value="comps">Most Compliments</option>
         </select>
       </div>
-      <!-- Family filter chips -->
-      <div class="fam-chips" id="famChips">
-        <span class="coll-sort-lbl" style="margin-right:2px;">Family</span>
-        <div class="fam-chip" data-fam="Floral" onclick="toggleFamChip(this)">Floral</div>
-        <div class="fam-chip" data-fam="Woody" onclick="toggleFamChip(this)">Woody</div>
-        <div class="fam-chip" data-fam="Oriental" onclick="toggleFamChip(this)">Oriental</div>
-        <div class="fam-chip" data-fam="Fresh" onclick="toggleFamChip(this)">Fresh</div>
-        <div class="fam-chip" data-fam="Citrus" onclick="toggleFamChip(this)">Citrus</div>
-        <div class="fam-chip" data-fam="Chypre" onclick="toggleFamChip(this)">Chypre</div>
-        <div class="fam-chip" data-fam="Fougere" onclick="toggleFamChip(this)">Fougère</div>
-        <div class="fam-chip" data-fam="Gourmand" onclick="toggleFamChip(this)">Gourmand</div>
-      </div>
-      <!-- Active filter summary bar -->
-      <div class="active-filter-bar" id="activeFilterBar">
-        <span id="activeFilterText"></span>
-        <button class="btn btn-ghost btn-sm" onclick="clearFamFilter()" style="margin-left:auto;">Clear</button>
-      </div>
+      <div id="collCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
       <div class="note-filter-bar" id="noteFilterBar">
         <span class="note-filter-label">Showing: <span id="noteFilterName"></span></span>
         <button class="btn btn-ghost btn-sm" onclick="clearNoteFilter()">Clear filter</button>
       </div>
-      <div id="vTable">
-        <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Size</th><th>Rating</th><th>Longevity</th><th>Notes</th><th>Dupe?</th><th></th></tr></thead>
-        <tbody id="collBody"></tbody></table>
-      </div>
-      <div id="vGrid" style="display:none;"><div class="cgrid" id="collGrid"></div></div>
+      <table class="tbl"><thead><tr><th>Fragrance</th><th>Rating</th><th>Notes</th><th>Compliments</th><th></th></tr></thead>
+      <tbody id="collBody"></tbody></table>
     </div>
 
     <!-- WISHLIST -->
     <div class="page" id="page-wishlist">
       <div class="sh"><h2>Wishlist</h2><div class="sh-r"><button class="btn btn-blue" onclick="openAddFrag('WANT_TO_BUY')">Add to Wishlist</button></div></div>
-      <div class="fbar" id="wishFbar">
-        <div class="fc on" data-filter="all">All</div>
-        <div class="fc" data-filter="WANT_TO_SMELL">Want to Smell</div>
-        <div class="fc" data-filter="WANT_TO_BUY">Want to Buy</div>
+      <div class="coll-filters">
+        <input type="text" id="wishSearch" placeholder="Search wishlist..." />
+        <select id="wishHouse"><option value="">All houses</option></select>
+        <div id="wishFamilyFilterWrap">
+          <button class="filter-btn" onclick="toggleWishFamilyDrop()">Family <span id="wishFamilyFilterLabel"></span> ▾</button>
+          <div class="filter-drop-panel" id="wishFamilyDropPanel" style="display:none;"></div>
+        </div>
       </div>
+      <div id="wishCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
       <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Community Rating</th><th>Avg Price</th><th>Notes</th><th>Dupe Candidate</th><th></th></tr></thead>
       <tbody id="wishBody"></tbody></table>
       <div id="wishDiscover"></div>
@@ -2306,15 +2285,6 @@ function migrateFragranceTypes(){
   }
 }
 
-var activeTypeFilter='all';
-function setTypeFilter(el,type){
-  activeTypeFilter=type;
-  document.querySelectorAll('#typeFilter .fc').forEach(function(f){ f.classList.remove('on'); });
-  el.classList.add('on');
-  var activeStatus=document.querySelector('#collFbar .fc.on');
-  renderCollection(activeStatus?activeStatus.dataset.filter:'all');
-}
-
 // ── Per-user accessors ─────────────────────────────────────────────────────
 function myFragrances(){ return FRAGRANCES.filter(function(f){ return CURRENT_USER && f.userId===CURRENT_USER.id; }); }
 function friendFragrances(){ var fr=getFriend(); return fr ? FRAGRANCES.filter(function(f){ return f.userId===fr.id; }) : []; }
@@ -2498,143 +2468,304 @@ function avgRating(){
 // ═══════════════════════════════════════════════════════
 
 var collSort = 'nameAZ';
-var collFamFilter = [];
+var collSearchVal = '';
+var collHouseVal = '';
+var collFamilyVals = [];
+var collRatingVal = '';
+var collStatusVal = '';
+
+var SCENT_FAMILIES = [
+  'Floral','Woody','Oriental','Fresh','Citrus',
+  'Chypre','Fougère','Gourmand','Aquatic','Spicy',
+  'Musky','Powdery','Green'
+];
 
 function getFragFamily(frag){
   var db=FRAG_DB.find(function(d){ return normStr(d.n)===normStr(frag.name)&&normStr(d.h)===normStr(frag.house); });
   return db?db.fam:null;
 }
 
-function setCollSort(val){
-  collSort=val;
-  var activeFilter=document.querySelector('#collFbar .fc.on');
-  renderCollection(activeFilter?activeFilter.dataset.filter:'all');
+function setCollSort(val){ collSort=val; renderCollection(); }
+
+function buildHouseFilter(){
+  var houses=[...new Set(myFragrances().map(function(f){return f.house||'';}).filter(Boolean))].sort();
+  var sel=document.getElementById('collHouse'); if(!sel) return;
+  sel.innerHTML='<option value="">All houses</option>';
+  houses.forEach(function(h){ var o=document.createElement('option'); o.value=h; o.textContent=h; sel.appendChild(o); });
+  if(collHouseVal) sel.value=collHouseVal;
 }
 
-function toggleFamChip(el){
-  el.classList.toggle('on');
-  collFamFilter=Array.from(document.querySelectorAll('#famChips .fam-chip.on')).map(function(c){return c.dataset.fam;});
-  var activeFilter=document.querySelector('#collFbar .fc.on');
-  renderCollection(activeFilter?activeFilter.dataset.filter:'all');
+function buildFamilyFilter(){
+  var panel=document.getElementById('familyDropPanel'); if(!panel) return;
+  panel.innerHTML='';
+  SCENT_FAMILIES.forEach(function(fam){
+    var label=document.createElement('label');
+    label.style.cssText='display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-family:var(--body);font-size:12px;color:var(--ink);';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.value=fam;
+    cb.checked=collFamilyVals.includes(fam);
+    cb.style.accentColor='var(--blue)';
+    cb.addEventListener('change',function(){
+      if(this.checked){ collFamilyVals.push(fam); }
+      else { collFamilyVals=collFamilyVals.filter(function(f){ return f!==fam; }); }
+      updateFamilyLabel(); renderCollection();
+    });
+    label.appendChild(cb); label.appendChild(document.createTextNode(fam));
+    panel.appendChild(label);
+  });
 }
 
-function clearFamFilter(){
-  collFamFilter=[];
-  document.querySelectorAll('#famChips .fam-chip').forEach(function(c){c.classList.remove('on');});
-  var activeFilter=document.querySelector('#collFbar .fc.on');
-  renderCollection(activeFilter?activeFilter.dataset.filter:'all');
+function updateFamilyLabel(){
+  var lbl=document.getElementById('familyFilterLabel');
+  var btn=document.querySelector('#familyFilterWrap .filter-btn');
+  if(lbl) lbl.textContent=collFamilyVals.length?'('+collFamilyVals.length+')':'';
+  if(btn) btn.classList.toggle('active',collFamilyVals.length>0);
 }
 
-function renderCollection(filter='all'){
-  var MF=myFragrances();
-  const coll = MF.filter(f=>f.status!=='WANT_TO_BUY'&&f.status!=='WANT_TO_SMELL');
-  var filtered = filter==='all' ? coll : coll.filter(f=>f.status===filter);
-  // Apply family filter
-  if(collFamFilter.length){
-    filtered=filtered.filter(function(f){
-      var fam=getFragFamily(f);
-      return fam&&collFamFilter.some(function(cf){return fam.toLowerCase().includes(cf.toLowerCase());});
+function toggleFamilyDrop(){
+  var panel=document.getElementById('familyDropPanel'); if(!panel) return;
+  panel.style.display=panel.style.display==='none'?'block':'none';
+}
+
+function hasActiveFilter(){
+  return !!(collSearchVal||collHouseVal||collFamilyVals.length||collRatingVal||collStatusVal);
+}
+
+function statusChip(status){
+  var labels={'PREVIOUSLY_OWNED':'Prev. Owned','DONT_LIKE':"Don't Like",'WANT_TO_BUY':'Want to Buy','WANT_TO_SMELL':'Want to Smell'};
+  if(!labels[status]) return '';
+  return '<span style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--b2);padding:1px 5px;margin-left:6px;">'+labels[status]+'</span>';
+}
+
+// Wishlist filter state
+var wishSearchVal = '';
+var wishHouseVal = '';
+var wishFamilyVals = [];
+
+function buildWishHouseFilter(){
+  var wish=myFragrances().filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
+  var houses=[...new Set(wish.map(function(f){return f.house||'';}).filter(Boolean))].sort();
+  var sel=document.getElementById('wishHouse'); if(!sel) return;
+  sel.innerHTML='<option value="">All houses</option>';
+  houses.forEach(function(h){ var o=document.createElement('option'); o.value=h; o.textContent=h; sel.appendChild(o); });
+  if(wishHouseVal) sel.value=wishHouseVal;
+}
+
+function buildWishFamilyFilter(){
+  var panel=document.getElementById('wishFamilyDropPanel'); if(!panel) return;
+  panel.innerHTML='';
+  SCENT_FAMILIES.forEach(function(fam){
+    var label=document.createElement('label');
+    label.style.cssText='display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-family:var(--body);font-size:12px;color:var(--ink);';
+    var cb=document.createElement('input'); cb.type='checkbox'; cb.value=fam;
+    cb.checked=wishFamilyVals.includes(fam);
+    cb.style.accentColor='var(--blue)';
+    cb.addEventListener('change',function(){
+      if(this.checked){ wishFamilyVals.push(fam); }
+      else { wishFamilyVals=wishFamilyVals.filter(function(f){ return f!==fam; }); }
+      updateWishFamilyLabel(); renderWishlist();
+    });
+    label.appendChild(cb); label.appendChild(document.createTextNode(fam));
+    panel.appendChild(label);
+  });
+}
+
+function updateWishFamilyLabel(){
+  var lbl=document.getElementById('wishFamilyFilterLabel');
+  var btn=document.querySelector('#wishFamilyFilterWrap .filter-btn');
+  if(lbl) lbl.textContent=wishFamilyVals.length?'('+wishFamilyVals.length+')':'';
+  if(btn) btn.classList.toggle('active',wishFamilyVals.length>0);
+}
+
+function toggleWishFamilyDrop(){
+  var panel=document.getElementById('wishFamilyDropPanel'); if(!panel) return;
+  panel.style.display=panel.style.display==='none'?'block':'none';
+}
+
+// Close family dropdowns on outside click
+document.addEventListener('click',function(e){
+  var w=document.getElementById('familyFilterWrap');
+  if(w&&!w.contains(e.target)){ var p=document.getElementById('familyDropPanel'); if(p) p.style.display='none'; }
+  var ww=document.getElementById('wishFamilyFilterWrap');
+  if(ww&&!ww.contains(e.target)){ var wp=document.getElementById('wishFamilyDropPanel'); if(wp) wp.style.display='none'; }
+});
+
+// Initialise collection filter dropdowns and event listeners
+(function initCollFilters(){
+  var rSel=document.getElementById('collRating');
+  if(rSel){
+    [['','All ratings'],['5','★★★★★  Obsessed'],['4','★★★★☆  Love'],['3','★★★☆☆  Like'],['2','★★☆☆☆  Just OK'],['1',"★☆☆☆☆  Don't Like"]].forEach(function(p){
+      var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; rSel.appendChild(o);
     });
   }
-  // Apply type filter
-  var types=new Set(myFragrances().map(function(f){return f.type||'Eau de Parfum';}));
-  var typeFilterEl=document.getElementById('typeFilter');
-  if(typeFilterEl) typeFilterEl.style.display=types.size>1?'flex':'none';
-  if(activeTypeFilter!=='all'){
-    filtered=filtered.filter(function(f){ return (f.type||'Eau de Parfum')===activeTypeFilter; });
+  var sSel=document.getElementById('collStatus');
+  if(sSel){
+    [['','All statuses'],['CURRENT','Current'],['PREVIOUSLY_OWNED','Prev. Owned'],['DONT_LIKE',"Don't Like"],['WANT_TO_BUY','Want to Buy'],['WANT_TO_SMELL','Want to Smell']].forEach(function(p){
+      var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; sSel.appendChild(o);
+    });
   }
-  // Active filter bar
-  var aBar=document.getElementById('activeFilterBar');
-  var aTxt=document.getElementById('activeFilterText');
-  if(aBar&&aTxt){
-    if(collFamFilter.length){ aBar.classList.add('show'); aTxt.textContent='Family: '+collFamFilter.join(', '); }
-    else { aBar.classList.remove('show'); aTxt.textContent=''; }
+  var cs=document.getElementById('collSearch');
+  if(cs) cs.addEventListener('input',function(){ collSearchVal=this.value.toLowerCase(); renderCollection(); });
+  var ch=document.getElementById('collHouse');
+  if(ch) ch.addEventListener('change',function(){ collHouseVal=this.value; renderCollection(); });
+  var cr=document.getElementById('collRating');
+  if(cr) cr.addEventListener('change',function(){ collRatingVal=this.value; renderCollection(); });
+  var cst=document.getElementById('collStatus');
+  if(cst) cst.addEventListener('change',function(){ collStatusVal=this.value; renderCollection(); });
+  var ws=document.getElementById('wishSearch');
+  if(ws) ws.addEventListener('input',function(){ wishSearchVal=this.value.toLowerCase(); renderWishlist(); });
+  var wh=document.getElementById('wishHouse');
+  if(wh) wh.addEventListener('change',function(){ wishHouseVal=this.value; renderWishlist(); });
+})();
+
+function renderCollection(){
+  buildHouseFilter();
+  buildFamilyFilter();
+  var frags=myFragrances();
+  // Status filter — default to CURRENT when no explicit status selected
+  if(collStatusVal){
+    frags=frags.filter(function(f){ return f.status===collStatusVal; });
+  } else {
+    frags=frags.filter(function(f){ return f.status==='CURRENT'; });
   }
-  // Apply sort
+  // Search
+  if(collSearchVal){
+    frags=frags.filter(function(f){
+      return (f.name||'').toLowerCase().includes(collSearchVal)||
+             (f.house||'').toLowerCase().includes(collSearchVal)||
+             (f.notes||'').toLowerCase().includes(collSearchVal);
+    });
+  }
+  // House
+  if(collHouseVal){ frags=frags.filter(function(f){ return f.house===collHouseVal; }); }
+  // Family — AND logic: every selected family must appear in notes/family field
+  if(collFamilyVals.length){
+    frags=frags.filter(function(f){
+      var notesAndFamily=((f.notes||'')+' '+(f.family||'')+' '+(getFragFamily(f)||'')).toLowerCase();
+      return collFamilyVals.every(function(fam){ return notesAndFamily.includes(fam.toLowerCase()); });
+    });
+  }
+  // Rating
+  if(collRatingVal){ frags=frags.filter(function(f){ return parseRating(f.statusRating)===parseInt(collRatingVal); }); }
+  // Sort
   var MC=myCompliments();
-  filtered=filtered.slice().sort(function(a,b){
+  frags=frags.slice().sort(function(a,b){
     if(collSort==='nameZA') return b.name.localeCompare(a.name);
-    if(collSort==='ratingHL') return (b.personalRating||0)-(a.personalRating||0);
+    if(collSort==='ratingHL') return (parseRating(b.statusRating)||0)-(parseRating(a.statusRating)||0);
+    if(collSort==='ratingLH') return (parseRating(a.statusRating)||0)-(parseRating(b.statusRating)||0);
     if(collSort==='comps'){ var ca=MC.filter(function(c){return c.primaryFragId===a.id;}).length; var cb=MC.filter(function(c){return c.primaryFragId===b.id;}).length; return cb-ca; }
     if(collSort==='recent') return parseInt((b.id||'0').replace(/\D/g,''))-parseInt((a.id||'0').replace(/\D/g,''));
-    return a.name.localeCompare(b.name); // nameAZ default
+    if(collSort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
+    return a.name.localeCompare(b.name);
   });
-  // Update filter counts
-  document.querySelector('#collFbar .fc[data-filter="all"]').textContent=`All (${coll.length})`;
-  document.querySelector('#collFbar .fc[data-filter="CURRENT"]').textContent=`Current (${coll.filter(f=>f.status==='CURRENT').length})`;
-  document.querySelector('#collFbar .fc[data-filter="PREVIOUSLY_OWNED"]').textContent=`Prev. Owned (${coll.filter(f=>f.status==='PREVIOUSLY_OWNED').length})`;
-  document.querySelector('#collFbar .fc[data-filter="DONT_LIKE"]').textContent=`Don't Like (${coll.filter(f=>f.status==='DONT_LIKE').length})`;
-  // Table
-  const friendOwnsSet = new Set(friendFragrances().map(f=>f.name.toLowerCase()));
-  if(filtered.length){
-    document.getElementById('collBody').innerHTML = filtered.map(f=>{
-      const hasFriendMatch = friendOwnsSet.has(f.name.toLowerCase());
-      return `<tr data-s="${f.status}" onclick="openDetail('${f.id}')">
-        <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
-        <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
-        <td class="tmono">${f.sizes.join(', ')||'—'}</td>
-        <td><div class="tstars">${renderStars(f.statusRating)}</div></td>
-        <td class="tmono">${f.personalLong||'—'}</td>
-        <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,2).join(', ')}</td>
-        <td class="tmono" style="color:var(--warm);">${f.isDupe?'≈ '+f.dupeFor:''}</td>
-        <td class="tact">
-          <button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button>
-          ${hasFriendMatch?`<button class="btn-bare" style="color:var(--warm);" onclick="event.stopPropagation();openCompare('${f.name}','${f.id}')" title="Compare with friend">Compare</button>`:''}
-        </td>
-      </tr>`;
-    }).join('');
-  } else {
-    if(coll.length){
-      document.getElementById('collBody').innerHTML = '<tr><td colspan="8"><div class="empty-state">No fragrances in this category.</div></td></tr>';
-    } else {
-      document.getElementById('collBody').innerHTML = '<tr><td colspan="8"><div class="empty-state">No fragrances yet \u2014 <span onclick="openAddFrag(\'CURRENT\')">add your first one</span>.</div></td></tr>';
+  // Count + clear link
+  var countEl=document.getElementById('collCount');
+  if(countEl){
+    countEl.innerHTML='';
+    countEl.appendChild(document.createTextNode(frags.length+' fragrance'+(frags.length!==1?'s':'')+(hasActiveFilter()?' — filtered':'')));
+    if(hasActiveFilter()){
+      var clear=document.createElement('span');
+      clear.textContent=' · Clear';
+      clear.style.cssText='color:var(--blue);cursor:pointer;margin-left:4px;';
+      clear.onclick=function(){
+        collSearchVal=collHouseVal=collRatingVal=collStatusVal='';
+        collFamilyVals=[];
+        var el;
+        el=document.getElementById('collSearch'); if(el) el.value='';
+        el=document.getElementById('collHouse'); if(el) el.value='';
+        el=document.getElementById('collRating'); if(el) el.value='';
+        el=document.getElementById('collStatus'); if(el) el.value='';
+        document.querySelectorAll('#familyDropPanel input[type=checkbox]').forEach(function(cb){ cb.checked=false; });
+        updateFamilyLabel();
+        renderCollection();
+      };
+      countEl.appendChild(clear);
     }
   }
-  // Grid
-  document.getElementById('collGrid').innerHTML = filtered.map(f=>`
-    <div class="ccard" data-s="${f.status}" onclick="openDetail('${f.id}')">
-      <div class="cc-bar" style="background:${f.status==='CURRENT'?'var(--sage)':f.status==='PREVIOUSLY_OWNED'?'var(--ink3)':'var(--rose)'}"></div>
-      <div class="cc-h">${f.house}</div>
-      <div class="cc-n">${f.name}</div>
-      <div class="cc-notes">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</div>
-      <div class="cc-ft"><div class="cc-r">${starsStr(f.personalRating)}</div><div class="cc-c">${getCompCount(f.id)} compliments</div></div>
-    </div>`).join('');
+  // Table
+  var friendOwnsSet=new Set(friendFragrances().map(function(f){return f.name.toLowerCase();}));
+  if(frags.length){
+    document.getElementById('collBody').innerHTML=frags.map(function(f){
+      var hasFriendMatch=friendOwnsSet.has(f.name.toLowerCase());
+      var compCount=getCompCount(f.id);
+      return '<tr onclick="openDetail(\''+f.id+'\')">'
+        +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
+        +'<td><div class="tstars">'+renderStars(f.statusRating)+'</div></td>'
+        +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,2).join(', ')+'</td>'
+        +'<td class="tmono">'+compCount+'</td>'
+        +'<td class="tact">'
+        +'<button class="btn-bare" onclick="event.stopPropagation();openAddComp(\''+f.id+'\')">+ Compliment</button>'
+        +(hasFriendMatch?'<button class="btn-bare" style="color:var(--warm);" onclick="event.stopPropagation();openCompare(\''+f.name+'\',\''+f.id+'\')" title="Compare with friend">Compare</button>':'')
+        +'</td>'
+        +'</tr>';
+    }).join('');
+  } else {
+    var msg=hasActiveFilter()?'No fragrances match your filters.':'Your collection is empty \u2014 <span onclick="openAddFrag(\'CURRENT\')">add your first one</span>.';
+    document.getElementById('collBody').innerHTML='<tr><td colspan="5"><div class="empty-state">'+msg+'</div></td></tr>';
+  }
   updateCounts();
 }
-
-document.getElementById('collFbar').addEventListener('click',e=>{
-  const fc=e.target.closest('.fc');if(!fc)return;
-  document.querySelectorAll('#collFbar .fc').forEach(c=>c.classList.remove('on'));
-  fc.classList.add('on');
-  renderCollection(fc.dataset.filter);
-});
 
 // ═══════════════════════════════════════════════════════
 // RENDER — WISHLIST
 // ═══════════════════════════════════════════════════════
 
-function renderWishlist(filter='all'){
-  var MF=myFragrances();
-  const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
-  const filtered = filter==='all' ? wish : wish.filter(f=>f.status===filter);
-  document.querySelector('#wishFbar .fc[data-filter="all"]').textContent=`All (${wish.length})`;
-  document.querySelector('#wishFbar .fc[data-filter="WANT_TO_SMELL"]').textContent=`Want to Smell (${wish.filter(f=>f.status==='WANT_TO_SMELL').length})`;
-  document.querySelector('#wishFbar .fc[data-filter="WANT_TO_BUY"]').textContent=`Want to Buy (${wish.filter(f=>f.status==='WANT_TO_BUY').length})`;
-  if(filtered.length){
-    document.getElementById('wishBody').innerHTML = filtered.map(f=>`
-      <tr onclick="openDetail('${f.id}')">
-        <td><div class="tn">${f.name}</div><div class="th_">${f.house}</div></td>
-        <td><div class="ts s-wnt">${STATUS_LABELS[f.status]}</div></td>
-        <td class="tmono" style="color:var(--warm)">${f.communityRating} / 5.0</td>
-        <td class="tmono">${f.avgPrice||'—'}</td>
-        <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
-        <td class="tmono" style="color:${f.isDupe?'var(--warm)':'var(--ink3)'};">${f.isDupe?'Yes — '+f.dupeFor:'—'}</td>
-        <td class="tact">
-          <button class="btn-bare" onclick="event.stopPropagation();promoteToOwned('${f.id}')">Mark as Owned</button>
-        </td>
-      </tr>`).join('');
+function renderWishlist(){
+  buildWishHouseFilter();
+  buildWishFamilyFilter();
+  var frags=myFragrances().filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
+  // Search
+  if(wishSearchVal){
+    frags=frags.filter(function(f){
+      return (f.name||'').toLowerCase().includes(wishSearchVal)||
+             (f.house||'').toLowerCase().includes(wishSearchVal)||
+             (f.notes||'').toLowerCase().includes(wishSearchVal);
+    });
+  }
+  // House
+  if(wishHouseVal){ frags=frags.filter(function(f){ return f.house===wishHouseVal; }); }
+  // Family — AND logic
+  if(wishFamilyVals.length){
+    frags=frags.filter(function(f){
+      var notesAndFamily=((f.notes||'')+' '+(f.family||'')+' '+(getFragFamily(f)||'')).toLowerCase();
+      return wishFamilyVals.every(function(fam){ return notesAndFamily.includes(fam.toLowerCase()); });
+    });
+  }
+  // Count
+  var wishCountEl=document.getElementById('wishCount');
+  if(wishCountEl){
+    var hasWishFilter=!!(wishSearchVal||wishHouseVal||wishFamilyVals.length);
+    wishCountEl.innerHTML='';
+    wishCountEl.appendChild(document.createTextNode(frags.length+' item'+(frags.length!==1?'s':'')+(hasWishFilter?' — filtered':'')));
+    if(hasWishFilter){
+      var wc=document.createElement('span');
+      wc.textContent=' · Clear';
+      wc.style.cssText='color:var(--blue);cursor:pointer;margin-left:4px;';
+      wc.onclick=function(){
+        wishSearchVal=wishHouseVal=''; wishFamilyVals=[];
+        var el;
+        el=document.getElementById('wishSearch'); if(el) el.value='';
+        el=document.getElementById('wishHouse'); if(el) el.value='';
+        document.querySelectorAll('#wishFamilyDropPanel input[type=checkbox]').forEach(function(cb){ cb.checked=false; });
+        updateWishFamilyLabel();
+        renderWishlist();
+      };
+      wishCountEl.appendChild(wc);
+    }
+  }
+  if(frags.length){
+    document.getElementById('wishBody').innerHTML=frags.map(function(f){
+      return '<tr onclick="openDetail(\''+f.id+'\')">'
+        +'<td><div class="tn">'+f.name+'</div><div class="th_">'+f.house+'</div></td>'
+        +'<td><div class="ts s-wnt">'+STATUS_LABELS[f.status]+'</div></td>'
+        +'<td class="tmono" style="color:var(--warm)">'+f.communityRating+' / 5.0</td>'
+        +'<td class="tmono">'+(f.avgPrice||'—')+'</td>'
+        +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,3).join(', ')+'</td>'
+        +'<td class="tmono" style="color:'+(f.isDupe?'var(--warm)':'var(--ink3)')+';">'+(f.isDupe?'Yes — '+f.dupeFor:'—')+'</td>'
+        +'<td class="tact"><button class="btn-bare" onclick="event.stopPropagation();promoteToOwned(\''+f.id+'\')">Mark as Owned</button></td>'
+        +'</tr>';
+    }).join('');
   } else {
-    document.getElementById('wishBody').innerHTML = `<tr><td colspan="7" style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;text-align:center;">Nothing on your wishlist yet</td></tr>`;
+    document.getElementById('wishBody').innerHTML='<tr><td colspan="7" style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;text-align:center;">Nothing on your wishlist yet</td></tr>';
   }
   renderDiscovery();
 }
@@ -2690,13 +2821,6 @@ function quickAddWishlist(name, house){
   updateCounts();
   toast(name+' added to wishlist');
 }
-
-document.getElementById('wishFbar').addEventListener('click',e=>{
-  const fc=e.target.closest('.fc');if(!fc)return;
-  document.querySelectorAll('#wishFbar .fc').forEach(c=>c.classList.remove('on'));
-  fc.classList.add('on');
-  renderWishlist(fc.dataset.filter);
-});
 
 function promoteToOwned(fragId){
   const f = FRAGRANCES.find(x=>x.id===fragId);
@@ -3604,8 +3728,8 @@ function renderCurrentPage(){
   if(!active)return;
   const id = active.id.replace('page-','');
   if(id==='dashboard') renderDashboard();
-  if(id==='collection') renderCollection(document.querySelector('#collFbar .fc.on')?.dataset.filter||'all');
-  if(id==='wishlist') renderWishlist(document.querySelector('#wishFbar .fc.on')?.dataset.filter||'all');
+  if(id==='collection') renderCollection();
+  if(id==='wishlist') renderWishlist();
   if(id==='compliments') renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all');
   if(id==='analytics') renderAnalytics();
 }
@@ -5052,14 +5176,6 @@ function togDupe(yes){
   document.getElementById('dupeFor').style.display=yes?'block':'none';
 }
 
-// View toggle
-function setView(v){
-  document.getElementById('vTable').style.display=v==='table'?'block':'none';
-  document.getElementById('vGrid').style.display=v==='grid'?'block':'none';
-  document.getElementById('btnTable').style.color=v==='table'?'var(--blue)':'';
-  document.getElementById('btnGrid').style.color=v==='grid'?'var(--blue)':'';
-}
-
 // Export
 function exportData(){
   var esc=function(v){ var s=String(v||''); return s.includes(',')||s.includes('"')?'"'+s.replace(/"/g,'""')+'"':s; };
@@ -5219,7 +5335,6 @@ function filterCollByNote(note){
     if(!nc){ row.style.display=''; return; }
     row.style.display = nc.textContent.toLowerCase().includes(note.toLowerCase()) ? '' : 'none';
   });
-  document.querySelectorAll('#collFbar .fc').forEach(c=>c.classList.remove('on'));
   // update chip active state
   document.querySelectorAll('.fave-note-chip').forEach(function(chip){
     chip.classList.toggle('on', chip.querySelector('span').textContent===note);
@@ -5241,9 +5356,6 @@ function clearNoteFilter(){
   document.querySelectorAll('.note-card').forEach(function(card){ card.classList.remove('on'); });
   var bar=document.getElementById('noteFilterBar');
   if(bar) bar.classList.remove('on');
-  // restore active filter chip
-  var on=document.querySelector('#collFbar .fc.on');
-  if(!on){ document.querySelector('#collFbar .fc[data-filter="all"]').classList.add('on'); }
 }
 
 // Global tooltip mousemove handler
