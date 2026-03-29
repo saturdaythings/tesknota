@@ -3392,13 +3392,14 @@ function renderCompliments(filter='all'){
     if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'Significant Others':r==='Family'?'Family':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
   });
   const allEmpty = MC.length === 0;
-  function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':''; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'+_house+'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(renderComplimentLocation(c)!=='—'?' · '+renderComplimentLocation(c):'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+c.month+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
+  var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':''; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'+_house+'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(renderComplimentLocation(c)!=='—'?' · '+renderComplimentLocation(c):'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+(_MN[parseInt(c.month)-1]||c.month)+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
   var listHtml;
   if(compView==='timeline'&&filtered.length){
     // Group by month+year, newest first
     var groups={}; var groupOrder=[];
     filtered.forEach(function(c){
-      var key=(c.month||'?')+' '+(c.year||'?');
+      var key=(_MN[parseInt(c.month)-1]||c.month||'?')+' '+(c.year||'?');
       if(!groups[key]){ groups[key]=[]; groupOrder.push(key); }
       groups[key].push(c);
     });
@@ -6775,7 +6776,7 @@ function palFlows() {
         label: 'Which compliment to edit?',
         source: function() { return myCompliments().slice(0, 20); },
         display: function(c) { return c.primaryFrag; },
-        sub: function(c) { var _loc=renderComplimentLocation(c); return c.relation + ' — ' + c.month + ' ' + c.year + (_loc!=='—' ? ' — ' + _loc : ''); },
+        sub: function(c) { var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; var _loc=renderComplimentLocation(c); return c.relation + ' — ' + (_MN[parseInt(c.month)-1]||c.month) + ' ' + c.year + (_loc!=='—' ? ' — ' + _loc : ''); },
         onPick: function(c) { PAL.editTarget = c; },
       },
       {
@@ -6838,7 +6839,7 @@ function palFlows() {
         label: 'Which compliment to delete?',
         source: function() { return COMPLIMENTS.slice(0, 20); },
         display: function(c) { return c.primaryFrag; },
-        sub: function(c) { return c.relation + ' — ' + c.month + ' ' + c.year; },
+        sub: function(c) { var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return c.relation + ' — ' + (_MN[parseInt(c.month)-1]||c.month) + ' ' + c.year; },
         onPick: function(c) { PAL.editTarget = c; },
       },
       {
