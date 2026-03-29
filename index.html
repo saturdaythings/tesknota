@@ -1144,7 +1144,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <div class="dsec" id="dsec-experience"><div class="dsl">My experience</div>
       <div class="dgrid">
         <div id="drow-mylong"><div class="di-l">My longevity</div><div class="di-v" id="d-mylong"></div></div>
-        <div id="drow-mysill"><div class="di-l">My sillage</div><div class="di-v" id="d-mysill"></div></div>
         <div id="drow-where"><div class="di-l">Where bought</div><div class="di-v" id="d-where"></div></div>
         <div id="drow-added"><div class="di-l">Added</div><div class="di-v" id="d-added"></div></div>
       </div>
@@ -1252,9 +1251,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="frow" style="margin-bottom:14px;">
           <div class="fg" style="margin:0;"><label>Personal longevity</label>
             <select id="afLong"><option value="">Not sure</option><option value="0–6h">0–6h</option><option value="6–12h" selected>6–12h</option><option value="12–24h">12–24h</option><option value=">24h">&gt;24h</option></select>
-          </div>
-          <div class="fg" style="margin:0;"><label>Personal sillage</label>
-            <select id="afSill"><option value="Soft">Soft</option><option value="Moderate" selected>Moderate</option><option value="Strong">Strong</option><option value="Enormous">Enormous</option></select>
           </div>
         </div>
         <div class="frow" style="margin-bottom:14px;">
@@ -1419,7 +1415,7 @@ const FRAG_HEADERS = [
   'id','userId','name','house','status','sizeOwned','type',
   'communityRating','communityLong','communitySill','avgPrice','notes',
   'topNotes','middleNotes','baseNotes',
-  'personalRating','statusRating','personalLong','personalSill',
+  'personalRating','statusRating','personalLong',
   'whereBought','purchaseDate','isDupe','dupeFor','personalNotes','createdAt'
 ];
 
@@ -1552,7 +1548,7 @@ function fragToRow(f){
     communitySill:f.communitySill||'', avgPrice:f.avgPrice||'', notes:f.notes||'',
     topNotes:f.topNotes||'', middleNotes:f.middleNotes||'', baseNotes:f.baseNotes||'',
     personalRating:f.personalRating||'', statusRating:f.statusRating||'',
-    personalLong:f.personalLong||'', personalSill:f.personalSill||'',
+    personalLong:f.personalLong||'',
     whereBought:f.whereBought||'', purchaseDate:f.purchaseDate||'',
     isDupe:f.isDupe?'true':'false', dupeFor:f.dupeFor||'',
     personalNotes:f.personalNotes||'', createdAt:f.createdAt||new Date().toISOString(),
@@ -1569,7 +1565,7 @@ function rowToFrag(row){
     topNotes:row.topNotes||'', middleNotes:row.middleNotes||'', baseNotes:row.baseNotes||'',
     personalRating:row.personalRating ? parseInt(row.personalRating) : null,
     statusRating:row.statusRating||null, personalLong:row.personalLong||null,
-    personalSill:row.personalSill||null, whereBought:row.whereBought||null,
+    whereBought:row.whereBought||null,
     purchaseDate:row.purchaseDate||null, isDupe:row.isDupe==='true',
     dupeFor:row.dupeFor||'', personalNotes:row.personalNotes||'', createdAt:row.createdAt||'',
   };
@@ -3317,13 +3313,12 @@ function openDetail(fragId){
   setDRow('drow-sill','d-sill', f.communitySill||null);
   renderDetailNotes(f);
   setDRow('drow-mylong','d-mylong', f.personalLong||null);
-  setDRow('drow-mysill','d-mysill', f.personalSill||null);
   setDRow('drow-where','d-where', f.whereBought||null);
   setDRow('drow-added','d-added', f.purchaseDate||null);
   // Show "Add details" if My experience section is entirely empty
   var expAddBtn=document.getElementById('d-add-experience');
   if(expAddBtn){
-    var expEmpty=!f.personalLong&&!f.personalSill&&!f.whereBought&&!f.purchaseDate;
+    var expEmpty=!f.personalLong&&!f.whereBought&&!f.purchaseDate;
     expAddBtn.style.display=expEmpty?'block':'none';
   }
   document.getElementById('d-notebox').textContent = f.personalNotes||'No personal notes yet.';
@@ -3691,7 +3686,7 @@ function openEditFrag(fragId, forceStatus){
   const sel = document.getElementById('afStatus');
   for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===statusVal){ sel.selectedIndex=i; break; }
   // Pre-fill Step 2
-  prefetchedData = {sizes:f.sizes,type:f.type,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,personalSill:f.personalSill,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:f.topNotes||'',middleNotes:f.middleNotes||'',baseNotes:f.baseNotes||''};
+  prefetchedData = {sizes:f.sizes,type:f.type,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:f.topNotes||'',middleNotes:f.middleNotes||'',baseNotes:f.baseNotes||''};
   // Auto-advance to step 2 for edits
   afGoStep(2, true);
   openModal('addFragM');
@@ -3715,7 +3710,6 @@ function resetAFModal(){
   document.getElementById('afRating').value=3; starRender(3);
   document.getElementById('afType').value='Eau de Parfum';
   document.getElementById('afLong').value='6–12h';
-  document.getElementById('afSill').value='Moderate';
   document.getElementById('afWhere').value='';
   document.getElementById('afMonth').value='';
   buildYearSelect('afYear',1990);document.getElementById('afYear').value='';
@@ -3751,7 +3745,6 @@ function afGoStep(n, skipValidation){
       if(d.personalRating){ document.querySelectorAll('#rOpts .opt').forEach(o=>o.classList.toggle('on',parseInt(o.dataset.v)===d.personalRating)); }
       if(d.statusRating){ var numRat=typeof d.statusRating==='number'?d.statusRating:({Obsessed:5,Love:4,Like:3,'Just OK':2,"Don't Like":1}[d.statusRating]||3); document.getElementById('afRating').value=numRat; starRender(numRat); }
       if(d.personalLong) document.getElementById('afLong').value=d.personalLong;
-      if(d.personalSill) document.getElementById('afSill').value=d.personalSill;
       if(d.whereBought) document.getElementById('afWhere').value=d.whereBought;
       if(d.purchaseDate){ const parts=d.purchaseDate.split(' '); if(parts[0]) document.getElementById('afMonth').value=parts[0]; if(parts[1]) document.getElementById('afYear').value=parts[1]; }
       if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeFor').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
@@ -3813,7 +3806,6 @@ function saveFragrance(){
     sizes, personalRating: ratingEl?parseInt(ratingEl.dataset.v):null,
     statusRating: parseInt(document.getElementById('afRating').value)||null,
     personalLong: document.getElementById('afLong').value||null,
-    personalSill: document.getElementById('afSill').value||null,
     whereBought: document.getElementById('afWhere').value||null,
     purchaseDate: (month&&year)?month+' '+year:null,
     isDupe, dupeFor: isDupe?document.getElementById('dupeFor').value:'',
@@ -4160,7 +4152,7 @@ function importToWishlist(data){
   const newFrag = {
     id:'f'+nextId++, userId:CURRENT_USER?CURRENT_USER.id:'u1', name:data.name, house:data.house||'',
     status:'WANT_TO_BUY', sizes:[], personalRating:null, statusRating:null,
-    personalLong:null, personalSill:null, communityRating:data.communityRating||null,
+    personalLong:null, communityRating:data.communityRating||null,
     communityLong:null, communitySill:null, avgPrice:data.avgPrice||null,
     notes:data.notes||'', whereBought:null, purchaseDate:null, isDupe:false, dupeFor:'', personalNotes:'',
   };
@@ -5289,7 +5281,6 @@ function openCompare(fragName, myFragIdOrName){
         <div class="cs"><div class="cs-label">Total compliments</div><div class="cs-val">${myComps.length}</div></div>
         <div class="cs"><div class="cs-label">From strangers</div><div class="cs-val">${myComps.filter(c=>c.relation==='Stranger').length}</div></div>
         <div class="cs"><div class="cs-label">My longevity</div><div class="cs-val">${mine?mine.personalLong||'—':'—'}</div></div>
-        <div class="cs"><div class="cs-label">My sillage</div><div class="cs-val">${mine?mine.personalSill||'—':'—'}</div></div>
         ${mine&&mine.personalNotes?`<div style="margin-top:10px;font-family:var(--script);font-size:13px;font-style:italic;color:var(--ink2);line-height:1.5;padding-top:10px;border-top:1px solid var(--b2);">${mine.personalNotes}</div>`:''}
       </div>
       <div class="compare-col">
@@ -5300,7 +5291,6 @@ function openCompare(fragName, myFragIdOrName){
         <div class="cs"><div class="cs-label">Total compliments</div><div class="cs-val">${herComps.length}</div></div>
         <div class="cs"><div class="cs-label">From strangers</div><div class="cs-val">${herComps.filter(c=>c.relation==='Stranger').length}</div></div>
         <div class="cs"><div class="cs-label">Their longevity</div><div class="cs-val">${herFrag&&herFrag.personalLong?herFrag.personalLong:'—'}</div></div>
-        <div class="cs"><div class="cs-label">Their sillage</div><div class="cs-val">${herFrag&&herFrag.personalSill?herFrag.personalSill:'—'}</div></div>
       </div>
     </div>
     ${allRels.length?`<div style="margin-bottom:20px;">
@@ -5470,20 +5460,6 @@ function palFlows() {
         ],
       },
       {
-        id: 'personalSill',
-        type: 'select',
-        label: 'Sillage (how far it projects)',
-        skipIf: function(a) { return a.status === 'WANT_TO_BUY' || a.status === 'WANT_TO_SMELL'; },
-        optional: true,
-        options: [
-          {v:'',        l:'Not sure'},
-          {v:'Soft',    l:'Soft — close to skin'},
-          {v:'Moderate',l:'Moderate'},
-          {v:'Strong',  l:'Strong'},
-          {v:'Enormous',l:'Enormous'},
-        ],
-      },
-      {
         id: 'whereBought',
         type: 'select',
         label: 'Where did you get it?',
@@ -5555,7 +5531,6 @@ function palFlows() {
             personalRating: answers.personalRating ? parseInt(answers.personalRating) : null,
             statusRating: answers.statusRating || null,
             personalLong: answers.personalLong || null,
-            personalSill: answers.personalSill || null,
             whereBought: answers.whereBought || null,
             purchaseDate: answers.purchaseDate || null,
             isDupe: answers.isDupe === 'yes',
@@ -5638,20 +5613,6 @@ function palFlows() {
         ],
       },
       {
-        id: 'personalSill',
-        type: 'select',
-        label: 'Sillage',
-        prefill: function() { return PAL.editTarget ? (PAL.editTarget.personalSill || '') : ''; },
-        optional: true,
-        options: [
-          {v:'',        l:'— Clear —'},
-          {v:'Soft',    l:'Soft'},
-          {v:'Moderate',l:'Moderate'},
-          {v:'Strong',  l:'Strong'},
-          {v:'Enormous',l:'Enormous'},
-        ],
-      },
-      {
         id: 'personalNotes',
         type: 'textarea',
         label: 'Personal notes',
@@ -5672,7 +5633,6 @@ function palFlows() {
           f.personalRating = answers.personalRating ? parseInt(answers.personalRating) : null;
           f.statusRating = answers.statusRating || null;
           f.personalLong = answers.personalLong || null;
-          f.personalSill = answers.personalSill || null;
           f.personalNotes = answers.personalNotes || f.personalNotes;
           writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
