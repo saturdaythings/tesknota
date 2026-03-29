@@ -752,9 +752,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="stats" id="dashStats"></div>
       <div id="dashOnboard" style="display:none"></div>
       <div id="dashSuggest"></div>
-      <div class="mb-20">
-        <button class="btn btn-warm" onclick="openAddComp(null)" title="Record a compliment you received">+ Log a Compliment</button>
-      </div>
       <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <table class="tbl tbl-spaced" id="dashTable">
         <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes to nose</th><th>Compliments</th><th></th></tr></thead>
@@ -1030,11 +1027,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="sh"><h2>Settings</h2></div>
       <table class="stbl">
         <tbody>
-          <tr><td><div class="st-label">Export data</div><div class="st-sub">Download all fragrances and compliments as CSV</div></td><td><button class="btn btn-ghost btn-sm" onclick="exportData()">Export</button></td></tr>
+          <tr><td><div class="st-label">Export data</div><div class="st-sub">Download all fragrances and compliments as CSV</div></td><td><button class="btn btn-ghost btn-sm" onclick="exportData()">Export CSV</button></td></tr>
           <tr style="border-bottom:none"><td><div class="st-label">Account</div><div class="st-sub">Sign out and return to user picker</div></td><td><button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button></td></tr>
         </tbody>
       </table>
-      <div class="sh sh-spaced-lg"><h2>Manage Notes</h2><div class="sh-r"><span class="sh-sub">Rename or merge across all fragrances</span></div></div>
+      <div class="sh sh-spaced-lg"><h2>Manage Notes</h2><div class="sh-r"><span class="sh-sub">Rename or merge notes across your collection. Merging replaces all uses of one note name with another — useful for fixing duplicates like "Oud" and "Aoud".</span></div></div>
       <div id="noteManager"></div>
       <div id="noteMergePanel" class="panel-inset" style="display:none;">
         <div class="merge-instruction">Merge selected notes into:</div>
@@ -1160,15 +1157,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
               <div class="opt" onclick="togOpt(this)">Small</div>
             </div>
           </div>
-          <div class="fg" style="margin:0;"><label>Personal rating</label>
-            <div class="opts" id="rOpts">
-              <div class="opt" onclick="selOpt(this,'rOpts')" data-v="1">★</div>
-              <div class="opt" onclick="selOpt(this,'rOpts')" data-v="2">★★</div>
-              <div class="opt" onclick="selOpt(this,'rOpts')" data-v="3">★★★</div>
-              <div class="opt on" onclick="selOpt(this,'rOpts')" data-v="4">★★★★</div>
-              <div class="opt" onclick="selOpt(this,'rOpts')" data-v="5">★★★★★</div>
-            </div>
-          </div>
         </div>
         <div class="fg"><label>Status rating</label>
           <div class="opts" id="sOpts">
@@ -1193,7 +1181,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         </div>
         <div class="frow" style="margin-bottom:14px;">
           <div class="fg" style="margin:0;"><label>Where bought</label>
-            <select id="afWhere"><option value="">— Select —</option><option>FragranceNet</option><option>Jomashop</option><option>Amazon</option><option>Scentsplit</option><option>Sephora</option><option>Brand Direct</option><option>Other</option></select>
+            <select id="afWhere"><option value="">— Select —</option><option>FragranceNet</option><option>Jomashop</option><option>Amazon</option><option>Scentsplit</option><option>Sephora</option><option>Nordstrom</option><option>Ulta</option><option>TJ Maxx / Marshalls</option><option>eBay</option><option>Poshmark</option><option>Decant</option><option>Brand Direct</option><option>Other</option></select>
           </div>
           <div class="fg" style="margin:0;"><label>Purchase date</label>
             <div class="date-row">
@@ -1255,7 +1243,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="frow" style="margin-top:4px;">
         <div class="fg" style="margin:0;">
           <label>Complimenter gender</label>
-          <select id="compGender"><option value="">— Select —</option><option>Male</option><option>Female</option><option>Non-binary</option><option>Unknown</option></select>
+          <select id="compGender"><option value="">— Select —</option><option value="Female" selected>Female</option><option value="Male">Male</option></select>
         </div>
         <div class="fg" style="margin:0;">
           <label>Relation</label>
@@ -1265,7 +1253,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <button type="button" class="comp-rel-btn" data-val="Colleague / Client" onclick="setCompRelation(this.dataset.val)">Colleague</button>
             <button type="button" class="comp-rel-btn" data-val="Family" onclick="setCompRelation(this.dataset.val)">Family</button>
             <button type="button" class="comp-rel-btn" data-val="Significant Other" onclick="setCompRelation(this.dataset.val)">Partner</button>
-            <button type="button" class="comp-rel-btn" data-val="Acquaintance" onclick="setCompRelation(this.dataset.val)">Acquaintance</button>
           </div>
           <input type="hidden" id="compRelation">
           <div class="err" id="compRelErr">Please select a relation</div>
@@ -1307,7 +1294,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <button class="mob-btn" data-mob="collection">Collection</button>
     <button class="mob-btn" onclick="openAddFrag('CURRENT')">Add</button>
     <button class="mob-btn" data-mob="compliments">Compliments</button>
-    <button class="mob-btn" data-mob="friend" id="mobFriendBtn">Friend</button>
+    <button class="mob-btn" data-mob="friend" id="mobFriendBtn">Friends</button>
   </div>
 </div>
 
@@ -2120,7 +2107,7 @@ function getDailySuggestion(){
   var lsKey = 'dashWearPick_' + today;
   try {
     var saved = localStorage.getItem(lsKey);
-    if(saved){ var found = MF.find(function(f){ return f.id===saved; }); if(found) return found; }
+    if(saved){ var found = MF.find(function(f){ return f.id===saved; }); if(found) return {f:found,score:0,comps:0}; }
   } catch(e){}
   // Score each frag: compliments × 3 + personal_rating
   var MC = myCompliments();
@@ -2157,7 +2144,7 @@ function renderDashboard(){
     var pick=getDailySuggestion();
     if(pick){
       var reason=pick.comps>0?pick.comps+' compliment'+(pick.comps>1?'s':''):((function(){ var mo=new Date().getMonth(); return mo<2||mo===11?'Winter pick':mo<5?'Spring pick':mo<8?'Summer pick':'Fall pick'; })());
-      suggestEl.innerHTML='<div class="dash-suggest"><div class="suggest-body"><div class="suggest-label">Today\'s Pick</div><div class="suggest-name">'+pick.f.name+'</div><div class="suggest-house">'+pick.f.house+'</div><div class="suggest-meta">'+reason+'</div></div><button class="btn btn-warm" onclick="openAddComp(\''+pick.f.id+'\')">+ Log Compliment</button></div>';
+      suggestEl.innerHTML='<div class="dash-suggest"><div class="suggest-body"><div class="suggest-label">Today\'s Pick</div><div class="suggest-name">'+pick.f.name+'</div><div class="suggest-house">'+pick.f.house+'</div><div class="suggest-meta">'+reason+'</div></div></div>';
       // Update mobile topbar wearing chip
       var mobChip=document.getElementById('mobWearChip');
       if(mobChip) mobChip.textContent=pick.f.name.split(' ').slice(0,2).join(' ');
@@ -2604,7 +2591,7 @@ function renderFriend(){
   if(sl&&sl.childNodes[0]) sl.childNodes[0].textContent=friend.name+' ';
   // Update all dynamic friend name references
   var mobFriendBtn=document.getElementById('mobFriendBtn');
-  if(mobFriendBtn) mobFriendBtn.textContent=friend.name;
+  if(mobFriendBtn) mobFriendBtn.textContent='Friends';
   var compareSub=document.getElementById('compareSub');
   if(compareSub) compareSub.textContent='You vs '+friend.name+' — all compliments and notes';
   // Activity dot — show if friend has any compliments or fragrances
@@ -3156,13 +3143,12 @@ function resetAFModal(){
   updPips(1);
   // Reset Step 2 to defaults
   document.querySelectorAll('#sizeOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===2);});
-  document.querySelectorAll('#rOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===3);});
   document.querySelectorAll('#sOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===1);});
   document.getElementById('afLong').value='6–12h';
   document.getElementById('afSill').value='Moderate';
   document.getElementById('afWhere').value='';
   document.getElementById('afMonth').value='';
-  document.getElementById('afYear').value='';
+  buildYearSelect('afYear',1990);document.getElementById('afYear').value='';
   document.getElementById('dY').classList.remove('on');
   document.getElementById('dN').classList.add('on');
   document.getElementById('dupeFor').style.display='none';
@@ -3297,12 +3283,26 @@ function saveFragrance(){
 function afSearch(v){
   const el=document.getElementById('afDrop');
   if(v.length<2){el.style.display='none';document.getElementById('afPrev').style.display='none';return;}
+  while(el.firstChild)el.removeChild(el.firstChild);
   const hits=fragSearch(v,8);
-  if(!hits.length){el.innerHTML='<div class="aci"><div class="aci-n" style="color:var(--ink3)">No match — you can still enter manually</div></div>';el.style.display='block';return;}
-  el.innerHTML=hits.map(function(f){
-    var badge=f.src==='community'?'<span style="font-size:9px;color:var(--ink3);margin-left:4px">community</span>':'';
-    return '<div class="aci" onmousedown="pickAF('+JSON.stringify(f.n)+')"><div class="aci-n">'+f.n+badge+'</div><div class="aci-h">'+f.h+'</div></div>';
-  }).join('');
+  if(!hits.length){
+    var row1=document.createElement('div');row1.className='aci';
+    var t1=document.createElement('div');t1.className='aci-n';t1.style.color='var(--ink3)';t1.textContent='No match — you can still enter manually';
+    row1.appendChild(t1);el.appendChild(row1);
+    var row2=document.createElement('div');row2.className='aci';row2.style.cursor='pointer';
+    var t2=document.createElement('div');t2.className='aci-n';t2.style.color='var(--blue)';t2.textContent='Can\'t find it? Import instead \u2192';
+    row2.onmousedown=function(e){e.preventDefault();closeModal('addFragM');goPage('import');setTimeout(function(){var li=document.getElementById('linkIn');if(li)li.focus();},300);};
+    row2.appendChild(t2);el.appendChild(row2);
+    el.style.display='block';return;
+  }
+  hits.forEach(function(f){
+    var item=document.createElement('div');item.className='aci';item.dataset.name=f.n;
+    item.onmousedown=function(e){e.preventDefault();pickAF(this.dataset.name);};
+    var nd=document.createElement('div');nd.className='aci-n';nd.textContent=f.n;
+    if(f.src==='community'){var b=document.createElement('span');b.style.cssText='font-size:9px;color:var(--ink3);margin-left:4px';b.textContent='community';nd.appendChild(b);}
+    var hd=document.createElement('div');hd.className='aci-h';hd.textContent=f.h;
+    item.appendChild(nd);item.appendChild(hd);el.appendChild(item);
+  });
   el.style.display='block';
 }
 
@@ -3334,7 +3334,23 @@ function pickAF(name){
 // ADD COMPLIMENT MODAL
 // ═══════════════════════════════════════════════════════
 
+function buildYearSelect(selectId, startYear){
+  var sel=document.getElementById(selectId);
+  if(!sel)return;
+  var current=new Date().getFullYear();
+  var prev=sel.value;
+  sel.innerHTML='<option value="">Year</option>';
+  for(var y=current;y>=startYear;y--){
+    var opt=document.createElement('option');
+    opt.value=y;opt.textContent=y;
+    if(y===current)opt.selected=true;
+    sel.appendChild(opt);
+  }
+  if(prev)sel.value=prev;
+}
+
 function openAddComp(fragId, prefill){
+  buildYearSelect('compYear',2015);
   editingCompId = prefill ? prefill.id : null;
   var title=document.getElementById('addCompTitle');
   var sub=document.getElementById('addCompSub');
@@ -3357,7 +3373,7 @@ function openAddComp(fragId, prefill){
   document.getElementById('compDateErr').style.display='none';
   // Relation — tap buttons
   setCompRelation(prefill?prefill.relation:'');
-  document.getElementById('compGender').value=prefill?(prefill.gender||''):'';
+  document.getElementById('compGender').value=prefill?(prefill.gender||''):'Female';
   document.getElementById('compLoc').value=prefill?(prefill.location||''):'';
   document.getElementById('compNotes').value=prefill?(prefill.notes||''):'';
   // Auto-fill current month/year (if not editing)
@@ -3620,8 +3636,17 @@ function qSearch(v){
   const el=document.getElementById('qDrop');
   if(v.length<2){el.style.display='none';return;}
   const hits=FRAG_DB.filter(f=>f.n.toLowerCase().includes(v.toLowerCase())).slice(0,6);
-  el.innerHTML=hits.map(f=>`<div class="aci" onmousedown="addToImportQueue(${JSON.stringify({name:f.n,house:f.h,communityRating:f.r,notes:f.notes})})"><div class="aci-n">${f.n}</div><div class="aci-h">${f.h}</div></div>`).join('');
-  el.style.display=hits.length?'block':'none';
+  while(el.firstChild)el.removeChild(el.firstChild);
+  if(!hits.length){el.style.display='none';return;}
+  hits.forEach(function(f){
+    var fdata={name:f.n,house:f.h,communityRating:f.r,notes:f.notes};
+    var item=document.createElement('div');item.className='aci';
+    item.onmousedown=(function(d){return function(e){e.preventDefault();addToImportQueue(d);};})(fdata);
+    var nd=document.createElement('div');nd.className='aci-n';nd.textContent=f.n;
+    var hd=document.createElement('div');hd.className='aci-h';hd.textContent=f.h;
+    item.appendChild(nd);item.appendChild(hd);el.appendChild(item);
+  });
+  el.style.display='block';
 }
 
 function addToImportQueue(data){
@@ -5108,7 +5133,6 @@ function palFlows() {
           {v:'Colleague / Client',l:'Colleague or Client'},
           {v:'Family',           l:'Family'},
           {v:'Significant Other',l:'Significant Other'},
-          {v:'Acquaintance',     l:'Acquaintance'},
           {v:'Other',            l:'Other'},
         ],
       },
@@ -5198,7 +5222,6 @@ function palFlows() {
           {v:'Colleague / Client',l:'Colleague or Client'},
           {v:'Family',            l:'Family'},
           {v:'Significant Other', l:'Significant Other'},
-          {v:'Acquaintance',      l:'Acquaintance'},
           {v:'Other',             l:'Other'},
         ],
       },
