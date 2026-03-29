@@ -116,9 +116,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .coll-filters{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
 .coll-filters input{flex:1;min-width:180px;max-width:280px;height:32px;padding:0 10px;border:1px solid var(--b3);background:var(--off);font-family:var(--body);font-size:12px;color:var(--ink);outline:none;border-radius:0;}
 .coll-filters input:focus{border-color:var(--blue);}
-.coll-filters select,.coll-filters .filter-btn{appearance:none;-webkit-appearance:none;height:32px;padding:0 28px 0 10px;border:1px solid var(--b3);background:var(--off) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E") no-repeat right 10px center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;outline:none;border-radius:0;}
+.coll-filters select,.coll-filters .filter-btn{appearance:none;-webkit-appearance:none;height:32px;padding:0 28px 0 10px;border:1px solid var(--b3);background:var(--off) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E") no-repeat right 10px center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--ink);cursor:pointer;outline:none;border-radius:0;}
 .coll-filters select:hover,.coll-filters select:focus,.coll-filters .filter-btn:hover{border-color:var(--blue);}
-.filter-btn{appearance:none;-webkit-appearance:none;height:32px;padding:0 28px 0 10px;border:1px solid var(--b3);background:var(--off) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E") no-repeat right 10px center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);cursor:pointer;outline:none;border-radius:0;white-space:nowrap;}
+.filter-btn{appearance:none;-webkit-appearance:none;height:32px;padding:0 28px 0 10px;border:1px solid var(--b3);background:var(--off) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E") no-repeat right 10px center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--ink);cursor:pointer;outline:none;border-radius:0;white-space:nowrap;}
 .filter-btn:hover{border-color:var(--blue);}
 .filter-btn.active{border-color:var(--blue);color:var(--blue);}
 #collHouse,#wishHouse{width:160px;}
@@ -819,15 +819,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- COLLECTION -->
     <div class="page" id="page-collection">
       <div class="sh"><h2>My Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="openAddFrag('CURRENT')">+ Add</button></div></div>
-      <div class="coll-filters">
-        <input type="text" id="collSearch" placeholder="Search fragrances..." />
-        <select id="collHouse"><option value="">All houses</option></select>
-        <div id="familyFilterWrap">
-          <button class="filter-btn" onclick="toggleFamilyDrop()">Accords <span id="familyFilterLabel"></span> ▾</button>
-          <div class="filter-drop-panel" id="familyDropPanel" style="display:none;"></div>
-        </div>
-        <select id="collRating"><option value="">All ratings</option></select>
-        <select id="collStatus"><option value="">All statuses</option></select>
+      <div class="coll-filters" id="collFiltersRow1">
+        <input type="text" id="collSearch" placeholder="Search fragrances..." style="flex:1;" />
         <select class="coll-sort-select" id="collSort" onchange="setCollSort(this.value)">
           <option value="nameAZ">Name A–Z</option>
           <option value="nameZA">Name Z–A</option>
@@ -837,6 +830,16 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <option value="houseAZ">House A–Z</option>
           <option value="comps">Most Compliments</option>
         </select>
+        <button class="btn btn-ghost btn-sm" id="collFiltersToggle" onclick="toggleCollFilters()">+ Filters</button>
+      </div>
+      <div class="coll-filters" id="collFiltersRow2" style="display:none;margin-top:0;">
+        <div id="familyFilterWrap" style="flex-shrink:0;position:relative;">
+          <button class="filter-btn" onclick="toggleFamilyDrop()">Accords <span id="familyFilterLabel"></span></button>
+          <div class="filter-drop-panel" id="familyDropPanel" style="display:none;"></div>
+        </div>
+        <select id="collRating"><option value="">Rating</option></select>
+        <select id="collStatus"><option value="">Status</option></select>
+        <select id="collHouse"><option value="">All houses</option></select>
       </div>
       <div id="collCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
       <div class="note-filter-bar" id="noteFilterBar">
@@ -848,7 +851,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <th data-sort="ratingHL">Rating <span class="sort-arrow"></span></th>
     <th data-sort="long">Longevity <span class="sort-arrow"></span></th>
     <th data-sort="added">Added <span class="sort-arrow"></span></th>
-    <th>Top Notes</th>
+    <th>Accords</th>
     <th data-sort="comps">Compliments <span class="sort-arrow"></span></th>
     <th></th>
   </tr></thead>
@@ -2608,6 +2611,31 @@ function updateSortArrows() {
   });
 }
 
+function toggleCollFilters() {
+  var row2 = document.getElementById('collFiltersRow2');
+  var btn = document.getElementById('collFiltersToggle');
+  if (!row2) return;
+  var open = row2.style.display !== 'none';
+  row2.style.display = open ? 'none' : 'flex';
+  if (btn) btn.textContent = open ? '+ Filters' : 'Filters ×';
+}
+
+function updateFiltersToggleLabel() {
+  var btn = document.getElementById('collFiltersToggle');
+  if (!btn) return;
+  var anyActive = !!(collSearchVal || collHouseVal || collAccordVals.length || collRatingVal || collStatusVal);
+  var row2 = document.getElementById('collFiltersRow2');
+  var open = row2 && row2.style.display !== 'none';
+  if (anyActive) {
+    btn.textContent = 'Filters ×';
+    btn.classList.add('active');
+    if (row2) row2.style.display = 'flex';
+  } else if (!open) {
+    btn.textContent = '+ Filters';
+    btn.classList.remove('active');
+  }
+}
+
 function setCollSort(val){ collSort=val; renderCollection(); updateSortArrows(); }
 
 function buildHouseFilter(){
@@ -2733,7 +2761,7 @@ document.addEventListener('click',function(e){
   var rSel=document.getElementById('collRating');
   if(rSel){
     rSel.innerHTML='';
-    [['','All ratings'],['5','★★★★★  Obsessed'],['4','★★★★☆  Love'],['3','★★★☆☆  Like'],['2','★★☆☆☆  Just OK'],['1',"★☆☆☆☆  Don't Like"]].forEach(function(p){
+    [['','All ratings'],['5','★★★★★'],['4','★★★★☆'],['3','★★★☆☆'],['2','★★☆☆☆'],['1','★☆☆☆☆']].forEach(function(p){
       var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; rSel.appendChild(o);
     });
   }
@@ -2761,6 +2789,7 @@ document.addEventListener('click',function(e){
 function renderCollection(){
   buildHouseFilter();
   buildFamilyFilter();
+  updateFiltersToggleLabel();
   var frags=myFragrances();
   // Status filter — default to CURRENT unless note filter is active (show all)
   if(collStatusVal){
@@ -2880,7 +2909,7 @@ function renderCollection(){
         +'<td><div class="tstars">'+renderStars(f.statusRating)+'</div></td>'
         +'<td>'+longTdHtml+'</td>'
         +'<td>'+addedTdHtml+'</td>'
-        +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,2).map(function(n){return noteDisplayName(n);}).join(', ')+'</td>'
+        +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+getAccords(f).join(', ')+'</td>'
         +'<td class="tmono">'+compCount+'</td>'
         +'<td class="tact">'
         +'<button class="btn-bare" onclick="event.stopPropagation();openAddComp(\''+f.id+'\')">+ Compliment</button>'
