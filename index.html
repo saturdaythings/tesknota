@@ -1370,7 +1370,12 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           </div>
           <div class="err" id="compDateErr">Please select a date</div>
         </div>
-        <div class="fg" style="margin:0;"><label>Location</label><input type="text" id="compLoc" placeholder="City, venue, context..."></div>
+        <div class="fg" style="margin:0;"><label>Location Name</label><input type="text" id="compLoc" placeholder="e.g. King Soopers Pharmacy, Gothic Theater" /></div>
+      </div>
+      <div class="frow" style="margin-top:8px;">
+        <div class="fg" style="margin:0;"><label>City</label><input type="text" id="compCity" placeholder="City" /></div>
+        <div class="fg" style="margin:0;"><label>State</label><input type="text" id="compState" placeholder="State" /></div>
+        <div class="fg" style="margin:0;"><label>Country</label><select id="compCountry"><option value="US">United States</option><option value="UK">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="Other">Other</option></select></div>
       </div>
       <!-- Layering (secondary) — expandable -->
       <div class="fg" style="margin-top:4px;margin-bottom:0;">
@@ -1449,7 +1454,7 @@ const FRAG_HEADERS = [
 const COMP_HEADERS = [
   'id','userId','primaryFragranceId','primaryFragranceName',
   'secondaryFragranceId','secondaryFragranceName','complimenterGender',
-  'relation','month','year','location','notes','createdAt'
+  'relation','month','year','location','city','state','country','notes','createdAt'
 ];
 
 const USER_HEADERS = ['id','name','createdAt'];
@@ -1605,6 +1610,7 @@ function compToRow(c){
     secondaryFragranceId:c.secondaryFragId||'', secondaryFragranceName:c.secondaryFrag||'',
     complimenterGender:c.gender||'', relation:c.relation||'',
     month:c.month||'', year:c.year||'', location:c.location||'',
+    city:c.city||'', state:c.state||'', country:c.country||'US',
     notes:c.notes||'', createdAt:c.createdAt||new Date().toISOString(),
   };
 }
@@ -1616,6 +1622,7 @@ function rowToComp(row){
     secondaryFragId:row.secondaryFragranceId||null, secondaryFrag:row.secondaryFragranceName||null,
     gender:row.complimenterGender||null, relation:row.relation,
     month:row.month, year:row.year, location:row.location||null,
+    city:row.city||null, state:row.state||null, country:row.country||'US',
     notes:row.notes||null, createdAt:row.createdAt||'',
   };
 }
@@ -3285,6 +3292,15 @@ function setCompView(v){
   renderCompliments(fc?fc.dataset.filter:'all');
 }
 
+function renderComplimentLocation(c){
+  var parts=[];
+  if(c.location) parts.push(c.location);
+  if(c.city) parts.push(c.city);
+  if(c.state) parts.push(c.state);
+  if(c.country&&c.country!=='US') parts.push(c.country);
+  return parts.join(', ')||'—';
+}
+
 function renderCompliments(filter='all'){
   var MC=myCompliments();
   // Frag filter bar
@@ -3302,7 +3318,7 @@ function renderCompliments(filter='all'){
     if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'Significant Others':r==='Family'?'Family':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
   });
   const allEmpty = MC.length === 0;
-  function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':''; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'+_house+'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+c.month+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
+  function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':''; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'+_house+'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(renderComplimentLocation(c)!=='—'?' · '+renderComplimentLocation(c):'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+c.month+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
   var listHtml;
   if(compView==='timeline'&&filtered.length){
     // Group by month+year, newest first
@@ -3788,7 +3804,7 @@ function renderFriend(){
       if(c.secondaryFrag){ var cfl=document.createElement('span'); cfl.className='cr-layer'; cfl.textContent=' + '+c.secondaryFrag; cf.appendChild(cfl); }
       left.appendChild(cf);
       var cm=document.createElement('div'); cm.className='cr-m';
-      cm.textContent=c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:''); left.appendChild(cm);
+      var _loc=renderComplimentLocation(c); cm.textContent=c.relation+(c.gender?' · '+c.gender:'')+(_loc!=='—'?' · '+_loc:''); left.appendChild(cm);
       if(c.notes){ var cn=document.createElement('div'); cn.className='cr-n'; cn.textContent=c.notes; left.appendChild(cn); }
       row.appendChild(left);
       var right=document.createElement('div'); right.style.cssText='display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;';
@@ -4584,6 +4600,9 @@ function openAddComp(fragId, prefill){
   setCompRelation(prefill?prefill.relation:'');
   document.getElementById('compGender').value=prefill?(prefill.gender||''):'Female';
   document.getElementById('compLoc').value=prefill?(prefill.location||''):'';
+  document.getElementById('compCity').value=prefill?(prefill.city||''):'';
+  document.getElementById('compState').value=prefill?(prefill.state||''):'';
+  document.getElementById('compCountry').value=prefill?(prefill.country||'US'):'US';
   document.getElementById('compNotes').value=prefill?(prefill.notes||''):'';
   // Auto-fill current month/year (if not editing)
   if(prefill&&prefill.month){
@@ -4691,7 +4710,10 @@ function saveCompliment(){
         secondaryFragId: f2?f2Id:null, secondaryFrag: f2?f2.name:null,
         gender: document.getElementById('compGender').value||null,
         relation, month, year,
-        location: document.getElementById('compLoc').value||null,
+        location: document.getElementById('compLoc').value.trim()||null,
+        city: document.getElementById('compCity').value.trim()||null,
+        state: document.getElementById('compState').value.trim()||null,
+        country: document.getElementById('compCountry').value||'US',
         notes: document.getElementById('compNotes').value||null,
       });
     }
@@ -4713,7 +4735,10 @@ function saveCompliment(){
     gender: document.getElementById('compGender').value||null,
     relation,
     month, year,
-    location: document.getElementById('compLoc').value||null,
+    location: document.getElementById('compLoc').value.trim()||null,
+    city: document.getElementById('compCity').value.trim()||null,
+    state: document.getElementById('compState').value.trim()||null,
+    country: document.getElementById('compCountry').value||'US',
     notes: document.getElementById('compNotes').value||null,
   };
   COMPLIMENTS.unshift(newComp);
@@ -6620,7 +6645,7 @@ function palFlows() {
         label: 'Which compliment to edit?',
         source: function() { return myCompliments().slice(0, 20); },
         display: function(c) { return c.primaryFrag; },
-        sub: function(c) { return c.relation + ' — ' + c.month + ' ' + c.year + (c.location ? ' — ' + c.location : ''); },
+        sub: function(c) { var _loc=renderComplimentLocation(c); return c.relation + ' — ' + c.month + ' ' + c.year + (_loc!=='—' ? ' — ' + _loc : ''); },
         onPick: function(c) { PAL.editTarget = c; },
       },
       {
