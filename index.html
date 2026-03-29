@@ -1215,6 +1215,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           </div>
           <div class="fg" style="margin:0;"><label>Type</label>
             <select id="afType">
+              <option value="">— Type —</option>
               <option value="Eau de Parfum">Eau de Parfum (EDP)</option>
               <option value="Eau de Toilette">Eau de Toilette (EDT)</option>
               <option value="Body Spray">Body Spray</option>
@@ -2230,14 +2231,14 @@ function fragNameHtml(name){
 }
 
 var typeBadgeText={
-  'Eau de Parfum':'',
+  'Eau de Parfum':'EDP',
   'Eau de Toilette':'EDT',
   'Body Spray':'Body Spray',
   'Perfume Oil':'Oil',
   'Other':'Other',
 };
 function fragDisplayName(f){
-  var t=f.type||'Eau de Parfum';
+  var t=f.type||'';
   var badge=typeBadgeText[t]||'';
   if(!badge) return f.name;
   return f.name+'<span class="type-badge">'+badge+'</span>';
@@ -2296,13 +2297,34 @@ function migrateFragranceTypes(){
       }
     }
     if(!matched){
-      if(!f.type){ f.type='Eau de Parfum'; changed=true; }
-      if(typeNormalise[f.type]){ f.type=typeNormalise[f.type]; changed=true; }
+      if(f.type && typeNormalise[f.type]){ f.type=typeNormalise[f.type]; changed=true; }
     }
   });
   if(changed){
     writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS)
       .catch(function(e){ console.error('migrateFragranceTypes write failed:',e); });
+  }
+}
+
+function cleanFragranceNames(){
+  var changed=false;
+  FRAGRANCES.forEach(function(f){
+    if(f.house && f.name.indexOf(f.house)===0 && f.name.length>f.house.length && f.name[f.house.length]===' '){
+      f.name=f.name.slice(f.house.length).trim();
+      changed=true;
+    }
+  });
+  // Also clean FRAG_DB entries
+  if(typeof FRAG_DB!=='undefined'){
+    FRAG_DB.forEach(function(e){
+      if(e.h && e.n.indexOf(e.h)===0 && e.n.length>e.h.length && e.n[e.h.length]===' '){
+        e.n=e.n.slice(e.h.length).trim();
+      }
+    });
+  }
+  if(changed){
+    writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS)
+      .catch(function(e){ console.error('cleanFragranceNames write failed:',e); });
   }
 }
 
@@ -3182,7 +3204,7 @@ function renderAnalytics(){
     var houseListEl=document.createElement('div'); houseListEl.id='anaHouseList'; collSection.appendChild(houseListEl);
     renderHouseList('anaHouseList',MFC);
     var typeHd=document.createElement('div'); typeHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:8px;'; typeHd.textContent='By Type'; collSection.appendChild(typeHd);
-    var typeCounts={}; MFC.forEach(function(f){var t=f.type||'Eau de Parfum';typeCounts[t]=(typeCounts[t]||0)+1;});
+    var typeCounts={}; MFC.forEach(function(f){var t=f.type||'Unknown';typeCounts[t]=(typeCounts[t]||0)+1;});
     var totalMFC=MFC.length||1;
     var typeColors={'Eau de Parfum':'var(--blue)','Eau de Toilette':'var(--blue2)','Body Spray':'var(--warm)','Perfume Oil':'var(--sage)','Other':'var(--muted)'};
     var typeRow=document.createElement('div'); typeRow.style.cssText='display:flex;flex-wrap:wrap;gap:16px;margin-bottom:8px;'; collSection.appendChild(typeRow);
@@ -3863,7 +3885,7 @@ function resetAFModal(){
   // Reset Step 2 to defaults
   document.querySelectorAll('#sizeOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===2);});
   document.getElementById('afRating').value=3; starRender(3);
-  document.getElementById('afType').value='Eau de Parfum';
+  document.getElementById('afType').value='';
 
   document.getElementById('afLong').value='6–12h';
   document.getElementById('afWhere').value='';
@@ -3896,8 +3918,8 @@ function afGoStep(n, skipValidation){
       const d = prefetchedData;
       if(d.sizes){ document.querySelectorAll('#sizeOpts .opt').forEach(o=>o.classList.toggle('on',d.sizes.includes(o.textContent.trim()))); }
       var _typeNorm={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Eau de Parfum (EDP)':'Eau de Parfum','Eau de Toilette (EDT)':'Eau de Toilette'};
-      var _savedType=d.type||'Eau de Parfum';
-      document.getElementById('afType').value=_typeNorm[_savedType]||_savedType||'Eau de Parfum';
+      var _savedType=d.type||'';
+      document.getElementById('afType').value=_typeNorm[_savedType]||_savedType||'';
     
       if(d.personalRating){ document.querySelectorAll('#rOpts .opt').forEach(o=>o.classList.toggle('on',parseInt(o.dataset.v)===d.personalRating)); }
       if(d.statusRating){ var numRat=typeof d.statusRating==='number'?d.statusRating:({Obsessed:5,Love:4,Like:3,'Just OK':2,"Don't Like":1}[d.statusRating]||3); document.getElementById('afRating').value=numRat; starRender(numRat); }
@@ -5688,6 +5710,7 @@ window.auditData=auditDataIntegrity;
   });
   fixPhlurVanillaSkin();
   migrateFragranceTypes();
+  cleanFragranceNames();
   document.getElementById('idLoading').style.display='none';
   // Always show the picker — never block the user due to a sync failure
   document.getElementById('idPicker').style.display='flex';
