@@ -1218,10 +1218,10 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="frow" style="margin-bottom:14px;">
           <div class="fg" style="margin:0;"><label>Size owned</label>
             <div class="opts" id="sizeOpts">
-              <div class="opt" onclick="togOpt(this)">Sample</div>
-              <div class="opt" onclick="togOpt(this)">Travel</div>
-              <div class="opt on" onclick="togOpt(this)">Full Bottle</div>
-              <div class="opt" onclick="togOpt(this)">Small</div>
+              <div class="opt" onclick="togOpt(this)" title="Sample vial or spray, typically 1–2 ml" data-tip="Sample vial or spray, typically 1–2 ml">Sample</div>
+              <div class="opt" onclick="togOpt(this)" title="Travel / purse size, typically 5–10 ml" data-tip="Travel / purse size, typically 5–10 ml">Travel</div>
+              <div class="opt on" onclick="togOpt(this)" title="Full retail bottle, typically 30–100 ml" data-tip="Full retail bottle, typically 30–100 ml">Full Bottle</div>
+              <div class="opt" onclick="togOpt(this)" title="Small bottle, typically 10–30 ml" data-tip="Small bottle, typically 10–30 ml">Small</div>
             </div>
           </div>
           <div class="fg" style="margin:0;"><label>Type</label>
@@ -1232,6 +1232,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
               <option value="Perfume Oil">Perfume Oil</option>
               <option value="Other">Other</option>
             </select>
+            <div id="typeDesc" style="font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:4px;min-height:15px;"></div>
           </div>
         </div>
         <div class="fg"><label>Rating</label>
@@ -3709,6 +3710,7 @@ function resetAFModal(){
   document.querySelectorAll('#sizeOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===2);});
   document.getElementById('afRating').value=3; starRender(3);
   document.getElementById('afType').value='Eau de Parfum';
+  updateTypeDesc();
   document.getElementById('afLong').value='6–12h';
   document.getElementById('afWhere').value='';
   document.getElementById('afMonth').value='';
@@ -3742,6 +3744,7 @@ function afGoStep(n, skipValidation){
       var _typeNorm={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Eau de Parfum (EDP)':'Eau de Parfum','Eau de Toilette (EDT)':'Eau de Toilette'};
       var _savedType=d.type||'Eau de Parfum';
       document.getElementById('afType').value=_typeNorm[_savedType]||_savedType||'Eau de Parfum';
+      updateTypeDesc();
       if(d.personalRating){ document.querySelectorAll('#rOpts .opt').forEach(o=>o.classList.toggle('on',parseInt(o.dataset.v)===d.personalRating)); }
       if(d.statusRating){ var numRat=typeof d.statusRating==='number'?d.statusRating:({Obsessed:5,Love:4,Like:3,'Just OK':2,"Don't Like":1}[d.statusRating]||3); document.getElementById('afRating').value=numRat; starRender(numRat); }
       if(d.personalLong) document.getElementById('afLong').value=d.personalLong;
@@ -5248,6 +5251,37 @@ document.addEventListener('mousemove', function(e){
   var tip=document.getElementById('anaTooltip');
   if(tip&&tip.style.display!=='none'){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';}
 });
+
+function showTooltip(text){
+  var tip=document.getElementById('anaTooltip');
+  if(!tip) return;
+  tip.textContent=text;
+  tip.style.display='block';
+}
+function hideTooltip(){
+  var tip=document.getElementById('anaTooltip');
+  if(tip) tip.style.display='none';
+}
+
+// Wire size chip tooltips
+document.querySelectorAll('#sizeOpts .opt').forEach(function(el){
+  el.addEventListener('mouseenter',function(){ showTooltip(el.dataset.tip||el.textContent.trim()); });
+  el.addEventListener('mouseleave',hideTooltip);
+});
+
+// Type description helper
+var TYPE_DESC={
+  'Eau de Parfum':'15–20% fragrance oil · lasts 6–8h',
+  'Eau de Toilette':'5–15% fragrance oil · lasts 3–5h',
+  'Body Spray':'1–3% fragrance oil · light coverage',
+  'Perfume Oil':'20–30% fragrance oil · no alcohol · lasts 8–12h',
+  'Other':'Custom concentration or format'
+};
+function updateTypeDesc(){
+  var el=document.getElementById('typeDesc'); if(!el) return;
+  el.textContent=TYPE_DESC[document.getElementById('afType').value]||'';
+}
+document.getElementById('afType').addEventListener('change', updateTypeDesc);
 
 // ═══════════════════════════════════════════════════════
 // COMPARE OVERLAY
