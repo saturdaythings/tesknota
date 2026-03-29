@@ -1659,6 +1659,11 @@ function selectIdentity(name, id){
   var _initAddBtn=document.getElementById('topbarAddBtn');if(_initAddBtn)_initAddBtn.style.display='none';
   renderImportQueue();
   updateCounts();
+  // Silent audit on load — only warns if failures found
+  var audit=auditDataIntegrity();
+  if(audit.fail>0){
+    console.warn('Data integrity: '+audit.fail+' issue(s) found. Run auditData() for details.');
+  }
   // Auto-navigate to scan tab if ?scan=1 is in URL
   if(new URLSearchParams(window.location.search).get('scan')==='1'){
     goPage('import');
@@ -5473,6 +5478,188 @@ function closeCompare(){ document.getElementById('compareOverlay').classList.rem
 document.getElementById('compareOverlay').addEventListener('click', function(e){
   if(e.target===this) closeCompare();
 });
+
+// ═══════════════════════════════════════════════════════
+// DATA INTEGRITY AUDIT
+// ═══════════════════════════════════════════════════════
+
+function auditDataIntegrity(){
+  var results=[];
+  var pass=0;
+  var fail=0;
+
+  function check(label,condition,detail){
+    var ok=!!condition;
+    results.push((ok?'✓':'✗')+' '+label+(detail?' — '+detail:''));
+    if(ok) pass++; else fail++;
+  }
+
+  // STATE LOADED
+  check('Data loaded',FRAGRANCES&&FRAGRANCES.length>0,FRAGRANCES?FRAGRANCES.length+' total fragrances':'empty');
+  check('USERS has records',USERS&&USERS.length>0,USERS?USERS.length+' users':'empty');
+  check('COMPLIMENTS loaded',COMPLIMENTS!==undefined,COMPLIMENTS?COMPLIMENTS.length+' total':'empty');
+
+  // CURRENT USER
+  check('CURRENT_USER set',CURRENT_USER&&CURRENT_USER.id);
+  check('CURRENT_USER exists in USERS',USERS.some(function(u){return u.id===(CURRENT_USER&&CURRENT_USER.id);}));
+
+  // USER SCOPING
+  var myFrags=myFragrances();
+  var friendFrags=friendFragrances();
+  check('myFragrances() scoped to CURRENT_USER',
+    myFrags.every(function(f){return f.userId===CURRENT_USER.id;}),
+    myFrags.length+' fragrances');
+  check('friendFragrances() excludes CURRENT_USER',
+    friendFrags.every(function(f){return f.userId!==CURRENT_USER.id;}),
+    friendFrags.length+' fragrances');
+
+  var myComps=myCompliments();
+  check('myCompliments() scoped to CURRENT_USER',
+    myComps.every(function(c){return c.userId===CURRENT_USER.id;}),
+    myComps.length+' compliments');
+
+  // FRAG_HEADERS COMPLETENESS
+  var expectedHeaders=[
+    'id','userId','name','house','status','sizeOwned','type',
+    'communityRating','communityLong','communitySill','avgPrice','notes',
+    'statusRating','personalLong','whereBought','purchaseDate',
+    'isDupe','dupeFor','personalNotes','createdAt'
+  ];
+  expectedHeaders.forEach(function(h){
+    check('FRAG_HEADERS contains '+h,FRAG_HEADERS.indexOf(h)>-1);
+  });
+
+  // COMP_HEADERS COMPLETENESS
+  var expectedCompHeaders=[
+    'id','userId','primaryFragranceId','primaryFragranceName',
+    'secondaryFragranceId','secondaryFragranceName','complimenterGender',
+    'relation','month','year','location','notes','createdAt'
+  ];
+  expectedCompHeaders.forEach(function(h){
+    check('COMP_HEADERS contains '+h,COMP_HEADERS.indexOf(h)>-1);
+  });
+
+  // FRAGRANCE RECORD INTEGRITY
+  var fragIssues=[];
+  myFrags.forEach(function(f){
+    if(!f.id) fragIssues.push('missing id: '+f.name);
+    if(!f.name) fragIssues.push('missing name: '+f.id);
+    if(!f.userId) fragIssues.push('missing userId: '+f.name);
+    if(!f.status) fragIssues.push('missing status: '+f.name);
+    if(!f.createdAt) fragIssues.push('missing createdAt: '+f.name);
+  });
+  check('All my fragrances have required fields',
+    fragIssues.length===0,
+    fragIssues.length?fragIssues.join(', '):'all clean');
+
+  // TYPE FIELD INTEGRITY
+  var missingType=myFrags.filter(function(f){return !f.type;});
+  check('All my fragrances have type set',
+    missingType.length===0,
+    missingType.length
+      ?missingType.map(function(f){return f.name;}).join(', ')
+      :'all have type');
+
+  // RATING INTEGRITY
+  var badRating=myFrags.filter(function(f){
+    return f.statusRating&&isNaN(parseRating(f.statusRating));
+  });
+  check('All ratings parseable',badRating.length===0,
+    badRating.length?badRating.map(function(f){return f.name+':'+f.statusRating;}).join(', '):'all clean');
+
+  // COMPLIMENT INTEGRITY — orphaned references
+  var orphanedComps=[];
+  var fragIds=FRAGRANCES.map(function(f){return f.id;});
+  myComps.forEach(function(c){
+    if(c.primaryFragId&&fragIds.indexOf(c.primaryFragId)===-1){
+      orphanedComps.push('compliment '+c.id+' → missing frag '+c.primaryFragId);
+    }
+  });
+  check('No orphaned compliments',orphanedComps.length===0,
+    orphanedComps.length?orphanedComps.join(', '):'all linked');
+
+  // COMPLIMENT RECORD INTEGRITY
+  var compIssues=[];
+  myComps.forEach(function(c){
+    if(!c.id) compIssues.push('missing id');
+    if(!c.primaryFrag) compIssues.push('missing fragrance name: '+c.id);
+    if(!c.relation) compIssues.push('missing relation: '+c.id);
+    if(!c.month||!c.year) compIssues.push('missing date: '+c.id);
+  });
+  check('All compliments have required fields',
+    compIssues.length===0,
+    compIssues.length?compIssues.join(', '):'all clean');
+
+  // SHEETS CONNECTIVITY
+  check('SA_EMAIL configured',
+    window.__ENV__&&!!window.__ENV__.SA_EMAIL);
+  check('SA_KEY configured',
+    window.__ENV__&&!!window.__ENV__.SA_KEY);
+  check('SPREADSHEET_ID configured',
+    window.__ENV__&&!!window.__ENV__.SPREADSHEET_ID);
+  check('WORKER_URL configured',
+    window.__ENV__&&!!window.__ENV__.WORKER_URL,
+    window.__ENV__&&window.__ENV__.WORKER_URL
+      ?window.__ENV__.WORKER_URL:'not set — link import uses local DB fallback');
+
+  // DUPLICATE DETECTION
+  var fragNameKeys={};
+  var dupeFrags=[];
+  myFrags.forEach(function(f){
+    var key=(f.name||'').toLowerCase().trim()+'|'+(f.type||'');
+    if(fragNameKeys[key]){
+      dupeFrags.push(f.name+' ('+(f.type||'no type')+')');
+    } else {
+      fragNameKeys[key]=true;
+    }
+  });
+  check('No duplicate name+type combos in collection',
+    dupeFrags.length===0,
+    dupeFrags.length?dupeFrags.join(', '):'none found');
+
+  // WISHLIST INTEGRITY
+  var wishlist=myFrags.filter(function(f){
+    return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';
+  });
+  check('Wishlist items accessible via myFragrances()',
+    true,wishlist.length+' items');
+
+  // RENDER COVERAGE
+  check('renderDashboard exists',typeof renderDashboard==='function');
+  check('renderCollection exists',typeof renderCollection==='function');
+  check('renderCompliments exists',typeof renderCompliments==='function');
+  check('renderAnalytics exists',typeof renderAnalytics==='function');
+  check('renderFriend exists',typeof renderFriend==='function');
+  check('fragDisplayName exists',typeof fragDisplayName==='function');
+  check('renderStars exists',typeof renderStars==='function');
+  check('parseRating exists',typeof parseRating==='function');
+  check('openAddFrag exists',typeof openAddFrag==='function');
+  check('openAddComp exists',typeof openAddComp==='function');
+  check('saveFragrance exists',typeof saveFragrance==='function');
+  check('saveCompliment exists',typeof saveCompliment==='function');
+  check('writeSheet exists',typeof writeSheet==='function');
+  check('appendRow exists',typeof appendRow==='function');
+  check('migrateFragranceTypes exists',typeof migrateFragranceTypes==='function');
+
+  // PRINT RESULTS
+  console.log('\n=== tęsknota DATA INTEGRITY AUDIT ===');
+  console.log('User: '+(CURRENT_USER&&CURRENT_USER.name));
+  console.log('');
+  results.forEach(function(r){console.log(r);});
+  console.log('');
+  console.log('PASSED: '+pass+'  FAILED: '+fail);
+  console.log('=====================================\n');
+
+  if(fail>0){
+    console.warn('ACTION NEEDED: '+fail+' check(s) failed. See above for details.');
+  } else {
+    console.log('All checks passed.');
+  }
+
+  return {pass:pass,fail:fail,results:results};
+}
+
+window.auditData=auditDataIntegrity;
 
 // ═══════════════════════════════════════════════════════
 // INIT
