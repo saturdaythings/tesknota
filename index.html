@@ -1658,6 +1658,13 @@ async function loadAllData(){
     var fragSeed=FRAGRANCES.filter(function(f){return !fragSheetIds.has(f.userId);});
     FRAGRANCES=fragSeed.concat(fragsRaw.map(rowToFrag));
   }
+  // Write any seed fragrances missing from Sheets so they persist
+  var _sheetFragIds=new Set(fragsRaw.map(function(r){return r.id;}));
+  FRAGRANCES.forEach(function(f){
+    if(!_sheetFragIds.has(f.id)){
+      appendRow('fragrances',fragToRow(f),FRAG_HEADERS).catch(function(e){console.error('[syncSeedFragrances] write failed:',e);});
+    }
+  });
   var _sheetCompIds=new Set(compsRaw.map(function(r){return r.id;}));
   if(compsRaw.length){
     var seedOnly=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
