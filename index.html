@@ -811,7 +811,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div id="dashOnboard" style="display:none"></div>
       <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <table class="tbl tbl-spaced" id="dashTable">
-        <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Top Notes</th><th>Compliments</th><th></th></tr></thead>
+        <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Accords</th><th>Compliments</th><th></th></tr></thead>
         <tbody id="dashBody"></tbody>
       </table>
     </div>
@@ -865,7 +865,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <input type="text" id="wishSearch" placeholder="Search wishlist..." />
         <select id="wishHouse"><option value="">All houses</option></select>
         <div id="wishFamilyFilterWrap">
-          <button class="filter-btn" onclick="toggleWishFamilyDrop()">Accords <span id="wishFamilyFilterLabel"></span> ▾</button>
+          <button class="filter-btn" onclick="toggleWishFamilyDrop()">Accords <span id="wishFamilyFilterLabel"></span></button>
           <div class="filter-drop-panel" id="wishFamilyDropPanel" style="display:none;"></div>
         </div>
       </div>
@@ -2449,7 +2449,7 @@ function renderDashboard(){
         <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td><div class="tstars">${renderStars(f.statusRating)}</div></td>
-        <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).map(function(n){return noteDisplayName(n);}).join(', ')}</td>
+        <td class="tmono" style="font-size:11px;color:var(--ink3);">${getAccords(f).join(', ')}</td>
         <td class="tmono">${getCompCount(f.id)}</td>
         <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
       </tr>`).join('');
@@ -2864,8 +2864,8 @@ function renderCollection(){
   }
   if (collSort === 'added' || collSort === 'addedOld') {
     frags.sort(function(a,b){
-      var av = (parseInt(a.purchaseYear)||0)*12+(parseInt(a.purchaseMonth)||0);
-      var bv = (parseInt(b.purchaseYear)||0)*12+(parseInt(b.purchaseMonth)||0);
+      var av = a.purchaseDate ? new Date(a.purchaseDate).getTime() : 0;
+      var bv = b.purchaseDate ? new Date(b.purchaseDate).getTime() : 0;
       return collSort==='added' ? bv-av : av-bv;
     });
   }
@@ -2911,16 +2911,14 @@ function renderCollection(){
       var longTdHtml = longVal
         ? '<span style="font-family:var(--mono);font-size:11px;color:' + (f.personalLong ? 'var(--ink2)' : 'var(--ink3)') + ';">' + longVal + '</span>'
         : '<span style="color:var(--ink3);">—</span>';
-      var addedTdHtml;
-      if (f.purchaseYear) {
-        var mo = f.purchaseMonth ? months[parseInt(f.purchaseMonth)-1] + ' ' : '';
-        addedTdHtml = '<span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">' + mo + f.purchaseYear + '</span>';
-      } else if (f.createdAt) {
+      var addedStr = f.purchaseDate || '';
+      if (!addedStr && f.createdAt) {
         var d = new Date(f.createdAt);
-        addedTdHtml = '<span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">' + months[d.getMonth()] + ' ' + d.getFullYear() + '</span>';
-      } else {
-        addedTdHtml = '<span style="color:var(--ink3);">—</span>';
+        addedStr = months[d.getMonth()] + ' ' + d.getFullYear();
       }
+      var addedTdHtml = addedStr
+        ? '<span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">' + addedStr + '</span>'
+        : '<span style="color:var(--ink3);">—</span>';
       return '<tr onclick="openDetail(\''+f.id+'\')">'
         +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
         +'<td><div class="tstars">'+renderStars(f.statusRating)+'</div></td>'
