@@ -174,6 +174,29 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .ins-t{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:2px;}
 .ins-b{font-size:12px;color:var(--ink2);line-height:1.6;}
 
+/* ANALYTICS REDESIGN */
+.ana-wrap{max-width:100%;}
+.ana-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;}
+#anaInsight{font-family:var(--script);font-size:17px;font-style:italic;color:var(--ink);line-height:1.6;max-width:680px;flex:1;}
+.ana-pills{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px;}
+.ana-pill{background:var(--off2);border:1px solid var(--b2);padding:10px 16px;display:flex;flex-direction:column;align-items:flex-start;}
+.ana-pill-num{font-family:var(--serif);font-size:26px;color:var(--blue);line-height:1;}
+.ana-pill-lbl{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;margin-top:3px;}
+.ana-section{margin-bottom:32px;}
+.ana-sh{display:flex;align-items:baseline;border-bottom:1px solid var(--b2);padding-bottom:9px;margin-bottom:14px;}
+.ana-sh h2{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--blue);font-style:italic;}
+.comp-map-grid{display:grid;grid-template-columns:80px repeat(6,1fr);gap:1px;background:var(--b2);margin-bottom:8px;}
+.comp-map-cell{background:var(--off);height:52px;display:flex;align-items:center;justify-content:center;position:relative;}
+.comp-map-dot{border-radius:50%;transition:transform .14s;}
+.comp-map-cell:hover .comp-map-dot{transform:scale(1.18);}
+.perf-card{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .12s;gap:12px;}
+.perf-card:hover{background:var(--blue4);}
+.perf-rank{font-family:var(--mono);font-size:11px;color:var(--ink3);width:24px;flex-shrink:0;}
+.perf-name{font-family:var(--serif);font-size:15px;color:var(--blue);font-style:italic;}
+.perf-house{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.perf-count{font-family:var(--serif);font-size:22px;color:var(--blue);width:40px;text-align:right;flex-shrink:0;}
+.perf-meta{font-family:var(--mono);font-size:9px;color:var(--ink3);text-align:right;letter-spacing:.06em;text-transform:uppercase;}
+
 /* FRIEND PROFILE */
 .f-banner{background:var(--blue3);padding:32px 26px 24px;margin:-26px -26px 28px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;}
 /* FRIEND ACTIVITY */
@@ -876,23 +899,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 
     <!-- ANALYTICS -->
     <div class="page" id="page-analytics">
-      <div class="stats" id="anaStats"></div>
-      <div id="anaPreviewHint"></div>
-      <div class="sh"><h2>Compliments by fragrance</h2></div>
-      <div class="bchart" id="bc1"></div>
-      <div class="chart-legend" id="bc1-legend"></div>
-      <div class="sh"><h2>By relation</h2></div>
-      <div class="bchart" id="bc2" style="margin-bottom:26px;"></div>
-      <div class="sh"><h2>By season</h2></div>
-      <div class="bchart" id="bc-season" style="margin-bottom:26px;"></div>
-      <div class="sh"><h2>Key insights</h2></div>
-      <div id="insightsList"></div>
-      <div class="sh sh-spaced"><h2>Notes intelligence</h2><div class="sh-r"><span class="sh-sub">Compliments per note</span></div></div>
-      <div id="notesIntel" class="notes-grid"></div>
-      <div class="sh"><h2>Your favourite notes</h2></div>
-      <div id="faveNotes" style="margin-bottom:4px;"></div>
-      <div class="sh"><h2>Collection insights</h2></div>
-      <div class="ana-insight-grid" id="anaInsightGrid"></div>
+      <div class="ana-wrap">
+        <div class="ana-header">
+          <div id="anaInsight"></div>
+          <button class="btn btn-ghost btn-sm" id="sylviaToggle" onclick="toggleSylviaOverlay()">Compare with Sylvia</button>
+        </div>
+        <div id="anaPills" class="ana-pills"></div>
+        <div class="ana-section" id="anaNotesSection"></div>
+        <div class="ana-section" id="anaMapSection"></div>
+        <div class="ana-section" id="anaPerformersSection"></div>
+        <div class="ana-section" id="anaCollectionSection"></div>
+      </div>
     </div>
 
     <!-- FRIEND PROFILE -->
@@ -2703,109 +2720,301 @@ function deleteCompliment(id){
 // RENDER — ANALYTICS
 // ═══════════════════════════════════════════════════════
 
+var showSylviaOverlay = false;
+
+function toggleSylviaOverlay(){
+  showSylviaOverlay = !showSylviaOverlay;
+  var btn = document.getElementById('sylviaToggle');
+  if(btn){
+    btn.textContent = showSylviaOverlay ? 'Hide Sylvia' : 'Compare with Sylvia';
+    btn.classList.toggle('btn-warm', showSylviaOverlay);
+  }
+  renderAnalytics();
+}
+
+function generateInsight(mc, mf){
+  if(!mc.length) return 'Start logging compliments to unlock your scent story.';
+  var fragCounts={};
+  mc.forEach(function(c){ fragCounts[c.primaryFrag]=(fragCounts[c.primaryFrag]||0)+1; });
+  var topFrag=Object.keys(fragCounts).sort(function(a,b){return fragCounts[b]-fragCounts[a];})[0];
+  var topCount=fragCounts[topFrag];
+  var relCounts={};
+  mc.forEach(function(c){ relCounts[c.relation]=(relCounts[c.relation]||0)+1; });
+  var topRel=Object.keys(relCounts).sort(function(a,b){return relCounts[b]-relCounts[a];})[0];
+  var noteCounts={};
+  mc.forEach(function(c){
+    var frag=mf.find(function(f){return f.name===c.primaryFrag;});
+    if(!frag||!frag.notes) return;
+    frag.notes.split(',').forEach(function(n){var note=n.trim().toLowerCase();if(note)noteCounts[note]=(noteCounts[note]||0)+1;});
+  });
+  var topNotes=Object.keys(noteCounts).sort(function(a,b){return noteCounts[b]-noteCounts[a];}).slice(0,3);
+  var sentence=topFrag?(topFrag+' leads with '+topCount+' compliment'+(topCount>1?'s':'')+', mostly from '+(topRel||'strangers').toLowerCase()+'s.'):'You have '+mc.length+' compliment'+(mc.length>1?'s':'')+' logged.';
+  if(topNotes.length) sentence+=' '+topNotes.map(function(n){return n.charAt(0).toUpperCase()+n.slice(1);}).join(', ')+' are pulling the most attention.';
+  return sentence;
+}
+
+function getNoteFrequency(frags){
+  var counts={};
+  frags.forEach(function(f){
+    if(!f.notes) return;
+    f.notes.split(',').forEach(function(n){var note=n.trim().toLowerCase();if(note.length>1)counts[note]=(counts[note]||0)+1;});
+  });
+  return counts;
+}
+
+function renderNoteChips(containerId, noteCounts, color, maxShow){
+  var el=document.getElementById(containerId); if(!el) return;
+  var sorted=Object.keys(noteCounts).sort(function(a,b){return noteCounts[b]-noteCounts[a];}).slice(0,maxShow||24);
+  var maxCount=noteCounts[sorted[0]]||1;
+  el.innerHTML='';
+  el.style.cssText='display:flex;flex-wrap:wrap;gap:6px;';
+  sorted.forEach(function(note){
+    var count=noteCounts[note];
+    var weight=count/maxCount;
+    var chip=document.createElement('div');
+    chip.style.cssText='padding:4px 10px;border:1px solid '+(color||'var(--b3)')+';font-family:var(--mono);font-size:'+(9+Math.round(weight*3))+'px;color:'+(color||'var(--ink3)')+';letter-spacing:.08em;text-transform:uppercase;cursor:pointer;opacity:'+(0.5+weight*0.5)+';transition:all .14s;';
+    chip.textContent=note+' '+count;
+    chip.title=count+' fragrance'+(count>1?'s':'')+' contain '+note;
+    chip.onmouseenter=function(){this.style.background='var(--blue4)';this.style.opacity='1';};
+    chip.onmouseleave=function(){this.style.background='';this.style.opacity=(0.5+weight*0.5).toString();};
+    chip.onclick=function(){goPage('collection');if(typeof filterCollByNote==='function')filterCollByNote(note);};
+    el.appendChild(chip);
+  });
+}
+
+function buildComplimentMap(compliments){
+  var seasons=['Spring','Summer','Fall','Winter'];
+  var relations=['Stranger','Friend','Colleague / Client','Family','Significant Other','Other'];
+  function getSeason(month){
+    if(['Mar','Apr','May'].indexOf(month)>=0) return 'Spring';
+    if(['Jun','Jul','Aug'].indexOf(month)>=0) return 'Summer';
+    if(['Sep','Oct','Nov'].indexOf(month)>=0) return 'Fall';
+    return 'Winter';
+  }
+  var grid={};
+  seasons.forEach(function(s){grid[s]={};relations.forEach(function(r){grid[s][r]=0;});});
+  var topFrags={};
+  compliments.forEach(function(c){
+    var s=getSeason(c.month); var r=c.relation||'Other';
+    if(!grid[s]) return;
+    grid[s][r]=(grid[s][r]||0)+1;
+    if(!topFrags[s]) topFrags[s]={};
+    topFrags[s][r]=c.primaryFrag;
+  });
+  return {grid:grid,topFrags:topFrags,seasons:seasons,relations:relations};
+}
+
+function renderCompMap(containerId, mapData, dotColor){
+  var el=document.getElementById(containerId); if(!el) return;
+  var max=0;
+  mapData.seasons.forEach(function(s){mapData.relations.forEach(function(r){if(mapData.grid[s][r]>max)max=mapData.grid[s][r];});});
+  var gridEl=document.createElement('div'); gridEl.className='comp-map-grid';
+  var hdr=document.createElement('div'); hdr.className='comp-map-cell'; hdr.style.background='var(--off2)'; gridEl.appendChild(hdr);
+  mapData.relations.forEach(function(r){
+    var cell=document.createElement('div'); cell.className='comp-map-cell'; cell.style.background='var(--off2)';
+    var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:0 4px;';
+    lbl.textContent=r==='Colleague / Client'?'Colleague':r==='Significant Other'?'Partner':r;
+    cell.appendChild(lbl); gridEl.appendChild(cell);
+  });
+  mapData.seasons.forEach(function(s){
+    var rowHdr=document.createElement('div'); rowHdr.className='comp-map-cell'; rowHdr.style.background='var(--off2)';
+    var slbl=document.createElement('div'); slbl.style.cssText='font-family:var(--script);font-size:13px;font-style:italic;color:var(--ink2);padding:0 8px;'; slbl.textContent=s; rowHdr.appendChild(slbl); gridEl.appendChild(rowHdr);
+    mapData.relations.forEach(function(r){
+      var count=mapData.grid[s][r]||0; var topFrag=(mapData.topFrags[s]&&mapData.topFrags[s][r])||'';
+      var cell=document.createElement('div'); cell.className='comp-map-cell';
+      if(count>0){
+        var size=8+Math.round((count/Math.max(max,1))*24);
+        var dot=document.createElement('div'); dot.className='comp-map-dot';
+        dot.style.width=size+'px'; dot.style.height=size+'px';
+        dot.style.background=dotColor||'var(--blue)';
+        dot.style.opacity=(0.4+0.6*(count/Math.max(max,1))).toString();
+        cell.appendChild(dot);
+        (function(cnt,tf){
+          cell.addEventListener('mouseenter',function(){
+            var tip=document.getElementById('anaTooltip'); if(!tip) return;
+            tip.textContent=cnt+' compliment'+(cnt>1?'s':'')+(tf?' — '+tf:'');
+            tip.style.display='block';
+          });
+          cell.addEventListener('mouseleave',function(){
+            var tip=document.getElementById('anaTooltip'); if(tip) tip.style.display='none';
+          });
+        })(count,topFrag);
+      }
+      gridEl.appendChild(cell);
+    });
+  });
+  el.innerHTML=''; el.appendChild(gridEl);
+}
+
+function renderHouseList(containerId, frags){
+  var counts={};
+  frags.forEach(function(f){if(f.house)counts[f.house]=(counts[f.house]||0)+1;});
+  var sorted=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];}).slice(0,10);
+  var max=counts[sorted[0]]||1;
+  var el=document.getElementById(containerId); if(!el) return;
+  el.innerHTML='';
+  sorted.forEach(function(house,i){
+    var count=counts[house]; var pct=Math.round(count/max*100);
+    var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--b1);';
+    var rn=document.createElement('div'); rn.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);width:16px;flex-shrink:0;'; rn.textContent=i+1;
+    var hn=document.createElement('div'); hn.style.cssText='font-family:var(--body);font-size:13px;color:var(--ink);flex:1;'; hn.textContent=house;
+    var bar=document.createElement('div'); bar.style.cssText='width:80px;height:4px;background:var(--off2);position:relative;flex-shrink:0;';
+    var fill=document.createElement('div'); fill.style.cssText='position:absolute;left:0;top:0;height:100%;background:var(--blue);width:'+pct+'%;'; bar.appendChild(fill);
+    var ct=document.createElement('div'); ct.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:24px;text-align:right;flex-shrink:0;'; ct.textContent=count;
+    row.appendChild(rn); row.appendChild(hn); row.appendChild(bar); row.appendChild(ct); el.appendChild(row);
+  });
+}
+
 function renderAnalytics(){
   var MC=myCompliments();
-  const total = MC.length;
-  var previewHint=document.getElementById('anaPreviewHint');
-  if(!total){
-    // Preview state — ghost charts to show what analytics looks like
-    if(previewHint) previewHint.innerHTML='<div class="ana-preview-hint">Log compliments to unlock your analytics</div>';
-    document.getElementById('anaStats').innerHTML = '<div class="sbox"><div class="snum">0</div><div class="slbl">Total Compliments</div></div><div class="sbox"><div class="snum">0</div><div class="slbl">Fragrances</div></div><div class="sbox"><div class="snum">0.0</div><div class="slbl">Per Month Avg</div></div><div class="sbox"><div class="snum">0%</div><div class="slbl">From Strangers</div></div>';
-    var ghostData=[{l:'—',v:0,h:75},{l:'—',v:0,h:55},{l:'—',v:0,h:40},{l:'—',v:0,h:30},{l:'—',v:0,h:20}];
-    bldChartPreview('bc1',ghostData); document.getElementById('bc1-legend').textContent='';
-    bldChartPreview('bc2',ghostData.slice(0,4));
-    bldChartPreview('bc-season',[{l:'Spring',v:0,h:60},{l:'Summer',v:0,h:80},{l:'Fall',v:0,h:50},{l:'Winter',v:0,h:40}]);
-    document.getElementById('insightsList').innerHTML='<div class="lbl-empty">Insights appear after you log at least one compliment</div>';
-    return;
+  var MF=myFragrances();
+  var MFC=MF.filter(function(f){return f.status==='CURRENT';});
+  var SC=showSylviaOverlay?friendCompliments():[];
+  var SF=showSylviaOverlay?friendFragrances().filter(function(f){return f.status==='CURRENT';}):[];
+
+  // INSIGHT
+  var insightEl=document.getElementById('anaInsight');
+  if(insightEl) insightEl.textContent=generateInsight(MC,MF);
+
+  // PILLS
+  var pillsEl=document.getElementById('anaPills');
+  if(pillsEl){
+    pillsEl.innerHTML='';
+    var relCounts={}; MC.forEach(function(c){relCounts[c.relation]=(relCounts[c.relation]||0)+1;});
+    var topRel=Object.keys(relCounts).sort(function(a,b){return relCounts[b]-relCounts[a];})[0]||'—';
+    var pills=[{num:MC.length,lbl:'Compliments'},{num:new Set(MC.map(function(c){return c.primaryFrag;})).size,lbl:'Fragrances'},{num:MFC.length,lbl:'Collection'},{num:topRel,lbl:'Top Relation'}];
+    pills.forEach(function(p){
+      var pill=document.createElement('div'); pill.className='ana-pill';
+      var num=document.createElement('div'); num.className='ana-pill-num'; num.textContent=p.num;
+      var lbl=document.createElement('div'); lbl.className='ana-pill-lbl'; lbl.textContent=p.lbl;
+      pill.appendChild(num); pill.appendChild(lbl); pillsEl.appendChild(pill);
+    });
+    if(showSylviaOverlay&&SC.length){
+      var sdiv=document.createElement('div'); sdiv.style.cssText='width:100%;font-family:var(--mono);font-size:9px;color:var(--warm);letter-spacing:.12em;text-transform:uppercase;padding-top:8px;'; sdiv.textContent='Sylvia'; pillsEl.appendChild(sdiv);
+      var sRelCounts={}; SC.forEach(function(c){sRelCounts[c.relation]=(sRelCounts[c.relation]||0)+1;});
+      var sTopRel=Object.keys(sRelCounts).sort(function(a,b){return sRelCounts[b]-sRelCounts[a];})[0]||'—';
+      [{num:SC.length,lbl:'Compliments'},{num:new Set(SC.map(function(c){return c.primaryFrag;})).size,lbl:'Fragrances'},{num:SF.length,lbl:'Collection'},{num:sTopRel,lbl:'Top Relation'}].forEach(function(p){
+        var pill=document.createElement('div'); pill.className='ana-pill'; pill.style.borderColor='var(--warm2)';
+        var num=document.createElement('div'); num.className='ana-pill-num'; num.style.color='var(--warm)'; num.textContent=p.num;
+        var lbl=document.createElement('div'); lbl.className='ana-pill-lbl'; lbl.textContent=p.lbl;
+        pill.appendChild(num); pill.appendChild(lbl); pillsEl.appendChild(pill);
+      });
+    }
   }
-  if(previewHint) previewHint.innerHTML='';
-  const byFrag = {};
-  MC.forEach(c=>{ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; if(c.secondaryFrag) byFrag[c.secondaryFrag]=(byFrag[c.secondaryFrag]||0)+1; });
-  const fragSorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const byRel = {};
-  MC.forEach(c=>{ byRel[c.relation]=(byRel[c.relation]||0)+1; });
-  const relSorted = Object.entries(byRel).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const strangerPct = Math.round((MC.filter(c=>c.relation==='Stranger').length/total)*100)||0;
-  const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  let monthSpan = 12;
-  if(total){
-    const dates=MC.map(function(c){return parseInt(c.year)*12+(MONTH_NAMES.indexOf(c.month)||0);}).filter(function(n){return n>0;});
-    if(dates.length){const mn=Math.min.apply(null,dates),mx=Math.max.apply(null,dates);monthSpan=Math.max(mx-mn+1,1);}
+
+  // NOTES FINGERPRINT
+  var notesSection=document.getElementById('anaNotesSection');
+  if(notesSection){
+    notesSection.innerHTML='<div class="ana-sh"><h2>Your notes</h2></div><div id="anaNotesChips"></div>';
+    renderNoteChips('anaNotesChips',getNoteFrequency(MFC),'var(--blue)',24);
+    if(showSylviaOverlay&&SF.length){
+      var sdivN=document.createElement('div'); sdivN.style.cssText='font-family:var(--mono);font-size:9px;color:var(--warm);letter-spacing:.12em;text-transform:uppercase;margin-top:12px;margin-bottom:6px;'; sdivN.textContent='Sylvia'; notesSection.appendChild(sdivN);
+      var sChips=document.createElement('div'); sChips.id='anaSylviaChips'; notesSection.appendChild(sChips);
+      renderNoteChips('anaSylviaChips',getNoteFrequency(SF),'var(--warm)',24);
+    }
   }
-  const perMonth = total ? (total/monthSpan).toFixed(1) : '0.0';
-  document.getElementById('anaStats').innerHTML = `
-    <div class="sbox"><div class="snum">${total}</div><div class="slbl">Total Compliments</div></div>
-    <div class="sbox"><div class="snum">${Object.keys(byFrag).length}</div><div class="slbl">Fragrances</div></div>
-    <div class="sbox"><div class="snum">${perMonth}</div><div class="slbl">Per Month Avg</div></div>
-    <div class="sbox"><div class="snum">${strangerPct}%</div><div class="slbl">From Strangers</div></div>`;
-  const maxFrag = fragSorted[0]?fragSorted[0][1]:1;
-  bldChart('bc1', fragSorted.map(([l,v])=>({l:l.split(' ')[0],v,h:Math.round((v/maxFrag)*100)})));
-  document.getElementById('bc1-legend').textContent = fragSorted.map(([l])=>l).join(' · ');
-  const maxRel = relSorted[0]?relSorted[0][1]:1;
-  bldChart('bc2', relSorted.map(([l,v])=>({l:l==='Colleague / Client'?'Colleagues':l,v,h:Math.round((v/maxRel)*100)})));
-  // Dynamic insights
-  const insights = [];
-  if(fragSorted[0]) insights.push({t:`${fragSorted[0][0]} is your top performer`,b:`${fragSorted[0][1]} compliments — ${Math.round((fragSorted[0][1]/total)*100)}% of total. ${strangerPct>50?'Predominantly from strangers — the strongest unprompted signal.':''}`});
-  const layered = MC.filter(c=>c.secondaryFragId);
-  if(layered.length) insights.push({t:'Layering generates response',b:`${layered.length} of your ${total} compliments were while wearing two fragrances together.`});
-  const locs = {}; MC.forEach(c=>{ if(c.location){const city=c.location.split(',').pop().trim();locs[city]=(locs[city]||0)+1;}});
-  const topCity=Object.entries(locs).sort((a,b)=>b[1]-a[1])[0];
-  if(topCity) insights.push({t:`${topCity[0]} is your best city`,b:`${topCity[1]} of ${total} compliments in ${topCity[0]}.`});
-  document.getElementById('insightsList').innerHTML = insights.map((ins,i)=>`<div class="ins"${i===insights.length-1?' style="border-bottom:none"':''}><div class="ins-t">${ins.t}</div><div class="ins-b">${ins.b}</div></div>`).join('');
-  // Season breakdown
-  var seasonMap={Jan:'Winter',Feb:'Winter',Mar:'Spring',Apr:'Spring',May:'Spring',Jun:'Summer',Jul:'Summer',Aug:'Summer',Sep:'Fall',Oct:'Fall',Nov:'Fall',Dec:'Winter'};
-  var bySeason={Spring:0,Summer:0,Fall:0,Winter:0};
-  MC.forEach(function(c){ var s=seasonMap[c.month]; if(s) bySeason[s]++; });
-  var maxSeason=Math.max.apply(null,Object.values(bySeason))||1;
-  bldChart('bc-season',Object.entries(bySeason).map(function(e){ return {l:e[0],v:e[1],h:Math.round((e[1]/maxSeason)*100)}; }));
-  renderNotesIntel();
-  // Collection insight cards
-  var MF2=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
-  var anaGrid=document.getElementById('anaInsightGrid');
-  if(anaGrid){
-    var icards=[];
-    // Top Note across collection
-    var noteCounts={};
-    MF2.forEach(function(f){
-      var allN=[f.topNotes,f.middleNotes,f.baseNotes].filter(Boolean).join(', ');
-      allN.split(/,\s*|·/).forEach(function(n){n=n.trim();if(n)noteCounts[n]=(noteCounts[n]||0)+1;});
+
+  // COMPLIMENT MAP
+  var mapSection=document.getElementById('anaMapSection');
+  if(mapSection){
+    mapSection.innerHTML='<div class="ana-sh"><h2>When and who</h2></div>';
+    if(MC.length<3){
+      var msg=document.createElement('div'); msg.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:16px 0;'; msg.textContent='Log 3 compliments to unlock your pattern map.'; mapSection.appendChild(msg);
+    } else {
+      var mapDiv=document.createElement('div'); mapDiv.id='anaMapK'; mapSection.appendChild(mapDiv);
+      renderCompMap('anaMapK',buildComplimentMap(MC),'var(--blue)');
+      if(showSylviaOverlay&&SC.length>=3){
+        var sMapLbl=document.createElement('div'); sMapLbl.style.cssText='font-family:var(--mono);font-size:9px;color:var(--warm);letter-spacing:.12em;text-transform:uppercase;margin-top:16px;margin-bottom:6px;'; sMapLbl.textContent='Sylvia'; mapSection.appendChild(sMapLbl);
+        var sMapDiv=document.createElement('div'); sMapDiv.id='anaMapS'; mapSection.appendChild(sMapDiv);
+        renderCompMap('anaMapS',buildComplimentMap(SC),'var(--warm)');
+      }
+    }
+  }
+
+  // TOP PERFORMERS
+  var perfSection=document.getElementById('anaPerformersSection');
+  if(perfSection){
+    perfSection.innerHTML='<div class="ana-sh"><h2>Top performers</h2></div>';
+    if(!MC.length){
+      var msg2=document.createElement('div'); msg2.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:16px 0;'; msg2.textContent='No compliments yet.'; perfSection.appendChild(msg2);
+    } else {
+      var perfCounts={}; MC.forEach(function(c){if(c.primaryFragId)perfCounts[c.primaryFragId]=(perfCounts[c.primaryFragId]||0)+1;});
+      var sPerfCounts={}; if(showSylviaOverlay) SC.forEach(function(c){if(c.primaryFragId)sPerfCounts[c.primaryFragId]=(sPerfCounts[c.primaryFragId]||0)+1;});
+      Object.entries(perfCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,8).forEach(function(entry,idx){
+        var fragId=entry[0]; var cnt=entry[1];
+        var frag=MF.find(function(f){return f.id===fragId;}); if(!frag) return;
+        var relForFrag={}; MC.filter(function(c){return c.primaryFragId===fragId;}).forEach(function(c){relForFrag[c.relation]=(relForFrag[c.relation]||0)+1;});
+        var topRelFrag=Object.keys(relForFrag).sort(function(a,b){return relForFrag[b]-relForFrag[a];})[0]||'';
+        var noteTip=frag.notes?frag.notes.split(',').slice(0,4).map(function(n){return n.trim();}).join(' · '):'';
+        var card=document.createElement('div'); card.className='perf-card';
+        (function(id){card.onclick=function(){openDetail(id);};})(fragId);
+        card.title=noteTip;
+        var rank=document.createElement('div'); rank.className='perf-rank'; rank.textContent='#'+(idx+1);
+        var nameWrap=document.createElement('div'); nameWrap.style.flex='1';
+        var pname=document.createElement('div'); pname.className='perf-name'; pname.innerHTML=fragDisplayName(frag);
+        var phouse=document.createElement('div'); phouse.className='perf-house'; phouse.textContent=frag.house;
+        nameWrap.appendChild(pname); nameWrap.appendChild(phouse);
+        var countWrap=document.createElement('div'); countWrap.style.cssText='text-align:right;flex-shrink:0;';
+        var pcount=document.createElement('div'); pcount.className='perf-count'; pcount.textContent=cnt;
+        var pmeta=document.createElement('div'); pmeta.className='perf-meta'; pmeta.textContent=topRelFrag;
+        countWrap.appendChild(pcount); countWrap.appendChild(pmeta);
+        card.appendChild(rank); card.appendChild(nameWrap); card.appendChild(countWrap);
+        if(showSylviaOverlay){
+          var sc2=sPerfCounts[fragId]||0;
+          var sylv=document.createElement('div'); sylv.style.cssText='font-family:var(--mono);font-size:10px;color:var(--warm);width:40px;text-align:right;flex-shrink:0;margin-left:8px;'; sylv.textContent=sc2?'S: '+sc2:''; card.appendChild(sylv);
+        }
+        perfSection.appendChild(card);
+      });
+    }
+  }
+
+  // COLLECTION BREAKDOWN
+  var collSection=document.getElementById('anaCollectionSection');
+  if(collSection){
+    collSection.innerHTML='<div class="ana-sh"><h2>Your collection</h2></div>';
+    var houseHd=document.createElement('div'); houseHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;'; houseHd.textContent='By House'; collSection.appendChild(houseHd);
+    var houseListEl=document.createElement('div'); houseListEl.id='anaHouseList'; collSection.appendChild(houseListEl);
+    renderHouseList('anaHouseList',MFC);
+    var typeHd=document.createElement('div'); typeHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:8px;'; typeHd.textContent='By Type'; collSection.appendChild(typeHd);
+    var typeCounts={}; MFC.forEach(function(f){var t=f.type||'Eau de Parfum';typeCounts[t]=(typeCounts[t]||0)+1;});
+    var totalMFC=MFC.length||1;
+    var typeColors={'Eau de Parfum':'var(--blue)','Eau de Toilette':'var(--blue2)','Body Spray':'var(--warm)','Perfume Oil':'var(--sage)','Other':'var(--muted)'};
+    var typeRow=document.createElement('div'); typeRow.style.cssText='display:flex;flex-wrap:wrap;gap:16px;margin-bottom:8px;'; collSection.appendChild(typeRow);
+    Object.entries(typeCounts).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry){
+      var t=entry[0]; var ct=entry[1]; var pct=Math.round(ct/totalMFC*100);
+      var seg=document.createElement('div'); seg.style.cssText='display:flex;flex-direction:column;';
+      var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:13px;color:'+(typeColors[t]||'var(--ink)')+';'; pctEl.textContent=pct+'%';
+      var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;'; lbl.textContent=(typeBadgeText&&typeBadgeText[t])||t;
+      seg.appendChild(pctEl); seg.appendChild(lbl); typeRow.appendChild(seg);
     });
-    var topNote=Object.entries(noteCounts).sort(function(a,b){return b[1]-a[1];})[0];
-    icards.push({title:'Top Note',val:topNote?topNote[0]:'—',sub:topNote?topNote[1]+' fragrances':''});
-    // Most complimented note
-    var noteCompCounts={};
-    MC.forEach(function(c){
-      var frag=FRAGRANCES.find(function(f){return f.id===c.primaryFragId;});
-      if(frag){[frag.topNotes,frag.middleNotes,frag.baseNotes].filter(Boolean).join(', ').split(/,\s*|·/).forEach(function(n){n=n.trim();if(n)noteCompCounts[n]=(noteCompCounts[n]||0)+1;});}
+    var typeBar=document.createElement('div'); typeBar.style.cssText='display:flex;height:4px;width:100%;margin-bottom:16px;'; collSection.appendChild(typeBar);
+    Object.entries(typeCounts).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry){
+      var t=entry[0]; var ct=entry[1]; var pct=ct/totalMFC*100;
+      var seg=document.createElement('div'); seg.style.cssText='height:100%;background:'+(typeColors[t]||'var(--b2)')+';width:'+pct+'%;'; typeBar.appendChild(seg);
     });
-    var topCompNote=Object.entries(noteCompCounts).sort(function(a,b){return b[1]-a[1];})[0];
-    icards.push({title:'Most Complimented Note',val:topCompNote?topCompNote[0]:'—',sub:topCompNote?topCompNote[1]+' compliments':''});
-    // Notes by season (best season for compliments)
-    var topSeason=Object.entries(bySeason).sort(function(a,b){return b[1]-a[1];})[0];
-    icards.push({title:'Notes by Season',val:topSeason&&topSeason[1]>0?topSeason[0]:'—',sub:topSeason&&topSeason[1]>0?topSeason[1]+' compliments':''});
-    // Average spend
-    var prices=MF2.map(function(f){var m=(f.personalNotes||'').match(/\$(\d+(?:\.\d+)?)/);return m?parseFloat(m[1]):null;}).filter(Boolean);
-    var avgSpend=prices.length?(prices.reduce(function(a,b){return a+b;},0)/prices.length).toFixed(0):'—';
-    icards.push({title:'Avg Spend',val:prices.length?'$'+avgSpend:'—',sub:prices.length?prices.length+' priced':''});
-    // Collection by house
-    var houseCounts={};
-    MF2.forEach(function(f){if(f.house)houseCounts[f.house]=(houseCounts[f.house]||0)+1;});
-    var topHouse=Object.entries(houseCounts).sort(function(a,b){return b[1]-a[1];})[0];
-    icards.push({title:'Top House',val:topHouse?topHouse[0]:'—',sub:topHouse?topHouse[1]+' fragrances':''});
-    // Rating distribution
-    var rated=MF2.filter(function(f){return f.statusRating;});
-    var avgRat=rated.length?(rated.reduce(function(a,f){return a+(f.statusRating||0);},0)/rated.length).toFixed(1):'—';
-    icards.push({title:'Avg Rating',val:avgRat!=='—'?starsStr(Math.round(parseFloat(avgRat))):'—',sub:avgRat!=='—'?avgRat+' / 5':''});
-    // Render
-    anaGrid.innerHTML='';
-    icards.forEach(function(c){
-      var div=document.createElement('div'); div.className='ana-icard';
-      var t=document.createElement('div'); t.className='ana-icard-title'; t.textContent=c.title;
-      var v=document.createElement('div'); v.className='ana-icard-val'; v.textContent=c.val;
-      var s=document.createElement('div'); s.className='ana-icard-sub'; s.textContent=c.sub;
-      div.appendChild(t); div.appendChild(v); div.appendChild(s);
-      anaGrid.appendChild(div);
-    });
+    var allF=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+    var priceRecs=allF.map(function(f){var m=(f.personalNotes||'').match(/\$(\d+(?:\.\d+)?)/);return m?{f:f,price:parseFloat(m[1])}:null;}).filter(Boolean);
+    if(priceRecs.length>=3){
+      var spendHd=document.createElement('div'); spendHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:8px;'; spendHd.textContent='Spend'; collSection.appendChild(spendHd);
+      var total2=priceRecs.reduce(function(a,r){return a+r.price;},0);
+      var avg=(total2/priceRecs.length).toFixed(0);
+      priceRecs.sort(function(a,b){return b.price-a.price;});
+      var mostExp=priceRecs[0];
+      var bestVal=priceRecs.slice().filter(function(r){return r.f.statusRating;}).sort(function(a,b){return (b.f.statusRating/b.price)-(a.f.statusRating/a.price);})[0]||priceRecs[priceRecs.length-1];
+      var spendGrid=document.createElement('div'); spendGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;'; collSection.appendChild(spendGrid);
+      function addSpendRow(lbl,name,price){
+        var d=document.createElement('div'); d.style.cssText='border-bottom:1px solid var(--b1);padding:6px 0;';
+        var l=document.createElement('div'); l.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;'; l.textContent=lbl;
+        var v=document.createElement('div'); v.style.cssText='font-family:var(--serif);font-size:14px;color:var(--ink);';
+        if(name){var nm=document.createTextNode(name+' ');var pr=document.createElement('span');pr.style.color='var(--ink3)';pr.style.fontSize='12px';pr.textContent='$'+Math.round(price);v.appendChild(nm);v.appendChild(pr);}
+        else{v.textContent=price;}
+        d.appendChild(l); d.appendChild(v); return d;
+      }
+      spendGrid.appendChild(addSpendRow('Total Spent',null,'$'+Math.round(total2)));
+      spendGrid.appendChild(addSpendRow('Avg per Bottle',null,'$'+avg));
+      spendGrid.appendChild(addSpendRow('Most Expensive',mostExp.f.name,mostExp.price));
+      spendGrid.appendChild(addSpendRow('Best Value',bestVal.f.name,bestVal.price));
+    }
   }
 }
 
@@ -4940,6 +5149,12 @@ function clearNoteFilter(){
   if(!on){ document.querySelector('#collFbar .fc[data-filter="all"]').classList.add('on'); }
 }
 
+// Global tooltip mousemove handler
+document.addEventListener('mousemove', function(e){
+  var tip=document.getElementById('anaTooltip');
+  if(tip&&tip.style.display!=='none'){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';}
+});
+
 // ═══════════════════════════════════════════════════════
 // COMPARE OVERLAY
 // ═══════════════════════════════════════════════════════
@@ -6220,6 +6435,7 @@ document.addEventListener('keydown', function(e) {
   <div class="pal-box" id="palBox"></div>
 </div>
 
+  <div id="anaTooltip" style="position:fixed;background:rgba(26,32,48,.92);color:#fff;font-family:var(--mono);font-size:11px;padding:7px 11px;pointer-events:none;display:none;z-index:9999;letter-spacing:.06em;line-height:1.5;max-width:220px;box-shadow:0 4px 16px rgba(0,0,0,.2);"></div>
 
 </body>
 </html>
