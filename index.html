@@ -862,9 +862,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <div class="page" id="page-wishlist">
       <div class="sh"><h2>Wishlist</h2><div class="sh-r"><button class="btn btn-blue" onclick="openAddFrag('WANT_TO_BUY')">Add to Wishlist</button></div></div>
       <div class="coll-filters">
-        <input type="text" id="wishSearch" placeholder="Search wishlist..." />
+        <input type="text" id="wishSearch" placeholder="Search wishlist..." style="flex:1;" />
+        <select class="coll-sort-select" id="wishSort" onchange="setWishSort(this.value)">
+          <option value="nameAZ">Name A–Z</option>
+          <option value="nameZA">Name Z–A</option>
+          <option value="ratingHL">Rating High–Low</option>
+          <option value="ratingLH">Rating Low–High</option>
+          <option value="houseAZ">House A–Z</option>
+        </select>
         <select id="wishHouse"><option value="">All houses</option></select>
-        <div id="wishFamilyFilterWrap">
+        <select id="wishRating"></select>
+        <div id="wishFamilyFilterWrap" style="flex-shrink:0;position:relative;">
           <button class="filter-btn" onclick="toggleWishFamilyDrop()">Accords <span id="wishFamilyFilterLabel"></span></button>
           <div class="filter-drop-panel" id="wishFamilyDropPanel" style="display:none;"></div>
         </div>
@@ -2724,6 +2732,8 @@ function statusChip(status){
 var wishSearchVal = '';
 var wishHouseVal = '';
 var wishFamilyVals = [];
+var wishRatingVal = '';
+var wishSortVal = 'nameAZ';
 
 function buildWishHouseFilter(){
   var wish=myFragrances().filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
@@ -2765,6 +2775,8 @@ function toggleWishFamilyDrop(){
   panel.style.display=panel.style.display==='none'?'block':'none';
 }
 
+function setWishSort(val){ wishSortVal=val; renderWishlist(); }
+
 // Close family dropdowns on outside click
 document.addEventListener('click',function(e){
   var w=document.getElementById('familyFilterWrap');
@@ -2801,6 +2813,14 @@ document.addEventListener('click',function(e){
   if(ws) ws.addEventListener('input',function(){ wishSearchVal=this.value.toLowerCase(); renderWishlist(); });
   var wh=document.getElementById('wishHouse');
   if(wh) wh.addEventListener('change',function(){ wishHouseVal=this.value; renderWishlist(); });
+  var wr=document.getElementById('wishRating');
+  if(wr){
+    wr.innerHTML='';
+    [['','All ratings'],['5','★★★★★'],['4','★★★★☆'],['3','★★★☆☆'],['2','★★☆☆☆'],['1','★☆☆☆☆']].forEach(function(p){
+      var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; wr.appendChild(o);
+    });
+    wr.addEventListener('change',function(){ wishRatingVal=this.value; renderWishlist(); });
+  }
 })();
 
 function renderCollection(){
@@ -2957,17 +2977,32 @@ function renderWishlist(){
   }
   // House
   if(wishHouseVal){ frags=frags.filter(function(f){ return f.house===wishHouseVal; }); }
-  // Family — AND logic
+  // Accords — AND logic using getAccords()
   if(wishFamilyVals.length){
     frags=frags.filter(function(f){
-      var notesAndFamily=((f.notes||'')+' '+(f.family||'')+' '+(getFragFamily(f)||'')).toLowerCase();
-      return wishFamilyVals.every(function(fam){ return notesAndFamily.includes(fam.toLowerCase()); });
+      var fragAccords=getAccords(f);
+      return wishFamilyVals.every(function(fam){
+        return fragAccords.some(function(a){ return a.toLowerCase()===fam.toLowerCase(); });
+      });
     });
   }
+  // Rating
+  if(wishRatingVal){
+    var minR=parseInt(wishRatingVal);
+    frags=frags.filter(function(f){ return (parseRating(f.communityRating)||0)>=minR; });
+  }
+  // Sort
+  frags=frags.slice().sort(function(a,b){
+    if(wishSortVal==='nameZA') return b.name.localeCompare(a.name);
+    if(wishSortVal==='ratingHL') return (parseRating(b.communityRating)||0)-(parseRating(a.communityRating)||0);
+    if(wishSortVal==='ratingLH') return (parseRating(a.communityRating)||0)-(parseRating(b.communityRating)||0);
+    if(wishSortVal==='houseAZ') return (a.house||'').localeCompare(b.house||'');
+    return a.name.localeCompare(b.name);
+  });
   // Count
   var wishCountEl=document.getElementById('wishCount');
   if(wishCountEl){
-    var hasWishFilter=!!(wishSearchVal||wishHouseVal||wishFamilyVals.length);
+    var hasWishFilter=!!(wishSearchVal||wishHouseVal||wishFamilyVals.length||wishRatingVal);
     wishCountEl.innerHTML='';
     wishCountEl.appendChild(document.createTextNode(frags.length+' item'+(frags.length!==1?'s':'')+(hasWishFilter?' — filtered':'')));
     if(hasWishFilter){
@@ -2975,10 +3010,11 @@ function renderWishlist(){
       wc.textContent=' · Clear';
       wc.style.cssText='color:var(--blue);cursor:pointer;margin-left:4px;';
       wc.onclick=function(){
-        wishSearchVal=wishHouseVal=''; wishFamilyVals=[];
+        wishSearchVal=wishHouseVal=wishRatingVal=''; wishFamilyVals=[];
         var el;
         el=document.getElementById('wishSearch'); if(el) el.value='';
         el=document.getElementById('wishHouse'); if(el) el.value='';
+        el=document.getElementById('wishRating'); if(el) el.value='';
         document.querySelectorAll('#wishFamilyDropPanel input[type=checkbox]').forEach(function(cb){ cb.checked=false; });
         updateWishFamilyLabel();
         renderWishlist();
