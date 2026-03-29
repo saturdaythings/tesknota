@@ -283,6 +283,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 
 /* FRAG SUFFIX (EDP / EDT / Spray) */
 .frag-suffix{font-size:.82em;opacity:.45;font-weight:400;}
+.type-badge{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-left:6px;vertical-align:middle;background:var(--off2);padding:1px 5px;border:1px solid var(--b2);white-space:nowrap;}
 
 /* CUSTOM NOTE ADD OPTION */
 .ti-opt-add{color:var(--blue1);font-style:italic;}
@@ -791,6 +792,13 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <div class="fc" data-filter="PREVIOUSLY_OWNED">Prev. Owned</div>
           <div class="fc" data-filter="DONT_LIKE">Don't Like</div>
         </div>
+        <div class="fbar" id="typeFilter" style="display:none;margin-bottom:12px;">
+          <div class="fc on" data-type="all" onclick="setTypeFilter(this,'all')">All Types</div>
+          <div class="fc" data-type="Eau de Parfum" onclick="setTypeFilter(this,'Eau de Parfum')">EDP</div>
+          <div class="fc" data-type="Eau de Toilette" onclick="setTypeFilter(this,'Eau de Toilette')">EDT</div>
+          <div class="fc" data-type="Body Spray" onclick="setTypeFilter(this,'Body Spray')">Body Spray</div>
+          <div class="fc" data-type="Perfume Oil" onclick="setTypeFilter(this,'Perfume Oil')">Oil</div>
+        </div>
         <div class="btn-row">
           <button class="btn btn-ghost btn-sm" id="btnTable" onclick="setView('table')" style="color:var(--blue);">Table</button>
           <button class="btn btn-ghost btn-sm" id="btnGrid" onclick="setView('grid')">Grid</button>
@@ -1180,6 +1188,15 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
               <div class="opt" onclick="togOpt(this)">Small</div>
             </div>
           </div>
+          <div class="fg" style="margin:0;"><label>Type</label>
+            <select id="afType">
+              <option value="Eau de Parfum">Eau de Parfum (EDP)</option>
+              <option value="Eau de Toilette">Eau de Toilette (EDT)</option>
+              <option value="Body Spray">Body Spray</option>
+              <option value="Perfume Oil">Perfume Oil</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
         </div>
         <div class="fg"><label>Rating</label>
           <input type="hidden" id="afRating" value="3">
@@ -1362,7 +1379,7 @@ const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/' + (window._
 // ═══════════════════════════════════════════════════════
 
 const FRAG_HEADERS = [
-  'id','userId','name','house','status','sizeOwned',
+  'id','userId','name','house','status','sizeOwned','type',
   'communityRating','communityLong','communitySill','avgPrice','notes',
   'topNotes','middleNotes','baseNotes',
   'personalRating','statusRating','personalLong','personalSill',
@@ -1493,7 +1510,7 @@ async function appendRow(tabName,row,headers){
 function fragToRow(f){
   return {
     id:f.id||'', userId:f.userId||'', name:f.name||'', house:f.house||'',
-    status:f.status||'', sizeOwned:(f.sizes||[]).join(', '),
+    status:f.status||'', sizeOwned:(f.sizes||[]).join(', '), type:f.type||'',
     communityRating:f.communityRating||'', communityLong:f.communityLong||'',
     communitySill:f.communitySill||'', avgPrice:f.avgPrice||'', notes:f.notes||'',
     topNotes:f.topNotes||'', middleNotes:f.middleNotes||'', baseNotes:f.baseNotes||'',
@@ -1509,6 +1526,7 @@ function rowToFrag(row){
   return {
     id:row.id, userId:row.userId, name:row.name, house:row.house, status:row.status,
     sizes:row.sizeOwned ? row.sizeOwned.split(',').map(function(s){return s.trim();}).filter(Boolean) : [],
+    type:row.type||null,
     communityRating:row.communityRating||null, communityLong:row.communityLong||null,
     communitySill:row.communitySill||null, avgPrice:row.avgPrice||null, notes:row.notes||'',
     topNotes:row.topNotes||'', middleNotes:row.middleNotes||'', baseNotes:row.baseNotes||'',
@@ -2168,6 +2186,67 @@ function fragNameHtml(name){
   return name;
 }
 
+var typeBadgeText={
+  'Eau de Parfum':'',
+  'Eau de Toilette':'EDT',
+  'Body Spray':'Body Spray',
+  'Perfume Oil':'Oil',
+  'Other':'Other',
+};
+function fragDisplayName(f){
+  var t=f.type||'Eau de Parfum';
+  var badge=typeBadgeText[t]||'';
+  if(!badge) return f.name;
+  return f.name+'<span class="type-badge">'+badge+'</span>';
+}
+
+function migrateFragranceTypes(){
+  var typeMap=[
+    [' Body & Hair Fragrance','Body Spray'],
+    [' Body & Hair Mist','Body Spray'],
+    [' Hair Fragrance','Body Spray'],
+    [' Perfume Spray','Body Spray'],
+    [' Body Spray','Body Spray'],
+    [' Body Mist','Body Spray'],
+    [' Eau de Parfum','Eau de Parfum'],
+    [' Eau de Toilette','Eau de Toilette'],
+    [' Extrait de Parfum','Eau de Parfum'],
+    [' Extrait','Eau de Parfum'],
+    [' Perfume Oil','Perfume Oil'],
+    [' EDP','Eau de Parfum'],
+    [' EDT','Eau de Toilette'],
+    [' EDC','Eau de Toilette'],
+    [' Fragrance Oil','Perfume Oil'],
+    [' Spray','Body Spray'],
+  ];
+  var changed=false;
+  FRAGRANCES.forEach(function(f){
+    if(f.type) return;
+    var matched=false;
+    for(var i=0;i<typeMap.length;i++){
+      var suffix=typeMap[i][0]; var type=typeMap[i][1];
+      if(f.name.endsWith(suffix)){
+        f.name=f.name.slice(0,-suffix.length).trim();
+        f.type=type; matched=true; changed=true; break;
+      }
+    }
+    if(!matched){ f.type='Eau de Parfum'; changed=true; }
+  });
+  if(changed){
+    writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS)
+      .catch(function(e){ console.error('migrateFragranceTypes write failed:',e); });
+  }
+}
+
+var activeTypeFilter='all';
+function setTypeFilter(el,type){
+  activeTypeFilter=type;
+  document.querySelectorAll('#typeFilter .fc').forEach(function(f){ f.classList.remove('on'); });
+  el.classList.add('on');
+  var activeStatus=document.querySelector('#collFbar .fc.on');
+  renderCollection(activeStatus?activeStatus.dataset.filter:'all');
+}
+
 // ── Per-user accessors ─────────────────────────────────────────────────────
 function myFragrances(){ return FRAGRANCES.filter(function(f){ return CURRENT_USER && f.userId===CURRENT_USER.id; }); }
 function friendFragrances(){ var fr=getFriend(); return fr ? FRAGRANCES.filter(function(f){ return f.userId===fr.id; }) : []; }
@@ -2309,7 +2388,7 @@ function renderDashboard(){
   if(recent.length){
     document.getElementById('dashBody').innerHTML = recent.map(f=>`
       <tr onclick="openDetail('${f.id}')">
-        <td><div class="tn">${fragNameHtml(f.name)}</div><div class="th_">${f.house}</div></td>
+        <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
         <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
@@ -2329,7 +2408,7 @@ function renderDashboard(){
       const dist = getCompDist(id);
       return '<div class="card-performer" onclick="openDetail(\'' + id + '\')">' +
         '<div class="card-num">No. ' + (i+1) + '</div>' +
-        '<div class="card-pfrag">' + f.name + '</div>' +
+        '<div class="card-pfrag">' + fragDisplayName(f) + '</div>' +
         '<div class="card-pcount">' + cnt + ' compliment' + (cnt>1?'s':'') + '</div>' +
         '<div class="card-pdist">' + dist + '</div>' +
         '</div>';
@@ -2388,6 +2467,13 @@ function renderCollection(filter='all'){
       return fam&&collFamFilter.some(function(cf){return fam.toLowerCase().includes(cf.toLowerCase());});
     });
   }
+  // Apply type filter
+  var types=new Set(myFragrances().map(function(f){return f.type||'Eau de Parfum';}));
+  var typeFilterEl=document.getElementById('typeFilter');
+  if(typeFilterEl) typeFilterEl.style.display=types.size>1?'flex':'none';
+  if(activeTypeFilter!=='all'){
+    filtered=filtered.filter(function(f){ return (f.type||'Eau de Parfum')===activeTypeFilter; });
+  }
   // Active filter bar
   var aBar=document.getElementById('activeFilterBar');
   var aTxt=document.getElementById('activeFilterText');
@@ -2415,7 +2501,7 @@ function renderCollection(filter='all'){
     document.getElementById('collBody').innerHTML = filtered.map(f=>{
       const hasFriendMatch = friendOwnsSet.has(f.name.toLowerCase());
       return `<tr data-s="${f.status}" onclick="openDetail('${f.id}')">
-        <td><div class="tn">${fragNameHtml(f.name)}</div><div class="th_">${f.house}</div></td>
+        <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td class="tmono">${f.sizes.join(', ')||'—'}</td>
         <td><div class="tstars">${starsStr(f.statusRating)}</div></td>
@@ -2579,7 +2665,7 @@ function renderCompliments(filter='all'){
     if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'Significant Others':r==='Family'?'Family':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
   });
   const allEmpty = MC.length === 0;
-  function crowHtml(c){ return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+c.primaryFrag+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div><div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+c.month+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
+  function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div><div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+c.month+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
   var listHtml;
   if(compView==='timeline'&&filtered.length){
     // Group by month+year, newest first
@@ -2792,7 +2878,7 @@ function renderFriend(){
     friendOwned.forEach(function(f){
       var tr=document.createElement('tr');
       var td1=document.createElement('td');
-      var dn=document.createElement('div'); dn.className='tn'; dn.textContent=f.name; td1.appendChild(dn);
+      var dn=document.createElement('div'); dn.className='tn'; dn.innerHTML=fragDisplayName(f); td1.appendChild(dn);
       var dh=document.createElement('div'); dh.className='th_'; dh.textContent=f.house; td1.appendChild(dh);
       tr.appendChild(td1);
       var td2=document.createElement('td');
@@ -2821,7 +2907,7 @@ function renderFriend(){
     FC.slice(0,10).forEach(function(c){
       var row=document.createElement('div'); row.className='crow';
       var left=document.createElement('div'); left.style.flex='1';
-      var cf=document.createElement('div'); cf.className='cr-f'; cf.textContent=c.primaryFrag;
+      var cf=document.createElement('div'); cf.className='cr-f'; var _cfrag=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); if(_cfrag){cf.innerHTML=fragDisplayName(_cfrag);}else{cf.textContent=c.primaryFrag;}
       if(c.secondaryFrag){ var cfl=document.createElement('span'); cfl.className='cr-layer'; cfl.textContent=' + '+c.secondaryFrag; cf.appendChild(cfl); }
       left.appendChild(cf);
       var cm=document.createElement('div'); cm.className='cr-m';
@@ -2845,7 +2931,7 @@ function renderFriend(){
     friendWish.forEach(function(f){
       var tr=document.createElement('tr');
       var td1=document.createElement('td');
-      var dn=document.createElement('div'); dn.className='tn'; dn.textContent=f.name; td1.appendChild(dn);
+      var dn=document.createElement('div'); dn.className='tn'; dn.innerHTML=fragDisplayName(f); td1.appendChild(dn);
       var dh=document.createElement('div'); dh.className='th_'; dh.textContent=f.house; td1.appendChild(dh); tr.appendChild(td1);
       var td2=document.createElement('td');
       var ds=document.createElement('div'); ds.className='ts s-wnt'; ds.textContent=STATUS_LABELS[f.status]; td2.appendChild(ds); tr.appendChild(td2);
@@ -2952,7 +3038,7 @@ function openDetail(fragId){
   if(!f)return;
   currentDetailId = fragId;
   document.getElementById('d-house').textContent = f.house.toUpperCase();
-  document.getElementById('d-name').textContent = f.name;
+  document.getElementById('d-name').innerHTML = fragDisplayName(f);
   document.getElementById('d-status').textContent = STATUS_LABELS[f.status] + (f.sizes.length?' · '+f.sizes.join(', '):'') + (f.personalRating?' · '+starsStr(f.personalRating):'') + (f.statusRating?' · '+f.statusRating:'');
   // Detail fields — hide row when empty
   function setDRow(rowId, valId, val){
@@ -3318,6 +3404,7 @@ function resetAFModal(){
   // Reset Step 2 to defaults
   document.querySelectorAll('#sizeOpts .opt').forEach((o,i)=>{o.classList.toggle('on',i===2);});
   document.getElementById('afRating').value=3; starRender(3);
+  document.getElementById('afType').value='Eau de Parfum';
   document.getElementById('afLong').value='6–12h';
   document.getElementById('afSill').value='Moderate';
   document.getElementById('afWhere').value='';
@@ -3349,6 +3436,7 @@ function afGoStep(n, skipValidation){
     if(prefetchedData){
       const d = prefetchedData;
       if(d.sizes){ document.querySelectorAll('#sizeOpts .opt').forEach(o=>o.classList.toggle('on',d.sizes.includes(o.textContent.trim()))); }
+      if(d.type) document.getElementById('afType').value=d.type; else document.getElementById('afType').value='Eau de Parfum';
       if(d.personalRating){ document.querySelectorAll('#rOpts .opt').forEach(o=>o.classList.toggle('on',parseInt(o.dataset.v)===d.personalRating)); }
       if(d.statusRating){ var numRat=typeof d.statusRating==='number'?d.statusRating:({Obsessed:5,Love:4,Like:3,'Just OK':2,"Don't Like":1}[d.statusRating]||3); document.getElementById('afRating').value=numRat; starRender(numRat); }
       if(d.personalLong) document.getElementById('afLong').value=d.personalLong;
@@ -3410,6 +3498,7 @@ function saveFragrance(){
   var combinedNotes=[topN,midN,baseN].filter(Boolean).join(' · ');
   const data = {
     name, status: document.getElementById('afStatus').value,
+    type: document.getElementById('afType').value,
     sizes, personalRating: ratingEl?parseInt(ratingEl.dataset.v):null,
     statusRating: parseInt(document.getElementById('afRating').value)||null,
     personalLong: document.getElementById('afLong').value||null,
@@ -4941,6 +5030,7 @@ document.getElementById('compareOverlay').addEventListener('click', function(e){
     console.error('[init] loadAllData threw:', e);
     sheetsOk = false;
   }
+  migrateFragranceTypes();
   document.getElementById('idLoading').style.display='none';
   // Always show the picker — never block the user due to a sync failure
   document.getElementById('idPicker').style.display='flex';
