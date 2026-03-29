@@ -34,10 +34,10 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .sb-sub{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:4px;}
 .sb-def{font-family:'Cormorant Garamond',var(--script);font-size:13px;font-style:italic;color:rgba(200,185,154,.92);line-height:1.45;margin-top:10px;letter-spacing:.01em;}
 .sb-body{flex:1;overflow-y:auto;padding:16px 0;}
-.sb-label{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:0 20px;margin:22px 0 2px;pointer-events:none;}
-.sb-link{display:flex;align-items:center;justify-content:space-between;padding:6px 20px;cursor:pointer;color:rgba(255,255,255,.65);font-size:13px;letter-spacing:.02em;transition:all .14s;user-select:none;}
-.sb-link:hover{color:var(--warm2);background:rgba(255,255,255,.05);}
-.sb-link.on{color:var(--warm2);background:rgba(200,185,154,.14);border-right:2px solid var(--warm);}
+.sb-label{font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:0 20px;margin-top:24px;margin-bottom:2px;pointer-events:none;cursor:default;opacity:.32;}
+.sb-link{display:flex;align-items:center;justify-content:space-between;padding:5px 20px;cursor:pointer;color:rgba(255,255,255,.65);font-size:13px;letter-spacing:.02em;transition:all .14s;user-select:none;opacity:.65;}
+.sb-link:hover{color:var(--warm2);background:rgba(255,255,255,.05);opacity:1;}
+.sb-link.on{color:var(--warm2);background:rgba(200,185,154,.14);border-right:2px solid var(--warm);opacity:1;}
 .sb-ct{font-family:var(--mono);font-size:10px;color:rgba(200,185,154,.8);}
 .sb-foot{padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);}
 .sb-who{font-size:11px;color:rgba(255,255,255,.45);cursor:pointer;transition:all .14s;}
@@ -255,7 +255,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .comp-rel-btn:hover{border-color:var(--blue1);color:var(--blue1);}
 .comp-rel-btn.active{border-color:var(--blue1);background:rgba(107,154,242,.15);color:var(--blue1);}
 .comp-season-hint{font-size:10px;color:var(--ink3);font-family:var(--mono);letter-spacing:.08em;margin-left:6px;text-transform:none;}
-.comp-layer-toggle{background:none;border:none;color:var(--blue1);font-family:var(--body);font-size:12px;cursor:pointer;padding:0;letter-spacing:.02em;opacity:.8;}
+.comp-layer-toggle{background:none;border:none;color:var(--blue1);font-family:var(--body);font-size:12px;cursor:pointer;padding:0;letter-spacing:.02em;opacity:.8;display:block;text-align:left;margin:8px 0 4px 0;}
 .comp-layer-toggle:hover{opacity:1;}
 .comp-save-banner{display:none;background:rgba(60,180,90,.85);color:#fff;text-align:center;padding:11px 20px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;border-top:1px solid rgba(60,180,90,.4);}
 
@@ -361,14 +361,16 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .cam-capture-btn{display:none;width:100%;height:56px;font-size:13px;margin-top:12px;}
 .cam-res{display:none;padding:16px;background:var(--blue4);}
 .cam-label{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;}
-.scan-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-.scan-card{background:#fff;border:1px solid var(--b2);padding:20px;display:flex;flex-direction:column;gap:6px;}
+.scan-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--b2);margin-bottom:20px;}
+.scan-card{background:var(--off);padding:18px;display:flex;flex-direction:column;gap:6px;text-align:center;}
 .scan-card-t{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink);margin-bottom:2px;}
-.scan-card-s{font-family:var(--mono);font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.12em;flex:1;line-height:1.6;}
+.scan-card-s{font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.12em;flex:1;line-height:1.6;}
 .scan-card-qr{margin:8px 0;}
 .scan-footer-link{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:10px;text-align:center;}
 .scan-footer-link span{color:var(--blue);cursor:pointer;}
 @media(max-width:640px){.scan-cards{grid-template-columns:1fr;}}
+.empty-state{text-align:center;padding:32px 0;font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.08em;}
+.empty-state span{color:var(--blue);cursor:pointer;text-decoration:underline;}
 
 /* IDENTITY SCREEN */
 .idscreen-hero{text-align:center;margin-bottom:64px;}
@@ -1253,6 +1255,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <button type="button" class="comp-rel-btn" data-val="Colleague / Client" onclick="setCompRelation(this.dataset.val)">Colleague</button>
             <button type="button" class="comp-rel-btn" data-val="Family" onclick="setCompRelation(this.dataset.val)">Family</button>
             <button type="button" class="comp-rel-btn" data-val="Significant Other" onclick="setCompRelation(this.dataset.val)">Partner</button>
+            <button type="button" class="comp-rel-btn" data-val="Other" onclick="setCompRelation(this.dataset.val)">Other</button>
           </div>
           <input type="hidden" id="compRelation">
           <div class="err" id="compRelErr">Please select a relation</div>
@@ -2274,12 +2277,7 @@ function renderDashboard(){
         <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
       </tr>`).join('');
   } else {
-    const emptyTr = document.createElement('tr');
-    const emptyTd = document.createElement('td'); emptyTd.colSpan = 6; emptyTd.style.cssText = 'padding:32px 0;text-align:center;';
-    const emptyMsg = document.createElement('div'); emptyMsg.style.cssText = 'font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink3);margin-bottom:12px;'; emptyMsg.textContent = 'Add your first fragrance to get started';
-    const emptyBtn = document.createElement('button'); emptyBtn.className = 'btn btn-blue'; emptyBtn.textContent = 'Add Fragrance'; emptyBtn.onclick = function(){ openAddFrag('CURRENT'); };
-    emptyTd.appendChild(emptyMsg); emptyTd.appendChild(emptyBtn); emptyTr.appendChild(emptyTd);
-    const tbody = document.getElementById('dashBody'); tbody.textContent = ''; tbody.appendChild(emptyTr);
+    document.getElementById('dashBody').innerHTML = '<tr><td colspan="6"><div class="empty-state">Your collection is empty.</div></td></tr>';
   }
   // Top performers
   const byFrag = {};
@@ -2297,8 +2295,7 @@ function renderDashboard(){
         '</div>';
     }).join('');
   } else {
-    const perfEl = document.getElementById('dashPerformers'); perfEl.textContent = '';
-    const perfMsg = document.createElement('div'); perfMsg.className = 'lbl-empty'; perfMsg.textContent = 'Log some compliments to see your top performers'; perfEl.appendChild(perfMsg);
+    document.getElementById('dashPerformers').innerHTML = '<div class="empty-state">No compliment data yet.</div>';
   }
 }
 
@@ -2392,8 +2389,11 @@ function renderCollection(filter='all'){
       </tr>`;
     }).join('');
   } else {
-    const emptyMsg = coll.length ? 'No fragrances in this category' : 'Your collection is empty — add a fragrance or import from Fragrantica';
-    document.getElementById('collBody').innerHTML = `<tr><td colspan="8" style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;text-align:center;">${emptyMsg}</td></tr>`;
+    if(coll.length){
+      document.getElementById('collBody').innerHTML = '<tr><td colspan="8"><div class="empty-state">No fragrances in this category.</div></td></tr>';
+    } else {
+      document.getElementById('collBody').innerHTML = '<tr><td colspan="8"><div class="empty-state">No fragrances yet \u2014 <span onclick="openAddFrag(\'CURRENT\')">add your first one</span>.</div></td></tr>';
+    }
   }
   // Grid
   document.getElementById('collGrid').innerHTML = filtered.map(f=>`
@@ -2552,8 +2552,8 @@ function renderCompliments(filter='all'){
     listHtml=groupOrder.map(function(key){ return '<div class="tl-month-hd">'+key+'</div>'+groups[key].map(crowHtml).join(''); }).join('');
   } else {
     listHtml=filtered.map(crowHtml).join('') || (allEmpty
-      ? '<div style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliments logged yet — wear something great</div>'
-      : '<div style="padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliments in this category yet</div>');
+      ? '<div class="empty-state">No compliments logged yet.</div>'
+      : '<div class="empty-state">No compliments in this category yet.</div>');
   }
   document.getElementById('compList').innerHTML=listHtml;
 }
@@ -3744,16 +3744,18 @@ function addToImportQueue(data){
   toast(data.name+(dup?' already in collection — flagged':''+' added to queue'));
 }
 
-function confirmBulkImport(){
+async function confirmBulkImport(){
   let added=0,skipped=0;
-  importQueueData.forEach((d,i)=>{
-    const chk=document.getElementById('iqchk'+i);
+  for(var i=0;i<importQueueData.length;i++){
+    var d=importQueueData[i];
+    var chk=document.getElementById('iqchk'+i);
     if(chk&&chk.checked&&!d.isDup){
-      FRAGRANCES.push({id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:d.communityRating,communityLong:null,communitySill:null,avgPrice:null,notes:d.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
+      var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:d.communityRating,communityLong:null,communitySill:null,avgPrice:null,notes:d.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:new Date().toISOString()};
+      FRAGRANCES.push(newFrag);
+      await appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
       added++;
     } else skipped++;
-  });
-  if(added>0) writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  }
   importQueueData=[];
   renderImportQueue();
   updateCounts();
@@ -4056,16 +4058,18 @@ function showLinkResult(data){
   // Confidence
   var conf=document.getElementById('lr-confidence');
   var confMsg={
-    'slug-only':'Parsed from URL only — verify name and add notes before saving',
-    'local-db':'Data from local database',
-    'community':'Data contributed by the community',
-    'high':'',
-    'vision':''
+    'local-db':'FOUND IN LOCAL DATABASE',
+    'slug-only':'PARSED FROM URL \u2014 VERIFY BEFORE SAVING',
+    'community':'DATA FROM COMMUNITY',
   }[data.parseConfidence]||'';
-  var confColor={'local-db':'#4c9a6e','community':'#5b7ec9','slug-only':'#b87a30'}[data.parseConfidence]||'#888';
   if(confMsg){
     conf.textContent=confMsg;
-    conf.style.color=confColor;
+    conf.style.fontFamily='var(--mono)';
+    conf.style.fontSize='9px';
+    conf.style.color='var(--ink3)';
+    conf.style.textTransform='uppercase';
+    conf.style.letterSpacing='.1em';
+    conf.style.marginTop='4px';
     conf.style.display='block';
   }else{
     conf.style.display='none';
@@ -4381,7 +4385,16 @@ function initCamPanel(){
   var loading=document.getElementById('camLoading'); if(loading)loading.style.display='none';
   var captureBtn=document.getElementById('camCaptureBtn'); if(captureBtn){captureBtn.style.display='none';captureBtn.disabled=false;}
   var camBox=document.getElementById('camBox'); if(camBox)camBox.style.display='none';
-  var isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  // No key message
+  var hasKey=window.__ENV__&&window.__ENV__.VISION_API_KEY;
+  if(!hasKey){
+    var msg=document.createElement('div');
+    msg.style.cssText='padding:24px 0;font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.08em;text-align:center;line-height:1.7;';
+    msg.textContent='Bottle scan requires a Vision API key. Add VISION_API_KEY to Cloudflare Pages environment variables and redeploy.';
+    el.appendChild(msg);
+    var si=document.getElementById('camSearchInput');if(si)si.value='';
+    return;
+  }
   var grid=document.createElement('div'); grid.className='scan-cards';
   function makeCard(title,sub,btnText,btnAction){
     var card=document.createElement('div'); card.className='scan-card';
@@ -4390,26 +4403,23 @@ function initCamPanel(){
     var btn=document.createElement('button'); btn.className='btn btn-ghost btn-sm'; btn.textContent=btnText; btn.onclick=btnAction; card.appendChild(btn);
     return card;
   }
-  if(isMobile){
-    grid.appendChild(makeCard('Open Camera','Rear camera \u00b7 Label recognition','Open Camera',startScan));
-    grid.appendChild(makeCard('Choose from Photos','Browse your camera roll or files','Choose Photo',function(){document.getElementById('camFileInput').click();}));
-  } else {
-    grid.appendChild(makeCard('Open Webcam','Use your device camera','Open Webcam',startScan));
-    var phoneCard=document.createElement('div'); phoneCard.className='scan-card';
-    var pt=document.createElement('div'); pt.className='scan-card-t'; pt.textContent='Scan with Phone'; phoneCard.appendChild(pt);
-    var qrDiv=document.createElement('div'); qrDiv.className='scan-card-qr'; qrDiv.id='scanQrCode'; phoneCard.appendChild(qrDiv);
-    var ps=document.createElement('div'); ps.className='scan-card-s'; ps.textContent='Opens scanner on mobile'; phoneCard.appendChild(ps);
-    grid.appendChild(phoneCard);
-    grid.appendChild(makeCard('Upload a Photo','From camera roll or files','Upload Photo',function(){document.getElementById('camFileInput').click();}));
-    setTimeout(function(){
-      var qrEl=document.getElementById('scanQrCode');
-      if(qrEl&&typeof QRCode!=='undefined'){
-        new QRCode(qrEl,{text:'https://tesknota.pages.dev?scan=1',width:120,height:120,colorDark:'#1A2E5C',colorLight:'#F4F2ED'});
-      }
-    },80);
-  }
+  var isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  var camLabel=isMobile?'Open Camera':'Open Webcam';
+  var camSub=isMobile?'POINT AT BOTTLE LABEL':'POINT AT BOTTLE LABEL';
+  grid.appendChild(makeCard(camLabel,camSub,'Open Camera',startScan));
+  var phoneCard=document.createElement('div'); phoneCard.className='scan-card';
+  var pt=document.createElement('div'); pt.className='scan-card-t'; pt.textContent='Scan with Phone'; phoneCard.appendChild(pt);
+  var ps=document.createElement('div'); ps.className='scan-card-s'; ps.textContent='OPEN ON MOBILE'; phoneCard.appendChild(ps);
+  var qrDiv=document.createElement('div'); qrDiv.className='scan-card-qr'; qrDiv.id='scanQrCode'; phoneCard.appendChild(qrDiv);
+  grid.appendChild(phoneCard);
+  grid.appendChild(makeCard('Upload Photo','FROM CAMERA ROLL','Choose Photo',function(){document.getElementById('camFileInput').click();}));
   el.appendChild(grid);
-  // Focus search bar as fallback
+  setTimeout(function(){
+    var qrEl=document.getElementById('scanQrCode');
+    if(qrEl&&typeof QRCode!=='undefined'){
+      new QRCode(qrEl,{text:'https://tesknota.pages.dev?scan=1',width:100,height:100,colorDark:'#1A2E5C',colorLight:'#F4F2ED'});
+    }
+  },80);
   var si=document.getElementById('camSearchInput');if(si)si.value='';
 }
 
