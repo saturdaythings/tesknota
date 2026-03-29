@@ -892,7 +892,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 
     <!-- COMPLIMENTS -->
     <div class="page" id="page-compliments">
-      <div class="sh"><h2>Compliment Log</h2><div class="sh-r"><div class="btn-row"><button class="btn btn-ghost btn-sm" id="compViewList" onclick="setCompView('list')" style="color:var(--blue);">List</button><button class="btn btn-ghost btn-sm" id="compViewTimeline" onclick="setCompView('timeline')">Timeline</button><button class="btn btn-blue" onclick="openAddComp('')">Log Compliment</button></div></div></div>
+      <div class="sh"><h2>Compliment Log</h2><div class="sh-r"><div class="btn-row"><button class="btn btn-blue" onclick="openAddComp('')">Log Compliment</button></div></div></div>
       <div class="fbar" id="compFbar">
         <div class="fc on" data-filter="all">All</div>
         <div class="fc" data-filter="Stranger">Strangers</div>
@@ -1833,8 +1833,6 @@ const FRAG_DB = [
   {n:'Chanel Coco EDP',h:'Chanel',conc:'EDP',fam:'Oriental Spicy',top:'Mandarin, Peach, Coriander, Aldehydes',mid:'Rose, Jasmine, Clove, Clover',base:'Benzoin, Sandalwood, Opoponax, Civet',r:'4.3',l:'8–12h',s:'Strong',p:'~$165'},
   {n:'Dior Miss Dior EDP',h:'Dior',conc:'EDP',fam:'Floral Chypre',top:'Calabrian Bergamot, Pink Pepper',mid:'Grasse Rose, Peony',base:'Patchouli, Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$155'},
   {n:'Dior Miss Dior Blooming Bouquet EDT',h:'Dior',conc:'EDT',fam:'Floral Fruity',top:'Strawberry, Pear, Red Mandarin',mid:'Peony, Damascus Rose',base:'White Musk, Patchouli',r:'4.0',l:'4–6h',s:'Soft',p:'~$140'},
-  {n:'Dior J\'adore EDP',h:'Dior',conc:'EDP',fam:'Floral',top:'Pear, Melon, Magnolia',mid:'Rose, Jasmine, Orchid, Violet',base:'Musk, Blackberry, Sandalwood',r:'4.2',l:'6–8h',s:'Moderate',p:'~$155'},
-  {n:'Dior J\'adore Parfum',h:'Dior',conc:'Parfum',fam:'Floral',top:'Jasmine, Ylang-Ylang',mid:'Rose, Violet, Magnolia',base:'Musk, Sandalwood, Vanilla',r:'4.4',l:'12–24h',s:'Strong',p:'~$290'},
   {n:'Dior Hypnotic Poison EDT',h:'Dior',conc:'EDT',fam:'Oriental Vanilla',top:'Bitter Almond, Plum, Apricot',mid:'Jasmine, Tuberose, Sambac Jasmine',base:'Musk, Vanilla, Sandalwood, Caraway',r:'4.4',l:'8–12h',s:'Strong',p:'~$135'},
   {n:'Dior Poison Girl EDP',h:'Dior',conc:'EDP',fam:'Floral Oriental',top:'Bitter Orange, Neroli',mid:'Rose, Almond, Heliotrope',base:'Vanilla, Sandalwood',r:'4.1',l:'8–12h',s:'Moderate',p:'~$135'},
   {n:'Dior Homme EDP',h:'Dior',conc:'EDP',fam:'Floral Woody',top:'Bergamot, Elemi',mid:'Iris, Vetiver, Lavender',base:'Patchouli, Leather, Musk',r:'4.4',l:'8–12h',s:'Strong',p:'~$140'},
@@ -2491,68 +2489,6 @@ function fixPhlurVanillaSkin(){
   console.log('[fixPhlur] After:',JSON.stringify({id:k4.id,name:k4.name,type:k4.type,communityRating:k4.communityRating}));
   writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS)
     .catch(function(e){ console.error('[fixPhlur] write failed:',e); });
-}
-
-function migrateFragranceTypes(){
-  var typeMap=[
-    [' Body & Hair Fragrance','Body Spray'],
-    [' Body & Hair Mist','Body Spray'],
-    [' Hair Fragrance','Body Spray'],
-    [' Perfume Spray','Body Spray'],
-    [' Body Spray','Body Spray'],
-    [' Body Mist','Body Spray'],
-    [' Eau de Parfum','Eau de Parfum'],
-    [' Eau de Toilette','Eau de Toilette'],
-    [' Extrait de Parfum','Eau de Parfum'],
-    [' Extrait','Eau de Parfum'],
-    [' Perfume Oil','Perfume Oil'],
-    [' EDP','Eau de Parfum'],
-    [' EDT','Eau de Toilette'],
-    [' EDC','Eau de Toilette'],
-    [' Fragrance Oil','Perfume Oil'],
-    [' Spray','Body Spray'],
-  ];
-  var typeNormalise={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Eau de Parfum (EDP)':'Eau de Parfum','Eau de Toilette (EDT)':'Eau de Toilette'};
-  var changed=false;
-  FRAGRANCES.forEach(function(f){
-    var matched=false;
-    for(var i=0;i<typeMap.length;i++){
-      var suffix=typeMap[i][0]; var type=typeMap[i][1];
-      if(f.name.endsWith(suffix)){
-        f.name=f.name.slice(0,-suffix.length).trim();
-        f.type=type; matched=true; changed=true; break;
-      }
-    }
-    if(!matched){
-      if(f.type && typeNormalise[f.type]){ f.type=typeNormalise[f.type]; changed=true; }
-    }
-  });
-  if(changed){
-    writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS)
-      .catch(function(e){ console.error('migrateFragranceTypes write failed:',e); });
-  }
-}
-
-function cleanFragranceNames(){
-  var changed=false;
-  FRAGRANCES.forEach(function(f){
-    if(f.house && f.name.indexOf(f.house)===0 && f.name.length>f.house.length && f.name[f.house.length]===' '){
-      f.name=f.name.slice(f.house.length).trim();
-      changed=true;
-    }
-  });
-  // Also clean FRAG_DB entries
-  if(typeof FRAG_DB!=='undefined'){
-    FRAG_DB.forEach(function(e){
-      if(e.h && e.n.indexOf(e.h)===0 && e.n.length>e.h.length && e.n[e.h.length]===' '){
-        e.n=e.n.slice(e.h.length).trim();
-      }
-    });
-  }
-  if(changed){
-    writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS)
-      .catch(function(e){ console.error('cleanFragranceNames write failed:',e); });
-  }
 }
 
 // ── Per-user accessors ─────────────────────────────────────────────────────
@@ -3357,15 +3293,6 @@ function promoteToCollection(fragId){
 // RENDER — COMPLIMENTS
 // ═══════════════════════════════════════════════════════
 
-var compView = 'list';
-function setCompView(v){
-  compView=v;
-  document.getElementById('compViewList').style.color=v==='list'?'var(--blue)':'';
-  document.getElementById('compViewTimeline').style.color=v==='timeline'?'var(--blue)':'';
-  var fc=document.querySelector('#compFbar .fc.on');
-  renderCompliments(fc?fc.dataset.filter:'all');
-}
-
 function renderComplimentLocation(c){
   var parts=[];
   if(c.location) parts.push(c.location);
@@ -3394,21 +3321,9 @@ function renderCompliments(filter='all'){
   const allEmpty = MC.length === 0;
   var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':''; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'+_house+'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(renderComplimentLocation(c)!=='—'?' · '+renderComplimentLocation(c):'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+(_MN[parseInt(c.month)-1]||c.month)+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
-  var listHtml;
-  if(compView==='timeline'&&filtered.length){
-    // Group by month+year, newest first
-    var groups={}; var groupOrder=[];
-    filtered.forEach(function(c){
-      var key=(_MN[parseInt(c.month)-1]||c.month||'?')+' '+(c.year||'?');
-      if(!groups[key]){ groups[key]=[]; groupOrder.push(key); }
-      groups[key].push(c);
-    });
-    listHtml=groupOrder.map(function(key){ return '<div class="tl-month-hd">'+key+'</div>'+groups[key].map(crowHtml).join(''); }).join('');
-  } else {
-    listHtml=filtered.map(crowHtml).join('') || (allEmpty
-      ? '<div class="empty-state">No compliments logged yet.</div>'
-      : '<div class="empty-state">No compliments in this category yet.</div>');
-  }
+  var listHtml=filtered.map(crowHtml).join('') || (allEmpty
+    ? '<div class="empty-state">No compliments logged yet.</div>'
+    : '<div class="empty-state">No compliments in this category yet.</div>');
   document.getElementById('compList').innerHTML=listHtml;
 }
 
@@ -6247,7 +6162,6 @@ function auditDataIntegrity(){
   check('saveCompliment exists',typeof saveCompliment==='function');
   check('writeSheet exists',typeof writeSheet==='function');
   check('appendRow exists',typeof appendRow==='function');
-  check('migrateFragranceTypes exists',typeof migrateFragranceTypes==='function');
 
   // PRINT RESULTS
   console.log('\n=== tęsknota DATA INTEGRITY AUDIT ===');
@@ -6289,8 +6203,6 @@ window.auditData=auditDataIntegrity;
   });
   fixBeirutBaklava();
   fixPhlurVanillaSkin();
-  migrateFragranceTypes();
-  cleanFragranceNames();
   initCollectionSort();
   document.getElementById('idLoading').style.display='none';
   // Always show the picker — never block the user due to a sync failure
