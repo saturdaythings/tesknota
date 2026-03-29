@@ -71,6 +71,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .btn-blue:hover{background:var(--blue2);}
 .btn-warm{background:var(--warm);color:#fff;}
 .btn-warm:hover{background:#b5a485;}
+.btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none;}
 .btn-ghost{background:none;border:1px solid var(--b3);color:var(--ink2);}
 .btn-ghost:hover{background:var(--off2);}
 .btn-bare{background:none;border:none;color:var(--ink3);cursor:pointer;font-family:var(--body);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;}
@@ -4130,6 +4131,7 @@ function openEditFrag(fragId, forceStatus){
 
 function resetAFModal(){
   afAccordVals = [];
+  initAfValidation();
   _afStep=1;
   document.getElementById('af-s1').style.display='block';
   document.getElementById('af-s2').style.display='none';
@@ -4157,6 +4159,22 @@ function resetAFModal(){
   document.getElementById('dupeFor').value='';
   document.getElementById('afNotes').value='';
   tiInit('afTop',''); tiInit('afMiddle',''); tiInit('afBase','');
+}
+
+function validateAfStep2(){
+  var hasSize = !!document.querySelector('#sizeOpts .opt.on');
+  var hasType = !!(document.getElementById('afType')||{}).value;
+  var btn = document.getElementById('afSave');
+  if(btn) btn.disabled = !(hasSize && hasType);
+  return hasSize && hasType;
+}
+
+function initAfValidation(){
+  var typeEl = document.getElementById('afType');
+  if(typeEl) typeEl.addEventListener('change', validateAfStep2);
+  document.querySelectorAll('#sizeOpts .opt').forEach(function(chip){
+    chip.addEventListener('click', function(){ setTimeout(validateAfStep2, 0); });
+  });
 }
 
 function afGoStep(n, skipValidation){
@@ -4190,6 +4208,7 @@ function afGoStep(n, skipValidation){
       if(d.personalNotes) document.getElementById('afNotes').value=d.personalNotes;
       tiInit('afTop',d.topNotes||''); tiInit('afMiddle',d.middleNotes||''); tiInit('afBase',d.baseNotes||'');
     }
+    validateAfStep2();
   } else {
     document.getElementById('af-s1').style.display='block';
     document.getElementById('af-s2').style.display='none';
