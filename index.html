@@ -1290,6 +1290,10 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <div class="note-tier"><div class="note-tier-head">Base Notes</div><div class="ti-wrap" id="ti-afBase" onclick="focusTi('afBase')"></div></div>
           </div>
         </div>
+        <div class="fg">
+          <label>Accords</label>
+          <div class="fam-chips" id="afAccordPicker" style="margin-top:4px;"></div>
+        </div>
         <div class="fg"><label>Personal notes</label>
           <textarea id="afNotes" placeholder="How does it smell on your skin? When do you wear it? Any context worth remembering?"></textarea>
         </div>
@@ -2209,6 +2213,33 @@ let nextCompId = 1;
 let currentDetailId = null;
 let editingFragId = null;
 let prefetchedData = null;
+var afAccordVals = [];
+
+function buildAccordPicker(preselected){
+  afAccordVals = preselected
+    ? (typeof preselected==='string'
+        ? preselected.split(',').map(function(a){return a.trim();}).filter(Boolean)
+        : preselected.slice())
+    : [];
+  var wrap = document.getElementById('afAccordPicker');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  SCENT_FAMILIES.forEach(function(fam){
+    var chip = document.createElement('div');
+    chip.className = 'fam-chip' + (afAccordVals.includes(fam) ? ' on' : '');
+    chip.textContent = fam;
+    chip.onclick = function(){
+      if(afAccordVals.includes(fam)){
+        afAccordVals = afAccordVals.filter(function(a){ return a!==fam; });
+        chip.classList.remove('on');
+      } else {
+        afAccordVals.push(fam);
+        chip.classList.add('on');
+      }
+    };
+    wrap.appendChild(chip);
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // UTILITY
@@ -4066,6 +4097,7 @@ function openAddFrag(presetStatus, prefillName){
   const sel = document.getElementById('afStatus');
   for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===presetStatus){ sel.selectedIndex=i; break; }
   if(prefillName){ document.getElementById('afSrch').value=prefillName; afSearchAndSelect(prefillName); }
+  buildAccordPicker(null);
   openModal('addFragM');
 }
 
@@ -4090,12 +4122,14 @@ function openEditFrag(fragId, forceStatus){
   for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===statusVal){ sel.selectedIndex=i; break; }
   // Pre-fill Step 2
   prefetchedData = {sizes:f.sizes,type:f.type,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:f.topNotes||'',middleNotes:f.middleNotes||'',baseNotes:f.baseNotes||''};
+  buildAccordPicker(f.accords||null);
   // Auto-advance to step 2 for edits
   afGoStep(2, true);
   openModal('addFragM');
 }
 
 function resetAFModal(){
+  afAccordVals = [];
   _afStep=1;
   document.getElementById('af-s1').style.display='block';
   document.getElementById('af-s2').style.display='none';
@@ -4216,6 +4250,7 @@ function saveFragrance(){
     isDupe, dupeFor: isDupe?document.getElementById('dupeFor').value:'',
     personalNotes: document.getElementById('afNotes').value,
     topNotes: topN, middleNotes: midN, baseNotes: baseN,
+    accords: afAccordVals.length ? afAccordVals.join(', ') : (deriveAccords([topN,midN,baseN].filter(Boolean).join(', ')||'').join(', ')||undefined),
   };
   if(combinedNotes) data.notes = combinedNotes;
   if(editingFragId){
