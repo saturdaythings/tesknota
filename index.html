@@ -1673,7 +1673,7 @@ async function loadAllData(){
   var _sheetFragIds=new Set(fragsRaw.map(function(r){return r.id;}));
   var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.id);});
   if(_missingFrags.length){
-    syncMissingRows('fragrances',_missingFrags.map(fragToRow),FRAG_HEADERS,'syncFrags');
+    await syncMissingRows('fragrances',_missingFrags.map(fragToRow),FRAG_HEADERS,'syncFrags');
   }
   var _sheetCompIds=new Set(compsRaw.map(function(r){return r.id;}));
   if(compsRaw.length){
@@ -1683,7 +1683,7 @@ async function loadAllData(){
   // Write any seed compliments missing from Sheets so they persist
   var _missingComps=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
   if(_missingComps.length){
-    syncMissingRows('compliments',_missingComps.map(compToRow),COMP_HEADERS,'syncComps');
+    await syncMissingRows('compliments',_missingComps.map(compToRow),COMP_HEADERS,'syncComps');
   }
 
   // Recalculate ID counters so new entries don't collide with loaded data
