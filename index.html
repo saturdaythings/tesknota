@@ -741,7 +741,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <div class="sync-wrap"><div class="sync-dot" id="syncDot"></div><span class="sync-txt" id="syncTxt"></span></div>
     <div class="mob-wear-chip" id="mobWearChip" title="Today's suggested fragrance"></div>
     <button class="mob-srch-btn" onclick="toggleMobSearch()" title="Search">&#9906;</button>
-    <button class="btn btn-blue" onclick="openAddFrag('CURRENT')" title="Add a new fragrance to your collection">Add Fragrance</button>
+    <button class="btn btn-blue" id="topbarAddBtn" onclick="openAddFrag('CURRENT')" title="Add a new fragrance to your collection">Add Fragrance</button>
   </div>
   <div class="mob-srch-row" id="mobSrchRow">
     <input class="mob-srch-input" id="mobSrch" placeholder="Search fragrances..." oninput="gSearch(this.value)" onblur="setTimeout(closeGS,180)" onkeydown="if(event.key==='Escape')toggleMobSearch()">
@@ -1237,9 +1237,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
       <div class="fg">
         <label>Primary fragrance</label>
-        <select id="compFrag">
-          <option value="">— Select from collection —</option>
-        </select>
+        <div class="acwrap">
+          <input id="compFragSrch" type="text" placeholder="Search your collection..." oninput="cfSearch(this.value)" autocomplete="off" onblur="setTimeout(function(){var d=document.getElementById('cfDrop');if(d)d.style.display='none';},180)">
+          <div class="acdrop" id="cfDrop"></div>
+        </div>
+        <input type="hidden" id="compFrag">
         <div class="err" id="compFragErr">Please select a fragrance</div>
       </div>
       <div class="frow" style="margin-top:4px;">
@@ -1593,6 +1595,7 @@ function selectIdentity(name, id){
     who.appendChild(document.createTextNode('Settings'));
   }
   renderDashboard();
+  var _initAddBtn=document.getElementById('topbarAddBtn');if(_initAddBtn)_initAddBtn.style.display='none';
   renderImportQueue();
   updateCounts();
   // Auto-navigate to scan tab if ?scan=1 is in URL
@@ -2167,6 +2170,8 @@ function goPage(id){
   document.getElementById('pgName').textContent=pageName;
   document.querySelectorAll('.sb-link[data-page]').forEach(l=>l.classList.toggle('on',l.dataset.page===id));
   document.querySelectorAll('.mob-btn[data-mob]').forEach(b=>b.classList.toggle('on',b.dataset.mob===id));
+  var topbarAddBtn=document.getElementById('topbarAddBtn');
+  if(topbarAddBtn) topbarAddBtn.style.display=(id==='dashboard')?'none':'';
   closeSB();
   if(id==='dashboard') renderDashboard();
   if(id==='collection') renderCollection();
@@ -2248,8 +2253,8 @@ function renderDashboard(){
     if(!hasCurrent){
       onboardEl.style.display='block';
       onboardEl.innerHTML='<div class="dash-onboard"><div class="dash-onboard-title">Welcome to tęsknota</div><div class="dash-onboard-sub">Your fragrance journey starts here</div>'
-        +'<div class="dash-step"><div class="dash-step-num">1</div><div class="dash-step-body"><div class="dash-step-title">Add your first fragrance</div><div class="dash-step-desc">Search by name, scan a bottle, or import from a spreadsheet</div></div><button class="btn btn-blue" onclick="openAddFrag(\'CURRENT\')">Add Fragrance</button></div>'
-        +'<div class="dash-step"><div class="dash-step-num">2</div><div class="dash-step-body"><div class="dash-step-title">Log your first compliment</div><div class="dash-step-desc">Record who complimented you, when, and what you were wearing</div></div><button class="btn btn-ghost" onclick="openAddComp(null)">Log Compliment</button></div>'
+        +'<div class="dash-step"><div class="dash-step-num">1</div><div class="dash-step-body"><div class="dash-step-title">Add your first fragrance</div><div class="dash-step-desc">Search by name, scan a bottle, or import from a spreadsheet</div></div><span onclick="openAddFrag(\'CURRENT\')" style="color:var(--blue);cursor:pointer;font-size:12px;text-decoration:underline;font-family:var(--body);">Add your first fragrance \u2192</span></div>'
+        +'<div class="dash-step"><div class="dash-step-num">2</div><div class="dash-step-body"><div class="dash-step-title">Log your first compliment</div><div class="dash-step-desc">Record who complimented you, when, and what you were wearing</div></div><span onclick="openAddComp(null)" style="color:var(--blue);cursor:pointer;font-size:12px;text-decoration:underline;font-family:var(--body);">Log your first compliment \u2192</span></div>'
         +'</div>';
     } else {
       onboardEl.style.display='none';
@@ -3355,6 +3360,8 @@ function saveFragrance(){
         }
       },500);
     }
+    var duplicate=myFragrances().find(function(f){return f.name.toLowerCase().trim()===newFrag.name.toLowerCase().trim();});
+    if(duplicate){toast('You already have '+newFrag.name+' in your collection.');return;}
     FRAGRANCES.push(newFrag);
     appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
     toast(name+' added to '+STATUS_LABELS[data.status]);
@@ -3390,6 +3397,45 @@ function afSearch(v){
     item.appendChild(nd);item.appendChild(hd);el.appendChild(item);
   });
   el.style.display='block';
+}
+
+function cfSearch(v){
+  var el=document.getElementById('cfDrop');
+  if(v.length<1){el.style.display='none';return;}
+  var eligible=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+  var hits=eligible.filter(function(f){return f.name.toLowerCase().includes(v.toLowerCase())||f.house.toLowerCase().includes(v.toLowerCase());}).slice(0,8);
+  while(el.firstChild)el.removeChild(el.firstChild);
+  if(!hits.length){
+    var noRow=document.createElement('div');noRow.className='aci';
+    var noT=document.createElement('div');noT.className='aci-n';noT.style.color='var(--ink3)';noT.textContent='Not in your collection';
+    noRow.appendChild(noT);el.appendChild(noRow);
+    var addRow=document.createElement('div');addRow.className='aci';addRow.style.cursor='pointer';
+    var addT=document.createElement('div');addT.className='aci-n';addT.style.color='var(--ink3)';addT.style.fontSize='11px';addT.textContent='Not in your collection? Add it first \u2192';
+    addRow.onmousedown=function(e){e.preventDefault();closeModal('addCompM');openAddFrag('CURRENT');};
+    addRow.appendChild(addT);el.appendChild(addRow);
+    var importRow=document.createElement('div');importRow.className='aci';importRow.style.cursor='pointer';
+    var importT=document.createElement('div');importT.className='aci-n';importT.style.color='var(--blue)';importT.textContent='Can\'t find it? Import instead \u2192';
+    importRow.onmousedown=function(e){e.preventDefault();closeModal('addCompM');goPage('import');setTimeout(function(){var li=document.getElementById('linkIn');if(li)li.focus();},300);};
+    importRow.appendChild(importT);el.appendChild(importRow);
+  } else {
+    hits.forEach(function(f){
+      var item=document.createElement('div');item.className='aci';
+      item.onmousedown=(function(fid,fn){return function(e){e.preventDefault();pickCF(fid,fn);};})(f.id,f.name);
+      var nd=document.createElement('div');nd.className='aci-n';nd.textContent=f.name+(f.status==='PREVIOUSLY_OWNED'?' (prev. owned)':'');
+      var hd=document.createElement('div');hd.className='aci-h';hd.textContent=f.house;
+      item.appendChild(nd);item.appendChild(hd);el.appendChild(item);
+    });
+  }
+  el.style.display='block';
+}
+
+function pickCF(fragId, fragName){
+  document.getElementById('compFrag').value=fragId;
+  document.getElementById('compFragSrch').value=fragName;
+  document.getElementById('cfDrop').style.display='none';
+  document.getElementById('compFragErr').style.display='none';
+  updateCompFrag2();
+  updateCompStickyHeader();
 }
 
 function afSearchAndSelect(name){
@@ -3442,17 +3488,20 @@ function openAddComp(fragId, prefill){
   var sub=document.getElementById('addCompSub');
   if(title) title.textContent = editingCompId ? 'Edit Compliment' : 'Log a Compliment';
   if(sub) sub.textContent = editingCompId ? 'Update the details of this compliment' : 'Record who, where, and what you were wearing';
-  // Populate fragrance dropdown with CURRENT + PREVIOUSLY_OWNED
-  const eligible = myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
-  const sel = document.getElementById('compFrag');
-  sel.innerHTML='<option value="">— Select from collection —</option>';
-  eligible.forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=f.name+(f.status==='PREVIOUSLY_OWNED'?' (prev. owned)':''); sel.appendChild(o); });
+  // Reset custom fragrance picker
+  var fragSrch=document.getElementById('compFragSrch');
+  var fragHid=document.getElementById('compFrag');
+  if(fragSrch) fragSrch.value='';
+  if(fragHid) fragHid.value='';
+  var cfDrop=document.getElementById('cfDrop'); if(cfDrop) cfDrop.style.display='none';
   const fillFragId = prefill ? prefill.primaryFragId : fragId;
-  if(fillFragId){ for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===fillFragId){ sel.selectedIndex=i; break; } }
+  if(fillFragId){
+    var fillFrag=FRAGRANCES.find(function(x){return x.id===fillFragId;});
+    if(fillFrag){ if(fragSrch) fragSrch.value=fillFrag.name+(fillFrag.status==='PREVIOUSLY_OWNED'?' (prev. owned)':''); if(fragHid) fragHid.value=fillFragId; }
+  }
   // Populate secondary dropdown
   updateCompFrag2();
   if(prefill&&prefill.secondaryFragId){ var s2=document.getElementById('compFrag2'); for(let i=0;i<s2.options.length;i++) if(s2.options[i].value===prefill.secondaryFragId){ s2.selectedIndex=i; break; } }
-  sel.onchange = function(){ updateCompFrag2(); updateCompStickyHeader(); };
   // Reset errors
   document.getElementById('compFragErr').style.display='none';
   document.getElementById('compRelErr').style.display='none';
@@ -3505,14 +3554,14 @@ function setCompRelation(val){
 }
 
 function updateCompStickyHeader(){
-  var sel=document.getElementById('compFrag');
+  var fragId=document.getElementById('compFrag').value;
   var sticky=document.getElementById('compFragSticky');
   var stickyName=document.getElementById('compFragStickyName');
   if(!sticky||!stickyName) return;
-  var opt=sel.options[sel.selectedIndex];
-  if(sel.value&&opt){
-    stickyName.textContent=opt.textContent;
-    sticky.style.display='block';
+  if(fragId){
+    var f=FRAGRANCES.find(function(x){return x.id===fragId;});
+    if(f){stickyName.textContent=f.name;sticky.style.display='block';}
+    else{sticky.style.display='none';}
   } else {
     sticky.style.display='none';
   }
@@ -3555,6 +3604,10 @@ function saveCompliment(){
   const f = FRAGRANCES.find(x=>x.id===fragId);
   const f2Id = document.getElementById('compFrag2').value;
   const f2 = f2Id ? FRAGRANCES.find(x=>x.id===f2Id) : null;
+  if(!editingCompId&&f){
+    var potentialDup=myCompliments().find(function(c){return c.primaryFrag===f.name&&c.relation===relation&&c.month===month&&c.year===year;});
+    if(potentialDup) toast('Heads up \u2014 you have a similar compliment already logged for '+f.name+' this month.');
+  }
   if(editingCompId){
     // Update existing compliment
     var idx = COMPLIMENTS.findIndex(function(x){ return x.id===editingCompId; });
@@ -3745,21 +3798,25 @@ function addToImportQueue(data){
 }
 
 async function confirmBulkImport(){
-  let added=0,skipped=0;
+  let added=0,dups=0,skipped=0;
   for(var i=0;i<importQueueData.length;i++){
     var d=importQueueData[i];
     var chk=document.getElementById('iqchk'+i);
-    if(chk&&chk.checked&&!d.isDup){
-      var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:d.communityRating,communityLong:null,communitySill:null,avgPrice:null,notes:d.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:new Date().toISOString()};
-      FRAGRANCES.push(newFrag);
-      await appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
-      added++;
-    } else skipped++;
+    if(!chk||!chk.checked){skipped++;continue;}
+    var collDup=myFragrances().find(function(f){return f.name.toLowerCase().trim()===d.name.toLowerCase().trim();});
+    if(d.isDup||collDup){dups++;continue;}
+    var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:d.communityRating,communityLong:null,communitySill:null,avgPrice:null,notes:d.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:new Date().toISOString()};
+    FRAGRANCES.push(newFrag);
+    await appendRow('fragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+    added++;
   }
   importQueueData=[];
   renderImportQueue();
   updateCounts();
-  toast(added+' imported, '+skipped+' skipped');
+  var msg=added+' fragrance'+(added!==1?'s':'')+' imported';
+  if(dups>0) msg+=', '+dups+' duplicate'+(dups!==1?'s':'')+' skipped';
+  if(skipped>0) msg+=', '+skipped+' unchecked';
+  toast(msg);
   if(added>0) goPage('collection');
 }
 
