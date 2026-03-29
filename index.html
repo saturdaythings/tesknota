@@ -494,13 +494,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .video-fullwidth{width:100%;display:block;}
 
 /* SMART WEARING SUGGESTER */
-.dash-suggest{background:var(--off);border:1px solid var(--b2);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
-.suggest-body{}
-.suggest-label{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;}
-.suggest-name{font-family:var(--serif);font-size:17px;font-style:italic;color:var(--blue);margin-bottom:2px;}
-.suggest-house{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;}
-.suggest-meta{font-family:var(--mono);font-size:10px;color:var(--warm);margin-top:4px;}
-.suggest-reason{font-size:11px;color:var(--ink3);margin-top:3px;}
 
 /* PERFORMER CARDS */
 .card-performer{background:var(--off);padding:18px;cursor:pointer;}
@@ -686,8 +679,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .csv-preview td{padding:5px 6px;border-bottom:1px solid var(--b3);color:var(--ink2);font-size:12px;}
 .csv-preview .csv-dup{color:var(--warm);font-family:var(--mono);font-size:9px;}
 .csv-preview .csv-new{color:var(--green,#4a7c59);font-family:var(--mono);font-size:9px;}
-/* MOBILE WEARING CHIP */
-.mob-wear-chip{display:none;font-family:var(--mono);font-size:10px;background:rgba(107,154,242,.15);border:1px solid rgba(107,154,242,.25);padding:3px 8px;border-radius:10px;color:var(--blue1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
 @media(max-width:768px){
   .sidebar{position:fixed;top:0;bottom:0;left:0;transform:translateX(-100%);}
   .sidebar.open{transform:translateX(0);}
@@ -709,8 +700,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   .mp-g{grid-template-columns:1fr 1fr;}
   /* Fix 2: FAB above mobile nav */
   .fab-btn{bottom:78px;}
-  /* Fix 3: wearing chip visible on mobile */
-  .mob-wear-chip{display:block;}
 }
 </style>
 </head>
@@ -787,7 +776,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="sdrop" id="gDrop"></div>
     </div>
     <div class="sync-wrap"><div class="sync-dot" id="syncDot"></div><span class="sync-txt" id="syncTxt"></span></div>
-    <div class="mob-wear-chip" id="mobWearChip" title="Today's suggested fragrance"></div>
     <button class="mob-srch-btn" onclick="toggleMobSearch()" title="Search">&#9906;</button>
     <button class="btn btn-blue" id="topbarAddBtn" onclick="openAddFrag('CURRENT')" title="Add a new fragrance to your collection">Add Fragrance</button>
   </div>
@@ -801,7 +789,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <div class="page on" id="page-dashboard">
       <div class="stats" id="dashStats"></div>
       <div id="dashOnboard" style="display:none"></div>
-      <div id="dashSuggest"></div>
       <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <table class="tbl tbl-spaced" id="dashTable">
         <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes to nose</th><th>Compliments</th><th></th></tr></thead>
@@ -1153,6 +1140,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
     </div>
     <div class="d-actions">
+      <button class="btn btn-warm btn-flex-equal" id="dBoughtIt" style="display:none" onclick="promoteToCollection(currentDetailId)">Bought it &rarr;</button>
       <button class="btn btn-ghost btn-flex-equal" onclick="editCurrentFrag()">Edit</button>
       <button class="btn btn-danger btn-flex-equal" onclick="showRemoveConfirm()">Remove</button>
     </div>
@@ -2388,59 +2376,8 @@ function closeSB(){ document.getElementById('SB').classList.remove('open'); docu
 // RENDER — DASHBOARD
 // ═══════════════════════════════════════════════════════
 
-function getDailySuggestion(){
-  var MF = myFragrances().filter(function(f){ return f.status==='CURRENT'; });
-  if(!MF.length) return null;
-  // Check localStorage for today's persisted pick
-  var today = new Date().toISOString().slice(0,10);
-  var lsKey = 'dashWearPick_' + today;
-  try {
-    var saved = localStorage.getItem(lsKey);
-    if(saved){ var found = MF.find(function(f){ return f.id===saved; }); if(found) return {f:found,score:0,comps:0}; }
-  } catch(e){}
-  // Score each frag: compliments × 3 + personal_rating
-  var MC = myCompliments();
-  var season = (function(){ var mo=new Date().getMonth(); return mo<2||mo===11?'winter':mo<5?'spring':mo<8?'summer':'fall'; })();
-  var seasonFamilies = {winter:['Woody','Oriental','Leather','Spicy'],spring:['Floral','Fresh'],summer:['Fresh','Citrus','Aquatic','Floral'],fall:['Oriental','Spicy','Woody','Amber']};
-  var scored = MF.map(function(f){
-    var comps = MC.filter(function(c){ return c.primaryFragId===f.id||c.secondaryFragId===f.id; }).length;
-    var score = comps*3 + (f.personalRating||0);
-    return {f:f, score:score, comps:comps};
-  });
-  scored.sort(function(a,b){ return b.score-a.score; });
-  // If scores tied at top, use seasonal preference as tiebreaker
-  var topScore = scored[0].score;
-  var candidates = scored.filter(function(x){ return x.score===topScore; });
-  var winner;
-  if(candidates.length>1){
-    var seasonal = candidates.filter(function(x){
-      var fam = (x.f.family||'').toLowerCase();
-      return (seasonFamilies[season]||[]).some(function(s){ return fam.includes(s.toLowerCase()); });
-    });
-    winner = (seasonal.length?seasonal:candidates)[0];
-  } else {
-    winner = candidates[0];
-  }
-  try{ localStorage.setItem(lsKey, winner.f.id); }catch(e){}
-  return winner;
-}
-
 function renderDashboard(){
   var MF=myFragrances(), MC=myCompliments();
-  // Smart wearing suggester
-  var suggestEl=document.getElementById('dashSuggest');
-  if(suggestEl){
-    var pick=getDailySuggestion();
-    if(pick){
-      var reason=pick.comps>0?pick.comps+' compliment'+(pick.comps>1?'s':''):((function(){ var mo=new Date().getMonth(); return mo<2||mo===11?'Winter pick':mo<5?'Spring pick':mo<8?'Summer pick':'Fall pick'; })());
-      suggestEl.innerHTML='<div class="dash-suggest"><div class="suggest-body"><div class="suggest-label">Today\'s Pick</div><div class="suggest-name">'+fragDisplayName(pick.f)+'</div><div class="suggest-house">'+pick.f.house+'</div><div class="suggest-meta">'+reason+'</div></div></div>';
-      // Update mobile topbar wearing chip
-      var mobChip=document.getElementById('mobWearChip');
-      if(mobChip) mobChip.textContent=pick.f.name.split(' ').slice(0,2).join(' ');
-    } else {
-      suggestEl.innerHTML='';
-    }
-  }
   // Onboarding guide — show when no CURRENT fragrances
   var onboardEl=document.getElementById('dashOnboard');
   var hasCurrent=MF.filter(function(f){return f.status==='CURRENT';}).length>0;
@@ -2664,10 +2601,10 @@ function renderCollection(){
   buildHouseFilter();
   buildFamilyFilter();
   var frags=myFragrances();
-  // Status filter — default to CURRENT when no explicit status selected
+  // Status filter — default to CURRENT unless note filter is active (show all)
   if(collStatusVal){
     frags=frags.filter(function(f){ return f.status===collStatusVal; });
-  } else {
+  } else if(!activeNoteFilter){
     frags=frags.filter(function(f){ return f.status==='CURRENT'; });
   }
   // Search
@@ -2689,6 +2626,12 @@ function renderCollection(){
   }
   // Rating
   if(collRatingVal){ frags=frags.filter(function(f){ return parseRating(f.statusRating)===parseInt(collRatingVal); }); }
+  // Note filter (from analytics chip click)
+  if(activeNoteFilter){
+    frags=frags.filter(function(f){
+      return (f.notes||'').toLowerCase().includes(activeNoteFilter);
+    });
+  }
   // Sort
   var MC=myCompliments();
   frags=frags.slice().sort(function(a,b){
@@ -2804,7 +2747,7 @@ function renderWishlist(){
         +'<td class="tmono">'+(f.avgPrice||'—')+'</td>'
         +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,3).join(', ')+'</td>'
         +'<td class="tmono" style="color:'+(f.isDupe?'var(--warm)':'var(--ink3)')+';">'+(f.isDupe?'Yes — '+f.dupeFor:'—')+'</td>'
-        +'<td class="tact"><button class="btn-bare" onclick="event.stopPropagation();promoteToOwned(\''+f.id+'\')">Mark as Owned</button></td>'
+        +'<td class="tact"><button class="btn btn-warm btn-sm" onclick="event.stopPropagation();promoteToCollection(\''+f.id+'\')">Bought it</button></td>'
         +'</tr>';
     }).join('');
   } else {
@@ -2865,10 +2808,31 @@ function quickAddWishlist(name, house){
   toast(name+' added to wishlist');
 }
 
-function promoteToOwned(fragId){
-  const f = FRAGRANCES.find(x=>x.id===fragId);
-  if(!f)return;
+function promoteToCollection(fragId){
+  var frag = FRAGRANCES.find(function(f){ return f.id===fragId; });
+  if(!frag){ toast('Fragrance not found'); return; }
+  editingFragId = fragId;
   openEditFrag(fragId,'CURRENT');
+  setTimeout(function(){
+    var afLbl=document.getElementById('af-lbl');
+    if(afLbl){
+      afLbl.textContent='Moving from wishlist to collection — confirm details';
+      afLbl.style.color='var(--sage)';
+    }
+    if(frag.type){
+      var afType=document.getElementById('afType');
+      if(afType) afType.value=frag.type;
+    }
+    if(frag.whereBought){
+      var afWhere=document.getElementById('afWhere');
+      if(afWhere) afWhere.value=frag.whereBought;
+    }
+    var now=new Date();
+    var afMonth=document.getElementById('afMonth');
+    var afYear=document.getElementById('afYear');
+    if(afMonth&&!frag.purchaseDate) afMonth.value=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()];
+    if(afYear&&!frag.purchaseDate) afYear.value=now.getFullYear();
+  },100);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3505,6 +3469,9 @@ function openDetail(fragId){
   const dupeS = document.getElementById('d-dupe-sec');
   if(f.isDupe && f.dupeFor){ dupeS.style.display='block'; document.getElementById('d-dupe').textContent='Dupe for: '+f.dupeFor; }
   else { dupeS.style.display='none'; }
+  // Show "Bought it" button for wishlist items
+  var dBoughtIt=document.getElementById('dBoughtIt');
+  if(dBoughtIt) dBoughtIt.style.display=(f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL')?'':'none';
   // Status change strip
   document.getElementById('statusStrip').classList.remove('show');
   hideRemoveConfirm();
@@ -3995,9 +3962,11 @@ function saveFragrance(){
   if(editingFragId){
     const idx = FRAGRANCES.findIndex(f=>f.id===editingFragId);
     if(idx>=0){
+      var oldStatus=FRAGRANCES[idx].status;
       FRAGRANCES[idx]={...FRAGRANCES[idx],...data};
       writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
-      toast('Fragrance updated');
+      var wasWishlist=oldStatus==='WANT_TO_BUY'||oldStatus==='WANT_TO_SMELL';
+      toast(wasWishlist&&data.status==='CURRENT'?'Moved to your collection':'Fragrance updated');
     }
   } else {
     // Find metadata from DB (fuzzy match)
@@ -5343,7 +5312,7 @@ function toast(msg){
 
 function computeNotesIntel(){
   const noteMap = {};
-  myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED').forEach(f=>{
+  myFragrances().filter(f=>f.status==='CURRENT').forEach(f=>{
     const notes = f.notes.split(/[·,]/).map(n=>n.trim()).filter(n=>n.length>1);
     const compCount = getCompCount(f.id);
     notes.forEach(note=>{
@@ -5380,34 +5349,38 @@ function renderNotesIntel(){
 }
 
 function filterCollByNote(note){
-  activeNoteFilter = note;
-  goPage('collection');
-  document.querySelectorAll('#collBody tr').forEach(row=>{
-    const nc = row.querySelector('.tscript');
-    if(!nc){ row.style.display=''; return; }
-    row.style.display = nc.textContent.toLowerCase().includes(note.toLowerCase()) ? '' : 'none';
-  });
-  // update chip active state
-  document.querySelectorAll('.fave-note-chip').forEach(function(chip){
-    chip.classList.toggle('on', chip.querySelector('span').textContent===note);
-  });
-  document.querySelectorAll('.note-card').forEach(function(card){
-    card.classList.toggle('on', card.querySelector('.note-name').textContent===note);
-  });
-  // show filter bar
+  // Clear all other filters first
+  collSearchVal='';
+  collHouseVal='';
+  collFamilyVals=[];
+  collRatingVal='';
+  collStatusVal='';
+  var search=document.getElementById('collSearch');
+  var house=document.getElementById('collHouse');
+  var rating=document.getElementById('collRating');
+  var status=document.getElementById('collStatus');
+  if(search) search.value='';
+  if(house) house.value='';
+  if(rating) rating.value='';
+  if(status) status.value='';
+  document.querySelectorAll('#familyDropPanel input[type=checkbox]').forEach(function(cb){ cb.checked=false; });
+  if(typeof updateFamilyLabel==='function') updateFamilyLabel();
+  // Set note filter
+  activeNoteFilter=note.toLowerCase().trim();
   var bar=document.getElementById('noteFilterBar');
   var lbl=document.getElementById('noteFilterName');
-  if(bar){ bar.classList.add('on'); }
-  if(lbl){ lbl.textContent=note; }
+  if(bar) bar.classList.add('on');
+  if(lbl) lbl.textContent=note;
+  // Navigate and render
+  goPage('collection');
+  renderCollection();
 }
 
 function clearNoteFilter(){
-  activeNoteFilter = null;
-  document.querySelectorAll('#collBody tr').forEach(row=>{ row.style.display=''; });
-  document.querySelectorAll('.fave-note-chip').forEach(function(chip){ chip.classList.remove('on'); });
-  document.querySelectorAll('.note-card').forEach(function(card){ card.classList.remove('on'); });
+  activeNoteFilter=null;
   var bar=document.getElementById('noteFilterBar');
   if(bar) bar.classList.remove('on');
+  renderCollection();
 }
 
 // Global tooltip mousemove handler
