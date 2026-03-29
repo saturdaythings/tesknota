@@ -1637,6 +1637,17 @@ function rowToComp(row){
   };
 }
 
+async function syncMissingRows(tab,rows,headers,label){
+  for(var i=0;i<rows.length;i++){
+    try{
+      await appendRow(tab,rows[i],headers);
+      await new Promise(function(r){setTimeout(r,300);});
+    }catch(e){
+      console.error('['+label+'] row '+i+' failed:',e);
+    }
+  }
+}
+
 async function loadAllData(){
   var sheetsOk = true;
   const [usersRaw, fragsRaw, compsRaw, communityRaw] = await Promise.all([
@@ -1660,22 +1671,20 @@ async function loadAllData(){
   }
   // Write any seed fragrances missing from Sheets so they persist
   var _sheetFragIds=new Set(fragsRaw.map(function(r){return r.id;}));
-  FRAGRANCES.forEach(function(f){
-    if(!_sheetFragIds.has(f.id)){
-      appendRow('fragrances',fragToRow(f),FRAG_HEADERS).catch(function(e){console.error('[syncSeedFragrances] write failed:',e);});
-    }
-  });
+  var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.id);});
+  if(_missingFrags.length){
+    syncMissingRows('fragrances',_missingFrags.map(fragToRow),FRAG_HEADERS,'syncFrags');
+  }
   var _sheetCompIds=new Set(compsRaw.map(function(r){return r.id;}));
   if(compsRaw.length){
     var seedOnly=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
     COMPLIMENTS=seedOnly.concat(compsRaw.map(rowToComp));
   }
   // Write any seed compliments missing from Sheets so they persist
-  COMPLIMENTS.forEach(function(c){
-    if(!_sheetCompIds.has(c.id)){
-      appendRow('compliments',compToRow(c),COMP_HEADERS).catch(function(e){console.error('[syncSeedCompliments] write failed:',e);});
-    }
-  });
+  var _missingComps=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
+  if(_missingComps.length){
+    syncMissingRows('compliments',_missingComps.map(compToRow),COMP_HEADERS,'syncComps');
+  }
 
   // Recalculate ID counters so new entries don't collide with loaded data
   FRAGRANCES.forEach(function(f){ var n=parseInt((f.id||'').replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
@@ -2264,6 +2273,8 @@ let FRAGRANCES = [
   {id:'k41',userId:'u1',name:'Comptoir Sud Pacifique Coco Vanille EDP',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],communityRating:'4.0',communityLong:'4–6h',communitySill:'Moderate',avgPrice:'~$85',notes:'Coconut, Bergamot, Mandarin, Vanilla, Heliotrope, Jasmine, Musk, Sandalwood, White Cedar, Amber',topNotes:'Coconut, Bergamot, Mandarin',middleNotes:'Vanilla, Heliotrope, Jasmine',baseNotes:'Musk, Sandalwood, White Cedar, Amber',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k42',userId:'u1',name:'Le Monde Gourmand Pistachio Brûlée EDP',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],communityRating:'3.8',communityLong:'4–6h',communitySill:'Soft',avgPrice:'~$25',notes:'Pistachio, Almond, Coconut Milk, Praline, Vanilla Cream, Pistachio, Vanilla, White Musk, Sandalwood',topNotes:'Pistachio, Almond, Coconut Milk',middleNotes:'Praline, Vanilla Cream, Pistachio',baseNotes:'Vanilla, White Musk, Sandalwood',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'Amazon',purchaseDate:'Jul 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $25.00',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k43',userId:'u1',name:'Le Monde Gourmand Chai Épicé EDP',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],communityRating:'3.9',communityLong:'4–6h',communitySill:'Moderate',avgPrice:'~$25',notes:'Cardamom, Cinnamon, Ginger, Chai Tea, Tonka Bean, Vanilla, Sandalwood, Musk, Amber, Vanilla',topNotes:'Cardamom, Cinnamon, Ginger',middleNotes:'Chai Tea, Tonka Bean, Vanilla',baseNotes:'Sandalwood, Musk, Amber, Vanilla',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'Amazon',purchaseDate:'Jun 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $25.00',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k44',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',communityRating:'4.3',communityLong:'6-8h',communitySill:'Moderate',avgPrice:'~$150',notes:'Whipped Cream, Powdered Sugar, Florentine Iris, Fiordilatte Ice Cream, Crunchy Wafer, Vanilla, Sweet Amber',accords:'Gourmand, Powdery, Vanilla',topNotes:'Whipped Cream, Powdered Sugar',middleNotes:'Florentine Iris, Fiordilatte Ice Cream, Crunchy Wafer',baseNotes:'Vanilla, Sweet Amber',personalRating:5,statusRating:null,personalLong:null,personalSill:null,whereBought:'Scent Split',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
+  {id:'k45',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Eau de Parfum',communityRating:'4.3',communityLong:'6-8h',communitySill:'Moderate',avgPrice:'~$150',notes:'Whipped Cream, Powdered Sugar, Florentine Iris, Fiordilatte Ice Cream, Crunchy Wafer, Vanilla, Sweet Amber',accords:'Gourmand, Powdery, Vanilla',topNotes:'Whipped Cream, Powdered Sugar',middleNotes:'Florentine Iris, Fiordilatte Ice Cream, Crunchy Wafer',baseNotes:'Vanilla, Sweet Amber',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
   {id:'s1',userId:'u2',name:'Lost Cherry',house:'Tom Ford',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Fruity, Oriental, Gourmand',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s2',userId:'u2',name:'Yum Pistachio Gelato 33',house:'Kay Ali',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Vanilla, Nutty',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s3',userId:'u2',name:'Angels\' Share',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Boozy, Spicy',createdAt:'2024-01-01T00:00:00.000Z'},
