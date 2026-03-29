@@ -1089,6 +1089,26 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <button class="btn btn-ghost btn-sm" onclick="cancelMergeNotes()">Cancel</button>
         </div>
       </div>
+      <div id="mergeFrag" style="margin-top:32px;">
+        <div class="sh sh-spaced-lg">
+          <h2>Merge Fragrances</h2>
+          <div class="sh-r">
+            <span class="sh-sub">Combine two entries into one. Compliments and notes transfer to the kept record.</span>
+          </div>
+        </div>
+        <div class="frow" style="margin-bottom:12px;">
+          <div class="fg" style="margin:0;">
+            <label>Keep this one</label>
+            <select id="mergeKeep"></select>
+          </div>
+          <div class="fg" style="margin:0;">
+            <label>Remove this one</label>
+            <select id="mergeRemove"></select>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="executeMerge()">Merge</button>
+        <div id="mergeResult" style="font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:8px;display:none;"></div>
+      </div>
     </div>
 
   </div>
@@ -1100,8 +1120,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   <div class="dhd">
     <div class="dhd-inner">
       <button class="dhd-close" onclick="closeDetail()">Close</button>
-      <div class="d-house" id="d-house"></div>
       <div class="d-name" id="d-name"></div>
+      <div class="d-house" id="d-house"></div>
       <div class="d-status-row">
         <div class="d-status" id="d-status"></div>
         <button class="btn-bare btn-bare-warm" onclick="toggleStatusStrip()">Change status</button>
@@ -2124,7 +2144,7 @@ let FRAGRANCES = [
   {id:'k1',userId:'u1',name:'Diptyque Eau Duelle EDT',house:'Diptyque',status:'CURRENT',sizes:['Full Bottle'],communityRating:'3.9',communityLong:'4–6h',communitySill:'Soft',avgPrice:'~$165',notes:'Bergamot, Cardamom, Pink Pepper, Vanilla, Orchid, Iris, Vetiver, Sandalwood, Musk',topNotes:'Bergamot, Cardamom, Pink Pepper',middleNotes:'Vanilla, Orchid, Iris',baseNotes:'Vetiver, Sandalwood, Musk',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'FragranceNet',purchaseDate:'Feb 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $136.34',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k2',userId:'u1',name:'Atelier des Ors Lune Féline EDP',house:'Atelier des Ors',status:'CURRENT',sizes:['Full Bottle'],communityRating:'4.4',communityLong:'8–12h',communitySill:'Strong',avgPrice:'~$290',notes:'Cardamom, Cinnamon, Pink Pepper, Woodsy Notes, Ambergris, Styrax, Cedar, Green Notes, Tahitian Vanilla, Peru Balsam, Musk',topNotes:'Cardamom, Cinnamon, Pink Pepper',middleNotes:'Woodsy Notes, Ambergris, Styrax, Cedar, Green Notes',baseNotes:'Tahitian Vanilla, Peru Balsam, Musk',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'FragranceNet',purchaseDate:'Nov 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $139.47',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k3',userId:'u1',name:'Phlur Heavy Cream Body Mist',house:'Phlur',status:'CURRENT',sizes:['Full Bottle'],communityRating:'4.1',communityLong:'2–4h',communitySill:'Soft',avgPrice:'~$38',notes:'Lemon Sugar, Marshmallow, Orange, Jasmine Blossom, Coconut Cream, Ambrettolide, Vanilla Mousse, Salted Caramel, Whipped Cream',topNotes:'Lemon Sugar, Marshmallow, Orange',middleNotes:'Jasmine Blossom, Coconut Cream, Ambrettolide',baseNotes:'Vanilla Mousse, Salted Caramel, Whipped Cream',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'TikTok Shop',purchaseDate:'Oct 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $38.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k4',userId:'u1',name:'Phlur Heavy Cream Body & Hair Fragrance',house:'Phlur',status:'CURRENT',sizes:['Full Bottle'],communityRating:'4.1',communityLong:'2–4h',communitySill:'Soft',avgPrice:'~$38',notes:'Lemon Sugar, Marshmallow, Orange, Jasmine Blossom, Coconut Cream, Ambrettolide, Vanilla Mousse, Salted Caramel, Whipped Cream',topNotes:'Lemon Sugar, Marshmallow, Orange',middleNotes:'Jasmine Blossom, Coconut Cream, Ambrettolide',baseNotes:'Vanilla Mousse, Salted Caramel, Whipped Cream',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'TikTok Shop',purchaseDate:'Sep 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $38.00',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k4',userId:'u1',name:'Phlur Vanilla Skin',house:'Phlur',status:'CURRENT',sizes:['Full Bottle'],communityRating:null,communityLong:null,communitySill:null,avgPrice:null,notes:'bergamot, mandarin, cardamom, vanilla orchid, heliotrope, jasmine, musk, sandalwood, skin musk, amber',topNotes:'bergamot, mandarin, cardamom',middleNotes:'vanilla orchid, heliotrope, jasmine',baseNotes:'musk, sandalwood, skin musk, amber',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'TikTok Shop',purchaseDate:'Oct 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $38.00',type:'Eau de Parfum',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k5',userId:'u1',name:'Calvin Klein CK One EDT',house:'Calvin Klein',status:'CURRENT',sizes:['Full Bottle'],communityRating:'4.1',communityLong:'4–6h',communitySill:'Soft',avgPrice:'~$55',notes:'Bergamot, Green Tea, Cardamom, Papaya, Violet, Rose, Jasmine, Amber, Musk, Sandalwood, Cedarwood',topNotes:'Bergamot, Green Tea, Cardamom, Papaya',middleNotes:'Violet, Rose, Jasmine',baseNotes:'Amber, Musk, Sandalwood, Cedarwood',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $21.41',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k6',userId:'u1',name:'Dolce & Gabbana Light Blue EDT',house:'Dolce & Gabbana',status:'CURRENT',sizes:['Full Bottle'],communityRating:'4.2',communityLong:'4–6h',communitySill:'Soft',avgPrice:'~$80',notes:'Sicilian Lemon, Apple, Cedar, Bellflower, Bamboo, Jasmine, White Rose, Cedar, Amber, Musk',topNotes:'Sicilian Lemon, Apple, Cedar, Bellflower',middleNotes:'Bamboo, Jasmine, White Rose',baseNotes:'Cedar, Amber, Musk',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $44.09',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k7',userId:'u1',name:'Juicy Couture Viva La Juicy EDP',house:'Juicy Couture',status:'CURRENT',sizes:['Small'],communityRating:'3.9',communityLong:'6–8h',communitySill:'Moderate',avgPrice:'~$65',notes:'Wild Berries, Mandarin, Watermelon, Honeysuckle, Gardenia, Jasmine, Rose, Caramel, Vanilla, Sandalwood, Amber, Musk, Praline',topNotes:'Wild Berries, Mandarin, Watermelon',middleNotes:'Honeysuckle, Gardenia, Jasmine, Rose',baseNotes:'Caramel, Vanilla, Sandalwood, Amber, Musk, Praline',personalRating:null,statusRating:null,personalLong:null,personalSill:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $18.26',createdAt:'2026-03-28T00:00:00.000Z'},
@@ -2189,6 +2209,21 @@ const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt'
 
 function starsStr(n){ if(!n)return '—'; let s=''; for(let i=1;i<=5;i++) s+=i<=n?'★':'☆'; return s; }
 
+var ratingWordToNum={'Obsessed':5,'Love':4,'Like':3,'Just OK':2,"Don't Like":1,'WTF':0};
+function parseRating(val){
+  if(!val) return 0;
+  if(!isNaN(parseInt(val))) return parseInt(val);
+  return ratingWordToNum[val]||0;
+}
+function renderStars(val){
+  var v=parseRating(val);
+  if(!v) return '<span style="color:var(--ink3);">—</span>';
+  var filled='★'.repeat(v);
+  var empty='☆'.repeat(5-v);
+  return '<span style="color:var(--warm);letter-spacing:1px;font-size:13px;">'+filled+'</span>'
+    +'<span style="color:var(--b3);letter-spacing:1px;font-size:13px;">'+empty+'</span>';
+}
+
 const STAR_WORDS={1:"Don't Like",2:'Just OK',3:'Like',4:'Love',5:'Obsessed'};
 function starPick(n){ document.getElementById('afRating').value=n; starRender(n); }
 function starHover(n){ var val=n||parseInt(document.getElementById('afRating').value)||3; starRender(val); }
@@ -2217,6 +2252,22 @@ function fragDisplayName(f){
   return f.name+'<span class="type-badge">'+badge+'</span>';
 }
 
+function fixPhlurVanillaSkin(){
+  var k4=FRAGRANCES.find(function(f){ return f.id==='k4'; });
+  if(!k4||k4.name==='Phlur Vanilla Skin') return;
+  console.log('[fixPhlur] Before:',JSON.stringify({id:k4.id,name:k4.name,type:k4.type}));
+  k4.name='Phlur Vanilla Skin';
+  k4.house='Phlur';
+  k4.type='Eau de Parfum';
+  k4.whereBought='TikTok Shop';
+  k4.purchaseDate='Oct 2024';
+  k4.notes='bergamot, mandarin, cardamom, vanilla orchid, heliotrope, jasmine, musk, sandalwood, skin musk, amber';
+  k4.personalNotes='Purchased for $38.00';
+  console.log('[fixPhlur] After:',JSON.stringify({id:k4.id,name:k4.name,type:k4.type}));
+  writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS)
+    .catch(function(e){ console.error('[fixPhlur] write failed:',e); });
+}
+
 function migrateFragranceTypes(){
   var typeMap=[
     [' Body & Hair Fragrance','Body Spray'],
@@ -2236,9 +2287,9 @@ function migrateFragranceTypes(){
     [' Fragrance Oil','Perfume Oil'],
     [' Spray','Body Spray'],
   ];
+  var typeNormalise={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Eau de Parfum (EDP)':'Eau de Parfum','Eau de Toilette (EDT)':'Eau de Toilette'};
   var changed=false;
   FRAGRANCES.forEach(function(f){
-    if(f.type) return;
     var matched=false;
     for(var i=0;i<typeMap.length;i++){
       var suffix=typeMap[i][0]; var type=typeMap[i][1];
@@ -2247,7 +2298,10 @@ function migrateFragranceTypes(){
         f.type=type; matched=true; changed=true; break;
       }
     }
-    if(!matched){ f.type='Eau de Parfum'; changed=true; }
+    if(!matched){
+      if(!f.type){ f.type='Eau de Parfum'; changed=true; }
+      if(typeNormalise[f.type]){ f.type=typeNormalise[f.type]; changed=true; }
+    }
   });
   if(changed){
     writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS)
@@ -2369,7 +2423,7 @@ function renderDashboard(){
     var pick=getDailySuggestion();
     if(pick){
       var reason=pick.comps>0?pick.comps+' compliment'+(pick.comps>1?'s':''):((function(){ var mo=new Date().getMonth(); return mo<2||mo===11?'Winter pick':mo<5?'Spring pick':mo<8?'Summer pick':'Fall pick'; })());
-      suggestEl.innerHTML='<div class="dash-suggest"><div class="suggest-body"><div class="suggest-label">Today\'s Pick</div><div class="suggest-name">'+pick.f.name+'</div><div class="suggest-house">'+pick.f.house+'</div><div class="suggest-meta">'+reason+'</div></div></div>';
+      suggestEl.innerHTML='<div class="dash-suggest"><div class="suggest-body"><div class="suggest-label">Today\'s Pick</div><div class="suggest-name">'+fragDisplayName(pick.f)+'</div><div class="suggest-house">'+pick.f.house+'</div><div class="suggest-meta">'+reason+'</div></div></div>';
       // Update mobile topbar wearing chip
       var mobChip=document.getElementById('mobWearChip');
       if(mobChip) mobChip.textContent=pick.f.name.split(' ').slice(0,2).join(' ');
@@ -2407,7 +2461,7 @@ function renderDashboard(){
       <tr onclick="openDetail('${f.id}')">
         <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
-        <td><div class="tstars">${starsStr(f.personalRating)}</div></td>
+        <td><div class="tstars">${renderStars(f.statusRating)}</div></td>
         <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
         <td class="tmono">${getCompCount(f.id)}</td>
         <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
@@ -2426,6 +2480,7 @@ function renderDashboard(){
       return '<div class="card-performer" onclick="openDetail(\'' + id + '\')">' +
         '<div class="card-num">No. ' + (i+1) + '</div>' +
         '<div class="card-pfrag">' + fragDisplayName(f) + '</div>' +
+        '<div class="th_">' + (f.house||'').toUpperCase() + '</div>' +
         '<div class="card-pcount">' + cnt + ' compliment' + (cnt>1?'s':'') + '</div>' +
         '<div class="card-pdist">' + dist + '</div>' +
         '</div>';
@@ -2521,7 +2576,7 @@ function renderCollection(filter='all'){
         <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td class="tmono">${f.sizes.join(', ')||'—'}</td>
-        <td><div class="tstars">${starsStr(f.statusRating)}</div></td>
+        <td><div class="tstars">${renderStars(f.statusRating)}</div></td>
         <td class="tmono">${f.personalLong||'—'}</td>
         <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,2).join(', ')}</td>
         <td class="tmono" style="color:var(--warm);">${f.isDupe?'≈ '+f.dupeFor:''}</td>
@@ -2682,7 +2737,7 @@ function renderCompliments(filter='all'){
     if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'Significant Others':r==='Family'?'Family':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
   });
   const allEmpty = MC.length === 0;
-  function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div><div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+c.month+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
+  function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':''; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'+_house+'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(c.location?' · '+c.location:'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+c.month+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
   var listHtml;
   if(compView==='timeline'&&filtered.length){
     // Group by month+year, newest first
@@ -3093,7 +3148,7 @@ function renderFriend(){
       var td2=document.createElement('td');
       var ds=document.createElement('div'); ds.className='ts '+(STATUS_CSS[f.status]||''); ds.textContent=STATUS_LABELS[f.status]||f.status; td2.appendChild(ds); tr.appendChild(td2);
       var td3=document.createElement('td');
-      var dr=document.createElement('div'); dr.className='tstars'; dr.textContent=starsStr(f.personalRating); td3.appendChild(dr); tr.appendChild(td3);
+      var dr=document.createElement('div'); dr.className='tstars'; dr.innerHTML=renderStars(f.statusRating||f.personalRating); td3.appendChild(dr); tr.appendChild(td3);
       var td4=document.createElement('td'); td4.className='tscript'; td4.textContent=f.notes.replace(/·/g,',').split(',').slice(0,2).join(', '); tr.appendChild(td4);
       var td5=document.createElement('td'); td5.className='tmono'; td5.textContent=getCompCount(f.id); tr.appendChild(td5);
       var td6=document.createElement('td'); td6.className='tact';
@@ -3248,7 +3303,7 @@ function openDetail(fragId){
   currentDetailId = fragId;
   document.getElementById('d-house').textContent = f.house.toUpperCase();
   document.getElementById('d-name').innerHTML = fragDisplayName(f);
-  document.getElementById('d-status').textContent = STATUS_LABELS[f.status] + (f.sizes.length?' · '+f.sizes.join(', '):'') + (f.personalRating?' · '+starsStr(f.personalRating):'') + (f.statusRating?' · '+f.statusRating:'');
+  document.getElementById('d-status').innerHTML = STATUS_LABELS[f.status] + (f.sizes.length?' · '+f.sizes.join(', '):'') + (f.statusRating?' &nbsp;'+renderStars(f.statusRating):'');
   // Detail fields — hide row when empty
   function setDRow(rowId, valId, val){
     var row=document.getElementById(rowId), el=document.getElementById(valId);
@@ -3347,6 +3402,7 @@ function renderNoteManager(){
     }).join('')
     +'</div>'
     +'<button class="btn btn-ghost btn-sm" id="startMergeBtn" style="display:none;" onclick="startMergeNotes()">Merge selected</button>';
+  populateMergeSelects();
 }
 
 function toggleMergeSelect(){
@@ -3435,6 +3491,50 @@ function cancelMergeNotes(){
   var panel=document.getElementById('noteMergePanel'); if(panel) panel.style.display='none';
   document.querySelectorAll('.note-merge-chk').forEach(function(c){c.checked=false;});
   var btn=document.getElementById('startMergeBtn'); if(btn) btn.style.display='none';
+}
+
+function populateMergeSelects(){
+  var frags=myFragrances().slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  ['mergeKeep','mergeRemove'].forEach(function(id){
+    var sel=document.getElementById(id); if(!sel) return;
+    sel.innerHTML='<option value="">— Select —</option>';
+    frags.forEach(function(f){
+      var opt=document.createElement('option');
+      opt.value=f.id;
+      opt.textContent=f.name+(f.type&&f.type!=='Eau de Parfum'?' ('+f.type+')':'');
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function executeMerge(){
+  var keepId=document.getElementById('mergeKeep').value;
+  var removeId=document.getElementById('mergeRemove').value;
+  if(!keepId||!removeId){ toast('Select both fragrances'); return; }
+  if(keepId===removeId){ toast('Select two different fragrances'); return; }
+  var keep=FRAGRANCES.find(function(f){ return f.id===keepId; });
+  var remove=FRAGRANCES.find(function(f){ return f.id===removeId; });
+  if(!keep||!remove){ toast('Fragrance not found'); return; }
+  COMPLIMENTS.forEach(function(c){
+    if(c.primaryFragId===removeId){ c.primaryFragId=keepId; c.primaryFrag=keep.name; }
+    if(c.secondaryFragId===removeId){ c.secondaryFragId=keepId; c.secondaryFrag=keep.name; }
+  });
+  if(!keep.notes&&remove.notes) keep.notes=remove.notes;
+  if(!keep.personalNotes&&remove.personalNotes) keep.personalNotes=remove.personalNotes;
+  if(!keep.statusRating&&remove.statusRating) keep.statusRating=remove.statusRating;
+  if(!keep.whereBought&&remove.whereBought) keep.whereBought=remove.whereBought;
+  var removedName=remove.name;
+  FRAGRANCES=FRAGRANCES.filter(function(f){ return f.id!==removeId; });
+  Promise.all([
+    writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS),
+    writeSheet('compliments',COMPLIMENTS.map(compToRow),COMP_HEADERS),
+  ]).then(function(){
+    var result=document.getElementById('mergeResult');
+    if(result){ result.textContent='Merged — '+removedName+' combined into '+keep.name+'. Compliments transferred.'; result.style.display='block'; }
+    populateMergeSelects();
+    updateCounts();
+    toast('Merge complete');
+  }).catch(function(e){ toast('Merge failed: '+e.message); });
 }
 
 document.addEventListener('click',e=>{
@@ -3591,7 +3691,7 @@ function openEditFrag(fragId, forceStatus){
   const sel = document.getElementById('afStatus');
   for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===statusVal){ sel.selectedIndex=i; break; }
   // Pre-fill Step 2
-  prefetchedData = {sizes:f.sizes,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,personalSill:f.personalSill,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:f.topNotes||'',middleNotes:f.middleNotes||'',baseNotes:f.baseNotes||''};
+  prefetchedData = {sizes:f.sizes,type:f.type,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,personalSill:f.personalSill,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:f.topNotes||'',middleNotes:f.middleNotes||'',baseNotes:f.baseNotes||''};
   // Auto-advance to step 2 for edits
   afGoStep(2, true);
   openModal('addFragM');
@@ -3645,7 +3745,9 @@ function afGoStep(n, skipValidation){
     if(prefetchedData){
       const d = prefetchedData;
       if(d.sizes){ document.querySelectorAll('#sizeOpts .opt').forEach(o=>o.classList.toggle('on',d.sizes.includes(o.textContent.trim()))); }
-      if(d.type) document.getElementById('afType').value=d.type; else document.getElementById('afType').value='Eau de Parfum';
+      var _typeNorm={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Eau de Parfum (EDP)':'Eau de Parfum','Eau de Toilette (EDT)':'Eau de Toilette'};
+      var _savedType=d.type||'Eau de Parfum';
+      document.getElementById('afType').value=_typeNorm[_savedType]||_savedType||'Eau de Parfum';
       if(d.personalRating){ document.querySelectorAll('#rOpts .opt').forEach(o=>o.classList.toggle('on',parseInt(o.dataset.v)===d.personalRating)); }
       if(d.statusRating){ var numRat=typeof d.statusRating==='number'?d.statusRating:({Obsessed:5,Love:4,Like:3,'Just OK':2,"Don't Like":1}[d.statusRating]||3); document.getElementById('afRating').value=numRat; starRender(numRat); }
       if(d.personalLong) document.getElementById('afLong').value=d.personalLong;
@@ -5245,6 +5347,12 @@ document.getElementById('compareOverlay').addEventListener('click', function(e){
     console.error('[init] loadAllData threw:', e);
     sheetsOk = false;
   }
+  // Normalise short-form type values from Sheets before migration
+  FRAGRANCES.forEach(function(f){
+    if(f.type==='EDP') f.type='Eau de Parfum';
+    if(f.type==='EDT') f.type='Eau de Toilette';
+  });
+  fixPhlurVanillaSkin();
   migrateFragranceTypes();
   document.getElementById('idLoading').style.display='none';
   // Always show the picker — never block the user due to a sync failure
