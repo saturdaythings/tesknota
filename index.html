@@ -1654,8 +1654,8 @@ async function loadAllData(){
   // Users with no sheet rows keep their seed data (so demo looks populated
   // until real data is added).
   if(fragsRaw.length){
-    var fragSheetIds=new Set(fragsRaw.map(function(r){return r.userId;}));
-    var fragSeed=FRAGRANCES.filter(function(f){return !fragSheetIds.has(f.userId);});
+    var _fragSeedIds=new Set(fragsRaw.map(function(r){return r.id;}));
+    var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.id);});
     FRAGRANCES=fragSeed.concat(fragsRaw.map(rowToFrag));
   }
   // Write any seed fragrances missing from Sheets so they persist
