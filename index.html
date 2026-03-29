@@ -219,10 +219,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 /* FRIEND ACTIVITY */
 .friend-activity-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warm);margin-left:4px;vertical-align:middle;animation:pulse-dot 2s infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.4;}}
-.fb-right-now{background:rgba(107,154,242,.08);border:1px solid rgba(107,154,242,.18);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
-.fb-rn-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--warm);flex-shrink:0;}
-.fb-rn-val{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);}
-.fb-rn-sub{font-family:var(--mono);font-size:10px;color:var(--ink3);margin-top:2px;}
 .fb-label{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:8px;}
 .fb-name{font-family:var(--serif);font-size:30px;font-style:italic;color:var(--warm2);line-height:1;}
 .fb-meta{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.65);margin-top:7px;letter-spacing:.06em;text-transform:uppercase;}
@@ -947,7 +943,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <div class="fb-stat"><div class="fsn" id="fb-stat-wish">0</div><div class="fsl">Wishlist</div></div>
         </div>
       </div>
-      <div id="fbRightNow"></div>
       <div class="ftabs" id="friendTabs">
         <div class="ftab on" data-panel="ft-col">Collection</div>
         <div class="ftab" data-panel="ft-comp">Compliments</div>
@@ -3763,19 +3758,6 @@ function renderFriend(){
   // Activity dot — show if friend has any compliments or fragrances
   var actDot=document.getElementById('friendActivityDot');
   if(actDot) actDot.style.display=(FC.length||FF.length)?'inline-block':'none';
-  // "Right now" section — friend's most recently worn fragrance
-  var rnEl=document.getElementById('fbRightNow');
-  if(rnEl){
-    var latestComp=FC.length?FC[0]:null;
-    var latestFrag=friendOwned.length?friendOwned[0]:null;
-    if(latestComp){
-      rnEl.innerHTML='<div class="fb-right-now"><div class="fb-rn-lbl">Right Now</div><div><div class="fb-rn-val">'+latestComp.primaryFrag+'</div><div class="fb-rn-sub">Last compliment: '+latestComp.month+' '+latestComp.year+(latestComp.location?' · '+latestComp.location:'')+'</div></div></div>';
-    } else if(latestFrag){
-      rnEl.innerHTML='<div class="fb-right-now"><div class="fb-rn-lbl">Right Now</div><div><div class="fb-rn-val">'+latestFrag.name+'</div><div class="fb-rn-sub">Recently added to collection</div></div></div>';
-    } else {
-      rnEl.innerHTML='';
-    }
-  }
 
   // Collection table
   var collBody=document.querySelector('#ft-col tbody');
