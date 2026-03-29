@@ -401,12 +401,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .d-note-chip{display:inline-flex;align-items:center;gap:4px;font-family:var(--script);font-size:14px;font-style:italic;color:var(--ink2);padding:1px 0;}
 .d-note-chip .nc-del{display:none;font-size:10px;}
 .d-note-chip:hover .nc-del{display:inline;}
-/* settings: note manager */
-.note-manage-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border:1px solid var(--b2);font-size:12px;}
-.note-manage-name{flex:1;cursor:pointer;color:var(--blue);}
-.note-manage-name:hover{text-decoration:underline;}
-.note-manage-ct{font-family:var(--mono);font-size:10px;color:var(--ink3);}
-.note-rename-inp{border:none;border-bottom:1px solid var(--blue);background:none;font-size:12px;font-family:var(--body);color:var(--ink);outline:none;flex:1;}
 .cam-box{position:relative;border:1px solid var(--b2);overflow:hidden;margin-bottom:16px;}
 .cam-view{width:100%;height:220px;background:var(--blue3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
 .cam-view:hover{background:var(--blue2);}
@@ -1060,16 +1054,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <tr style="border-bottom:none"><td><div class="st-label">Account</div><div class="st-sub">Sign out and return to user picker</div></td><td><button class="btn btn-ghost btn-sm" onclick="signOut()">Sign Out</button></td></tr>
         </tbody>
       </table>
-      <div class="sh sh-spaced-lg"><h2>Manage Notes</h2><div class="sh-r"><span class="sh-sub">Rename or merge notes across your collection. Merging replaces all uses of one note name with another — useful for fixing duplicates like "Oud" and "Aoud".</span></div></div>
-      <div id="noteManager"></div>
-      <div id="noteMergePanel" class="panel-inset" style="display:none;">
-        <div class="merge-instruction">Merge selected notes into:</div>
-        <div id="noteMergeOptions" class="merge-options"></div>
-        <div class="btn-row">
-          <button class="btn btn-blue btn-sm" id="noteMergeConfirmBtn" onclick="confirmMergeNotes()">Confirm merge</button>
-          <button class="btn btn-ghost btn-sm" onclick="cancelMergeNotes()">Cancel</button>
-        </div>
-      </div>
       <div id="mergeFrag" style="margin-top:32px;">
         <div class="sh sh-spaced-lg">
           <h2>Merge Fragrances</h2>
@@ -1089,6 +1073,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         </div>
         <button class="btn btn-ghost btn-sm" onclick="executeMerge()">Merge</button>
         <div id="mergeResult" style="font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:8px;display:none;"></div>
+      </div>
+      <div id="configSection" style="display:none;margin-top:40px;">
+        <div class="sh sh-spaced-lg"><h2>Configuration</h2></div>
+        <div class="sh" style="margin-top:24px;"><h2 style="font-size:16px;">Note Library</h2><div class="sh-r"><span class="sh-sub">All notes across your collection — deduplicated and alphabetised.</span></div></div>
+        <div id="noteLibraryList" style="margin-top:10px;"></div>
       </div>
     </div>
 
@@ -2364,7 +2353,7 @@ function goPage(id){
   if(id==='compliments') renderCompliments();
   if(id==='analytics') renderAnalytics();
   if(id==='friend') renderFriend();
-  if(id==='settings') renderNoteManager();
+  if(id==='settings') renderConfigSection();
 }
 
 document.querySelectorAll('.sb-link[data-page]').forEach(l=>l.addEventListener('click',()=>goPage(l.dataset.page)));
@@ -2411,7 +2400,7 @@ function renderDashboard(){
         <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td><div class="tstars">${renderStars(f.statusRating)}</div></td>
-        <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).join(', ')}</td>
+        <td class="tscript">${f.notes.replace(/·/g,',').split(',').slice(0,3).map(function(n){return noteDisplayName(n);}).join(', ')}</td>
         <td class="tmono">${getCompCount(f.id)}</td>
         <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
       </tr>`).join('');
@@ -2677,7 +2666,7 @@ function renderCollection(){
       return '<tr onclick="openDetail(\''+f.id+'\')">'
         +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
         +'<td><div class="tstars">'+renderStars(f.statusRating)+'</div></td>'
-        +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,2).join(', ')+'</td>'
+        +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,2).map(function(n){return noteDisplayName(n);}).join(', ')+'</td>'
         +'<td class="tmono">'+compCount+'</td>'
         +'<td class="tact">'
         +'<button class="btn-bare" onclick="event.stopPropagation();openAddComp(\''+f.id+'\')">+ Compliment</button>'
@@ -2746,7 +2735,7 @@ function renderWishlist(){
         +'<td><div class="ts s-wnt">'+STATUS_LABELS[f.status]+'</div></td>'
         +'<td class="tmono" style="color:var(--warm)">'+f.communityRating+' / 5.0</td>'
         +'<td class="tmono">'+(f.avgPrice||'—')+'</td>'
-        +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,3).join(', ')+'</td>'
+        +'<td class="tscript">'+(f.notes||'').replace(/·/g,',').split(',').slice(0,3).map(function(n){return noteDisplayName(n);}).join(', ')+'</td>'
         +'<td class="tmono" style="color:'+(f.isDupe?'var(--warm)':'var(--ink3)')+';">'+(f.isDupe?'Yes — '+f.dupeFor:'—')+'</td>'
         +'<td class="tact"><button class="btn btn-warm btn-sm" onclick="event.stopPropagation();promoteToCollection(\''+f.id+'\')">Bought it</button></td>'
         +'</tr>';
@@ -2966,8 +2955,8 @@ function renderNoteChips(containerId, noteCounts, color, maxShow){
     var weight=count/maxCount;
     var chip=document.createElement('div');
     chip.style.cssText='padding:4px 10px;border:1px solid '+(color||'var(--b3)')+';font-family:var(--mono);font-size:'+(9+Math.round(weight*3))+'px;color:'+(color||'var(--ink3)')+';letter-spacing:.08em;text-transform:uppercase;cursor:pointer;opacity:'+(0.5+weight*0.5)+';transition:all .14s;';
-    chip.textContent=note+' '+count;
-    chip.title=count+' fragrance'+(count>1?'s':'')+' contain '+note;
+    chip.textContent=noteDisplayName(note)+' '+count;
+    chip.title=count+' fragrance'+(count>1?'s':'')+' contain '+noteDisplayName(note);
     chip.onmouseenter=function(){this.style.background='var(--blue4)';this.style.opacity='1';};
     chip.onmouseleave=function(){this.style.background='';this.style.opacity=(0.5+weight*0.5).toString();};
     chip.onclick=function(){goPage('collection');if(typeof filterCollByNote==='function')filterCollByNote(note);};
@@ -3287,7 +3276,7 @@ function renderFriend(){
       var ds=document.createElement('div'); ds.className='ts '+(STATUS_CSS[f.status]||''); ds.textContent=STATUS_LABELS[f.status]||f.status; td2.appendChild(ds); tr.appendChild(td2);
       var td3=document.createElement('td');
       var dr=document.createElement('div'); dr.className='tstars'; dr.innerHTML=renderStars(f.statusRating||f.personalRating); td3.appendChild(dr); tr.appendChild(td3);
-      var td4=document.createElement('td'); td4.className='tscript'; td4.textContent=f.notes.replace(/·/g,',').split(',').slice(0,2).join(', '); tr.appendChild(td4);
+      var td4=document.createElement('td'); td4.className='tscript'; td4.textContent=f.notes.replace(/·/g,',').split(',').slice(0,2).map(function(n){return noteDisplayName(n);}).join(', '); tr.appendChild(td4);
       var td5=document.createElement('td'); td5.className='tmono'; td5.textContent=getCompCount(f.id); tr.appendChild(td5);
       var td6=document.createElement('td'); td6.className='tact';
       var btn=document.createElement('button'); btn.className='btn-bare'; btn.textContent='Compare';
@@ -3499,7 +3488,7 @@ function renderDetailNotes(f){
 
 function buildDetailChips(str, fragId, tier){
   return str.split(/[,·]+/).map(function(s){return s.trim();}).filter(Boolean).map(function(n){
-    return '<span class="d-note-chip">'+n+'<button class="nc-del" onclick="removeNoteFromFrag(\''+fragId+'\',\''+tier+'\',\''+n.replace(/'/g,"\\'")+'\')" title="Remove note">×</button></span>';
+    return '<span class="d-note-chip">'+noteDisplayName(n)+'<button class="nc-del" onclick="removeNoteFromFrag(\''+fragId+'\',\''+tier+'\',\''+n.replace(/'/g,"\\'")+'\')" title="Remove note">×</button></span>';
   }).join('');
 }
 
@@ -3513,124 +3502,49 @@ function removeNoteFromFrag(fragId, tier, note){
   openDetail(fragId);
 }
 
-// ── NOTES MANAGER (GROUP 3) ───────────────────────────────
-function renderNoteManager(){
-  var counts={};
-  myFragrances().forEach(function(f){
-    ['topNotes','middleNotes','baseNotes','notes'].forEach(function(field){
-      if(f[field]){
-        f[field].split(/[,·]+/).map(function(s){return s.trim();}).filter(Boolean).forEach(function(n){
-          var k=n.toLowerCase();
-          if(!counts[k]) counts[k]={name:n,count:0};
-          counts[k].count++; counts[k].name=n;
-        });
-      }
-    });
-  });
-  var sorted=Object.values(counts).sort(function(a,b){return b.count-a.count;});
-  var el=document.getElementById('noteManager'); if(!el) return;
-  if(!sorted.length){ el.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);padding:12px 0;">No notes yet — add fragrances with note pyramids first</div>'; return; }
-  el.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'+sorted.length+' unique notes</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px;" id="notesList">'
-    +sorted.map(function(n){
-      var enc=n.name.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-      return '<div class="note-manage-row" data-note="'+enc+'">'
-        +'<input type="checkbox" class="note-merge-chk" value="'+enc+'" onchange="toggleMergeSelect()">'
-        +' <span class="note-manage-name" ondblclick="startRenameNote(this,\''+enc+'\')">'+n.name+'</span>'
-        +' <span class="note-manage-ct">'+n.count+'</span>'
-        +'</div>';
-    }).join('')
-    +'</div>'
-    +'<button class="btn btn-ghost btn-sm" id="startMergeBtn" style="display:none;" onclick="startMergeNotes()">Merge selected</button>';
+
+function noteDisplayName(n){
+  return n.trim().replace(/\w\S*/g,function(w){return w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();});
+}
+
+function renderConfigSection(){
+  var el=document.getElementById('configSection');
+  if(!el) return;
+  el.style.display=(CURRENT_USER&&CURRENT_USER.id==='u1')?'block':'none';
+  if(CURRENT_USER&&CURRENT_USER.id==='u1') renderNoteLibrary();
   populateMergeSelects();
 }
 
-function toggleMergeSelect(){
-  var checked=document.querySelectorAll('.note-merge-chk:checked');
-  var btn=document.getElementById('startMergeBtn');
-  if(btn) btn.style.display=checked.length>=2?'':'none';
-}
-
-function startRenameNote(el, name){
-  var row=el.parentElement;
-  var inp=document.createElement('input');
-  inp.className='note-rename-inp'; inp.value=name;
-  inp.onkeydown=function(e){
-    if(e.key==='Enter'){ saveRenameNote(name, inp.value.trim()); }
-    else if(e.key==='Escape'){ renderNoteManager(); }
-  };
-  inp.onblur=function(){ if(inp.value.trim()&&inp.value.trim()!==name) saveRenameNote(name,inp.value.trim()); else renderNoteManager(); };
-  el.replaceWith(inp);
-  inp.focus(); inp.select();
-}
-
-function saveRenameNote(oldName, newName){
-  if(!newName||newName===oldName){ renderNoteManager(); return; }
-  var affected=[];
-  myFragrances().forEach(function(f){
-    var changed=false;
-    ['topNotes','middleNotes','baseNotes','notes'].forEach(function(field){
-      if(!f[field]) return;
-      var parts=f[field].split(/[,·]+/).map(function(s){return s.trim();});
-      var updated=parts.map(function(n){return n.toLowerCase()===oldName.toLowerCase()?newName:n;}).join(', ');
-      if(updated!==f[field]){ f[field]=updated; changed=true; }
+function renderNoteLibrary(){
+  var el=document.getElementById('noteLibraryList');
+  if(!el) return;
+  var seen={};
+  FRAGRANCES.forEach(function(f){
+    if(!f.notes) return;
+    f.notes.split(/[,·]+/).forEach(function(n){
+      var raw=n.trim();
+      var key=raw.toLowerCase();
+      if(key.length<2) return;
+      if(!seen[key]) seen[key]={display:raw,count:0};
+      seen[key].count++;
     });
-    if(changed) affected.push(f);
   });
-  if(affected.length) writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
-  toast('Renamed "'+oldName+'" → "'+newName+'" across '+affected.length+' fragrance'+(affected.length!==1?'s':''));
-  renderNoteManager();
-}
-
-function startMergeNotes(){
-  var checked=[...document.querySelectorAll('.note-merge-chk:checked')].map(function(c){return c.value;});
-  if(checked.length<2){ toast('Select at least 2 notes to merge'); return; }
-  _noteMergeSelected=checked; _noteMergeKeep=null;
-  var panel=document.getElementById('noteMergePanel');
-  var opts=document.getElementById('noteMergeOptions');
-  if(!panel||!opts) return;
-  opts.innerHTML=checked.map(function(n){
-    return '<button class="btn btn-ghost btn-sm" style="border:2px solid transparent;" onclick="selectMergeKeep(this,\''+n.replace(/'/g,"\\'")+'\')" data-nm="'+n.replace(/"/g,'&quot;')+'">'+n+'</button>';
-  }).join('');
-  panel.style.display='';
-  var btn=document.getElementById('noteMergeConfirmBtn'); if(btn) btn.disabled=true;
-}
-
-function selectMergeKeep(el, name){
-  _noteMergeKeep=name;
-  document.querySelectorAll('#noteMergeOptions button').forEach(function(b){ b.style.borderColor=b.dataset.nm===name?'var(--blue)':'transparent'; });
-  var btn=document.getElementById('noteMergeConfirmBtn'); if(btn) btn.disabled=false;
-}
-
-function confirmMergeNotes(){
-  if(!_noteMergeKeep||!_noteMergeSelected.length){ toast('Pick which name to keep'); return; }
-  var toReplace=_noteMergeSelected.filter(function(n){return n!==_noteMergeKeep;});
-  var affected=[];
-  myFragrances().forEach(function(f){
-    var changed=false;
-    ['topNotes','middleNotes','baseNotes','notes'].forEach(function(field){
-      if(!f[field]) return;
-      var parts=f[field].split(/[,·]+/).map(function(s){return s.trim();});
-      var seen=new Set();
-      var updated=parts.map(function(n){
-        var lo=n.toLowerCase();
-        if(toReplace.some(function(r){return r.toLowerCase()===lo;})) return _noteMergeKeep;
-        return n;
-      }).filter(function(n){var k=n.toLowerCase();if(seen.has(k))return false;seen.add(k);return true;}).join(', ');
-      if(updated!==f[field]){ f[field]=updated; changed=true; }
-    });
-    if(changed) affected.push(f);
+  var sorted=Object.keys(seen).sort();
+  el.innerHTML='';
+  el.style.cssText='columns:3;column-gap:24px;margin-top:4px;';
+  sorted.forEach(function(key){
+    var entry=seen[key];
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--b1);break-inside:avoid;';
+    var name=document.createElement('span');
+    name.textContent=noteDisplayName(entry.display);
+    name.style.cssText='font-family:var(--body);font-size:12px;color:var(--ink);';
+    var count=document.createElement('span');
+    count.textContent=entry.count;
+    count.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);margin-left:8px;';
+    row.appendChild(name);row.appendChild(count);
+    el.appendChild(row);
   });
-  if(affected.length) writeSheet('fragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
-  toast('Merged '+toReplace.length+' note'+(toReplace.length!==1?'s':'')+' into "'+_noteMergeKeep+'" across '+affected.length+' fragrance'+(affected.length!==1?'s':''));
-  cancelMergeNotes();
-}
-
-function cancelMergeNotes(){
-  _noteMergeSelected=[]; _noteMergeKeep=null;
-  var panel=document.getElementById('noteMergePanel'); if(panel) panel.style.display='none';
-  document.querySelectorAll('.note-merge-chk').forEach(function(c){c.checked=false;});
-  var btn=document.getElementById('startMergeBtn'); if(btn) btn.style.display='none';
 }
 
 function populateMergeSelects(){
@@ -4332,8 +4246,6 @@ let compFragFilter = null;
 let editingCompId = null;
 let activeNoteFilter = null;
 let csvParsedRows = [];
-let _noteMergeSelected = [];
-let _noteMergeKeep = null;
 
 // ── TAG INPUT SYSTEM ──────────────────────────────────────
 const NOTE_LIST = ['rose','vanilla','sandalwood','musk','oud','amber','bergamot','jasmine','cedar','vetiver','patchouli','iris','pepper','cardamom','ginger','lemon','grapefruit','neroli','ylang ylang','tobacco','leather','coffee','chocolate','caramel','coconut','peach','apple','fig','violet','lavender','oakmoss','incense','frankincense','myrrh','benzoin','tonka bean','orris','heliotrope','tuberose','gardenia','magnolia','lily','freesia','peony','saffron','cinnamon','clove','nutmeg','anise','mint','eucalyptus','pine','fir','hay','smoke','salt','marine','moss','earth','mushroom','ambergris','castoreum','civet','beeswax','honey'];
@@ -5348,7 +5260,7 @@ function renderNotesIntel(){
   if(!el)return;
   el.innerHTML = notes.map(n=>`
     <div class="note-card" onclick="filterCollByNote('${n.name.replace(/'/g,"\\'")}')">
-      <div class="note-name">${n.name}</div>
+      <div class="note-name">${noteDisplayName(n.name)}</div>
       <div class="note-ct">${n.totalComps} compliment${n.totalComps!==1?'s':''}</div>
       <div class="note-comp">${n.frags} fragrance${n.frags!==1?'s':''}</div>
       <div class="note-bar-wrap"><div class="note-bar-fill" style="width:${Math.round((n.totalComps/maxComps)*100)}%"></div></div>
@@ -5362,7 +5274,7 @@ function renderNotesIntel(){
     });
   });
   const sorted = Object.entries(byFrag).sort((a,b)=>b[1]-a[1]).slice(0,16);
-  faveEl.innerHTML = sorted.map(([name,ct])=>`<span class="fave-note-chip" onclick="filterCollByNote('${name.replace(/'/g,"\\'")}')"><span>${name}</span><span class="chip-ct">${ct}</span></span>`).join('');
+  faveEl.innerHTML = sorted.map(([name,ct])=>`<span class="fave-note-chip" onclick="filterCollByNote('${name.replace(/'/g,"\\'")}')"><span>${noteDisplayName(name)}</span><span class="chip-ct">${ct}</span></span>`).join('');
 }
 
 function filterCollByNote(note){
@@ -5387,7 +5299,7 @@ function filterCollByNote(note){
   var bar=document.getElementById('noteFilterBar');
   var lbl=document.getElementById('noteFilterName');
   if(bar) bar.classList.add('on');
-  if(lbl) lbl.textContent=note;
+  if(lbl) lbl.textContent=noteDisplayName(note);
   // Navigate and render
   goPage('collection');
   renderCollection();
