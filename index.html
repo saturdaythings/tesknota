@@ -157,6 +157,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .cam-search-drop .sdi:hover{background:var(--off2);}
 .s-prv{color:var(--ink3);}
 .s-no{color:var(--rose);}
+.s-fin{color:#B08040;}
 .tstars{font-size:11px;color:var(--warm);letter-spacing:1px;}
 .tmono{font-family:var(--mono);font-size:10px;color:var(--ink2);}
 .tscript{font-family:var(--script);font-size:13px;font-style:italic;color:var(--ink2);}
@@ -1230,6 +1231,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <option value="WANT_TO_SMELL">Want to Smell</option>
             <option value="WANT_TO_BUY">Want to Buy</option>
             <option value="DONT_LIKE">Have Smelled — Don't Like</option>
+            <option value="FINISHED">Finished (empty bottle)</option>
             <option value="WANT_TO_IDENTIFY">Save to Identify Later</option>
           </select>
         </div>
@@ -2556,8 +2558,8 @@ function buildAccordPicker(preselected){
 function genId(prefix){ return prefix + (nextId++); }
 function genCompId(){ return 'c' + (nextCompId++); }
 const PAGES = {dashboard:'Dashboard',collection:'My Collection',wishlist:'Wishlist',compliments:'Compliments',analytics:'Analytics',import:'Import',settings:'Settings'};
-const STATUS_LABELS = {CURRENT:'Current',PREVIOUSLY_OWNED:'Prev. Owned',WANT_TO_BUY:'Want to Buy',WANT_TO_SMELL:'Want to Smell',DONT_LIKE:"Don't Like",WANT_TO_IDENTIFY:'Identify Later'};
-const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt',WANT_TO_SMELL:'s-wnt',DONT_LIKE:'s-no',WANT_TO_IDENTIFY:'s-unk'};
+const STATUS_LABELS = {CURRENT:'Current',PREVIOUSLY_OWNED:'Prev. Owned',WANT_TO_BUY:'Want to Buy',WANT_TO_SMELL:'Want to Smell',DONT_LIKE:"Don't Like",WANT_TO_IDENTIFY:'Identify Later',FINISHED:'Finished'};
+const STATUS_CSS = {CURRENT:'s-cur',PREVIOUSLY_OWNED:'s-prv',WANT_TO_BUY:'s-wnt',WANT_TO_SMELL:'s-wnt',DONT_LIKE:'s-no',WANT_TO_IDENTIFY:'s-unk',FINISHED:'s-fin'};
 
 function starsStr(n){ if(!n)return '—'; let s=''; for(let i=1;i<=5;i++) s+=i<=n?'★':'☆'; return s; }
 
@@ -4335,7 +4337,7 @@ document.addEventListener('click',e=>{
 function toggleStatusStrip(){
   const strip = document.getElementById('statusStrip');
   if(strip.classList.contains('show')){ strip.classList.remove('show'); return; }
-  const statuses = ['CURRENT','PREVIOUSLY_OWNED','WANT_TO_BUY','WANT_TO_SMELL','DONT_LIKE'];
+  const statuses = ['CURRENT','FINISHED','PREVIOUSLY_OWNED','WANT_TO_BUY','WANT_TO_SMELL','DONT_LIKE'];
   strip.innerHTML = statuses.map(s=>`<div class="opt${currentDetailId&&FRAGRANCES.find(f=>f.id===currentDetailId)?.status===s?' on':''}" onclick="changeStatus('${s}')">${STATUS_LABELS[s]}</div>`).join('');
   strip.classList.add('show');
 }
@@ -4670,7 +4672,9 @@ function saveFragrance(){
     if(duplicate){toast('You already have '+newFrag.name+' in your collection.');return;}
     FRAGRANCES.push(newFrag);
     appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
-    showPostSaveToast(name,STATUS_LABELS[data.status]);
+    var _moreExpanded = document.getElementById('afMoreWrap')&&document.getElementById('afMoreWrap').style.display!=='none';
+    if(!_moreExpanded){ showPostSaveToastWithEdit(name,STATUS_LABELS[data.status],newFrag.id); }
+    else { showPostSaveToast(name,STATUS_LABELS[data.status]); }
   }
   closeModal('addFragM');
   renderCurrentPage();
@@ -4693,6 +4697,20 @@ function showPostSaveToast(fragName,statusLabel){
   c.appendChild(t);
   requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('on');});});
   setTimeout(function(){t.classList.remove('on');setTimeout(function(){t.remove();},300);},4000);
+}
+
+function showPostSaveToastWithEdit(fragName, statusLabel, fragId){
+  var c=document.getElementById('toasts');
+  if(!c){toast(fragName+' added.');return;}
+  var t=document.createElement('div');t.className='toast';
+  var msg=document.createElement('span');msg.textContent=fragName+' added. ';
+  var link=document.createElement('span');link.textContent='Add details \u2192';
+  link.style.cssText='color:var(--warm2);cursor:pointer;text-decoration:underline;margin-left:4px;';
+  link.onclick=function(){openEditFrag(fragId);};
+  t.appendChild(msg);t.appendChild(link);
+  c.appendChild(t);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){t.classList.add('on');});});
+  setTimeout(function(){t.classList.remove('on');setTimeout(function(){t.remove();},300);},5000);
 }
 
 function afSearch(v){
@@ -6831,6 +6849,7 @@ function palFlows() {
         prefill: function() { return PAL.editTarget ? PAL.editTarget.status : ''; },
         options: [
           {v:'CURRENT',         l:'Current Collection'},
+          {v:'FINISHED',        l:'Finished (empty bottle)'},
           {v:'PREVIOUSLY_OWNED',l:'Previously Owned'},
           {v:'WANT_TO_BUY',     l:'Want to Buy'},
           {v:'WANT_TO_SMELL',   l:'Want to Smell'},
