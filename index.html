@@ -903,6 +903,17 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="fc" data-filter="Family">Family</div>
         <div class="fc" data-filter="Significant Other">Partners</div>
       </div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px;">
+        <select id="compSort" onchange="compSortVal=this.value;renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all')" style="font-family:var(--mono);font-size:11px;padding:4px 8px;border:1px solid var(--b2);background:var(--surface);color:var(--ink1);cursor:pointer;">
+          <option value="dateDesc">Date — Newest first</option>
+          <option value="dateAsc">Date — Oldest first</option>
+          <option value="relation">Complimenter type</option>
+          <option value="houseAZ">House A–Z</option>
+          <option value="houseZA">House Z–A</option>
+          <option value="nameAZ">Perfume name A–Z</option>
+          <option value="nameZA">Perfume name Z–A</option>
+        </select>
+      </div>
       <div class="cff-bar" id="compFragFilterBar" style="display:none;">
         Filtered: <span class="cff-name" id="cffName"></span>
         <button class="cff-clear" onclick="clearCompFragFilter()" title="Clear filter">×</button>
@@ -1416,6 +1427,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- Satisfaction banner — shown briefly after save, then modal closes -->
     <div class="comp-save-banner" id="compSaveBanner">Compliment logged ✓</div>
     <div class="mfoot">
+      <button class="btn btn-danger" id="compDeleteBtn" style="display:none;margin-right:auto;" onclick="deleteComplimentFromModal()">Delete</button>
       <button class="btn btn-ghost" onclick="closeModal('addCompM')">Cancel</button>
       <button class="btn btn-blue" onclick="saveCompliment()">Save Compliment</button>
     </div>
@@ -3593,7 +3605,29 @@ function renderCompliments(filter='all'){
   if(ffBar){ ffBar.style.display=compFragFilter?'':'none'; if(ffName&&compFragFilter) ffName.textContent=compFragFilter.name; }
   // Apply frag filter first, then relation filter
   var base = compFragFilter ? MC.filter(function(c){return c.primaryFragId===compFragFilter.id||c.secondaryFragId===compFragFilter.id;}) : MC;
-  const filtered = filter==='all' ? base : base.filter(c=>c.relation===filter);
+  var filtered = (filter==='all' ? base : base.filter(c=>c.relation===filter)).slice();
+  // Apply sort
+  var _sv = compSortVal || 'dateDesc';
+  function _compFrag(c){ return FRAGRANCES.find(function(x){return x.id===c.primaryFragId;})||{}; }
+  filtered.sort(function(a,b){
+    if(_sv==='dateDesc'||_sv==='dateAsc'){
+      var da=(parseInt(a.year)||0)*100+(parseInt(a.month)||0);
+      var db=(parseInt(b.year)||0)*100+(parseInt(b.month)||0);
+      return _sv==='dateDesc'?db-da:da-db;
+    }
+    if(_sv==='relation') return (a.relation||'').localeCompare(b.relation||'');
+    if(_sv==='houseAZ'||_sv==='houseZA'){
+      var ha=(_compFrag(a).house||a.primaryFrag||'').toLowerCase();
+      var hb=(_compFrag(b).house||b.primaryFrag||'').toLowerCase();
+      return _sv==='houseAZ'?ha.localeCompare(hb):hb.localeCompare(ha);
+    }
+    if(_sv==='nameAZ'||_sv==='nameZA'){
+      var na=(_compFrag(a).name||a.primaryFrag||'').toLowerCase();
+      var nb=(_compFrag(b).name||b.primaryFrag||'').toLowerCase();
+      return _sv==='nameAZ'?na.localeCompare(nb):nb.localeCompare(na);
+    }
+    return 0;
+  });
   // Update counts in filter bar
   const rel=['Stranger','Friend','Colleague / Client','Family','Significant Other'];
   const relLabel={'Stranger':'Strangers','Friend':'Friends','Colleague / Client':'Colleagues','Family':'Family','Significant Other':'Partners'};
@@ -3616,9 +3650,8 @@ function renderCompliments(filter='all'){
       +'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(renderComplimentLocation(c)!=='—'?' · '+renderComplimentLocation(c):'')+'</div>'
       +_notePrev
       +'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;">'
+      +'<div style="flex-shrink:0;margin-left:16px;">'
       +'<div class="cr-d">'+(_MN[parseInt(c.month)-1]||c.month)+' '+c.year+'</div>'
-      +'<button class="btn-bare" style="font-size:10px;" onclick="event.stopPropagation();deleteCompliment(\''+c.id+'\')" title="Delete">×</button>'
       +'</div>'
       +'</div>';
   }
@@ -3638,9 +3671,16 @@ document.getElementById('compFbar').addEventListener('click',e=>{
 function deleteCompliment(id){
   COMPLIMENTS = COMPLIMENTS.filter(c=>c.id!==id);
   writeSheet('userCompliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
-  renderCompliments(document.querySelector('#compFbar .fc.on').dataset.filter);
+  renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all');
   updateCounts();
   toast('Compliment removed');
+}
+
+function deleteComplimentFromModal(){
+  if(!editingCompId) return;
+  var id = editingCompId;
+  closeModal('addCompM');
+  deleteCompliment(id);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4999,6 +5039,7 @@ function openAddComp(fragId, prefill){
   var sub=document.getElementById('addCompSub');
   if(title) title.textContent = editingCompId ? 'Edit Compliment' : 'Log a Compliment';
   if(sub) sub.textContent = editingCompId ? 'Update the details of this compliment' : 'Record who, where, and what you were wearing';
+  var _delBtn=document.getElementById('compDeleteBtn'); if(_delBtn) _delBtn.style.display=editingCompId?'':'none';
   // Reset custom fragrance picker
   var fragSrch=document.getElementById('compFragSrch');
   var fragHid=document.getElementById('compFrag');
@@ -5290,6 +5331,7 @@ function importToWishlist(data){
 
 let compFragFilter = null;
 let editingCompId = null;
+var compSortVal = 'dateDesc';
 let activeNoteFilter = null;
 let csvParsedRows = [];
 
