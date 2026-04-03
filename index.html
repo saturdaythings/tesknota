@@ -1027,11 +1027,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
               <div class="lr-static" id="lrs-price"><span class="lrv" id="lr-price">—</span> <button class="lr-editbtn" onclick="lrEditField('price')">edit</button></div>
               <input type="text" id="lr-price-inp" class="input-editable" style="display:none;" placeholder="~$280" oninput="lrSync('avgPrice',this.value)">
             </div>
-            <div>
-              <div class="lrl">Sillage</div>
-              <div class="lr-static" id="lrs-sill"><span class="lrv" id="lr-sill">—</span> <button class="lr-editbtn" onclick="lrEditField('sill')">edit</button></div>
-              <select id="lr-sill-inp" class="input-editable" style="display:none;" onchange="lrSync('communitySill',this.value)"><option value="">—</option><option>Soft</option><option>Moderate</option><option>Strong</option><option>Enormous</option></select>
-            </div>
           </div>
           <!-- Notes pyramid for import card -->
           <div class="divider-section">
@@ -1180,7 +1175,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <div class="dsec" id="dsec-profile"><div class="dsl">Fragrance profile</div>
       <div class="dgrid">
         <div id="drow-price"><div class="di-l">Avg price</div><div class="di-v" id="d-price"></div></div>
-        <div id="drow-sill"><div class="di-l">Sillage (comm.)</div><div class="di-v" id="d-sill"></div></div>
       </div>
     </div>
     <div class="dsec"><div class="dsl">Notes</div>
@@ -1632,7 +1626,6 @@ function getCommunityData(name, house){
   if(db){
     var notes = db.notes || [db.top||'',db.mid||'',db.base||''].filter(Boolean).join(', ');
     return {
-      communitySill: db.s||null,
       avgPrice: db.p||null,
       notes: notes,
       accords: db.accords||'',
@@ -1647,7 +1640,6 @@ function getCommunityData(name, house){
   });
   if(cf){
     return {
-      communitySill: cf.communitySill||null,
       avgPrice: cf.avgPrice||null,
       notes: cf.notes||'',
       accords: cf.accords||'',
@@ -1669,11 +1661,11 @@ function fragToDbRow(f){
     fragranceHouse: f.house||'',
     fragranceType: f.type||'',
     fragranceAccords: f.accords||cd.accords||'',
+    notes: cd.notes||'',
     topNotes: cd.topNotes||'',
     middleNotes: cd.middleNotes||'',
     baseNotes: cd.baseNotes||'',
-    avgPrice: cd.avgPrice||'',
-    communitySill: cd.communitySill||'',
+    avgPrice: (cd.avgPrice||'').replace(/~/g,'').trim(),
     addedBy: 'system',
     addedAt: f.createdAt||new Date().toISOString(),
   };
@@ -1898,6 +1890,11 @@ async function loadAllData(){
   COMMUNITY_FRAGS = _newDbRows.map(function(r){
     return Object.assign({}, r, { name: r.fragranceName||r.name||'', house: r.fragranceHouse||r.house||'', id: r.fragranceId||r.id||'' });
   });
+  // Re-resolve names in FRAGRANCES from updated COMMUNITY_FRAGS so renames take effect immediately
+  FRAGRANCES = FRAGRANCES.map(function(f){
+    var resolved = resolveFragById(f.id);
+    return (resolved.name && resolved.name !== f.name) ? Object.assign({}, f, {name: resolved.name, house: resolved.house}) : f;
+  });
 
   // Clean up QA test entries that were added during automated testing
   var _qaFrags = FRAGRANCES.filter(function(f){ return (f.name||'').toLowerCase().startsWith('qa '); });
@@ -2005,7 +2002,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v3';
+const FRAG_DB_VERSION = '2026-04-03-v4';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2456,8 +2453,8 @@ let COMMUNITY_FRAGS = [];
 
 const COMMUNITY_FRAG_HEADERS = [
   'fragranceId','fragranceName','fragranceHouse','fragranceType',
-  'fragranceAccords','topNotes','middleNotes','baseNotes',
-  'avgPrice','communitySill',
+  'fragranceAccords','notes','topNotes','middleNotes','baseNotes',
+  'avgPrice',
   'addedBy','addedAt'
 ];
 
@@ -4422,7 +4419,6 @@ function openDetail(fragId){
   }
   var _cd = getCommunityData(f.name, f.house) || {};
   setDRow('drow-price','d-price', _cd.avgPrice ? _cd.avgPrice.replace('~','').trim() : null);
-  setDRow('drow-sill','d-sill', _cd.communitySill||null);
   // Rating stars
   var _rating = f.personalRating||0;
   document.querySelectorAll('#detailStarRow .star-glyph').forEach(function(s){
@@ -5891,9 +5887,6 @@ function showLinkResult(data){
   document.getElementById('lr-house-inp').value = data.house||'';
   // Avg Price
   lrSetField('price', data.avgPrice||null);
-  // Sillage
-  lrSetField('sill', data.communitySill||null);
-  if(data.communitySill){ document.getElementById('lr-sill-inp').value=data.communitySill; }
   // Notes pyramid
   tiInit('lrTop', data.topNotes||'');
   tiInit('lrMiddle', data.middleNotes||'');
@@ -5965,7 +5958,6 @@ function lrSyncAll(){
   d.name = document.getElementById('lr-name-inp').value.trim()||d.name;
   d.house = document.getElementById('lr-house-inp').value.trim()||d.house;
   var priceInp=document.getElementById('lr-price-inp'); if(priceInp&&priceInp.value) d.avgPrice=priceInp.value;
-  var sillInp=document.getElementById('lr-sill-inp'); if(sillInp&&sillInp.value) d.communitySill=sillInp.value;
   d.topNotes = tiGet('lrTop');
   d.middleNotes = tiGet('lrMiddle');
   d.baseNotes = tiGet('lrBase');
