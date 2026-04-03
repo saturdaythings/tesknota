@@ -1272,6 +1272,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
               <option value="Extrait de Parfum">Extrait de Parfum</option>
               <option value="Eau de Parfum">Eau de Parfum</option>
               <option value="Eau de Toilette">Eau de Toilette</option>
+              <option value="Cologne">Cologne</option>
+              <option value="Perfume Concentré">Perfume Concentré</option>
               <option value="Body Spray">Body Spray</option>
               <option value="Perfume Oil">Perfume Oil</option>
               <option value="Other">Other</option>
@@ -2005,7 +2007,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v7';
+const FRAG_DB_VERSION = '2026-04-03-v8';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2449,6 +2451,17 @@ const FRAG_DB = [
   {n:'Après Ski',h:'Laurel Bath House',conc:'EDP',fam:'Gourmand',top:'Whiskey, Cloves',mid:'Maraschino Cherry',base:'Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$120',accords:'Boozy, Fruity, Warm Spicy, Woody, Musky'},
   {n:'Buontalenti',h:'Profumo di Firenze',conc:'EDP',fam:'Fruity Gourmand',top:'Banana, Peach, Apricot, Red Fruits',mid:'Coconut, Vanilla, Raspberry',base:'Toffee, Cookie, Caramel, Musk',r:'4.0',l:'4–6h',s:'Moderate',p:'~$130',accords:'Gourmand, Fruity, Sweet, Caramel, Vanilla'},
   {n:'London Fog',h:'House of Brandt',conc:'EDP',fam:'Aromatic Gourmand',top:'Bergamot, Earl Grey Tea, Smoke',mid:'Milk, Lavender, Honey',base:'Vanilla Absolute, Sandalwood, White Musk, Ambergris',r:'4.3',l:'6–8h',s:'Soft',p:'~$130',accords:'Tea, Creamy, Floral, Vanilla, Musky'},
+  // ── Avon Vintage ──────────────────────────────────────────────────────────
+  {n:'Elusive',h:'Avon',conc:'Cologne',fam:'Smoky Green',top:'Incense, Galbanum',mid:'Cloves, Coriander',base:'Civet, Orris Root, Musk, Oakmoss',r:'3.8',l:'2–4h',s:'Soft',p:'~$7',accords:'Smoky, Green, Powdery, Musky, Spicy'},
+  {n:'Bird of Paradise',h:'Avon',conc:'Cologne',fam:'Floral Green',notes:'Green Florals, Sandalwood, Incense, Oakmoss',r:'3.8',l:'2–4h',s:'Soft',p:'~$7',accords:'Floral, Green, Smoky, Powdery, Woody'},
+  {n:'Sweet Honesty',h:'Avon',conc:'Cologne',fam:'Floral Powdery',top:'Lily of the Valley, Aldehydes, Sicilian Lemon',mid:'Hyacinth, Rose',base:'Musk, Honey, Vanilla, Cedar',r:'3.8',l:'2–4h',s:'Soft',p:'~$10',accords:'Floral, Powdery, Sweet, Musky, Vanilla'},
+  {n:'Occur!',h:'Avon',conc:'Cologne',fam:'Floral Chypre',top:'Aldehydes, Gardenia, Cardamom, Coriander, Bergamot',mid:'Carnation, Myrrh, Patchouli, Styrax, Jasmine',base:'Honey, Leather, Amber, Civet, Vanilla, Coconut',r:'3.8',l:'2–4h',s:'Soft',p:'~$6',accords:'Floral, Smoky, Powdery, Chypre, Warm Spicy'},
+  {n:'Moonwind',h:'Avon',conc:'Cologne',fam:'Green Floral',top:'Aldehydes, Bergamot, Grapefruit',mid:'Lavender, Narcissus, Green Notes',base:'Oakmoss, Vetiver',r:'3.8',l:'2–4h',s:'Soft',p:'~$14',accords:'Green, Floral, Powdery, Aldehydic, Woody'},
+  {n:'Topaze',h:'Avon',conc:'Cologne',fam:'Aldehydic Floral',top:'Aldehydes, Coriander, Peach, Bergamot, Lemon',mid:'Carnation, Ylang-Ylang, Iris, Rose, Jasmine, Lily of the Valley',base:'Civet, Sandalwood, Amber, Benzoin, Vetiver, Tonka Bean',r:'3.8',l:'2–4h',s:'Soft',p:'~$8',accords:'Aldehydic, Floral, Powdery, Warm Spicy, Amber'},
+  {n:'Sonnet',h:'Avon',conc:'Cologne',fam:'Powdery Oriental',top:'Powdery Notes, Floral Notes, Spices',mid:'Carnation, Pepper',base:'Iris, Spicy Notes, Woody Notes',r:'3.8',l:'2–4h',s:'Soft',p:'~$24',accords:'Powdery, Floral, Warm Spicy, Oriental, Woody'},
+  {n:'Charisma',h:'Avon',conc:'Cologne',fam:'Aldehydic Floral',top:'Aldehydes, Bergamot, Peach, Neroli, Hyacinth, Coriander',mid:'Iris Root, Carnation, Jasmine, Rose, Narcissus, Ylang-Ylang, Lily of the Valley',base:'Sandalwood, Amber, Civet, Musk, Tonka Bean, Vanilla, Styrax',r:'3.8',l:'2–4h',s:'Soft',p:'~$14',accords:'Aldehydic, Floral, Powdery, Animalic, Musky'},
+  {n:'Imperial Garden',h:'Avon',conc:'Cologne',fam:'Green Floral',notes:'Floral Notes, Maté',r:'3.8',l:'2–4h',s:'Soft',p:'~$10',accords:'Green, Floral, Fresh, Earthy, Powdery'},
+  {n:'Moonwind (Perfume Concentré)',h:'Avon',conc:'Perfume Concentré',fam:'Green Floral',top:'Aldehydes, Bergamot, Grapefruit',mid:'Lavender, Narcissus, Green Notes',base:'Oakmoss, Vetiver',r:'3.8',l:'4–6h',s:'Moderate',p:'~$15',accords:'Green, Floral, Powdery, Aldehydic, Woody'},
 ];
 
 // COMMUNITY_FRAGS — user-contributed metadata (Layer 0 search, loaded from fragranceDB sheet tab)
@@ -2540,6 +2553,21 @@ let FRAGRANCES = [
   {id:'s29',userId:'u2',name:'Après Ski',house:'Laurel Bath House',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'Sep 2025',accords:'Gourmand, Fresh, Vanilla',createdAt:'2025-09-01T00:00:00.000Z'},
   {id:'s30',userId:'u2',name:'Buontalenti',house:'Profumo di Firenze',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',purchaseDate:'Aug 2025',whereBought:'Scent Split',accords:'Gourmand, Fruity, Vanilla',createdAt:'2025-08-01T00:00:00.000Z'},
   {id:'s31',userId:'u2',name:'London Fog',house:'House of Brandt',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',purchaseDate:'Aug 2025',whereBought:'Scent Split',accords:'Fresh, Gourmand, Woody',createdAt:'2025-08-01T00:00:00.000Z'},
+  // ── Sylvia Avon Vintage — purchased Apr 2026 ──────────────────────────────
+  {id:'s32',userId:'u2',name:'Elusive',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:7.00,whereBought:'Mercari',personalNotes:'Petit-Fleur flower decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s33',userId:'u2',name:'Bird of Paradise',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:8.00,whereBought:'Mercari',personalNotes:'Vintage decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s34',userId:'u2',name:'Bird of Paradise',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:7.00,whereBought:'Mercari',personalNotes:'Vintage decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s35',userId:'u2',name:'Sweet Honesty',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:10.00,whereBought:'eBay',personalNotes:'Curious Kitty decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s36',userId:'u2',name:'Occur!',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:6.00,whereBought:'eBay',personalNotes:'Fuzzy Bear decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s37',userId:'u2',name:'Moonwind',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:14.99,whereBought:'eBay',personalNotes:'Courting Rose decanter (gold flower)',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s38',userId:'u2',name:'Sonnet',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:24.99,whereBought:'eBay',personalNotes:'Strawberry Fair decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s39',userId:'u2',name:'Topaze',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:8.00,whereBought:'eBay',personalNotes:'Teddy Bear decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  // ── Sylvia Avon Vintage — wishlist ────────────────────────────────────────
+  {id:'s40',userId:'u2',name:'Imperial Garden',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Good luck elephant decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s41',userId:'u2',name:'Charisma',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Statue of Liberty Centennial decanter (1986)',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s42',userId:'u2',name:'Occur!',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Pierrot clown milk glass decanter (Pierrot = Occur!, Pierrette = Charisma — want both)',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s43',userId:'u2',name:'Charisma',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Pierrette clown milk glass decanter (pair with Pierrot above)',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s44',userId:'u2',name:'Moonwind (Perfume Concentré)',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Perfume Concentré',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'La Belle Telephone rotary phone decanter, 3" tall, NEW/filled',createdAt:'2026-04-03T00:00:00.000Z'},
 ];
 // Ensure all seed fragrances have fragranceId for id-linked architecture
 FRAGRANCES.forEach(function(f){ if(!f.fragranceId) f.fragranceId = f.id; });
@@ -2704,6 +2732,8 @@ var typeBadgeText={
   'Extrait de Parfum':'Extrait',
   'Eau de Parfum':'EDP',
   'Eau de Toilette':'EDT',
+  'Cologne':'Cologne',
+  'Perfume Concentré':'Concentré',
   'Body Spray':'Body Spray',
   'Perfume Oil':'Oil',
   'Other':'Other',
