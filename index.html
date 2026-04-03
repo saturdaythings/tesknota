@@ -2749,7 +2749,10 @@ function fragDisplayName(f){
 function _parsePurchaseDate(s){
   if(!s) return 0;
   var p=s.split(' ');
-  if(p.length===2){var mi=_MNS.indexOf(p[0]);if(mi>=0) return new Date(parseInt(p[1],10),mi,1).getTime();}
+  if(p.length===2){
+    var mi=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(p[0]);
+    if(mi>=0) return new Date(parseInt(p[1],10),mi,1).getTime();
+  }
   var d=new Date(s); return isNaN(d)?0:d.getTime();
 }
 
