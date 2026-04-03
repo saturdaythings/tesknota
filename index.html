@@ -1271,7 +1271,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="af-more-wrap" id="afMoreWrap" style="display:none;">
         <div class="frow" style="margin-bottom:14px;">
           <div class="fg" style="margin:0;"><label>Personal longevity</label>
-            <select id="afLong"><option value="">Not sure</option><option value="0–6h">0–6h</option><option value="6–12h" selected>6–12h</option><option value="12–24h">12–24h</option><option value=">24h">&gt;24h</option></select>
+            <select id="afLong"><option value="" selected>Not sure</option><option value="0–6h">0–6h</option><option value="6–12h">6–12h</option><option value="12–24h">12–24h</option><option value=">24h">&gt;24h</option></select>
           </div>
         </div>
         <div class="frow" style="margin-bottom:14px;">
@@ -1912,7 +1912,12 @@ function selectIdentity(name, id){
     who.appendChild(nb);
     who.appendChild(document.createTextNode('Settings'));
   }
-  renderDashboard();
+  // Restore last page — fall back to dashboard
+  try {
+    var _lp = localStorage.getItem('lastPage');
+    var _validPages = ['dashboard','collection','wishlist','compliments','analytics','friend','import','settings'];
+    if(_lp && _validPages.includes(_lp)) { goPage(_lp); } else { goPage('dashboard'); }
+  } catch(e){ goPage('dashboard'); }
   renderImportQueue();
   updateCounts();
   // Silent audit on load — only warns if failures found
@@ -2632,6 +2637,7 @@ function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   const pg=document.getElementById('page-'+id);
   if(pg)pg.classList.add('on');
+  try { localStorage.setItem('lastPage', id); } catch(e){}
   var pageName=id==='friend'?(getFriend().name+'\'s Profile'):(PAGES[id]||id);
   document.getElementById('pgName').textContent=pageName;
   document.querySelectorAll('.sb-link[data-page]').forEach(l=>l.classList.toggle('on',l.dataset.page===id));
@@ -3499,7 +3505,24 @@ function renderCompliments(filter='all'){
   });
   const allEmpty = MC.length === 0;
   var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  function crowHtml(c){ var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); var _pname=_pf?fragDisplayName(_pf):c.primaryFrag; var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':''; return '<div class="crow" data-rel="'+c.relation+'"><div style="flex:1;"><div class="cr-f" onclick="openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'+_house+'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(renderComplimentLocation(c)!=='—'?' · '+renderComplimentLocation(c):'')+'</div>'+(c.notes?'<div class="cr-n">'+c.notes+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;"><div class="cr-d">'+(_MN[parseInt(c.month)-1]||c.month)+' '+c.year+'</div><button class="btn-bare" style="font-size:11px;color:var(--ink3);" onclick="editCompliment(\''+c.id+'\')" title="Edit">✎</button><button class="btn-bare" style="font-size:10px;" onclick="deleteCompliment(\''+c.id+'\')">×</button></div></div>'; }
+  function crowHtml(c){
+    var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;});
+    var _pname=_pf?fragDisplayName(_pf):c.primaryFrag;
+    var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':'';
+    var _notePrev=c.notes?'<div class="cr-n" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.65;font-size:11px;">'+c.notes+'</div>':'';
+    return '<div class="crow" data-rel="'+c.relation+'" onclick="editCompliment(\''+c.id+'\')" style="cursor:pointer;" title="Click to edit">'
+      +'<div style="flex:1;">'
+      +'<div class="cr-f" onclick="event.stopPropagation();openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'
+      +_house
+      +'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(renderComplimentLocation(c)!=='—'?' · '+renderComplimentLocation(c):'')+'</div>'
+      +_notePrev
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;">'
+      +'<div class="cr-d">'+(_MN[parseInt(c.month)-1]||c.month)+' '+c.year+'</div>'
+      +'<button class="btn-bare" style="font-size:10px;" onclick="event.stopPropagation();deleteCompliment(\''+c.id+'\')" title="Delete">×</button>'
+      +'</div>'
+      +'</div>';
+  }
   var listHtml=filtered.map(crowHtml).join('') || (allEmpty
     ? '<div class="empty-state">No compliments logged yet.</div>'
     : '<div class="empty-state">No compliments in this category yet.</div>');
@@ -4483,7 +4506,7 @@ function resetAFModal(){
   document.getElementById('afRating').value=3; starRender(3);
   document.getElementById('afType').value='';
 
-  document.getElementById('afLong').value='6–12h';
+  document.getElementById('afLong').value='';
   document.getElementById('afWhere').value='';
   document.getElementById('afMonth').value='';
   buildYearSelect('afYear',1990);document.getElementById('afYear').value='';
@@ -4798,7 +4821,7 @@ function openAddComp(fragId, prefill){
   document.getElementById('compRelErr').style.display='none';
   document.getElementById('compDateErr').style.display='none';
   // Relation — tap buttons
-  setCompRelation(prefill?prefill.relation:'');
+  setCompRelation(prefill?prefill.relation:'Stranger');
   document.getElementById('compGender').value=prefill?(prefill.gender||''):'Female';
   document.getElementById('compLoc').value=prefill?(prefill.location||''):'';
   document.getElementById('compCity').value=prefill?(prefill.city||''):'';
