@@ -870,24 +870,45 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <!-- WISHLIST -->
     <div class="page" id="page-wishlist">
       <div class="sh"><h2>Wishlist</h2><div class="sh-r"><button class="btn btn-blue" onclick="openAddFrag('WANT_TO_BUY')">Add to Wishlist</button></div></div>
-      <div class="coll-filters">
+      <div class="coll-filters" id="wishFiltersRow1">
         <input type="text" id="wishSearch" placeholder="Search wishlist..." style="flex:1;" />
         <select class="coll-sort-select" id="wishSort" onchange="setWishSort(this.value)">
+          <option value="" disabled selected>Sort by</option>
           <option value="nameAZ">Name A–Z</option>
           <option value="nameZA">Name Z–A</option>
+          <option value="houseAZ">House A–Z</option>
+          <option value="houseZA">House Z–A</option>
           <option value="ratingHL">Rating High–Low</option>
           <option value="ratingLH">Rating Low–High</option>
-          <option value="houseAZ">House A–Z</option>
+          <option value="priceHL">Price High–Low</option>
+          <option value="priceLH">Price Low–High</option>
         </select>
-        <select id="wishHouse"><option value="">All houses</option></select>
-        <select id="wishRating"></select>
+        <button class="btn btn-ghost btn-sm" id="wishFiltersToggle" onclick="toggleWishFilters()">+ Filters</button>
+      </div>
+      <div class="coll-filters" id="wishFiltersRow2" style="display:none;margin-top:0;">
         <div id="wishFamilyFilterWrap" style="flex-shrink:0;position:relative;">
           <button class="filter-btn" onclick="toggleWishFamilyDrop()">Accords <span id="wishFamilyFilterLabel"></span></button>
           <div class="filter-drop-panel" id="wishFamilyDropPanel" style="display:none;"></div>
         </div>
+        <div style="position:relative;display:inline-flex;align-items:center;gap:4px;">
+          <select id="wishRating"></select>
+          <span id="wishRatingX" onclick="wishRatingVal='';document.getElementById('wishRating').value='';this.style.display='none';updateWishFiltersToggleLabel();renderWishlist();" style="display:none;cursor:pointer;color:var(--ink3);font-size:11px;padding:0 2px;">×</span>
+        </div>
+        <div id="wishHouseFilterWrap" style="flex-shrink:0;position:relative;">
+          <button class="filter-btn" id="wishHouseFilterBtn" onclick="wishHouseVal?clearWishHouseFilter():toggleWishHouseDrop()">Houses</button>
+          <div id="wishHouseDropPanel" style="display:none;position:absolute;top:calc(100% + 2px);left:0;background:var(--off);border:1px solid var(--b3);z-index:500;min-width:220px;box-shadow:0 4px 16px rgba(26,46,92,.12);"></div>
+        </div>
       </div>
       <div id="wishCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
-      <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Community Rating</th><th>Avg Price</th><th>Notes</th><th>Dupe Candidate</th><th></th></tr></thead>
+      <table class="tbl" id="wishTable"><thead id="wishThead"><tr>
+        <th data-sort="nameAZ">Fragrance <span class="sort-arrow"></span></th>
+        <th data-sort="houseAZ">House <span class="sort-arrow"></span></th>
+        <th>Status</th>
+        <th data-sort="ratingHL">Community Rating <span class="sort-arrow"></span></th>
+        <th data-sort="priceHL">Avg Price <span class="sort-arrow"></span></th>
+        <th>Accords</th>
+        <th></th>
+      </tr></thead>
       <tbody id="wishBody"></tbody></table>
       <div id="wishDiscover"></div>
     </div>
@@ -3198,12 +3219,106 @@ var wishRatingVal = '';
 var wishSortVal = 'nameAZ';
 
 function buildWishHouseFilter(){
+  var panel=document.getElementById('wishHouseDropPanel'); if(!panel) return;
+  panel.innerHTML='';
+  var sw=document.createElement('div'); sw.style.cssText='padding:8px 10px;border-bottom:1px solid var(--b1);';
+  var si=document.createElement('input'); si.type='text'; si.placeholder='Search houses...';
+  si.style.cssText='width:100%;border:none;background:transparent;font-family:var(--body);font-size:12px;color:var(--ink);outline:none;';
+  si.oninput=function(){renderWishHouseRows(this.value.toLowerCase());};
+  sw.appendChild(si); panel.appendChild(sw);
+  var lw=document.createElement('div'); lw.id='wishHouseRowList'; lw.style.cssText='max-height:180px;overflow-y:auto;';
+  panel.appendChild(lw);
+  renderWishHouseRows('');
+}
+
+function renderWishHouseRows(filter){
+  var list=document.getElementById('wishHouseRowList'); if(!list) return;
   var wish=myFragrances().filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
   var houses=[...new Set(wish.map(function(f){return f.house||'';}).filter(Boolean))].sort();
-  var sel=document.getElementById('wishHouse'); if(!sel) return;
-  sel.innerHTML='<option value="">All houses</option>';
-  houses.forEach(function(h){ var o=document.createElement('option'); o.value=h; o.textContent=h; sel.appendChild(o); });
-  if(wishHouseVal) sel.value=wishHouseVal;
+  var filtered=filter?houses.filter(function(h){return h.toLowerCase().includes(filter);}):houses;
+  list.innerHTML='';
+  filtered.forEach(function(house){
+    var sel=wishHouseVal===house;
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--b1);background:'+(sel?'var(--blue4)':'transparent')+';';
+    var lbl=document.createElement('span'); lbl.textContent=house; lbl.style.cssText='font-family:var(--body);font-size:13px;color:var(--ink);';
+    var tick=document.createElement('span'); tick.textContent=sel?'✓':''; tick.style.cssText='color:var(--blue);font-size:12px;width:16px;text-align:right;flex-shrink:0;';
+    row.appendChild(lbl); row.appendChild(tick);
+    row.addEventListener('click',function(e){
+      e.stopPropagation();
+      wishHouseVal=sel?'':house;
+      var btn=document.getElementById('wishHouseFilterBtn');
+      if(btn){btn.textContent=wishHouseVal?house+' ×':'Houses'; btn.style.borderColor=wishHouseVal?'var(--blue)':'var(--b3)';}
+      updateWishFiltersToggleLabel(); renderWishlist();
+      renderWishHouseRows(document.querySelector('#wishHouseDropPanel input')?document.querySelector('#wishHouseDropPanel input').value.toLowerCase():'');
+    });
+    list.appendChild(row);
+  });
+}
+
+function toggleWishHouseDrop(){
+  var panel=document.getElementById('wishHouseDropPanel'); if(!panel) return;
+  var open=panel.style.display!=='none';
+  panel.style.display=open?'none':'block';
+  if(!open) buildWishHouseFilter();
+}
+
+function clearWishHouseFilter(){
+  wishHouseVal='';
+  var btn=document.getElementById('wishHouseFilterBtn');
+  if(btn){btn.textContent='Houses';btn.style.borderColor='';}
+  updateWishFiltersToggleLabel();
+  renderWishlist();
+}
+
+function toggleWishFilters(){
+  var row2=document.getElementById('wishFiltersRow2'); if(!row2) return;
+  var open=row2.style.display!=='none';
+  row2.style.display=open?'none':'flex';
+  updateWishFiltersToggleLabel();
+}
+
+function updateWishFiltersToggleLabel(){
+  var btn=document.getElementById('wishFiltersToggle'); if(!btn) return;
+  var anyActive=!!(wishHouseVal||wishFamilyVals.length||wishRatingVal);
+  var row2=document.getElementById('wishFiltersRow2');
+  var open=row2&&row2.style.display!=='none';
+  if(anyActive){btn.textContent='Filters ×';btn.classList.add('active');}
+  else if(open){btn.textContent='− Filters';btn.classList.remove('active');}
+  else{btn.textContent='+ Filters';btn.classList.remove('active');}
+}
+
+function initWishlistSort(){
+  var thead=document.getElementById('wishThead'); if(!thead) return;
+  thead.querySelectorAll('th[data-sort]').forEach(function(th){
+    th.style.cursor='pointer'; th.style.userSelect='none';
+    th.addEventListener('click',function(){
+      var val=th.dataset.sort;
+      if(wishSortVal===val){
+        if(val==='nameAZ') val='nameZA'; else if(val==='nameZA') val='nameAZ';
+        else if(val==='houseAZ') val='houseZA'; else if(val==='houseZA') val='houseAZ';
+        else if(val==='ratingHL') val='ratingLH'; else if(val==='ratingLH') val='ratingHL';
+        else if(val==='priceHL') val='priceLH'; else if(val==='priceLH') val='priceHL';
+      }
+      setWishSort(val); updateWishSortArrows();
+    });
+    th.addEventListener('mouseenter',function(){this.style.color='var(--blue)';});
+    th.addEventListener('mouseleave',function(){this.style.color='';});
+  });
+}
+
+function updateWishSortArrows(){
+  var thead=document.getElementById('wishThead'); if(!thead) return;
+  var sortToCol={'nameAZ':'nameAZ','nameZA':'nameAZ','houseAZ':'houseAZ','houseZA':'houseAZ','ratingHL':'ratingHL','ratingLH':'ratingHL','priceHL':'priceHL','priceLH':'priceHL'};
+  var ascSorts=['nameAZ','houseAZ','ratingHL','priceHL'];
+  thead.querySelectorAll('th[data-sort]').forEach(function(th){
+    var arrow=th.querySelector('.sort-arrow'); if(!arrow) return;
+    var colGroup=sortToCol[wishSortVal];
+    if(th.dataset.sort===colGroup){
+      arrow.textContent=ascSorts.includes(wishSortVal)?' ↑':' ↓';
+      arrow.style.color='var(--blue)';
+    } else { arrow.textContent=''; }
+  });
 }
 
 function buildWishFamilyFilter(){
@@ -3237,7 +3352,7 @@ function toggleWishFamilyDrop(){
   panel.style.display=panel.style.display==='none'?'block':'none';
 }
 
-function setWishSort(val){ wishSortVal=val; renderWishlist(); }
+function setWishSort(val){ wishSortVal=val; renderWishlist(); updateWishSortArrows(); }
 
 // Close family dropdowns on outside click
 document.addEventListener('click',function(e){
@@ -3245,6 +3360,8 @@ document.addEventListener('click',function(e){
   if(w&&!w.contains(e.target)){ var p=document.getElementById('familyDropPanel'); if(p) p.style.display='none'; }
   var ww=document.getElementById('wishFamilyFilterWrap');
   if(ww&&!ww.contains(e.target)){ var wp=document.getElementById('wishFamilyDropPanel'); if(wp) wp.style.display='none'; }
+  var wh=document.getElementById('wishHouseFilterWrap');
+  if(wh&&!wh.contains(e.target)){ var whp=document.getElementById('wishHouseDropPanel'); if(whp) whp.style.display='none'; }
 });
 
 // Initialise collection filter dropdowns and event listeners
@@ -3269,16 +3386,20 @@ document.addEventListener('click',function(e){
   if(cst) cst.addEventListener('change',function(){ collStatusVal=this.value; var x=document.getElementById('collStatusX'); if(x) x.style.display=this.value?'inline':'none'; renderCollection(); });
   var ws=document.getElementById('wishSearch');
   if(ws) ws.addEventListener('input',function(){ wishSearchVal=this.value.toLowerCase(); renderWishlist(); });
-  var wh=document.getElementById('wishHouse');
-  if(wh) wh.addEventListener('change',function(){ wishHouseVal=this.value; renderWishlist(); });
   var wr=document.getElementById('wishRating');
   if(wr){
     wr.innerHTML='';
-    [['','All ratings'],['5','★★★★★'],['4','★★★★☆'],['3','★★★☆☆'],['2','★★☆☆☆'],['1','★☆☆☆☆']].forEach(function(p){
+    [['','Rating'],['5','★★★★★'],['4','★★★★☆'],['3','★★★☆☆'],['2','★★☆☆☆'],['1','★☆☆☆☆']].forEach(function(p){
       var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; wr.appendChild(o);
     });
-    wr.addEventListener('change',function(){ wishRatingVal=this.value; renderWishlist(); });
+    wr.addEventListener('change',function(){
+      wishRatingVal=this.value;
+      var x=document.getElementById('wishRatingX'); if(x) x.style.display=this.value?'inline':'none';
+      updateWishFiltersToggleLabel(); renderWishlist();
+    });
   }
+  initCollectionSort();
+  initWishlistSort();
 })();
 
 function renderCollection(){
@@ -3458,9 +3579,10 @@ function renderWishlist(){
   // Sort
   frags=frags.slice().sort(function(a,b){
     if(wishSortVal==='nameZA') return b.name.localeCompare(a.name);
-    if(wishSortVal==='ratingHL'){ var _acd=getCommunityData(a.name,a.house)||{},_bcd=getCommunityData(b.name,b.house)||{}; return (parseRating(_bcd.communityRating)||0)-(parseRating(_acd.communityRating)||0); }
-    if(wishSortVal==='ratingLH'){ var _acd=getCommunityData(a.name,a.house)||{},_bcd=getCommunityData(b.name,b.house)||{}; return (parseRating(_acd.communityRating)||0)-(parseRating(_bcd.communityRating)||0); }
     if(wishSortVal==='houseAZ') return (a.house||'').localeCompare(b.house||'');
+    if(wishSortVal==='houseZA') return (b.house||'').localeCompare(a.house||'');
+    if(wishSortVal==='ratingHL'||wishSortVal==='ratingLH'){ var _acd=getCommunityData(a.name,a.house)||{},_bcd=getCommunityData(b.name,b.house)||{}; var ra=parseRating(_acd.communityRating)||0,rb=parseRating(_bcd.communityRating)||0; return wishSortVal==='ratingHL'?rb-ra:ra-rb; }
+    if(wishSortVal==='priceHL'||wishSortVal==='priceLH'){ var _acd2=getCommunityData(a.name,a.house)||{},_bcd2=getCommunityData(b.name,b.house)||{}; var pa=parseFloat((_acd2.avgPrice||'0').replace(/[^0-9.]/g,''))||0,pb=parseFloat((_bcd2.avgPrice||'0').replace(/[^0-9.]/g,''))||0; return wishSortVal==='priceHL'?pb-pa:pa-pb; }
     return a.name.localeCompare(b.name);
   });
   // Count
@@ -3477,10 +3599,11 @@ function renderWishlist(){
         wishSearchVal=wishHouseVal=wishRatingVal=''; wishFamilyVals=[];
         var el;
         el=document.getElementById('wishSearch'); if(el) el.value='';
-        el=document.getElementById('wishHouse'); if(el) el.value='';
         el=document.getElementById('wishRating'); if(el) el.value='';
+        var rx=document.getElementById('wishRatingX'); if(rx) rx.style.display='none';
+        var hbtn=document.getElementById('wishHouseFilterBtn'); if(hbtn){hbtn.textContent='Houses';hbtn.style.borderColor='';}
         document.querySelectorAll('#wishFamilyDropPanel input[type=checkbox]').forEach(function(cb){ cb.checked=false; });
-        updateWishFamilyLabel();
+        updateWishFamilyLabel(); updateWishFiltersToggleLabel();
         renderWishlist();
       };
       wishCountEl.appendChild(wc);
@@ -3489,13 +3612,14 @@ function renderWishlist(){
   if(frags.length){
     document.getElementById('wishBody').innerHTML=frags.map(function(f){
       var _cd = getCommunityData(f.name, f.house) || {};
+      var _accords=getAccords(f);
       return '<tr onclick="openDetail(\''+f.id+'\')">'
-        +'<td><div class="tn">'+f.name+'</div><div class="th_">'+f.house+'</div></td>'
+        +'<td><div class="tn">'+f.name+'</div></td>'
+        +'<td class="tmono" style="font-size:11px;">'+f.house+'</td>'
         +'<td><div class="ts s-wnt">'+STATUS_LABELS[f.status]+'</div></td>'
-        +'<td class="tmono" style="color:var(--warm)">'+(_cd.communityRating||'—')+' / 5.0</td>'
+        +'<td class="tmono" style="color:var(--warm)">'+(_cd.communityRating?_cd.communityRating+' / 5.0':'—')+'</td>'
         +'<td class="tmono">'+(_cd.avgPrice||'—')+'</td>'
-        +'<td class="tscript">'+(_cd.notes||'').replace(/·/g,',').split(',').slice(0,3).map(function(n){return noteDisplayName(n);}).join(', ')+'</td>'
-        +'<td class="tmono" style="color:'+(f.isDupe?'var(--warm)':'var(--ink3)')+';">'+(f.isDupe?'Yes — '+f.dupeFor:'—')+'</td>'
+        +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(_accords.slice(0,3).join(', ')||'—')+'</td>'
         +'<td class="tact"><button class="btn btn-warm btn-sm" onclick="event.stopPropagation();promoteToCollection(\''+f.id+'\')">Bought it</button></td>'
         +'</tr>';
     }).join('');
@@ -6719,6 +6843,7 @@ window.auditData=auditDataIntegrity;
     if(f.type==='EDT') f.type='Eau de Toilette';
   });
   initCollectionSort();
+  initWishlistSort();
   document.getElementById('idLoading').style.display='none';
   if(!sheetsOk) setSyncState('error');
   // Always show identity picker — users choose who they are on each visit
