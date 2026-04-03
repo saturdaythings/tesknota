@@ -1830,8 +1830,17 @@ async function loadAllData(){
   var _missingDbRows = [];
   _referencedIds.forEach(function(fragId){
     if(!fragId || _dbFragIds.has(fragId)) return;
+    // Prefer a full fragrance object from user's collection
     var f = FRAGRANCES.find(function(x){ return x.id===fragId; });
-    if(f) _missingDbRows.push(fragToDbRow(f));
+    if(f){ _missingDbRows.push(fragToDbRow(f)); return; }
+    // Fall back: look up name/house from COMMUNITY_FRAGS or seed data
+    var resolved = resolveFragById(fragId);
+    if(resolved.name){
+      _missingDbRows.push(fragToDbRow({
+        id: fragId, name: resolved.name, house: resolved.house,
+        type:'', accords:'', createdAt: new Date().toISOString()
+      }));
+    }
   });
 
   if(_missingDbRows.length){
@@ -1841,7 +1850,10 @@ async function loadAllData(){
         name: row.fragranceName, house: row.fragranceHouse, id: row.fragranceId
       }));
     });
-    await syncMissingRows('fragranceDB', _missingDbRows, COMMUNITY_FRAG_HEADERS, 'syncFragDB');
+    // Use writeSheet (not appendRow) so the header row is always written —
+    // readSheet requires headers + ≥1 data row; appendRow never writes headers.
+    var _allDbRows = communityRaw.concat(_missingDbRows);
+    await writeSheet('fragranceDB', _allDbRows, COMMUNITY_FRAG_HEADERS);
   }
 
   // Recalculate ID counters so new entries don't collide with loaded data
