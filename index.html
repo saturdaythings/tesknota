@@ -1451,13 +1451,13 @@ const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/' + (window._
 // HEADER CONSTANTS
 // ═══════════════════════════════════════════════════════
 
-const USER_FRAG_HEADERS = [
+const FRAG_HEADERS = [
   'userId','fragranceId','status','bottleSize','type',
   'boughtFrom','purchaseMonth','purchaseYear','purchasePrice',
   'personalLongevity','personalRating','notes','addedAt'
 ];
 
-const USER_COMP_HEADERS = [
+const COMP_HEADERS = [
   'complimentId','userId','primaryFragranceId','secondaryFragranceId',
   'complimenterGender','relation','month','year',
   'locationName','city','state','country','notes','createdAt'
@@ -1618,72 +1618,81 @@ function getCommunityData(name, house){
   return null;
 }
 
-function resolveFragById(fragranceId){
-  // First check COMMUNITY_FRAGS (sheet-loaded fragranceDB rows)
-  var cf = COMMUNITY_FRAGS.find(function(f){ return f.fragranceId===fragranceId; });
+function resolveFragById(fragId){
+  // Check COMMUNITY_FRAGS (fragranceDB sheet rows) first
+  var cf = COMMUNITY_FRAGS.find(function(f){ return (f.fragranceId||f.id)===fragId; });
   if(cf) return { name: cf.fragranceName||cf.name||'', house: cf.fragranceHouse||cf.house||'' };
-  // Fall back to checking FRAGRANCES in-memory (seed data has fragranceId set)
-  var f = FRAGRANCES.find(function(f){ return (f.fragranceId||f.id)===fragranceId; });
-  if(f) return { name: f.name||'', house: f.house||'' };
+  // Fall back to seed FRAGRANCES already in memory
+  var sf = FRAGRANCES.find(function(f){ return f.id===fragId; });
+  if(sf) return { name: sf.name||'', house: sf.house||'' };
   return { name: '', house: '' };
 }
 
 function fragToRow(f){
+  // Parse purchaseDate into separate month/year if present
+  var pm='', py='';
+  if(f.purchaseDate){
+    var parts=(f.purchaseDate||'').split(' ');
+    if(parts.length===2){ pm=parts[0]; py=parts[1]; }
+    else { py=f.purchaseDate; }
+  }
   return {
     userId: f.userId||'',
-    fragranceId: f.fragranceId||f.id||'',
+    fragranceId: f.id||'',
     status: f.status||'',
     bottleSize: (f.sizes||[]).join(', '),
     type: f.type||'',
-    boughtFrom: f.whereBought||f.boughtFrom||'',
-    purchaseMonth: f.purchaseMonth||'',
-    purchaseYear: f.purchaseYear||'',
+    boughtFrom: f.whereBought||'',
+    purchaseMonth: pm,
+    purchaseYear: py,
     purchasePrice: f.purchasePrice||'',
-    personalLongevity: f.personalLong||f.personalLongevity||'',
+    personalLongevity: f.personalLong||'',
     personalRating: f.personalRating||'',
-    notes: f.personalNotes||f.notes||'',
-    addedAt: f.addedAt||f.createdAt||new Date().toISOString(),
+    notes: f.personalNotes||'',
+    addedAt: f.createdAt||new Date().toISOString(),
   };
 }
 
 function rowToFrag(row){
-  var fragId = row.fragranceId||'';
-  var resolved = resolveFragById(fragId);
+  var resolved = resolveFragById(row.fragranceId||'');
+  // Reconstruct purchaseDate from separate month/year columns
+  var purchaseDate = '';
+  if(row.purchaseMonth && row.purchaseYear) purchaseDate = row.purchaseMonth+' '+row.purchaseYear;
+  else if(row.purchaseYear) purchaseDate = row.purchaseYear;
   return {
-    id: fragId,
-    fragranceId: fragId,
+    id: row.fragranceId||'',
     userId: row.userId,
     name: resolved.name,
     house: resolved.house,
     status: row.status,
     sizes: row.bottleSize ? row.bottleSize.split(',').map(function(s){return s.trim();}).filter(Boolean) : [],
     type: row.type||null,
-    boughtFrom: row.boughtFrom||null,
+    personalRating: row.personalRating ? parseInt(row.personalRating) : null,
+    statusRating: null,
+    personalLong: row.personalLongevity||null,
     whereBought: row.boughtFrom||null,
+    purchaseDate: purchaseDate||null,
     purchaseMonth: row.purchaseMonth||null,
     purchaseYear: row.purchaseYear||null,
     purchasePrice: row.purchasePrice||null,
-    personalLongevity: row.personalLongevity||null,
-    personalLong: row.personalLongevity||null,
-    personalRating: row.personalRating ? parseInt(row.personalRating) : null,
+    isDupe: false,
+    dupeFor: '',
     personalNotes: row.notes||'',
-    notes: row.notes||'',
-    addedAt: row.addedAt||'',
     createdAt: row.addedAt||'',
   };
 }
 
 function compToRow(c){
   return {
-    complimentId: c.id||c.complimentId||'',
+    complimentId: c.id||'',
     userId: c.userId||'',
-    primaryFragranceId: c.primaryFragId||c.primaryFragranceId||'',
-    secondaryFragranceId: c.secondaryFragId||c.secondaryFragranceId||'',
-    complimenterGender: c.gender||c.complimenterGender||'',
+    primaryFragranceId: c.primaryFragId||'',
+    secondaryFragranceId: c.secondaryFragId||'',
+    complimenterGender: c.gender||'',
     relation: c.relation||'',
     month: c.month||'',
     year: c.year||'',
-    locationName: c.location||c.locationName||'',
+    locationName: c.location||'',
     city: c.city||'',
     state: c.state||'',
     country: c.country||'US',
@@ -1693,25 +1702,21 @@ function compToRow(c){
 }
 
 function rowToComp(row){
-  var primaryResolved = resolveFragById(row.primaryFragranceId||'');
-  var secondaryResolved = row.secondaryFragranceId ? resolveFragById(row.secondaryFragranceId) : null;
+  // Resolve display names from fragranceId at load time
+  var primary = resolveFragById(row.primaryFragranceId||'');
+  var secondary = row.secondaryFragranceId ? resolveFragById(row.secondaryFragranceId) : null;
   return {
     id: row.complimentId,
-    complimentId: row.complimentId,
     userId: row.userId,
     primaryFragId: row.primaryFragranceId,
-    primaryFragranceId: row.primaryFragranceId,
-    primaryFrag: primaryResolved.name,
+    primaryFrag: primary.name,
     secondaryFragId: row.secondaryFragranceId||null,
-    secondaryFragranceId: row.secondaryFragranceId||null,
-    secondaryFrag: secondaryResolved ? secondaryResolved.name : null,
+    secondaryFrag: secondary ? secondary.name : null,
     gender: row.complimenterGender||null,
-    complimenterGender: row.complimenterGender||null,
     relation: row.relation,
     month: row.month,
     year: row.year,
     location: row.locationName||null,
-    locationName: row.locationName||null,
     city: row.city||null,
     state: row.state||null,
     country: row.country||'US',
@@ -1741,20 +1746,24 @@ async function loadAllData(){
   ]);
 
   if(communityRaw.length) COMMUNITY_FRAGS = communityRaw.map(function(r){
-    return Object.assign({}, r, { name: r.fragranceName||r.name||'', house: r.fragranceHouse||r.house||'' });
+    return Object.assign({}, r, {
+      name: r.fragranceName||r.name||'',
+      house: r.fragranceHouse||r.house||'',
+      id: r.fragranceId||r.id||''
+    });
   });
 
   if(usersRaw.length) USERS=usersRaw;
 
   // Schema migration: if userFragrances rows still have old 'name' column, clear and resync
   if(fragsRaw.length && fragsRaw[0].hasOwnProperty('name')){
-    await writeSheet('userFragrances', [], USER_FRAG_HEADERS);
+    await writeSheet('userFragrances', [], FRAG_HEADERS);
     fragsRaw.length = 0;
   }
 
   // Schema migration: if userCompliments rows still have embedded name columns, clear and resync
   if(compsRaw.length && compsRaw[0].hasOwnProperty('primaryFragranceName')){
-    await writeSheet('userCompliments', [], USER_COMP_HEADERS);
+    await writeSheet('userCompliments', [], COMP_HEADERS);
     compsRaw.length = 0;
   }
 
@@ -1762,17 +1771,17 @@ async function loadAllData(){
   // Users with no sheet rows keep their seed data (so demo looks populated
   // until real data is added).
   if(fragsRaw.length){
-    var _fragSeedIds=new Set(fragsRaw.map(function(r){return r.fragranceId||r.id;}));
-    var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.fragranceId||f.id);});
+    var _fragSeedIds=new Set(fragsRaw.map(function(r){return r.fragranceId||'';}));
+    var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.id);});
     FRAGRANCES=fragSeed.concat(fragsRaw.map(rowToFrag));
   }
   // Write any seed fragrances missing from Sheets so they persist
-  var _sheetFragIds=new Set(fragsRaw.map(function(r){return r.fragranceId||r.id;}));
-  var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.fragranceId||f.id);});
+  var _sheetFragIds=new Set(fragsRaw.map(function(r){return r.fragranceId||'';}));
+  var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.id);});
   if(_missingFrags.length){
-    await syncMissingRows('userFragrances',_missingFrags.map(fragToRow),USER_FRAG_HEADERS,'syncFrags');
+    await syncMissingRows('userFragrances',_missingFrags.map(fragToRow),FRAG_HEADERS,'syncFrags');
   }
-  var _sheetCompIds=new Set(compsRaw.map(function(r){return r.complimentId||r.id;}));
+  var _sheetCompIds=new Set(compsRaw.map(function(r){return r.complimentId||r.id||'';}));
   if(compsRaw.length){
     var seedOnly=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
     COMPLIMENTS=seedOnly.concat(compsRaw.map(rowToComp));
@@ -1780,7 +1789,7 @@ async function loadAllData(){
   // Write any seed compliments missing from Sheets so they persist
   var _missingComps=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
   if(_missingComps.length){
-    await syncMissingRows('userCompliments',_missingComps.map(compToRow),USER_COMP_HEADERS,'syncComps');
+    await syncMissingRows('userCompliments',_missingComps.map(compToRow),COMP_HEADERS,'syncComps');
   }
 
   // Recalculate ID counters so new entries don't collide with loaded data
@@ -2320,7 +2329,7 @@ const FRAG_DB = [
 // COMMUNITY_FRAGS — user-contributed metadata (Layer 0 search, loaded from fragranceDB sheet tab)
 let COMMUNITY_FRAGS = [];
 
-const FRAG_DB_HEADERS = [
+const COMMUNITY_FRAG_HEADERS = [
   'fragranceId','fragranceName','fragranceHouse','fragranceType',
   'fragranceAccords','topNotes','middleNotes','baseNotes',
   'avgPrice','communityRating','communityLongevity','communitySill',
@@ -3290,7 +3299,7 @@ function quickAddWishlist(name, house){
   var allNotes=[db.top||'',db.mid||'',db.base||''].filter(Boolean).join(', ')||'';
   var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:name,house:house,status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:db.r||null,communityLong:db.l||null,communitySill:db.s||null,avgPrice:db.p||null,notes:allNotes,topNotes:db.top||'',middleNotes:db.mid||'',baseNotes:db.base||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''};
   FRAGRANCES.push(newFrag);
-  appendRow('userFragrances',fragToRow(newFrag),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   renderWishlist();
   updateCounts();
   toast(name+' added to wishlist');
@@ -3370,7 +3379,7 @@ document.getElementById('compFbar').addEventListener('click',e=>{
 
 function deleteCompliment(id){
   COMPLIMENTS = COMPLIMENTS.filter(c=>c.id!==id);
-  writeSheet('userCompliments',COMPLIMENTS.map(compToRow),USER_COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  writeSheet('userCompliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   renderCompliments(document.querySelector('#compFbar .fc.on').dataset.filter);
   updateCounts();
   toast('Compliment removed');
@@ -4025,7 +4034,7 @@ function removeNoteFromFrag(fragId, tier, note){
   var updated=(f[field]||'').split(/[,·]+/).map(function(s){return s.trim();}).filter(function(n){return n&&n.toLowerCase()!==note.toLowerCase();}).join(', ');
   f[field]=updated;
   if(tier==='all') f.notes=updated;
-  writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   openDetail(fragId);
 }
 
@@ -4107,8 +4116,8 @@ function executeMerge(){
   var removedName=remove.name;
   FRAGRANCES=FRAGRANCES.filter(function(f){ return f.id!==removeId; });
   Promise.all([
-    writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS),
-    writeSheet('userCompliments',COMPLIMENTS.map(compToRow),USER_COMP_HEADERS),
+    writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS),
+    writeSheet('userCompliments',COMPLIMENTS.map(compToRow),COMP_HEADERS),
   ]).then(function(){
     var result=document.getElementById('mergeResult');
     if(result){ result.textContent='Merged — '+removedName+' combined into '+keep.name+'. Compliments transferred.'; result.style.display='block'; }
@@ -4138,7 +4147,7 @@ function changeStatus(newStatus){
   const f = FRAGRANCES.find(x=>x.id===currentDetailId);
   if(!f)return;
   f.status = newStatus;
-  writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   document.getElementById('statusStrip').classList.remove('show');
   openDetail(currentDetailId); // re-render panel
   renderCurrentPage();
@@ -4177,7 +4186,7 @@ function showRemoveConfirm(){
 function hideRemoveConfirm(){ document.getElementById('removeConfirm').style.display='none'; }
 function confirmRemove(){
   FRAGRANCES = FRAGRANCES.filter(f=>f.id!==currentDetailId);
-  writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   closeDetail();
   renderCurrentPage();
   updateCounts();
@@ -4430,7 +4439,7 @@ function saveFragrance(){
     if(idx>=0){
       var oldStatus=FRAGRANCES[idx].status;
       FRAGRANCES[idx]={...FRAGRANCES[idx],...data};
-      writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+      writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
       var wasWishlist=oldStatus==='WANT_TO_BUY'||oldStatus==='WANT_TO_SMELL';
       toast(wasWishlist&&data.status==='CURRENT'?'Moved to your collection':'Fragrance updated');
     }
@@ -4456,7 +4465,7 @@ function saveFragrance(){
     var duplicate=myFragrances().find(function(f){return f.name.toLowerCase().trim()===newFrag.name.toLowerCase().trim();});
     if(duplicate){toast('You already have '+newFrag.name+' in your collection.');return;}
     FRAGRANCES.push(newFrag);
-    appendRow('userFragrances',fragToRow(newFrag),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+    appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
     showPostSaveToast(name,STATUS_LABELS[data.status]);
   }
   closeModal('addFragM');
@@ -4800,7 +4809,7 @@ function saveCompliment(){
         notes: document.getElementById('compNotes').value||null,
       });
     }
-    writeSheet('userCompliments',COMPLIMENTS.map(compToRow),USER_COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+    writeSheet('userCompliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
     editingCompId = null;
     closeModal('addCompM');
     renderCurrentPage();
@@ -4825,7 +4834,7 @@ function saveCompliment(){
     notes: document.getElementById('compNotes').value||null,
   };
   COMPLIMENTS.unshift(newComp);
-  appendRow('userCompliments',compToRow(newComp),USER_COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  appendRow('userCompliments',compToRow(newComp),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   renderCurrentPage();
   updateCounts();
   // Show satisfaction banner, then close
@@ -4863,7 +4872,7 @@ function importToWishlist(data){
     personalLong:null, whereBought:null, purchaseDate:null, isDupe:false, dupeFor:'', personalNotes:'',
   };
   FRAGRANCES.push(newFrag);
-  appendRow('userFragrances',fragToRow(newFrag),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   document.getElementById('linkRes').style.display='none';
   renderCurrentPage(); updateCounts();
   toast(data.name+' added to Wishlist');
@@ -4997,7 +5006,7 @@ async function confirmBulkImport(){
     if(d.isDup||collDup){dups++;continue;}
     var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:new Date().toISOString()};
     FRAGRANCES.push(newFrag);
-    await appendRow('userFragrances',fragToRow(newFrag),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+    await appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
     added++;
   }
   importQueueData=[];
@@ -5193,29 +5202,33 @@ function dbToLinkResult(f, url, confidence){
 async function contributeToCommmunity(data){
   if(!data||!data.name||!data.house) return;
   // Don't duplicate — check if already in community
-  var exists=COMMUNITY_FRAGS.find(function(f){return normStr(f.name)===normStr(data.name)&&normStr(f.house)===normStr(data.house);});
+  var exists=COMMUNITY_FRAGS.find(function(f){
+    return normStr(f.fragranceName||f.name)===normStr(data.name) && normStr(f.fragranceHouse||f.house)===normStr(data.house);
+  });
   if(exists) return;
+  var fid='fdb_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
   var row={
-    fragranceId: 'fdb_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),
+    fragranceId: fid,
     fragranceName: data.name,
     fragranceHouse: data.house,
-    fragranceType: data.type||'',
+    fragranceType: data.concentration||data.type||'',
     fragranceAccords: data.accords||'',
     topNotes: data.topNotes||'',
     middleNotes: data.middleNotes||'',
     baseNotes: data.baseNotes||'',
     avgPrice: data.avgPrice||'',
-    communityRating: '',
+    communityRating: data.communityRating||'',
     communityLongevity: '',
     communitySill: '',
     addedBy: CURRENT_USER?CURRENT_USER.id:'',
     addedAt: new Date().toISOString(),
   };
-  // Add display aliases so getCommunityData() can find it by name+house
-  var entry = Object.assign({}, row, { name: row.fragranceName, house: row.fragranceHouse });
-  COMMUNITY_FRAGS.push(entry);
+  // Keep legacy aliases so getCommunityData and resolveFragById work
+  row.name = data.name;
+  row.house = data.house;
+  COMMUNITY_FRAGS.push(row);
   try{
-    await appendRow('fragranceDB',row,FRAG_DB_HEADERS);
+    await appendRow('fragranceDB',row,COMMUNITY_FRAG_HEADERS);
     toast('Saved to community database — '+(getFriend()?getFriend().name:'your friend')+' will benefit from this!');
   }catch(e){
     // fragranceDB tab may not exist yet — silently ignore
@@ -5595,7 +5608,7 @@ function saveUnknownScan(){
     notes:'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''
   };
   FRAGRANCES.push(newFrag);
-  appendRow('userFragrances',fragToRow(newFrag),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   renderCurrentPage();updateCounts();
   resetScan();
   toast(newFrag.name+' saved — tap to edit when you have more info');
@@ -5850,7 +5863,7 @@ function importCSVSelected(){
     FRAGRANCES.push({id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:r.name,house:r.house,status:status,sizes:['Full Bottle'],personalRating:r.rating,statusRating:null,personalLong:null,personalSill:null,communityRating:null,communityLong:null,communitySill:null,avgPrice:null,notes:r.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
     added++;
   });
-  if(added>0) writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  if(added>0) writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   csvParsedRows=[];
   document.getElementById('csvPreview').style.display='none';
   updateCounts();
@@ -6094,24 +6107,24 @@ function auditDataIntegrity(){
     myComps.every(function(c){return c.userId===CURRENT_USER.id;}),
     myComps.length+' compliments');
 
-  // USER_FRAG_HEADERS COMPLETENESS
+  // FRAG_HEADERS COMPLETENESS
   var expectedHeaders=[
     'userId','fragranceId','status','bottleSize','type',
     'boughtFrom','purchaseMonth','purchaseYear','purchasePrice',
     'personalLongevity','personalRating','notes','addedAt'
   ];
   expectedHeaders.forEach(function(h){
-    check('USER_FRAG_HEADERS contains '+h,USER_FRAG_HEADERS.indexOf(h)>-1);
+    check('FRAG_HEADERS contains '+h,FRAG_HEADERS.indexOf(h)>-1);
   });
 
-  // USER_COMP_HEADERS COMPLETENESS
+  // COMP_HEADERS COMPLETENESS
   var expectedCompHeaders=[
     'complimentId','userId','primaryFragranceId','secondaryFragranceId',
     'complimenterGender','relation','month','year',
     'locationName','city','state','country','notes','createdAt'
   ];
   expectedCompHeaders.forEach(function(h){
-    check('USER_COMP_HEADERS contains '+h,USER_COMP_HEADERS.indexOf(h)>-1);
+    check('COMP_HEADERS contains '+h,COMP_HEADERS.indexOf(h)>-1);
   });
 
   // FRAGRANCE RECORD INTEGRITY
@@ -6448,7 +6461,7 @@ function palFlows() {
             personalNotes: answers.personalNotes || '',
           };
           FRAGRANCES.push(newFrag);
-          appendRow('userFragrances',fragToRow(newFrag),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(answers.name + ' added');
@@ -6544,7 +6557,7 @@ function palFlows() {
           f.statusRating = answers.statusRating || null;
           f.personalLong = answers.personalLong || null;
           f.personalNotes = answers.personalNotes || f.personalNotes;
-          writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(f.name + ' updated');
@@ -6586,7 +6599,7 @@ function palFlows() {
           var f = FRAGRANCES.find(function(x) { return x.id === PAL.editTarget.id; });
           if (!f) return;
           f.status = answers.status;
-          writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(f.name + ' moved to ' + STATUS_LABELS[answers.status]);
@@ -6615,7 +6628,7 @@ function palFlows() {
           if (!PAL.editTarget) return;
           var name = PAL.editTarget.name;
           FRAGRANCES = FRAGRANCES.filter(function(f) { return f.id !== PAL.editTarget.id; });
-          writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(name + ' removed');
@@ -6722,7 +6735,7 @@ function palFlows() {
             notes: answers.notes ? '"' + answers.notes + '"' : null,
           };
           COMPLIMENTS.unshift(newComp);
-          appendRow('userCompliments',compToRow(newComp),USER_COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          appendRow('userCompliments',compToRow(newComp),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast('Compliment logged');
@@ -6786,7 +6799,7 @@ function palFlows() {
           c.relation = answers.relation || c.relation;
           c.location = answers.location || c.location;
           c.notes = answers.notes ? '"' + answers.notes + '"' : c.notes;
-          writeSheet('userCompliments',COMPLIMENTS.map(compToRow),USER_COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          writeSheet('userCompliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           toast('Compliment updated');
         },
@@ -6813,7 +6826,7 @@ function palFlows() {
         onSave: function() {
           if (!PAL.editTarget) return;
           COMPLIMENTS = COMPLIMENTS.filter(function(c) { return c.id !== PAL.editTarget.id; });
-          writeSheet('userCompliments',COMPLIMENTS.map(compToRow),USER_COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          writeSheet('userCompliments',COMPLIMENTS.map(compToRow),COMP_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast('Compliment deleted');
@@ -6869,7 +6882,7 @@ function palFlows() {
             isDupe: false, dupeFor: '', personalNotes: '',
           };
           FRAGRANCES.push(wFrag);
-          appendRow('userFragrances',fragToRow(wFrag),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          appendRow('userFragrances',fragToRow(wFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(answers.name + ' added to Wishlist');
@@ -6932,7 +6945,7 @@ function palFlows() {
           if (answers.personalRating) f.personalRating = parseInt(answers.personalRating);
           if (answers.whereBought) f.whereBought = answers.whereBought;
           f.sizes = ['Full Bottle'];
-          writeSheet('userFragrances',FRAGRANCES.map(fragToRow),USER_FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+          writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
           toast(f.name + ' moved to Current Collection');
