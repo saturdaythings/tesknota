@@ -1270,8 +1270,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <select id="afType">
               <option value="">— Type —</option>
               <option value="Extrait de Parfum">Extrait de Parfum</option>
-              <option value="Eau de Parfum">Eau de Parfum (EDP)</option>
-              <option value="Eau de Toilette">Eau de Toilette (EDT)</option>
+              <option value="Eau de Parfum">Eau de Parfum</option>
+              <option value="Eau de Toilette">Eau de Toilette</option>
               <option value="Body Spray">Body Spray</option>
               <option value="Perfume Oil">Perfume Oil</option>
               <option value="Other">Other</option>
@@ -2480,8 +2480,8 @@ let FRAGRANCES = [
   {id:'k14',userId:'u1',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Jul 2025',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k15',userId:'u1',name:'Beirut Baklava',house:'Kheir Fragrance House',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Aug 2025',purchasePrice:144.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k16',userId:'u1',name:'Ruhe',house:'Oakcha',status:'CURRENT',sizes:['Decant'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:20.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k17',userId:'u1',name:'That Girl Viral Vanilla',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:47.14,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k18',userId:'u1',name:'Miss Girl',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:40.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k17',userId:'u1',name:'That Girl Viral Vanilla',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:47.14,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k18',userId:'u1',name:'Miss Girl',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:40.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k19',userId:'u1',name:'Amber Musk',house:'Aerin',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'eBay',purchaseDate:'',purchasePrice:78.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k20',userId:'u1',name:'Perle Sensuelle',house:'Pardon My French & Co',status:'CURRENT',sizes:['Travel'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jul 2025',purchasePrice:30.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k21',userId:'u1',name:'Santal 33',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',purchasePrice:7.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
@@ -2701,9 +2701,11 @@ function fragNameHtml(name){
 }
 
 var typeBadgeText={
+  'Extrait de Parfum':'Extrait',
   'Eau de Parfum':'EDP',
   'Eau de Toilette':'EDT',
   'Body Spray':'Body Spray',
+  'Body Mist':'Mist',
   'Perfume Oil':'Oil',
   'Other':'Other',
 };
@@ -4860,7 +4862,7 @@ function afGoStep(n, skipValidation){
     if(prefetchedData){
       const d = prefetchedData;
       if(d.sizes){ document.querySelectorAll('#sizeOpts .opt').forEach(o=>o.classList.toggle('on',d.sizes.includes(o.textContent.trim()))); }
-      var _typeNorm={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Eau de Parfum (EDP)':'Eau de Parfum','Eau de Toilette (EDT)':'Eau de Toilette'};
+      var _typeNorm={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum','Eau de Parfum (EDP)':'Eau de Parfum','Eau de Toilette (EDT)':'Eau de Toilette'};
       var _savedType=d.type||'';
       document.getElementById('afType').value=_typeNorm[_savedType]||_savedType||'';
     
@@ -6824,6 +6826,7 @@ window.auditData=auditDataIntegrity;
   FRAGRANCES.forEach(function(f){
     if(f.type==='EDP') f.type='Eau de Parfum';
     if(f.type==='EDT') f.type='Eau de Toilette';
+    if(f.type==='Extrait') f.type='Extrait de Parfum';
   });
   initCollectionSort();
   initWishlistSort();
