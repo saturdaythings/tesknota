@@ -1825,9 +1825,21 @@ async function loadAllData(){
     await syncMissingRows('userCompliments',_missingComps.map(compToRow),COMP_HEADERS,'syncComps');
   }
 
-  // fragranceDB integrity: every fragranceId referenced in userFragrances or
-  // userCompliments must have a matching row in fragranceDB. Sync any missing ones.
-  var _dbFragIds = new Set(communityRaw.map(function(r){ return r.fragranceId||''; }));
+  // fragranceDB deduplication: remove blank-name rows, QA test entries, and name+house dupes.
+  // Keep the row with the most non-empty fields when merging duplicates.
+  function _countFields(r){ return Object.values(r).filter(function(v){return v&&String(v).trim();}).length; }
+  var _dedupMap = {}; // key: normalized name+house → best row
+  communityRaw.forEach(function(r){
+    var nm = (r.fragranceName||'').trim();
+    if(!nm) return; // skip blank-name rows
+    if(nm.toLowerCase().startsWith('qa ')) return; // skip QA test entries
+    var key = nm.toLowerCase()+'|'+(r.fragranceHouse||'').toLowerCase();
+    if(!_dedupMap[key] || _countFields(r) > _countFields(_dedupMap[key])){
+      _dedupMap[key] = r;
+    }
+  });
+  var communityDeduped = Object.values(_dedupMap);
+  var _dbFragIds = new Set(communityDeduped.map(function(r){ return r.fragranceId||''; }));
 
   // Collect every fragranceId that must exist in fragranceDB
   var _referencedIds = new Set();
@@ -1837,16 +1849,20 @@ async function loadAllData(){
     if(c.secondaryFragId) _referencedIds.add(c.secondaryFragId);
   });
 
-  // Build rows for any fragranceId not yet in fragranceDB
+  // Build rows for any fragranceId not yet in fragranceDB (skip QA test entries)
   var _missingDbRows = [];
   _referencedIds.forEach(function(fragId){
     if(!fragId || _dbFragIds.has(fragId)) return;
     // Prefer a full fragrance object from user's collection
     var f = FRAGRANCES.find(function(x){ return x.id===fragId; });
-    if(f){ _missingDbRows.push(fragToDbRow(f)); return; }
+    if(f){
+      var nm = (f.name||'').trim();
+      if(!nm || nm.toLowerCase().startsWith('qa ')) return; // skip test entries
+      _missingDbRows.push(fragToDbRow(f)); return;
+    }
     // Fall back: look up name/house from COMMUNITY_FRAGS or seed data
     var resolved = resolveFragById(fragId);
-    if(resolved.name){
+    if(resolved.name && !resolved.name.toLowerCase().startsWith('qa ')){
       _missingDbRows.push(fragToDbRow({
         id: fragId, name: resolved.name, house: resolved.house,
         type:'', accords:'', createdAt: new Date().toISOString()
@@ -1854,17 +1870,36 @@ async function loadAllData(){
     }
   });
 
-  if(_missingDbRows.length){
-    // Add to in-memory COMMUNITY_FRAGS immediately so resolveFragById works this session
-    _missingDbRows.forEach(function(row){
-      COMMUNITY_FRAGS.push(Object.assign({}, row, {
-        name: row.fragranceName, house: row.fragranceHouse, id: row.fragranceId
-      }));
-    });
-    // Use writeSheet (not appendRow) so the header row is always written —
-    // readSheet requires headers + ≥1 data row; appendRow never writes headers.
-    var _allDbRows = communityRaw.concat(_missingDbRows);
+  // Always write fragranceDB if dedup changed anything OR new rows needed
+  var _needsWrite = communityDeduped.length !== communityRaw.length || _missingDbRows.length;
+  if(_needsWrite){
+    if(_missingDbRows.length){
+      _missingDbRows.forEach(function(row){
+        COMMUNITY_FRAGS.push(Object.assign({}, row, {
+          name: row.fragranceName, house: row.fragranceHouse, id: row.fragranceId
+        }));
+      });
+    }
+    // Update in-memory COMMUNITY_FRAGS to match deduped set
+    COMMUNITY_FRAGS = communityDeduped.map(function(r){
+      return Object.assign({}, r, { name: r.fragranceName, house: r.fragranceHouse, id: r.fragranceId });
+    }).concat(_missingDbRows.map(function(row){
+      return Object.assign({}, row, { name: row.fragranceName, house: row.fragranceHouse, id: row.fragranceId });
+    }));
+    var _allDbRows = communityDeduped.concat(_missingDbRows);
     await writeSheet('fragranceDB', _allDbRows, COMMUNITY_FRAG_HEADERS);
+  }
+
+  // Clean up QA test entries that were added during automated testing
+  var _qaFrags = FRAGRANCES.filter(function(f){ return (f.name||'').toLowerCase().startsWith('qa '); });
+  if(_qaFrags.length){
+    var _qaIds = new Set(_qaFrags.map(function(f){return f.id;}));
+    FRAGRANCES = FRAGRANCES.filter(function(f){ return !_qaIds.has(f.id); });
+    COMPLIMENTS = COMPLIMENTS.filter(function(c){ return !_qaIds.has(c.primaryFragId); });
+    await Promise.all([
+      writeSheet('userFragrances', FRAGRANCES.map(fragToRow), FRAG_HEADERS),
+      writeSheet('userCompliments', COMPLIMENTS.map(compToRow), COMP_HEADERS),
+    ]).catch(function(e){ console.error('[cleanup] QA entry cleanup failed', e); });
   }
 
   // Recalculate ID counters so new entries don't collide with loaded data
@@ -3743,12 +3778,12 @@ function renderAnalytics(){
       pill.appendChild(num); pill.appendChild(lbl); pillsEl.appendChild(pill);
     });
     if(showSylviaOverlay&&SC.length){
-      var sdiv=document.createElement('div'); sdiv.style.cssText='width:100%;font-family:var(--mono);font-size:9px;color:var(--warm);letter-spacing:.12em;text-transform:uppercase;padding-top:8px;'; sdiv.textContent='Sylvia'; pillsEl.appendChild(sdiv);
+      var sdiv=document.createElement('div'); sdiv.style.cssText='width:100%;font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;padding-top:8px;'; sdiv.textContent='Sylvia'; pillsEl.appendChild(sdiv);
       var sRelCounts={}; SC.forEach(function(c){sRelCounts[c.relation]=(sRelCounts[c.relation]||0)+1;});
       var sTopRel=Object.keys(sRelCounts).sort(function(a,b){return sRelCounts[b]-sRelCounts[a];})[0]||'—';
       [{num:SC.length,lbl:'Compliments'},{num:new Set(SC.map(function(c){return c.primaryFrag;})).size,lbl:'Fragrances'},{num:SF.length,lbl:'Collection'},{num:sTopRel,lbl:'Top Relation'}].forEach(function(p){
-        var pill=document.createElement('div'); pill.className='ana-pill'; pill.style.borderColor='var(--warm2)';
-        var num=document.createElement('div'); num.className='ana-pill-num'; num.style.color='var(--warm)'; num.textContent=p.num;
+        var pill=document.createElement('div'); pill.className='ana-pill'; pill.style.borderColor='rgba(184,112,104,.35)';
+        var num=document.createElement('div'); num.className='ana-pill-num'; num.style.color='var(--rose)'; num.textContent=p.num;
         var lbl=document.createElement('div'); lbl.className='ana-pill-lbl'; lbl.textContent=p.lbl;
         pill.appendChild(num); pill.appendChild(lbl); pillsEl.appendChild(pill);
       });
@@ -3761,9 +3796,9 @@ function renderAnalytics(){
     notesSection.innerHTML='<div class="ana-sh"><h2>Your notes</h2></div><div id="anaNotesChips"></div>';
     renderNoteChips('anaNotesChips',getNoteFrequency(MFC),'var(--blue)',24);
     if(showSylviaOverlay&&SF.length){
-      var sdivN=document.createElement('div'); sdivN.style.cssText='font-family:var(--mono);font-size:9px;color:var(--warm);letter-spacing:.12em;text-transform:uppercase;margin-top:12px;margin-bottom:6px;'; sdivN.textContent='Sylvia'; notesSection.appendChild(sdivN);
+      var sdivN=document.createElement('div'); sdivN.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:12px;margin-bottom:6px;'; sdivN.textContent='Sylvia'; notesSection.appendChild(sdivN);
       var sChips=document.createElement('div'); sChips.id='anaSylviaChips'; notesSection.appendChild(sChips);
-      renderNoteChips('anaSylviaChips',getNoteFrequency(SF),'var(--warm)',24);
+      renderNoteChips('anaSylviaChips',getNoteFrequency(SF),'var(--rose)',24);
     }
   }
 
@@ -3777,9 +3812,9 @@ function renderAnalytics(){
       var mapDiv=document.createElement('div'); mapDiv.id='anaMapK'; mapSection.appendChild(mapDiv);
       renderCompMap('anaMapK',buildComplimentMap(MC),'var(--blue)');
       if(showSylviaOverlay&&SC.length>=3){
-        var sMapLbl=document.createElement('div'); sMapLbl.style.cssText='font-family:var(--mono);font-size:9px;color:var(--warm);letter-spacing:.12em;text-transform:uppercase;margin-top:16px;margin-bottom:6px;'; sMapLbl.textContent='Sylvia'; mapSection.appendChild(sMapLbl);
+        var sMapLbl=document.createElement('div'); sMapLbl.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:16px;margin-bottom:6px;'; sMapLbl.textContent='Sylvia'; mapSection.appendChild(sMapLbl);
         var sMapDiv=document.createElement('div'); sMapDiv.id='anaMapS'; mapSection.appendChild(sMapDiv);
-        renderCompMap('anaMapS',buildComplimentMap(SC),'var(--warm)');
+        renderCompMap('anaMapS',buildComplimentMap(SC),'var(--rose)');
       }
     }
   }
@@ -3814,10 +3849,33 @@ function renderAnalytics(){
         card.appendChild(rank); card.appendChild(nameWrap); card.appendChild(countWrap);
         if(showSylviaOverlay){
           var sc2=sPerfCounts[fragId]||0;
-          var sylv=document.createElement('div'); sylv.style.cssText='font-family:var(--mono);font-size:10px;color:var(--warm);width:40px;text-align:right;flex-shrink:0;margin-left:8px;'; sylv.textContent=sc2?'S: '+sc2:''; card.appendChild(sylv);
+          var sylv=document.createElement('div'); sylv.style.cssText='font-family:var(--mono);font-size:10px;color:var(--rose);width:40px;text-align:right;flex-shrink:0;margin-left:8px;'; sylv.textContent=sc2?'S: '+sc2:''; card.appendChild(sylv);
         }
         perfSection.appendChild(card);
       });
+      // Sylvia's own top performers
+      if(showSylviaOverlay&&SC.length){
+        var sPerfHd=document.createElement('div'); sPerfHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:16px;margin-bottom:4px;padding-top:12px;border-top:1px solid var(--b1);'; sPerfHd.textContent='Sylvia — Top Performers'; perfSection.appendChild(sPerfHd);
+        var FF=friendFragrances();
+        Object.entries(sPerfCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,5).forEach(function(entry,idx){
+          var fragId=entry[0]; var cnt=entry[1];
+          var frag=FF.find(function(f){return f.id===fragId;}); if(!frag) return;
+          var sRelForFrag={}; SC.filter(function(c){return c.primaryFragId===fragId;}).forEach(function(c){sRelForFrag[c.relation]=(sRelForFrag[c.relation]||0)+1;});
+          var sTopRelFrag=Object.keys(sRelForFrag).sort(function(a,b){return sRelForFrag[b]-sRelForFrag[a];})[0]||'';
+          var sCard=document.createElement('div'); sCard.className='perf-card'; sCard.style.borderLeft='2px solid rgba(184,112,104,.4)';
+          var sRank=document.createElement('div'); sRank.className='perf-rank'; sRank.style.color='var(--rose)'; sRank.textContent='#'+(idx+1);
+          var sNameWrap=document.createElement('div'); sNameWrap.style.flex='1';
+          var sPname=document.createElement('div'); sPname.className='perf-name'; sPname.innerHTML=fragDisplayName(frag);
+          var sPhouse=document.createElement('div'); sPhouse.className='perf-house'; sPhouse.textContent=frag.house;
+          sNameWrap.appendChild(sPname); sNameWrap.appendChild(sPhouse);
+          var sCountWrap=document.createElement('div'); sCountWrap.style.cssText='text-align:right;flex-shrink:0;min-width:120px;';
+          var sPcount=document.createElement('div'); sPcount.className='perf-count'; sPcount.style.color='var(--rose)'; sPcount.textContent=cnt;
+          var sPmeta=document.createElement('div'); sPmeta.className='perf-meta'; sPmeta.textContent=sTopRelFrag;
+          sCountWrap.appendChild(sPcount); sCountWrap.appendChild(sPmeta);
+          sCard.appendChild(sRank); sCard.appendChild(sNameWrap); sCard.appendChild(sCountWrap);
+          perfSection.appendChild(sCard);
+        });
+      }
     }
   }
 
@@ -3827,7 +3885,7 @@ function renderAnalytics(){
     while(accordPerfSection.firstChild) accordPerfSection.removeChild(accordPerfSection.firstChild);
     var apHdr=document.createElement('div'); apHdr.className='ana-sh';
     var apH2=document.createElement('h2'); apH2.textContent='Accord performance';
-    var apSub=document.createElement('div'); apSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;'; apSub.textContent='compliments by scent family';
+    var apSub=document.createElement('div'); apSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:6px;'; apSub.textContent='compliments by scent family';
     apHdr.appendChild(apH2); apHdr.appendChild(apSub); accordPerfSection.appendChild(apHdr);
     if(MC.length<2){
       var apEmpty=document.createElement('div'); apEmpty.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:12px 0;'; apEmpty.textContent='Log more compliments to unlock accord insights.'; accordPerfSection.appendChild(apEmpty);
@@ -3868,17 +3926,20 @@ function renderAnalytics(){
     var typeHd=document.createElement('div'); typeHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:8px;'; typeHd.textContent='By Type'; collSection.appendChild(typeHd);
     var typeCounts={}; MFC.forEach(function(f){var t=f.type||'Unknown';typeCounts[t]=(typeCounts[t]||0)+1;});
     var totalMFC=MFC.length||1;
-    var typeColors={'Eau de Parfum':'var(--blue)','Eau de Toilette':'var(--blue2)','Body Spray':'var(--warm)','Perfume Oil':'var(--sage)','Other':'var(--muted)'};
+    // All shades of blue — darkest to lightest for readability on tan background
+    var blueShades=['#1A2E5C','#2B4480','#3A5699','#566B96','#7A8FAA','#A0B0C4'];
+    var typeEntries=Object.entries(typeCounts).sort(function(a,b){return b[1]-a[1];});
+    var typeColors={}; typeEntries.forEach(function(e,i){typeColors[e[0]]=blueShades[Math.min(i,blueShades.length-1)];});
     var typeRow=document.createElement('div'); typeRow.style.cssText='display:flex;flex-wrap:wrap;gap:16px;margin-bottom:8px;'; collSection.appendChild(typeRow);
-    Object.entries(typeCounts).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry){
+    typeEntries.forEach(function(entry){
       var t=entry[0]; var ct=entry[1]; var pct=Math.round(ct/totalMFC*100);
       var seg=document.createElement('div'); seg.style.cssText='display:flex;flex-direction:column;';
-      var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:13px;color:'+(typeColors[t]||'var(--ink)')+';'; pctEl.textContent=pct+'%';
-      var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;'; lbl.textContent=(typeBadgeText&&typeBadgeText[t])||t;
+      var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:14px;font-weight:600;color:'+(typeColors[t]||'var(--blue)')+';'; pctEl.textContent=pct+'%';
+      var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;'; lbl.textContent=(typeBadgeText&&typeBadgeText[t])||t;
       seg.appendChild(pctEl); seg.appendChild(lbl); typeRow.appendChild(seg);
     });
-    var typeBar=document.createElement('div'); typeBar.style.cssText='display:flex;height:4px;width:100%;margin-bottom:16px;'; collSection.appendChild(typeBar);
-    Object.entries(typeCounts).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry){
+    var typeBar=document.createElement('div'); typeBar.style.cssText='display:flex;height:4px;width:100%;margin-bottom:16px;border-radius:2px;overflow:hidden;'; collSection.appendChild(typeBar);
+    typeEntries.forEach(function(entry){
       var t=entry[0]; var ct=entry[1]; var pct=ct/totalMFC*100;
       var seg=document.createElement('div'); seg.style.cssText='height:100%;background:'+(typeColors[t]||'var(--b2)')+';width:'+pct+'%;'; typeBar.appendChild(seg);
     });
@@ -3890,12 +3951,12 @@ function renderAnalytics(){
     Object.entries(accordCounts).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry){
       var ac=entry[0]; var ct=entry[1]; var pct=Math.round(ct/totalAccordFrags*100);
       var seg=document.createElement('div'); seg.style.cssText='display:flex;flex-direction:column;';
-      var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:13px;color:var(--warm2);'; pctEl.textContent=pct+'%';
-      var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;'; lbl.textContent=ac;
+      var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:14px;font-weight:600;color:var(--blue);'; pctEl.textContent=pct+'%';
+      var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;'; lbl.textContent=ac;
       seg.appendChild(pctEl); seg.appendChild(lbl); accordRow.appendChild(seg);
     });
     if(showSylviaOverlay&&SF.length){
-      var sylvAccordHd=document.createElement('div'); sylvAccordHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--warm);letter-spacing:.12em;text-transform:uppercase;margin-top:12px;margin-bottom:6px;'; sylvAccordHd.textContent='Sylvia — By Accord'; collSection.appendChild(sylvAccordHd);
+      var sylvAccordHd=document.createElement('div'); sylvAccordHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:6px;padding-top:12px;border-top:1px solid var(--b1);'; sylvAccordHd.textContent='Sylvia — By Accord'; collSection.appendChild(sylvAccordHd);
       var sylvAccordCounts={};
       SF.forEach(function(f){getAccords(f).forEach(function(a){sylvAccordCounts[a]=(sylvAccordCounts[a]||0)+1;});});
       var totalSylvFrags=SF.length||1;
@@ -3903,8 +3964,8 @@ function renderAnalytics(){
       Object.entries(sylvAccordCounts).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry){
         var ac=entry[0]; var ct=entry[1]; var pct=Math.round(ct/totalSylvFrags*100);
         var seg=document.createElement('div'); seg.style.cssText='display:flex;flex-direction:column;';
-        var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:13px;color:var(--warm);'; pctEl.textContent=pct+'%';
-        var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;'; lbl.textContent=ac;
+        var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:14px;font-weight:600;color:var(--rose);'; pctEl.textContent=pct+'%';
+        var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;'; lbl.textContent=ac;
         seg.appendChild(pctEl); seg.appendChild(lbl); sylvAccordRow.appendChild(seg);
       });
     }
@@ -3916,7 +3977,6 @@ function renderAnalytics(){
       var avg=(total2/priceRecs.length).toFixed(0);
       priceRecs.sort(function(a,b){return b.price-a.price;});
       var mostExp=priceRecs[0];
-      var bestVal=priceRecs.slice().filter(function(r){return r.f.statusRating;}).sort(function(a,b){return (b.f.statusRating/b.price)-(a.f.statusRating/a.price);})[0]||priceRecs[priceRecs.length-1];
       var spendGrid=document.createElement('div'); spendGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;'; collSection.appendChild(spendGrid);
       function addSpendRow(lbl,name,price){
         var d=document.createElement('div'); d.style.cssText='border-bottom:1px solid var(--b1);padding:6px 0;';
@@ -3929,7 +3989,6 @@ function renderAnalytics(){
       spendGrid.appendChild(addSpendRow('Total Spent',null,'$'+Math.round(total2)));
       spendGrid.appendChild(addSpendRow('Avg per Bottle',null,'$'+avg));
       spendGrid.appendChild(addSpendRow('Most Expensive',mostExp.f.name,mostExp.price));
-      spendGrid.appendChild(addSpendRow('Best Value',bestVal.f.name,bestVal.price));
     }
   }
 }
@@ -4668,8 +4727,20 @@ function saveFragrance(){
         }
       },500);
     }
-    var duplicate=myFragrances().find(function(f){return f.name.toLowerCase().trim()===newFrag.name.toLowerCase().trim();});
-    if(duplicate){toast('You already have '+newFrag.name+' in your collection.');return;}
+    // Allow same-name fragrance in different status groups (e.g. sample + wishlist for full bottle).
+    // Block exact same name+status combination only.
+    var _newWish = newFrag.status==='WANT_TO_BUY'||newFrag.status==='WANT_TO_SMELL';
+    var duplicate = myFragrances().find(function(f){
+      if(f.name.toLowerCase().trim() !== newFrag.name.toLowerCase().trim()) return false;
+      var _existWish = f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';
+      // Only block if both are in the same bucket (collection vs wishlist)
+      return _newWish === _existWish;
+    });
+    if(duplicate){
+      var _bucket = _newWish ? 'wishlist' : 'collection';
+      toast('You already have '+newFrag.name+' in your '+_bucket+'.');
+      return;
+    }
     FRAGRANCES.push(newFrag);
     appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
     var _moreExpanded = document.getElementById('afMoreWrap')&&document.getElementById('afMoreWrap').style.display!=='none';

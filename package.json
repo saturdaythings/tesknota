@@ -1,0 +1,24 @@
+{
+  "name": "tesknota",
+  "version": "1.0.0",
+  "description": "Private 2-user fragrance tracker for Kiana and Sylvia. Built as a single HTML file with Google Sheets as the database — identical architecture to `github.com/saturdaythings/ATS-HRIS`.",
+  "main": "build.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saturdaythings/tesknota.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/saturdaythings/tesknota/issues"
+  },
+  "homepage": "https://github.com/saturdaythings/tesknota#readme",
+  "devDependencies": {
+    "playwright": "^1.59.1"
+  }
+}
