@@ -1876,11 +1876,14 @@ async function loadAllData(){
   var _lsKey = 'fragDBSyncedVersion';
   var _syncedVersion = localStorage.getItem(_lsKey);
   var _newDbRows = [];
-  var _seenDbIds = {};
+  var _seenDbKeys = {};
+  var _normKey = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); };
   FRAGRANCES.forEach(function(f){
     var nm = (f.name||'').trim();
-    if(!nm || nm.toLowerCase().startsWith('qa ') || !f.id || _seenDbIds[f.id]) return;
-    _seenDbIds[f.id] = true;
+    if(!nm || nm.toLowerCase().startsWith('qa ') || !f.id) return;
+    var _key = _normKey(nm)+'|'+_normKey(f.house||'');
+    if(_seenDbKeys[_key]) return;
+    _seenDbKeys[_key] = true;
     _newDbRows.push(fragToDbRow(f));
   });
   if(_syncedVersion !== FRAG_DB_VERSION){
@@ -2002,7 +2005,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v4';
+const FRAG_DB_VERSION = '2026-04-03-v5';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2410,7 +2413,7 @@ const FRAG_DB = [
   {n:'That Girl Viral Vanilla',h:'Oakcha',conc:'Extrait',fam:'Gourmand',top:'Caramel, Coconut Milk',mid:'Tonka Bean, Honey',base:'Vanilla, Marshmallow, White Musk, Amber',r:'4.2',l:'12–24h',s:'Strong',p:'~$47',accords:'Gourmand, Sweet, Vanilla, Caramel, Musky'},
   {n:'Miss Girl',h:'Oakcha',conc:'Extrait',fam:'Amber Oriental',top:'Black Cherry, Saffron, Bitter Almond',mid:'Jasmine Sambac, Turkish Rose, Tonka Bean, Tobacco',base:'Amber, Moss, Vanilla, Caramel, Sandalwood',r:'4.2',l:'12–24h',s:'Strong',p:'~$40',accords:'Cherry, Warm Spicy, Amber, Sweet, Vanilla'},
   {n:'Amber Musk',h:'Aerin',conc:'EDP',fam:'Musky Floral',top:'',mid:'Ambrox, Coconut Water, Rose Centifolia, Muguet',base:'Benzoin, Sandalwood, Musk',r:'3.9',l:'4–6h',s:'Soft',p:'~$145',accords:'Musky, Amber, Floral, Powdery, Woody'},
-  {n:'Pure Vanilla',h:'Lavanila',conc:'EDP',fam:'Vanilla Powdery',notes:'Madagascar Vanilla, Tonka Bean, Heliotrope',r:'3.9',l:'4–6h',s:'Soft',p:'~$38',accords:'Vanilla, Sweet, Powdery, Musky, Woody'},
+  {n:'Pure Vanilla',h:'Lavanila',conc:'EDP',fam:'Vanilla Powdery',top:'Madagascar Vanilla',mid:'Tonka Bean, Heliotrope',base:'Vanilla, Musk',r:'3.9',l:'4–6h',s:'Soft',p:'~$38',accords:'Vanilla, Sweet, Powdery, Musky, Woody'},
   {n:'Choco Musk',h:'Al Rehab',conc:'EDP',fam:'Gourmand Sweet',top:'Vanilla, Chocolate',mid:'Cinnamon, Spices, Musk',base:'Rose, Sandalwood',r:'3.9',l:'6–8h',s:'Moderate',p:'~$8',accords:'Gourmand, Sweet, Chocolate, Vanilla, Musky'},
   {n:'Amber Perfume Oil',h:'Nemat',conc:'Perfume Oil',fam:'Amber Musky',top:'Amber',mid:'Amber',base:'Amber',r:'4.1',l:'8–12h',s:'Moderate',p:'~$13',accords:'Amber, Musky, Woody, Sweet, Clean'},
   {n:'Persian Garden',h:'Kuumba Made',conc:'Fragrance Oil',fam:'Floral Musky',top:'Warm Florals',mid:'Ocean Air',base:'Light Amber, Musk',r:'3.8',l:'6–8h',s:'Moderate',p:'~$8',accords:'Floral, Musky, Amber, Clean, Sweet'},
@@ -2433,7 +2436,7 @@ const FRAG_DB = [
   {n:'Mooncake',h:"d'Annam",conc:'EDP',fam:'Gourmand Earthy',top:'Golden Syrup, Honey',mid:'Salted Egg Yolk, Mung Bean, Lotus Seed',base:'Honey, Vanilla',r:'4.1',l:'8–12h',s:'Strong',p:'~$160',accords:'Gourmand, Sweet, Honey, Earthy, Creamy'},
   {n:'Crema di Latte',h:'Hilde Soliani',conc:'EDP',fam:'Gourmand Creamy',top:'Milk, Lemon',mid:'Caramel, Sugar, Cinnamon',base:'Vanilla, Cream',r:'4.1',l:'6–8h',s:'Moderate',p:'~$165',accords:'Gourmand, Creamy, Sweet, Vanilla, Lactonic'},
   {n:'Sweet Parmesan Violet',h:'Hilde Soliani',conc:'EDP',fam:'Floral Sweet',top:'Violet',mid:'Sugar',base:'Violet, Musk',r:'3.9',l:'6–8h',s:'Moderate',p:'~$165',accords:'Floral, Sweet, Powdery, Violet, Candy'},
-  {n:'Orgasmo',h:'Hilde Soliani',conc:'EDP',fam:'Gourmand Nutty',notes:'Amaretto, Almond',r:'4.0',l:'4–6h',s:'Soft',p:'~$165',accords:'Gourmand, Nutty, Sweet, Creamy, Boozy'},
+  {n:'Orgasmo',h:'Hilde Soliani',conc:'EDP',fam:'Gourmand Nutty',top:'Amaretto',mid:'Bitter Almond',base:'Almond, Musk',r:'4.0',l:'4–6h',s:'Soft',p:'~$165',accords:'Gourmand, Nutty, Sweet, Creamy, Boozy'},
   {n:"SOL Cheirosa '62",h:'Sol de Janeiro',conc:'EDP',fam:'Gourmand Nutty',top:'Pistachio, Almond',mid:'Heliotrope, Jasmine',base:'Caramel, Vanilla, Salt, Sandalwood',r:'4.1',l:'4–6h',s:'Moderate',p:'~$80',accords:'Gourmand, Sweet, Nutty, Vanilla, Caramel'},
   {n:'Good Girl',h:'Carolina Herrera',conc:'EDP',fam:'Floral Gourmand',top:'Almond, Coffee, Bergamot, Lemon',mid:'Tuberose, Jasmine Sambac, Orange Blossom, Bulgarian Rose, Orris',base:'Tonka Bean, Cacao, Vanilla, Praline, Sandalwood, Musk, Amber, Cashmere Wood, Patchouli, Cinnamon, Cedar',r:'4.2',l:'8–12h',s:'Strong',p:'~$130',accords:'Floral, Sweet, Gourmand, Coffee, Warm Spicy'},
   {n:'Dandelion Butter',h:'Clue Perfumery',conc:'EDP',fam:'Green Gourmand',top:'Pollen, Dandelion Greens',mid:'Yellow Dandelion, Snapped Stem, Milky Sap',base:'Salted Butter, Dandelion-Stained Chin',r:'4.3',l:'4–6h',s:'Soft',p:'~$140',accords:'Green, Creamy, Floral, Fresh, Earthy'},
