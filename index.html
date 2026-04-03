@@ -1888,7 +1888,7 @@ async function loadAllData(){
     else if(f.type==='Body Mist') f.type='Body Spray';
     // Fix Eclair Pistache naming/type variants already written to sheet
     if((f.name==='Eclaire Pistache'||f.name==='Eclair Pistachio')&&f.house==='Lattafa'){
-      f.name='Eclair Pistache'; f.type='Body Spray';
+      f.name='Eclair Pistache'; f.type='Eau de Parfum';
     }
     if(f.type!==origType||f.name!==origName) _migNeedsWrite=true;
   });
@@ -1906,7 +1906,7 @@ async function loadAllData(){
   FRAGRANCES.forEach(function(f){
     var nm = (f.name||'').trim();
     if(!nm || nm.toLowerCase().startsWith('qa ') || !f.id) return;
-    var _key = _normKey(nm)+'|'+_normKey(f.house||'')+'|'+_normKey(f.type||'');
+    var _key = _normKey(nm)+'|'+_normKey(f.house||'');
     if(_seenDbKeys[_key]) return;
     _seenDbKeys[_key] = true;
     _newDbRows.push(fragToDbRow(f));
@@ -2030,7 +2030,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v9';
+const FRAG_DB_VERSION = '2026-04-03-v10';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2425,7 +2425,7 @@ const FRAG_DB = [
   {n:'Eclair EDP',h:'Lattafa',conc:'EDP',fam:'Gourmand Sweet',top:'Caramel, Milk, Sugar',mid:'Honey, White Flowers',base:'Vanilla, Praline, Musk',r:'4.1',l:'6–8h',s:'Moderate',p:'~$37',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky'},
   {n:'Eclair',h:'Lattafa',conc:'Body Spray',fam:'Gourmand Sweet',top:'Caramel, Sugar, Milk',mid:'Honey, White Flowers',base:'Vanilla, Praline, Musk',r:'3.8',l:'2–4h',s:'Soft',p:'~$8',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky'},
   {n:'Yara',h:'Lattafa',conc:'Body Spray',fam:'Sweet Fruity',top:'Orchid, Heliotrope, Tangerine',mid:'Gourmand Accord, Tropical Fruits',base:'Vanilla, Musk, Sandalwood',r:'3.9',l:'2–4h',s:'Soft',p:'~$8',accords:'Sweet, Vanilla, Powdery, Tropical, Fruity'},
-  {n:'Eclair Pistache',h:'Lattafa',conc:'Body Spray',fam:'Gourmand Nutty',top:'Pistachio Spread Cream, Pistachio',mid:'Cacao, Whipped Cream, Coconut',base:'Vanilla, Milk, Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$30',accords:'Gourmand, Sweet, Nutty, Creamy, Lactonic'},
+  {n:'Eclair Pistache',h:'Lattafa',conc:'Eau de Parfum',fam:'Gourmand Nutty',top:'Pistachio Spread Cream, Pistachio',mid:'Cacao, Whipped Cream, Coconut',base:'Vanilla, Milk, Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$30',accords:'Gourmand, Sweet, Nutty, Creamy, Lactonic'},
   {n:'Eau Duelle',h:'Diptyque',conc:'EDT',fam:'Oriental Vanilla',top:'Bergamot, Black Tea, Elemi Resin',mid:'Cardamom, Pink Pepper, Juniper, Olibanum',base:'Bourbon Vanilla, Ambergris, Musk, Saffron',r:'3.9',l:'4–6h',s:'Soft',p:'~$190',accords:'Vanilla, Spicy, Woody, Aromatic, Resinous'},
   {n:'Lune Féline',h:'Atelier des Ors',conc:'EDP',fam:'Amber Vanilla',top:'Cardamom, Cinnamon, Pink Pepper',mid:'Woodsy Notes, Ambergris, Styrax, Cedar, Green Notes',base:'Tahitian Vanilla, Peru Balsam, Musk',r:'4.4',l:'8–12h',s:'Strong',p:'~$275',accords:'Amber, Vanilla, Warm Spicy, Woody, Balsamic'},
   {n:'Heavy Cream',h:'Phlur',conc:'Body Spray',fam:'Gourmand Creamy',top:'Marshmallow, Sugar, Lemon, Orange',mid:'Coconut, Ambrettolide, Jasmine',base:'Whipped Cream, Vanilla, Caramel',r:'4.1',l:'2–4h',s:'Soft',p:'~$39',accords:'Sweet, Gourmand, Lactonic, Creamy, Vanilla'},
@@ -2524,7 +2524,7 @@ let FRAGRANCES = [
   {id:'k22',userId:'u1',name:'Eucalyptus 18',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',purchasePrice:7.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k23',userId:'u1',name:'Tonka 25',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',purchasePrice:7.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k24',userId:'u1',name:'Bergamote 22',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',purchasePrice:7.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k25',userId:'u1',name:'Eclair Pistache',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Mar 2026',purchasePrice:26.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k25',userId:'u1',name:'Eclair Pistache',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Mar 2026',purchasePrice:26.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k26',userId:'u1',name:'Eclair EDP',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Dec 2024',purchasePrice:36.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k27',userId:'u1',name:'Cocktail Intense',house:'Fragrance World',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Dec 2024',purchasePrice:18.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k28',userId:'u1',name:'Affection',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Oct 2024',purchasePrice:27.87,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
