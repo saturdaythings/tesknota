@@ -1878,8 +1878,10 @@ async function loadAllData(){
     await syncMissingRows('userCompliments',_missingComps.map(compToRow),COMP_HEADERS,'syncComps');
   }
 
-  // Rebuild fragranceDB entirely from current FRAGRANCES + FRAG_DB on every load.
-  // This guarantees FRAG_DB corrections, renames, and new entries always sync to the sheet.
+  // Rebuild fragranceDB from FRAGRANCES + FRAG_DB only when FRAG_DB_VERSION changed.
+  // Each browser tracks the last-synced version in localStorage to avoid redundant writes.
+  var _lsKey = 'fragDBSyncedVersion';
+  var _syncedVersion = localStorage.getItem(_lsKey);
   var _newDbRows = [];
   var _seenDbIds = {};
   FRAGRANCES.forEach(function(f){
@@ -1888,7 +1890,10 @@ async function loadAllData(){
     _seenDbIds[f.id] = true;
     _newDbRows.push(fragToDbRow(f));
   });
-  await writeSheet('fragranceDB', _newDbRows, COMMUNITY_FRAG_HEADERS);
+  if(_syncedVersion !== FRAG_DB_VERSION){
+    await writeSheet('fragranceDB', _newDbRows, COMMUNITY_FRAG_HEADERS);
+    localStorage.setItem(_lsKey, FRAG_DB_VERSION);
+  }
   COMMUNITY_FRAGS = _newDbRows.map(function(r){
     return Object.assign({}, r, { name: r.fragranceName||r.name||'', house: r.fragranceHouse||r.house||'', id: r.fragranceId||r.id||'' });
   });
@@ -1995,6 +2000,10 @@ function checkIdentity(){
 // ═══════════════════════════════════════════════════════
 // SINGLE SOURCE OF TRUTH — ALL DATA LIVES HERE
 // ═══════════════════════════════════════════════════════
+
+// Bump this string whenever FRAG_DB entries are corrected or added.
+// Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
+const FRAG_DB_VERSION = '2026-04-03-v1';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
