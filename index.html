@@ -862,7 +862,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <table class="tbl" id="collTable"><thead id="collThead"><tr>
     <th data-sort="nameAZ">Fragrance <span class="sort-arrow"></span></th>
     <th data-sort="ratingHL">Rating <span class="sort-arrow"></span></th>
-    <th data-sort="long">Longevity <span class="sort-arrow"></span></th>
     <th data-sort="added">Added <span class="sort-arrow"></span></th>
     <th>Accords</th>
     <th data-sort="comps">Compliments <span class="sort-arrow"></span></th>
@@ -3490,15 +3489,6 @@ function renderCollection(){
     if(collSort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
     return a.name.localeCompare(b.name);
   });
-  if (collSort === 'long' || collSort === 'longDesc') {
-    var lo = {'Very weak':1,'Weak':2,'Moderate':3,'Long lasting':4,'Eternal':5,
-              '0–6h':1,'6–12h':2,'12–24h':4,'>24h':5,'2–4h':1,'4–6h':2,'6–8h':2,'8–12h':3};
-    frags.sort(function(a,b){
-      var av = lo[a.personalLong]||0;
-      var bv = lo[b.personalLong]||0;
-      return collSort==='long' ? av-bv : bv-av;
-    });
-  }
   if (collSort === 'added' || collSort === 'addedOld') {
     frags.sort(function(a,b){
       var av = _parsePurchaseDate(a.purchaseDate);
@@ -3545,9 +3535,6 @@ function renderCollection(){
       var hasFriendMatch=friendOwnsSet.has(f.name.toLowerCase());
       var compCount=getCompCount(f.id);
       var _cd = getCommunityData(f.name, f.house) || {};
-      var longTdHtml = f.personalLong
-        ? '<span style="font-family:var(--mono);font-size:11px;color:var(--ink2);">' + formatLong(f.personalLong) + '</span>'
-        : '<span style="color:var(--ink3);">—</span>';
       var addedStr = f.purchaseDate || '';
       if (!addedStr && f.createdAt) {
         var d = new Date(f.createdAt);
@@ -3560,7 +3547,6 @@ function renderCollection(){
       return '<tr onclick="openDetail(\''+f.id+'\')">'
         +'<td><div class="tn">'+fragDisplayName(f)+dupeBadge+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
         +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
-        +'<td>'+longTdHtml+'</td>'
         +'<td>'+addedTdHtml+'</td>'
         +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+getAccords(f).join(', ')+'</td>'
         +'<td class="tmono">'+compCount+'</td>'
@@ -3572,7 +3558,7 @@ function renderCollection(){
     }).join('');
   } else {
     var msg=hasActiveFilter()?'No fragrances match your filters.':'Your collection is empty \u2014 <span onclick="openAddFrag(\'CURRENT\')">add your first one</span>.';
-    document.getElementById('collBody').innerHTML='<tr><td colspan="7"><div class="empty-state">'+msg+'</div></td></tr>';
+    document.getElementById('collBody').innerHTML='<tr><td colspan="6"><div class="empty-state">'+msg+'</div></td></tr>';
   }
   updateCounts();
 }
