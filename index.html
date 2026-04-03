@@ -924,6 +924,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div id="anaCollection" class="fpanel on">
           <div class="ana-section" id="anaCollectionSection"></div>
           <div class="ana-section" id="anaNotesSection"></div>
+          <div class="ana-section" id="anaNoteLibrarySection"></div>
         </div>
         <div id="anaCompliments" class="fpanel">
           <div class="ana-header" style="margin-bottom:8px;">
@@ -1123,11 +1124,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <button class="btn btn-ghost btn-sm" onclick="executeMerge()">Merge</button>
         <div id="mergeResult" style="font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:8px;display:none;"></div>
       </div>
-      <div id="configSection" style="display:none;margin-top:40px;">
-        <div class="sh sh-spaced-lg"><h2>Configuration</h2></div>
-        <div class="sh" style="margin-top:24px;"><h2 style="font-size:16px;">Note Library</h2><div class="sh-r"><span class="sh-sub">All notes across your collection — deduplicated and alphabetised.</span></div></div>
-        <div id="noteLibraryList" style="margin-top:10px;"></div>
-      </div>
+      <div id="configSection" style="display:none;margin-top:40px;"></div>
     </div>
 
   </div>
@@ -1839,9 +1836,41 @@ async function loadAllData(){
     }
   });
   var communityDeduped = Object.values(_dedupMap);
+
+  // Build ID remap: non-canonical fragranceId → canonical fragranceId
+  // e.g. Sylvia's s6 (Eclair) → Kiana's k11 (Eclair) — one entry per fragrance
+  var _idRemap = {};
+  communityRaw.forEach(function(r){
+    var nm = (r.fragranceName||'').trim();
+    if(!nm || nm.toLowerCase().startsWith('qa ')) return;
+    var key = nm.toLowerCase()+'|'+(r.fragranceHouse||'').toLowerCase();
+    var canonical = _dedupMap[key];
+    if(canonical && r.fragranceId && r.fragranceId !== canonical.fragranceId){
+      _idRemap[r.fragranceId] = canonical.fragranceId;
+    }
+  });
+
+  // Apply remap to FRAGRANCES and COMPLIMENTS so all references use canonical IDs
+  var _refsChanged = false;
+  if(Object.keys(_idRemap).length){
+    FRAGRANCES.forEach(function(f){
+      if(_idRemap[f.id]){ f.id = _idRemap[f.id]; _refsChanged = true; }
+    });
+    COMPLIMENTS.forEach(function(c){
+      if(_idRemap[c.primaryFragId]){ c.primaryFragId = _idRemap[c.primaryFragId]; _refsChanged = true; }
+      if(c.secondaryFragId && _idRemap[c.secondaryFragId]){ c.secondaryFragId = _idRemap[c.secondaryFragId]; _refsChanged = true; }
+    });
+    if(_refsChanged){
+      await Promise.all([
+        writeSheet('userFragrances', FRAGRANCES.map(fragToRow), FRAG_HEADERS),
+        writeSheet('userCompliments', COMPLIMENTS.map(compToRow), COMP_HEADERS),
+      ]).catch(function(e){ console.error('[dedup] ref remap write failed', e); });
+    }
+  }
+
   var _dbFragIds = new Set(communityDeduped.map(function(r){ return r.fragranceId||''; }));
 
-  // Collect every fragranceId that must exist in fragranceDB
+  // Collect referenced fragranceIds that still need a fragranceDB entry
   var _referencedIds = new Set();
   FRAGRANCES.forEach(function(f){ if(f.id) _referencedIds.add(f.id); });
   COMPLIMENTS.forEach(function(c){
@@ -1849,20 +1878,22 @@ async function loadAllData(){
     if(c.secondaryFragId) _referencedIds.add(c.secondaryFragId);
   });
 
-  // Build rows for any fragranceId not yet in fragranceDB (skip QA test entries)
+  // Build rows for fragranceIds with no fragranceDB entry (skip QA and already-covered names)
   var _missingDbRows = [];
   _referencedIds.forEach(function(fragId){
     if(!fragId || _dbFragIds.has(fragId)) return;
-    // Prefer a full fragrance object from user's collection
     var f = FRAGRANCES.find(function(x){ return x.id===fragId; });
     if(f){
       var nm = (f.name||'').trim();
-      if(!nm || nm.toLowerCase().startsWith('qa ')) return; // skip test entries
+      if(!nm || nm.toLowerCase().startsWith('qa ')) return;
+      var _nameKey = nm.toLowerCase()+'|'+(f.house||'').toLowerCase();
+      if(_dedupMap[_nameKey]) return; // already represented by canonical entry
       _missingDbRows.push(fragToDbRow(f)); return;
     }
-    // Fall back: look up name/house from COMMUNITY_FRAGS or seed data
     var resolved = resolveFragById(fragId);
     if(resolved.name && !resolved.name.toLowerCase().startsWith('qa ')){
+      var _rKey = resolved.name.toLowerCase()+'|'+(resolved.house||'').toLowerCase();
+      if(_dedupMap[_rKey]) return;
       _missingDbRows.push(fragToDbRow({
         id: fragId, name: resolved.name, house: resolved.house,
         type:'', accords:'', createdAt: new Date().toISOString()
@@ -1870,25 +1901,16 @@ async function loadAllData(){
     }
   });
 
-  // Always write fragranceDB if dedup changed anything OR new rows needed
-  var _needsWrite = communityDeduped.length !== communityRaw.length || _missingDbRows.length;
-  if(_needsWrite){
-    if(_missingDbRows.length){
-      _missingDbRows.forEach(function(row){
-        COMMUNITY_FRAGS.push(Object.assign({}, row, {
-          name: row.fragranceName, house: row.fragranceHouse, id: row.fragranceId
-        }));
-      });
-    }
-    // Update in-memory COMMUNITY_FRAGS to match deduped set
-    COMMUNITY_FRAGS = communityDeduped.map(function(r){
-      return Object.assign({}, r, { name: r.fragranceName, house: r.fragranceHouse, id: r.fragranceId });
-    }).concat(_missingDbRows.map(function(row){
-      return Object.assign({}, row, { name: row.fragranceName, house: row.fragranceHouse, id: row.fragranceId });
-    }));
+  // Write fragranceDB if dedup changed anything or new rows needed
+  var _needsDbWrite = communityDeduped.length !== communityRaw.filter(function(r){ return (r.fragranceName||'').trim() && !r.fragranceName.toLowerCase().startsWith('qa '); }).length || _missingDbRows.length;
+  if(_needsDbWrite){
     var _allDbRows = communityDeduped.concat(_missingDbRows);
     await writeSheet('fragranceDB', _allDbRows, COMMUNITY_FRAG_HEADERS);
   }
+  // Always sync COMMUNITY_FRAGS in-memory to the clean deduped set
+  COMMUNITY_FRAGS = communityDeduped.concat(_missingDbRows).map(function(r){
+    return Object.assign({}, r, { name: r.fragranceName||r.name||'', house: r.fragranceHouse||r.house||'', id: r.fragranceId||r.id||'' });
+  });
 
   // Clean up QA test entries that were added during automated testing
   var _qaFrags = FRAGRANCES.filter(function(f){ return (f.name||'').toLowerCase().startsWith('qa '); });
@@ -1937,7 +1959,6 @@ let CURRENT_USER = null;
 
 function selectIdentity(name, id){
   CURRENT_USER = USERS.find(u=>u.id===id) || {id, name};
-  try { localStorage.setItem('currentUser', JSON.stringify(CURRENT_USER)); } catch(e){}
   document.getElementById('identityScreen').style.display='none';
   document.querySelector('.shell').style.display='flex';
   // Update sidebar username
@@ -1949,12 +1970,7 @@ function selectIdentity(name, id){
     who.appendChild(nb);
     who.appendChild(document.createTextNode('Settings'));
   }
-  // Restore last page — fall back to dashboard
-  try {
-    var _lp = localStorage.getItem('lastPage');
-    var _validPages = ['dashboard','collection','wishlist','compliments','analytics','friend','import','settings'];
-    if(_lp && _validPages.includes(_lp)) { goPage(_lp); } else { goPage('dashboard'); }
-  } catch(e){ goPage('dashboard'); }
+  goPage('dashboard');
   renderImportQueue();
   updateCounts();
   // Silent audit on load — only warns if failures found
@@ -3991,6 +4007,8 @@ function renderAnalytics(){
       spendGrid.appendChild(addSpendRow('Most Expensive',mostExp.f.name,mostExp.price));
     }
   }
+  // Note library — all notes across user's collection
+  renderNoteLibrary();
 }
 
 function bldChartPreview(id,data){
@@ -4310,8 +4328,10 @@ function renderConfigSection(){
 }
 
 function renderNoteLibrary(){
-  var el=document.getElementById('noteLibraryList');
+  // Render in analytics (primary) or settings fallback
+  var el=document.getElementById('anaNoteLibrarySection')||document.getElementById('noteLibraryList');
   if(!el) return;
+  el.innerHTML='<div class="ana-sh"><h2>Note library</h2><span class="sh-sub" style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-left:8px;">all notes across your collection</span></div>';
   var seen={};
   FRAGRANCES.forEach(function(f){
     var _cd=getCommunityData(f.name,f.house)||{}; if(!_cd.notes) return;
@@ -6603,15 +6623,9 @@ window.auditData=auditDataIntegrity;
   initCollectionSort();
   document.getElementById('idLoading').style.display='none';
   if(!sheetsOk) setSyncState('error');
-  // Auto-login if a session exists in localStorage
-  if(checkIdentity()){
-    selectIdentity(CURRENT_USER.name, CURRENT_USER.id);
-    if(!sheetsOk) document.getElementById('idError').style.display='flex';
-  } else {
-    // Show picker — never block the user due to a sync failure
-    document.getElementById('idPicker').style.display='flex';
-    if(!sheetsOk) document.getElementById('idError').style.display='flex';
-  }
+  // Always show identity picker — users choose who they are on each visit
+  document.getElementById('idPicker').style.display='flex';
+  if(!sheetsOk) document.getElementById('idError').style.display='flex';
 })();
 
 // ═══════════════════════════════════════════════════════
