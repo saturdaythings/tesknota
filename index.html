@@ -1275,6 +1275,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <div class="fg" style="margin:0;"><label>Type</label>
             <select id="afType">
               <option value="">— Type —</option>
+              <option value="Extrait de Parfum">Extrait de Parfum</option>
               <option value="Eau de Parfum">Eau de Parfum (EDP)</option>
               <option value="Eau de Toilette">Eau de Toilette (EDT)</option>
               <option value="Body Spray">Body Spray</option>
@@ -1945,6 +1946,7 @@ let CURRENT_USER = null;
 
 function selectIdentity(name, id){
   CURRENT_USER = USERS.find(u=>u.id===id) || {id, name};
+  try { localStorage.setItem('currentUser', JSON.stringify(CURRENT_USER)); } catch(e){}
   document.getElementById('identityScreen').style.display='none';
   document.querySelector('.shell').style.display='flex';
   // Update sidebar username
@@ -2544,20 +2546,20 @@ FRAGRANCES.forEach(function(f){ if(!f.fragranceId) f.fragranceId = f.id; });
 
 // COMPLIMENTS — main compliment log (loaded from Google Sheets)
 let COMPLIMENTS = [
-  {id:'c1',userId:'u1',primaryFragId:'k13',primaryFrag:'Crème Brûlée',secondaryFragId:'k4',secondaryFrag:'Vanilla Skin',gender:'Male',relation:'Significant Other',month:'11',year:'2024',location:'Home',city:'Arvada',state:'Colorado',country:'US',notes:'Trevor',createdAt:'2024-11-01T00:00:00.000Z'},
-  {id:'c2',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'8',year:'2024',location:'King Soopers Pharmacy',city:'Arvada',state:'Colorado',country:'US',notes:'Pharmacist asked 2x for the perfume name',createdAt:'2024-08-01T00:00:00.000Z'},
-  {id:'c3',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'9',year:'2024',location:'King Soopers Pharmacy',city:'Arvada',state:'Colorado',country:'US',notes:'Asked if it was the cake or me',createdAt:'2024-09-01T00:00:00.000Z'},
-  {id:'c4',userId:'u1',primaryFragId:'k12',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'12',year:'2023',location:'Viceroy',city:'Snowmass',state:'Colorado',country:'US',notes:'Hotel front desk, said I smelled like cinnamon buns',createdAt:'2023-12-01T00:00:00.000Z'},
-  {id:'c5',userId:'u1',primaryFragId:'k33',primaryFrag:'Khamrah',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'6',year:'2024',location:'Airbnb',city:'Denver',state:'Colorado',country:'US',notes:'Asked who smelled good, then later asked for the link and bought it',createdAt:'2024-06-01T00:00:00.000Z'},
-  {id:'c6',userId:'u2',primaryFragId:'s1',primaryFrag:'Lost Cherry',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'8',year:'2023',location:'Ted Lasso Bar',city:'Richmond',state:'',country:'UK',notes:'Bartender asked for what it was',createdAt:'2023-08-01T00:00:00.000Z'},
-  {id:'c7',userId:'u2',primaryFragId:'s5',primaryFrag:'Crème Brûlée',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'11',year:'2024',location:'Kilauea Fish Market',city:'Princeville',state:'Hawaii',country:'US',notes:'Said it smelled like vanilla',createdAt:'2024-11-01T00:00:00.000Z'},
-  {id:'c8',userId:'u2',primaryFragId:'s7',primaryFrag:'Lune Féline',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'9',year:'2024',location:'Gym',city:'Westminster',state:'Colorado',country:'US',notes:'Gym goers girlfriend, resulted in a phone number exchange to share the perfume name',createdAt:'2024-09-01T00:00:00.000Z'},
-  {id:'c9',userId:'u2',primaryFragId:'s7',primaryFrag:'Lune Féline',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'10',year:'2024',location:"Kiana's",city:'Arvada',state:'Colorado',country:'US',notes:'Kiana',createdAt:'2024-10-01T00:00:00.000Z'},
-  {id:'c10',userId:'u2',primaryFragId:'s8',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'9',year:'2024',location:'Gothic Theater',city:'Denver',state:'Colorado',country:'US',notes:'Girl at the California Honeydrops show asked who smelled like vanilla',createdAt:'2024-09-01T00:00:00.000Z'},
-  {id:'c11',userId:'u2',primaryFragId:'s5',primaryFrag:'Crème Brûlée',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'8',year:'2024',location:'Teocali',city:'Lafayette',state:'Colorado',country:'US',notes:'Kiana',createdAt:'2024-08-01T00:00:00.000Z'},
-  {id:'c12',userId:'u2',primaryFragId:'s3',primaryFrag:'Angels\' Share',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'11',year:'2024',location:'Sushi burrito bar',city:'Kauai',state:'Hawaii',country:'US',notes:'Asked what kind it was',createdAt:'2024-11-01T00:00:00.000Z'},
-  {id:'c13',userId:'u1',primaryFragId:'k12',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Significant Other',month:'3',year:'2026',location:'Home',city:'Rochester',state:'New York',country:'US',notes:'Mike',createdAt:'2026-03-01T00:00:00.000Z'},
-  {id:'c14',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'4',year:'2026',location:'Bluegrass Lounge',city:'Arvada',state:'Colorado',country:'US',notes:'Lauren',createdAt:'2026-04-01T00:00:00.000Z'},
+  {id:'c1',userId:'u1',primaryFragId:'k13',primaryFrag:'Crème Brûlée',secondaryFragId:'k4',secondaryFrag:'Vanilla Skin',gender:'Male',relation:'Significant Other',month:'Nov',year:'2024',location:'Home',city:'Arvada',state:'Colorado',country:'US',notes:'Trevor',createdAt:'2024-11-01T00:00:00.000Z'},
+  {id:'c2',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Aug',year:'2024',location:'King Soopers Pharmacy',city:'Arvada',state:'Colorado',country:'US',notes:'Pharmacist asked 2x for the perfume name',createdAt:'2024-08-01T00:00:00.000Z'},
+  {id:'c3',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'Sep',year:'2024',location:'King Soopers Pharmacy',city:'Arvada',state:'Colorado',country:'US',notes:'Asked if it was the cake or me',createdAt:'2024-09-01T00:00:00.000Z'},
+  {id:'c4',userId:'u1',primaryFragId:'k12',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Dec',year:'2023',location:'Viceroy',city:'Snowmass',state:'Colorado',country:'US',notes:'Hotel front desk, said I smelled like cinnamon buns',createdAt:'2023-12-01T00:00:00.000Z'},
+  {id:'c5',userId:'u1',primaryFragId:'k33',primaryFrag:'Khamrah',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Jun',year:'2024',location:'Airbnb',city:'Denver',state:'Colorado',country:'US',notes:'Asked who smelled good, then later asked for the link and bought it',createdAt:'2024-06-01T00:00:00.000Z'},
+  {id:'c6',userId:'u2',primaryFragId:'s1',primaryFrag:'Lost Cherry',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Aug',year:'2023',location:'Ted Lasso Bar',city:'Richmond',state:'',country:'UK',notes:'Bartender asked for what it was',createdAt:'2023-08-01T00:00:00.000Z'},
+  {id:'c7',userId:'u2',primaryFragId:'s5',primaryFrag:'Crème Brûlée',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Nov',year:'2024',location:'Kilauea Fish Market',city:'Princeville',state:'Hawaii',country:'US',notes:'Said it smelled like vanilla',createdAt:'2024-11-01T00:00:00.000Z'},
+  {id:'c8',userId:'u2',primaryFragId:'s7',primaryFrag:'Lune Féline',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Sep',year:'2024',location:'Gym',city:'Westminster',state:'Colorado',country:'US',notes:'Gym goers girlfriend, resulted in a phone number exchange to share the perfume name',createdAt:'2024-09-01T00:00:00.000Z'},
+  {id:'c9',userId:'u2',primaryFragId:'s7',primaryFrag:'Lune Féline',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Oct',year:'2024',location:"Kiana's",city:'Arvada',state:'Colorado',country:'US',notes:'Kiana',createdAt:'2024-10-01T00:00:00.000Z'},
+  {id:'c10',userId:'u2',primaryFragId:'s8',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Sep',year:'2024',location:'Gothic Theater',city:'Denver',state:'Colorado',country:'US',notes:'Girl at the California Honeydrops show asked who smelled like vanilla',createdAt:'2024-09-01T00:00:00.000Z'},
+  {id:'c11',userId:'u2',primaryFragId:'s5',primaryFrag:'Crème Brûlée',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Aug',year:'2024',location:'Teocali',city:'Lafayette',state:'Colorado',country:'US',notes:'Kiana',createdAt:'2024-08-01T00:00:00.000Z'},
+  {id:'c12',userId:'u2',primaryFragId:'s3',primaryFrag:'Angels\' Share',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Nov',year:'2024',location:'Sushi burrito bar',city:'Kauai',state:'Hawaii',country:'US',notes:'Asked what kind it was',createdAt:'2024-11-01T00:00:00.000Z'},
+  {id:'c13',userId:'u1',primaryFragId:'k12',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Significant Other',month:'Mar',year:'2026',location:'Home',city:'Rochester',state:'New York',country:'US',notes:'Mike',createdAt:'2026-03-01T00:00:00.000Z'},
+  {id:'c14',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Apr',year:'2026',location:'Bluegrass Lounge',city:'Arvada',state:'Colorado',country:'US',notes:'Lauren',createdAt:'2026-04-01T00:00:00.000Z'},
 ];
 
 // IMPORT QUEUE
@@ -3696,10 +3698,12 @@ function renderCompliments(filter='all'){
   // Apply sort
   var _sv = compSortVal || 'dateDesc';
   function _compFrag(c){ return FRAGRANCES.find(function(x){return x.id===c.primaryFragId;})||{}; }
+  var _MNS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function _mnum(m){var n=parseInt(m);return isNaN(n)?_MNS.indexOf(m)+1:n;}
   filtered.sort(function(a,b){
     if(_sv==='dateDesc'||_sv==='dateAsc'){
-      var da=(parseInt(a.year)||0)*100+(parseInt(a.month)||0);
-      var db=(parseInt(b.year)||0)*100+(parseInt(b.month)||0);
+      var da=(parseInt(a.year)||0)*100+_mnum(a.month);
+      var db=(parseInt(b.year)||0)*100+_mnum(b.month);
       return _sv==='dateDesc'?db-da:da-db;
     }
     if(_sv==='relation') return (a.relation||'').localeCompare(b.relation||'');
@@ -4392,7 +4396,7 @@ function renderInCommon(){
 document.getElementById('friendTabs').addEventListener('click',e=>{
   const tab=e.target.closest('.ftab');if(!tab)return;
   document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.fpanel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('#page-friend .fpanel').forEach(p=>p.classList.remove('on'));
   tab.classList.add('on');
   const panel=document.getElementById(tab.dataset.panel);
   if(panel){ panel.classList.add('on'); if(tab.dataset.panel==='ft-ana'){ var FC2=friendCompliments(),byF2={}; FC2.forEach(function(c){byF2[c.primaryFrag]=(byF2[c.primaryFrag]||0)+1;}); var fs2=Object.entries(byF2).sort(function(a,b){return b[1]-a[1];}).slice(0,5),mx2=fs2[0]?fs2[0][1]:1; bldChart('bc-f',fs2.map(function(e){return {l:e[0].split(' ')[0],v:e[1],h:Math.round((e[1]/mx2)*100)};})); }}
@@ -4544,7 +4548,9 @@ function renderNoteLibrary(){
   // Render in analytics (primary) or settings fallback
   var el=document.getElementById('anaNoteLibrarySection')||document.getElementById('noteLibraryList');
   if(!el) return;
-  el.innerHTML='<div class="ana-sh"><h2>Note library</h2><span class="sh-sub" style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-left:8px;">all notes across your collection</span></div>';
+  var heading=document.createElement('div');
+  heading.className='ana-sh';
+  heading.innerHTML='<h2>Note library</h2><span class="sh-sub" style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-left:8px;">all notes across your collection</span>';
   var seen={};
   FRAGRANCES.forEach(function(f){
     var _cd=getCommunityData(f.name,f.house)||{}; if(!_cd.notes) return;
@@ -4558,7 +4564,9 @@ function renderNoteLibrary(){
   });
   var sorted=Object.keys(seen).sort();
   el.innerHTML='';
-  el.style.cssText='columns:3;column-gap:24px;margin-top:4px;';
+  el.appendChild(heading);
+  var noteGrid=document.createElement('div');
+  noteGrid.style.cssText='columns:3;column-gap:24px;margin-top:4px;';
   sorted.forEach(function(key){
     var entry=seen[key];
     var row=document.createElement('div');
@@ -4570,8 +4578,9 @@ function renderNoteLibrary(){
     count.textContent=entry.count;
     count.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);margin-left:8px;';
     row.appendChild(name);row.appendChild(count);
-    el.appendChild(row);
+    noteGrid.appendChild(row);
   });
+  el.appendChild(noteGrid);
 }
 
 function populateMergeSelects(){
@@ -5049,8 +5058,10 @@ function cfSearch(v){
   // Sort by most recent compliment date so frequently worn fragrances surface first
   var MC2=myCompliments();
   eligible=eligible.slice().sort(function(a,b){
-    var aLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===a.id;}).map(function(c){return parseInt(c.year||'0')*100+parseInt(c.month||'0');}));
-    var bLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===b.id;}).map(function(c){return parseInt(c.year||'0')*100+parseInt(c.month||'0');}));
+    var _MN2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function _mn2(m){var n=parseInt(m);return isNaN(n)?_MN2.indexOf(m)+1:n;}
+    var aLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===a.id;}).map(function(c){return parseInt(c.year||'0')*100+_mn2(c.month||'0');}));
+    var bLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===b.id;}).map(function(c){return parseInt(c.year||'0')*100+_mn2(c.month||'0');}));
     if(!isFinite(aLast)) aLast=0; if(!isFinite(bLast)) bLast=0;
     return bLast-aLast;
   });
@@ -6562,9 +6573,10 @@ function openCompare(fragName, myFragIdOrName){
   herComps.forEach(c=>{ herByRel[c.relation]=(herByRel[c.relation]||0)+1; });
   const allRels=[...new Set([...Object.keys(myByRel),...Object.keys(herByRel)])];
   const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function _mIdx(m){var n=parseInt(m);return isNaN(n)?MONTHS.indexOf(m):n-1;}
   const allEvents=[
-    ...myComps.map(c=>({...c,who:'you',sortKey:c.year+'-'+String(MONTHS.indexOf(c.month)).padStart(2,'0')})),
-    ...herComps.map(c=>({relation:c.relation,gender:c.gender,month:c.month,year:c.year,location:c.location,notes:c.notes,who:'friend',sortKey:c.year+'-'+String(MONTHS.indexOf(c.month)).padStart(2,'0')})),
+    ...myComps.map(c=>({...c,who:'you',sortKey:c.year+'-'+String(_mIdx(c.month)).padStart(2,'0')})),
+    ...herComps.map(c=>({relation:c.relation,gender:c.gender,month:c.month,year:c.year,location:c.location,notes:c.notes,who:'friend',sortKey:c.year+'-'+String(_mIdx(c.month)).padStart(2,'0')})),
   ].sort((a,b)=>b.sortKey.localeCompare(a.sortKey));
 
   document.getElementById('compareBody').innerHTML = `
