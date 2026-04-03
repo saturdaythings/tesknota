@@ -808,7 +808,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="stats" id="dashStats"></div>
       <div id="dashOnboard" style="display:none"></div>
       <div id="dashUnidentified" style="display:none"></div>
-      <div id="dashQuickLog" style="display:none"></div>
       <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <table class="tbl tbl-spaced" id="dashTable">
         <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Accords</th><th>Compliments</th><th></th></tr></thead>
@@ -1254,6 +1253,14 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             </select>
           </div>
         </div>
+        <div class="frow" style="margin-bottom:14px;">
+          <div class="fg" style="margin:0;"><label>Purchase price ($)</label>
+            <input type="number" id="afPrice" min="0" step="0.01" placeholder="e.g. 136.34" class="input-editable" style="width:100%;">
+          </div>
+          <div class="fg" style="margin:0;"><label>Where bought</label>
+            <select id="afWhere"><option value="">— Select —</option><option>FragranceNet</option><option>Jomashop</option><option>Amazon</option><option>Scentsplit</option><option>Sephora</option><option>Nordstrom</option><option>Ulta</option><option>TJ Maxx / Marshalls</option><option>eBay</option><option>Poshmark</option><option>Decant</option><option>Brand Direct</option><option>TikTok Shop</option><option>Other</option></select>
+          </div>
+        </div>
         <div class="fg"><label>Rating</label>
           <input type="hidden" id="afRating" value="3">
           <div class="star-row" id="starRow" onmouseleave="starHover(0)">
@@ -1274,9 +1281,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           </div>
         </div>
         <div class="frow" style="margin-bottom:14px;">
-          <div class="fg" style="margin:0;"><label>Where bought</label>
-            <select id="afWhere"><option value="">— Select —</option><option>FragranceNet</option><option>Jomashop</option><option>Amazon</option><option>Scentsplit</option><option>Sephora</option><option>Nordstrom</option><option>Ulta</option><option>TJ Maxx / Marshalls</option><option>eBay</option><option>Poshmark</option><option>Decant</option><option>Brand Direct</option><option>Other</option></select>
-          </div>
+        <div class="frow" style="margin-bottom:14px;">
           <div class="fg" style="margin:0;"><label>Purchase date</label>
             <div class="date-row">
               <select id="afMonth"><option value="">Month</option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select>
@@ -1300,7 +1305,13 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         </div>
         <div class="fg">
           <label>Accords</label>
-          <div class="fam-chips" id="afAccordPicker" style="margin-top:4px;"></div>
+          <div id="afAccordPicker" style="margin-top:4px;">
+            <div style="position:relative;">
+              <input type="text" id="afAccordSearch" placeholder="Search or type an accord, press Enter to add..." class="input-editable" style="width:100%;" autocomplete="off" oninput="accordSearchInput()" onkeydown="accordSearchKey(event)" onfocus="accordSearchInput()">
+              <div id="afAccordDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--b2);border-top:none;z-index:50;max-height:160px;overflow-y:auto;"></div>
+            </div>
+            <div id="afAccordTags" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+          </div>
         </div>
         <div class="fg"><label>Personal notes</label>
           <textarea id="afNotes" placeholder="How does it smell on your skin? When do you wear it? Any context worth remembering?"></textarea>
@@ -1675,7 +1686,7 @@ function fragToRow(f){
     boughtFrom: f.whereBought||'',
     purchaseMonth: pm,
     purchaseYear: py,
-    purchasePrice: f.purchasePrice||'',
+    purchasePrice: f.purchasePrice || (function(){ var m=(f.personalNotes||'').match(/\$(\d+(?:\.\d+)?)/); return m?m[1]:''; })(),
     personalLongevity: f.personalLong||'',
     personalRating: f.personalRating||'',
     notes: f.personalNotes||'',
@@ -1805,6 +1816,19 @@ async function loadAllData(){
     var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.id);});
     FRAGRANCES=fragSeed.concat(fragsRaw.map(rowToFrag));
   }
+  // Remove blank-name entries (QA test artifacts or orphaned Sheet rows with no resolved fragrance)
+  FRAGRANCES = FRAGRANCES.filter(function(f){ return !!(f.name||'').trim(); });
+  // Dedup FRAGRANCES by ID (Sheets may have accumulated duplicate rows from prior syncs)
+  var _fragDupeBefore = FRAGRANCES.length;
+  var _seenFids = {};
+  FRAGRANCES = FRAGRANCES.filter(function(f){
+    if(!f.id || _seenFids[f.id]) return false;
+    _seenFids[f.id] = true;
+    return true;
+  });
+  if(FRAGRANCES.length < _fragDupeBefore){
+    writeSheet('userFragrances', FRAGRANCES.map(fragToRow), FRAG_HEADERS).catch(function(e){ console.error('[dedup] frag dedup write failed', e); });
+  }
   // Write any seed fragrances missing from Sheets so they persist
   var _sheetFragIds=new Set(fragsRaw.map(function(r){return r.fragranceId||'';}));
   var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.id);});
@@ -1815,6 +1839,17 @@ async function loadAllData(){
   if(compsRaw.length){
     var seedOnly=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
     COMPLIMENTS=seedOnly.concat(compsRaw.map(rowToComp));
+  }
+  // Dedup COMPLIMENTS by ID (same reason as FRAGRANCES)
+  var _compDupeBefore = COMPLIMENTS.length;
+  var _seenCids = {};
+  COMPLIMENTS = COMPLIMENTS.filter(function(c){
+    if(!c.id || _seenCids[c.id]) return false;
+    _seenCids[c.id] = true;
+    return true;
+  });
+  if(COMPLIMENTS.length < _compDupeBefore){
+    writeSheet('userCompliments', COMPLIMENTS.map(compToRow), COMP_HEADERS).catch(function(e){ console.error('[dedup] comp dedup write failed', e); });
   }
   // Write any seed compliments missing from Sheets so they persist
   var _missingComps=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
@@ -1830,43 +1865,16 @@ async function loadAllData(){
     var nm = (r.fragranceName||'').trim();
     if(!nm) return; // skip blank-name rows
     if(nm.toLowerCase().startsWith('qa ')) return; // skip QA test entries
-    var key = nm.toLowerCase()+'|'+(r.fragranceHouse||'').toLowerCase();
+    var key = nm.toLowerCase()+'|'+(r.fragranceHouse||'').toLowerCase()+'|'+(r.fragranceType||'').toLowerCase();
     if(!_dedupMap[key] || _countFields(r) > _countFields(_dedupMap[key])){
       _dedupMap[key] = r;
     }
   });
   var communityDeduped = Object.values(_dedupMap);
 
-  // Build ID remap: non-canonical fragranceId → canonical fragranceId
-  // e.g. Sylvia's s6 (Eclair) → Kiana's k11 (Eclair) — one entry per fragrance
-  var _idRemap = {};
-  communityRaw.forEach(function(r){
-    var nm = (r.fragranceName||'').trim();
-    if(!nm || nm.toLowerCase().startsWith('qa ')) return;
-    var key = nm.toLowerCase()+'|'+(r.fragranceHouse||'').toLowerCase();
-    var canonical = _dedupMap[key];
-    if(canonical && r.fragranceId && r.fragranceId !== canonical.fragranceId){
-      _idRemap[r.fragranceId] = canonical.fragranceId;
-    }
-  });
-
-  // Apply remap to FRAGRANCES and COMPLIMENTS so all references use canonical IDs
-  var _refsChanged = false;
-  if(Object.keys(_idRemap).length){
-    FRAGRANCES.forEach(function(f){
-      if(_idRemap[f.id]){ f.id = _idRemap[f.id]; _refsChanged = true; }
-    });
-    COMPLIMENTS.forEach(function(c){
-      if(_idRemap[c.primaryFragId]){ c.primaryFragId = _idRemap[c.primaryFragId]; _refsChanged = true; }
-      if(c.secondaryFragId && _idRemap[c.secondaryFragId]){ c.secondaryFragId = _idRemap[c.secondaryFragId]; _refsChanged = true; }
-    });
-    if(_refsChanged){
-      await Promise.all([
-        writeSheet('userFragrances', FRAGRANCES.map(fragToRow), FRAG_HEADERS),
-        writeSheet('userCompliments', COMPLIMENTS.map(compToRow), COMP_HEADERS),
-      ]).catch(function(e){ console.error('[dedup] ref remap write failed', e); });
-    }
-  }
+  // fragranceDB dedup is catalog-only — do NOT remap IDs in userFragrances/userCompliments.
+  // Each user keeps their own fragrance IDs; the catalog is deduplicated separately.
+  // Remapping cross-user would bleed Sylvia's compliments onto Kiana's frags, etc.
 
   var _dbFragIds = new Set(communityDeduped.map(function(r){ return r.fragranceId||''; }));
 
@@ -1886,13 +1894,13 @@ async function loadAllData(){
     if(f){
       var nm = (f.name||'').trim();
       if(!nm || nm.toLowerCase().startsWith('qa ')) return;
-      var _nameKey = nm.toLowerCase()+'|'+(f.house||'').toLowerCase();
+      var _nameKey = nm.toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.type||'').toLowerCase();
       if(_dedupMap[_nameKey]) return; // already represented by canonical entry
       _missingDbRows.push(fragToDbRow(f)); return;
     }
     var resolved = resolveFragById(fragId);
     if(resolved.name && !resolved.name.toLowerCase().startsWith('qa ')){
-      var _rKey = resolved.name.toLowerCase()+'|'+(resolved.house||'').toLowerCase();
+      var _rKey = resolved.name.toLowerCase()+'|'+(resolved.house||'').toLowerCase()+'|'+(resolved.type||'').toLowerCase();
       if(_dedupMap[_rKey]) return;
       _missingDbRows.push(fragToDbRow({
         id: fragId, name: resolved.name, house: resolved.house,
@@ -2045,7 +2053,7 @@ const FRAG_DB = [
   {n:'Tom Ford Black Orchid EDP',h:'Tom Ford',conc:'EDP',fam:'Floral Oriental',top:'Truffle, Gardenia, Black Currant, Ylang-Ylang',mid:'Orchid, Spices, Lotus Wood, Fruit',base:'Patchouli, Vanilla, Balsam, Sandalwood, Vetiver',r:'4.3',l:'8–12h',s:'Strong',p:'~$220'},
   {n:'Tom Ford Oud Wood EDP',h:'Tom Ford',conc:'EDP',fam:'Woody Oriental',top:'Oud, Rosewood, Cardamom',mid:'Sandalwood, Vetiver, Tonka Bean',base:'Amber, Musk',r:'4.4',l:'8–12h',s:'Moderate',p:'~$260'},
   {n:'Tom Ford Neroli Portofino EDT',h:'Tom Ford',conc:'EDT',fam:'Citrus Aromatic',top:'Bergamot, Lemon, Mandarin, Myrtle, Neroli',mid:'Rosemary, Lavender, Thyme',base:'Amber, Oak Moss, Angelica Root',r:'4.3',l:'6–8h',s:'Moderate',p:'~$250'},
-  {n:'Tom Ford Lost Cherry EDP',h:'Tom Ford',conc:'EDP',fam:'Fruity Oriental',top:'Cherry, Rum, Almond',mid:'Turkish Rose, Jasmine',base:'Sandalwood, Vetiver, Tonka Bean, Benzyl Benzoate, Clove',r:'4.4',l:'8–12h',s:'Strong',p:'~$330'},
+  {n:'Lost Cherry',h:'Tom Ford',conc:'EDP',fam:'Fruity Oriental',top:'Cherry, Rum, Almond',mid:'Turkish Rose, Jasmine',base:'Sandalwood, Vetiver, Tonka Bean, Benzyl Benzoate, Clove',r:'4.4',l:'8–12h',s:'Strong',p:'~$330',accords:'Fruity, Oriental, Gourmand'},
   {n:'Tom Ford Soleil Blanc EDP',h:'Tom Ford',conc:'EDP',fam:'Floral Woody Musk',top:'Cardamom, Aldehydes',mid:'Ylang-Ylang, Jasmine, Tuberose, Hibiscus',base:'Benzoin, Sandalwood, Cashmeran, White Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$265'},
   {n:'Tom Ford Rose Prick EDP',h:'Tom Ford',conc:'EDP',fam:'Floral',top:'Pink Pepper, Bergamot',mid:'Turkish Rose, Bulgarian Rose, Damask Rose',base:'Vetiver, Oud, Amber, Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$330'},
   {n:'Tom Ford Fucking Fabulous EDP',h:'Tom Ford',conc:'EDP',fam:'Leather Aromatic',top:'Orris Root, Clary Sage',mid:'Leather, Almond, Orris',base:'Tonka Bean, Cashmeran, Musk',r:'4.3',l:'8–12h',s:'Strong',p:'~$330'},
@@ -2084,9 +2092,9 @@ const FRAG_DB = [
   {n:'Byredo Inflorescence EDP',h:'Byredo',conc:'EDP',fam:'Fresh Floral',top:'Freesia, Italian Mimosa, Jasmine',mid:'Peony, Lily of the Valley, Gardenia',base:'Musk, White Cedar',r:'4.0',l:'4–6h',s:'Soft',p:'~$230'},
   {n:'Byredo Eleventh Hour EDP',h:'Byredo',conc:'EDP',fam:'Aromatic Fougere',top:'Patchouli, Tonka Bean, Lavender',mid:'Amber, Musk',base:'Vetiver, Cedar, Sandalwood',r:'4.2',l:'8–12h',s:'Moderate',p:'~$230'},
   {n:'Byredo Sundazed EDP',h:'Byredo',conc:'EDP',fam:'Citrus Floral',top:'Mandarin, Yuzu, Peach',mid:'Jasmine, Neroli',base:'Musk, Sandalwood, Ambrette',r:'4.0',l:'4–6h',s:'Soft',p:'~$230'},
-  {n:'Le Labo Santal 33 EDP',h:'Le Labo',conc:'EDP',fam:'Woody Aromatic',top:'Cardamom, Iris, Violet',mid:'Ambrox, Leather, Sandalwood',base:'Papyrus, Cedar, Musk',r:'4.3',l:'6–8h',s:'Moderate',p:'~$250',accords:'Woody, Spicy, Oriental'},
+  {n:'Santal 33',h:'Le Labo',conc:'EDP',fam:'Woody Aromatic',top:'Cardamom, Iris, Violet',mid:'Ambrox, Leather, Sandalwood',base:'Papyrus, Cedar, Musk',r:'4.3',l:'6–8h',s:'Moderate',p:'~$250',accords:'Woody, Spicy, Oriental'},
   {n:'Le Labo Rose 31 EDP',h:'Le Labo',conc:'EDP',fam:'Floral Woody',top:'Cumin, Coriander, Rose',mid:'Cedar, Guaiac Wood, Musk',base:'Vetiver, Amber, Olibanum',r:'4.2',l:'6–8h',s:'Moderate',p:'~$250'},
-  {n:'Le Labo Bergamote 22 EDP',h:'Le Labo',conc:'EDP',fam:'Citrus Woody',top:'Grapefruit, Bergamot, Petitgrain',mid:'Amber, Musk',base:'Cedar, Vetiver, Musk',r:'4.1',l:'4–6h',s:'Soft',p:'~$250'},
+  {n:'Bergamote 22',h:'Le Labo',conc:'EDP',fam:'Citrus Woody',top:'Grapefruit, Bergamot, Petitgrain',mid:'Amber, Musk',base:'Cedar, Vetiver, Musk',r:'4.1',l:'4–6h',s:'Soft',p:'~$250',accords:'Citrus, Woody, Fresh'},
   {n:'Le Labo Thé Noir 29 EDP',h:'Le Labo',conc:'EDP',fam:'Smoky Woody',top:'Laurel, Bay Leaf, Black Tea',mid:'Pepper, Smoked Wood',base:'Vetiver, Amber, Musk',r:'4.3',l:'6–8h',s:'Moderate',p:'~$250'},
   {n:'Le Labo Neroli 36 EDP',h:'Le Labo',conc:'EDP',fam:'Fresh Floral',top:'Neroli, Citrus',mid:'Jasmine, Orange Blossom',base:'Musk, Amber, Sandalwood',r:'4.1',l:'4–6h',s:'Soft',p:'~$250'},
   {n:'Le Labo Another 13 EDP',h:'Le Labo',conc:'EDP',fam:'Woody Musk',top:'Ambrox, Moss',mid:'Jasmine, Ambrette',base:'Musk, Woody Notes',r:'4.2',l:'6–8h',s:'Moderate',p:'~$250'},
@@ -2213,7 +2221,7 @@ const FRAG_DB = [
   {n:'Givenchy Gentleman Boisee EDP',h:'Givenchy',conc:'EDP',fam:'Woody Spicy',top:'Pink Pepper, Bergamot, Cardamom',mid:'Iris, Patchouli',base:'Vetiver, Cedarwood, Musk',r:'4.2',l:'8–12h',s:'Strong',p:'~$120'},
   {n:'Dolce & Gabbana The One EDP',h:'Dolce & Gabbana',conc:'EDP',fam:'Floral Oriental',top:'Lychee, Peach, Bergamot, Mandarin',mid:'Jasmine, Lily, Plum',base:'Amber, Musk, Vanilla, Sandalwood',r:'4.3',l:'8–12h',s:'Strong',p:'~$110'},
   {n:'Dolce & Gabbana The One for Men EDP',h:'Dolce & Gabbana',conc:'EDP',fam:'Oriental Spicy',top:'Basil, Bergamot, Grapefruit',mid:'Cardamom, Coriander, Ginger, Orange Blossom',base:'Amber, Cedar, Musk, Sandalwood, Tobacco',r:'4.3',l:'8–12h',s:'Strong',p:'~$105'},
-  {n:'Dolce & Gabbana Light Blue EDT',h:'Dolce & Gabbana',conc:'EDT',fam:'Fresh Floral',top:'Sicilian Lemon, Apple, Cedar, Bellflower',mid:'Bamboo, Jasmine, White Rose',base:'Cedar, Amber, Musk',r:'4.2',l:'4–6h',s:'Soft',p:'~$80',accords:'Fresh, Floral, Citrus'},
+  {n:'Light Blue',h:'Dolce & Gabbana',conc:'EDT',fam:'Fresh Floral',top:'Sicilian Lemon, Apple, Cedar, Bellflower',mid:'Bamboo, Jasmine, White Rose',base:'Cedar, Amber, Musk',r:'4.2',l:'4–6h',s:'Soft',p:'~$80',accords:'Fresh, Floral, Citrus'},
   {n:'Dolce & Gabbana Light Blue Homme EDT',h:'Dolce & Gabbana',conc:'EDT',fam:'Fresh Aquatic',top:'Sicilian Mandarin, Bergamot, Frozen Grapefruit',mid:'Rosemary, Brazilian Rosewood, Juniper',base:'Musk, Oakmoss, Incense',r:'4.2',l:'4–6h',s:'Soft',p:'~$80'},
   {n:'Dolce & Gabbana K EDT',h:'Dolce & Gabbana',conc:'EDT',fam:'Fresh Aromatic',top:'Cardamom, Juniper Berry, Grapefruit',mid:'Geranium, Cypriol, Cashmeran',base:'Vetiver, Amber, Cedar',r:'4.1',l:'6–8h',s:'Moderate',p:'~$90'},
   {n:'Dolce & Gabbana Velvet Rose EDP',h:'Dolce & Gabbana',conc:'EDP',fam:'Floral',top:'Rose',mid:'Rose, Peony',base:'Musk, Sandalwood',r:'4.2',l:'8–12h',s:'Moderate',p:'~$200'},
@@ -2360,7 +2368,7 @@ const FRAG_DB = [
   {n:'Hugo Boss Boss Intenso EDP',h:'Hugo Boss',conc:'EDP',fam:'Woody Aromatic',top:'Bergamot, Apple',mid:'Vetiver, Geranium, Patchouli',base:'Musk, Amber, Sandalwood',r:'4.1',l:'8–12h',s:'Strong',p:'~$75'},
   {n:'Calvin Klein Eternity EDP',h:'Calvin Klein',conc:'EDP',fam:'Floral Green',top:'Freesia, Mandarin, Green Notes',mid:'Jasmine, Rose, Lily of the Valley',base:'Sandalwood, Vetiver, Musk, Amber',r:'4.1',l:'6–8h',s:'Moderate',p:'~$65'},
   {n:'Calvin Klein Obsession EDP',h:'Calvin Klein',conc:'EDP',fam:'Oriental Spicy',top:'Bergamot, Mandarin, Spices',mid:'Jasmine, Frankincense, Orange Blossom',base:'Vanilla, Sandalwood, Musk, Amber',r:'4.1',l:'8–12h',s:'Strong',p:'~$65'},
-  {n:'Calvin Klein CK One EDT',h:'Calvin Klein',conc:'EDT',fam:'Citrus Aromatic',top:'Bergamot, Green Tea, Cardamom, Papaya',mid:'Violet, Rose, Jasmine',base:'Amber, Musk, Sandalwood, Cedarwood',r:'4.1',l:'4–6h',s:'Soft',p:'~$55',accords:'Fresh, Floral, Citrus'},
+  {n:'CK One',h:'Calvin Klein',conc:'EDT',fam:'Citrus Aromatic',top:'Bergamot, Green Tea, Cardamom, Papaya',mid:'Violet, Rose, Jasmine',base:'Amber, Musk, Sandalwood, Cedarwood',r:'4.1',l:'4–6h',s:'Soft',p:'~$55',accords:'Fresh, Floral, Citrus'},
   {n:'Calvin Klein Euphoria EDP',h:'Calvin Klein',conc:'EDP',fam:'Floral Oriental',top:'Pomegranate, Persimmon, Green Notes',mid:'Black Orchid, Lotus, Champaca',base:'Black Violet, Sandalwood, Amber',r:'4.1',l:'8–12h',s:'Strong',p:'~$65'},
   {n:'Calvin Klein Defy EDP',h:'Calvin Klein',conc:'EDP',fam:'Woody Aromatic',top:'Bergamot, Cardamom',mid:'Vetiver, Geranium',base:'Amber, Woody Notes, Musk',r:'4.0',l:'6–8h',s:'Moderate',p:'~$75'},
   {n:'Calvin Klein Eternity for Men EDT',h:'Calvin Klein',conc:'EDT',fam:'Aromatic Fougere',top:'Bergamot, Lavender, Basil, Lemon',mid:'Sandalwood, Jasmine, Geranium',base:'Musk, Amber, Oakmoss',r:'4.0',l:'4–6h',s:'Soft',p:'~$60'},
@@ -2392,70 +2400,69 @@ const FRAG_DB = [
   {n:'Jimmy Choo Blossom EDP',h:'Jimmy Choo',conc:'EDP',fam:'Floral Fruity',top:'Nashi Pear, Red Cherry, Red Berries',mid:'Jasmine, Rose',base:'Sandalwood, Cedarwood, Musk',r:'4.1',l:'6–8h',s:'Moderate',p:'~$90'},
   {n:'Jimmy Choo Man Ice EDT',h:'Jimmy Choo',conc:'EDT',fam:'Fresh Aromatic',top:'Bergamot, Lavender, Grapefruit',mid:'Sage, Bamboo, Mint',base:'Teak, Musk, Amberwood',r:'3.9',l:'4–6h',s:'Soft',p:'~$75'},
   {n:'Jimmy Choo I Want Choo EDP',h:'Jimmy Choo',conc:'EDP',fam:'Floral Fruity',top:'Bergamot, Mandarin, Pineapple',mid:'Tuberose, Jasmine',base:'Sandalwood, Musk, Amber',r:'4.0',l:'6–8h',s:'Moderate',p:'~$95'},
-  {n:'By Kilian Angels\' Share EDP',h:'By Kilian',conc:'EDP',fam:'Gourmand Oriental',top:'Cognac, Cinnamon, Nutmeg',mid:'Caramel, Bourbon Vanilla, Oak',base:'Sandalwood, Musk, Vanilla',r:'4.5',l:'8–12h',s:'Strong',p:'~$295',accords:'Gourmand, Boozy, Spicy'},
-  {n:'By Kilian Apple Brandy on the Rocks EDP',h:'By Kilian',conc:'EDP',fam:'Gourmand Fruity',top:'Apple, Cognac, Bergamot',mid:'Caramel, Vanilla, Cinnamon',base:'Sandalwood, Musk, Amber',r:'4.3',l:'8–12h',s:'Moderate',p:'~$285',accords:'Gourmand, Boozy, Floral'},
-  {n:'Theodoros Kalotinis Matcha Ice Cream EDP',h:'Theodoros Kalotinis',conc:'EDP',fam:'Gourmand',top:'Matcha, Green Tea, Bergamot',mid:'Vanilla Cream, Milk, Coconut',base:'Sandalwood, Musk, White Musks',r:'4.4',l:'8–12h',s:'Moderate',p:'~$132',accords:'Gourmand, Fresh, Floral'},
-  {n:'Theodoros Kalotinis Crème Brûlée EDP',h:'Theodoros Kalotinis',conc:'EDP',fam:'Gourmand',top:'Caramel, Vanilla, Sugar',mid:'Custard Cream, Tonka Bean, Heliotrope',base:'Sandalwood, Musk, Benzoin',r:'4.4',l:'8–12h',s:'Moderate',p:'~$132',accords:'Gourmand, Vanilla, Spicy'},
-  {n:'Comptoir Sud Pacifique Vanille Extreme EDP',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Gourmand',top:'Vanilla, Coconut, Bergamot',mid:'Heliotrope, Vanilla Flower, Tonka Bean',base:'Vanilla, Musk, Sandalwood',r:'4.2',l:'6–8h',s:'Moderate',p:'~$90'},
-  {n:'Comptoir Sud Pacifique Lick Me All Over EDP',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Fruity Gourmand',top:'Coconut, Vanilla, Bergamot',mid:'Jasmine, Ylang-Ylang, Mango',base:'Vanilla, Musk, Sandalwood',r:'4.1',l:'4–6h',s:'Moderate',p:'~$75'},
-  {n:'Comptoir Sud Pacifique Coco Vanille EDP',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Gourmand',top:'Coconut, Bergamot, Mandarin',mid:'Vanilla, Heliotrope, Jasmine',base:'Musk, Sandalwood, White Cedar, Amber',r:'4.0',l:'4–6h',s:'Moderate',p:'~$85'},
-  {n:'Le Labo Eucalyptus 18 EDP',h:'Le Labo',conc:'EDP',fam:'Fresh Aromatic',top:'Eucalyptus, Mint, Bergamot',mid:'Rosemary, Cedarwood, Cypress',base:'Musk, Amber, Vetiver',r:'4.0',l:'4–6h',s:'Moderate',p:'~$250'},
-  {n:'Le Labo Tonka 25 EDP',h:'Le Labo',conc:'EDP',fam:'Oriental Vanilla',top:'Cardamom, Clary Sage',mid:'Tonka Bean, Heliotrope, Coumarin',base:'Vanilla, Musk, Amber',r:'4.3',l:'8–12h',s:'Moderate',p:'~$250'},
-  {n:'Commodity Matcha Made in Heaven EDP',h:'Commodity',conc:'EDP',fam:'Gourmand',top:'Matcha, Green Tea, Bergamot',mid:'Jasmine, Vanilla, Coconut Milk',base:'Sandalwood, Musk, Amber',r:'4.2',l:'6–8h',s:'Moderate',p:'~$140'},
-  {n:'Lattafa Affection EDP',h:'Lattafa',conc:'EDP',fam:'Floral Oriental',top:'Bergamot, Raspberry, Saffron',mid:'Rose, Violet, Jasmine',base:'Vanilla, Amber, Musk, Sandalwood',r:'4.0',l:'6–8h',s:'Moderate',p:'~$28'},
-  {n:'Lattafa Eclair EDP',h:'Lattafa',conc:'EDP',fam:'Gourmand Oriental',top:'Bergamot, Plum, Saffron',mid:'Rose, Jasmine, Oud',base:'Vanilla, Amber, Musk, Patchouli',r:'4.1',l:'6–8h',s:'Moderate',p:'~$37',accords:'Gourmand, Vanilla, Floral'},
-  {n:'Lattafa Eclair Body Spray',h:'Lattafa',conc:'Body Spray',fam:'Gourmand Oriental',top:'Bergamot, Plum',mid:'Rose, Jasmine',base:'Vanilla, Amber, Musk',r:'3.8',l:'2–4h',s:'Soft',p:'~$8'},
-  {n:'Lattafa Yara Body Spray',h:'Lattafa',conc:'Body Spray',fam:'Floral Fruity',top:'Raspberry, Citrus, Strawberry',mid:'Rose, Peony, Jasmine',base:'Musk, Vanilla, Amber',r:'3.9',l:'2–4h',s:'Soft',p:'~$8',accords:'Floral, Fruity, Oriental'},
-  {n:'Lattafa Eclair Pistachio EDP',h:'Lattafa',conc:'EDP',fam:'Gourmand',top:'Pistachio, Almond, Bergamot',mid:'Vanilla Cream, Tonka Bean, Praline',base:'Sandalwood, Musk, Amber, Cedar',r:'4.2',l:'6–8h',s:'Moderate',p:'~$26',accords:'Gourmand, Vanilla, Fruity'},
-  {n:'Diptyque Eau Duelle EDT',h:'Diptyque',conc:'EDT',fam:'Oriental Spicy',top:'Bergamot, Cardamom, Pink Pepper',mid:'Vanilla, Orchid, Iris',base:'Vetiver, Sandalwood, Musk',r:'3.9',l:'4–6h',s:'Soft',p:'~$165',accords:'Floral, Oriental, Spicy'},
-  {n:'Atelier des Ors Lune Féline EDP',h:'Atelier des Ors',conc:'EDP',fam:'Gourmand Spiced',top:'Cardamom, Cinnamon, Pink Pepper',mid:'Woodsy Notes, Ambergris, Styrax, Cedar, Green Notes',base:'Tahitian Vanilla, Peru Balsam, Musk',r:'4.4',l:'8–12h',s:'Strong',p:'~$290',accords:'Oriental, Gourmand, Spicy'},
-  {n:'Phlur Heavy Cream Body Mist',h:'Phlur',conc:'Body Mist',fam:'Gourmand',top:'Lemon Sugar, Marshmallow, Orange',mid:'Jasmine Blossom, Coconut Cream, Ambrettolide',base:'Vanilla Mousse, Salted Caramel, Whipped Cream',r:'4.1',l:'2–4h',s:'Soft',p:'~$38',accords:'Gourmand, Floral, Fresh'},
-  {n:'Phlur Heavy Cream Body & Hair Fragrance',h:'Phlur',conc:'Body & Hair Mist',fam:'Gourmand',top:'Lemon Sugar, Marshmallow, Orange',mid:'Jasmine Blossom, Coconut Cream, Ambrettolide',base:'Vanilla Mousse, Salted Caramel, Whipped Cream',r:'4.1',l:'2–4h',s:'Soft',p:'~$38',accords:'Gourmand, Floral, Fresh'},
-  {n:'Vanilla Skin',h:'Phlur',conc:'EDP',fam:'Warm Floral',top:'Bergamot, Mandarin, Cardamom',mid:'Vanilla Orchid, Heliotrope, Jasmine',base:'Musk, Sandalwood, Skin Musk, Amber',r:'4.1',l:'4-6h',s:'Moderate',p:'~$38',accords:'Gourmand, Floral, Oriental'},
-  {n:'Juicy Couture Viva La Juicy EDP',h:'Juicy Couture',conc:'EDP',fam:'Fruity Floral',top:'Wild Berries, Mandarin, Watermelon',mid:'Honeysuckle, Gardenia, Jasmine, Rose',base:'Caramel, Vanilla, Sandalwood, Amber, Musk, Praline',r:'3.9',l:'6–8h',s:'Moderate',p:'~$65',accords:'Fruity, Floral, Gourmand'},
-  {n:'Giardini di Toscana Bianco Latte EDP',h:'Giardini di Toscana',conc:'EDP',fam:'Gourmand',top:'Caramel',mid:'Coumarin, Honey',base:'Vanilla, White Musk',r:'4.3',l:'8–12h',s:'Moderate',p:'~$123',accords:'Gourmand, Vanilla, Powdery'},
-  {n:'Fragrance World Cocktail Intense EDP',h:'Fragrance World',conc:'EDP',fam:'Gourmand Oriental',top:'Cognac, Cinnamon, Plum',mid:'Myrrh, Cashmeran, Tonka Bean, Oak',base:'Vanilla, Praline, Sandalwood',r:'4.1',l:'8–12h',s:'Strong',p:'~$18',accords:'Boozy, Gourmand, Spicy'},
-  {n:'Maison Alhambra Kismet Angel EDP',h:'Maison Alhambra',conc:'EDP',fam:'Gourmand Oriental',top:'Vanilla, Honeycomb, Amber',mid:'Cognac, Cinnamon, Caramel',base:'Tonka Bean, Praline, Sandalwood, Musk',r:'4.0',l:'6–8h',s:'Moderate',p:'~$22',accords:'Gourmand, Boozy, Oriental'},
-  {n:'Oakcha Ruhe Extrait',h:'Oakcha',conc:'Extrait',fam:'Woody Aromatic',top:'Cardamom, Violet',mid:'Iris',base:'Sandalwood, Leather, Cedarwood',r:'4.1',l:'8–12h',s:'Moderate',p:'~$20',accords:'Woody, Spicy, Fresh'},
-  {n:'Oakcha That Girl Viral Vanilla Extrait',h:'Oakcha',conc:'Extrait',fam:'Gourmand',top:'Caramel, Coconut Milk',mid:'Tonka Bean, Honey',base:'Vanilla, Marshmallow, White Musk, Amber',r:'4.2',l:'12–24h',s:'Strong',p:'~$47',accords:'Gourmand, Vanilla, Oriental'},
-  {n:'Oakcha Miss Girl Extrait',h:'Oakcha',conc:'Extrait',fam:'Fruity Oriental',top:'Black Cherry, Saffron, Bitter Almond',mid:'Jasmine Sambac, Turkish Rose, Tonka Bean, Tobacco',base:'Amber, Moss, Vanilla, Caramel, Sandalwood',r:'4.2',l:'12–24h',s:'Strong',p:'~$40',accords:'Fruity, Floral, Oriental'},
-  {n:'Aerin Amber Musk EDP',h:'Aerin',conc:'EDP',fam:'Floral Musky',top:'Bergamot, Amber, Aldehydes',mid:'Iris, Rose, Jasmine, Muguet',base:'Musk, Sandalwood, Vetiver, Amber',r:'3.9',l:'4–6h',s:'Soft',p:'~$78',accords:'Oriental, Floral, Powdery'},
-  {n:'Lavanila Pure Vanilla EDP',h:'Lavanila',conc:'EDP',fam:'Gourmand',top:'Bergamot, Lemon, Pink Pepper',mid:'Vanilla Orchid, Heliotrope, Jasmine',base:'Vanilla, Musk, Sandalwood, Tonka Bean',r:'3.9',l:'4–6h',s:'Soft',p:'~$72'},
-  {n:'Al Rehab Choco Musk EDP',h:'Al Rehab',conc:'EDP',fam:'Gourmand Oriental',top:'Chocolate, Cinnamon, Vanilla',mid:'Rose, Jasmine, Musk',base:'Vanilla, Musk, Sandalwood, Patchouli',r:'3.9',l:'6–8h',s:'Moderate',p:'~$8'},
-  {n:'Nemat Amber Perfume Oil',h:'Nemat',conc:'Perfume Oil',fam:'Oriental Amber',top:'Amber, Bergamot',mid:'Musk, Labdanum',base:'Vanilla, Sandalwood, Benzoin, Amber',r:'4.1',l:'8–12h',s:'Moderate',p:'~$13'},
-  {n:'Kuumba Made Persian Garden Fragrance Oil',h:'Kuumba Made',conc:'Fragrance Oil',fam:'Floral Oriental',top:'Bergamot, Jasmine, Rose',mid:'Sandalwood, Amber, Cedar',base:'Musk, Amber',r:'3.8',l:'6–8h',s:'Moderate',p:'~$8'},
-  {n:'Kuumba Made Vanilla Bean Fragrance Oil',h:'Kuumba Made',conc:'Fragrance Oil',fam:'Gourmand',top:'Vanilla, Bergamot',mid:'Tonka Bean, Musk',base:'Sandalwood, Amber, Musk',r:'3.9',l:'6–8h',s:'Moderate',p:'~$8'},
-  {n:'Philosophy Fresh Cream EDT',h:'Philosophy',conc:'EDT',fam:'Gourmand',top:'Fresh Cream, Milk',mid:'Vanilla, Musk, Sandalwood',base:'White Musk, Warm Vanilla',r:'3.8',l:'2–4h',s:'Soft',p:'~$40'},
-  {n:'Le Monde Gourmand Ambre Etoile EDP',h:'Le Monde Gourmand',conc:'EDP',fam:'Oriental Amber',top:'Bergamot, Amber',mid:'Jasmine, Vanilla, Amber',base:'Sandalwood, Musk, Tonka Bean',r:'3.8',l:'4–6h',s:'Moderate',p:'~$13'},
-  {n:'Le Monde Gourmand Crème Brûlée EDP',h:'Le Monde Gourmand',conc:'EDP',fam:'Gourmand',top:'Caramelized Sugar, Vanilla, Spices',mid:'Vanilla Cream, Tonka Bean, Coumarin',base:'Vanilla, White Musk, Soft Woods',r:'3.8',l:'4–6h',s:'Moderate',p:'~$13',accords:'Gourmand, Vanilla, Spicy'},
-  {n:'Le Monde Gourmand Pistachio Brûlée EDP',h:'Le Monde Gourmand',conc:'EDP',fam:'Gourmand',top:'Pistachio, Almond, Coconut Milk',mid:'Praline, Vanilla Cream, Pistachio',base:'Vanilla, White Musk, Sandalwood',r:'3.8',l:'4–6h',s:'Soft',p:'~$25'},
-  {n:'Le Monde Gourmand Chai Épicé EDP',h:'Le Monde Gourmand',conc:'EDP',fam:'Gourmand Spiced',top:'Cardamom, Cinnamon, Ginger',mid:'Chai Tea, Tonka Bean, Vanilla',base:'Sandalwood, Musk, Amber, Vanilla',r:'3.9',l:'4–6h',s:'Moderate',p:'~$25'},
-  {n:'Pardon My French & Co Perle Sensuelle EDP',h:'Pardon My French & Co',conc:'EDP',fam:'Floral Musky',top:'Bergamot, Peach, Pink Pepper',mid:'Rose, Jasmine, Peony',base:'Musk, Sandalwood, Vanilla, Amber',r:'3.9',l:'4–6h',s:'Moderate',p:'~$30'},
-  {n:'Beirut Baklava',h:'Kheir Fragrance House',conc:'EDP',fam:'Gourmand Oriental',top:'Orange Blossom, Bergamot, Cardamom',mid:'Vanilla, Baklava, Pistachio, Whipped Cream, Heliotrope',base:'Vanilla Absolute, Honey, Tonka Bean, Leather, Cedarwood, Guaiac Wood, Amber, White Musk',r:'4.2',l:'4-6h',s:'Moderate',p:'~$144',accords:'Gourmand, Floral, Woody'},
-  {n:'Lattafa Badee Al Oud Sublime EDP',h:'Lattafa',conc:'EDP',fam:'Fruity Oriental',top:'Bergamot, Saffron, Plum',mid:'Rose, Oud, Jasmine',base:'Amber, Musk, Sandalwood, Vanilla',r:'4.0',l:'8–12h',s:'Strong',p:'~$22'},
-  {n:'Lattafa Khamrah EDP',h:'Lattafa',conc:'EDP',fam:'Gourmand Oriental',top:'Cognac, Rum, Bergamot',mid:'Rose, Vanilla, Caramel, Tonka Bean',base:'Oud, Sandalwood, Amber, Musk',r:'4.3',l:'12–24h',s:'Strong',p:'~$41',accords:'Gourmand, Oriental, Spicy'},
-  {n:'J\'Adore', h:'Dior', r:4.4, notes:'ylang-ylang, rose, jasmine, violet, lily, peach, bergamot, mandarin, sandalwood, musk', accords:'Floral, Fresh, Powdery', l:'6-8h', s:'Moderate', p:140},
-  {n:'Inspiration', h:'Lacoste', r:4.0, notes:'bergamot, lemon, green tea, rose, jasmine, lily of the valley, cedar, sandalwood, musk, white musk', accords:'Fresh, Floral, Woody', l:'4-6h', s:'Moderate', p:55},
-  {n:'Vanille Café', h:'Comptoir Sud Pacifique', r:4.1, notes:'coffee, vanilla, sandalwood, tonka bean, musk, caramel', accords:'Gourmand, Boozy, Vanilla', l:'6-8h', s:'Moderate', p:85},
-  {n:'Vanilla Mousse', h:'Le Monde Gourmand', r:3.8, notes:'vanilla, whipped cream, musk, sandalwood, tonka bean', accords:'Gourmand, Vanilla, Powdery', l:'4-6h', s:'Soft', p:68},
-  {n:'Yum Pistachio Gelato 33', h:'Kay Ali', r:4.2, notes:'pistachio, vanilla, sandalwood, musk, tonka bean, caramel, coconut', accords:'Gourmand, Vanilla, Nutty', l:'4-6h', s:'Moderate', p:135},
-  {n:'Lick Me', h:'Michela Mezzetti Parfums', r:4.3, notes:'whipped cream, powdered sugar, florentine iris, fiordilatte ice cream, crunchy wafer, vanilla, sweet amber', accords:'Gourmand, Powdery, Vanilla', l:'6-8h', s:'Moderate', p:150},
-  {n:'Mooncake', h:"d'Annam", r:4.1, notes:'golden syrup, salted egg yolk, mung bean, lotus seed, honey, vanilla', accords:'Gourmand, Oriental, Powdery', l:'8h+', s:'Moderate', p:165},
-  {n:'Crema di Latte', h:'Hilde Soliani', r:4.2, notes:'milk, sugar, vanilla, caramel, cinnamon, lemon', accords:'Gourmand, Vanilla, Powdery', l:'6-8h', s:'Moderate', p:165},
-  {n:'Sweet Parmesan Violet', h:'Hilde Soliani', r:4.0, notes:'violet, sugar', accords:'Floral, Powdery, Gourmand', l:'8h+', s:'Moderate', p:175},
-  {n:'Orgasmo', h:'Hilde Soliani', r:4.1, notes:'almond, amaretto, marzipan, vanilla', accords:'Gourmand, Boozy, Powdery', l:'4-6h', s:'Soft', p:165},
-  {n:'Cheirosa 62', h:'Sol de Janeiro', r:4.3, notes:'pistachio, salted caramel, praline, vanilla, sandalwood, musk', accords:'Gourmand, Vanilla, Woody', l:'4-6h', s:'Moderate', p:42},
-  {n:'Good Girl', h:'Carolina Herrera', r:4.2, notes:'almond, coffee, tuberose, jasmine, rose, cocoa, sandalwood, tonka bean, musk, vanilla', accords:'Floral, Gourmand, Oriental', l:'6-8h', s:'Strong', p:130},
-  {n:'Dandelion Butter', h:'Clue Perfumery', r:4.3, notes:'dandelion pollen, dandelion greens, yellow dandelion, snapped stem, milky sap, salted butter', accords:'Fresh, Gourmand, Green', l:'4-6h', s:'Soft', p:120},
-  {n:'Mistpouffer', h:'Stora Skuggan', r:4.1, notes:'immortelle, bergamot, pine, ozonic notes, fig leaf, sugar, smoke, malt, cypriol, vetiver', accords:'Woody, Smoky, Fresh', l:'6-8h', s:'Moderate', p:175},
-  {n:'Azalai', h:'Stora Skuggan', r:4.2, notes:'blood orange, mint, dried fruits, saffron, amber, incense, gum acacia, velvione', accords:'Oriental, Spicy, Fruity', l:'6-8h', s:'Moderate', p:175},
-  {n:'Deadly Nightcap', h:'Curatrix', r:4.0, notes:'campari, cardamom, orange, gin, juniper berry, cypress, vetiver, cedarwood, fir', accords:'Woody, Spicy, Fresh', l:'6-8h', s:'Moderate', p:195},
-  {n:'Antihero', h:'Curatrix', r:4.3, notes:'apple, cardamom, saffron, cognac, rum, sandalwood, vanilla, praline', accords:'Gourmand, Boozy, Spicy', l:'8h+', s:'Strong', p:195},
-  {n:'Lola at Coat Check', h:'Discoth\u00e8que', r:4.4, notes:'pink pepper, cardamom, grapefruit, white chocolate, orris, caramel, lily, jasmine, sandalwood, vetiver, cedarwood, amber', accords:'Gourmand, Floral, Woody', l:'4-6h', s:'Soft', p:175},
-  {n:'Cannoli', h:'Laurel Bath House', r:4.4, notes:'sicilian lemon, pistachio, cinnamon milk', accords:'Gourmand, Vanilla, Nutty', l:'6-8h', s:'Moderate', p:88},
-  {n:'Après Ski', h:'Laurel Bath House', r:4.2, notes:'peppermint, marshmallow, vanilla, tonka bean, musk', accords:'Gourmand, Fresh, Vanilla', l:'6-8h', s:'Moderate', p:88},
-  {n:'Buontalenti', h:'Profumo di Firenze', r:4.2, notes:'banana, peach, apricot, red fruits, coconut, vanilla, raspberry, toffee, cookie, caramel, musk', accords:'Gourmand, Fruity, Vanilla', l:'4-6h', s:'Moderate', p:120},
-  {n:'London Fog', h:'House of Brandt', r:4.2, notes:'earl grey tea, bergamot, smoke, milk, lavender, honey, vanilla absolute, sandalwood, white musk, ambergris', accords:'Fresh, Gourmand, Woody', l:'8h+', s:'Soft', p:155},
+  {n:'Angels\' Share',h:'By Kilian',conc:'EDP',fam:'Gourmand Oriental',top:'Cognac, Cinnamon, Nutmeg',mid:'Caramel, Bourbon Vanilla, Oak',base:'Sandalwood, Musk, Vanilla',r:'4.5',l:'8–12h',s:'Strong',p:'~$295',accords:'Gourmand, Boozy, Spicy'},
+  {n:'Apple Brandy on the Rocks',h:'By Kilian',conc:'EDP',fam:'Gourmand Fruity',top:'Apple, Cognac, Bergamot',mid:'Caramel, Vanilla, Cinnamon',base:'Sandalwood, Musk, Amber',r:'4.3',l:'8–12h',s:'Moderate',p:'~$285',accords:'Gourmand, Boozy, Floral'},
+  {n:'Matcha Ice Cream',h:'Theodoros Kalotinis',conc:'EDP',fam:'Gourmand',top:'Matcha, Green Tea, Bergamot',mid:'Vanilla Cream, Milk, Coconut',base:'Sandalwood, Musk, White Musks',r:'4.4',l:'8–12h',s:'Moderate',p:'~$132',accords:'Gourmand, Fresh, Floral'},
+  {n:'Crème Brûlée',h:'Theodoros Kalotinis',conc:'EDP',fam:'Gourmand',top:'Caramel, Vanilla, Sugar',mid:'Custard Cream, Tonka Bean, Heliotrope',base:'Sandalwood, Musk, Benzoin',r:'4.4',l:'8–12h',s:'Moderate',p:'~$132',accords:'Gourmand, Vanilla, Spicy'},
+  {n:'Vanille Extreme',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Gourmand',top:'Vanilla, Coconut, Bergamot',mid:'Heliotrope, Vanilla Flower, Tonka Bean',base:'Vanilla, Musk, Sandalwood',r:'4.2',l:'6–8h',s:'Moderate',p:'~$90',accords:'Gourmand, Vanilla, Fresh'},
+  {n:'Lick Me All Over',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Fruity Gourmand',top:'Coconut, Vanilla, Bergamot',mid:'Jasmine, Ylang-Ylang, Mango',base:'Vanilla, Musk, Sandalwood',r:'4.1',l:'4–6h',s:'Moderate',p:'~$75',accords:'Fruity, Gourmand, Floral'},
+  {n:'Coco Vanille',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Gourmand',top:'Coconut, Bergamot, Mandarin',mid:'Vanilla, Heliotrope, Jasmine',base:'Musk, Sandalwood, White Cedar, Amber',r:'4.0',l:'4–6h',s:'Moderate',p:'~$85',accords:'Gourmand, Floral, Fresh'},
+  {n:'Eucalyptus 18',h:'Le Labo',conc:'EDP',fam:'Fresh Aromatic',top:'Eucalyptus, Mint, Bergamot',mid:'Rosemary, Cedarwood, Cypress',base:'Musk, Amber, Vetiver',r:'4.0',l:'4–6h',s:'Moderate',p:'~$250',accords:'Fresh, Aromatic, Woody'},
+  {n:'Tonka 25',h:'Le Labo',conc:'EDP',fam:'Oriental Vanilla',top:'Cardamom, Clary Sage',mid:'Tonka Bean, Heliotrope, Coumarin',base:'Vanilla, Musk, Amber',r:'4.3',l:'8–12h',s:'Moderate',p:'~$250',accords:'Gourmand, Vanilla, Woody'},
+  {n:'Match Made in Heaven',h:'Sorce',conc:'EDP',fam:'Gourmand',top:'Matcha, Pollen, Cherry Blossom',mid:'Vanilla Soft Serve, Almond',base:'Waffle Cone, Powdered Sugar, Creamy Sandalwood',r:'4.4',l:'8–12h',s:'Moderate',p:'~$140',accords:'Gourmand, Fresh, Floral'},
+  {n:'Affection',h:'Lattafa',conc:'EDP',fam:'Floral Oriental',top:'Bergamot, Raspberry, Saffron',mid:'Rose, Violet, Jasmine',base:'Vanilla, Amber, Musk, Sandalwood',r:'4.0',l:'6–8h',s:'Moderate',p:'~$28',accords:'Floral, Oriental, Fruity'},
+  {n:'Eclair',h:'Lattafa',conc:'EDP',fam:'Gourmand Oriental',top:'Bergamot, Plum, Saffron',mid:'Rose, Jasmine, Oud',base:'Vanilla, Amber, Musk, Patchouli',r:'4.1',l:'6–8h',s:'Moderate',p:'~$37',accords:'Gourmand, Vanilla, Floral'},
+  {n:'Eclair Body Spray',h:'Lattafa',conc:'Body Spray',fam:'Gourmand Oriental',top:'Bergamot, Plum',mid:'Rose, Jasmine',base:'Vanilla, Amber, Musk',r:'3.8',l:'2–4h',s:'Soft',p:'~$8',accords:'Gourmand, Floral, Soft'},
+  {n:'Yara',h:'Lattafa',conc:'Body Spray',fam:'Floral Fruity',top:'Raspberry, Citrus, Strawberry',mid:'Rose, Peony, Jasmine',base:'Musk, Vanilla, Amber',r:'3.9',l:'2–4h',s:'Soft',p:'~$8',accords:'Floral, Fruity, Oriental'},
+  {n:'Eclair Pistachio',h:'Lattafa',conc:'EDP',fam:'Gourmand',top:'Pistachio, Almond, Bergamot',mid:'Vanilla Cream, Tonka Bean, Praline',base:'Sandalwood, Musk, Amber, Cedar',r:'4.2',l:'6–8h',s:'Moderate',p:'~$26',accords:'Gourmand, Vanilla, Nutty'},
+  {n:'Eau Duelle',h:'Diptyque',conc:'EDT',fam:'Oriental Spicy',top:'Bergamot, Cardamom, Pink Pepper',mid:'Vanilla, Orchid, Iris',base:'Vetiver, Sandalwood, Musk',r:'3.9',l:'4–6h',s:'Soft',p:'~$165',accords:'Floral, Oriental, Spicy'},
+  {n:'Lune Féline',h:'Atelier des Ors',conc:'EDP',fam:'Gourmand Spiced',top:'Cardamom, Cinnamon, Pink Pepper',mid:'Woodsy Notes, Ambergris, Styrax, Cedar, Green Notes',base:'Tahitian Vanilla, Peru Balsam, Musk',r:'4.4',l:'8–12h',s:'Strong',p:'~$290',accords:'Oriental, Gourmand, Spicy'},
+  {n:'Heavy Cream',h:'Phlur',conc:'Body Mist',fam:'Gourmand',top:'Lemon Sugar, Marshmallow, Orange',mid:'Jasmine Blossom, Coconut Cream, Ambrettolide',base:'Vanilla Mousse, Salted Caramel, Whipped Cream',r:'4.1',l:'2–4h',s:'Soft',p:'~$38',accords:'Gourmand, Floral, Fresh'},
+  {n:'Vanilla Skin',h:'Phlur',conc:'EDP',fam:'Warm Floral',top:'Bergamot, Mandarin, Cardamom',mid:'Vanilla Orchid, Heliotrope, Jasmine',base:'Musk, Sandalwood, Skin Musk, Amber',r:'4.1',l:'4–6h',s:'Moderate',p:'~$38',accords:'Gourmand, Floral, Oriental'},
+  {n:'Viva La Juicy',h:'Juicy Couture',conc:'EDP',fam:'Fruity Floral',top:'Wild Berries, Mandarin, Watermelon',mid:'Honeysuckle, Gardenia, Jasmine, Rose',base:'Caramel, Vanilla, Sandalwood, Amber, Musk, Praline',r:'3.9',l:'6–8h',s:'Moderate',p:'~$65',accords:'Fruity, Floral, Gourmand'},
+  {n:'Bianco Latte',h:'Giardini di Toscana',conc:'EDP',fam:'Gourmand',top:'Caramel',mid:'Coumarin, Honey',base:'Vanilla, White Musk',r:'4.3',l:'8–12h',s:'Moderate',p:'~$123',accords:'Gourmand, Vanilla, Powdery'},
+  {n:'Cocktail Intense',h:'Fragrance World',conc:'EDP',fam:'Gourmand Oriental',top:'Cognac, Cinnamon, Plum',mid:'Myrrh, Cashmeran, Tonka Bean, Oak',base:'Vanilla, Praline, Sandalwood',r:'4.1',l:'8–12h',s:'Strong',p:'~$18',accords:'Boozy, Gourmand, Spicy'},
+  {n:'Kismet Angel',h:'Maison Alhambra',conc:'EDP',fam:'Gourmand Oriental',top:'Vanilla, Honeycomb, Amber',mid:'Cognac, Cinnamon, Caramel',base:'Tonka Bean, Praline, Sandalwood, Musk',r:'4.0',l:'6–8h',s:'Moderate',p:'~$22',accords:'Gourmand, Boozy, Oriental'},
+  {n:'Ruhe',h:'Oakcha',conc:'Extrait',fam:'Woody Aromatic',top:'Cardamom, Violet',mid:'Iris',base:'Sandalwood, Leather, Cedarwood',r:'4.1',l:'8–12h',s:'Moderate',p:'~$20',accords:'Woody, Spicy, Fresh'},
+  {n:'That Girl Viral Vanilla Extrait',h:'Oakcha',conc:'Extrait',fam:'Gourmand',top:'Caramel, Coconut Milk',mid:'Tonka Bean, Honey',base:'Vanilla, Marshmallow, White Musk, Amber',r:'4.2',l:'12–24h',s:'Strong',p:'~$47',accords:'Gourmand, Vanilla, Oriental'},
+  {n:'Miss Girl Extrait',h:'Oakcha',conc:'Extrait',fam:'Fruity Oriental',top:'Black Cherry, Saffron, Bitter Almond',mid:'Jasmine Sambac, Turkish Rose, Tonka Bean, Tobacco',base:'Amber, Moss, Vanilla, Caramel, Sandalwood',r:'4.2',l:'12–24h',s:'Strong',p:'~$40',accords:'Fruity, Floral, Oriental'},
+  {n:'Amber Musk',h:'Aerin',conc:'EDP',fam:'Floral Musky',top:'Bergamot, Amber, Aldehydes',mid:'Iris, Rose, Jasmine, Muguet',base:'Musk, Sandalwood, Vetiver, Amber',r:'3.9',l:'4–6h',s:'Soft',p:'~$78',accords:'Oriental, Floral, Powdery'},
+  {n:'Pure Vanilla',h:'Lavanila',conc:'EDP',fam:'Gourmand',top:'Bergamot, Lemon, Pink Pepper',mid:'Vanilla Orchid, Heliotrope, Jasmine',base:'Vanilla, Musk, Sandalwood, Tonka Bean',r:'3.9',l:'4–6h',s:'Soft',p:'~$72',accords:'Gourmand, Vanilla, Floral'},
+  {n:'Choco Musk',h:'Al Rehab',conc:'EDP',fam:'Gourmand Oriental',top:'Chocolate, Cinnamon, Vanilla',mid:'Rose, Jasmine, Musk',base:'Vanilla, Musk, Sandalwood, Patchouli',r:'3.9',l:'6–8h',s:'Moderate',p:'~$8',accords:'Gourmand, Oriental, Floral'},
+  {n:'Amber',h:'Nemat',conc:'Perfume Oil',fam:'Oriental Amber',top:'Amber, Bergamot',mid:'Musk, Labdanum',base:'Vanilla, Sandalwood, Benzoin, Amber',r:'4.1',l:'8–12h',s:'Moderate',p:'~$13',accords:'Oriental, Amber, Woody'},
+  {n:'Persian Garden',h:'Kuumba Made',conc:'Fragrance Oil',fam:'Floral Oriental',top:'Bergamot, Jasmine, Rose',mid:'Sandalwood, Amber, Cedar',base:'Musk, Amber',r:'3.8',l:'6–8h',s:'Moderate',p:'~$8',accords:'Floral, Oriental, Woody'},
+  {n:'Vanilla Bean',h:'Kuumba Made',conc:'Fragrance Oil',fam:'Gourmand',top:'Vanilla, Bergamot',mid:'Tonka Bean, Musk',base:'Sandalwood, Amber, Musk',r:'3.9',l:'6–8h',s:'Moderate',p:'~$8',accords:'Gourmand, Vanilla, Woody'},
+  {n:'Fresh Cream',h:'Philosophy',conc:'EDT',fam:'Gourmand',top:'Fresh Cream, Milk',mid:'Vanilla, Musk, Sandalwood',base:'White Musk, Warm Vanilla',r:'3.8',l:'2–4h',s:'Soft',p:'~$40',accords:'Gourmand, Soft, Fresh'},
+  {n:'Ambre Etoile',h:'Le Monde Gourmand',conc:'EDP',fam:'Oriental Amber',top:'Bergamot, Amber',mid:'Jasmine, Vanilla, Amber',base:'Sandalwood, Musk, Tonka Bean',r:'3.8',l:'4–6h',s:'Moderate',p:'~$13',accords:'Oriental, Amber, Floral'},
+  {n:'Crème Brûlée',h:'Le Monde Gourmand',conc:'EDP',fam:'Gourmand',top:'Caramelized Sugar, Vanilla, Spices',mid:'Vanilla Cream, Tonka Bean, Coumarin',base:'Vanilla, White Musk, Soft Woods',r:'3.8',l:'4–6h',s:'Moderate',p:'~$13',accords:'Gourmand, Vanilla, Spicy'},
+  {n:'Pistachio Brûlée',h:'Le Monde Gourmand',conc:'EDP',fam:'Gourmand',top:'Pistachio, Almond, Coconut Milk',mid:'Praline, Vanilla Cream, Pistachio',base:'Vanilla, White Musk, Sandalwood',r:'3.8',l:'4–6h',s:'Soft',p:'~$25',accords:'Gourmand, Nutty, Vanilla'},
+  {n:'Chai Épicé',h:'Le Monde Gourmand',conc:'EDP',fam:'Gourmand Spiced',top:'Cardamom, Cinnamon, Ginger',mid:'Chai Tea, Tonka Bean, Vanilla',base:'Sandalwood, Musk, Amber, Vanilla',r:'3.9',l:'4–6h',s:'Moderate',p:'~$25',accords:'Gourmand, Spicy, Warm'},
+  {n:'Perle Sensuelle',h:'Pardon My French & Co',conc:'EDP',fam:'Floral Musky',top:'Bergamot, Peach, Pink Pepper',mid:'Rose, Jasmine, Peony',base:'Musk, Sandalwood, Vanilla, Amber',r:'3.9',l:'4–6h',s:'Moderate',p:'~$30',accords:'Floral, Musky, Fresh'},
+  {n:'Beirut Baklava',h:'Kheir Fragrance House',conc:'EDP',fam:'Gourmand Oriental',top:'Orange Blossom, Bergamot, Cardamom',mid:'Vanilla, Baklava, Pistachio, Whipped Cream, Heliotrope',base:'Vanilla Absolute, Honey, Tonka Bean, Leather, Cedarwood, Guaiac Wood, Amber, White Musk',r:'4.2',l:'4–6h',s:'Moderate',p:'~$144',accords:'Gourmand, Floral, Woody'},
+  {n:'Badee Al Oud Sublime',h:'Lattafa',conc:'EDP',fam:'Fruity Oriental',top:'Bergamot, Saffron, Plum',mid:'Rose, Oud, Jasmine',base:'Amber, Musk, Sandalwood, Vanilla',r:'4.0',l:'8–12h',s:'Strong',p:'~$22',accords:'Oriental, Oud, Floral'},
+  {n:'Khamrah',h:'Lattafa',conc:'EDP',fam:'Gourmand Oriental',top:'Cognac, Rum, Bergamot',mid:'Rose, Vanilla, Caramel, Tonka Bean',base:'Oud, Sandalwood, Amber, Musk',r:'4.3',l:'12–24h',s:'Strong',p:'~$41',accords:'Gourmand, Oriental, Spicy'},
+  {n:'J\'Adore',h:'Dior',conc:'EDP',fam:'Floral',top:'Ylang-Ylang, Peach, Bergamot, Mandarin',mid:'Rose, Jasmine, Violet, Lily, Muguet',base:'Sandalwood, Musk, Cedar, Vanilla',r:'4.4',l:'6–8h',s:'Moderate',p:'~$140',accords:'Floral, Fresh, Powdery'},
+  {n:'Inspiration',h:'Lacoste',conc:'EDP',fam:'Fresh Floral',top:'Bergamot, Lemon, Green Tea',mid:'Rose, Jasmine, Lily of the Valley',base:'Cedar, Sandalwood, Musk, White Musk',r:'4.0',l:'4–6h',s:'Moderate',p:'~$55',accords:'Fresh, Floral, Woody'},
+  {n:'Vanille Café',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Gourmand',top:'Coffee, Vanilla, Sandalwood',mid:'Tonka Bean, Musk, Caramel',base:'Sandalwood, Vanilla, Amber',r:'4.1',l:'6–8h',s:'Moderate',p:'~$85',accords:'Gourmand, Boozy, Vanilla'},
+  {n:'Vanilla Mousse',h:'Le Monde Gourmand',conc:'EDP',fam:'Gourmand',top:'Vanilla, Whipped Cream',mid:'Musk, Sandalwood, Tonka Bean',base:'Vanilla, Soft Musk, Amber',r:'3.8',l:'4–6h',s:'Soft',p:'~$68',accords:'Gourmand, Vanilla, Powdery'},
+  {n:'Yum Pistachio Gelato 33',h:'Kayali',conc:'EDP',fam:'Gourmand',top:'Pistachio, Bergamot, Hazelnut, Rum, Cardamom',mid:'Jasmine, Peony, Lily of the Valley, Geranium, Raspberry, White Peach, Pear',base:'Whipped Cream, Marshmallow, Cotton Candy, Tonka Bean, Cocoa, Cedarwood, Sandalwood',r:'4.2',l:'6–8h',s:'Moderate',p:'~$145',accords:'Gourmand, Vanilla, Nutty'},
+  {n:'Lick Me',h:'Michela Mezzetti Parfums',conc:'EDP',fam:'Gourmand',top:'Whipped Cream, Powdered Sugar',mid:'Florentine Iris, Fiordilatte Ice Cream, Crunchy Wafer',base:'Vanilla, Sweet Amber',r:'4.3',l:'6–8h',s:'Moderate',p:'~$150',accords:'Gourmand, Powdery, Vanilla'},
+  {n:'Mooncake',h:"d'Annam",conc:'EDP',fam:'Gourmand Oriental',top:'Golden Syrup, Honey',mid:'Salted Egg Yolk, Mung Bean, Lotus Seed',base:'Vanilla',r:'4.1',l:'8–12h',s:'Strong',p:'~$160',accords:'Gourmand, Oriental, Powdery'},
+  {n:'Crema di Latte',h:'Hilde Soliani',conc:'EDP',fam:'Gourmand',top:'Milk, Lemon',mid:'Sugar, Caramel, Cinnamon',base:'Vanilla, Cream',r:'4.1',l:'6–8h',s:'Moderate',p:'~$165',accords:'Gourmand, Vanilla, Powdery'},
+  {n:'Sweet Parmesan Violet',h:'Hilde Soliani',conc:'EDP',fam:'Floral Powdery',top:'Violet',mid:'Sugar',base:'Violet',r:'3.9',l:'6–8h',s:'Moderate',p:'~$165',accords:'Floral, Powdery, Gourmand'},
+  {n:'Orgasmo',h:'Hilde Soliani',conc:'EDP',fam:'Gourmand',top:'Amaretto',mid:'Bitter Almond',base:'Vanilla, Cream',r:'4.0',l:'4–6h',s:'Soft',p:'~$165',accords:'Gourmand, Boozy, Powdery'},
+  {n:'Cheirosa 62',h:'Sol de Janeiro',conc:'EDP',fam:'Gourmand',top:'Pistachio, Almond',mid:'Heliotrope, Jasmine Petals',base:'Vanilla, Salted Caramel, Sandalwood',r:'4.1',l:'4–6h',s:'Moderate',p:'~$42',accords:'Gourmand, Vanilla, Woody'},
+  {n:'Good Girl',h:'Carolina Herrera',conc:'EDP',fam:'Floral Gourmand',top:'Almond, Coffee, Bergamot, Lemon',mid:'Tuberose, Jasmine Sambac, Orange Blossom, Bulgarian Rose, Orris',base:'Tonka Bean, Cocoa, Sandalwood, Patchouli',r:'4.2',l:'8–12h',s:'Strong',p:'~$130',accords:'Floral, Gourmand, Oriental'},
+  {n:'Dandelion Butter',h:'Clue Perfumery',conc:'EDP',fam:'Green Gourmand',top:'Pollen, Dandelion Greens',mid:'Yellow Dandelion, Snapped Stem, Milky Sap',base:'Salted Butter',r:'4.3',l:'4–6h',s:'Soft',p:'~$140',accords:'Fresh, Gourmand, Green'},
+  {n:'Mistpouffer',h:'Stora Skuggan',conc:'EDP',fam:'Smoky Gourmand',top:'Immortelle, Bergamot',mid:'Fig Leaf, Pine, Ozonic Notes',base:'Sugar, Smoke, Malt, Cypriol, Vetiver',r:'4.0',l:'6–8h',s:'Moderate',p:'~$195',accords:'Woody, Smoky, Fresh'},
+  {n:'Azalai',h:'Stora Skuggan',conc:'EDP',fam:'Oriental Fruity',top:'Blood Orange, Mint',mid:'Dried Fruits, Saffron',base:'Amber, Incense, Velvione, Acacia',r:'4.2',l:'6–8h',s:'Moderate',p:'~$195',accords:'Oriental, Spicy, Fruity'},
+  {n:'Deadly Nightcap',h:'Curatrix',conc:'EDP',fam:'Aromatic Woody',top:'Campari, Cardamom, Orange',mid:'Gin, Juniper Berry, Cypress',base:'Vetiver, Cedarwood, Fir',r:'4.0',l:'6–8h',s:'Moderate',p:'~$175',accords:'Woody, Spicy, Fresh'},
+  {n:'Antihero',h:'Curatrix',conc:'EDP',fam:'Gourmand Oriental',top:'Apple, Saffron, Cardamom',mid:'Cognac, Rum',base:'Vanilla, Praline, Sandalwood',r:'4.3',l:'8–12h',s:'Strong',p:'~$175',accords:'Gourmand, Boozy, Spicy'},
+  {n:'Lola at Coat Check',h:'Discothèque',conc:'EDP',fam:'Gourmand Floral',top:'Pink Pepper, Cardamom, Grapefruit',mid:'White Chocolate, Caramel, Orris, Lily, Jasmine',base:'Sandalwood, Cedarwood, Amber, Vetiver',r:'4.4',l:'4–6h',s:'Soft',p:'~$175',accords:'Gourmand, Floral, Woody'},
+  {n:'Cannoli',h:'Laurel Bath House',conc:'EDP',fam:'Gourmand',top:'Sicilian Lemon, Pistachio',mid:'Cinnamon Milk, Almond',base:'Vanilla, Caramel, Sandalwood',r:'4.4',l:'6–8h',s:'Moderate',p:'~$68',accords:'Gourmand, Vanilla, Nutty'},
+  {n:'Après Ski',h:'Laurel Bath House',conc:'EDP',fam:'Gourmand',top:'Whiskey, Cloves',mid:'Maraschino Cherry',base:'Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$68',accords:'Gourmand, Boozy, Warm'},
+  {n:'Buontalenti',h:'Profumo di Firenze',conc:'EDP',fam:'Fruity Gourmand',top:'Banana, Peach, Apricot, Red Fruits',mid:'Coconut, Vanilla, Raspberry',base:'Toffee, Cookie, Caramel, Musk',r:'4.0',l:'4–6h',s:'Moderate',p:'~$130',accords:'Gourmand, Fruity, Vanilla'},
+  {n:'London Fog',h:'House of Brandt',conc:'EDP',fam:'Aromatic Gourmand',top:'Bergamot, Earl Grey Tea, Smoke',mid:'Milk, Lavender, Honey',base:'Vanilla Absolute, Sandalwood, White Musk, Ambergris',r:'4.3',l:'6–8h',s:'Soft',p:'~$130',accords:'Fresh, Gourmand, Woody'},
 ];
 
 // COMMUNITY_FRAGS — user-contributed metadata (Layer 0 search, loaded from fragranceDB sheet tab)
@@ -2486,9 +2493,9 @@ let FRAGRANCES = [
   {id:'k13',userId:'u1',name:'Crème Brûlée',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Sep 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $132.00',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k14',userId:'u1',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Jul 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $132.00',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k15',userId:'u1',name:'Beirut Baklava',house:'Kheir Fragrance House',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Aug 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $144.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k16',userId:'u1',name:'Ruhe',house:'Oakcha',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $20.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k17',userId:'u1',name:'That Girl Viral Vanilla',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $47.14',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k18',userId:'u1',name:'Miss Girl',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $40.00',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k16',userId:'u1',name:'Ruhe',house:'Oakcha',status:'CURRENT',sizes:['Decant'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $20.00',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k17',userId:'u1',name:'That Girl Viral Vanilla Extrait',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $47.14',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k18',userId:'u1',name:'Miss Girl Extrait',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $40.00',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k19',userId:'u1',name:'Amber Musk',house:'Aerin',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'eBay',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Purchased for $78.00',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k20',userId:'u1',name:'Perle Sensuelle',house:'Pardon My French & Co',status:'CURRENT',sizes:['Travel'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jul 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $30.00',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k21',userId:'u1',name:'Santal 33',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.00',createdAt:'2026-03-28T00:00:00.000Z'},
@@ -2517,7 +2524,7 @@ let FRAGRANCES = [
   {id:'k44',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:5,statusRating:null,personalLong:null,whereBought:'Scent Split',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
   {id:'k45',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
   {id:'s1',userId:'u2',name:'Lost Cherry',house:'Tom Ford',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Fruity, Oriental, Gourmand',createdAt:'2024-01-01T00:00:00.000Z'},
-  {id:'s2',userId:'u2',name:'Yum Pistachio Gelato 33',house:'Kay Ali',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Vanilla, Nutty',createdAt:'2024-01-01T00:00:00.000Z'},
+  {id:'s2',userId:'u2',name:'Yum Pistachio Gelato 33',house:'Kayali',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Vanilla, Nutty',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s3',userId:'u2',name:'Angels\' Share',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Boozy, Spicy',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s4',userId:'u2',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Fresh, Floral',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s5',userId:'u2',name:'Crème Brûlée',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Vanilla, Spicy',createdAt:'2024-01-01T00:00:00.000Z'},
@@ -2527,7 +2534,7 @@ let FRAGRANCES = [
   {id:'s9',userId:'u2',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'Aug 2025',accords:'Gourmand, Powdery, Vanilla',createdAt:'2025-08-01T00:00:00.000Z'},
   {id:'s10',userId:'u2',name:'Vanilla Skin',house:'Phlur',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Floral, Oriental',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s11',userId:'u2',name:'Beirut Baklava',house:'Kheir Fragrance House',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Floral, Woody',createdAt:'2024-01-01T00:00:00.000Z'},
-  {id:'s12',userId:'u2',name:'Matcha Made in Heaven',house:'Commodity',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Fresh, Floral, Gourmand',createdAt:'2024-01-01T00:00:00.000Z'},
+  {id:'s12',userId:'u2',name:'Match Made in Heaven',house:'Sorce',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Fresh, Floral',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s13',userId:'u2',name:'That Girl Viral Vanilla Extrait',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Vanilla, Oriental',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s14',userId:'u2',name:'Miss Girl Extrait',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Fruity, Floral, Oriental',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s15',userId:'u2',name:'Mooncake',house:"d'Annam",status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'Dec 2025',accords:'Gourmand, Oriental, Powdery',createdAt:'2025-12-01T00:00:00.000Z'},
@@ -2553,18 +2560,20 @@ FRAGRANCES.forEach(function(f){ if(!f.fragranceId) f.fragranceId = f.id; });
 
 // COMPLIMENTS — main compliment log (loaded from Google Sheets)
 let COMPLIMENTS = [
-  {id:'c1',userId:'u1',primaryFragId:'k13',primaryFrag:'Crème Brûlée',secondaryFragId:'k4',secondaryFrag:'Vanilla Skin',gender:'Male',relation:'Significant Other',month:'11',year:'2024',location:'Home',city:'Arvada',state:'Colorado',country:'US',notes:'',createdAt:'2024-11-01T00:00:00.000Z'},
+  {id:'c1',userId:'u1',primaryFragId:'k13',primaryFrag:'Crème Brûlée',secondaryFragId:'k4',secondaryFrag:'Vanilla Skin',gender:'Male',relation:'Significant Other',month:'11',year:'2024',location:'Home',city:'Arvada',state:'Colorado',country:'US',notes:'Trevor',createdAt:'2024-11-01T00:00:00.000Z'},
   {id:'c2',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla Extrait',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'8',year:'2024',location:'King Soopers Pharmacy',city:'Arvada',state:'Colorado',country:'US',notes:'Pharmacist asked 2x for the perfume name',createdAt:'2024-08-01T00:00:00.000Z'},
-  {id:'c3',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla Extrait',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'9',year:'2024',location:'King Soopers Pharmacy',city:'Arvada',state:'Colorado',country:'US',notes:'Pharmacist asked if it was the cake I had that smelled like cake or me',createdAt:'2024-09-01T00:00:00.000Z'},
+  {id:'c3',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla Extrait',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Stranger',month:'9',year:'2024',location:'King Soopers Pharmacy',city:'Arvada',state:'Colorado',country:'US',notes:'Asked if it was the cake or me',createdAt:'2024-09-01T00:00:00.000Z'},
   {id:'c4',userId:'u1',primaryFragId:'k12',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'12',year:'2023',location:'Viceroy',city:'Snowmass',state:'Colorado',country:'US',notes:'Hotel front desk, said I smelled like cinnamon buns',createdAt:'2023-12-01T00:00:00.000Z'},
   {id:'c5',userId:'u1',primaryFragId:'k33',primaryFrag:'Khamrah',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'6',year:'2024',location:'Airbnb',city:'Denver',state:'Colorado',country:'US',notes:'Asked who smelled good, then later asked for the link and bought it',createdAt:'2024-06-01T00:00:00.000Z'},
   {id:'c6',userId:'u2',primaryFragId:'s1',primaryFrag:'Lost Cherry',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'8',year:'2023',location:'Ted Lasso Bar',city:'Richmond',state:'',country:'UK',notes:'Bartender asked for what it was',createdAt:'2023-08-01T00:00:00.000Z'},
   {id:'c7',userId:'u2',primaryFragId:'s5',primaryFrag:'Crème Brûlée',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'11',year:'2024',location:'Kilauea Fish Market',city:'Princeville',state:'Hawaii',country:'US',notes:'Said it smelled like vanilla',createdAt:'2024-11-01T00:00:00.000Z'},
   {id:'c8',userId:'u2',primaryFragId:'s7',primaryFrag:'Lune Féline',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'9',year:'2024',location:'Gym',city:'Westminster',state:'Colorado',country:'US',notes:'Gym goers girlfriend, resulted in a phone number exchange to share the perfume name',createdAt:'2024-09-01T00:00:00.000Z'},
-  {id:'c9',userId:'u2',primaryFragId:'s7',primaryFrag:'Lune Féline',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'10',year:'2024',location:'Kianas',city:'Arvada',state:'Colorado',country:'US',notes:'',createdAt:'2024-10-01T00:00:00.000Z'},
+  {id:'c9',userId:'u2',primaryFragId:'s7',primaryFrag:'Lune Féline',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'10',year:'2024',location:"Kiana's",city:'Arvada',state:'Colorado',country:'US',notes:'Kiana',createdAt:'2024-10-01T00:00:00.000Z'},
   {id:'c10',userId:'u2',primaryFragId:'s8',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'9',year:'2024',location:'Gothic Theater',city:'Denver',state:'Colorado',country:'US',notes:'Girl at the California Honeydrops show asked who smelled like vanilla',createdAt:'2024-09-01T00:00:00.000Z'},
-  {id:'c11',userId:'u2',primaryFragId:'s5',primaryFrag:'Crème Brûlée',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'8',year:'2024',location:'Teocali',city:'Lafayette',state:'Colorado',country:'US',notes:'',createdAt:'2024-08-01T00:00:00.000Z'},
-  {id:'c12',userId:'u2',primaryFragId:'s3',primaryFrag:'Angels\' Share',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'11',year:'2024',location:'Sushi burrito bar',city:'Kauai',state:'Hawaii',country:'US',notes:'Girl asked what kind it was',createdAt:'2024-11-01T00:00:00.000Z'},
+  {id:'c11',userId:'u2',primaryFragId:'s5',primaryFrag:'Crème Brûlée',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'8',year:'2024',location:'Teocali',city:'Lafayette',state:'Colorado',country:'US',notes:'Kiana',createdAt:'2024-08-01T00:00:00.000Z'},
+  {id:'c12',userId:'u2',primaryFragId:'s3',primaryFrag:'Angels\' Share',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'11',year:'2024',location:'Sushi burrito bar',city:'Kauai',state:'Hawaii',country:'US',notes:'Asked what kind it was',createdAt:'2024-11-01T00:00:00.000Z'},
+  {id:'c13',userId:'u1',primaryFragId:'k12',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Significant Other',month:'3',year:'2026',location:'Home',city:'Rochester',state:'New York',country:'US',notes:'Mike',createdAt:'2026-03-01T00:00:00.000Z'},
+  {id:'c14',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla Extrait',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'4',year:'2026',location:'Bluegrass Lounge',city:'Arvada',state:'Colorado',country:'US',notes:'Lauren',createdAt:'2026-04-01T00:00:00.000Z'},
 ];
 
 // IMPORT QUEUE
@@ -2582,24 +2591,73 @@ function buildAccordPicker(preselected){
         ? preselected.split(',').map(function(a){return a.trim();}).filter(Boolean)
         : preselected.slice())
     : [];
-  var wrap = document.getElementById('afAccordPicker');
-  if(!wrap) return;
-  wrap.innerHTML = '';
-  SCENT_FAMILIES.forEach(function(fam){
-    var chip = document.createElement('div');
-    chip.className = 'fam-chip' + (afAccordVals.includes(fam) ? ' on' : '');
-    chip.textContent = fam;
-    chip.onclick = function(){
-      if(afAccordVals.includes(fam)){
-        afAccordVals = afAccordVals.filter(function(a){ return a!==fam; });
-        chip.classList.remove('on');
-      } else {
-        afAccordVals.push(fam);
-        chip.classList.add('on');
-      }
-    };
-    wrap.appendChild(chip);
+  var search = document.getElementById('afAccordSearch');
+  if(search) search.value = '';
+  var drop = document.getElementById('afAccordDrop');
+  if(drop){ drop.innerHTML = ''; drop.style.display = 'none'; }
+  renderAccordTags();
+}
+
+function renderAccordTags(){
+  var tags = document.getElementById('afAccordTags');
+  if(!tags) return;
+  tags.innerHTML = '';
+  afAccordVals.forEach(function(accord){
+    var tag = document.createElement('span');
+    tag.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:3px 8px 3px 10px;background:var(--blue);color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.05em;border-radius:2px;';
+    var txt = document.createElement('span'); txt.textContent = accord; tag.appendChild(txt);
+    var x = document.createElement('span');
+    x.textContent = '×'; x.style.cssText = 'cursor:pointer;font-size:14px;line-height:1;opacity:.85;margin-left:1px;';
+    (function(a){ x.onclick = function(){ afAccordVals = afAccordVals.filter(function(v){ return v !== a; }); renderAccordTags(); }; })(accord);
+    tag.appendChild(x); tags.appendChild(tag);
   });
+}
+
+function accordSearchInput(){
+  var search = document.getElementById('afAccordSearch');
+  var drop = document.getElementById('afAccordDrop');
+  if(!search || !drop) return;
+  var q = search.value.trim().toLowerCase();
+  var matches = SCENT_FAMILIES.filter(function(f){
+    return f.toLowerCase().indexOf(q) !== -1 && !afAccordVals.includes(f);
+  });
+  drop.innerHTML = '';
+  if(!matches.length){ drop.style.display = 'none'; return; }
+  matches.forEach(function(fam){
+    var opt = document.createElement('div');
+    opt.style.cssText = 'padding:7px 12px;cursor:pointer;font-family:var(--body);font-size:13px;color:var(--ink1);';
+    opt.textContent = fam;
+    opt.onmousedown = function(e){ e.preventDefault(); accordAdd(fam); };
+    opt.onmouseover = function(){ this.style.background = 'var(--b1)'; };
+    opt.onmouseout = function(){ this.style.background = ''; };
+    drop.appendChild(opt);
+  });
+  drop.style.display = 'block';
+}
+
+function accordSearchKey(e){
+  var search = document.getElementById('afAccordSearch');
+  if(!search) return;
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    var val = search.value.trim();
+    if(!val) return;
+    var match = SCENT_FAMILIES.find(function(f){ return f.toLowerCase() === val.toLowerCase(); });
+    accordAdd(match || val);
+  } else if(e.key === 'Escape'){
+    var drop = document.getElementById('afAccordDrop');
+    if(drop) drop.style.display = 'none';
+  }
+}
+
+function accordAdd(val){
+  if(!val || afAccordVals.includes(val)) return;
+  afAccordVals.push(val);
+  renderAccordTags();
+  var search = document.getElementById('afAccordSearch');
+  if(search) search.value = '';
+  var drop = document.getElementById('afAccordDrop');
+  if(drop){ drop.innerHTML = ''; drop.style.display = 'none'; }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2664,7 +2722,21 @@ function myCompliments(){ return COMPLIMENTS.filter(function(c){ return CURRENT_
 function friendCompliments(){ var fr=getFriend(); return fr ? COMPLIMENTS.filter(function(c){ return c.userId===fr.id; }) : []; }
 function getFriend(){ return USERS.find(function(u){ return !CURRENT_USER || u.id!==CURRENT_USER.id; }); }
 
-function getCompCount(fragId){ return COMPLIMENTS.filter(c=>c.primaryFragId===fragId||c.secondaryFragId===fragId).length; }
+function getPurchasePrice(frag){
+  // Returns numeric price or null. Priority: purchasePrice field → parse personalNotes → avgPrice from DB
+  if(frag.purchasePrice && parseFloat(frag.purchasePrice)>0) return parseFloat(frag.purchasePrice);
+  var m=(frag.personalNotes||'').match(/\$(\d+(?:\.\d+)?)/);
+  if(m) return parseFloat(m[1]);
+  var cd=getCommunityData(frag.name,frag.house);
+  if(cd&&cd.avgPrice){ var m2=(cd.avgPrice+'').match(/(\d+(?:\.\d+)?)/); if(m2) return parseFloat(m2[1]); }
+  return null;
+}
+function getCompCount(fragId, userId){
+  var uid = userId !== undefined ? userId : (CURRENT_USER && CURRENT_USER.id);
+  return COMPLIMENTS.filter(function(c){
+    return (c.primaryFragId===fragId||c.secondaryFragId===fragId) && (!uid||c.userId===uid);
+  }).length;
+}
 function getCompDist(fragId){
   const comps = COMPLIMENTS.filter(c=>c.primaryFragId===fragId||c.secondaryFragId===fragId);
   const groups = {};
@@ -2760,38 +2832,6 @@ function renderDashboard(){
       unidentEl.appendChild(uList);
     } else {
       unidentEl.style.display='none';
-    }
-  }
-
-  // Quick log section — top CURRENT fragrances by compliment count
-  var quickLogEl=document.getElementById('dashQuickLog');
-  if(quickLogEl){
-    while(quickLogEl.firstChild) quickLogEl.removeChild(quickLogEl.firstChild);
-    var currentFrags=MF.filter(function(f){return f.status==='CURRENT';});
-    if(currentFrags.length){
-      var topFrags=currentFrags.slice().sort(function(a,b){return getCompCount(b.id)-getCompCount(a.id);}).slice(0,4);
-      quickLogEl.style.display='block';
-      var qlHdr=document.createElement('div'); qlHdr.className='sh'; qlHdr.style.marginTop='4px';
-      var qlH2=document.createElement('h2'); qlH2.textContent='Quick log';
-      var qlSub=document.createElement('div'); qlSub.className='sh-r';
-      qlSub.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.06em;';
-      qlSub.textContent='tap to log a compliment';
-      qlHdr.appendChild(qlH2); qlHdr.appendChild(qlSub); quickLogEl.appendChild(qlHdr);
-      var qlGrid=document.createElement('div'); qlGrid.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;';
-      topFrags.forEach(function(f){
-        var btn=document.createElement('button');
-        btn.style.cssText='display:flex;flex-direction:column;align-items:flex-start;padding:8px 12px;background:var(--surface);border:1px solid var(--b2);cursor:pointer;font-family:var(--body);text-align:left;min-width:140px;flex:1;transition:border-color .14s;';
-        btn.onmouseover=function(){this.style.borderColor='var(--blue)';};
-        btn.onmouseout=function(){this.style.borderColor='var(--b2)';};
-        (function(id){btn.onclick=function(){openAddComp(id);};})(f.id);
-        var nm=document.createElement('span'); nm.style.cssText='font-size:13px;color:var(--ink1);font-weight:500;'; nm.textContent=f.name;
-        var meta=document.createElement('span'); meta.style.cssText='font-size:11px;color:var(--ink3);font-family:var(--mono);margin-top:2px;';
-        var cc=getCompCount(f.id); meta.textContent=f.house+(cc?' · '+cc+' comp'+(cc>1?'s':''):'');
-        btn.appendChild(nm); btn.appendChild(meta); qlGrid.appendChild(btn);
-      });
-      quickLogEl.appendChild(qlGrid);
-    } else {
-      quickLogEl.style.display='none';
     }
   }
 
@@ -3063,6 +3103,11 @@ function clearHouseFilter(){
   renderCollection();
 }
 
+document.addEventListener('click',function(e){
+  var aSearch=document.getElementById('afAccordSearch');
+  var aDrop=document.getElementById('afAccordDrop');
+  if(aDrop && e.target !== aSearch && !aDrop.contains(e.target)) aDrop.style.display='none';
+});
 document.addEventListener('click',function(e){
   var wrap=document.getElementById('houseFilterWrap');
   if(wrap&&!wrap.contains(e.target)){var p=document.getElementById('houseDropPanel'); if(p) p.style.display='none';}
@@ -3986,14 +4031,22 @@ function renderAnalytics(){
       });
     }
     var allF=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
-    var priceRecs=allF.map(function(f){var m=(f.personalNotes||'').match(/\$(\d+(?:\.\d+)?)/);return m?{f:f,price:parseFloat(m[1])}:null;}).filter(Boolean);
-    if(priceRecs.length>=3){
+    var priceRecs=allF.map(function(f){
+      var knownPrice=f.purchasePrice&&parseFloat(f.purchasePrice)>0;
+      var p=getPurchasePrice(f);
+      return p!==null?{f:f,price:p,isEstimated:!knownPrice&&!(f.personalNotes||'').match(/\$/)}:null;
+    }).filter(Boolean);
+    var _noPrice=allF.length-priceRecs.length;
+    if(priceRecs.length>=1){
       var spendHd=document.createElement('div'); spendHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:8px;'; spendHd.textContent='Spend'; collSection.appendChild(spendHd);
       var total2=priceRecs.reduce(function(a,r){return a+r.price;},0);
       var avg=(total2/priceRecs.length).toFixed(0);
       priceRecs.sort(function(a,b){return b.price-a.price;});
       var mostExp=priceRecs[0];
       var spendGrid=document.createElement('div'); spendGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;'; collSection.appendChild(spendGrid);
+      if(_noPrice>0){
+        var excNote=document.createElement('div'); excNote.style.cssText='grid-column:1/-1;font-family:var(--mono);font-size:10px;color:var(--ink3);'; excNote.textContent=_noPrice+' fragrance'+((_noPrice>1)?'s':'')+' not included — no price data'; spendGrid.appendChild(excNote);
+      }
       function addSpendRow(lbl,name,price){
         var d=document.createElement('div'); d.style.cssText='border-bottom:1px solid var(--b1);padding:6px 0;';
         var l=document.createElement('div'); l.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;'; l.textContent=lbl;
@@ -4568,7 +4621,7 @@ function openEditFrag(fragId, forceStatus){
   const sel = document.getElementById('afStatus');
   for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===statusVal){ sel.selectedIndex=i; break; }
   // Pre-fill Step 2
-  prefetchedData = {sizes:f.sizes,type:f.type,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,whereBought:f.whereBought,purchaseDate:f.purchaseDate,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:_cd.topNotes||'',middleNotes:_cd.middleNotes||'',baseNotes:_cd.baseNotes||''};
+  prefetchedData = {sizes:f.sizes,type:f.type,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,whereBought:f.whereBought,purchaseDate:f.purchaseDate,purchasePrice:f.purchasePrice||null,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:_cd.topNotes||'',middleNotes:_cd.middleNotes||'',baseNotes:_cd.baseNotes||''};
   buildAccordPicker(_cd.accords||null);
   // Auto-advance to step 2 for edits
   afGoStep(2, true);
@@ -4605,6 +4658,7 @@ function resetAFModal(){
   document.getElementById('dupeFor').value='';
   document.getElementById('afNotes').value='';
   tiInit('afTop',''); tiInit('afMiddle',''); tiInit('afBase','');
+  var priceEl=document.getElementById('afPrice'); if(priceEl) priceEl.value='';
 }
 
 function validateAfStep2(){
@@ -4651,6 +4705,7 @@ function afGoStep(n, skipValidation){
       if(d.whereBought) document.getElementById('afWhere').value=d.whereBought;
       if(d.purchaseDate){ const parts=d.purchaseDate.split(' '); if(parts[0]) document.getElementById('afMonth').value=parts[0]; if(parts[1]) document.getElementById('afYear').value=parts[1]; }
       if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeFor').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
+      if(d.purchasePrice){ var prEl=document.getElementById('afPrice'); if(prEl) prEl.value=d.purchasePrice; }
       if(d.personalNotes) document.getElementById('afNotes').value=d.personalNotes;
       tiInit('afTop',d.topNotes||''); tiInit('afMiddle',d.middleNotes||''); tiInit('afBase',d.baseNotes||'');
     }
@@ -4712,6 +4767,7 @@ function saveFragrance(){
     statusRating: parseInt(document.getElementById('afRating').value)||null,
     personalLong: document.getElementById('afLong').value||null,
     whereBought: document.getElementById('afWhere').value||null,
+    purchasePrice: parseFloat(document.getElementById('afPrice').value)||null,
     purchaseDate: (month&&year)?month+' '+year:null,
     isDupe, dupeFor: isDupe?document.getElementById('dupeFor').value:'',
     personalNotes: document.getElementById('afNotes').value,
