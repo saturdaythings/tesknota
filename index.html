@@ -900,8 +900,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="fc" data-filter="Stranger">Strangers</div>
         <div class="fc" data-filter="Friend">Friends</div>
         <div class="fc" data-filter="Colleague / Client">Colleagues</div>
-        <div class="fc" data-filter="Accords">Accords</div>
-        <div class="fc" data-filter="Significant Other">Significant Others</div>
+        <div class="fc" data-filter="Family">Family</div>
+        <div class="fc" data-filter="Significant Other">Partners</div>
       </div>
       <div class="cff-bar" id="compFragFilterBar" style="display:none;">
         Filtered: <span class="cff-name" id="cffName"></span>
@@ -1334,7 +1334,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       <div class="fg">
         <label>Primary fragrance</label>
         <div class="acwrap">
-          <input id="compFragSrch" type="text" placeholder="Search your collection..." oninput="cfSearch(this.value)" autocomplete="off" onblur="setTimeout(function(){var d=document.getElementById('cfDrop');if(d)d.style.display='none';},180)">
+          <input id="compFragSrch" type="text" placeholder="Search your collection..." oninput="cfSearch(this.value)" onfocus="cfSearch(this.value)" autocomplete="off" onblur="setTimeout(function(){var d=document.getElementById('cfDrop');if(d)d.style.display='none';},180)">
           <div class="acdrop" id="cfDrop"></div>
         </div>
         <input type="hidden" id="compFrag">
@@ -2759,7 +2759,7 @@ function renderDashboard(){
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td><div class="tstars">${renderStars(f.statusRating)}</div></td>
         <td class="tmono" style="font-size:11px;color:var(--ink3);">${getAccords(f).join(', ')}</td>
-        <td class="tmono">${getCompCount(f.id)}</td>
+        <td class="tmono">${getCompCount(f.id)>0?`<span onclick="event.stopPropagation();filterComplimentsByFrag('${f.id}')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;" title="View compliments for this fragrance">${getCompCount(f.id)}</span>`:'—'}</td>
         <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
       </tr>`).join('');
   } else {
@@ -3498,10 +3498,11 @@ function renderCompliments(filter='all'){
   const filtered = filter==='all' ? base : base.filter(c=>c.relation===filter);
   // Update counts in filter bar
   const rel=['Stranger','Friend','Colleague / Client','Family','Significant Other'];
+  const relLabel={'Stranger':'Strangers','Friend':'Friends','Colleague / Client':'Colleagues','Family':'Family','Significant Other':'Partners'};
   document.querySelector('#compFbar .fc[data-filter="all"]').textContent='All ('+MC.length+')';
   rel.forEach(r=>{
     const el = document.querySelector('#compFbar .fc[data-filter="'+r+'"]');
-    if(el) el.textContent = (r==='Colleague / Client'?'Colleagues':r==='Significant Other'?'Significant Others':r==='Family'?'Family':r+'s')+' ('+MC.filter(c=>c.relation===r).length+')';
+    if(el) el.textContent = (relLabel[r]||r)+' ('+MC.filter(c=>c.relation===r).length+')';
   });
   const allEmpty = MC.length === 0;
   var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -4354,10 +4355,17 @@ function changeStatus(newStatus){
 function viewFragCompliments(){
   const f = FRAGRANCES.find(x=>x.id===currentDetailId);
   if(!f)return;
-  compFragFilter = f;
+  filterComplimentsByFrag(f.id);
   closeDetail();
+}
+
+function filterComplimentsByFrag(fragId){
+  const f = FRAGRANCES.find(x=>x.id===fragId);
+  if(!f)return;
+  compFragFilter = f;
   goPage('compliments');
-  renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all');
+  document.querySelectorAll('#compFbar .fc').forEach(c=>c.classList.toggle('on',c.dataset.filter==='all'));
+  renderCompliments('all');
 }
 
 function clearCompFragFilter(){
@@ -4715,8 +4723,32 @@ function afSearch(v){
 
 function cfSearch(v){
   var el=document.getElementById('cfDrop');
-  if(v.length<1){el.style.display='none';return;}
+  // When empty, show top recently-complimented fragrances as suggestions
   var eligible=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+  // Sort by most recent compliment date so frequently worn fragrances surface first
+  var MC2=myCompliments();
+  eligible=eligible.slice().sort(function(a,b){
+    var aLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===a.id;}).map(function(c){return parseInt(c.year||'0')*100+parseInt(c.month||'0');}));
+    var bLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===b.id;}).map(function(c){return parseInt(c.year||'0')*100+parseInt(c.month||'0');}));
+    if(!isFinite(aLast)) aLast=0; if(!isFinite(bLast)) bLast=0;
+    return bLast-aLast;
+  });
+  if(v.length<1){
+    // Show top 5 suggestions when input is focused/empty
+    var topSugg=eligible.slice(0,5);
+    if(!topSugg.length){el.style.display='none';return;}
+    while(el.firstChild)el.removeChild(el.firstChild);
+    var hintRow=document.createElement('div'); hintRow.style.cssText='padding:4px 12px 2px;font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;'; hintRow.textContent='Recently worn'; el.appendChild(hintRow);
+    topSugg.forEach(function(f){
+      var item=document.createElement('div');item.className='aci';
+      item.onmousedown=(function(fid,fn){return function(e){e.preventDefault();pickCF(fid,fn);};})(f.id,f.name);
+      var nd=document.createElement('div');nd.className='aci-n';nd.textContent=f.name+(f.status==='PREVIOUSLY_OWNED'?' (prev. owned)':'');
+      var hd=document.createElement('div');hd.className='aci-h';hd.textContent=f.house;
+      item.appendChild(nd);item.appendChild(hd);el.appendChild(item);
+    });
+    el.style.display='block';
+    return;
+  }
   var hits=eligible.filter(function(f){return f.name.toLowerCase().includes(v.toLowerCase())||f.house.toLowerCase().includes(v.toLowerCase());}).slice(0,8);
   while(el.firstChild)el.removeChild(el.firstChild);
   if(!hits.length){
@@ -6101,7 +6133,7 @@ function toast(msg){
   const t=document.createElement('div');t.className='toast';t.textContent=msg;
   c.appendChild(t);
   requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('on')));
-  setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},2600);
+  setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},4500);
 }
 
 
