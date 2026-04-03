@@ -1893,6 +1893,26 @@ async function loadAllData(){
   });
   var communityDeduped = Object.values(_dedupMap);
 
+  // Sync FRAG_DB corrections into existing sheet rows so the sheet stays current
+  var _norm = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); };
+  var _dbSyncChanged = false;
+  communityDeduped = communityDeduped.map(function(r){
+    var db = FRAG_DB.find(function(d){
+      return _norm(d.n)===_norm(r.fragranceName) && _norm(d.h)===_norm(r.fragranceHouse);
+    });
+    if(!db) return r;
+    var updated = Object.assign({}, r, {
+      fragranceAccords: db.accords||r.fragranceAccords||'',
+      topNotes: db.top||r.topNotes||'',
+      middleNotes: db.mid||r.middleNotes||'',
+      baseNotes: db.base||r.baseNotes||'',
+      avgPrice: db.p||r.avgPrice||'',
+      communitySill: db.s||r.communitySill||'',
+    });
+    if(JSON.stringify(updated)!==JSON.stringify(r)) _dbSyncChanged=true;
+    return updated;
+  });
+
   // fragranceDB dedup is catalog-only — do NOT remap IDs in userFragrances/userCompliments.
   // Each user keeps their own fragrance IDs; the catalog is deduplicated separately.
   // Remapping cross-user would bleed Sylvia's compliments onto Kiana's frags, etc.
@@ -1931,7 +1951,7 @@ async function loadAllData(){
   });
 
   // Write fragranceDB if dedup changed anything or new rows needed
-  var _needsDbWrite = communityDeduped.length !== communityRaw.filter(function(r){ return (r.fragranceName||'').trim() && !r.fragranceName.toLowerCase().startsWith('qa '); }).length || _missingDbRows.length;
+  var _needsDbWrite = _dbSyncChanged || communityDeduped.length !== communityRaw.filter(function(r){ return (r.fragranceName||'').trim() && !r.fragranceName.toLowerCase().startsWith('qa '); }).length || _missingDbRows.length;
   if(_needsDbWrite){
     var _allDbRows = communityDeduped.concat(_missingDbRows);
     await writeSheet('fragranceDB', _allDbRows, COMMUNITY_FRAG_HEADERS);
