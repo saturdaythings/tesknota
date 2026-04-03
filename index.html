@@ -1878,86 +1878,18 @@ async function loadAllData(){
     await syncMissingRows('userCompliments',_missingComps.map(compToRow),COMP_HEADERS,'syncComps');
   }
 
-  // fragranceDB deduplication: remove blank-name rows, QA test entries, and name+house dupes.
-  // Keep the row with the most non-empty fields when merging duplicates.
-  function _countFields(r){ return Object.values(r).filter(function(v){return v&&String(v).trim();}).length; }
-  var _dedupMap = {}; // key: normalized name+house → best row
-  communityRaw.forEach(function(r){
-    var nm = (r.fragranceName||'').trim();
-    if(!nm) return; // skip blank-name rows
-    if(nm.toLowerCase().startsWith('qa ')) return; // skip QA test entries
-    var key = nm.toLowerCase()+'|'+(r.fragranceHouse||'').toLowerCase()+'|'+(r.fragranceType||'').toLowerCase();
-    if(!_dedupMap[key] || _countFields(r) > _countFields(_dedupMap[key])){
-      _dedupMap[key] = r;
-    }
+  // Rebuild fragranceDB entirely from current FRAGRANCES + FRAG_DB on every load.
+  // This guarantees FRAG_DB corrections, renames, and new entries always sync to the sheet.
+  var _newDbRows = [];
+  var _seenDbIds = {};
+  FRAGRANCES.forEach(function(f){
+    var nm = (f.name||'').trim();
+    if(!nm || nm.toLowerCase().startsWith('qa ') || !f.id || _seenDbIds[f.id]) return;
+    _seenDbIds[f.id] = true;
+    _newDbRows.push(fragToDbRow(f));
   });
-  var communityDeduped = Object.values(_dedupMap);
-
-  // Sync FRAG_DB corrections into existing sheet rows so the sheet stays current
-  var _norm = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); };
-  var _dbSyncChanged = false;
-  communityDeduped = communityDeduped.map(function(r){
-    var db = FRAG_DB.find(function(d){
-      return _norm(d.n)===_norm(r.fragranceName) && _norm(d.h)===_norm(r.fragranceHouse);
-    });
-    if(!db) return r;
-    var updated = Object.assign({}, r, {
-      fragranceAccords: db.accords||r.fragranceAccords||'',
-      topNotes: db.top||r.topNotes||'',
-      middleNotes: db.mid||r.middleNotes||'',
-      baseNotes: db.base||r.baseNotes||'',
-      avgPrice: db.p||r.avgPrice||'',
-      communitySill: db.s||r.communitySill||'',
-    });
-    if(JSON.stringify(updated)!==JSON.stringify(r)) _dbSyncChanged=true;
-    return updated;
-  });
-
-  // fragranceDB dedup is catalog-only — do NOT remap IDs in userFragrances/userCompliments.
-  // Each user keeps their own fragrance IDs; the catalog is deduplicated separately.
-  // Remapping cross-user would bleed Sylvia's compliments onto Kiana's frags, etc.
-
-  var _dbFragIds = new Set(communityDeduped.map(function(r){ return r.fragranceId||''; }));
-
-  // Collect referenced fragranceIds that still need a fragranceDB entry
-  var _referencedIds = new Set();
-  FRAGRANCES.forEach(function(f){ if(f.id) _referencedIds.add(f.id); });
-  COMPLIMENTS.forEach(function(c){
-    if(c.primaryFragId) _referencedIds.add(c.primaryFragId);
-    if(c.secondaryFragId) _referencedIds.add(c.secondaryFragId);
-  });
-
-  // Build rows for fragranceIds with no fragranceDB entry (skip QA and already-covered names)
-  var _missingDbRows = [];
-  _referencedIds.forEach(function(fragId){
-    if(!fragId || _dbFragIds.has(fragId)) return;
-    var f = FRAGRANCES.find(function(x){ return x.id===fragId; });
-    if(f){
-      var nm = (f.name||'').trim();
-      if(!nm || nm.toLowerCase().startsWith('qa ')) return;
-      var _nameKey = nm.toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.type||'').toLowerCase();
-      if(_dedupMap[_nameKey]) return; // already represented by canonical entry
-      _missingDbRows.push(fragToDbRow(f)); return;
-    }
-    var resolved = resolveFragById(fragId);
-    if(resolved.name && !resolved.name.toLowerCase().startsWith('qa ')){
-      var _rKey = resolved.name.toLowerCase()+'|'+(resolved.house||'').toLowerCase()+'|'+(resolved.type||'').toLowerCase();
-      if(_dedupMap[_rKey]) return;
-      _missingDbRows.push(fragToDbRow({
-        id: fragId, name: resolved.name, house: resolved.house,
-        type:'', accords:'', createdAt: new Date().toISOString()
-      }));
-    }
-  });
-
-  // Write fragranceDB if dedup changed anything or new rows needed
-  var _needsDbWrite = _dbSyncChanged || communityDeduped.length !== communityRaw.filter(function(r){ return (r.fragranceName||'').trim() && !r.fragranceName.toLowerCase().startsWith('qa '); }).length || _missingDbRows.length;
-  if(_needsDbWrite){
-    var _allDbRows = communityDeduped.concat(_missingDbRows);
-    await writeSheet('fragranceDB', _allDbRows, COMMUNITY_FRAG_HEADERS);
-  }
-  // Always sync COMMUNITY_FRAGS in-memory to the clean deduped set
-  COMMUNITY_FRAGS = communityDeduped.concat(_missingDbRows).map(function(r){
+  await writeSheet('fragranceDB', _newDbRows, COMMUNITY_FRAG_HEADERS);
+  COMMUNITY_FRAGS = _newDbRows.map(function(r){
     return Object.assign({}, r, { name: r.fragranceName||r.name||'', house: r.fragranceHouse||r.house||'', id: r.fragranceId||r.id||'' });
   });
 
