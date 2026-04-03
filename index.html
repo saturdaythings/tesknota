@@ -10,7 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --blue:#2B4480;--blue2:#3A5699;--blue3:#1A2E5C;--blue4:#EEF1F8;--blue5:#D4DCEE;
+  --blue:#2B4480;--blue1:#6B9AF2;--blue2:#3A5699;--blue3:#1A2E5C;--blue4:#EEF1F8;--blue5:#D4DCEE;
+  --card:#F4F2ED;--head:'Playfair Display',Georgia,serif;
   --off:#F4F2ED;--off2:#EAE7DF;--off3:#DDD9CF;
   --warm:#C8B99A;--warm2:#E6D9C4;--warm3:#F2EBD9;
   --muted:#7A8FAA;--rose:#B87068;--sage:#5E8A6E;
@@ -2516,8 +2517,8 @@ let FRAGRANCES = [
   {id:'k37',userId:'u1',name:'Vanilla Bean',house:'Kuumba Made',status:'CURRENT',sizes:['Decant'],type:'Perfume Oil',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'May 2023',purchasePrice:7.88,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k38',userId:'u1',name:'Ambre Etoile',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:12.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k39',userId:'u1',name:'Crème Brûlée',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:12.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k40',userId:'u1',name:'Vanille Extreme',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k41',userId:'u1',name:'Coco Vanille',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k40',userId:'u1',name:'Vanille Extreme',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k41',userId:'u1',name:'Coco Vanille',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k42',userId:'u1',name:'Pistachio Brûlée',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jul 2023',purchasePrice:25.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k43',userId:'u1',name:'Chai Épicé',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jun 2023',purchasePrice:25.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k44',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:5,statusRating:null,personalLong:null,whereBought:'Scent Split',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
@@ -2554,20 +2555,20 @@ let FRAGRANCES = [
   {id:'s30',userId:'u2',name:'Buontalenti',house:'Profumo di Firenze',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',purchaseDate:'Aug 2025',whereBought:'Scent Split',accords:'Gourmand, Fruity, Vanilla',createdAt:'2025-08-01T00:00:00.000Z'},
   {id:'s31',userId:'u2',name:'London Fog',house:'House of Brandt',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',purchaseDate:'Aug 2025',whereBought:'Scent Split',accords:'Fresh, Gourmand, Woody',createdAt:'2025-08-01T00:00:00.000Z'},
   // ── Sylvia Avon Vintage — purchased Apr 2026 ──────────────────────────────
-  {id:'s32',userId:'u2',name:'Elusive',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:7.00,whereBought:'Mercari',personalNotes:'Petit-Fleur flower decanter',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s33',userId:'u2',name:'Bird of Paradise',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:8.00,whereBought:'Mercari',personalNotes:'Vintage decanter',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s34',userId:'u2',name:'Bird of Paradise',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:7.00,whereBought:'Mercari',personalNotes:'Vintage decanter',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s35',userId:'u2',name:'Sweet Honesty',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:10.00,whereBought:'eBay',personalNotes:'Curious Kitty decanter',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s36',userId:'u2',name:'Occur!',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:6.00,whereBought:'eBay',personalNotes:'Fuzzy Bear decanter',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s37',userId:'u2',name:'Moonwind',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:14.99,whereBought:'eBay',personalNotes:'Courting Rose decanter (gold flower)',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s38',userId:'u2',name:'Sonnet',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:24.99,whereBought:'eBay',personalNotes:'Strawberry Fair decanter',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s39',userId:'u2',name:'Topaze',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'Apr 2026',purchasePrice:8.00,whereBought:'eBay',personalNotes:'Teddy Bear decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s32',userId:'u2',name:'Elusive',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'Apr 2026',purchasePrice:7.00,whereBought:'Mercari',personalNotes:'Petit-Fleur flower decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s33',userId:'u2',name:'Bird of Paradise',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'Apr 2026',purchasePrice:8.00,whereBought:'Mercari',personalNotes:'Vintage decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s34',userId:'u2',name:'Bird of Paradise',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'Apr 2026',purchasePrice:7.00,whereBought:'Mercari',personalNotes:'Vintage decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s35',userId:'u2',name:'Sweet Honesty',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'Apr 2026',purchasePrice:10.00,whereBought:'eBay',personalNotes:'Curious Kitty decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s36',userId:'u2',name:'Occur!',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'Apr 2026',purchasePrice:6.00,whereBought:'eBay',personalNotes:'Fuzzy Bear decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s37',userId:'u2',name:'Moonwind',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'Apr 2026',purchasePrice:14.99,whereBought:'eBay',personalNotes:'Courting Rose decanter (gold flower)',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s38',userId:'u2',name:'Sonnet',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'Apr 2026',purchasePrice:24.99,whereBought:'eBay',personalNotes:'Strawberry Fair decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s39',userId:'u2',name:'Topaze',house:'Avon',status:'CURRENT',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'Apr 2026',purchasePrice:8.00,whereBought:'eBay',personalNotes:'Teddy Bear decanter',createdAt:'2026-04-03T00:00:00.000Z'},
   // ── Sylvia Avon Vintage — wishlist ────────────────────────────────────────
-  {id:'s40',userId:'u2',name:'Imperial Garden',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Good luck elephant decanter',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s41',userId:'u2',name:'Charisma',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Statue of Liberty Centennial decanter (1986)',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s42',userId:'u2',name:'Occur!',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Pierrot clown milk glass decanter (Pierrot = Occur!, Pierrette = Charisma — want both)',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s43',userId:'u2',name:'Charisma',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Pierrette clown milk glass decanter (pair with Pierrot above)',createdAt:'2026-04-03T00:00:00.000Z'},
-  {id:'s44',userId:'u2',name:'Moonwind (Perfume Concentré)',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Perfume Concentré',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'La Belle Telephone rotary phone decanter, 3" tall, NEW/filled',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s40',userId:'u2',name:'Imperial Garden',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'',purchasePrice:null,whereBought:'',personalNotes:'Good luck elephant decanter',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s41',userId:'u2',name:'Charisma',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'',purchasePrice:null,whereBought:'',personalNotes:'Statue of Liberty Centennial decanter (1986)',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s42',userId:'u2',name:'Occur!',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'',purchasePrice:null,whereBought:'',personalNotes:'Pierrot clown milk glass decanter (Pierrot = Occur!, Pierrette = Charisma — want both)',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s43',userId:'u2',name:'Charisma',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'',purchasePrice:null,whereBought:'',personalNotes:'Pierrette clown milk glass decanter (pair with Pierrot above)',createdAt:'2026-04-03T00:00:00.000Z'},
+  {id:'s44',userId:'u2',name:'Moonwind (Perfume Concentré)',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Perfume Concentré',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'',purchasePrice:null,whereBought:'',personalNotes:'La Belle Telephone rotary phone decanter, 3" tall, NEW/filled',createdAt:'2026-04-03T00:00:00.000Z'},
 ];
 // Ensure all seed fragrances have fragranceId for id-linked architecture
 FRAGRANCES.forEach(function(f){ if(!f.fragranceId) f.fragranceId = f.id; });
@@ -2745,6 +2746,13 @@ function fragDisplayName(f){
   return f.name+'<span class="type-badge">'+badge+'</span>';
 }
 
+function _parsePurchaseDate(s){
+  if(!s) return 0;
+  var p=s.split(' ');
+  if(p.length===2){var mi=_MNS.indexOf(p[0]);if(mi>=0) return new Date(parseInt(p[1],10),mi,1).getTime();}
+  var d=new Date(s); return isNaN(d)?0:d.getTime();
+}
+
 // ── Per-user accessors ─────────────────────────────────────────────────────
 function myFragrances(){ return FRAGRANCES.filter(function(f){ return CURRENT_USER && f.userId===CURRENT_USER.id; }); }
 function friendFragrances(){ var fr=getFriend(); return fr ? FRAGRANCES.filter(function(f){ return f.userId===fr.id; }) : []; }
@@ -2776,7 +2784,7 @@ function getCompDist(fragId){
 
 function updateCounts(){
   var MF=myFragrances(), MC=myCompliments();
-  const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE').length;
+  const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED'||f.status==='DONT_LIKE').length;
   const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL').length;
   const comps = MC.length;
   document.getElementById('ct-collection').textContent = owned;
@@ -2865,7 +2873,7 @@ function renderDashboard(){
     }
   }
 
-  const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE');
+  const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED'||f.status==='DONT_LIKE');
   const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
   document.getElementById('dashStats').innerHTML = `
     <div class="sbox"><div class="snum">${owned.length}</div><div class="slbl">Owned</div></div>
@@ -2994,7 +3002,7 @@ function deriveAccords(notesStr) {
 
 function getAccords(f) {
   var _cd = getCommunityData(f.name, f.house) || {};
-  var _accords = _cd.accords || '';
+  var _accords = _cd.accords || f.accords || '';
   if (_accords && _accords.length) {
     return typeof _accords === 'string'
       ? _accords.split(',').map(function(a){ return a.trim(); })
@@ -3375,7 +3383,7 @@ document.addEventListener('click',function(e){
   var sSel=document.getElementById('collStatus');
   if(sSel){
     sSel.innerHTML='';
-    [['','Status'],['CURRENT','Current'],['PREVIOUSLY_OWNED','Prev. Owned']].forEach(function(p){
+    [['','Status'],['CURRENT','Current'],['PREVIOUSLY_OWNED','Prev. Owned'],['FINISHED','Finished'],['DONT_LIKE',"Don't Like"]].forEach(function(p){
       var o=document.createElement('option'); o.value=p[0]; o.textContent=p[1]; sSel.appendChild(o);
     });
   }
@@ -3468,8 +3476,8 @@ function renderCollection(){
   }
   if (collSort === 'added' || collSort === 'addedOld') {
     frags.sort(function(a,b){
-      var av = a.purchaseDate ? new Date(a.purchaseDate).getTime() : 0;
-      var bv = b.purchaseDate ? new Date(b.purchaseDate).getTime() : 0;
+      var av = _parsePurchaseDate(a.purchaseDate);
+      var bv = _parsePurchaseDate(b.purchaseDate);
       return collSort==='added' ? bv-av : av-bv;
     });
   }
@@ -4192,7 +4200,7 @@ function renderAnalytics(){
         seg.appendChild(pctEl); seg.appendChild(lbl); sylvAccordRow.appendChild(seg);
       });
     }
-    var allF=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+    var allF=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
     var priceRecs=allF.map(function(f){
       var knownPrice=f.purchasePrice&&parseFloat(f.purchasePrice)>0;
       var p=getPurchasePrice(f);
@@ -4245,7 +4253,7 @@ function renderFriend(){
   var friend=getFriend();
   if(!friend)return;
   var FF=friendFragrances(), FC=friendCompliments();
-  var friendOwned=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+  var friendOwned=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
   var friendWish=FF.filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
 
   // Banner
@@ -4386,9 +4394,9 @@ function renderFriend(){
 function renderInCommon(){
   var friend=getFriend();
   var FF=friendFragrances();
-  var friendOwnedKeys=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';}).map(function(f){return f.name.toLowerCase()+'|'+(f.house||'').toLowerCase();});
+  var friendOwnedKeys=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';}).map(function(f){return f.name.toLowerCase()+'|'+(f.house||'').toLowerCase();});
   var friendWishKeys=FF.filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';}).map(function(f){return f.name.toLowerCase()+'|'+(f.house||'').toLowerCase();});
-  var myOwned=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+  var myOwned=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
   var myWishList=myFragrances().filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
   var shared=myOwned.filter(function(f){return friendOwnedKeys.indexOf(f.name.toLowerCase()+'|'+(f.house||'').toLowerCase())>=0;});
   var wishShared=myWishList.filter(function(f){return friendWishKeys.indexOf(f.name.toLowerCase()+'|'+(f.house||'').toLowerCase())>=0;});
@@ -5084,7 +5092,7 @@ function afSearch(v){
 function cfSearch(v){
   var el=document.getElementById('cfDrop');
   // When empty, show top recently-complimented fragrances as suggestions
-  var eligible=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED';});
+  var eligible=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
   // Sort by most recent compliment date so frequently worn fragrances surface first
   var MC2=myCompliments();
   eligible=eligible.slice().sort(function(a,b){
@@ -5377,7 +5385,7 @@ function editCompliment(id){
 function updateCompFrag2(){
   const primaryId = document.getElementById('compFrag').value;
   const sel2 = document.getElementById('compFrag2');
-  const eligible = myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED');
+  const eligible = myFragrances().filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED');
   sel2.innerHTML='<option value="">None</option>';
   eligible.filter(f=>f.id!==primaryId).forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=f.name; sel2.appendChild(o); });
 }
@@ -6701,7 +6709,7 @@ function auditDataIntegrity(){
   var expectedHeaders=[
     'userId','fragranceId','status','bottleSize','type',
     'boughtFrom','purchaseMonth','purchaseYear','purchasePrice',
-    'personalLongevity','personalRating','notes','addedAt'
+    'personalLongevity','personalSillage','personalRating','notes','addedAt'
   ];
   expectedHeaders.forEach(function(h){
     check('FRAG_HEADERS contains '+h,FRAG_HEADERS.indexOf(h)>-1);
