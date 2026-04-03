@@ -1618,6 +1618,28 @@ function getCommunityData(name, house){
   return null;
 }
 
+function fragToDbRow(f){
+  // Build a fragranceDB row from an in-memory fragrance object.
+  // Community fields are resolved from the hardcoded FRAG_DB via getCommunityData.
+  var cd = getCommunityData(f.name, f.house) || {};
+  return {
+    fragranceId: f.id||'',
+    fragranceName: f.name||'',
+    fragranceHouse: f.house||'',
+    fragranceType: f.type||'',
+    fragranceAccords: f.accords||cd.accords||'',
+    topNotes: cd.topNotes||'',
+    middleNotes: cd.middleNotes||'',
+    baseNotes: cd.baseNotes||'',
+    avgPrice: cd.avgPrice||'',
+    communityRating: cd.communityRating||'',
+    communityLongevity: cd.communityLong||'',
+    communitySill: cd.communitySill||'',
+    addedBy: 'system',
+    addedAt: f.createdAt||new Date().toISOString(),
+  };
+}
+
 function resolveFragById(fragId){
   // Check COMMUNITY_FRAGS (fragranceDB sheet rows) first
   var cf = COMMUNITY_FRAGS.find(function(f){ return (f.fragranceId||f.id)===fragId; });
@@ -1790,6 +1812,36 @@ async function loadAllData(){
   var _missingComps=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
   if(_missingComps.length){
     await syncMissingRows('userCompliments',_missingComps.map(compToRow),COMP_HEADERS,'syncComps');
+  }
+
+  // fragranceDB integrity: every fragranceId referenced in userFragrances or
+  // userCompliments must have a matching row in fragranceDB. Sync any missing ones.
+  var _dbFragIds = new Set(communityRaw.map(function(r){ return r.fragranceId||''; }));
+
+  // Collect every fragranceId that must exist in fragranceDB
+  var _referencedIds = new Set();
+  FRAGRANCES.forEach(function(f){ if(f.id) _referencedIds.add(f.id); });
+  COMPLIMENTS.forEach(function(c){
+    if(c.primaryFragId) _referencedIds.add(c.primaryFragId);
+    if(c.secondaryFragId) _referencedIds.add(c.secondaryFragId);
+  });
+
+  // Build rows for any fragranceId not yet in fragranceDB
+  var _missingDbRows = [];
+  _referencedIds.forEach(function(fragId){
+    if(!fragId || _dbFragIds.has(fragId)) return;
+    var f = FRAGRANCES.find(function(x){ return x.id===fragId; });
+    if(f) _missingDbRows.push(fragToDbRow(f));
+  });
+
+  if(_missingDbRows.length){
+    // Add to in-memory COMMUNITY_FRAGS immediately so resolveFragById works this session
+    _missingDbRows.forEach(function(row){
+      COMMUNITY_FRAGS.push(Object.assign({}, row, {
+        name: row.fragranceName, house: row.fragranceHouse, id: row.fragranceId
+      }));
+    });
+    await syncMissingRows('fragranceDB', _missingDbRows, COMMUNITY_FRAG_HEADERS, 'syncFragDB');
   }
 
   // Recalculate ID counters so new entries don't collide with loaded data
