@@ -1038,7 +1038,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <div>
               <div class="lrl">Longevity</div>
               <div class="lr-static" id="lrs-long"><span class="lrv" id="lr-long">—</span> <button class="lr-editbtn" onclick="lrEditField('long')">edit</button></div>
-              <select id="lr-long-inp" class="input-editable" style="display:none;" onchange="lrSync('communityLong',this.value)"><option value="">—</option><option>0–6h</option><option>6–12h</option><option>12–24h</option><option>&gt;24h</option></select>
+              <select id="lr-long-inp" class="input-editable" style="display:none;" onchange="lrSync('communityLong',this.value)"><option value="">—</option><option value="Very weak">Very weak (0–4h)</option><option value="Weak">Weak (4–8h)</option><option value="Moderate">Moderate (8–12h)</option><option value="Long lasting">Long lasting (12–24h)</option><option value="Eternal">Eternal (&gt;24h)</option></select>
             </div>
             <div>
               <div class="lrl">Sillage</div>
@@ -1192,6 +1192,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <div class="dsec" id="dsec-experience"><div class="dsl">My experience</div>
       <div class="dgrid">
         <div id="drow-mylong"><div class="di-l">My longevity</div><div class="di-v" id="d-mylong"></div></div>
+        <div id="drow-myprice"><div class="di-l">Purchase price</div><div class="di-v" id="d-myprice"></div></div>
         <div id="drow-where"><div class="di-l">Where bought</div><div class="di-v" id="d-where"></div></div>
         <div id="drow-added"><div class="di-l">Added</div><div class="di-v" id="d-added"></div></div>
       </div>
@@ -1308,8 +1309,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <button type="button" class="af-more-toggle" id="afMoreToggle" onclick="toggleAFMore()">+ MORE DETAILS</button>
         <div class="af-more-wrap" id="afMoreWrap" style="display:none;">
         <div class="frow" style="margin-bottom:14px;">
+          <div class="fg" style="margin:0;"><label>Community rating <span style="font-size:10px;color:var(--ink3);">(0–5.0)</span></label>
+            <input type="number" id="afCommunityRating" min="0" max="5" step="0.1" placeholder="e.g. 4.2" class="input-editable" style="width:100%;">
+          </div>
           <div class="fg" style="margin:0;"><label>Personal longevity</label>
-            <select id="afLong"><option value="" selected>Not sure</option><option value="0–6h">0–6h</option><option value="6–12h">6–12h</option><option value="12–24h">12–24h</option><option value=">24h">&gt;24h</option></select>
+            <select id="afLong"><option value="" selected>Not sure</option><option value="Very weak">Very weak (0–4h)</option><option value="Weak">Weak (4–8h)</option><option value="Moderate">Moderate (8–12h)</option><option value="Long lasting">Long lasting (12–24h)</option><option value="Eternal">Eternal (&gt;24h)</option></select>
           </div>
         </div>
         <div class="frow" style="margin-bottom:14px;">
@@ -1506,7 +1510,7 @@ const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/' + (window._
 const FRAG_HEADERS = [
   'userId','fragranceId','status','bottleSize','type',
   'boughtFrom','purchaseMonth','purchaseYear','purchasePrice',
-  'personalLongevity','personalRating','notes','addedAt'
+  'personalLongevity','personalRating','communityRating','notes','addedAt'
 ];
 
 const COMP_HEADERS = [
@@ -1719,10 +1723,11 @@ function fragToRow(f){
     boughtFrom: f.whereBought||'',
     purchaseMonth: pm,
     purchaseYear: py,
-    purchasePrice: f.purchasePrice || (function(){ var m=(f.personalNotes||'').match(/\$(\d+(?:\.\d+)?)/); return m?m[1]:''; })(),
+    purchasePrice: f.purchasePrice||'',
     personalLongevity: f.personalLong||'',
     personalRating: f.personalRating||'',
-    notes: f.personalNotes||'',
+    communityRating: f.communityRating||'',
+    notes: (f.personalNotes||'').replace(/^Purchased for \$[\d.]+\.?\s*/,'').trim(),
     addedAt: f.createdAt||new Date().toISOString(),
   };
 }
@@ -1743,6 +1748,7 @@ function rowToFrag(row){
     type: row.type||null,
     personalRating: row.personalRating ? parseInt(row.personalRating) : null,
     statusRating: null,
+    communityRating: row.communityRating ? parseFloat(row.communityRating) : null,
     personalLong: row.personalLongevity||null,
     whereBought: row.boughtFrom||null,
     purchaseDate: purchaseDate||null,
@@ -1751,7 +1757,7 @@ function rowToFrag(row){
     purchasePrice: row.purchasePrice||null,
     isDupe: false,
     dupeFor: '',
-    personalNotes: row.notes||'',
+    personalNotes: (row.notes||'').replace(/^Purchased for \$[\d.]+\.?\s*/,'').trim(),
     createdAt: row.addedAt||'',
   };
 }
@@ -2511,49 +2517,49 @@ const COMMUNITY_FRAG_HEADERS = [
 // FRAGRANCES — main collection (loaded from Google Sheets)
 let FRAGRANCES = [
   // ── Kiana’s collection seed (userId: u1) ─────────────────────────────────────────
-  {id:'k1',userId:'u1',name:'Eau Duelle',house:'Diptyque',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Feb 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $136.34',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k2',userId:'u1',name:'Lune Féline',house:'Atelier des Ors',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Nov 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $139.47',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k3',userId:'u1',name:'Heavy Cream',house:'Phlur',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'TikTok Shop',purchaseDate:'Oct 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $38.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k4',userId:'u1',name:'Vanilla Skin',house:'Phlur',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TikTok Shop',purchaseDate:'Oct 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $38.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k5',userId:'u1',name:'CK One',house:'Calvin Klein',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $21.41',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k6',userId:'u1',name:'Light Blue',house:'Dolce & Gabbana',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $44.09',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k7',userId:'u1',name:'Viva La Juicy',house:'Juicy Couture',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $18.26',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k8',userId:'u1',name:'Angels\' Share',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Jul 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $189.69',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k9',userId:'u1',name:'Apple Brandy on the Rocks',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Other',purchaseDate:'Jul 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $123.75',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k10',userId:'u1',name:'Yara',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2026',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.99',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k11',userId:'u1',name:'Eclair',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2026',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.99',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k12',userId:'u1',name:'Bianco Latte',house:'Giardini di Toscana',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Nov 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $123.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k13',userId:'u1',name:'Crème Brûlée',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Sep 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $132.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k14',userId:'u1',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Jul 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $132.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k15',userId:'u1',name:'Beirut Baklava',house:'Kheir Fragrance House',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Aug 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $144.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k16',userId:'u1',name:'Ruhe',house:'Oakcha',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $20.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k17',userId:'u1',name:'That Girl Viral Vanilla Extrait',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $47.14',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k18',userId:'u1',name:'Miss Girl Extrait',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $40.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k19',userId:'u1',name:'Amber Musk',house:'Aerin',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'eBay',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'Purchased for $78.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k20',userId:'u1',name:'Perle Sensuelle',house:'Pardon My French & Co',status:'CURRENT',sizes:['Travel'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jul 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $30.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k21',userId:'u1',name:'Santal 33',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k22',userId:'u1',name:'Eucalyptus 18',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k23',userId:'u1',name:'Tonka 25',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k24',userId:'u1',name:'Bergamote 22',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k25',userId:'u1',name:'Eclair Pistachio',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Mar 2026',isDupe:false,dupeFor:'',personalNotes:'Purchased for $26.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k26',userId:'u1',name:'Eclair',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Dec 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $36.99',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k27',userId:'u1',name:'Cocktail Intense',house:'Fragrance World',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Dec 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $18.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k28',userId:'u1',name:'Affection',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Oct 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $27.87',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k29',userId:'u1',name:'Badee Al Oud Sublime',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jul 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $22.20',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k30',userId:'u1',name:'Kismet Angel',house:'Maison Alhambra',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jul 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $22.49',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k31',userId:'u1',name:'Pure Vanilla',house:'Lavanila',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Nov 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $36.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k32',userId:'u1',name:'Choco Musk',house:'Al Rehab',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Nov 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $8.35',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k33',userId:'u1',name:'Khamrah',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jun 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $41.07',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k34',userId:'u1',name:'Fresh Cream',house:'Philosophy',status:'CURRENT',sizes:['Sample'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Nov 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $18.20',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k35',userId:'u1',name:'Amber',house:'Nemat',status:'CURRENT',sizes:['Decant'],type:'Perfume Oil',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'May 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $12.72',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k36',userId:'u1',name:'Persian Garden',house:'Kuumba Made',status:'CURRENT',sizes:['Decant'],type:'Perfume Oil',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'May 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.88',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k37',userId:'u1',name:'Vanilla Bean',house:'Kuumba Made',status:'CURRENT',sizes:['Decant'],type:'Perfume Oil',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'May 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $7.88',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k38',userId:'u1',name:'Ambre Etoile',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $12.99',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k39',userId:'u1',name:'Crème Brûlée',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',isDupe:false,dupeFor:'',personalNotes:'Purchased for $12.99',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k1',userId:'u1',name:'Eau Duelle',house:'Diptyque',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Feb 2025',purchasePrice:136.34,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k2',userId:'u1',name:'Lune Féline',house:'Atelier des Ors',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Nov 2024',purchasePrice:139.47,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k3',userId:'u1',name:'Heavy Cream',house:'Phlur',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'TikTok Shop',purchaseDate:'Oct 2024',purchasePrice:38.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k4',userId:'u1',name:'Vanilla Skin',house:'Phlur',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TikTok Shop',purchaseDate:'Oct 2024',purchasePrice:38.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k5',userId:'u1',name:'CK One',house:'Calvin Klein',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',purchasePrice:21.41,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k6',userId:'u1',name:'Light Blue',house:'Dolce & Gabbana',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',purchasePrice:44.09,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k7',userId:'u1',name:'Viva La Juicy',house:'Juicy Couture',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Jun 2024',purchasePrice:18.26,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k8',userId:'u1',name:'Angels\' Share',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'FragranceNet',purchaseDate:'Jul 2023',purchasePrice:189.69,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k9',userId:'u1',name:'Apple Brandy on the Rocks',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Other',purchaseDate:'Jul 2023',purchasePrice:123.75,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k10',userId:'u1',name:'Yara',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2026',purchasePrice:7.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k11',userId:'u1',name:'Eclair',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2026',purchasePrice:7.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k12',userId:'u1',name:'Bianco Latte',house:'Giardini di Toscana',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Nov 2023',purchasePrice:123.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k13',userId:'u1',name:'Crème Brûlée',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Sep 2024',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k14',userId:'u1',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Jul 2025',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k15',userId:'u1',name:'Beirut Baklava',house:'Kheir Fragrance House',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Aug 2025',purchasePrice:144.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k16',userId:'u1',name:'Ruhe',house:'Oakcha',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:20.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k17',userId:'u1',name:'That Girl Viral Vanilla Extrait',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:47.14,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k18',userId:'u1',name:'Miss Girl Extrait',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:40.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k19',userId:'u1',name:'Amber Musk',house:'Aerin',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'eBay',purchaseDate:'',purchasePrice:78.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k20',userId:'u1',name:'Perle Sensuelle',house:'Pardon My French & Co',status:'CURRENT',sizes:['Travel'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jul 2025',purchasePrice:30.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k21',userId:'u1',name:'Santal 33',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',purchasePrice:7.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k22',userId:'u1',name:'Eucalyptus 18',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',purchasePrice:7.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k23',userId:'u1',name:'Tonka 25',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',purchasePrice:7.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k24',userId:'u1',name:'Bergamote 22',house:'Le Labo',status:'CURRENT',sizes:['Sample'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Oct 2025',purchasePrice:7.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k25',userId:'u1',name:'Eclair Pistachio',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Mar 2026',purchasePrice:26.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k26',userId:'u1',name:'Eclair',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Dec 2024',purchasePrice:36.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k27',userId:'u1',name:'Cocktail Intense',house:'Fragrance World',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Dec 2024',purchasePrice:18.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k28',userId:'u1',name:'Affection',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Oct 2024',purchasePrice:27.87,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k29',userId:'u1',name:'Badee Al Oud Sublime',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jul 2024',purchasePrice:22.20,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k30',userId:'u1',name:'Kismet Angel',house:'Maison Alhambra',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jul 2024',purchasePrice:22.49,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k31',userId:'u1',name:'Pure Vanilla',house:'Lavanila',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Nov 2023',purchasePrice:36.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k32',userId:'u1',name:'Choco Musk',house:'Al Rehab',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Nov 2023',purchasePrice:8.35,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k33',userId:'u1',name:'Khamrah',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jun 2023',purchasePrice:41.07,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k34',userId:'u1',name:'Fresh Cream',house:'Philosophy',status:'CURRENT',sizes:['Sample'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Nov 2023',purchasePrice:18.20,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k35',userId:'u1',name:'Amber',house:'Nemat',status:'CURRENT',sizes:['Decant'],type:'Perfume Oil',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'May 2023',purchasePrice:12.72,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k36',userId:'u1',name:'Persian Garden',house:'Kuumba Made',status:'CURRENT',sizes:['Decant'],type:'Perfume Oil',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'May 2023',purchasePrice:7.88,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k37',userId:'u1',name:'Vanilla Bean',house:'Kuumba Made',status:'CURRENT',sizes:['Decant'],type:'Perfume Oil',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'May 2023',purchasePrice:7.88,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k38',userId:'u1',name:'Ambre Etoile',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:12.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k39',userId:'u1',name:'Crème Brûlée',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:12.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k40',userId:'u1',name:'Vanille Extreme',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k41',userId:'u1',name:'Coco Vanille',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k42',userId:'u1',name:'Pistachio Brûlée',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jul 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $25.00',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k43',userId:'u1',name:'Chai Épicé',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jun 2023',isDupe:false,dupeFor:'',personalNotes:'Purchased for $25.00',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k42',userId:'u1',name:'Pistachio Brûlée',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jul 2023',purchasePrice:25.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k43',userId:'u1',name:'Chai Épicé',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jun 2023',purchasePrice:25.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k44',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:5,statusRating:null,personalLong:null,whereBought:'Scent Split',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
   {id:'k45',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
   {id:'s1',userId:'u2',name:'Lost Cherry',house:'Tom Ford',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Fruity, Oriental, Gourmand',createdAt:'2024-01-01T00:00:00.000Z'},
@@ -2721,6 +2727,19 @@ function renderStars(val){
 }
 
 const STAR_WORDS={1:"Don't Like",2:'Just OK',3:'Like',4:'Love',5:'Obsessed'};
+
+var LONG_MAP = {
+  '2–4h':'Very weak','4–6h':'Weak','6–8h':'Weak','8–12h':'Moderate',
+  '0–6h':'Very weak','6–12h':'Moderate','12–24h':'Long lasting','>24h':'Eternal',
+  'Very weak':'Very weak','Weak':'Weak','Moderate':'Moderate','Long lasting':'Long lasting','Eternal':'Eternal'
+};
+var LONG_HOURS = {'Very weak':'0–4h','Weak':'4–8h','Moderate':'8–12h','Long lasting':'12–24h','Eternal':'>24h'};
+function formatLong(val){
+  if(!val) return '';
+  var word = LONG_MAP[val] || val;
+  var hrs = LONG_HOURS[word];
+  return hrs ? word+' ('+hrs+')' : word;
+}
 function starPick(n){ document.getElementById('afRating').value=n; starRender(n); }
 function starHover(n){ var val=n||parseInt(document.getElementById('afRating').value)||3; starRender(val); }
 function starRender(n){
@@ -3456,7 +3475,8 @@ function renderCollection(){
     return a.name.localeCompare(b.name);
   });
   if (collSort === 'long' || collSort === 'longDesc') {
-    var lo = {'0–6h':1,'6–12h':2,'12–24h':3,'>24h':4};
+    var lo = {'Very weak':1,'Weak':2,'Moderate':3,'Long lasting':4,'Eternal':5,
+              '0–6h':1,'6–12h':2,'12–24h':4,'>24h':5,'2–4h':1,'4–6h':2,'6–8h':2,'8–12h':3};
     frags.sort(function(a,b){
       var _acd = getCommunityData(a.name, a.house) || {};
       var _bcd = getCommunityData(b.name, b.house) || {};
@@ -3511,9 +3531,11 @@ function renderCollection(){
       var hasFriendMatch=friendOwnsSet.has(f.name.toLowerCase());
       var compCount=getCompCount(f.id);
       var _cd = getCommunityData(f.name, f.house) || {};
-      var longVal = f.personalLong || _cd.communityLong || '';
-      var longTdHtml = longVal
-        ? '<span style="font-family:var(--mono);font-size:11px;color:' + (f.personalLong ? 'var(--ink2)' : 'var(--ink3)') + ';">' + longVal + '</span>'
+      var longIsPersonal = !!f.personalLong;
+      var longRaw = f.personalLong || _cd.communityLong || '';
+      var longTdHtml = longRaw
+        ? '<span style="font-family:var(--mono);font-size:11px;color:' + (longIsPersonal ? 'var(--ink2)' : 'var(--ink3)') + ';" title="' + (longIsPersonal ? 'My longevity' : 'Community longevity') + '">' + formatLong(longRaw) + '</span>'
+          + '<br><span style="font-size:9px;color:var(--ink3);letter-spacing:.04em;">' + (longIsPersonal ? 'mine' : 'comm.') + '</span>'
         : '<span style="color:var(--ink3);">—</span>';
       var addedStr = f.purchaseDate || '';
       if (!addedStr && f.createdAt) {
@@ -3525,7 +3547,7 @@ function renderCollection(){
         : '<span style="color:var(--ink3);">—</span>';
       return '<tr onclick="openDetail(\''+f.id+'\')">'
         +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
-        +'<td><div class="tstars">'+renderStars(f.statusRating)+'</div></td>'
+        +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
         +'<td>'+longTdHtml+'</td>'
         +'<td>'+addedTdHtml+'</td>'
         +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+getAccords(f).join(', ')+'</td>'
@@ -4455,9 +4477,10 @@ function openDetail(fragId){
     else { el.textContent=''; row.style.display='none'; }
   }
   var _cd = getCommunityData(f.name, f.house) || {};
-  setDRow('drow-comm','d-comm', _cd.communityRating?(_cd.communityRating+' / 5.0'):null);
+  var _commRating = f.communityRating || _cd.communityRating;
+  setDRow('drow-comm','d-comm', _commRating?(_commRating+' / 5.0'):null);
   setDRow('drow-price','d-price', _cd.avgPrice||null);
-  setDRow('drow-long','d-long', _cd.communityLong||null);
+  setDRow('drow-long','d-long', _cd.communityLong ? formatLong(_cd.communityLong) : null);
   setDRow('drow-sill','d-sill', _cd.communitySill||null);
   renderDetailNotes(f);
   var accords = getAccords(f);
@@ -4471,13 +4494,14 @@ function openDetail(fragId){
       accordEl.appendChild(chip);
     });
   }
-  setDRow('drow-mylong','d-mylong', f.personalLong||null);
+  setDRow('drow-mylong','d-mylong', f.personalLong ? formatLong(f.personalLong) : null);
+  setDRow('drow-myprice','d-myprice', f.purchasePrice ? '$'+parseFloat(f.purchasePrice).toFixed(2) : null);
   setDRow('drow-where','d-where', f.whereBought||null);
   setDRow('drow-added','d-added', f.purchaseDate||null);
   // Show "Add details" if My experience section is entirely empty
   var expAddBtn=document.getElementById('d-add-experience');
   if(expAddBtn){
-    var expEmpty=!f.personalLong&&!f.whereBought&&!f.purchaseDate;
+    var expEmpty=!f.personalLong&&!f.purchasePrice&&!f.whereBought&&!f.purchaseDate;
     expAddBtn.style.display=expEmpty?'block':'none';
   }
   document.getElementById('d-notebox').textContent = f.personalNotes||'No personal notes yet.';
@@ -4777,7 +4801,7 @@ function openEditFrag(fragId, forceStatus){
   document.getElementById('mpH').textContent = f.house.toUpperCase();
   var _cd = getCommunityData(f.name, f.house) || {};
   document.getElementById('mpR').textContent = _cd.communityRating ? _cd.communityRating+' / 5' : '—';
-  document.getElementById('mpL').textContent = _cd.communityLong||'—';
+  document.getElementById('mpL').textContent = _cd.communityLong ? formatLong(_cd.communityLong) : '—';
   document.getElementById('mpP').textContent = _cd.avgPrice||'—';
   document.getElementById('mpNotes').textContent = _cd.notes||'';
   document.getElementById('afPrev').style.display='block';
@@ -4823,6 +4847,7 @@ function resetAFModal(){
   document.getElementById('afNotes').value='';
   tiInit('afTop',''); tiInit('afMiddle',''); tiInit('afBase','');
   var priceEl=document.getElementById('afPrice'); if(priceEl) priceEl.value='';
+  var crEl=document.getElementById('afCommunityRating'); if(crEl) crEl.value='';
 }
 
 function validateAfStep2(){
@@ -4863,13 +4888,13 @@ function afGoStep(n, skipValidation){
       var _savedType=d.type||'';
       document.getElementById('afType').value=_typeNorm[_savedType]||_savedType||'';
     
-      if(d.personalRating){ document.querySelectorAll('#rOpts .opt').forEach(o=>o.classList.toggle('on',parseInt(o.dataset.v)===d.personalRating)); }
-      if(d.statusRating){ var numRat=typeof d.statusRating==='number'?d.statusRating:({Obsessed:5,Love:4,Like:3,'Just OK':2,"Don't Like":1}[d.statusRating]||3); document.getElementById('afRating').value=numRat; starRender(numRat); }
+      if(d.personalRating){ document.getElementById('afRating').value=d.personalRating; starRender(d.personalRating); }
       if(d.personalLong) document.getElementById('afLong').value=d.personalLong;
       if(d.whereBought) document.getElementById('afWhere').value=d.whereBought;
       if(d.purchaseDate){ const parts=d.purchaseDate.split(' '); if(parts[0]) document.getElementById('afMonth').value=parts[0]; if(parts[1]) document.getElementById('afYear').value=parts[1]; }
       if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeFor').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
       if(d.purchasePrice){ var prEl=document.getElementById('afPrice'); if(prEl) prEl.value=d.purchasePrice; }
+      if(d.communityRating){ var crEl=document.getElementById('afCommunityRating'); if(crEl) crEl.value=d.communityRating; }
       if(d.personalNotes) document.getElementById('afNotes').value=d.personalNotes;
       tiInit('afTop',d.topNotes||''); tiInit('afMiddle',d.middleNotes||''); tiInit('afBase',d.baseNotes||'');
     }
@@ -4927,8 +4952,9 @@ function saveFragrance(){
   const data = {
     name, status: document.getElementById('afStatus').value,
     type: document.getElementById('afType').value,
-    sizes, personalRating: ratingEl?parseInt(ratingEl.dataset.v):null,
-    statusRating: parseInt(document.getElementById('afRating').value)||null,
+    sizes, personalRating: parseInt(document.getElementById('afRating').value)||null,
+    statusRating: null,
+    communityRating: parseFloat(document.getElementById('afCommunityRating').value)||null,
     personalLong: document.getElementById('afLong').value||null,
     whereBought: document.getElementById('afWhere').value||null,
     purchasePrice: parseFloat(document.getElementById('afPrice').value)||null,
@@ -5130,7 +5156,7 @@ function pickAF(name){
     document.getElementById('mpN').textContent=f.n;
     document.getElementById('mpH').textContent=f.h.toUpperCase();
     document.getElementById('mpR').textContent=f.r?(f.r+' / 5'):'—';
-    document.getElementById('mpL').textContent=f.l||'—';
+    document.getElementById('mpL').textContent=f.l ? formatLong(f.l) : '—';
     document.getElementById('mpP').textContent=f.p||'—';
     document.getElementById('mpNotes').textContent=allNotes||'—';
   }
@@ -5430,7 +5456,7 @@ function importToCollection(data){
   document.getElementById('mpN').textContent=data.name;
   document.getElementById('mpH').textContent=data.house.toUpperCase();
   document.getElementById('mpR').textContent=data.communityRating?' '+data.communityRating+' / 5':'—';
-  document.getElementById('mpL').textContent=data.communityLong||'—';
+  document.getElementById('mpL').textContent=data.communityLong ? formatLong(data.communityLong) : '—';
   document.getElementById('mpP').textContent=data.avgPrice||'—';
   document.getElementById('mpNotes').textContent=data.notes||'';
   document.getElementById('afPrev').style.display='block';
@@ -5899,7 +5925,7 @@ function showLinkResult(data){
   // Avg Price
   lrSetField('price', data.avgPrice||null);
   // Longevity
-  lrSetField('long', data.communityLong||null);
+  lrSetField('long', data.communityLong ? formatLong(data.communityLong) : null);
   if(data.communityLong){ document.getElementById('lr-long-inp').value=data.communityLong; }
   // Sillage
   lrSetField('sill', data.communitySill||null);
