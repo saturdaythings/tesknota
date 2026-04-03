@@ -881,8 +881,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <option value="nameZA">Name Z–A</option>
           <option value="houseAZ">House A–Z</option>
           <option value="houseZA">House Z–A</option>
-          <option value="ratingHL">Rating High–Low</option>
-          <option value="ratingLH">Rating Low–High</option>
           <option value="priceHL">Price High–Low</option>
           <option value="priceLH">Price Low–High</option>
           <option value="recent">Recently Added</option>
@@ -894,10 +892,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           <button class="filter-btn" onclick="toggleWishFamilyDrop()">Accords <span id="wishFamilyFilterLabel"></span></button>
           <div class="filter-drop-panel" id="wishFamilyDropPanel" style="display:none;"></div>
         </div>
-        <div style="position:relative;display:inline-flex;align-items:center;gap:4px;">
-          <select id="wishRating"></select>
-          <span id="wishRatingX" onclick="wishRatingVal='';document.getElementById('wishRating').value='';this.style.display='none';updateWishFiltersToggleLabel();renderWishlist();" style="display:none;cursor:pointer;color:var(--ink3);font-size:11px;padding:0 2px;">×</span>
-        </div>
         <div id="wishHouseFilterWrap" style="flex-shrink:0;position:relative;">
           <button class="filter-btn" id="wishHouseFilterBtn" onclick="wishHouseVal?clearWishHouseFilter():toggleWishHouseDrop()">Houses</button>
           <div id="wishHouseDropPanel" style="display:none;position:absolute;top:calc(100% + 2px);left:0;background:var(--off);border:1px solid var(--b3);z-index:500;min-width:220px;box-shadow:0 4px 16px rgba(26,46,92,.12);"></div>
@@ -908,7 +902,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <th data-sort="nameAZ">Fragrance <span class="sort-arrow"></span></th>
         <th data-sort="houseAZ">House <span class="sort-arrow"></span></th>
         <th>Status</th>
-        <th data-sort="ratingHL">Community Rating <span class="sort-arrow"></span></th>
         <th data-sort="priceHL">Avg Price <span class="sort-arrow"></span></th>
         <th>Accords</th>
         <th></th>
@@ -1030,19 +1023,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           </div>
           <div class="lr-g">
             <div>
-              <div class="lrl">Community rating</div>
-              <div class="lr-static" id="lrs-comm"><span class="lrv" id="lr-comm">—</span> <button class="lr-editbtn" onclick="lrEditField('comm')">edit</button></div>
-              <input type="number" id="lr-comm-inp" class="input-editable" style="display:none;" min="0" max="5" step="0.1" placeholder="0.0–5.0" oninput="lrSync('communityRating',this.value)">
-            </div>
-            <div>
               <div class="lrl">Avg price</div>
               <div class="lr-static" id="lrs-price"><span class="lrv" id="lr-price">—</span> <button class="lr-editbtn" onclick="lrEditField('price')">edit</button></div>
               <input type="text" id="lr-price-inp" class="input-editable" style="display:none;" placeholder="~$280" oninput="lrSync('avgPrice',this.value)">
-            </div>
-            <div>
-              <div class="lrl">Longevity</div>
-              <div class="lr-static" id="lrs-long"><span class="lrv" id="lr-long">—</span> <button class="lr-editbtn" onclick="lrEditField('long')">edit</button></div>
-              <select id="lr-long-inp" class="input-editable" style="display:none;" onchange="lrSync('communityLong',this.value)"><option value="">—</option><option value="Very weak">Very weak (0–4h)</option><option value="Weak">Weak (4–8h)</option><option value="Moderate">Moderate (8–12h)</option><option value="Long lasting">Long lasting (12–24h)</option><option value="Eternal">Eternal (&gt;24h)</option></select>
             </div>
             <div>
               <div class="lrl">Sillage</div>
@@ -1088,7 +1071,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
             <div class="lr-n" id="scan-name"></div>
             <div class="lr-h" id="scan-house"></div>
             <div class="grid-2col-gap">
-              <div><div class="lrl">Community</div><div class="lrv" id="scan-comm"></div></div>
               <div><div class="lrl">Notes</div><div class="lrv" id="scan-notes" style="font-size:11px;"></div></div>
             </div>
             <div class="btn-row">
@@ -1183,9 +1165,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   <div class="dbody">
     <div class="dsec" id="dsec-profile"><div class="dsl">Fragrance profile</div>
       <div class="dgrid">
-        <div id="drow-comm"><div class="di-l">Community rating</div><div class="di-v" id="d-comm"></div></div>
         <div id="drow-price"><div class="di-l">Avg price</div><div class="di-v" id="d-price"></div></div>
-        <div id="drow-long"><div class="di-l">Longevity (comm.)</div><div class="di-v" id="d-long"></div></div>
         <div id="drow-sill"><div class="di-l">Sillage (comm.)</div><div class="di-v" id="d-sill"></div></div>
       </div>
     </div>
@@ -1252,8 +1232,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <div class="mprev" id="afPrev">
           <div class="mp-n" id="mpN"></div><div class="mp-h" id="mpH"></div>
           <div class="mp-g">
-            <div><div class="mpl">Community</div><div class="mpv" id="mpR"></div></div>
-            <div><div class="mpl">Longevity</div><div class="mpv" id="mpL"></div></div>
             <div><div class="mpl">Avg Price</div><div class="mpv" id="mpP"></div></div>
           </div>
           <div class="mp-notes" id="mpNotes"></div>
@@ -1314,9 +1292,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <button type="button" class="af-more-toggle" id="afMoreToggle" onclick="toggleAFMore()">+ MORE DETAILS</button>
         <div class="af-more-wrap" id="afMoreWrap" style="display:none;">
         <div class="frow" style="margin-bottom:14px;">
-          <div class="fg" style="margin:0;"><label>Community rating <span style="font-size:10px;color:var(--ink3);">(0–5.0)</span></label>
-            <input type="number" id="afCommunityRating" min="0" max="5" step="0.1" placeholder="e.g. 4.2" class="input-editable" style="width:100%;">
-          </div>
           <div class="fg" style="margin:0;"><label>Personal longevity</label>
             <select id="afLong"><option value="" selected>Not sure</option><option value="Very weak">Very weak (0–4h)</option><option value="Weak">Weak (4–8h)</option><option value="Moderate">Moderate (8–12h)</option><option value="Long lasting">Long lasting (12–24h)</option><option value="Eternal">Eternal (&gt;24h)</option></select>
           </div>
@@ -1518,7 +1493,7 @@ const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/' + (window._
 const FRAG_HEADERS = [
   'userId','fragranceId','status','bottleSize','type',
   'boughtFrom','purchaseMonth','purchaseYear','purchasePrice',
-  'personalLongevity','personalSillage','personalRating','communityRating','notes','addedAt'
+  'personalLongevity','personalSillage','personalRating','notes','addedAt'
 ];
 
 const COMP_HEADERS = [
@@ -1651,8 +1626,6 @@ function getCommunityData(name, house){
   if(db){
     var notes = db.notes || [db.top||'',db.mid||'',db.base||''].filter(Boolean).join(', ');
     return {
-      communityRating: db.r||null,
-      communityLong: db.l||null,
       communitySill: db.s||null,
       avgPrice: db.p||null,
       notes: notes,
@@ -1668,8 +1641,6 @@ function getCommunityData(name, house){
   });
   if(cf){
     return {
-      communityRating: cf.communityRating||null,
-      communityLong: cf.communityLong||null,
       communitySill: cf.communitySill||null,
       avgPrice: cf.avgPrice||null,
       notes: cf.notes||'',
@@ -1696,8 +1667,6 @@ function fragToDbRow(f){
     middleNotes: cd.middleNotes||'',
     baseNotes: cd.baseNotes||'',
     avgPrice: cd.avgPrice||'',
-    communityRating: cd.communityRating||'',
-    communityLongevity: cd.communityLong||'',
     communitySill: cd.communitySill||'',
     addedBy: 'system',
     addedAt: f.createdAt||new Date().toISOString(),
@@ -1735,7 +1704,6 @@ function fragToRow(f){
     personalLongevity: f.personalLong||'',
     personalSillage: f.personalSill||'',
     personalRating: f.personalRating||'',
-    communityRating: f.communityRating||'',
     notes: (f.personalNotes||'').replace(/^Purchased for \$[\d.]+\.?\s*/,'').trim(),
     addedAt: f.createdAt||new Date().toISOString(),
   };
@@ -1757,7 +1725,6 @@ function rowToFrag(row){
     type: row.type||null,
     personalRating: row.personalRating ? parseInt(row.personalRating) : null,
     statusRating: null,
-    communityRating: row.communityRating ? parseFloat(row.communityRating) : null,
     personalLong: row.personalLongevity||null,
     personalSill: row.personalSillage||null,
     whereBought: row.boughtFrom||null,
@@ -2520,7 +2487,7 @@ let COMMUNITY_FRAGS = [];
 const COMMUNITY_FRAG_HEADERS = [
   'fragranceId','fragranceName','fragranceHouse','fragranceType',
   'fragranceAccords','topNotes','middleNotes','baseNotes',
-  'avgPrice','communityRating','communityLongevity','communitySill',
+  'avgPrice','communitySill',
   'addedBy','addedAt'
 ];
 
@@ -3465,7 +3432,7 @@ function renderCollection(){
     });
   }
   // Rating
-  if(collRatingVal){ frags=frags.filter(function(f){ return parseRating(f.statusRating)===parseInt(collRatingVal); }); }
+  if(collRatingVal){ frags=frags.filter(function(f){ return parseRating(f.personalRating)===parseInt(collRatingVal); }); }
   // Note filter (from analytics chip click)
   if(activeNoteFilter){
     frags=frags.filter(function(f){
@@ -3491,10 +3458,8 @@ function renderCollection(){
     var lo = {'Very weak':1,'Weak':2,'Moderate':3,'Long lasting':4,'Eternal':5,
               '0–6h':1,'6–12h':2,'12–24h':4,'>24h':5,'2–4h':1,'4–6h':2,'6–8h':2,'8–12h':3};
     frags.sort(function(a,b){
-      var _acd = getCommunityData(a.name, a.house) || {};
-      var _bcd = getCommunityData(b.name, b.house) || {};
-      var av = lo[a.personalLong]||lo[_acd.communityLong]||0;
-      var bv = lo[b.personalLong]||lo[_bcd.communityLong]||0;
+      var av = lo[a.personalLong]||0;
+      var bv = lo[b.personalLong]||0;
       return collSort==='long' ? av-bv : bv-av;
     });
   }
@@ -3544,11 +3509,8 @@ function renderCollection(){
       var hasFriendMatch=friendOwnsSet.has(f.name.toLowerCase());
       var compCount=getCompCount(f.id);
       var _cd = getCommunityData(f.name, f.house) || {};
-      var longIsPersonal = !!f.personalLong;
-      var longRaw = f.personalLong || _cd.communityLong || '';
-      var longTdHtml = longRaw
-        ? '<span style="font-family:var(--mono);font-size:11px;color:' + (longIsPersonal ? 'var(--ink2)' : 'var(--ink3)') + ';" title="' + (longIsPersonal ? 'My longevity' : 'Community longevity') + '">' + formatLong(longRaw) + '</span>'
-          + '<br><span style="font-size:9px;color:var(--ink3);letter-spacing:.04em;">' + (longIsPersonal ? 'mine' : 'comm.') + '</span>'
+      var longTdHtml = f.personalLong
+        ? '<span style="font-family:var(--mono);font-size:11px;color:var(--ink2);">' + formatLong(f.personalLong) + '</span>'
         : '<span style="color:var(--ink3);">—</span>';
       var addedStr = f.purchaseDate || '';
       if (!addedStr && f.createdAt) {
@@ -3608,16 +3570,11 @@ function renderWishlist(){
     });
   }
   // Rating
-  if(wishRatingVal){
-    var minR=parseInt(wishRatingVal);
-    frags=frags.filter(function(f){ var _cd = getCommunityData(f.name, f.house) || {}; return (parseRating(_cd.communityRating)||0)>=minR; });
-  }
   // Sort
   frags=frags.slice().sort(function(a,b){
     if(wishSortVal==='nameZA') return b.name.localeCompare(a.name);
     if(wishSortVal==='houseAZ') return (a.house||'').localeCompare(b.house||'');
     if(wishSortVal==='houseZA') return (b.house||'').localeCompare(a.house||'');
-    if(wishSortVal==='ratingHL'||wishSortVal==='ratingLH'){ var _acd=getCommunityData(a.name,a.house)||{},_bcd=getCommunityData(b.name,b.house)||{}; var ra=parseRating(_acd.communityRating)||0,rb=parseRating(_bcd.communityRating)||0; return wishSortVal==='ratingHL'?rb-ra:ra-rb; }
     if(wishSortVal==='priceHL'||wishSortVal==='priceLH'){ var _acd2=getCommunityData(a.name,a.house)||{},_bcd2=getCommunityData(b.name,b.house)||{}; var pa=parseFloat((_acd2.avgPrice||'0').replace(/[^0-9.]/g,''))||0,pb=parseFloat((_bcd2.avgPrice||'0').replace(/[^0-9.]/g,''))||0; return wishSortVal==='priceHL'?pb-pa:pa-pb; }
     if(wishSortVal==='recent') return parseInt((b.id||'0').replace(/\D/g,''))-parseInt((a.id||'0').replace(/\D/g,''));
     return a.name.localeCompare(b.name);
@@ -3654,7 +3611,6 @@ function renderWishlist(){
         +'<td><div class="tn">'+fragDisplayName(f)+'</div></td>'
         +'<td class="tmono" style="font-size:11px;">'+f.house+'</td>'
         +'<td><div class="ts s-wnt">'+STATUS_LABELS[f.status]+'</div></td>'
-        +'<td class="tmono" style="color:var(--warm)">'+(_cd.communityRating?_cd.communityRating+' / 5.0':'—')+'</td>'
         +'<td class="tmono">'+(_cd.avgPrice||'—')+'</td>'
         +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(_accords.slice(0,3).join(', ')||'—')+'</td>'
         +'<td class="tact"><button class="btn btn-warm btn-sm" onclick="event.stopPropagation();promoteToCollection(\''+f.id+'\')">Bought it</button></td>'
@@ -3681,7 +3637,7 @@ function renderDiscovery(){
 
   // 1. Friend signals: friend owns, I don't
   var friendName=(getFriend()||{name:'your friend'}).name;
-  var friendSigs=friendFragrances().filter(function(f){return f.status==='CURRENT'&&!alreadyHave(f.name);}).slice(0,3).map(function(f){ var _cd=getCommunityData(f.name,f.house)||{}; return {n:f.name,h:f.house,r:_cd.communityRating,p:_cd.avgPrice,reason:'In '+friendName+'\'s collection'}; });
+  var friendSigs=friendFragrances().filter(function(f){return f.status==='CURRENT'&&!alreadyHave(f.name);}).slice(0,3).map(function(f){ var _cd=getCommunityData(f.name,f.house)||{}; return {n:f.name,h:f.house,p:_cd.avgPrice,reason:'In '+friendName+'\'s collection'}; });
 
   // 2. Note-based: extract notes from my top-rated frags, find DB matches
   var myTopNotes={};
@@ -3710,7 +3666,7 @@ function renderDiscovery(){
 function quickAddWishlist(name, house){
   var db=FRAG_DB.find(function(d){return normStr(d.n)===normStr(name)&&normStr(d.h)===normStr(house);})||{};
   var allNotes=[db.top||'',db.mid||'',db.base||''].filter(Boolean).join(', ')||'';
-  var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:name,house:house,status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communityRating:db.r||null,communityLong:db.l||null,communitySill:db.s||null,avgPrice:db.p||null,notes:allNotes,topNotes:db.top||'',middleNotes:db.mid||'',baseNotes:db.base||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''};
+  var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:name,house:house,status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communitySill:db.s||null,avgPrice:db.p||null,notes:allNotes,topNotes:db.top||'',middleNotes:db.mid||'',baseNotes:db.base||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''};
   FRAGRANCES.push(newFrag);
   appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   renderWishlist();
@@ -4379,9 +4335,8 @@ function renderFriend(){
       var dh=document.createElement('div'); dh.className='th_'; dh.textContent=f.house; td1.appendChild(dh); tr.appendChild(td1);
       var td2=document.createElement('td');
       var ds=document.createElement('div'); ds.className='ts s-wnt'; ds.textContent=STATUS_LABELS[f.status]; td2.appendChild(ds); tr.appendChild(td2);
-      var td3=document.createElement('td'); td3.className='tmono'; td3.style.color='var(--warm)';
-      var _wcd=getCommunityData(f.name,f.house)||{}; td3.textContent=(_wcd.communityRating||'—')+' / 5.0'; tr.appendChild(td3);
-      var td4=document.createElement('td'); td4.className='tmono'; td4.textContent=_wcd.avgPrice||'—'; tr.appendChild(td4);
+      var _wcd=getCommunityData(f.name,f.house)||{};
+      var td3=document.createElement('td'); td3.className='tmono'; td3.textContent=_wcd.avgPrice||'—'; tr.appendChild(td3);
       wishBody.appendChild(tr);
     });
     if(!friendWish.length){
@@ -4492,10 +4447,7 @@ function openDetail(fragId){
     else { el.textContent=''; row.style.display='none'; }
   }
   var _cd = getCommunityData(f.name, f.house) || {};
-  var _commRating = f.communityRating || _cd.communityRating;
-  setDRow('drow-comm','d-comm', _commRating?(_commRating+' / 5.0'):null);
   setDRow('drow-price','d-price', _cd.avgPrice||null);
-  setDRow('drow-long','d-long', _cd.communityLong ? formatLong(_cd.communityLong) : null);
   setDRow('drow-sill','d-sill', _cd.communitySill||null);
   renderDetailNotes(f);
   var accords = getAccords(f);
@@ -4822,8 +4774,6 @@ function openEditFrag(fragId, forceStatus){
   document.getElementById('mpN').textContent = f.name;
   document.getElementById('mpH').textContent = f.house.toUpperCase();
   var _cd = getCommunityData(f.name, f.house) || {};
-  document.getElementById('mpR').textContent = _cd.communityRating ? _cd.communityRating+' / 5' : '—';
-  document.getElementById('mpL').textContent = _cd.communityLong ? formatLong(_cd.communityLong) : '—';
   document.getElementById('mpP').textContent = _cd.avgPrice||'—';
   document.getElementById('mpNotes').textContent = _cd.notes||'';
   document.getElementById('afPrev').style.display='block';
@@ -4831,7 +4781,7 @@ function openEditFrag(fragId, forceStatus){
   const sel = document.getElementById('afStatus');
   for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===statusVal){ sel.selectedIndex=i; break; }
   // Pre-fill Step 2
-  prefetchedData = {sizes:f.sizes,type:f.type,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,personalSill:f.personalSill,whereBought:f.whereBought,purchaseDate:f.purchaseDate,purchasePrice:f.purchasePrice||null,communityRating:f.communityRating||null,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:_cd.topNotes||'',middleNotes:_cd.middleNotes||'',baseNotes:_cd.baseNotes||''};
+  prefetchedData = {sizes:f.sizes,type:f.type,personalRating:f.personalRating,statusRating:f.statusRating,personalLong:f.personalLong,personalSill:f.personalSill,whereBought:f.whereBought,purchaseDate:f.purchaseDate,purchasePrice:f.purchasePrice||null,isDupe:f.isDupe,dupeFor:f.dupeFor,personalNotes:f.personalNotes,topNotes:_cd.topNotes||'',middleNotes:_cd.middleNotes||'',baseNotes:_cd.baseNotes||''};
   buildAccordPicker(_cd.accords||null);
   // Auto-advance to step 2 for edits
   afGoStep(2, true);
@@ -4870,7 +4820,6 @@ function resetAFModal(){
   document.getElementById('afNotes').value='';
   tiInit('afTop',''); tiInit('afMiddle',''); tiInit('afBase','');
   var priceEl=document.getElementById('afPrice'); if(priceEl) priceEl.value='';
-  var crEl=document.getElementById('afCommunityRating'); if(crEl) crEl.value='';
 }
 
 function validateAfStep2(){
@@ -4918,7 +4867,6 @@ function afGoStep(n, skipValidation){
       if(d.purchaseDate){ const parts=d.purchaseDate.split(' '); if(parts[0]) document.getElementById('afMonth').value=parts[0]; if(parts[1]) document.getElementById('afYear').value=parts[1]; }
       if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeFor').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
       if(d.purchasePrice){ var prEl=document.getElementById('afPrice'); if(prEl) prEl.value=d.purchasePrice; }
-      if(d.communityRating){ var crEl=document.getElementById('afCommunityRating'); if(crEl) crEl.value=d.communityRating; }
       if(d.personalNotes) document.getElementById('afNotes').value=d.personalNotes;
       tiInit('afTop',d.topNotes||''); tiInit('afMiddle',d.middleNotes||''); tiInit('afBase',d.baseNotes||'');
     }
@@ -4978,7 +4926,6 @@ function saveFragrance(){
     type: document.getElementById('afType').value,
     sizes, personalRating: parseInt(document.getElementById('afRating').value)||null,
     statusRating: null,
-    communityRating: parseFloat(document.getElementById('afCommunityRating').value)||null,
     personalLong: document.getElementById('afLong').value||null,
     personalSill: document.getElementById('afSill').value||null,
     whereBought: document.getElementById('afWhere').value||null,
@@ -5180,8 +5127,6 @@ function pickAF(name){
     var allNotes=[f.top||'',f.mid||'',f.base||''].filter(Boolean).join(', ')||f.notes||'';
     document.getElementById('mpN').textContent=f.n;
     document.getElementById('mpH').textContent=f.h.toUpperCase();
-    document.getElementById('mpR').textContent=f.r?(f.r+' / 5'):'—';
-    document.getElementById('mpL').textContent=f.l ? formatLong(f.l) : '—';
     document.getElementById('mpP').textContent=f.p||'—';
     document.getElementById('mpNotes').textContent=allNotes||'—';
   }
@@ -5480,13 +5425,11 @@ function importToCollection(data){
   document.getElementById('afSrch').value=data.name;
   document.getElementById('mpN').textContent=data.name;
   document.getElementById('mpH').textContent=data.house.toUpperCase();
-  document.getElementById('mpR').textContent=data.communityRating?' '+data.communityRating+' / 5':'—';
-  document.getElementById('mpL').textContent=data.communityLong ? formatLong(data.communityLong) : '—';
   document.getElementById('mpP').textContent=data.avgPrice||'—';
   document.getElementById('mpNotes').textContent=data.notes||'';
   document.getElementById('afPrev').style.display='block';
   // Store as pending prefetch
-  prefetchedData = {communityRating:data.communityRating,communityLong:data.communityLong,communitySill:data.communitySill,avgPrice:data.avgPrice,notes:data.notes,house:data.house,sizes:[],isDupe:false,dupeFor:'',personalNotes:'',topNotes:data.topNotes||'',middleNotes:data.middleNotes||'',baseNotes:data.baseNotes||''};
+  prefetchedData = {communitySill:data.communitySill,avgPrice:data.avgPrice,notes:data.notes,house:data.house,sizes:[],isDupe:false,dupeFor:'',personalNotes:'',topNotes:data.topNotes||'',middleNotes:data.middleNotes||'',baseNotes:data.baseNotes||''};
 }
 
 function importToWishlist(data){
@@ -5592,7 +5535,7 @@ function renderImportQueue(){
   <div class="iq">`+importQueueData.map((d,i)=>`
     <div class="iq-row">
       <input type="checkbox" class="iq-chk" id="iqchk${i}" checked>
-      <div style="flex:1;"><div class="iq-n">${d.name}</div><div class="iq-h">${d.house} · Comm ${d.communityRating}</div></div>
+      <div style="flex:1;"><div class="iq-n">${d.name}</div><div class="iq-h">${d.house}</div></div>
       <span class="badge ${d.isDup?'b-dup':'b-new'}">${d.isDup?'Already owned':'New'}</span>
     </div>`).join('')+'</div>';
 }
@@ -5604,7 +5547,7 @@ function qSearch(v){
   while(el.firstChild)el.removeChild(el.firstChild);
   if(!hits.length){el.style.display='none';return;}
   hits.forEach(function(f){
-    var fdata={name:f.n,house:f.h,communityRating:f.r,notes:f.notes};
+    var fdata={name:f.n,house:f.h,notes:f.notes};
     var item=document.createElement('div');item.className='aci';
     item.onmousedown=(function(d){return function(e){e.preventDefault();addToImportQueue(d);};})(fdata);
     var nd=document.createElement('div');nd.className='aci-n';nd.textContent=f.n;
@@ -5774,7 +5717,7 @@ function fragSearch(query, limit){
   // Build unified candidate list: community first (Layer 0), then FRAG_DB (Layer 1)
   var candidates=[];
   COMMUNITY_FRAGS.forEach(function(f){
-    candidates.push({n:f.name,h:f.house,r:f.communityRating,l:f.communityLong||null,s:f.communitySill||null,p:f.avgPrice||null,top:f.topNotes||'',mid:f.middleNotes||'',base:f.baseNotes||'',conc:f.concentration||'',fam:f.family||'',src:'community',_raw:f});
+    candidates.push({n:f.name,h:f.house,s:f.communitySill||null,p:f.avgPrice||null,top:f.topNotes||'',mid:f.middleNotes||'',base:f.baseNotes||'',conc:f.concentration||'',fam:f.family||'',src:'community',_raw:f});
   });
   FRAG_DB.forEach(function(f){ candidates.push(Object.assign({src:'local'},f)); });
 
@@ -5808,8 +5751,6 @@ function dbToLinkResult(f, url, confidence){
   var allNotes=[f.top||'',f.mid||'',f.base||''].filter(Boolean).join(', ')||f.notes||'';
   return {
     name:f.n, house:f.h,
-    communityRating:f.r||f.communityRating||null,
-    communityLong:f.l||f.communityLong||null,
     communitySill:f.s||f.communitySill||null,
     avgPrice:f.p||f.avgPrice||null,
     topNotes:f.top||f.topNotes||'',
@@ -5844,8 +5785,6 @@ async function contributeToCommmunity(data){
     middleNotes: data.middleNotes||'',
     baseNotes: data.baseNotes||'',
     avgPrice: data.avgPrice||'',
-    communityRating: data.communityRating||'',
-    communityLongevity: '',
     communitySill: '',
     addedBy: CURRENT_USER?CURRENT_USER.id:'',
     addedAt: new Date().toISOString(),
@@ -5945,13 +5884,8 @@ function showLinkResult(data){
   // Name + House: always editable
   document.getElementById('lr-name-inp').value = data.name||'';
   document.getElementById('lr-house-inp').value = data.house||'';
-  // Community Rating
-  lrSetField('comm', data.communityRating ? data.communityRating+' / 5.0' : null);
   // Avg Price
   lrSetField('price', data.avgPrice||null);
-  // Longevity
-  lrSetField('long', data.communityLong ? formatLong(data.communityLong) : null);
-  if(data.communityLong){ document.getElementById('lr-long-inp').value=data.communityLong; }
   // Sillage
   lrSetField('sill', data.communitySill||null);
   if(data.communitySill){ document.getElementById('lr-sill-inp').value=data.communitySill; }
@@ -6025,9 +5959,7 @@ function lrSyncAll(){
   var d=window._fetchedFragData;
   d.name = document.getElementById('lr-name-inp').value.trim()||d.name;
   d.house = document.getElementById('lr-house-inp').value.trim()||d.house;
-  var commInp=document.getElementById('lr-comm-inp'); if(commInp&&commInp.value) d.communityRating=commInp.value;
   var priceInp=document.getElementById('lr-price-inp'); if(priceInp&&priceInp.value) d.avgPrice=priceInp.value;
-  var longInp=document.getElementById('lr-long-inp'); if(longInp&&longInp.value) d.communityLong=longInp.value;
   var sillInp=document.getElementById('lr-sill-inp'); if(sillInp&&sillInp.value) d.communitySill=sillInp.value;
   d.topNotes = tiGet('lrTop');
   d.middleNotes = tiGet('lrMiddle');
@@ -6170,7 +6102,7 @@ async function autoSearchAfterVision(candidateName){
       });
       var parfumoData=await res.json();
       if(parfumoData&&!parfumoData.error&&parfumoData.name){
-        showScanMatchList([{n:parfumoData.name,h:parfumoData.house,r:parfumoData.communityRating,l:parfumoData.communityLong,s:parfumoData.communitySill,p:parfumoData.avgPrice,top:parfumoData.topNotes,mid:parfumoData.middleNotes,base:parfumoData.baseNotes,src:'parfumo'}],candidateName);
+        showScanMatchList([{n:parfumoData.name,h:parfumoData.house,s:parfumoData.communitySill,p:parfumoData.avgPrice,top:parfumoData.topNotes,mid:parfumoData.middleNotes,base:parfumoData.baseNotes,src:'parfumo'}],candidateName);
         return;
       }
     }catch(e){}
@@ -6211,7 +6143,7 @@ function showScanMatchList(results,detectedName){
 
 function confirmScanMatch(frag){
   var allNotes=[frag.top||frag.topNotes||'',frag.mid||frag.middleNotes||'',frag.base||frag.baseNotes||''].filter(Boolean).join(', ')||frag.notes||'';
-  var result={name:frag.n||frag.name||'',house:frag.h||frag.house||'',communityRating:frag.r||frag.communityRating||null,communityLong:frag.l||frag.communityLong||null,communitySill:frag.s||frag.communitySill||null,avgPrice:frag.p||frag.avgPrice||null,topNotes:frag.top||frag.topNotes||'',middleNotes:frag.mid||frag.middleNotes||'',baseNotes:frag.base||frag.baseNotes||'',allNotes:allNotes,parseConfidence:'vision',src:frag.src||'local'};
+  var result={name:frag.n||frag.name||'',house:frag.h||frag.house||'',communitySill:frag.s||frag.communitySill||null,avgPrice:frag.p||frag.avgPrice||null,topNotes:frag.top||frag.topNotes||'',middleNotes:frag.mid||frag.middleNotes||'',baseNotes:frag.base||frag.baseNotes||'',allNotes:allNotes,parseConfidence:'vision',src:frag.src||'local'};
   document.getElementById('camMatchList').style.display='none';
   showScanResult(result);
 }
@@ -6231,7 +6163,7 @@ function saveUnknownScan(){
     name:d.name||rawText.split('\n')[0].slice(0,60)||'Unknown Fragrance',
     house:d.house||'',status:'WANT_TO_IDENTIFY',sizes:[],
     personalRating:null,statusRating:null,personalLong:null,personalSill:null,
-    communityRating:null,communityLong:null,communitySill:null,avgPrice:null,
+    communitySill:null,avgPrice:null,
     notes:'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''
   };
   FRAGRANCES.push(newFrag);
@@ -6248,7 +6180,7 @@ function identifyFragranceFromText(rawText,logoLabels){
   if(!results||!results.length) return null;
   var f=results[0];
   var allNotes=[f.top||'',f.mid||'',f.base||''].filter(Boolean).join(', ')||f.notes||'';
-  return {name:f.n,house:f.h,communityRating:f.r,communityLong:f.l,communitySill:f.s,avgPrice:f.p,topNotes:f.top||'',middleNotes:f.mid||'',baseNotes:f.base||'',allNotes:allNotes,parseConfidence:'vision',rawText:rawText.slice(0,200)};
+  return {name:f.n,house:f.h,communitySill:f.s,avgPrice:f.p,topNotes:f.top||'',middleNotes:f.mid||'',baseNotes:f.base||'',allNotes:allNotes,parseConfidence:'vision',rawText:rawText.slice(0,200)};
 }
 
 function showScanResult(data){
@@ -6257,7 +6189,6 @@ function showScanResult(data){
   var camInit=document.getElementById('camInitPanel');if(camInit)camInit.style.display='none';
   document.getElementById('scan-name').textContent=data.name;
   document.getElementById('scan-house').textContent=data.house;
-  document.getElementById('scan-comm').textContent=data.communityRating?data.communityRating+' / 5.0':'—';
   document.getElementById('scan-notes').textContent=data.allNotes||'—';
   document.getElementById('camRes').style.display='block';
   window._scannedFragData=data;
@@ -6487,7 +6418,7 @@ function importCSVSelected(){
     if(existing.has(r.name.toLowerCase())) return;
     var valid=['CURRENT','PREVIOUSLY_OWNED','WANT_TO_BUY','WANT_TO_SMELL','DONT_LIKE'];
     var status=valid.includes(r.status)?r.status:'CURRENT';
-    FRAGRANCES.push({id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:r.name,house:r.house,status:status,sizes:['Full Bottle'],personalRating:r.rating,statusRating:null,personalLong:null,personalSill:null,communityRating:null,communityLong:null,communitySill:null,avgPrice:null,notes:r.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
+    FRAGRANCES.push({id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:r.name,house:r.house,status:status,sizes:['Full Bottle'],personalRating:r.rating,statusRating:null,personalLong:null,personalSill:null,communitySill:null,avgPrice:null,notes:r.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
     added++;
   });
   if(added>0) writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
@@ -7071,8 +7002,6 @@ function palFlows() {
             house: db ? db.h : (answers.house || ''),
             status: answers.status,
             sizes: answers.sizes || [],
-            communityRating: db ? db.r : null,
-            communityLong: db ? db.l : null,
             communitySill: db ? db.s : null,
             avgPrice: db ? db.p : null,
             notes: db ? db.notes : '',
@@ -7497,8 +7426,6 @@ function palFlows() {
             house: db ? db.h : '',
             status: answers.status,
             sizes: [],
-            communityRating: db ? db.r : null,
-            communityLong: db ? db.l : null,
             communitySill: db ? db.s : null,
             avgPrice: db ? db.p : null,
             notes: db ? db.notes : '',
