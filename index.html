@@ -1163,6 +1163,20 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     </div>
   </div>
   <div class="dbody">
+    <div class="dsec" id="dsec-rating"><div class="dsl">My Rating</div>
+      <div class="star-row" id="detailStarRow" onmouseleave="detailStarHover(0)">
+        <span class="star-glyph" data-v="1" onclick="setDetailRating(1)" onmouseenter="detailStarHover(1)">★</span>
+        <span class="star-glyph" data-v="2" onclick="setDetailRating(2)" onmouseenter="detailStarHover(2)">★</span>
+        <span class="star-glyph" data-v="3" onclick="setDetailRating(3)" onmouseenter="detailStarHover(3)">★</span>
+        <span class="star-glyph" data-v="4" onclick="setDetailRating(4)" onmouseenter="detailStarHover(4)">★</span>
+        <span class="star-glyph" data-v="5" onclick="setDetailRating(5)" onmouseenter="detailStarHover(5)">★</span>
+      </div>
+      <div class="star-word" id="detailStarWord"></div>
+      <div class="dgrid" style="margin-top:12px;">
+        <div id="drow-sizes"><div class="di-l">Size owned</div><div class="di-v" id="d-sizes"></div></div>
+        <div id="drow-type"><div class="di-l">Type</div><div class="di-v" id="d-type"></div></div>
+      </div>
+    </div>
     <div class="dsec" id="dsec-profile"><div class="dsl">Fragrance profile</div>
       <div class="dgrid">
         <div id="drow-price"><div class="di-l">Avg price</div><div class="di-v" id="d-price"></div></div>
@@ -1291,15 +1305,6 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         <!-- "More details" toggle — expands remaining fields -->
         <button type="button" class="af-more-toggle" id="afMoreToggle" onclick="toggleAFMore()">+ MORE DETAILS</button>
         <div class="af-more-wrap" id="afMoreWrap" style="display:none;">
-        <div class="frow" style="margin-bottom:14px;">
-          <div class="fg" style="margin:0;"><label>Personal longevity</label>
-            <select id="afLong"><option value="" selected>Not sure</option><option value="Very weak">Very weak (0–4h)</option><option value="Weak">Weak (4–8h)</option><option value="Moderate">Moderate (8–12h)</option><option value="Long lasting">Long lasting (12–24h)</option><option value="Eternal">Eternal (&gt;24h)</option></select>
-          </div>
-          <div class="fg" style="margin:0;"><label>Personal sillage</label>
-            <select id="afSill"><option value="" selected>Not sure</option><option value="Soft">Soft</option><option value="Moderate">Moderate</option><option value="Strong">Strong</option><option value="Enormous">Enormous</option></select>
-          </div>
-        </div>
-        <div class="frow" style="margin-bottom:14px;">
         <div class="frow" style="margin-bottom:14px;">
           <div class="fg" style="margin:0;"><label>Purchase date</label>
             <div class="date-row">
@@ -2874,14 +2879,16 @@ function renderDashboard(){
     <div class="sbox"><div class="snum">${MC.length}</div><div class="slbl">Compliments</div></div>
     <div class="sbox"><div class="snum">${avgRating()}</div><div class="slbl">Avg Rating</div></div>
     <div class="sbox"><div class="snum">${MF.filter(f=>f.status==='PREVIOUSLY_OWNED').length}</div><div class="slbl">Prev. Owned</div></div>`;
-  // Recent 4 CURRENT fragrances
-  const recent = MF.filter(f=>f.status==='CURRENT').slice(0,4);
+  // Recent 4 CURRENT fragrances — sorted by most recent purchase date
+  var _MONTH_NUM={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  function _parsePurchase(d){if(!d)return 0;var p=d.split(' ');return (parseInt(p[1])||0)*100+(_MONTH_NUM[p[0]]||0);}
+  const recent = MF.filter(f=>f.status==='CURRENT').sort((a,b)=>_parsePurchase(b.purchaseDate)-_parsePurchase(a.purchaseDate)).slice(0,4);
   if(recent.length){
     document.getElementById('dashBody').innerHTML = recent.map(f=>`
       <tr onclick="openDetail('${f.id}')">
         <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
-        <td><div class="tstars">${renderStars(f.statusRating)}</div></td>
+        <td><div class="tstars">${renderStars(f.personalRating)}</div></td>
         <td class="tmono" style="font-size:11px;color:var(--ink3);">${getAccords(f).join(', ')}</td>
         <td class="tmono">${getCompCount(f.id)>0?`<span onclick="event.stopPropagation();filterComplimentsByFrag('${f.id}')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;" title="View compliments for this fragrance">${getCompCount(f.id)}</span>`:'—'}</td>
         <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
@@ -4440,7 +4447,7 @@ function openDetail(fragId){
   currentDetailId = fragId;
   document.getElementById('d-house').textContent = f.house.toUpperCase();
   document.getElementById('d-name').innerHTML = fragDisplayName(f);
-  document.getElementById('d-status').innerHTML = STATUS_LABELS[f.status] + (f.sizes.length?' · '+f.sizes.join(', '):'') + (f.statusRating?' &nbsp;'+renderStars(f.statusRating):'');
+  document.getElementById('d-status').innerHTML = STATUS_LABELS[f.status];
   // Detail fields — hide row when empty
   function setDRow(rowId, valId, val){
     var row=document.getElementById(rowId), el=document.getElementById(valId);
@@ -4449,8 +4456,17 @@ function openDetail(fragId){
     else { el.textContent=''; row.style.display='none'; }
   }
   var _cd = getCommunityData(f.name, f.house) || {};
-  setDRow('drow-price','d-price', _cd.avgPrice||null);
+  setDRow('drow-price','d-price', _cd.avgPrice ? _cd.avgPrice.replace('~','').trim() : null);
   setDRow('drow-sill','d-sill', _cd.communitySill||null);
+  // Rating stars
+  var _rating = f.personalRating||0;
+  document.querySelectorAll('#detailStarRow .star-glyph').forEach(function(s){
+    s.style.color = parseInt(s.getAttribute('data-v'))<=_rating ? 'var(--warm)' : 'var(--b2)';
+  });
+  var _dsw=document.getElementById('detailStarWord');
+  if(_dsw) _dsw.textContent = _rating ? STAR_WORDS[_rating] : 'Tap a star to rate';
+  setDRow('drow-sizes','d-sizes', f.sizes&&f.sizes.length ? f.sizes.join(', ') : null);
+  setDRow('drow-type','d-type', f.type||null);
   renderDetailNotes(f);
   var accords = getAccords(f);
   var accordEl = document.getElementById('detailAccords');
@@ -4471,7 +4487,7 @@ function openDetail(fragId){
   // Show "Add details" if My experience section is entirely empty
   var expAddBtn=document.getElementById('d-add-experience');
   if(expAddBtn){
-    var expEmpty=!f.personalLong&&!f.personalSill&&!f.purchasePrice&&!f.whereBought&&!f.purchaseDate;
+    var expEmpty=!f.purchasePrice&&!f.whereBought&&!f.purchaseDate;
     expAddBtn.style.display=expEmpty?'block':'none';
   }
   document.getElementById('d-notebox').textContent = f.personalNotes||'No personal notes yet.';
@@ -4497,6 +4513,25 @@ function openDetail(fragId){
 }
 
 function closeDetail(){ document.getElementById('detailP').classList.remove('on'); currentDetailId=null; }
+
+function detailStarHover(v){
+  var f=FRAGRANCES.find(function(x){return x.id===currentDetailId;});
+  var cur=f?(f.personalRating||0):0;
+  document.querySelectorAll('#detailStarRow .star-glyph').forEach(function(s){
+    s.style.color=parseInt(s.getAttribute('data-v'))<=(v||cur)?'var(--warm)':'var(--b2)';
+  });
+  var dsw=document.getElementById('detailStarWord');
+  if(dsw) dsw.textContent=(v||cur)?STAR_WORDS[v||cur]:'Tap a star to rate';
+}
+
+function setDetailRating(v){
+  if(!currentDetailId) return;
+  var idx=FRAGRANCES.findIndex(function(x){return x.id===currentDetailId;});
+  if(idx<0) return;
+  FRAGRANCES[idx].personalRating=(FRAGRANCES[idx].personalRating===v)?null:v;
+  writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  openDetail(currentDetailId);
+}
 
 function renderDetailNotes(f){
   var el=document.getElementById('d-notes'); if(!el) return;
@@ -4810,8 +4845,6 @@ function resetAFModal(){
   document.getElementById('afRating').value=3; starRender(3);
   document.getElementById('afType').value='';
 
-  document.getElementById('afLong').value='';
-  var afSillEl=document.getElementById('afSill'); if(afSillEl) afSillEl.value='';
   document.getElementById('afWhere').value='';
   document.getElementById('afMonth').value='';
   buildYearSelect('afYear',1990);document.getElementById('afYear').value='';
@@ -4863,8 +4896,6 @@ function afGoStep(n, skipValidation){
       document.getElementById('afType').value=_typeNorm[_savedType]||_savedType||'';
     
       if(d.personalRating){ document.getElementById('afRating').value=d.personalRating; starRender(d.personalRating); }
-      if(d.personalLong) document.getElementById('afLong').value=d.personalLong;
-      if(d.personalSill){ var afSillEl=document.getElementById('afSill'); if(afSillEl) afSillEl.value=d.personalSill; }
       if(d.whereBought) document.getElementById('afWhere').value=d.whereBought;
       if(d.purchaseDate){ const parts=d.purchaseDate.split(' '); if(parts[0]) document.getElementById('afMonth').value=parts[0]; if(parts[1]) document.getElementById('afYear').value=parts[1]; }
       if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeFor').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
@@ -4928,8 +4959,8 @@ function saveFragrance(){
     type: document.getElementById('afType').value,
     sizes, personalRating: parseInt(document.getElementById('afRating').value)||null,
     statusRating: null,
-    personalLong: document.getElementById('afLong').value||null,
-    personalSill: document.getElementById('afSill').value||null,
+    personalLong: null,
+    personalSill: null,
     whereBought: document.getElementById('afWhere').value||null,
     purchasePrice: parseFloat(document.getElementById('afPrice').value)||null,
     purchaseDate: (month&&year)?month+' '+year:null,
