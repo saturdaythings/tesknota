@@ -806,6 +806,8 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
     <div class="page on" id="page-dashboard">
       <div class="stats" id="dashStats"></div>
       <div id="dashOnboard" style="display:none"></div>
+      <div id="dashUnidentified" style="display:none"></div>
+      <div id="dashQuickLog" style="display:none"></div>
       <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <table class="tbl tbl-spaced" id="dashTable">
         <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Accords</th><th>Compliments</th><th></th></tr></thead>
@@ -928,6 +930,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
           </div>
           <div id="anaPills" class="ana-pills"></div>
           <div class="ana-section" id="anaPerformersSection"></div>
+          <div class="ana-section" id="anaAccordPerfSection"></div>
           <div class="ana-section" id="anaMapSection"></div>
         </div>
       </div>
@@ -1367,23 +1370,29 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
         </div>
         <div class="fg" style="margin:0;"><label>Location Name</label><input type="text" id="compLoc" placeholder="e.g. King Soopers Pharmacy, Gothic Theater" /></div>
       </div>
-      <div class="frow" style="margin-top:8px;">
-        <div class="fg" style="margin:0;"><label>City</label><input type="text" id="compCity" placeholder="City" /></div>
-        <div class="fg" style="margin:0;">
-          <label>State</label>
-          <div id="compStateWrap">
-            <div style="position:relative;">
-              <button type="button" id="compStateBtn" onclick="toggleCompStateDrop()" style="width:100%;text-align:left;background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px;color:#374151;display:flex;justify-content:space-between;align-items:center;"><span id="compStateBtnText">Select state...</span><span style="font-size:10px;color:#9ca3af;">▼</span></button>
-              <div id="compStatePanel" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:9999;background:#fff;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);max-height:220px;overflow:hidden;margin-top:2px;">
-                <input type="text" id="compStateSearch" placeholder="Search states..." oninput="buildCompStatePanel(this.value)" style="width:100%;padding:8px 12px;border:none;border-bottom:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;outline:none;" />
-                <div id="compStateList" style="overflow-y:auto;max-height:168px;"></div>
+      <!-- City/State/Country — collapsed by default, expand on demand -->
+      <div style="margin-top:2px;">
+        <button type="button" class="comp-layer-toggle" id="compLocDetailToggle" onclick="toggleCompLocDetail()">+ Add city &amp; country</button>
+        <div id="compLocDetailWrap" style="display:none;">
+          <div class="frow" style="margin-top:8px;">
+            <div class="fg" style="margin:0;"><label>City</label><input type="text" id="compCity" placeholder="City" /></div>
+            <div class="fg" style="margin:0;">
+              <label>State</label>
+              <div id="compStateWrap">
+                <div style="position:relative;">
+                  <button type="button" id="compStateBtn" onclick="toggleCompStateDrop()" style="width:100%;text-align:left;background:#fff;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px;color:#374151;display:flex;justify-content:space-between;align-items:center;"><span id="compStateBtnText">Select state...</span><span style="font-size:10px;color:#9ca3af;">▼</span></button>
+                  <div id="compStatePanel" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:9999;background:#fff;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);max-height:220px;overflow:hidden;margin-top:2px;">
+                    <input type="text" id="compStateSearch" placeholder="Search states..." oninput="buildCompStatePanel(this.value)" style="width:100%;padding:8px 12px;border:none;border-bottom:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;outline:none;" />
+                    <div id="compStateList" style="overflow-y:auto;max-height:168px;"></div>
+                  </div>
+                </div>
               </div>
+              <input type="text" id="compStateText" placeholder="State / Province / Region" style="display:none;width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;" />
+              <input type="hidden" id="compState" value="" />
             </div>
+            <div class="fg" style="margin:0;"><label>Country</label><select id="compCountry" onchange="toggleCompStateMode()"><option value="US">United States</option><option value="UK">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="Other">Other</option></select></div>
           </div>
-          <input type="text" id="compStateText" placeholder="State / Province / Region" style="display:none;width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;" />
-          <input type="hidden" id="compState" value="" />
         </div>
-        <div class="fg" style="margin:0;"><label>Country</label><select id="compCountry" onchange="toggleCompStateMode()"><option value="US">United States</option><option value="UK">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="Other">Other</option></select></div>
       </div>
       <!-- Layering (secondary) — expandable -->
       <div class="fg" style="margin-top:4px;margin-bottom:0;">
@@ -1891,6 +1900,7 @@ let CURRENT_USER = null;
 
 function selectIdentity(name, id){
   CURRENT_USER = USERS.find(u=>u.id===id) || {id, name};
+  try { localStorage.setItem('currentUser', JSON.stringify(CURRENT_USER)); } catch(e){}
   document.getElementById('identityScreen').style.display='none';
   document.querySelector('.shell').style.display='flex';
   // Update sidebar username
@@ -2664,6 +2674,68 @@ function renderDashboard(){
       onboardEl.innerHTML='';
     }
   }
+  // Unidentified section — surface WANT_TO_IDENTIFY items
+  var unidentEl=document.getElementById('dashUnidentified');
+  var unidentified=MF.filter(function(f){return f.status==='WANT_TO_IDENTIFY';});
+  if(unidentEl){
+    while(unidentEl.firstChild) unidentEl.removeChild(unidentEl.firstChild);
+    if(unidentified.length){
+      unidentEl.style.display='block';
+      var uHdr=document.createElement('div'); uHdr.className='sh'; uHdr.style.marginTop='8px';
+      var uH2=document.createElement('h2'); uH2.textContent='Needs identifying ';
+      var uBadge=document.createElement('span'); uBadge.textContent=unidentified.length+' sample'+(unidentified.length>1?'s':'')+' waiting';
+      uBadge.style.cssText='font-size:11px;font-family:var(--mono);font-weight:400;opacity:.55;letter-spacing:.06em;';
+      uH2.appendChild(uBadge); uHdr.appendChild(uH2); unidentEl.appendChild(uHdr);
+      var uList=document.createElement('div'); uList.style.cssText='display:flex;flex-direction:column;gap:6px;margin-bottom:16px;';
+      unidentified.forEach(function(f){
+        var row=document.createElement('div');
+        row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--b2);border-left:3px solid var(--warm);font-family:var(--body);font-size:13px;';
+        var nameSpan=document.createElement('span'); nameSpan.style.color='var(--ink1)';
+        var nm=document.createElement('span'); nm.textContent=f.name||'Unknown fragrance';
+        nameSpan.appendChild(nm);
+        if(f.house){ var hs=document.createElement('span'); hs.textContent=' '+f.house; hs.style.cssText='opacity:.45;font-size:11px;'; nameSpan.appendChild(hs); }
+        var btn=document.createElement('button'); btn.className='btn btn-ghost btn-sm'; btn.textContent='Identify →';
+        (function(id){btn.onclick=function(){openDetail(id);};})(f.id);
+        row.appendChild(nameSpan); row.appendChild(btn); uList.appendChild(row);
+      });
+      unidentEl.appendChild(uList);
+    } else {
+      unidentEl.style.display='none';
+    }
+  }
+
+  // Quick log section — top CURRENT fragrances by compliment count
+  var quickLogEl=document.getElementById('dashQuickLog');
+  if(quickLogEl){
+    while(quickLogEl.firstChild) quickLogEl.removeChild(quickLogEl.firstChild);
+    var currentFrags=MF.filter(function(f){return f.status==='CURRENT';});
+    if(currentFrags.length){
+      var topFrags=currentFrags.slice().sort(function(a,b){return getCompCount(b.id)-getCompCount(a.id);}).slice(0,4);
+      quickLogEl.style.display='block';
+      var qlHdr=document.createElement('div'); qlHdr.className='sh'; qlHdr.style.marginTop='4px';
+      var qlH2=document.createElement('h2'); qlH2.textContent='Quick log';
+      var qlSub=document.createElement('div'); qlSub.className='sh-r';
+      qlSub.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.06em;';
+      qlSub.textContent='tap to log a compliment';
+      qlHdr.appendChild(qlH2); qlHdr.appendChild(qlSub); quickLogEl.appendChild(qlHdr);
+      var qlGrid=document.createElement('div'); qlGrid.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;';
+      topFrags.forEach(function(f){
+        var btn=document.createElement('button');
+        btn.style.cssText='display:flex;flex-direction:column;align-items:flex-start;padding:8px 12px;background:var(--surface);border:1px solid var(--b2);cursor:pointer;font-family:var(--body);text-align:left;min-width:140px;flex:1;transition:border-color .14s;';
+        btn.onmouseover=function(){this.style.borderColor='var(--blue)';};
+        btn.onmouseout=function(){this.style.borderColor='var(--b2)';};
+        (function(id){btn.onclick=function(){openAddComp(id);};})(f.id);
+        var nm=document.createElement('span'); nm.style.cssText='font-size:13px;color:var(--ink1);font-weight:500;'; nm.textContent=f.name;
+        var meta=document.createElement('span'); meta.style.cssText='font-size:11px;color:var(--ink3);font-family:var(--mono);margin-top:2px;';
+        var cc=getCompCount(f.id); meta.textContent=f.house+(cc?' · '+cc+' comp'+(cc>1?'s':''):'');
+        btn.appendChild(nm); btn.appendChild(meta); qlGrid.appendChild(btn);
+      });
+      quickLogEl.appendChild(qlGrid);
+    } else {
+      quickLogEl.style.display='none';
+    }
+  }
+
   const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='DONT_LIKE');
   const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
   document.getElementById('dashStats').innerHTML = `
@@ -3723,6 +3795,43 @@ function renderAnalytics(){
     }
   }
 
+  // ACCORD PERFORMANCE — compliments per accord family
+  var accordPerfSection=document.getElementById('anaAccordPerfSection');
+  if(accordPerfSection){
+    while(accordPerfSection.firstChild) accordPerfSection.removeChild(accordPerfSection.firstChild);
+    var apHdr=document.createElement('div'); apHdr.className='ana-sh';
+    var apH2=document.createElement('h2'); apH2.textContent='Accord performance';
+    var apSub=document.createElement('div'); apSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;'; apSub.textContent='compliments by scent family';
+    apHdr.appendChild(apH2); apHdr.appendChild(apSub); accordPerfSection.appendChild(apHdr);
+    if(MC.length<2){
+      var apEmpty=document.createElement('div'); apEmpty.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:12px 0;'; apEmpty.textContent='Log more compliments to unlock accord insights.'; accordPerfSection.appendChild(apEmpty);
+    } else {
+      // Build accord → compliment count map
+      var accordComps={};
+      MC.forEach(function(c){
+        var frag=MF.find(function(f){return f.id===c.primaryFragId;});
+        if(!frag) return;
+        getAccords(frag).forEach(function(acc){
+          if(!acc) return;
+          accordComps[acc]=(accordComps[acc]||0)+1;
+        });
+      });
+      var sortedAccords=Object.entries(accordComps).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+      var maxAP=sortedAccords[0]?sortedAccords[0][1]:1;
+      var apList=document.createElement('div'); apList.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px;';
+      sortedAccords.forEach(function(entry){
+        var acc=entry[0]; var cnt=entry[1]; var pct=Math.round(cnt/maxAP*100);
+        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+        var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:90px;flex-shrink:0;'; lbl.textContent=acc;
+        var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;';
+        var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--blue);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
+        var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:20px;text-align:right;flex-shrink:0;'; countEl.textContent=cnt;
+        row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); apList.appendChild(row);
+      });
+      accordPerfSection.appendChild(apList);
+    }
+  }
+
   // COLLECTION BREAKDOWN
   var collSection=document.getElementById('anaCollectionSection');
   if(collSection){
@@ -4733,6 +4842,14 @@ function openAddComp(fragId, prefill){
     if(layerWrap) layerWrap.style.display='none';
     if(layerToggle) layerToggle.textContent='+ Add layering fragrance';
   }
+  // Reset/expand city-country detail section
+  var locDetailWrap=document.getElementById('compLocDetailWrap');
+  var locDetailToggle=document.getElementById('compLocDetailToggle');
+  var hasLocDetail=prefill&&(prefill.city||prefill.state||(prefill.country&&prefill.country!=='US'));
+  if(locDetailWrap){
+    locDetailWrap.style.display=hasLocDetail?'block':'none';
+    if(locDetailToggle) locDetailToggle.textContent=hasLocDetail?'− Hide city & country':'+ Add city & country';
+  }
   // Reset save banner
   var banner=document.getElementById('compSaveBanner');
   if(banner) banner.style.display='none';
@@ -4758,6 +4875,15 @@ function updateCompStickyHeader(){
   } else {
     sticky.style.display='none';
   }
+}
+
+function toggleCompLocDetail(){
+  var wrap=document.getElementById('compLocDetailWrap');
+  var toggle=document.getElementById('compLocDetailToggle');
+  if(!wrap) return;
+  var open=wrap.style.display==='block';
+  wrap.style.display=open?'none':'block';
+  toggle.textContent=open?'+ Add city & country':'− Hide city & country';
 }
 
 function toggleCompLayer(){
@@ -6332,12 +6458,15 @@ window.auditData=auditDataIntegrity;
   });
   initCollectionSort();
   document.getElementById('idLoading').style.display='none';
-  // Always show the picker — never block the user due to a sync failure
-  document.getElementById('idPicker').style.display='flex';
-  if(!sheetsOk){
-    // Show soft warning below the picker and set persistent error indicator
-    document.getElementById('idError').style.display='flex';
-    setSyncState('error');
+  if(!sheetsOk) setSyncState('error');
+  // Auto-login if a session exists in localStorage
+  if(checkIdentity()){
+    selectIdentity(CURRENT_USER.name, CURRENT_USER.id);
+    if(!sheetsOk) document.getElementById('idError').style.display='flex';
+  } else {
+    // Show picker — never block the user due to a sync failure
+    document.getElementById('idPicker').style.display='flex';
+    if(!sheetsOk) document.getElementById('idError').style.display='flex';
   }
 })();
 
