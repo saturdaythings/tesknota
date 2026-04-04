@@ -2001,6 +2001,7 @@ async function loadAllData(){
   // Recalculate ID counters so new entries don't collide with loaded data
   FRAGRANCES.forEach(function(f){ var n=parseInt((f.id||'').replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
   COMPLIMENTS.forEach(function(c){ var n=parseInt((c.id||'').replace(/\D/g,''))||0; if(n>=nextCompId)nextCompId=n+1; });
+  console.log('[loadAllData] FRAGRANCES: '+FRAGRANCES.length+', COMPLIMENTS: '+COMPLIMENTS.length+', COMMUNITY_FRAGS: '+COMMUNITY_FRAGS.length);
   return sheetsOk;
 }
 
@@ -3127,32 +3128,33 @@ function getFragFamily(frag){
   return db?db.fam:null;
 }
 
+var _collSortInited = false;
 function initCollectionSort() {
+  if (_collSortInited) return;
+  _collSortInited = true;
   var thead = document.getElementById('collThead');
   if (!thead) return;
+  // Map each data-sort value to its two toggle states [default, reversed]
+  var togglePairs = {
+    'nameAZ':   ['nameAZ','nameZA'],
+    'ratingHL': ['ratingHL','ratingLH'],
+    'comps':    ['comps','compsAsc'],
+    'added':    ['added','addedOld'],
+  };
   thead.querySelectorAll('th[data-sort]').forEach(function(th) {
     th.style.cursor = 'pointer';
     th.style.userSelect = 'none';
     th.addEventListener('click', function() {
-      var val = th.dataset.sort;
-      if (collSort === val) {
-        if (val === 'nameAZ')        val = 'nameZA';
-        else if (val === 'nameZA')   val = 'nameAZ';
-        else if (val === 'ratingHL') val = 'ratingLH';
-        else if (val === 'ratingLH') val = 'ratingHL';
-        else if (val === 'comps')    val = 'compsAsc';
-        else if (val === 'compsAsc') val = 'comps';
-        else if (val === 'added')    val = 'addedOld';
-        else if (val === 'addedOld') val = 'added';
-      }
-      setCollSort(val);
+      var col = th.dataset.sort;
+      var pair = togglePairs[col];
+      if (!pair) return;
+      // If already sorting by this column, toggle direction; otherwise switch to this column's default
+      var newVal;
+      if (collSort === pair[0]) newVal = pair[1];
+      else if (collSort === pair[1]) newVal = pair[0];
+      else newVal = pair[0];
+      setCollSort(newVal);
       updateSortArrows();
-    });
-    th.addEventListener('mouseenter', function() {
-      this.style.color = 'var(--blue)';
-    });
-    th.addEventListener('mouseleave', function() {
-      this.style.color = '';
     });
   });
 }
@@ -3631,7 +3633,7 @@ function renderCollection(){
         +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
         +'<td>'+addedTdHtml+'</td>'
         +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(getAccords(f).join(', ')||'—')+'</td>'
-        +'<td class="tmono">'+compCount+'</td>'
+        +'<td class="tmono">'+(compCount>0?'<span onclick="event.stopPropagation();filterComplimentsByFrag(\''+f.id+'\')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;">'+compCount+'</span>':'—')+'</td>'
         +'<td class="tact">'
         +'<button class="btn-bare" onclick="event.stopPropagation();openAddComp(\''+f.id+'\')">+ Compliment</button>'
         +(hasFriendMatch?'<button class="btn-bare" style="color:var(--warm);" onclick="event.stopPropagation();openCompare(\''+f.name+'\',\''+f.id+'\')" title="Compare with friend">Compare</button>':'')
