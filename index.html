@@ -7624,16 +7624,21 @@ function palFlows() {
         saveLabel: 'Add to Collection',
         onSave: function(answers) {
           var db = FRAG_DB.find(function(d) { return d.n === answers.name; });
+          var _concMap={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum'};
+          var _id='f'+nextId++;
+          var topN=db?db.top||'':'', midN=db?db.mid||'':'', baseN=db?db.base||'':'';
           var newFrag = {
-            id: 'f' + nextId++,
+            id: _id,
+            fragranceId: lookupFragDbId(answers.name, db?db.h:'', db?(_concMap[db.conc]||db.conc||''):'')||_id,
             userId: CURRENT_USER ? CURRENT_USER.id : 'u1',
             name: answers.name,
             house: db ? db.h : (answers.house || ''),
             status: answers.status,
+            type: db ? (_concMap[db.conc]||db.conc||'') : '',
             sizes: answers.sizes || [],
-            communitySill: db ? db.s : null,
-            avgPrice: db ? db.p : null,
-            notes: db ? db.notes : '',
+            topNotes: topN, middleNotes: midN, baseNotes: baseN,
+            notes: [topN,midN,baseN].filter(Boolean).join(' · '),
+            accords: db ? (db.accords||'') : '',
             personalRating: answers.personalRating ? parseInt(answers.personalRating) : null,
             statusRating: answers.statusRating || null,
             personalLong: answers.personalLong || null,
@@ -7642,7 +7647,16 @@ function palFlows() {
             isDupe: answers.isDupe === 'yes',
             dupeFor: answers.dupeFor || '',
             personalNotes: answers.personalNotes || '',
+            createdAt: new Date().toISOString()
           };
+          // Duplicate check — block same name in same bucket (collection vs wishlist)
+          var _isWish=newFrag.status==='WANT_TO_BUY'||newFrag.status==='WANT_TO_SMELL';
+          var dup=myFragrances().find(function(f){
+            if(f.name.toLowerCase().trim()!==newFrag.name.toLowerCase().trim()) return false;
+            var _ew=f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';
+            return _isWish===_ew;
+          });
+          if(dup){ toast(answers.name+' is already in your '+(_isWish?'wishlist':'collection')); return; }
           FRAGRANCES.push(newFrag);
           appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
@@ -8046,28 +8060,36 @@ function palFlows() {
         saveLabel: 'Add to Wishlist',
         onSave: function(answers) {
           var db = FRAG_DB.find(function(d) { return d.n === answers.name; });
-          var already = FRAGRANCES.find(function(f) { return f.name.toLowerCase() === answers.name.toLowerCase(); });
-          if (already) { toast(answers.name + ' is already in your collection'); return; }
+          var already = myFragrances().find(function(f) {
+            if(f.name.toLowerCase().trim() !== answers.name.toLowerCase().trim()) return false;
+            return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';
+          });
+          if (already) { toast(answers.name + ' is already on your wishlist'); return; }
+          var _concMap={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum'};
+          var _id='f'+nextId++;
+          var topN=db?db.top||'':'', midN=db?db.mid||'':'', baseN=db?db.base||'':'';
           var wFrag = {
-            id: 'f' + nextId++,
+            id: _id,
+            fragranceId: lookupFragDbId(answers.name, db?db.h:'', db?(_concMap[db.conc]||db.conc||''):'')||_id,
             userId: CURRENT_USER ? CURRENT_USER.id : 'u1',
             name: answers.name,
             house: db ? db.h : '',
             status: answers.status,
+            type: db ? (_concMap[db.conc]||db.conc||'') : '',
             sizes: [],
-            communitySill: db ? db.s : null,
-            avgPrice: db ? db.p : null,
-            notes: db ? db.notes : '',
+            topNotes: topN, middleNotes: midN, baseNotes: baseN,
+            notes: [topN,midN,baseN].filter(Boolean).join(' · '),
+            accords: db ? (db.accords||'') : '',
             personalRating: null, statusRating: null,
-            personalLong: null, personalSill: null,
             whereBought: null, purchaseDate: null,
             isDupe: false, dupeFor: '', personalNotes: '',
+            createdAt: new Date().toISOString()
           };
           FRAGRANCES.push(wFrag);
           appendRow('userFragrances',fragToRow(wFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
           renderCurrentPage();
           updateCounts();
-          toast(answers.name + ' added to Wishlist');
+          toast(answers.name + ' added to wishlist');
         },
       },
     ],
