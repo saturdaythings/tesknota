@@ -1900,11 +1900,14 @@ async function loadAllData(){
     if((f.name==='Eclair Pistache'||f.name==='Eclair Pistachio')&&f.house==='Lattafa'){
       f.name='Eclaire Pistache'; f.type='Eau de Parfum';
     }
-    if(f.name==='Matcha Made in Heaven'&&f.house==='Sorce') f.name='Match Made in Heaven';
-    if(f.name==='Yum Pistachio Gelato 33'&&f.house==='Kayali Fragrances') f.name='Yum Pistachio Gelato | 33';
+    if((f.name==='Matcha Made in Heaven'||f.name==='Match Made In Heaven')&&f.house==='Sorce') f.name='Match Made in Heaven';
+    if((f.name==='Yum Pistachio Gelato 33'||f.name==='Yum Pistachio Gelato| 33')&&f.house==='Kayali Fragrances') f.name='Yum Pistachio Gelato | 33';
     if(f.name==='Cheirosa 62'&&f.house==='Sol de Janeiro') f.name="SOL Cheirosa '62";
     if(f.name==='Eucalyptus 18'&&f.house==='Le Labo') f.name='Eucalyptus 20';
     if(f.name==='Eclair EDP'&&f.house==='Lattafa'){ f.name='Eclair'; f.type='Eau de Parfum'; }
+    if(f.name==='That Girl Viral Vanilla Extrait'&&f.house==='Oakcha'){ f.name='That Girl Viral Vanilla'; f.type='Extrait de Parfum'; }
+    if(f.name==='Miss Girl Extrait'&&f.house==='Oakcha'){ f.name='Miss Girl'; f.type='Extrait de Parfum'; }
+    if(f.name==='Amber'&&f.house==='Nemat') f.name='Amber Perfume Oil';
     if(f.type!==origType||f.name!==origName) _migNeedsWrite=true;
   });
   if(_migNeedsWrite){
@@ -2052,7 +2055,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v18';
+const FRAG_DB_VERSION = '2026-04-03-v19';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
