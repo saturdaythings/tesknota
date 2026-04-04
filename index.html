@@ -1940,7 +1940,7 @@ async function loadAllData(){
   FRAGRANCES = FRAGRANCES.filter(function(f){
     if(!f.id || _seenFids[f.id]) return false;
     _seenFids[f.id] = true;
-    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.userId||'');
+    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.type||'').toLowerCase()+'|'+(f.userId||'');
     if(_seenNameUser[nk]) return false;
     _seenNameUser[nk] = true;
     return true;
@@ -3120,13 +3120,15 @@ function renderDashboard(){
 
   const current = MF.filter(f=>f.status==='CURRENT');
   const finished = MF.filter(f=>f.status==='FINISHED');
+  const dupes = MF.filter(f=>f.isDupe);
   const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
   document.getElementById('dashStats').innerHTML = `
     <div class="sbox"><div class="snum">${current.length}</div><div class="slbl">Current</div></div>
     <div class="sbox"><div class="snum">${wish.length}</div><div class="slbl">Wishlist</div></div>
     <div class="sbox"><div class="snum">${MC.length}</div><div class="slbl">Compliments</div></div>
     <div class="sbox"><div class="snum">${avgRating()}</div><div class="slbl">Avg Rating</div></div>
-    <div class="sbox"><div class="snum">${finished.length}</div><div class="slbl">Finished</div></div>`;
+    <div class="sbox"><div class="snum">${finished.length}</div><div class="slbl">Finished</div></div>
+    <div class="sbox"><div class="snum">${dupes.length}</div><div class="slbl">Dupes</div></div>`;
   // Recent 4 CURRENT fragrances — sorted by most recent purchase date
   var _MONTH_NUM={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
   function _parsePurchase(d){if(!d)return 0;var p=d.split(' ');return (parseInt(p[1])||0)*100+(_MONTH_NUM[p[0]]||0);}
@@ -5637,6 +5639,7 @@ function saveFragrance(){
     var _newWish = newFrag.status==='WANT_TO_BUY'||newFrag.status==='WANT_TO_SMELL';
     var duplicate = myFragrances().find(function(f){
       if(f.name.toLowerCase().trim() !== newFrag.name.toLowerCase().trim()) return false;
+      if((f.type||'').toLowerCase() !== (newFrag.type||'').toLowerCase()) return false;
       // Finished/prev owned entries don't block new adds
       if(f.status==='FINISHED'||f.status==='PREVIOUSLY_OWNED') return false;
       var _existWish = f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';
@@ -5706,10 +5709,12 @@ function afSearch(v){
     el.style.display='block';return;
   }
   hits.forEach(function(f){
-    var item=document.createElement('div');item.className='aci';item.dataset.name=f.n;
-    item.onmousedown=function(e){e.preventDefault();pickAF(this.dataset.name);};
+    var _concMap={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum','Body Spray':'Body Spray','Perfume Oil':'Perfume Oil'};
+    var _type=_concMap[f.conc]||f.conc||f.concentration||'';
+    var item=document.createElement('div');item.className='aci';item.dataset.name=f.n;item.dataset.conc=f.conc||'';
+    item.onmousedown=function(e){e.preventDefault();pickAF(this.dataset.name,this.dataset.conc);};
     var nd=document.createElement('div');nd.className='aci-n';nd.textContent=f.n;
-    if(f.src==='community'){var b=document.createElement('span');b.style.cssText='font-size:9px;color:var(--ink3);margin-left:4px';b.textContent='community';nd.appendChild(b);}
+    if(_type){var b=document.createElement('span');b.style.cssText='font-size:9px;color:var(--ink3);margin-left:4px';b.textContent=_type;nd.appendChild(b);}
     var hd=document.createElement('div');hd.className='aci-h';hd.textContent=f.h;
     item.appendChild(nd);item.appendChild(hd);el.appendChild(item);
   });
@@ -5787,9 +5792,13 @@ function afSearchAndSelect(name){
   if(f) pickAF(f.n);
 }
 
-function pickAF(name){
-  var hits=fragSearch(name,1);
-  var f=hits.find(function(x){return normStr(x.n)===normStr(name);})||hits[0];
+function pickAF(name, conc){
+  var hits=fragSearch(name,10);
+  var f;
+  if(conc){
+    f=hits.find(function(x){return normStr(x.n)===normStr(name)&&normStr(x.conc||'')===normStr(conc);});
+  }
+  if(!f) f=hits.find(function(x){return normStr(x.n)===normStr(name);})||hits[0];
   document.getElementById('afSrch').value=name;
   document.getElementById('afDrop').style.display='none';
   document.getElementById('afSrchErr').style.display='none';
@@ -6425,11 +6434,11 @@ function fragSearch(query, limit){
   var top=scored
     .filter(function(x){return x.score>0;})
     .sort(function(a,b){return b.score-a.score;});
-  // Dedup by name+house — keep first (highest-scored) entry
+  // Dedup by name+house+conc — keep first (highest-scored) entry
   var seen={};
   var deduped=[];
   top.forEach(function(x){
-    var k=normStr(x.frag.n)+'|'+normStr(x.frag.h);
+    var k=normStr(x.frag.n)+'|'+normStr(x.frag.h)+'|'+normStr(x.frag.conc||x.frag.concentration||'');
     if(!seen[k]){ seen[k]=1; deduped.push(x); }
   });
   return deduped.slice(0,limit||8).map(function(x){return x.frag;});

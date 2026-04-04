@@ -143,7 +143,7 @@ App loads → getAccessToken() (JWT via Web Crypto)
            1. Read all 4 sheet tabs in parallel
            2. Populate COMMUNITY_FRAGS from fragranceDB tab
            3. Merge sheet data into FRAGRANCES / COMPLIMENTS
-           4. Dedup by ID, then by name+house+userId
+           4. Dedup by ID, then by name+house+type+userId
            5. Run migrations (fix stale names/types)
            6. Rebuild fragranceDB tab if FRAG_DB_VERSION changed
            7. Sync missing seed entries to sheets
