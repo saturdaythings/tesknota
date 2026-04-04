@@ -1935,12 +1935,13 @@ async function loadAllData(){
   var _concToType = {'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum','Extrait de Parfum':'Extrait de Parfum','Body Spray':'Body Spray','Oil':'Perfume Oil','Cologne':'Cologne','Perfume Concentré':'Perfume Concentré','Other':'Other'};
   var _typeToConc = {};
   Object.keys(_concToType).forEach(function(k){ _typeToConc[_concToType[k]]=k; });
-  // One row per FRAGRANCES entry — fragranceId must match userFragrances exactly
+  // One row per unique fragrance (name+house+type) — dedup across users
   FRAGRANCES.forEach(function(f){
     var nm = (f.name||'').trim();
     if(!nm || nm.toLowerCase().startsWith('qa ') || !f.id) return;
-    if(_seenDbKeys[f.id]) return;
-    _seenDbKeys[f.id] = true;
+    var _dedupKey = _normKey(nm)+'|'+_normKey(f.house||'')+'|'+_normKey(f.type||'');
+    if(_seenDbKeys[_dedupKey]) return;
+    _seenDbKeys[_dedupKey] = true;
     // Look up FRAG_DB for community data (accords, notes, price)
     var k = _normKey(nm)+'|'+_normKey(f.house||'');
     var dbEntries = _dbIndex[k] || [];
@@ -2096,7 +2097,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v25';
+const FRAG_DB_VERSION = '2026-04-03-v26';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
