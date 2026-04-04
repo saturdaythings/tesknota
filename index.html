@@ -1844,7 +1844,7 @@ async function loadAllData(){
   FRAGRANCES = FRAGRANCES.filter(function(f){
     if(!f.id || _seenFids[f.id]) return false;
     _seenFids[f.id] = true;
-    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.userId||'')+'|'+(f.status||'');
+    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.type||'').toLowerCase()+'|'+(f.userId||'')+'|'+(f.status||'');
     if(_seenNameUser[nk]) return false;
     _seenNameUser[nk] = true;
     return true;
