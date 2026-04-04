@@ -1585,7 +1585,8 @@ async function writeSheet(tabName,rows,headers){
   setSyncState('syncing');
   const token=await getAccessToken();
   const authHeader={Authorization:'Bearer '+token,'Content-Type':'application/json'};
-  await fetch(SHEETS_BASE+'/values/'+tabName+':clear',{method:'POST',headers:authHeader});
+  var r1=await fetch(SHEETS_BASE+'/values/'+tabName+':clear',{method:'POST',headers:authHeader});
+  if(!r1.ok){ setSyncState('error'); throw new Error('Sheet clear failed ['+tabName+']: '+r1.status); }
   if(!rows.length){setSyncState('ok');return;}
   const values=[headers].concat(rows.map(function(row){
     return headers.map(function(h){
@@ -1595,9 +1596,10 @@ async function writeSheet(tabName,rows,headers){
       return String(v);
     });
   }));
-  await fetch(SHEETS_BASE+'/values/'+tabName+'?valueInputOption=RAW',{
+  var r2=await fetch(SHEETS_BASE+'/values/'+tabName+'?valueInputOption=RAW',{
     method:'PUT',headers:authHeader,body:JSON.stringify({values:values})
   });
+  if(!r2.ok){ setSyncState('error'); throw new Error('Sheet write failed ['+tabName+']: '+r2.status); }
   setSyncState('ok');
 }
 
@@ -1925,8 +1927,15 @@ async function loadAllData(){
     _newDbRows.push(fragToDbRow(f));
   });
   if(_syncedVersion !== FRAG_DB_VERSION){
-    await writeSheet('fragranceDB', _newDbRows, COMMUNITY_FRAG_HEADERS);
-    localStorage.setItem(_lsKey, FRAG_DB_VERSION);
+    try {
+      console.log('[fragranceDB] rewriting sheet — '+_newDbRows.length+' rows, version '+FRAG_DB_VERSION);
+      await writeSheet('fragranceDB', _newDbRows, COMMUNITY_FRAG_HEADERS);
+      localStorage.setItem(_lsKey, FRAG_DB_VERSION);
+      console.log('[fragranceDB] sheet write succeeded');
+    } catch(e) {
+      console.error('[fragranceDB] sheet write FAILED — will retry next load:', e);
+      localStorage.removeItem(_lsKey);
+    }
   }
   COMMUNITY_FRAGS = _newDbRows.map(function(r){
     return Object.assign({}, r, { name: r.fragranceName||r.name||'', house: r.fragranceHouse||r.house||'', id: r.fragranceId||r.id||'' });
@@ -2043,7 +2052,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v17';
+const FRAG_DB_VERSION = '2026-04-03-v18';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
