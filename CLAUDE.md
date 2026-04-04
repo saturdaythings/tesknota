@@ -31,9 +31,9 @@ userFragrances.fragranceId <-> fragranceDB.fragranceId <-> userCompliments.prima
 
 ## FRAG_DB to fragranceDB sync
 
-1. Migrations fix stale names in FRAGRANCES (from sheet) BEFORE the rebuild
-2. Rebuild iterates FRAGRANCES, looks up FRAG_DB by norm(name)+norm(house) for community data
-3. One fragranceDB row per fragranceId — ID must match exactly
+1. fragranceDB is built directly from FRAG_DB array — one row per entry, zero duplicates
+2. Each entry gets a neutral ID (f1, f2, ...) based on FRAG_DB array position — not tied to any user
+3. userFragrances still uses per-user IDs (k1, s1, etc.) — these link to fragranceDB by name+house lookup, not by ID
 4. writeSheet checks response.ok, throws on HTTP errors
 5. localStorage version only set on successful write; cleared on failure (retries next load)
 6. **Bump FRAG_DB_VERSION** whenever FRAG_DB entries or migration rules change

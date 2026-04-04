@@ -1923,51 +1923,27 @@ async function loadAllData(){
   var _lsKey = 'fragDBSyncedVersion';
   var _syncedVersion = localStorage.getItem(_lsKey);
   var _newDbRows = [];
-  var _seenDbKeys = {};
   var _normKey = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); };
-  // Pre-index FRAG_DB by normalized name+house for fast community data lookup
-  var _dbIndex = {};
-  FRAG_DB.forEach(function(db){
-    var k = _normKey(db.n)+'|'+_normKey(db.h);
-    if(!_dbIndex[k]) _dbIndex[k] = [];
-    _dbIndex[k].push(db);
-  });
   var _concToType = {'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum','Extrait de Parfum':'Extrait de Parfum','Body Spray':'Body Spray','Oil':'Perfume Oil','Cologne':'Cologne','Perfume Concentré':'Perfume Concentré','Other':'Other'};
-  var _typeToConc = {};
-  Object.keys(_concToType).forEach(function(k){ _typeToConc[_concToType[k]]=k; });
-  // One row per unique fragrance (name+house+type) — dedup across users
-  FRAGRANCES.forEach(function(f){
-    var nm = (f.name||'').trim();
-    if(!nm || nm.toLowerCase().startsWith('qa ') || !f.id) return;
-    var _dedupKey = _normKey(nm)+'|'+_normKey(f.house||'')+'|'+_normKey(f.type||'');
-    if(_seenDbKeys[_dedupKey]) return;
-    _seenDbKeys[_dedupKey] = true;
-    // Look up FRAG_DB for community data (accords, notes, price)
-    var k = _normKey(nm)+'|'+_normKey(f.house||'');
-    var dbEntries = _dbIndex[k] || [];
-    var fc = _typeToConc[f.type]||f.type||'';
-    var db = dbEntries.length > 1
-      ? (dbEntries.find(function(d){ return d.conc===fc||d.conc===f.type; }) || dbEntries[0])
-      : dbEntries[0];
-    var _top='', _mid='', _base='', accords='', avgPrice='';
-    if(db){
-      _top = db.top||''; _mid = db.mid||''; _base = db.base||'';
-      if(!_top && !_mid && !_base && db.notes) _top = db.notes;
-      accords = db.accords||'';
-      avgPrice = (db.p||'').replace(/~/g,'').trim();
-    }
+  // Build fragranceDB directly from FRAG_DB — one row per entry, no duplicates
+  // Each entry gets a stable neutral ID (f1, f2, ...) not tied to any user
+  FRAG_DB.forEach(function(db, idx){
+    var _top = db.top||'';
+    var _mid = db.mid||'';
+    var _base = db.base||'';
+    if(!_top && !_mid && !_base && db.notes) _top = db.notes;
     _newDbRows.push({
-      fragranceId: f.id,
-      fragranceName: nm,
-      fragranceHouse: f.house||'',
-      fragranceType: f.type||'',
-      fragranceAccords: accords,
+      fragranceId: 'f'+(idx+1),
+      fragranceName: db.n,
+      fragranceHouse: db.h,
+      fragranceType: _concToType[db.conc]||db.conc||'',
+      fragranceAccords: db.accords||'',
       topNotes: _top,
       middleNotes: _mid,
       baseNotes: _base,
-      avgPrice: avgPrice,
+      avgPrice: (db.p||'').replace(/~/g,'').trim(),
       addedBy: 'system',
-      addedAt: f.createdAt||new Date().toISOString(),
+      addedAt: new Date().toISOString(),
     });
   });
   if(_syncedVersion !== FRAG_DB_VERSION){
@@ -2097,7 +2073,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v26';
+const FRAG_DB_VERSION = '2026-04-04-v27';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
