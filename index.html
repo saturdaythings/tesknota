@@ -2032,7 +2032,7 @@ async function loadAllData(){
   FRAGRANCES = FRAGRANCES.filter(function(f){
     if(!f.id || _seenFids[f.id]) return false;
     _seenFids[f.id] = true;
-    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.type||'').toLowerCase()+'|'+(f.userId||'');
+    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.type||'').toLowerCase()+'|'+(f.userId||'')+'|'+(f.status||'');
     if(_seenNameUser[nk]) return false;
     _seenNameUser[nk] = true;
     return true;
@@ -6688,7 +6688,7 @@ function fragSearch(query, limit){
   var seen={};
   var deduped=[];
   top.forEach(function(x){
-    var k=normStr(x.frag.n)+'|'+normStr(x.frag.h)+'|'+normStr(x.frag.conc||x.frag.concentration||'');
+    var k=normStr(x.frag.n)+'|'+normStr(x.frag.h);
     if(!seen[k]){ seen[k]=1; deduped.push(x); }
   });
   return deduped.slice(0,limit||8).map(function(x){return x.frag;});
