@@ -905,8 +905,7 @@ input,select,textarea{font-size:16px;}
       <div id="wishCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
       <table class="tbl" id="wishTable"><thead id="wishThead"><tr>
         <th data-sort="nameAZ">Fragrance <span class="sort-arrow"></span></th>
-        <th data-sort="houseAZ">House <span class="sort-arrow"></span></th>
-        <th>Status</th>
+        <th data-sort="added">Added <span class="sort-arrow"></span></th>
         <th data-sort="priceHL">Avg Price <span class="sort-arrow"></span></th>
         <th>Accords</th>
         <th></th>
@@ -1693,9 +1692,11 @@ function resolveFragById(fragId){
   // Check COMMUNITY_FRAGS (fragranceDB sheet rows) first
   var cf = COMMUNITY_FRAGS.find(function(f){ return (f.fragranceId||f.id)===fragId; });
   if(cf) return { name: cf.fragranceName||cf.name||'', house: cf.fragranceHouse||cf.house||'' };
-  // Fall back to seed FRAGRANCES already in memory (by id or fragranceId)
+  // Fall back to FRAGRANCES in memory (by id or fragranceId)
   var sf = FRAGRANCES.find(function(f){ return f.id===fragId || f.fragranceId===fragId; });
   if(sf) return { name: sf.name||'', house: sf.house||'' };
+  // Fall back to static seed map (survives dedup — always resolves k/s IDs)
+  if(typeof _seedIdMap!=='undefined' && _seedIdMap[fragId]) return _seedIdMap[fragId];
   return { name: '', house: '' };
 }
 
@@ -1878,8 +1879,8 @@ async function loadAllData(){
   // until real data is added).
   if(fragsRaw.length){
     var _fragSeedIds=new Set(fragsRaw.map(function(r){return r.fragranceId||'';}));
-    var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.fragranceId||f.id);});
-    FRAGRANCES=fragSeed.concat(fragsRaw.map(rowToFrag));
+    var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.fragranceId||f.id) && !_fragSeedIds.has(f.id);});
+    FRAGRANCES=fragsRaw.map(rowToFrag).concat(fragSeed);
   }
   // Remove blank-name entries (QA test artifacts or orphaned Sheet rows with no resolved fragrance)
   FRAGRANCES = FRAGRANCES.filter(function(f){ return !!(f.name||'').trim(); });
@@ -1899,7 +1900,7 @@ async function loadAllData(){
   }
   // Write any seed fragrances missing from Sheets so they persist
   var _sheetFragIds=new Set(fragsRaw.map(function(r){return r.fragranceId||'';}));
-  var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.fragranceId||f.id);});
+  var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.fragranceId||f.id) && !_sheetFragIds.has(f.id);});
   if(_missingFrags.length){
     await syncMissingRows('userFragrances',_missingFrags.map(fragToRow),FRAG_HEADERS,'syncFrags');
   }
@@ -2733,6 +2734,9 @@ let FRAGRANCES = [
 FRAGRANCES.forEach(function(f){
   f.fragranceId = lookupFragDbId(f.name, f.house, f.type) || f.id;
 });
+// Static seed ID map — survives loadAllData dedup so resolveFragById can always resolve k/s IDs
+var _seedIdMap = {};
+FRAGRANCES.forEach(function(f){ _seedIdMap[f.id] = {name:f.name, house:f.house}; });
 
 // COMPLIMENTS — main compliment log (loaded from Google Sheets)
 let COMPLIMENTS = [
@@ -3756,6 +3760,7 @@ function renderWishlist(){
     if(wishSortVal==='houseAZ') return (a.house||'').localeCompare(b.house||'');
     if(wishSortVal==='houseZA') return (b.house||'').localeCompare(a.house||'');
     if(wishSortVal==='priceHL'||wishSortVal==='priceLH'){ var _acd2=getCommunityData(a.name,a.house)||{},_bcd2=getCommunityData(b.name,b.house)||{}; var pa=parseFloat((_acd2.avgPrice||'0').replace(/[^0-9.]/g,''))||0,pb=parseFloat((_bcd2.avgPrice||'0').replace(/[^0-9.]/g,''))||0; return wishSortVal==='priceHL'?pb-pa:pa-pb; }
+    if(wishSortVal==='added'){ var _da=new Date(a.createdAt||0).getTime(),_db2=new Date(b.createdAt||0).getTime(); return _db2-_da; }
     if(wishSortVal==='recent') return parseInt((b.id||'0').replace(/\D/g,''))-parseInt((a.id||'0').replace(/\D/g,''));
     return a.name.localeCompare(b.name);
   });
@@ -3784,20 +3789,28 @@ function renderWishlist(){
     }
   }
   if(frags.length){
+    var _wMonths=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     document.getElementById('wishBody').innerHTML=frags.map(function(f){
       var _cd = getCommunityData(f.name, f.house) || {};
       var _accords=getAccords(f);
+      var addedStr = f.purchaseDate || '';
+      if (!addedStr && f.createdAt) {
+        var _d = new Date(f.createdAt);
+        addedStr = _wMonths[_d.getMonth()] + ' ' + _d.getFullYear();
+      }
+      var addedHtml = addedStr
+        ? '<span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">' + addedStr + '</span>'
+        : '<span style="color:var(--ink3);">—</span>';
       return '<tr onclick="openDetail(\''+f.id+'\')">'
-        +'<td><div class="tn">'+fragDisplayName(f)+'</div></td>'
-        +'<td class="tmono" style="font-size:11px;">'+f.house+'</td>'
-        +'<td><div class="ts s-wnt">'+STATUS_LABELS[f.status]+'</div></td>'
-        +'<td class="tmono">'+(_cd.avgPrice||'—')+'</td>'
+        +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div></td>'
+        +'<td>'+addedHtml+'</td>'
+        +'<td class="tmono">'+((_cd.avgPrice||'').replace(/~/g,'')||'—')+'</td>'
         +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(_accords.slice(0,3).join(', ')||'—')+'</td>'
         +'<td class="tact"><button class="btn btn-warm btn-sm" onclick="event.stopPropagation();promoteToCollection(\''+f.id+'\')">Bought it</button></td>'
         +'</tr>';
     }).join('');
   } else {
-    document.getElementById('wishBody').innerHTML='<tr><td colspan="7" style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;text-align:center;">Nothing on your wishlist yet</td></tr>';
+    document.getElementById('wishBody').innerHTML='<tr><td colspan="5" style="padding:32px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;text-align:center;">Nothing on your wishlist yet</td></tr>';
   }
   renderDiscovery();
 }
@@ -4518,7 +4531,7 @@ function renderFriend(){
       var td2=document.createElement('td');
       var ds=document.createElement('div'); ds.className='ts s-wnt'; ds.textContent=STATUS_LABELS[f.status]; td2.appendChild(ds); tr.appendChild(td2);
       var _wcd=getCommunityData(f.name,f.house)||{};
-      var td3=document.createElement('td'); td3.className='tmono'; td3.textContent=_wcd.avgPrice||'—'; tr.appendChild(td3);
+      var td3=document.createElement('td'); td3.className='tmono'; td3.textContent=(_wcd.avgPrice||'').replace(/~/g,'')||'—'; tr.appendChild(td3);
       wishBody.appendChild(tr);
     });
     if(!friendWish.length){
@@ -4990,7 +5003,7 @@ function openEditFrag(fragId, forceStatus){
   document.getElementById('mpN').textContent = f.name;
   document.getElementById('mpH').textContent = f.house.toUpperCase();
   var _cd = getCommunityData(f.name, f.house) || {};
-  document.getElementById('mpP').textContent = _cd.avgPrice||'—';
+  document.getElementById('mpP').textContent = (_cd.avgPrice||'').replace(/~/g,'')||'—';
   document.getElementById('mpNotes').textContent = _cd.notes||'';
   document.getElementById('afPrev').style.display='block';
   const statusVal = forceStatus||f.status;
@@ -5639,7 +5652,7 @@ function importToCollection(data){
   document.getElementById('afSrch').value=data.name;
   document.getElementById('mpN').textContent=data.name;
   document.getElementById('mpH').textContent=data.house.toUpperCase();
-  document.getElementById('mpP').textContent=data.avgPrice||'—';
+  document.getElementById('mpP').textContent=(data.avgPrice||'').replace(/~/g,'')||'—';
   document.getElementById('mpNotes').textContent=data.notes||'';
   document.getElementById('afPrev').style.display='block';
   // Store as pending prefetch
