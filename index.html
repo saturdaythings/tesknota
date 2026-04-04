@@ -1957,7 +1957,8 @@ async function loadAllData(){
     if(f.name==='Beirut Baklava'&&f.house==='Kheir Fragrance House'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
     if(f.name==='That Girl Viral Vanilla'&&f.house==='Oakcha'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
     if(f.name==='Miss Girl'&&f.house==='Oakcha'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
-    if(f.name==='Matcha Ice Cream'&&f.house==='Theodoros Kalotinis'&&f.type==='Extrait de Parfum') f.type='Eau de Parfum';
+    if(f.name==='Matcha Ice Cream'&&f.house==='Theodoros Kalotinis'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
+    if(f.name==='Crème Brûlée'&&f.house==='Theodoros Kalotinis'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
     if(f.name==='Vanilla Skin'&&f.house==='Phlur'&&f.type==='Eau de Parfum') f.type='Body Spray';
     if(f.type!==origType||f.name!==origName) _migNeedsWrite=true;
   });
@@ -2138,7 +2139,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-04-v30';
+const FRAG_DB_VERSION = '2026-04-04-v31';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2520,7 +2521,7 @@ const FRAG_DB = [
   {n:'Jimmy Choo I Want Choo EDP',h:'Jimmy Choo',conc:'EDP',fam:'Floral Fruity',top:'Bergamot, Mandarin, Pineapple',mid:'Tuberose, Jasmine',base:'Sandalwood, Musk, Amber',r:'4.0',l:'6–8h',s:'Moderate',p:'~$95'},
   {n:'Angels\' Share',h:'By Kilian',conc:'EDP',fam:'Gourmand Oriental',top:'Cognac',mid:'Cinnamon, Tonka Bean, Oak, Hedione',base:'Vanilla, Praline, Sandalwood, Candied Almond',r:'4.5',l:'8–12h',s:'Strong',p:'~$275',accords:'Warm Spicy, Boozy, Sweet, Gourmand, Vanilla'},
   {n:'Apple Brandy on the Rocks',h:'By Kilian',conc:'EDP',fam:'Gourmand Fruity',top:'Cardamom, Bergamot',mid:'Apple, Rum, Brandy, Pineapple, Vanilla, Moss',base:'Cedar, Ambroxan',r:'4.3',l:'8–12h',s:'Moderate',p:'~$275',accords:'Fruity, Boozy, Sweet, Gourmand, Vanilla'},
-  {n:'Matcha Ice Cream',h:'Theodoros Kalotinis',conc:'EDP',fam:'Gourmand',top:'Lime, Matcha Tea',mid:'Ice Cream, Sugar, Waffle Cone',base:'Vanilla',r:'4.4',l:'8–12h',s:'Moderate',p:'~$160',accords:'Gourmand, Sweet, Green, Citrus, Creamy'},
+  {n:'Matcha Ice Cream',h:'Theodoros Kalotinis',conc:'Extrait de Parfum',fam:'Gourmand',top:'Lime, Matcha Tea',mid:'Ice Cream, Sugar, Waffle Cone',base:'Vanilla',r:'4.4',l:'8–12h',s:'Moderate',p:'~$160',accords:'Gourmand, Sweet, Green, Citrus, Creamy'},
   {n:'Crème Brûlée',h:'Theodoros Kalotinis',conc:'Extrait de Parfum',fam:'Gourmand',top:'Burnt Sugar',mid:'Coconut Milk',base:'Vanilla',r:'4.4',l:'8–12h',s:'Moderate',p:'~$165',accords:'Gourmand, Sweet, Vanilla, Coconut, Tropical, Lactonic'},
   {n:'Vanille Extreme',h:'Comptoir Sud Pacifique',conc:'EDT',fam:'Vanilla Milky',top:'Sugar Vanilla, Heliotrope',mid:'Vanilla Absolute, Milk',base:'Vanilla Absolute, Milk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$32',accords:'Vanilla, Sweet, Gourmand, Powdery, Milky'},
   {n:'Vanille Coco',h:'Comptoir Sud Pacifique',conc:'EDT',fam:'Vanilla Coconut',top:'Whipped Cream, Banana, Heliotrope',mid:'Vanilla, Coconut',base:'Vanille, Coconut',r:'4.0',l:'4–6h',s:'Moderate',p:'~$32',accords:'Vanilla, Coconut, Sweet, Gourmand, Milky'},
@@ -2650,7 +2651,7 @@ let FRAGRANCES = [
   {id:'k11',userId:'u1',name:'Eclair',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2026',purchasePrice:7.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k12',userId:'u1',name:'Bianco Latte',house:'Giardini di Toscana',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Nov 2023',purchasePrice:123.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k13',userId:'u1',name:'Crème Brûlée',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Sep 2024',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k14',userId:'u1',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Jul 2025',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k14',userId:'u1',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Jul 2025',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k15',userId:'u1',name:'Beirut Baklava',house:'Kheir Fragrance House',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Aug 2025',purchasePrice:144.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k16',userId:'u1',name:'Ruhe',house:'Oakcha',status:'CURRENT',sizes:['Decant'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:20.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k17',userId:'u1',name:'That Girl Viral Vanilla',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:47.14,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
@@ -2693,7 +2694,7 @@ let FRAGRANCES = [
   {id:'s1',userId:'u2',name:'Lost Cherry',house:'Tom Ford',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Fruity, Sweet, Gourmand, Floral, Boozy',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s2',userId:'u2',name:'Yum Pistachio Gelato | 33',house:'Kayali Fragrances',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Nutty, Fruity, Vanilla',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s3',userId:'u2',name:'Angels\' Share',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Warm Spicy, Boozy, Sweet, Gourmand, Vanilla',createdAt:'2024-01-01T00:00:00.000Z'},
-  {id:'s4',userId:'u2',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Green, Citrus, Creamy',createdAt:'2024-01-01T00:00:00.000Z'},
+  {id:'s4',userId:'u2',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Green, Citrus, Creamy',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s5',userId:'u2',name:'Crème Brûlée',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Vanilla, Coconut, Tropical, Lactonic',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s6',userId:'u2',name:'Eclair',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',purchaseDate:'',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s7',userId:'u2',name:'Lune Féline',house:'Atelier des Ors',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Oriental, Gourmand, Spicy',createdAt:'2024-01-01T00:00:00.000Z'},
