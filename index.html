@@ -1925,6 +1925,23 @@ async function loadAllData(){
   var _newDbRows = [];
   var _normKey = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); };
   var _concToType = {'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum','Extrait de Parfum':'Extrait de Parfum','Body Spray':'Body Spray','Oil':'Perfume Oil','Cologne':'Cologne','Perfume Concentré':'Perfume Concentré','Other':'Other'};
+  // Strip house prefix and concentration suffix from FRAG_DB name
+  // e.g. "Marc Jacobs Daisy EDT" → "Daisy", "Eau Duelle EDP" → "Eau Duelle"
+  var _cleanName = function(rawName, house, conc){
+    var name = rawName||'';
+    // Strip house prefix (case-insensitive, with trailing space)
+    if(house && name.length > house.length && name.substring(0, house.length).toLowerCase() === house.toLowerCase() && name.charAt(house.length) === ' '){
+      name = name.substring(house.length + 1);
+    }
+    // Strip concentration suffix (EDP, EDT, Extrait, Parfum, etc.)
+    if(conc && name.length > conc.length){
+      var tail = name.substring(name.length - conc.length);
+      if(tail.toLowerCase() === conc.toLowerCase() && (name.length === conc.length || name.charAt(name.length - conc.length - 1) === ' ')){
+        name = name.substring(0, name.length - conc.length).trim();
+      }
+    }
+    return name || rawName;
+  };
   // Build fragranceDB directly from FRAG_DB — one row per entry, no duplicates
   // Each entry gets a stable neutral ID (f1, f2, ...) not tied to any user
   FRAG_DB.forEach(function(db, idx){
@@ -1934,7 +1951,7 @@ async function loadAllData(){
     if(!_top && !_mid && !_base && db.notes) _top = db.notes;
     _newDbRows.push({
       fragranceId: 'f'+(idx+1),
-      fragranceName: db.n,
+      fragranceName: _cleanName(db.n, db.h, db.conc),
       fragranceHouse: db.h,
       fragranceType: _concToType[db.conc]||db.conc||'',
       fragranceAccords: db.accords||'',
@@ -2073,7 +2090,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-04-v27';
+const FRAG_DB_VERSION = '2026-04-04-v28';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
