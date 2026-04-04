@@ -3055,8 +3055,6 @@ function initCollectionSort() {
         else if (val === 'ratingLH') val = 'ratingHL';
         else if (val === 'comps')    val = 'compsAsc';
         else if (val === 'compsAsc') val = 'comps';
-        else if (val === 'long')     val = 'longDesc';
-        else if (val === 'longDesc') val = 'long';
         else if (val === 'added')    val = 'addedOld';
         else if (val === 'addedOld') val = 'added';
       }
@@ -3079,10 +3077,9 @@ function updateSortArrows() {
     'nameAZ': 'nameAZ', 'nameZA': 'nameAZ',
     'ratingHL': 'ratingHL', 'ratingLH': 'ratingHL',
     'comps': 'comps', 'compsAsc': 'comps',
-    'long': 'long', 'longDesc': 'long',
     'added': 'added', 'addedOld': 'added'
   };
-  var ascSorts = ['nameAZ', 'ratingHL', 'comps', 'long', 'added'];
+  var ascSorts = ['nameAZ', 'ratingHL', 'comps', 'added'];
   thead.querySelectorAll('th[data-sort]').forEach(function(th) {
     var arrow = th.querySelector('.sort-arrow');
     if (!arrow) return;
@@ -5013,7 +5010,7 @@ function saveFragrance(){
     if(!db && (data.topNotes||data.middleNotes||data.baseNotes)){
       setTimeout(function(){
         if(confirm('Add "'+name+'" to the shared community database so both users can find it?')){
-          contributeToCommmunity(Object.assign({name:name,house:newFrag.house},data));
+          contributeToCommunity(Object.assign({name:name,house:newFrag.house},data));
         }
       },500);
     }
@@ -5821,7 +5818,7 @@ function dbToLinkResult(f, url, confidence){
  * Save a manually-entered fragrance's metadata to the fragranceDB sheet tab.
  * Called from the import flow when data was filled in manually and no DB match existed.
  */
-async function contributeToCommmunity(data){
+async function contributeToCommunity(data){
   if(!data||!data.name||!data.house) return;
   // Don't duplicate — check if already in community
   var exists=COMMUNITY_FRAGS.find(function(f){
@@ -6870,13 +6867,6 @@ window.auditData=auditDataIntegrity;
     console.error('[init] loadAllData threw:', e);
     sheetsOk = false;
   }
-  // Normalise short-form type values from Sheets before migration
-  FRAGRANCES.forEach(function(f){
-    if(f.type==='EDP') f.type='Eau de Parfum';
-    if(f.type==='EDT') f.type='Eau de Toilette';
-    if(f.type==='Extrait') f.type='Extrait de Parfum';
-    if(f.type==='Body Mist') f.type='Body Spray';
-  });
   initCollectionSort();
   initWishlistSort();
   document.getElementById('idLoading').style.display='none';
