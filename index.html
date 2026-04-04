@@ -1496,7 +1496,7 @@ const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/' + (window._
 const FRAG_HEADERS = [
   'userId','fragranceId','status','bottleSize','type',
   'boughtFrom','purchaseMonth','purchaseYear','purchasePrice',
-  'personalLongevity','personalSillage','personalRating','notes','addedAt'
+  'personalRating','notes','addedAt'
 ];
 
 const COMP_HEADERS = [
@@ -1713,8 +1713,6 @@ function fragToRow(f){
     purchaseMonth: pm,
     purchaseYear: py,
     purchasePrice: f.purchasePrice||'',
-    personalLongevity: f.personalLong||'',
-    personalSillage: f.personalSill||'',
     personalRating: f.personalRating||'',
     notes: (f.personalNotes||'').replace(/^Purchased for \$[\d.]+\.?\s*/,'').trim(),
     addedAt: f.createdAt||new Date().toISOString(),
@@ -1866,11 +1864,16 @@ async function loadAllData(){
   if(_missingFrags.length){
     await syncMissingRows('userFragrances',_missingFrags.map(fragToRow),FRAG_HEADERS,'syncFrags');
   }
+  console.log('[comps] compsRaw from sheet: '+compsRaw.length+' rows');
+  if(compsRaw.length>0) console.log('[comps] first row keys: '+Object.keys(compsRaw[0]).join(', '));
+  console.log('[comps] seed COMPLIMENTS: '+COMPLIMENTS.length);
   var _sheetCompIds=new Set(compsRaw.map(function(r){return r.complimentId||r.id||'';}));
   if(compsRaw.length){
     var seedOnly=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
+    console.log('[comps] seedOnly (not in sheet): '+seedOnly.length+', sheet entries: '+compsRaw.length);
     COMPLIMENTS=seedOnly.concat(compsRaw.map(rowToComp));
   }
+  console.log('[comps] final COMPLIMENTS: '+COMPLIMENTS.length);
   // Dedup COMPLIMENTS by ID (same reason as FRAGRANCES)
   var _compDupeBefore = COMPLIMENTS.length;
   var _seenCids = {};
@@ -2093,7 +2096,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v24';
+const FRAG_DB_VERSION = '2026-04-03-v25';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
