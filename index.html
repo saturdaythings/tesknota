@@ -1948,10 +1948,14 @@ async function loadAllData(){
       addedAt: match ? (match.createdAt||new Date().toISOString()) : new Date().toISOString(),
     });
   });
+  // Track which name+house combos FRAG_DB already covers
+  var _dbCovered = {};
+  FRAG_DB.forEach(function(db){ _dbCovered[_normKey(db.n)+'|'+_normKey(db.h)] = true; });
   // Then add any FRAGRANCES entries not already covered by FRAG_DB
   FRAGRANCES.forEach(function(f){
     var nm = (f.name||'').trim();
     if(!nm || nm.toLowerCase().startsWith('qa ') || !f.id) return;
+    if(_dbCovered[_normKey(nm)+'|'+_normKey(f.house||'')]) return;
     var _key = _normKey(nm)+'|'+_normKey(f.house||'')+'|'+_normKey(f.type||'');
     if(_seenDbKeys[_key]) return;
     _seenDbKeys[_key] = true;
@@ -2083,7 +2087,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v20';
+const FRAG_DB_VERSION = '2026-04-03-v21';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
