@@ -5485,7 +5485,12 @@ function saveFragrance(){
   const year = document.getElementById('afYear').value;
   const isDupe = document.getElementById('dY').classList.contains('on');
   var topN=tiGet('afTop'), midN=tiGet('afMiddle'), baseN=tiGet('afBase');
+  // Fall back to DB data when form notes are empty (hidden for known fragrances)
+  if(!topN&&!midN&&!baseN&&prefetchedData){
+    topN=prefetchedData.topNotes||''; midN=prefetchedData.middleNotes||''; baseN=prefetchedData.baseNotes||'';
+  }
   var combinedNotes=[topN,midN,baseN].filter(Boolean).join(' · ');
+  var _accords=afAccordVals.length ? afAccordVals.join(', ') : (prefetchedData&&prefetchedData._accords ? prefetchedData._accords : (deriveAccords([topN,midN,baseN].filter(Boolean).join(', ')||'').join(', ')||undefined));
   const data = {
     name, status: document.getElementById('afStatus').value,
     type: document.getElementById('afType').value,
@@ -5497,7 +5502,7 @@ function saveFragrance(){
     isDupe, dupeFor: isDupe?document.getElementById('dupeFor').value:'',
     personalNotes: document.getElementById('afNotes').value,
     topNotes: topN, middleNotes: midN, baseNotes: baseN,
-    accords: afAccordVals.length ? afAccordVals.join(', ') : (deriveAccords([topN,midN,baseN].filter(Boolean).join(', ')||'').join(', ')||undefined),
+    accords: _accords,
   };
   if(combinedNotes) data.notes = combinedNotes;
   if(editingFragId){
@@ -5702,7 +5707,8 @@ function pickAF(name){
       type:_concMap[f.conc]||f.conc||'',
       topNotes:f.top||f.topNotes||'',
       middleNotes:f.mid||f.middleNotes||'',
-      baseNotes:f.base||f.baseNotes||''
+      baseNotes:f.base||f.baseNotes||'',
+      _accords:f.accords||''
     };
     buildAccordPicker(f.accords||null);
   }
