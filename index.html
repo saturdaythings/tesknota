@@ -1923,8 +1923,13 @@ async function loadAllData(){
     _seenCids[c.id] = true;
     return true;
   });
-  if(COMPLIMENTS.length < _compDupeBefore){
-    writeSheet('userCompliments', COMPLIMENTS.map(compToRow), COMP_HEADERS).catch(function(e){ console.error('[dedup] comp dedup write failed', e); });
+  // Check if any compliment IDs were migrated from k/s to f-IDs
+  var _compIdsChanged = compsRaw.length && COMPLIMENTS.some(function(c){
+    var orig = compsRaw.find(function(r){ return (r.complimentId||r.id) === c.id; });
+    return orig && (orig.primaryFragranceId||'') !== (c.primaryFragId||'');
+  });
+  if(COMPLIMENTS.length < _compDupeBefore || _compIdsChanged){
+    writeSheet('userCompliments', COMPLIMENTS.map(compToRow), COMP_HEADERS).catch(function(e){ console.error('[comp migration] write failed', e); });
   }
   // Write any seed compliments missing from Sheets so they persist
   var _missingComps=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
