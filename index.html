@@ -221,6 +221,58 @@ input,select,textarea{font-size:16px;}
 .perf-count{font-family:var(--serif);font-size:22px;color:var(--blue);text-align:right;line-height:1;}
 .perf-meta{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-align:right;text-transform:uppercase;margin-top:3px;}
 
+/* DASHBOARD ADDITIONS */
+.dash-insight{background:var(--off);border:1px solid var(--b2);border-left:3px solid var(--blue);padding:14px 18px;margin-bottom:20px;cursor:pointer;transition:border-color .14s;}
+.dash-insight:hover{border-left-color:var(--warm);}
+.dash-insight-text{font-family:var(--script);font-size:17px;font-style:italic;color:var(--ink);line-height:1.6;}
+.dash-insight-cta{font-family:var(--mono);font-size:9px;color:var(--blue);letter-spacing:.14em;text-transform:uppercase;margin-top:6px;}
+.sbox.clickable{cursor:pointer;transition:background .12s;}
+.sbox.clickable:hover{background:var(--blue4);}
+.sbox.active{background:var(--blue4);border-bottom:2px solid var(--blue);}
+.stat-expand{background:var(--off);border:1px solid var(--b2);border-top:none;padding:16px 20px;margin-top:-27px;margin-bottom:28px;display:none;}
+.stat-expand.on{display:block;}
+.stat-expand-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--b1);font-family:var(--mono);font-size:11px;}
+.stat-expand-row:last-child{border-bottom:none;}
+.stat-expand-lbl{color:var(--ink2);}
+.stat-expand-val{color:var(--blue);font-size:13px;}
+.accord-cloud{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+.ac-chip{font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--b3);color:var(--ink2);cursor:pointer;transition:all .14s;padding:6px 14px;font-size:11px;}
+.ac-chip.lg{font-size:14px;padding:9px 18px;border-color:var(--blue);color:var(--blue);}
+.ac-chip.md{font-size:12px;padding:7px 14px;border-color:var(--b3);color:var(--ink2);}
+.ac-chip.sm{font-size:10px;padding:5px 10px;border-color:var(--b1);color:var(--ink3);}
+.ac-chip:hover{background:var(--blue4);border-color:var(--blue);color:var(--blue);}
+.dash-cadence{margin-bottom:28px;}
+.cadence-bars{display:flex;align-items:flex-end;gap:4px;height:40px;margin-top:8px;}
+.cadence-bar{flex:1;background:var(--b2);cursor:pointer;transition:background .12s;border-radius:2px 2px 0 0;min-width:12px;}
+.cadence-bar.has-data{background:var(--blue);}
+.cadence-bar:hover{background:var(--warm)!important;}
+.cadence-labels{display:flex;gap:4px;margin-top:4px;}
+.cadence-lbl{flex:1;font-family:var(--mono);font-size:8px;color:var(--ink3);text-align:center;letter-spacing:.06em;text-transform:uppercase;}
+
+/* ANALYTICS ADDITIONS */
+.heat-grid{display:grid;gap:3px;margin-bottom:8px;}
+.heat-cell{width:20px;height:20px;border-radius:3px;background:var(--b2);cursor:pointer;transition:transform .1s;position:relative;}
+.heat-cell:hover{transform:scale(1.2);z-index:2;}
+.heat-cell.c0{background:var(--b2);}
+.heat-cell.c1{background:rgba(201,169,110,.35);}
+.heat-cell.c2{background:rgba(201,169,110,.65);}
+.heat-cell.c3{background:var(--warm);}
+.heat-month-lbl{font-family:var(--mono);font-size:8px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;text-align:center;}
+.heat-year-lbl{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.06em;writing-mode:vertical-lr;transform:rotate(180deg);padding-right:4px;}
+.heat-popover{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--off);border:1px solid var(--b3);padding:8px 12px;z-index:100;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.2);pointer-events:none;font-family:var(--mono);font-size:10px;color:var(--ink2);white-space:nowrap;}
+.donut-wrap{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.donut-legend{display:flex;flex-direction:column;gap:8px;}
+.donut-legend-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink2);}
+.donut-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.insight-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+.insight-card{background:var(--off2);border:1px solid var(--b2);border-left:3px solid var(--blue);padding:12px 16px;cursor:pointer;transition:border-color .14s;}
+.insight-card:hover{border-left-color:var(--warm);}
+.insight-card-title{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--blue);margin-bottom:4px;}
+.insight-card-body{font-family:var(--body);font-size:12px;color:var(--ink2);line-height:1.5;}
+.season-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;padding-top:8px;border-top:1px solid var(--b1);}
+.season-legend-item{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
+.season-legend-item span{color:var(--ink2);}
+
 /* FRIEND PROFILE */
 .f-banner{background:var(--blue3);padding:32px 26px 24px;margin:-26px -26px 28px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;}
 /* FRIEND ACTIVITY */
@@ -863,9 +915,14 @@ input,select,textarea{font-size:16px;}
 
     <!-- DASHBOARD -->
     <div class="page on" id="page-dashboard">
+      <div id="dashInsight" style="display:none;"></div>
       <div class="stats" id="dashStats"></div>
+      <div class="stat-expand" id="dashStatExpand"></div>
       <div id="dashOnboard" style="display:none"></div>
       <div id="dashUnidentified" style="display:none"></div>
+      <div id="dashAccordCloud" style="display:none;"></div>
+      <div id="dashTopPerf" style="display:none;"></div>
+      <div id="dashCadence" style="display:none;"></div>
       <div class="sh"><h2>Recent Purchases</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <div class="mob-scroll-wrap">
       <table class="tbl tbl-spaced" id="dashTable">
@@ -1013,6 +1070,8 @@ input,select,textarea{font-size:16px;}
           <div class="ftabs" id="anaTabs" style="border-bottom:none;margin-bottom:0;">
             <div class="ftab on" onclick="setAnaTab('collection',this)">Collection</div>
             <div class="ftab" onclick="setAnaTab('compliments',this)">Compliments</div>
+            <div class="ftab" onclick="setAnaTab('spend',this)">Spend</div>
+            <div class="ftab" onclick="setAnaTab('notes',this)">Notes</div>
           </div>
           <button class="btn btn-ghost btn-sm" id="sylviaToggle" onclick="toggleSylviaOverlay()">Compare with Sylvia</button>
         </div>
@@ -1027,10 +1086,19 @@ input,select,textarea{font-size:16px;}
           <div class="ana-header" style="margin-bottom:8px;">
             <div id="anaInsight"></div>
           </div>
+          <div id="anaInsightCards" class="insight-cards"></div>
           <div id="anaPills" class="ana-pills"></div>
+          <div class="ana-section" id="anaHeatMapSection"></div>
+          <div class="ana-section" id="anaDonutSection"></div>
           <div class="ana-section" id="anaPerformersSection"></div>
           <div class="ana-section" id="anaAccordPerfSection"></div>
           <div class="ana-section" id="anaMapSection"></div>
+        </div>
+        <div id="anaSpend" class="fpanel">
+          <div class="ana-section" id="anaSpendSection"></div>
+        </div>
+        <div id="anaNotes" class="fpanel">
+          <div class="ana-section" id="anaNotesMergedSection"></div>
         </div>
       </div>
     </div>
@@ -1131,13 +1199,25 @@ input,select,textarea{font-size:16px;}
         <div id="wishInCommon" class="mt-16"></div>
       </div>
       <div class="fpanel" id="ft-ana">
-        <div class="stats" id="ft-ana-stats" style="margin-bottom:22px;"></div>
-        <div class="sh"><h2 id="ft-ana-title">Top performers</h2></div>
-        <div class="bchart" id="bc-f"></div>
-        <div class="chart-legend" id="bc-f-legend"></div>
-        <div id="ft-ana-insights"></div>
-        <div style="margin-top:28px;" id="ft-ana-accords"></div>
-        <div style="margin-top:28px;" id="ft-ana-notes"></div>
+        <div id="ft-ana-shared-insight" style="margin-bottom:16px;"></div>
+        <div class="ftabs" id="ftAnaTabs" style="margin-bottom:16px;">
+          <div class="ftab on" data-ftana="ftana-compliments">Compliments</div>
+          <div class="ftab" data-ftana="ftana-collection">Collection</div>
+          <div class="ftab" data-ftana="ftana-notes">Notes &amp; Accords</div>
+        </div>
+        <div class="fpanel on" id="ftana-compliments">
+          <div class="stats" id="ft-ana-stats" style="margin-bottom:22px;"></div>
+          <div class="sh"><h2 id="ft-ana-title">Top performers</h2></div>
+          <div class="bchart" id="bc-f"></div>
+          <div class="chart-legend" id="bc-f-legend"></div>
+          <div id="ft-ana-insights"></div>
+        </div>
+        <div class="fpanel" id="ftana-collection">
+          <div id="ft-ana-accords"></div>
+        </div>
+        <div class="fpanel" id="ftana-notes">
+          <div id="ft-ana-notes"></div>
+        </div>
       </div>
     </div>
 
@@ -3226,12 +3306,13 @@ function renderDashboard(){
   const dupes = MF.filter(f=>f.isDupe);
   const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
   document.getElementById('dashStats').innerHTML = `
-    <div class="sbox"><div class="snum">${current.length}</div><div class="slbl">Current</div></div>
-    <div class="sbox"><div class="snum">${wish.length}</div><div class="slbl">Wishlist</div></div>
-    <div class="sbox"><div class="snum">${MC.length}</div><div class="slbl">Compliments</div></div>
+    <div class="sbox clickable" onclick="toggleStatDetail('current')"><div class="snum">${current.length}</div><div class="slbl">Current</div></div>
+    <div class="sbox clickable" onclick="toggleStatDetail('wishlist')"><div class="snum">${wish.length}</div><div class="slbl">Wishlist</div></div>
+    <div class="sbox clickable" onclick="toggleStatDetail('compliments')"><div class="snum">${MC.length}</div><div class="slbl">Compliments</div></div>
     <div class="sbox"><div class="snum">${avgRating()}</div><div class="slbl">Avg Rating</div></div>
     <div class="sbox"><div class="snum">${finished.length}</div><div class="slbl">Finished</div></div>
     <div class="sbox"><div class="snum">${dupes.length}</div><div class="slbl">Dupes</div></div>`;
+  renderDashboardExtras(MF, MC, current, wish);
   // Recent 3 purchases — sorted by most recent purchase date
   var _MONTH_NUM={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
   function _parsePurchase(d){if(!d)return 0;var p=d.split(' ');return (parseInt(p[1])||0)*100+(_MONTH_NUM[p[0]]||0);}
@@ -3289,6 +3370,168 @@ function avgRating(){
   const rated = myFragrances().filter(f=>f.personalRating);
   if(!rated.length)return '—';
   return (rated.reduce((a,f)=>a+f.personalRating,0)/rated.length).toFixed(1);
+}
+
+var _activeStatExpand = null;
+function toggleStatDetail(type){
+  var expand=document.getElementById('dashStatExpand');
+  if(!expand) return;
+  if(_activeStatExpand===type){ _activeStatExpand=null; expand.classList.remove('on'); return; }
+  _activeStatExpand=type;
+  var MF=myFragrances(), MC=myCompliments();
+  var rows=[];
+  if(type==='current'){
+    var statuses={CURRENT:0,PREVIOUSLY_OWNED:0,FINISHED:0,USED_UP:0,SOLD:0};
+    MF.forEach(function(f){if(statuses[f.status]!==undefined)statuses[f.status]++;});
+    var lblMap={CURRENT:'Current',PREVIOUSLY_OWNED:'Previously owned',FINISHED:'Finished',USED_UP:'Used up',SOLD:'Sold'};
+    Object.keys(statuses).forEach(function(s){if(statuses[s]>0)rows.push({lbl:lblMap[s],val:statuses[s]});});
+  } else if(type==='wishlist'){
+    var byW=MF.filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';}).slice(0,5);
+    byW.forEach(function(f){rows.push({lbl:(f.house||'Unknown'),val:f.name||'—'});});
+    if(!rows.length) rows.push({lbl:'Nothing on wishlist',val:''});
+  } else if(type==='compliments'){
+    var relC={}; MC.forEach(function(c){relC[c.relation||'Other']=(relC[c.relation||'Other']||0)+1;});
+    Object.entries(relC).sort(function(a,b){return b[1]-a[1];}).forEach(function(e){rows.push({lbl:e[0],val:e[1]});});
+    if(!rows.length) rows.push({lbl:'No compliments yet',val:''});
+  }
+  expand.innerHTML='';
+  rows.forEach(function(r){
+    var row=document.createElement('div'); row.className='stat-expand-row';
+    var lbl=document.createElement('span'); lbl.className='stat-expand-lbl'; lbl.textContent=r.lbl;
+    var val=document.createElement('span'); val.className='stat-expand-val'; val.textContent=r.val;
+    row.appendChild(lbl); row.appendChild(val); expand.appendChild(row);
+  });
+  expand.classList.add('on');
+}
+
+function renderDashboardExtras(MF, MC, current, wish){
+  // INSIGHT CARD
+  var insightEl=document.getElementById('dashInsight');
+  if(insightEl){
+    if(MC.length>=5){
+      var fragC={}; MC.forEach(function(c){fragC[c.primaryFrag]=(fragC[c.primaryFrag]||0)+1;});
+      var fk=Object.keys(fragC).sort(function(a,b){return fragC[b]-fragC[a];});
+      var topFrag=fk[0]||''; var topCount=fragC[topFrag]||0;
+      while(insightEl.firstChild) insightEl.removeChild(insightEl.firstChild);
+      var card=document.createElement('div'); card.className='dash-insight';
+      card.onclick=function(){goPage('analytics');setTimeout(function(){var t=document.querySelector('#anaTabs .ftab:nth-child(2)');if(t)setAnaTab('compliments',t);},100);};
+      var txt=document.createElement('div'); txt.className='dash-insight-text';
+      txt.textContent=topFrag?topFrag+' is your top performer with '+topCount+' compliment'+(topCount>1?'s':'')+'.' : generateInsight(MC,MF);
+      var cta=document.createElement('div'); cta.className='dash-insight-cta'; cta.textContent='View analytics →';
+      card.appendChild(txt); card.appendChild(cta); insightEl.appendChild(card);
+      insightEl.style.display='block';
+    } else { insightEl.style.display='none'; }
+  }
+
+  // ACCORD CLOUD
+  var cloudEl=document.getElementById('dashAccordCloud');
+  if(cloudEl){
+    var acCounts={}; current.forEach(function(f){getAccords(f).forEach(function(a){acCounts[a]=(acCounts[a]||0)+1;});});
+    var acSorted=Object.entries(acCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+    if(acSorted.length){
+      while(cloudEl.firstChild) cloudEl.removeChild(cloudEl.firstChild);
+      var hdr=document.createElement('div'); hdr.className='sh'; hdr.style.marginBottom='12px';
+      var h2=document.createElement('h2'); h2.textContent='Scent signature';
+      var shr=document.createElement('div'); shr.className='sh-r'; shr.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;'; shr.textContent='Top accords in your collection';
+      hdr.appendChild(h2); hdr.appendChild(shr); cloudEl.appendChild(hdr);
+      var cloud=document.createElement('div'); cloud.className='accord-cloud';
+      acSorted.forEach(function(e,i){
+        var cls=i===0?'lg':(i<=2?'md':'sm');
+        var chip=document.createElement('div'); chip.className='ac-chip '+cls; chip.textContent=e[0];
+        (function(acc){chip.onclick=function(){filterCollByAccord(acc);};})(e[0]);
+        cloud.appendChild(chip);
+      });
+      cloudEl.appendChild(cloud);
+      cloudEl.style.display='block';
+    } else { cloudEl.style.display='none'; }
+  }
+
+  // TOP PERFORMERS
+  var perfEl=document.getElementById('dashTopPerf');
+  if(perfEl){
+    var dpCounts={}; MC.forEach(function(c){if(c.primaryFragId)dpCounts[c.primaryFragId]=(dpCounts[c.primaryFragId]||0)+1;});
+    var dpSorted=Object.entries(dpCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+    if(dpSorted.length){
+      while(perfEl.firstChild) perfEl.removeChild(perfEl.firstChild);
+      var pHdr=document.createElement('div'); pHdr.className='sh'; pHdr.style.marginBottom='8px';
+      var pH2=document.createElement('h2'); pH2.textContent='Top performers';
+      var pShr=document.createElement('div'); pShr.className='sh-r';
+      var pBtn=document.createElement('button'); pBtn.className='btn btn-ghost btn-sm'; pBtn.textContent='View all';
+      pBtn.onclick=function(){goPage('analytics');setTimeout(function(){var t=document.querySelector('#anaTabs .ftab:nth-child(2)');if(t)setAnaTab('compliments',t);},100);};
+      pShr.appendChild(pBtn); pHdr.appendChild(pH2); pHdr.appendChild(pShr); perfEl.appendChild(pHdr);
+      dpSorted.forEach(function(e,idx){
+        var fragId=e[0]; var cnt=e[1];
+        var frag=MF.find(function(f){return (f.fragranceId||f.id)===fragId;}); if(!frag) return;
+        var card=document.createElement('div'); card.className='perf-card';
+        var rank=document.createElement('div'); rank.className='perf-rank'; rank.textContent='#'+(idx+1);
+        var nameWrap=document.createElement('div'); nameWrap.style.flex='1';
+        var pname=document.createElement('div'); pname.className='perf-name'; pname.textContent=frag.name||'—';
+        var phouse=document.createElement('div'); phouse.className='perf-house'; phouse.textContent=frag.house||'—';
+        nameWrap.appendChild(pname); nameWrap.appendChild(phouse);
+        var cWrap=document.createElement('div'); cWrap.style.cssText='text-align:right;flex-shrink:0;';
+        var pCnt=document.createElement('div'); pCnt.className='perf-count'; pCnt.textContent=cnt;
+        var pMeta=document.createElement('div'); pMeta.className='perf-meta'; pMeta.textContent='compliments';
+        cWrap.appendChild(pCnt); cWrap.appendChild(pMeta);
+        card.appendChild(rank); card.appendChild(nameWrap); card.appendChild(cWrap);
+        (function(fid){card.onclick=function(){filterComplimentsByFrag(fid);};})(frag.id);
+        perfEl.appendChild(card);
+      });
+      perfEl.style.display='block';
+    } else { perfEl.style.display='none'; }
+  }
+
+  // CADENCE CHART
+  var cadEl=document.getElementById('dashCadence');
+  if(cadEl){
+    var now=new Date(); var cadMonths=[];
+    for(var mi=5;mi>=0;mi--){var d=new Date(now.getFullYear(),now.getMonth()-mi,1);cadMonths.push({m:d.getMonth()+1,y:d.getFullYear(),lbl:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]});}
+    var cadCounts={}; MC.forEach(function(c){var k=(parseInt(c.year)||0)+'_'+(parseInt(c.month)||0);cadCounts[k]=(cadCounts[k]||0)+1;});
+    var maxCad=0; cadMonths.forEach(function(cm){var k=cm.y+'_'+cm.m;if((cadCounts[k]||0)>maxCad)maxCad=cadCounts[k]||0;});
+    if(maxCad>0){
+      while(cadEl.firstChild) cadEl.removeChild(cadEl.firstChild);
+      var cHdr=document.createElement('div'); cHdr.className='sh'; cHdr.style.marginBottom='0';
+      var cH2=document.createElement('h2'); cH2.textContent='Compliment cadence';
+      var cShr=document.createElement('div'); cShr.className='sh-r'; cShr.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;'; cShr.textContent='Last 6 months — click to filter';
+      cHdr.appendChild(cH2); cHdr.appendChild(cShr); cadEl.appendChild(cHdr);
+      var cadDiv=document.createElement('div'); cadDiv.className='dash-cadence';
+      var barsDiv=document.createElement('div'); barsDiv.className='cadence-bars';
+      var labDiv=document.createElement('div'); labDiv.className='cadence-labels';
+      cadMonths.forEach(function(cm){
+        var k=cm.y+'_'+cm.m; var cnt=cadCounts[k]||0; var pct=Math.round(cnt/maxCad*100);
+        var bar=document.createElement('div'); bar.className='cadence-bar'+(cnt>0?' has-data':'');
+        bar.style.height=(pct||6)+'%'; bar.style.minHeight='4px';
+        bar.title=cnt+' compliment'+(cnt!==1?'s':'')+' in '+cm.lbl+' '+cm.y;
+        (function(m,y){bar.onclick=function(){filterComplimentsByMonth(m,y);};})(cm.m,cm.y);
+        barsDiv.appendChild(bar);
+        var lbl=document.createElement('div'); lbl.className='cadence-lbl'; lbl.textContent=cm.lbl; labDiv.appendChild(lbl);
+      });
+      cadDiv.appendChild(barsDiv); cadDiv.appendChild(labDiv); cadEl.appendChild(cadDiv);
+      cadEl.style.display='block';
+    } else { cadEl.style.display='none'; }
+  }
+}
+
+function filterCollByAccord(acc){
+  collSearchVal=''; collHouseVal=''; collRatingVal=''; collStatusVal='';
+  var search=document.getElementById('collSearch'); if(search) search.value='';
+  var rating=document.getElementById('collRating'); if(rating) rating.value='';
+  var status=document.getElementById('collStatus'); if(status) status.value='';
+  document.querySelectorAll('#familyDropPanel input[type=checkbox]').forEach(function(cb){cb.checked=false;});
+  collAccordVals=[acc]; if(typeof updateFamilyLabel==='function') updateFamilyLabel();
+  if(typeof updateFiltersToggleLabel==='function') updateFiltersToggleLabel();
+  activeNoteFilter=null; var bar=document.getElementById('noteFilterBar'); if(bar) bar.classList.remove('on');
+  goPage('collection'); renderCollection();
+}
+
+var _compMonthFilter=null; var _compYearFilter=null;
+function filterComplimentsByMonth(month, year){
+  _compMonthFilter=parseInt(month); _compYearFilter=parseInt(year);
+  goPage('compliments');
+  renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all');
+}
+function clearCompMonthFilter(){
+  _compMonthFilter=null; _compYearFilter=null;
+  renderCompliments(document.querySelector('#compFbar .fc.on')?.dataset.filter||'all');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4116,8 +4359,9 @@ function renderCompliments(filter='all'){
   var ffBar=document.getElementById('compFragFilterBar');
   var ffName=document.getElementById('cffName');
   if(ffBar){ ffBar.style.display=compFragFilter?'':'none'; if(ffName&&compFragFilter) ffName.textContent=compFragFilter.name; }
-  // Apply frag filter first, then relation filter
+  // Apply frag filter first, then relation filter, then month filter
   var base = compFragFilter ? MC.filter(function(c){return c.primaryFragId===(compFragFilter.fragranceId||compFragFilter.id)||c.secondaryFragId===(compFragFilter.fragranceId||compFragFilter.id);}) : MC;
+  if(_compMonthFilter&&_compYearFilter){ base=base.filter(function(c){return parseInt(c.month)===_compMonthFilter&&parseInt(c.year)===_compYearFilter;}); }
   var filtered = (filter==='all' ? base : base.filter(c=>c.relation===filter)).slice();
   // Apply sort
   var _sv = compSortVal || 'dateDesc';
@@ -4207,10 +4451,12 @@ var showSylviaOverlay = false;
 function setAnaTab(tab, el){
   document.querySelectorAll('#anaTabs .ftab').forEach(function(t){ t.classList.remove('on'); });
   if(el) el.classList.add('on');
-  var cEl=document.getElementById('anaCollection');
-  var comEl=document.getElementById('anaCompliments');
-  if(cEl) cEl.classList.toggle('on', tab==='collection');
-  if(comEl) comEl.classList.toggle('on', tab==='compliments');
+  ['anaCollection','anaCompliments','anaSpend','anaNotes'].forEach(function(id){
+    var p=document.getElementById(id); if(p) p.classList.remove('on');
+  });
+  var tabMap={collection:'anaCollection',compliments:'anaCompliments',spend:'anaSpend',notes:'anaNotes'};
+  var target=document.getElementById(tabMap[tab]||'anaCollection');
+  if(target) target.classList.add('on');
 }
 
 function toggleSylviaOverlay(){
@@ -4381,13 +4627,54 @@ function renderAnalytics(){
   var insightEl=document.getElementById('anaInsight');
   if(insightEl) insightEl.textContent=generateInsight(MC,MF);
 
+  // KEY INSIGHT CARDS
+  var icEl=document.getElementById('anaInsightCards');
+  if(icEl){
+    icEl.innerHTML='';
+    if(MC.length>=5){
+      var icFragC={}; MC.forEach(function(c){icFragC[c.primaryFrag]=(icFragC[c.primaryFrag]||0)+1;});
+      var icTopFrag=Object.keys(icFragC).sort(function(a,b){return icFragC[b]-icFragC[a];})[0];
+      var icRelC={}; MC.forEach(function(c){icRelC[c.relation||'Unknown']=(icRelC[c.relation||'Unknown']||0)+1;});
+      var icTopRel=Object.keys(icRelC).sort(function(a,b){return icRelC[b]-icRelC[a];})[0];
+      var icSeasonC={}; var icSeasonFn=function(m){var mn=parseInt(m);return mn>=3&&mn<=5?'Spring':mn>=6&&mn<=8?'Summer':mn>=9&&mn<=11?'Autumn':'Winter';};
+      MC.forEach(function(c){var s=icSeasonFn(c.month);icSeasonC[s]=(icSeasonC[s]||0)+1;});
+      var icTopSeason=Object.keys(icSeasonC).sort(function(a,b){return icSeasonC[b]-icSeasonC[a];})[0];
+      var icCards=[
+        {title:'Your signature fragrance',body:icTopFrag+' has earned the most compliments — '+(icFragC[icTopFrag]||0)+' total.',action:function(){var f=FRAGRANCES.find(function(x){return x.name===icTopFrag;});if(f)filterComplimentsByFrag(f.id);}},
+        {title:'Who notices you most',body:(icTopRel||'Strangers')+' account for '+(icRelC[icTopRel]||0)+' of your '+MC.length+' compliments.'},
+        {title:'Your power season',body:'You get the most compliments in '+icTopSeason+' — '+(icSeasonC[icTopSeason]||0)+' logged.'}
+      ];
+      icCards.forEach(function(ic){
+        var card=document.createElement('div'); card.className='insight-card'; if(ic.action) card.onclick=ic.action;
+        var t=document.createElement('div'); t.className='insight-card-title'; t.textContent=ic.title;
+        var b=document.createElement('div'); b.className='insight-card-body'; b.textContent=ic.body;
+        card.appendChild(t); card.appendChild(b); icEl.appendChild(card);
+      });
+    }
+  }
+
   // PILLS
   var pillsEl=document.getElementById('anaPills');
   if(pillsEl){
     pillsEl.innerHTML='';
     var relCounts={}; MC.forEach(function(c){relCounts[c.relation]=(relCounts[c.relation]||0)+1;});
     var topRel=Object.keys(relCounts).sort(function(a,b){return relCounts[b]-relCounts[a];})[0]||'—';
-    var pills=[{num:MC.length,lbl:'Compliments'},{num:new Set(MC.map(function(c){return c.primaryFrag;})).size,lbl:'Fragrances'},{num:MFC.length,lbl:'Collection'},{num:topRel,lbl:'Top Relation'}];
+    // Avg gap calculation
+    var avgGapStr='—';
+    if(MC.length>=2){
+      var _MNS2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      function _mnum2(m){var n=parseInt(m);return isNaN(n)?_MNS2.indexOf(m)+1:n;}
+      var sorted=MC.slice().sort(function(a,b){return ((parseInt(a.year)||0)*100+_mnum2(a.month))-((parseInt(b.year)||0)*100+_mnum2(b.month));});
+      var totalDays=0; var gapCount=0;
+      for(var gi=1;gi<sorted.length;gi++){
+        var da=new Date((parseInt(sorted[gi-1].year)||2024),((_mnum2(sorted[gi-1].month)||1)-1),15);
+        var db=new Date((parseInt(sorted[gi].year)||2024),((_mnum2(sorted[gi].month)||1)-1),15);
+        var diff=Math.abs(db-da)/(1000*60*60*24); totalDays+=diff; gapCount++;
+      }
+      var avgDays=gapCount?Math.round(totalDays/gapCount):0;
+      avgGapStr=avgDays>=14?Math.round(avgDays/7)+'wk':avgDays+'d';
+    }
+    var pills=[{num:MC.length,lbl:'Compliments'},{num:new Set(MC.map(function(c){return c.primaryFrag;})).size,lbl:'Fragrances'},{num:MFC.length,lbl:'Collection'},{num:topRel,lbl:'Top Relation'},{num:avgGapStr,lbl:'Avg Gap'}];
     pills.forEach(function(p){
       var pill=document.createElement('div'); pill.className='ana-pill';
       var num=document.createElement('div'); num.className='ana-pill-num'; num.textContent=p.num;
@@ -4433,6 +4720,14 @@ function renderAnalytics(){
         var sMapDiv=document.createElement('div'); sMapDiv.id='anaMapS'; mapSection.appendChild(sMapDiv);
         renderCompMap('anaMapS',buildComplimentMap(SC),'var(--rose)');
       }
+      // Season legend
+      var legend=document.createElement('div'); legend.className='season-legend';
+      [{s:'Winter',r:'Dec–Feb'},{s:'Spring',r:'Mar–May'},{s:'Summer',r:'Jun–Aug'},{s:'Autumn',r:'Sep–Nov'}].forEach(function(sl){
+        var item=document.createElement('div'); item.className='season-legend-item';
+        item.textContent=sl.s+' '; var span=document.createElement('span'); span.textContent=sl.r;
+        item.appendChild(span); legend.appendChild(item);
+      });
+      mapSection.appendChild(legend);
     }
   }
 
@@ -4824,6 +5119,167 @@ function renderAnalytics(){
   }
   // Note library — all notes across user's collection
   renderNoteLibrary();
+
+  // HEAT MAP
+  var heatSection=document.getElementById('anaHeatMapSection');
+  if(heatSection){
+    while(heatSection.firstChild) heatSection.removeChild(heatSection.firstChild);
+    var hmHdr=document.createElement('div'); hmHdr.className='ana-sh';
+    var hmH2=document.createElement('h2'); hmH2.textContent='Compliment calendar';
+    var hmSub=document.createElement('div'); hmSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-left:12px;'; hmSub.textContent='by month — click to filter';
+    hmHdr.appendChild(hmH2); hmHdr.appendChild(hmSub); heatSection.appendChild(hmHdr);
+    if(MC.length<2){
+      var hmE=document.createElement('div'); hmE.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:12px 0;'; hmE.textContent='Log 2+ compliments to unlock.'; heatSection.appendChild(hmE);
+    } else {
+      // Build month×year grid: find date range
+      var _MNS3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      function _mn3(m){var n=parseInt(m);return isNaN(n)?_MNS3.indexOf(m)+1:n;}
+      var hmMin=99999,hmMax=0;
+      MC.forEach(function(c){var v=(parseInt(c.year)||0)*100+_mn3(c.month);if(v>0&&v<hmMin)hmMin=v;if(v>hmMax)hmMax=v;});
+      var hmCounts={}; MC.forEach(function(c){var k=(parseInt(c.year)||0)+'_'+_mn3(c.month);hmCounts[k]=(hmCounts[k]||0)+1;});
+      var hmMaxCnt=Math.max.apply(null,Object.values(hmCounts));
+      // Build columns (months) and rows (years)
+      var hmSY=Math.floor(hmMin/100),hmSM=hmMin%100,hmEY=Math.floor(hmMax/100),hmEM=hmMax%100;
+      var hmYears=[]; for(var yy=hmSY;yy<=hmEY;yy++) hmYears.push(yy);
+      var hmMonths=[]; for(var mm2=1;mm2<=12;mm2++) hmMonths.push(mm2);
+      var hmWrap=document.createElement('div'); hmWrap.style.cssText='overflow-x:auto;';
+      var hmGrid=document.createElement('div'); hmGrid.style.cssText='display:grid;grid-template-columns:28px repeat(12,20px);gap:3px;margin-bottom:6px;min-width:300px;';
+      // Header row — month labels
+      var hmCorner=document.createElement('div'); hmGrid.appendChild(hmCorner);
+      hmMonths.forEach(function(m){ var lbl=document.createElement('div'); lbl.className='heat-month-lbl'; lbl.textContent=_MNS3[m-1].slice(0,1); hmGrid.appendChild(lbl); });
+      hmYears.forEach(function(y){
+        var yLbl=document.createElement('div'); yLbl.className='heat-year-lbl'; yLbl.textContent=y; hmGrid.appendChild(yLbl);
+        hmMonths.forEach(function(m){
+          var k=y+'_'+m; var cnt=hmCounts[k]||0;
+          var cell=document.createElement('div');
+          cell.className='heat-cell c'+(cnt===0?0:cnt===1?1:cnt===2?2:3);
+          cell.title=cnt+' compliment'+(cnt!==1?'s':'')+' in '+_MNS3[m-1]+' '+y;
+          if(cnt>0){ (function(cm,cy){cell.onclick=function(){filterComplimentsByMonth(cm,cy);};})(m,y); }
+          hmGrid.appendChild(cell);
+        });
+      });
+      hmWrap.appendChild(hmGrid);
+      heatSection.appendChild(hmWrap);
+      // Legend
+      var hmLeg=document.createElement('div'); hmLeg.style.cssText='display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.08em;margin-top:4px;';
+      hmLeg.textContent='Less ';
+      [0,1,2,3].forEach(function(lv){ var lc=document.createElement('div'); lc.className='heat-cell c'+lv; lc.style.cssText='width:14px;height:14px;border-radius:2px;display:inline-block;flex-shrink:0;'; hmLeg.appendChild(lc); });
+      var mTxt=document.createElement('span'); mTxt.textContent=' More'; hmLeg.appendChild(mTxt);
+      heatSection.appendChild(hmLeg);
+    }
+  }
+
+  // DONUT CHART
+  var donutSection=document.getElementById('anaDonutSection');
+  if(donutSection){
+    while(donutSection.firstChild) donutSection.removeChild(donutSection.firstChild);
+    var dnHdr=document.createElement('div'); dnHdr.className='ana-sh';
+    var dnH2=document.createElement('h2'); dnH2.textContent='Who\'s complimenting you';
+    dnHdr.appendChild(dnH2); donutSection.appendChild(dnHdr);
+    if(MC.length<2){
+      var dnE=document.createElement('div'); dnE.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:12px 0;'; dnE.textContent='Log 2+ compliments to unlock.'; donutSection.appendChild(dnE);
+    } else {
+      var relGroups={'Stranger':0,'Friend':0,'Significant Other':0,'Colleague / Client':0,'Family':0,'Other':0};
+      MC.forEach(function(c){ var r=c.relation||'Other'; if(relGroups[r]!==undefined)relGroups[r]++;else relGroups['Other']++; });
+      var dnColors={'Stranger':'var(--blue)','Friend':'var(--warm)','Significant Other':'var(--rose)','Colleague / Client':'var(--sage)','Family':'var(--sky)','Other':'var(--b3)'};
+      var dnTotal=MC.length; var dnParts=Object.entries(relGroups).filter(function(e){return e[1]>0;});
+      var dnWrap=document.createElement('div'); dnWrap.className='donut-wrap';
+      // SVG donut
+      var svgNS='http://www.w3.org/2000/svg'; var svg=document.createElementNS(svgNS,'svg');
+      svg.setAttribute('width','120'); svg.setAttribute('height','120'); svg.setAttribute('viewBox','0 0 120 120');
+      var cx=60,cy=60,r=44,stroke=20; var startAngle=-90;
+      dnParts.forEach(function(e){
+        var pct=e[1]/dnTotal; var sweep=pct*360; var endAngle=startAngle+sweep;
+        var x1=cx+r*Math.cos(startAngle*Math.PI/180); var y1=cy+r*Math.sin(startAngle*Math.PI/180);
+        var x2=cx+r*Math.cos(endAngle*Math.PI/180); var y2=cy+r*Math.sin(endAngle*Math.PI/180);
+        var large=sweep>180?1:0;
+        var path=document.createElementNS(svgNS,'path');
+        var d='M '+x1+' '+y1+' A '+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2;
+        path.setAttribute('d',d); path.setAttribute('fill','none');
+        // Resolve CSS var to approximate hex for SVG stroke
+        var colorMap={'var(--blue)':'#3A5699','var(--warm)':'#c9a96e','var(--rose)':'#c4848a','var(--sage)':'#8aab96','var(--sky)':'#7fa8c4','var(--b3)':'#2e2d36'};
+        path.setAttribute('stroke',colorMap[dnColors[e[0]]]||'#3A5699');
+        path.setAttribute('stroke-width',stroke); svg.appendChild(path);
+        startAngle=endAngle;
+      });
+      dnWrap.appendChild(svg);
+      var dnLeg=document.createElement('div'); dnLeg.className='donut-legend';
+      dnParts.forEach(function(e){
+        var row=document.createElement('div'); row.className='donut-legend-row';
+        var dot=document.createElement('div'); dot.className='donut-legend-dot'; dot.style.background=dnColors[e[0]]||'var(--b3)';
+        var lbl=document.createElement('span'); lbl.textContent=e[0]+' ('+e[1]+')';
+        row.appendChild(dot); row.appendChild(lbl); dnLeg.appendChild(row);
+      });
+      dnWrap.appendChild(dnLeg); donutSection.appendChild(dnWrap);
+    }
+  }
+
+  // SPEND TAB
+  var spendSection=document.getElementById('anaSpendSection');
+  if(spendSection){
+    while(spendSection.firstChild) spendSection.removeChild(spendSection.firstChild);
+    var spHdr=document.createElement('div'); spHdr.className='ana-sh'; spHdr.style.marginTop='0';
+    var spH2=document.createElement('h2'); spH2.textContent='Spend overview'; spHdr.appendChild(spH2); spendSection.appendChild(spHdr);
+    var priced=MF.filter(function(f){return f.purchasePrice&&parseFloat(f.purchasePrice)>0;});
+    if(!priced.length){
+      var spE=document.createElement('div'); spE.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:16px 0;'; spE.textContent='Add purchase prices to your fragrances to unlock spend analytics.'; spendSection.appendChild(spE);
+    } else {
+      var spTotal=priced.reduce(function(a,f){return a+parseFloat(f.purchasePrice);},0);
+      var spAvg=spTotal/priced.length;
+      var spStat=document.createElement('div'); spStat.style.cssText='display:flex;gap:24px;flex-wrap:wrap;margin-bottom:24px;';
+      [{lbl:'Total spent',val:'$'+spTotal.toFixed(0)},{lbl:'Avg per bottle',val:'$'+spAvg.toFixed(0)},{lbl:'Bottles tracked',val:priced.length}].forEach(function(s){
+        var p=document.createElement('div'); p.style.cssText='display:flex;flex-direction:column;';
+        var n=document.createElement('div'); n.style.cssText='font-family:var(--serif);font-size:28px;color:var(--blue);line-height:1;'; n.textContent=s.val;
+        var l=document.createElement('div'); l.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;margin-top:4px;'; l.textContent=s.lbl;
+        p.appendChild(n); p.appendChild(l); spStat.appendChild(p);
+      });
+      spendSection.appendChild(spStat);
+      // By house
+      var spHouseH=document.createElement('div'); spHouseH.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;'; spHouseH.textContent='By House'; spendSection.appendChild(spHouseH);
+      var houseSpend={}; priced.forEach(function(f){houseSpend[f.house]=(houseSpend[f.house]||0)+parseFloat(f.purchasePrice);});
+      var hSorted=Object.entries(houseSpend).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+      var hMax=hSorted[0]?hSorted[0][1]:1;
+      var hList=document.createElement('div'); hList.style.cssText='display:flex;flex-direction:column;gap:2px;';
+      hSorted.forEach(function(e){
+        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;padding:4px 0;';
+        var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:110px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'; lbl.textContent=e[0];
+        var bWrap=document.createElement('div'); bWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;';
+        var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+Math.round(e[1]/hMax*100)+'%;background:var(--blue);border-radius:3px;'; bWrap.appendChild(bar);
+        var val=document.createElement('div'); val.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:44px;text-align:right;flex-shrink:0;'; val.textContent='$'+e[1].toFixed(0);
+        row.appendChild(lbl); row.appendChild(bWrap); row.appendChild(val); hList.appendChild(row);
+      });
+      spendSection.appendChild(hList);
+    }
+  }
+
+  // NOTES TAB
+  var notesMSection=document.getElementById('anaNotesMergedSection');
+  if(notesMSection){
+    while(notesMSection.firstChild) notesMSection.removeChild(notesMSection.firstChild);
+    var nmHdr=document.createElement('div'); nmHdr.className='ana-sh'; nmHdr.style.marginTop='0';
+    var nmH2=document.createElement('h2'); nmH2.textContent='Notes & accords'; nmHdr.appendChild(nmH2); notesMSection.appendChild(nmHdr);
+    var nmSub=document.createElement('div'); nmSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;'; nmSub.textContent='Across your current collection — click to filter'; notesMSection.appendChild(nmSub);
+    var nmChipsDiv=document.createElement('div'); nmChipsDiv.id='anaNotesMergedChips'; notesMSection.appendChild(nmChipsDiv);
+    renderNoteChips('anaNotesMergedChips',getNoteFrequency(MFC),'var(--blue)',32);
+    // Accords bar chart
+    var nmAccHdr=document.createElement('div'); nmAccHdr.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:24px;margin-bottom:8px;'; nmAccHdr.textContent='Accord breakdown'; notesMSection.appendChild(nmAccHdr);
+    var nmAccCounts=getCollectionAccordBreakdown();
+    var nmSorted=Object.entries(nmAccCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+    var nmMax=nmSorted[0]?nmSorted[0][1]:1;
+    var nmList=document.createElement('div'); nmList.style.cssText='display:flex;flex-direction:column;gap:2px;';
+    nmSorted.forEach(function(e){
+      var ac=e[0]; var cnt=e[1]; var pct=Math.round(cnt/nmMax*100);
+      var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;padding:4px 0;cursor:pointer;';
+      var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:90px;flex-shrink:0;'; lbl.textContent=ac;
+      var bWrap=document.createElement('div'); bWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;';
+      var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--blue);border-radius:3px;transition:width .4s;'; bWrap.appendChild(bar);
+      var cEl=document.createElement('div'); cEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:20px;text-align:right;flex-shrink:0;'; cEl.textContent=cnt;
+      row.appendChild(lbl); row.appendChild(bWrap); row.appendChild(cEl);
+      (function(acc){row.onclick=function(){filterCollByAccord(acc);};})(ac);
+      nmList.appendChild(row);
+    });
+    notesMSection.appendChild(nmList);
+  }
 }
 
 function bldChartPreview(id,data){
@@ -5064,6 +5520,34 @@ function renderFriendAnalytics(){
   var friend=getFriend(); if(!friend) return;
   var FF=friendFragrances(), FC=friendCompliments();
   var friendOwned=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
+
+  // SHARED INSIGHT CARD
+  var sharedEl=document.getElementById('ft-ana-shared-insight');
+  if(sharedEl){
+    while(sharedEl.firstChild) sharedEl.removeChild(sharedEl.firstChild);
+    var MC=myCompliments(), MF=myFragrances();
+    // Find fragrances both users have been complimented on
+    var myFragIds=new Set(MC.map(function(c){return c.primaryFragId;}));
+    var friendFragIds=new Set(FC.map(function(c){return c.primaryFragId;}));
+    var overlap=[]; myFragIds.forEach(function(id){if(id&&friendFragIds.has(id)) overlap.push(id);});
+    var card=document.createElement('div'); card.style.cssText='background:var(--blue3);border:1px solid var(--b2);padding:14px 18px;font-family:var(--body);font-size:13px;color:var(--ink);line-height:1.6;';
+    if(overlap.length){
+      var frag=FRAGRANCES.find(function(f){return (f.fragranceId||f.id)===overlap[0];});
+      var fragName=frag?(frag.name||'—'):'—';
+      var txt=document.createElement('div'); txt.style.cssText='font-family:var(--script);font-size:15px;font-style:italic;color:var(--warm);'; txt.textContent='You and '+friend.name+' have both been complimented on '+fragName+(overlap.length>1?' (and '+(overlap.length-1)+' more)':'')+'.';
+      card.appendChild(txt);
+    } else {
+      // Accord similarity fallback
+      var myAccords={}; MF.filter(function(f){return f.status==='CURRENT';}).forEach(function(f){getAccords(f).forEach(function(a){myAccords[a]=(myAccords[a]||0)+1;});});
+      var fAccords={}; FF.filter(function(f){return f.status==='CURRENT';}).forEach(function(f){getAccords(f).forEach(function(a){fAccords[a]=(fAccords[a]||0)+1;});});
+      var shared=Object.keys(myAccords).filter(function(a){return fAccords[a];}).sort(function(a,b){return (myAccords[b]+fAccords[b])-(myAccords[a]+fAccords[a]);}).slice(0,2);
+      var txt2=document.createElement('div'); txt2.style.cssText='font-family:var(--script);font-size:15px;font-style:italic;color:var(--warm);';
+      txt2.textContent=shared.length?'You and '+friend.name+' both love '+shared.join(' and ')+'.':'You share a love of fragrance.';
+      card.appendChild(txt2);
+    }
+    sharedEl.appendChild(card);
+  }
+
   // Stats
   var byFrag={};
   FC.forEach(function(c){ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; if(c.secondaryFrag) byFrag[c.secondaryFrag]=(byFrag[c.secondaryFrag]||0)+1; });
@@ -5237,12 +5721,22 @@ function renderInCommon(){
 }
 
 document.getElementById('friendTabs').addEventListener('click',e=>{
-  const tab=e.target.closest('.ftab');if(!tab)return;
-  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('#page-friend .fpanel').forEach(p=>p.classList.remove('on'));
+  const tab=e.target.closest('#friendTabs > .ftab');if(!tab)return;
+  document.querySelectorAll('#friendTabs > .ftab').forEach(t=>t.classList.remove('on'));
+  ['ft-col','ft-comp','ft-wish','ft-ana'].forEach(function(id){var p=document.getElementById(id);if(p)p.classList.remove('on');});
   tab.classList.add('on');
   const panel=document.getElementById(tab.dataset.panel);
   if(panel){ panel.classList.add('on'); if(tab.dataset.panel==='ft-ana') renderFriendAnalytics(); }
+});
+
+document.getElementById('ftAnaTabs').addEventListener('click',function(e){
+  var tab=e.target.closest('#ftAnaTabs .ftab'); if(!tab) return;
+  document.querySelectorAll('#ftAnaTabs .ftab').forEach(function(t){t.classList.remove('on');});
+  document.querySelectorAll('#ft-ana .fpanel').forEach(function(p){p.classList.remove('on');});
+  tab.classList.add('on');
+  var panelId=tab.getAttribute('data-ftana');
+  var panel=document.getElementById(panelId);
+  if(panel) panel.classList.add('on');
 });
 
 // ═══════════════════════════════════════════════════════
