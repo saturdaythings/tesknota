@@ -955,6 +955,7 @@ input,select,textarea{font-size:16px;}
         </div>
         <div id="anaCollection" class="fpanel on">
           <div class="ana-section" id="anaCollectionSection"></div>
+          <div class="ana-section" id="anaFinishedSection"></div>
           <div class="ana-section" id="anaTopNotesSection"></div>
           <div class="ana-section" id="anaNotesSection"></div>
           <div class="ana-section" id="anaNoteLibrarySection"></div>
@@ -1363,7 +1364,10 @@ input,select,textarea{font-size:16px;}
         <div class="fg"><label>Dupe tracking</label>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
             <div class="opts"><div class="opt" id="dY" onclick="togDupe(true)">Dupe for:</div><div class="opt on" id="dN" onclick="togDupe(false)">Not a dupe</div></div>
-            <input type="text" id="dupeFor" placeholder="Type original fragrance name..." class="input-editable" style="display:none;flex:1;min-width:140px;">
+            <div id="dupeForWrap" style="display:none;flex:1;min-width:140px;position:relative;">
+              <input type="text" id="dupeFor" placeholder="Search fragrance it's a dupe for..." class="input-editable" style="width:100%;" autocomplete="off" oninput="dupeSearch(this.value)">
+              <div id="dupeDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--b2);border-top:none;z-index:50;max-height:180px;overflow-y:auto;"></div>
+            </div>
           </div>
         </div>
         <div class="fg">
@@ -3114,14 +3118,15 @@ function renderDashboard(){
     }
   }
 
-  const owned = MF.filter(f=>f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED'||f.status==='DONT_LIKE');
+  const current = MF.filter(f=>f.status==='CURRENT');
+  const finished = MF.filter(f=>f.status==='FINISHED');
   const wish = MF.filter(f=>f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL');
   document.getElementById('dashStats').innerHTML = `
-    <div class="sbox"><div class="snum">${owned.length}</div><div class="slbl">Owned</div></div>
+    <div class="sbox"><div class="snum">${current.length}</div><div class="slbl">Current</div></div>
     <div class="sbox"><div class="snum">${wish.length}</div><div class="slbl">Wishlist</div></div>
     <div class="sbox"><div class="snum">${MC.length}</div><div class="slbl">Compliments</div></div>
     <div class="sbox"><div class="snum">${avgRating()}</div><div class="slbl">Avg Rating</div></div>
-    <div class="sbox"><div class="snum">${MF.filter(f=>f.status==='PREVIOUSLY_OWNED').length}</div><div class="slbl">Prev. Owned</div></div>`;
+    <div class="sbox"><div class="snum">${finished.length}</div><div class="slbl">Finished</div></div>`;
   // Recent 4 CURRENT fragrances — sorted by most recent purchase date
   var _MONTH_NUM={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
   function _parsePurchase(d){if(!d)return 0;var p=d.split(' ');return (parseInt(p[1])||0)*100+(_MONTH_NUM[p[0]]||0);}
@@ -4618,6 +4623,51 @@ function renderAnalytics(){
       if(mostExp) spendGrid.appendChild(addSpendRow('Most Expensive',mostExp.f.name,mostExp.price));
     }
   }
+  // Finished fragrances — sorted by size
+  var finishedEl=document.getElementById('anaFinishedSection');
+  if(finishedEl){
+    var finishedFrags=MF.filter(function(f){return f.status==='FINISHED';});
+    if(finishedFrags.length){
+      var _sizeOrder={'Full Bottle':4,'Travel':3,'Decant':2,'Sample':1};
+      finishedFrags.sort(function(a,b){
+        var as=Math.max.apply(null,(a.sizes||[]).map(function(s){return _sizeOrder[s]||0;}).concat([0]));
+        var bs=Math.max.apply(null,(b.sizes||[]).map(function(s){return _sizeOrder[s]||0;}).concat([0]));
+        return bs-as;
+      });
+      var fHtml='<div style="font-family:var(--serif);font-size:15px;color:var(--ink);margin-bottom:8px;">Finished bottles</div>'
+        +'<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.06em;margin-bottom:16px;">'+finishedFrags.length+' finished — sorted by size</div>';
+      // Count by size
+      var sizeCounts={};
+      finishedFrags.forEach(function(f){
+        var topSize=(f.sizes||[]).sort(function(a,b){return (_sizeOrder[b]||0)-(_sizeOrder[a]||0);})[0]||'Unknown';
+        sizeCounts[topSize]=(sizeCounts[topSize]||0)+1;
+      });
+      var scSorted=Object.entries(sizeCounts).sort(function(a,b){return (_sizeOrder[b[0]]||0)-(_sizeOrder[a[0]]||0);});
+      var scMax=scSorted[0]?scSorted[0][1]:1;
+      scSorted.forEach(function(e){
+        fHtml+='<div style="display:flex;align-items:center;gap:10px;padding:4px 0;">'
+          +'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);width:90px;text-transform:uppercase;letter-spacing:.06em;">'+e[0]+'</span>'
+          +'<div style="flex:1;height:14px;background:var(--b2);border-radius:4px;overflow:hidden;"><div style="height:100%;background:var(--sage);border-radius:4px;width:'+Math.round((e[1]/scMax)*100)+'%;"></div></div>'
+          +'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);min-width:24px;text-align:right;">'+e[1]+'</span>'
+          +'</div>';
+      });
+      // List each finished fragrance
+      fHtml+='<div style="margin-top:14px;">';
+      finishedFrags.forEach(function(f){
+        var topSize=(f.sizes||[]).sort(function(a,b){return (_sizeOrder[b]||0)-(_sizeOrder[a]||0);})[0]||'—';
+        var timesFinished=MF.filter(function(x){return x.name.toLowerCase()===f.name.toLowerCase()&&x.status==='FINISHED';}).length;
+        fHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--b2);cursor:pointer;" onclick="openDetail(\''+f.id+'\')">'
+          +'<div><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div></div>'
+          +'<div style="text-align:right;"><div style="font-family:var(--mono);font-size:11px;color:var(--ink3);">'+topSize+'</div>'
+          +(timesFinished>1?'<div style="font-family:var(--mono);font-size:9px;color:var(--sage);">Finished '+timesFinished+'x</div>':'')
+          +'</div></div>';
+      });
+      fHtml+='</div>';
+      finishedEl.innerHTML=fHtml;
+    } else {
+      finishedEl.innerHTML='';
+    }
+  }
   // Note library — all notes across user's collection
   renderNoteLibrary();
 }
@@ -5375,8 +5425,9 @@ function resetAFModal(){
   buildYearSelect('afYear',1990);document.getElementById('afYear').value='';
   document.getElementById('dY').classList.remove('on');
   document.getElementById('dN').classList.add('on');
-  document.getElementById('dupeFor').style.display='none';
+  document.getElementById('dupeForWrap').style.display='none';
   document.getElementById('dupeFor').value='';
+  document.getElementById('dupeDrop').style.display='none';
   document.getElementById('afNotes').value='';
   tiInit('afTop',''); tiInit('afMiddle',''); tiInit('afBase','');
   var priceEl=document.getElementById('afPrice'); if(priceEl) priceEl.value='';
@@ -5432,7 +5483,7 @@ function afGoStep(n, skipValidation){
       if(d.personalRating){ document.getElementById('afRating').value=d.personalRating; starRender(d.personalRating); }
       if(d.whereBought) document.getElementById('afWhere').value=d.whereBought;
       if(d.purchaseDate){ const parts=d.purchaseDate.split(' '); if(parts[0]) document.getElementById('afMonth').value=parts[0]; if(parts[1]) document.getElementById('afYear').value=parts[1]; }
-      if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeFor').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
+      if(d.isDupe){ document.getElementById('dY').classList.add('on'); document.getElementById('dN').classList.remove('on'); document.getElementById('dupeForWrap').style.display='block'; document.getElementById('dupeFor').value=d.dupeFor||''; }
       if(d.purchasePrice){ var prEl=document.getElementById('afPrice'); if(prEl) prEl.value=d.purchasePrice; }
       if(d.personalNotes) document.getElementById('afNotes').value=d.personalNotes;
       tiInit('afTop',d.topNotes||''); tiInit('afMiddle',d.middleNotes||''); tiInit('afBase',d.baseNotes||'');
@@ -5581,13 +5632,14 @@ function saveFragrance(){
         }
       },500);
     }
-    // Allow same-name fragrance in different status groups (e.g. sample + wishlist for full bottle).
-    // Block exact same name+status combination only.
+    // Allow repurchases: same name is OK if existing entry is FINISHED or PREVIOUSLY_OWNED.
+    // Block if an active (CURRENT) or wishlist duplicate exists in the same bucket.
     var _newWish = newFrag.status==='WANT_TO_BUY'||newFrag.status==='WANT_TO_SMELL';
     var duplicate = myFragrances().find(function(f){
       if(f.name.toLowerCase().trim() !== newFrag.name.toLowerCase().trim()) return false;
+      // Finished/prev owned entries don't block new adds
+      if(f.status==='FINISHED'||f.status==='PREVIOUSLY_OWNED') return false;
       var _existWish = f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';
-      // Only block if both are in the same bucket (collection vs wishlist)
       return _newWish === _existWish;
     });
     if(duplicate){
@@ -6061,8 +6113,11 @@ function importToCollection(data){
 }
 
 function importToWishlist(data){
-  const exists = FRAGRANCES.find(f=>f.name.toLowerCase()===data.name.toLowerCase());
-  if(exists){ toast(data.name+' is already in your collection'); return; }
+  var exists = myFragrances().find(function(f){
+    if(f.name.toLowerCase().trim()!==data.name.toLowerCase().trim()) return false;
+    return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';
+  });
+  if(exists){ toast(data.name+' is already on your wishlist'); return; }
   var _nfId3='f'+nextId++;
   const newFrag = {
     id:_nfId3, fragranceId:lookupFragDbId(data.name,data.house||'')||_nfId3,
@@ -6971,7 +7026,24 @@ function selOpt(el,id){document.querySelectorAll('#'+id+' .opt').forEach(o=>o.cl
 function togDupe(yes){
   document.getElementById('dY').classList.toggle('on',yes);
   document.getElementById('dN').classList.toggle('on',!yes);
-  document.getElementById('dupeFor').style.display=yes?'block':'none';
+  document.getElementById('dupeForWrap').style.display=yes?'block':'none';
+  if(!yes){ document.getElementById('dupeFor').value=''; document.getElementById('dupeDrop').style.display='none'; }
+}
+
+function dupeSearch(v){
+  var el=document.getElementById('dupeDrop');
+  if(!v||v.length<2){ el.style.display='none'; return; }
+  var hits=fragSearch(v,8);
+  while(el.firstChild) el.removeChild(el.firstChild);
+  if(!hits.length){ el.style.display='none'; return; }
+  hits.forEach(function(f){
+    var item=document.createElement('div'); item.className='aci';
+    item.onmousedown=function(e){ e.preventDefault(); document.getElementById('dupeFor').value=f.n; el.style.display='none'; };
+    var nd=document.createElement('div'); nd.className='aci-n'; nd.textContent=f.n;
+    var hd=document.createElement('div'); hd.className='aci-h'; hd.textContent=f.h;
+    item.appendChild(nd); item.appendChild(hd); el.appendChild(item);
+  });
+  el.style.display='block';
 }
 
 // Export
@@ -7485,10 +7557,10 @@ var PAL = {
 //             'text', 'textarea', 'monthyear', 'confirm'
 
 function palFlows() {
-  var myFrags = FRAGRANCES.filter(function(f) {
+  var myFrags = myFragrances().filter(function(f) {
     return f.status === 'CURRENT' || f.status === 'PREVIOUSLY_OWNED';
   });
-  var allMyFrags = FRAGRANCES.slice();
+  var allMyFrags = myFragrances();
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var currentYear = String(new Date().getFullYear());
   var years = [currentYear, String(new Date().getFullYear()-1), String(new Date().getFullYear()-2), String(new Date().getFullYear()-3)];
@@ -8010,7 +8082,7 @@ function palFlows() {
         id: '_pick',
         type: 'pick',
         label: 'Which compliment to delete?',
-        source: function() { return COMPLIMENTS.slice(0, 20); },
+        source: function() { return myCompliments().slice(0, 20); },
         display: function(c) { return c.primaryFrag; },
         sub: function(c) { var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return c.relation + ' — ' + (_MN[parseInt(c.month)-1]||c.month) + ' ' + c.year; },
         onPick: function(c) { PAL.editTarget = c; },
@@ -8101,7 +8173,7 @@ function palFlows() {
         type: 'pick',
         label: 'Which wishlist item did you buy?',
         source: function() {
-          return FRAGRANCES.filter(function(f) {
+          return myFragrances().filter(function(f) {
             return f.status === 'WANT_TO_BUY' || f.status === 'WANT_TO_SMELL';
           });
         },
