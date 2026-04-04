@@ -1960,6 +1960,7 @@ async function loadAllData(){
     if(f.name==='Matcha Ice Cream'&&f.house==='Theodoros Kalotinis'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
     if(f.name==='Crème Brûlée'&&f.house==='Theodoros Kalotinis'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
     if(f.name==='Vanilla Skin'&&f.house==='Phlur'&&f.type==='Eau de Parfum') f.type='Body Spray';
+    if(f.name==='Vanille Extreme'&&f.house==='Comptoir Sud Pacifique'&&f.type==='Eau de Parfum') f.type='Eau de Toilette';
     if(f.type!==origType||f.name!==origName) _migNeedsWrite=true;
   });
   if(_migNeedsWrite){
@@ -1981,8 +1982,11 @@ async function loadAllData(){
     if(house && name.length > house.length && name.substring(0, house.length).toLowerCase() === house.toLowerCase() && name.charAt(house.length) === ' '){
       name = name.substring(house.length + 1);
     }
-    // Strip concentration suffix (EDP, EDT, Extrait, Parfum, etc.)
-    if(conc && name.length > conc.length){
+    // Only strip well-known short concentration suffixes that get appended to FRAG_DB names
+    // Do NOT strip longer conc strings like "Oil", "Cologne", "Body Spray", "Extrait de Parfum"
+    // as they can be part of the actual fragrance name
+    var _stripConcs = {'edp':1,'edt':1,'parfum':1};
+    if(conc && _stripConcs[(conc||'').toLowerCase()] && name.length > conc.length){
       var tail = name.substring(name.length - conc.length);
       if(tail.toLowerCase() === conc.toLowerCase() && (name.length === conc.length || name.charAt(name.length - conc.length - 1) === ' ')){
         name = name.substring(0, name.length - conc.length).trim();
@@ -2139,7 +2143,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-04-v31';
+const FRAG_DB_VERSION = '2026-04-04-v32';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
