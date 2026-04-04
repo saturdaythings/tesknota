@@ -125,6 +125,13 @@ Current migrations:
 - Miss Girl Extrait → Miss Girl
 - Amber (Nemat) → Amber Perfume Oil
 - Coco Vanille → Vanille Coco
+- Beirut Baklava EDP → Extrait de Parfum
+- That Girl Viral Vanilla EDP → Extrait de Parfum
+- Miss Girl EDP → Extrait de Parfum
+- Matcha Ice Cream EDP → Extrait de Parfum
+- Crème Brûlée (Theodoros Kalotinis) EDP → Extrait de Parfum
+- Vanilla Skin (Phlur) EDP → Body Spray
+- Vanille Extreme EDP → Eau de Toilette
 
 ---
 
@@ -136,7 +143,7 @@ App loads → getAccessToken() (JWT via Web Crypto)
            1. Read all 4 sheet tabs in parallel
            2. Populate COMMUNITY_FRAGS from fragranceDB tab
            3. Merge sheet data into FRAGRANCES / COMPLIMENTS
-           4. Dedup by ID, then by name+house+type+userId+status
+           4. Dedup by ID, then by name+house+userId
            5. Run migrations (fix stale names/types)
            6. Rebuild fragranceDB tab if FRAG_DB_VERSION changed
            7. Sync missing seed entries to sheets

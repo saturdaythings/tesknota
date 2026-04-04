@@ -175,7 +175,7 @@ input,select,textarea{font-size:16px;}
 .cr-f:hover{text-decoration:underline;}
 .cr-layer{font-family:var(--mono);font-size:9px;font-style:normal;color:#9A7040;letter-spacing:.04em;}
 .cr-m{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
-.cr-n{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:4px;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;letter-spacing:.04em;}
+.cr-n{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:4px;font-style:normal;letter-spacing:.04em;}
 .cr-d{font-family:var(--mono);font-size:11px;color:var(--ink3);white-space:nowrap;margin-left:16px;letter-spacing:.06em;flex-shrink:0;}
 .crow-acts{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;transition:opacity .12s;}
 .crow:hover .crow-acts{opacity:1;}
@@ -1885,13 +1885,13 @@ async function loadAllData(){
   }
   // Remove blank-name entries (QA test artifacts or orphaned Sheet rows with no resolved fragrance)
   FRAGRANCES = FRAGRANCES.filter(function(f){ return !!(f.name||'').trim(); });
-  // Dedup FRAGRANCES by ID, then by name+house+user (catch same frag under different IDs)
+  // Dedup FRAGRANCES by ID, then by name+house+user (catch same frag under different IDs/types)
   var _fragDupeBefore = FRAGRANCES.length;
   var _seenFids = {}, _seenNameUser = {};
   FRAGRANCES = FRAGRANCES.filter(function(f){
     if(!f.id || _seenFids[f.id]) return false;
     _seenFids[f.id] = true;
-    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.type||'').toLowerCase()+'|'+(f.userId||'')+'|'+(f.status||'');
+    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.userId||'');
     if(_seenNameUser[nk]) return false;
     _seenNameUser[nk] = true;
     return true;
