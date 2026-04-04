@@ -988,13 +988,56 @@ input,select,textarea{font-size:16px;}
         <div class="ftab" data-panel="ft-ana">Analytics</div>
       </div>
       <div class="fpanel on" id="ft-col">
-        <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Notes</th><th>Compliments</th><th></th></tr></thead>
+        <div class="coll-filters">
+          <input type="text" id="fCollSearch" placeholder="Search collection..." style="flex:1;" oninput="renderFriendCollection()"/>
+          <select class="coll-sort-select" id="fCollSort" onchange="renderFriendCollection()">
+            <option value="" disabled selected>Sort by</option>
+            <option value="nameAZ">Name A–Z</option>
+            <option value="nameZA">Name Z–A</option>
+            <option value="ratingHL">Rating High–Low</option>
+            <option value="ratingLH">Rating Low–High</option>
+            <option value="houseAZ">House A–Z</option>
+            <option value="comps">Most Compliments</option>
+          </select>
+        </div>
+        <div id="fCollCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
+        <table class="tbl"><thead><tr>
+          <th>Fragrance</th><th>Size</th><th>Rating</th><th>Added</th><th>Accords</th><th>Compliments</th>
+        </tr></thead>
         <tbody id="ft-col-body"></tbody></table>
         <div class="in-common" id="inCommon"></div>
       </div>
-      <div class="fpanel" id="ft-comp"></div>
+      <div class="fpanel" id="ft-comp">
+        <div class="coll-filters">
+          <input type="text" id="fCompSearch" placeholder="Search compliments..." style="flex:1;" oninput="renderFriendCompliments()"/>
+          <select class="coll-sort-select" id="fCompFilter" onchange="renderFriendCompliments()">
+            <option value="">All</option>
+            <option value="Stranger">Strangers</option>
+            <option value="Friend">Friends</option>
+            <option value="Colleague / Client">Colleagues</option>
+            <option value="Family">Family</option>
+            <option value="Significant Other">S.O.</option>
+          </select>
+        </div>
+        <div id="fCompCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
+        <div id="ft-comp-body"></div>
+      </div>
       <div class="fpanel" id="ft-wish">
-        <table class="tbl"><thead><tr><th>Fragrance</th><th>Status</th><th>Community Rating</th><th>Avg Price</th></tr></thead>
+        <div class="coll-filters">
+          <input type="text" id="fWishSearch" placeholder="Search wishlist..." style="flex:1;" oninput="renderFriendWishlist()"/>
+          <select class="coll-sort-select" id="fWishSort" onchange="renderFriendWishlist()">
+            <option value="" disabled selected>Sort by</option>
+            <option value="nameAZ">Name A–Z</option>
+            <option value="nameZA">Name Z–A</option>
+            <option value="houseAZ">House A–Z</option>
+            <option value="priceHL">Price High–Low</option>
+            <option value="priceLH">Price Low–High</option>
+          </select>
+        </div>
+        <div id="fWishCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
+        <table class="tbl"><thead><tr>
+          <th>Fragrance</th><th>Added</th><th>Avg Price</th>
+        </tr></thead>
         <tbody id="ft-wish-body"></tbody></table>
         <div id="wishInCommon" class="mt-16"></div>
       </div>
@@ -1004,6 +1047,8 @@ input,select,textarea{font-size:16px;}
         <div class="bchart" id="bc-f"></div>
         <div class="chart-legend" id="bc-f-legend"></div>
         <div id="ft-ana-insights"></div>
+        <div style="margin-top:28px;" id="ft-ana-accords"></div>
+        <div style="margin-top:28px;" id="ft-ana-notes"></div>
       </div>
     </div>
 
@@ -1905,16 +1950,11 @@ async function loadAllData(){
   if(_missingFrags.length){
     await syncMissingRows('userFragrances',_missingFrags.map(fragToRow),FRAG_HEADERS,'syncFrags');
   }
-  console.log('[comps] compsRaw from sheet: '+compsRaw.length+' rows');
-  if(compsRaw.length>0) console.log('[comps] first row keys: '+Object.keys(compsRaw[0]).join(', '));
-  console.log('[comps] seed COMPLIMENTS: '+COMPLIMENTS.length);
   var _sheetCompIds=new Set(compsRaw.map(function(r){return r.complimentId||r.id||'';}));
   if(compsRaw.length){
     var seedOnly=COMPLIMENTS.filter(function(c){return !_sheetCompIds.has(c.id);});
-    console.log('[comps] seedOnly (not in sheet): '+seedOnly.length+', sheet entries: '+compsRaw.length);
     COMPLIMENTS=seedOnly.concat(compsRaw.map(rowToComp));
   }
-  console.log('[comps] final COMPLIMENTS: '+COMPLIMENTS.length);
   // Dedup COMPLIMENTS by ID (same reason as FRAGRANCES)
   var _compDupeBefore = COMPLIMENTS.length;
   var _seenCids = {};
@@ -2022,10 +2062,8 @@ async function loadAllData(){
   });
   if(_syncedVersion !== FRAG_DB_VERSION){
     try {
-      console.log('[fragranceDB] rewriting sheet — '+_newDbRows.length+' rows, version '+FRAG_DB_VERSION);
       await writeSheet('fragranceDB', _newDbRows, COMMUNITY_FRAG_HEADERS);
       localStorage.setItem(_lsKey, FRAG_DB_VERSION);
-      console.log('[fragranceDB] sheet write succeeded');
     } catch(e) {
       console.error('[fragranceDB] sheet write FAILED — will retry next load:', e);
       localStorage.removeItem(_lsKey);
@@ -2056,7 +2094,6 @@ async function loadAllData(){
   // Recalculate ID counters so new entries don't collide with loaded data
   FRAGRANCES.forEach(function(f){ var n=parseInt((f.id||'').replace(/\D/g,''))||0; if(n>=nextId)nextId=n+1; });
   COMPLIMENTS.forEach(function(c){ var n=parseInt((c.id||'').replace(/\D/g,''))||0; if(n>=nextCompId)nextCompId=n+1; });
-  console.log('[loadAllData] FRAGRANCES: '+FRAGRANCES.length+', COMPLIMENTS: '+COMPLIMENTS.length+', COMMUNITY_FRAGS: '+COMMUNITY_FRAGS.length);
   return sheetsOk;
 }
 
@@ -4619,128 +4656,254 @@ function renderFriend(){
     }
     bm.textContent=sinceStr;
   }
-  var sfEl=document.getElementById('fb-stat-frags'); if(sfEl) sfEl.textContent=FF.length;
+  var sfEl=document.getElementById('fb-stat-frags'); if(sfEl) sfEl.textContent=friendOwned.length;
   var scEl=document.getElementById('fb-stat-comps'); if(scEl) scEl.textContent=FC.length;
   var swEl=document.getElementById('fb-stat-wish'); if(swEl) swEl.textContent=friendWish.length;
   document.getElementById('ct-friend').textContent=FC.length;
   var sl=document.querySelector('.sb-link[data-page="friend"]');
   if(sl&&sl.childNodes[0]) sl.childNodes[0].textContent=friend.name+' ';
-  // Update all dynamic friend name references
   var mobFriendBtn=document.getElementById('mobFriendBtn');
   if(mobFriendBtn) mobFriendBtn.textContent='Friends';
   var compareSub=document.getElementById('compareSub');
   if(compareSub) compareSub.textContent='You vs '+friend.name+' — all compliments and notes';
-  // Activity dot — show if friend has any compliments or fragrances
   var actDot=document.getElementById('friendActivityDot');
   if(actDot) actDot.style.display=(FC.length||FF.length)?'inline-block':'none';
 
-  // Collection table
-  var collBody=document.querySelector('#ft-col tbody');
-  if(collBody){
-    while(collBody.firstChild) collBody.removeChild(collBody.firstChild);
-    friendOwned.forEach(function(f){
-      var tr=document.createElement('tr');
-      var td1=document.createElement('td');
-      var dn=document.createElement('div'); dn.className='tn'; dn.innerHTML=fragDisplayName(f); td1.appendChild(dn);
-      var dh=document.createElement('div'); dh.className='th_'; dh.textContent=f.house; td1.appendChild(dh);
-      tr.appendChild(td1);
-      var td2=document.createElement('td');
-      var ds=document.createElement('div'); ds.className='ts '+(STATUS_CSS[f.status]||''); ds.textContent=STATUS_LABELS[f.status]||f.status; td2.appendChild(ds); tr.appendChild(td2);
-      var td3=document.createElement('td');
-      var dr=document.createElement('div'); dr.className='tstars'; dr.innerHTML=renderStars(f.statusRating||f.personalRating); td3.appendChild(dr); tr.appendChild(td3);
-      var _cd=getCommunityData(f.name,f.house)||{}; var td4=document.createElement('td'); td4.className='tscript'; td4.textContent=(_cd.notes||'').replace(/·/g,',').split(',').slice(0,2).map(function(n){return noteDisplayName(n);}).join(', '); tr.appendChild(td4);
-      var td5=document.createElement('td'); td5.className='tmono'; td5.textContent=getCompCount(f.fragranceId||f.id); tr.appendChild(td5);
-      var td6=document.createElement('td'); td6.className='tact';
-      var btn=document.createElement('button'); btn.className='btn-bare'; btn.textContent='Compare';
-      (function(fn){ btn.onclick=function(){ openCompare(fn,fn); }; })(f.name);
-      td6.appendChild(btn); tr.appendChild(td6);
-      collBody.appendChild(tr);
-    });
-    if(!friendOwned.length){
-      var etr=document.createElement('tr'); var etd=document.createElement('td'); etd.colSpan=6;
-      etd.style.cssText='padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
-      etd.textContent='No fragrances yet'; etr.appendChild(etd); collBody.appendChild(etr);
-    }
-  }
+  renderFriendCollection();
+  renderFriendCompliments();
+  renderFriendWishlist();
+  renderFriendAnalytics();
+  renderInCommon();
+}
 
-  // Compliments tab
-  var compPanel=document.getElementById('ft-comp');
-  if(compPanel){
-    while(compPanel.firstChild) compPanel.removeChild(compPanel.firstChild);
-    FC.slice(0,10).forEach(function(c){
-      var row=document.createElement('div'); row.className='crow';
-      var left=document.createElement('div'); left.style.flex='1';
-      var cf=document.createElement('div'); cf.className='tn'; var _cfrag=FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;}); if(_cfrag){cf.innerHTML=fragDisplayName(_cfrag);}else{cf.textContent=c.primaryFrag;}
-      if(c.secondaryFrag){ var cfl=document.createElement('span'); cfl.className='cr-layer'; cfl.textContent=' + '+c.secondaryFrag; cf.appendChild(cfl); }
-      left.appendChild(cf);
-      if(_cfrag){ var cfh=document.createElement('div'); cfh.className='th_'; cfh.textContent=_cfrag.house; left.appendChild(cfh); }
-      var cm=document.createElement('div'); cm.className='cr-m';
-      var _loc=renderComplimentLocation(c); cm.textContent=c.relation+(c.gender?' · '+c.gender:'')+(_loc!=='—'?' · '+_loc:''); left.appendChild(cm);
-      if(c.notes){ var cn=document.createElement('div'); cn.className='cr-n'; cn.textContent=c.notes; left.appendChild(cn); }
-      row.appendChild(left);
-      var right=document.createElement('div'); right.style.cssText='display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;';
-      var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var cd=document.createElement('div'); cd.className='cr-d'; cd.textContent=(_MN[parseInt(c.month)-1]||c.month)+' '+c.year; right.appendChild(cd);
-      row.appendChild(right); compPanel.appendChild(row);
+function renderFriendCollection(){
+  var friend=getFriend(); if(!friend) return;
+  var FF=friendFragrances();
+  var frags=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
+  var FC=friendCompliments();
+  var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Search
+  var q=(document.getElementById('fCollSearch')||{}).value;
+  if(q&&q.length>=2){
+    q=q.toLowerCase();
+    frags=frags.filter(function(f){
+      return (f.name||'').toLowerCase().includes(q)||(f.house||'').toLowerCase().includes(q);
     });
-    if(!FC.length){
-      var em=document.createElement('div'); em.style.cssText='padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
-      em.textContent='No compliments yet'; compPanel.appendChild(em);
-    }
   }
+  // Sort
+  var sort=(document.getElementById('fCollSort')||{}).value||'nameAZ';
+  var _compMap={};
+  FC.forEach(function(c){ _compMap[c.primaryFragId]=(_compMap[c.primaryFragId]||0)+1; });
+  frags=frags.slice().sort(function(a,b){
+    if(sort==='nameZA') return b.name.localeCompare(a.name);
+    if(sort==='ratingHL') return (parseRating(b.personalRating)||0)-(parseRating(a.personalRating)||0);
+    if(sort==='ratingLH') return (parseRating(a.personalRating)||0)-(parseRating(b.personalRating)||0);
+    if(sort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
+    if(sort==='comps') return (_compMap[b.fragranceId||b.id]||0)-(_compMap[a.fragranceId||a.id]||0);
+    return a.name.localeCompare(b.name);
+  });
+  // Count
+  var countEl=document.getElementById('fCollCount');
+  if(countEl) countEl.textContent=frags.length+' fragrance'+(frags.length!==1?'s':'');
+  // Table
+  var myOwnedSet=new Set(myFragrances().map(function(f){return f.name.toLowerCase();}));
+  var body=document.getElementById('ft-col-body');
+  if(!body) return;
+  if(frags.length){
+    body.innerHTML=frags.map(function(f){
+      var hasMyMatch=myOwnedSet.has(f.name.toLowerCase());
+      var compCount=getCompCount(f.fragranceId||f.id, friend.id);
+      var _cd=getCommunityData(f.name,f.house)||{};
+      var addedStr=f.purchaseDate||'';
+      if(!addedStr&&f.createdAt){ var _d=new Date(f.createdAt); addedStr=_MN[_d.getMonth()]+' '+_d.getFullYear(); }
+      var sizeStr=(f.sizes||[]).join(', ')||'—';
+      return '<tr onclick="openDetail(\''+f.id+'\')">'
+        +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
+        +'<td class="tmono" style="font-size:11px;">'+sizeStr+'</td>'
+        +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
+        +'<td><span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">'+(addedStr||'—')+'</span></td>'
+        +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(getAccords(f).join(', ')||'—')+'</td>'
+        +'<td class="tmono">'+(compCount>0?compCount:'—')+'</td>'
+        +'</tr>';
+    }).join('');
+  } else {
+    body.innerHTML='<tr><td colspan="6"><div class="empty-state">No fragrances'+(q?' match your search':'')+'</div></td></tr>';
+  }
+}
 
-  // Wishlist tab
-  var wishBody=document.querySelector('#ft-wish tbody');
-  if(wishBody){
-    while(wishBody.firstChild) wishBody.removeChild(wishBody.firstChild);
-    friendWish.forEach(function(f){
-      var tr=document.createElement('tr');
-      var td1=document.createElement('td');
-      var dn=document.createElement('div'); dn.className='tn'; dn.innerHTML=fragDisplayName(f); td1.appendChild(dn);
-      var dh=document.createElement('div'); dh.className='th_'; dh.textContent=f.house; td1.appendChild(dh); tr.appendChild(td1);
-      var td2=document.createElement('td');
-      var ds=document.createElement('div'); ds.className='ts s-wnt'; ds.textContent=STATUS_LABELS[f.status]; td2.appendChild(ds); tr.appendChild(td2);
-      var _wcd=getCommunityData(f.name,f.house)||{};
-      var td3=document.createElement('td'); td3.className='tmono'; td3.textContent=(_wcd.avgPrice||'').replace(/~/g,'')||'—'; tr.appendChild(td3);
-      wishBody.appendChild(tr);
+function renderFriendCompliments(){
+  var friend=getFriend(); if(!friend) return;
+  var FC=friendCompliments();
+  var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Filter
+  var filterVal=(document.getElementById('fCompFilter')||{}).value||'';
+  if(filterVal) FC=FC.filter(function(c){return c.relation===filterVal;});
+  // Search
+  var q=(document.getElementById('fCompSearch')||{}).value;
+  if(q&&q.length>=2){
+    q=q.toLowerCase();
+    FC=FC.filter(function(c){
+      return (c.primaryFrag||'').toLowerCase().includes(q)||(c.notes||'').toLowerCase().includes(q)||(c.relation||'').toLowerCase().includes(q);
     });
-    if(!friendWish.length){
-      var etr=document.createElement('tr'); var etd=document.createElement('td'); etd.colSpan=4;
-      etd.style.cssText='padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
-      etd.textContent='No wishlist items yet'; etr.appendChild(etd); wishBody.appendChild(etr);
-    }
   }
+  // Count
+  var countEl=document.getElementById('fCompCount');
+  if(countEl) countEl.textContent=FC.length+' compliment'+(FC.length!==1?'s':'');
+  // Render
+  var panel=document.getElementById('ft-comp-body');
+  if(!panel) return;
+  while(panel.firstChild) panel.removeChild(panel.firstChild);
+  FC.forEach(function(c){
+    var row=document.createElement('div'); row.className='crow';
+    var left=document.createElement('div'); left.style.flex='1';
+    var cf=document.createElement('div'); cf.className='tn';
+    var _cfrag=FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;});
+    if(_cfrag){cf.innerHTML=fragDisplayName(_cfrag);}else{cf.textContent=c.primaryFrag;}
+    if(c.secondaryFrag){ var cfl=document.createElement('span'); cfl.className='cr-layer'; cfl.textContent=' + '+c.secondaryFrag; cf.appendChild(cfl); }
+    left.appendChild(cf);
+    if(_cfrag){ var cfh=document.createElement('div'); cfh.className='th_'; cfh.textContent=_cfrag.house; left.appendChild(cfh); }
+    var cm=document.createElement('div'); cm.className='cr-m';
+    var _loc=renderComplimentLocation(c); cm.textContent=c.relation+(c.gender?' · '+c.gender:'')+(_loc!=='—'?' · '+_loc:''); left.appendChild(cm);
+    if(c.notes){ var cn=document.createElement('div'); cn.className='cr-n'; cn.textContent=c.notes; left.appendChild(cn); }
+    row.appendChild(left);
+    var right=document.createElement('div'); right.style.cssText='display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:16px;';
+    var cd=document.createElement('div'); cd.className='cr-d'; cd.textContent=(_MN[parseInt(c.month)-1]||c.month)+' '+c.year; right.appendChild(cd);
+    row.appendChild(right); panel.appendChild(row);
+  });
+  if(!FC.length){
+    var em=document.createElement('div'); em.style.cssText='padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;';
+    em.textContent='No compliments'+(filterVal||q?' match':''); panel.appendChild(em);
+  }
+}
 
-  // Analytics tab
+function renderFriendWishlist(){
+  var friend=getFriend(); if(!friend) return;
+  var FF=friendFragrances();
+  var frags=FF.filter(function(f){return f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';});
+  var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Search
+  var q=(document.getElementById('fWishSearch')||{}).value;
+  if(q&&q.length>=2){
+    q=q.toLowerCase();
+    frags=frags.filter(function(f){
+      return (f.name||'').toLowerCase().includes(q)||(f.house||'').toLowerCase().includes(q);
+    });
+  }
+  // Sort
+  var sort=(document.getElementById('fWishSort')||{}).value||'nameAZ';
+  frags=frags.slice().sort(function(a,b){
+    if(sort==='nameZA') return b.name.localeCompare(a.name);
+    if(sort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
+    if(sort==='priceHL'||sort==='priceLH'){ var _a=getCommunityData(a.name,a.house)||{},_b=getCommunityData(b.name,b.house)||{}; var pa=parseFloat((_a.avgPrice||'0').replace(/[^0-9.]/g,''))||0,pb=parseFloat((_b.avgPrice||'0').replace(/[^0-9.]/g,''))||0; return sort==='priceHL'?pb-pa:pa-pb; }
+    return a.name.localeCompare(b.name);
+  });
+  // Count
+  var countEl=document.getElementById('fWishCount');
+  if(countEl) countEl.textContent=frags.length+' item'+(frags.length!==1?'s':'');
+  // Table
+  var body=document.getElementById('ft-wish-body');
+  if(!body) return;
+  if(frags.length){
+    body.innerHTML=frags.map(function(f){
+      var _cd=getCommunityData(f.name,f.house)||{};
+      var addedStr=f.purchaseDate||'';
+      if(!addedStr&&f.createdAt){ var _d=new Date(f.createdAt); addedStr=_MN[_d.getMonth()]+' '+_d.getFullYear(); }
+      return '<tr>'
+        +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div></td>'
+        +'<td><span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">'+(addedStr||'—')+'</span></td>'
+        +'<td class="tmono">'+((_cd.avgPrice||'').replace(/~/g,'')||'—')+'</td>'
+        +'</tr>';
+    }).join('');
+  } else {
+    body.innerHTML='<tr><td colspan="3" style="padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No wishlist items'+(q?' match':'')+'</td></tr>';
+  }
+}
+
+function renderFriendAnalytics(){
+  var friend=getFriend(); if(!friend) return;
+  var FF=friendFragrances(), FC=friendCompliments();
+  var friendOwned=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
+  // Stats
   var byFrag={};
   FC.forEach(function(c){ byFrag[c.primaryFrag]=(byFrag[c.primaryFrag]||0)+1; if(c.secondaryFrag) byFrag[c.secondaryFrag]=(byFrag[c.secondaryFrag]||0)+1; });
   var fragSorted=Object.entries(byFrag).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
   var ftotal=FC.length;
   var spct=ftotal?Math.round((FC.filter(function(c){return c.relation==='Stranger';}).length/ftotal)*100):0;
-  var ratedFF=FF.filter(function(f){return f.personalRating;});
+  var ratedFF=friendOwned.filter(function(f){return f.personalRating;});
   var avgR=ratedFF.length?(ratedFF.reduce(function(a,f){return a+f.personalRating;},0)/ratedFF.length).toFixed(1):'—';
   var anaStatsEl=document.getElementById('ft-ana-stats');
   if(anaStatsEl){
-    anaStatsEl.innerHTML='<div class="sbox"><div class="snum">'+ftotal+'</div><div class="slbl">Compliments</div></div>'
-      +'<div class="sbox"><div class="snum">'+Object.keys(byFrag).length+'</div><div class="slbl">Fragrances</div></div>'
+    anaStatsEl.innerHTML='<div class="sbox"><div class="snum">'+friendOwned.length+'</div><div class="slbl">Collection</div></div>'
+      +'<div class="sbox"><div class="snum">'+ftotal+'</div><div class="slbl">Compliments</div></div>'
       +'<div class="sbox"><div class="snum">'+spct+'%</div><div class="slbl">From Strangers</div></div>'
       +'<div class="sbox"><div class="snum">'+avgR+'</div><div class="slbl">Avg Rating</div></div>';
   }
+  // Top performers
   var title=document.getElementById('ft-ana-title'); if(title) title.textContent=friend.name+"'s top performers";
   var maxV=fragSorted[0]?fragSorted[0][1]:1;
   bldChart('bc-f',fragSorted.map(function(e){return {l:e[0].split(' ')[0],v:e[1],h:Math.round((e[1]/maxV)*100)};}));
   var legend=document.getElementById('bc-f-legend'); if(legend) legend.textContent='';
   var insightsEl=document.getElementById('ft-ana-insights');
   if(insightsEl){
-    if(fragSorted[0] && ftotal>0){
+    if(fragSorted[0]&&ftotal>0){
       insightsEl.innerHTML='<div class="ins"><div class="ins-t">'+fragSorted[0][0]+' is '+friend.name+"'s top performer</div>"
         +'<div class="ins-b">'+fragSorted[0][1]+' compliment'+(fragSorted[0][1]>1?'s':'')+' — '+Math.round((fragSorted[0][1]/ftotal)*100)+'% of total.</div></div>';
     } else {
       insightsEl.innerHTML='<div style="padding:16px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliment data yet</div>';
     }
   }
-
-  renderInCommon();
+  // Accord distribution
+  var accordsEl=document.getElementById('ft-ana-accords');
+  if(accordsEl){
+    var accordCount={};
+    friendOwned.forEach(function(f){
+      getAccords(f).forEach(function(a){ accordCount[a]=(accordCount[a]||0)+1; });
+    });
+    var accordSorted=Object.entries(accordCount).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+    var aMax=accordSorted[0]?accordSorted[0][1]:1;
+    var aHtml='<div style="font-family:var(--serif);font-size:15px;color:var(--ink);margin-bottom:16px;">Accord distribution</div>';
+    accordSorted.forEach(function(e){
+      var pct=Math.round((e[1]/friendOwned.length)*100);
+      var matching=friendOwned.filter(function(f){return getAccords(f).some(function(a){return a===e[0];});});
+      aHtml+='<div style="margin-bottom:6px;">'
+        +'<div style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);width:90px;text-transform:uppercase;letter-spacing:.06em;">'+e[0]+'</span>'
+        +'<div style="flex:1;height:14px;background:var(--b2);border-radius:4px;overflow:hidden;"><div style="height:100%;background:var(--warm);border-radius:4px;width:'+Math.round((e[1]/aMax)*100)+'%;"></div></div>'
+        +'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);min-width:36px;text-align:right;">'+pct+'%</span>'
+        +'</div>'
+        +'<div style="display:none;padding:4px 0 8px 16px;">';
+      matching.forEach(function(mf){
+        aHtml+='<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);padding:2px 0;">'+mf.name+' — '+mf.house+'</div>';
+      });
+      aHtml+='</div></div>';
+    });
+    accordsEl.innerHTML=aHtml;
+  }
+  // Top notes
+  var notesEl=document.getElementById('ft-ana-notes');
+  if(notesEl){
+    var noteCount={};
+    friendOwned.forEach(function(f){
+      var _cd=getCommunityData(f.name,f.house)||{};
+      [_cd.topNotes,_cd.middleNotes,_cd.baseNotes].forEach(function(tier){
+        (tier||'').split(',').forEach(function(n){
+          var t=n.trim(); if(t) noteCount[t]=(noteCount[t]||0)+1;
+        });
+      });
+    });
+    var noteSorted=Object.entries(noteCount).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+    var nMax=noteSorted[0]?noteSorted[0][1]:1;
+    var nHtml='<div style="font-family:var(--serif);font-size:15px;color:var(--ink);margin-bottom:16px;">Top notes</div>';
+    noteSorted.forEach(function(e){
+      var pct=Math.round((e[1]/friendOwned.length)*100);
+      nHtml+='<div style="display:flex;align-items:center;gap:10px;padding:4px 0;">'
+        +'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);width:90px;text-transform:uppercase;letter-spacing:.06em;">'+noteDisplayName(e[0])+'</span>'
+        +'<div style="flex:1;height:14px;background:var(--b2);border-radius:4px;overflow:hidden;"><div style="height:100%;background:var(--blue);border-radius:4px;width:'+Math.round((e[1]/nMax)*100)+'%;"></div></div>'
+        +'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);min-width:36px;text-align:right;">'+pct+'%</span>'
+        +'</div>';
+    });
+    notesEl.innerHTML=nHtml;
+  }
 }
 
 function renderInCommon(){
@@ -4790,7 +4953,7 @@ document.getElementById('friendTabs').addEventListener('click',e=>{
   document.querySelectorAll('#page-friend .fpanel').forEach(p=>p.classList.remove('on'));
   tab.classList.add('on');
   const panel=document.getElementById(tab.dataset.panel);
-  if(panel){ panel.classList.add('on'); if(tab.dataset.panel==='ft-ana'){ var FC2=friendCompliments(),byF2={}; FC2.forEach(function(c){byF2[c.primaryFrag]=(byF2[c.primaryFrag]||0)+1;}); var fs2=Object.entries(byF2).sort(function(a,b){return b[1]-a[1];}).slice(0,5),mx2=fs2[0]?fs2[0][1]:1; bldChart('bc-f',fs2.map(function(e){return {l:e[0].split(' ')[0],v:e[1],h:Math.round((e[1]/mx2)*100)};})); }}
+  if(panel){ panel.classList.add('on'); if(tab.dataset.panel==='ft-ana') renderFriendAnalytics(); }
 });
 
 // ═══════════════════════════════════════════════════════
@@ -5217,6 +5380,9 @@ function resetAFModal(){
   document.getElementById('afNotes').value='';
   tiInit('afTop',''); tiInit('afMiddle',''); tiInit('afBase','');
   var priceEl=document.getElementById('afPrice'); if(priceEl) priceEl.value='';
+  // Re-show notes/accords sections (may have been hidden for DB fragrances)
+  var _noteEl=document.querySelector('#afMoreWrap .note-tiers'); if(_noteEl) _noteEl.parentNode.style.display='';
+  var _accEl=document.getElementById('afAccordPicker'); if(_accEl) _accEl.parentNode.style.display='';
 }
 
 function validateAfStep2(){
@@ -5264,6 +5430,10 @@ function afGoStep(n, skipValidation){
       if(d.purchasePrice){ var prEl=document.getElementById('afPrice'); if(prEl) prEl.value=d.purchasePrice; }
       if(d.personalNotes) document.getElementById('afNotes').value=d.personalNotes;
       tiInit('afTop',d.topNotes||''); tiInit('afMiddle',d.middleNotes||''); tiInit('afBase',d.baseNotes||'');
+      // Hide notes/accords sections when DB data already present (user shouldn't re-enter known data)
+      var _hasDbNotes=!!(d.topNotes||d.middleNotes||d.baseNotes);
+      var _noteEl=document.querySelector('#afMoreWrap .note-tiers'); if(_noteEl) _noteEl.parentNode.style.display=_hasDbNotes&&!editingFragId?'none':'';
+      var _accEl=document.getElementById('afAccordPicker'); if(_accEl) _accEl.parentNode.style.display=_hasDbNotes&&!editingFragId?'none':'';
     }
     validateAfStep2();
   } else {
@@ -5524,8 +5694,17 @@ function pickAF(name){
     var allNotes=[f.top||'',f.mid||'',f.base||''].filter(Boolean).join(', ')||f.notes||'';
     document.getElementById('mpN').textContent=f.n;
     document.getElementById('mpH').textContent=f.h.toUpperCase();
-    document.getElementById('mpP').textContent=f.p||'—';
+    document.getElementById('mpP').textContent=(f.p||'').replace(/~/g,'')||'—';
     document.getElementById('mpNotes').textContent=allNotes||'—';
+    // Auto-populate step 2 from DB data so user doesn't re-enter known info
+    var _concMap={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum'};
+    prefetchedData={
+      type:_concMap[f.conc]||f.conc||'',
+      topNotes:f.top||f.topNotes||'',
+      middleNotes:f.mid||f.middleNotes||'',
+      baseNotes:f.base||f.baseNotes||''
+    };
+    buildAccordPicker(f.accords||null);
   }
   document.getElementById('afPrev').style.display='block';
 }
@@ -6136,11 +6315,17 @@ function fragSearch(query, limit){
     return {frag:f,score:score};
   });
 
-  return scored
+  var top=scored
     .filter(function(x){return x.score>0;})
-    .sort(function(a,b){return b.score-a.score;})
-    .slice(0,limit||8)
-    .map(function(x){return x.frag;});
+    .sort(function(a,b){return b.score-a.score;});
+  // Dedup by name+house — keep first (highest-scored) entry
+  var seen={};
+  var deduped=[];
+  top.forEach(function(x){
+    var k=normStr(x.frag.n)+'|'+normStr(x.frag.h);
+    if(!seen[k]){ seen[k]=1; deduped.push(x); }
+  });
+  return deduped.slice(0,limit||8).map(function(x){return x.frag;});
 }
 
 /**
