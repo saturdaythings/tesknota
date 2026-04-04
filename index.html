@@ -878,7 +878,7 @@ input,select,textarea{font-size:16px;}
 
     <!-- COLLECTION -->
     <div class="page" id="page-collection">
-      <div class="sh"><h2>My Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="openAddFrag('CURRENT')">+ Add</button></div></div>
+      <div class="sh"><h2>My Collection</h2><div class="sh-r"><button class="btn btn-blue" onclick="openAddFrag('CURRENT')">Add to Collection</button></div></div>
       <div class="coll-filters" id="collFiltersRow1">
         <input type="text" id="collSearch" placeholder="Search fragrances..." style="flex:1;" />
         <select class="coll-sort-select" id="collSort" onchange="setCollSort(this.value)">
@@ -1060,14 +1060,24 @@ input,select,textarea{font-size:16px;}
             <option value="nameZA">Name Z–A</option>
             <option value="ratingHL">Rating High–Low</option>
             <option value="ratingLH">Rating Low–High</option>
+            <option value="priceHL">Price High–Low</option>
+            <option value="priceLH">Price Low–High</option>
+            <option value="recent">Recently Added</option>
             <option value="houseAZ">House A–Z</option>
             <option value="comps">Most Compliments</option>
+            <option value="dupes">Dupes first</option>
+          </select>
+          <select class="coll-sort-select" id="fCollStatus" onchange="renderFriendCollection()">
+            <option value="">All statuses</option>
+            <option value="CURRENT">Current</option>
+            <option value="PREVIOUSLY_OWNED">Previously Owned</option>
+            <option value="FINISHED">Finished</option>
           </select>
         </div>
         <div id="fCollCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
         <div class="mob-scroll-wrap">
         <table class="tbl"><thead><tr>
-          <th>Fragrance</th><th>Size</th><th>Rating</th><th>Added</th><th>Accords</th><th>Compliments</th>
+          <th>Fragrance</th><th>Size</th><th>Rating</th><th>Added</th><th>Accords</th><th>Compliments</th><th>Status</th>
         </tr></thead>
         <tbody id="ft-col-body"></tbody></table>
         <div class="mob-scroll-hint" style="display:none;font-family:var(--mono);font-size:9px;color:var(--ink3);text-align:center;letter-spacing:.1em;text-transform:uppercase;padding:4px 0;">&larr; scroll &rarr;</div>
@@ -1084,6 +1094,15 @@ input,select,textarea{font-size:16px;}
             <option value="Colleague / Client">Colleagues</option>
             <option value="Family">Family</option>
             <option value="Significant Other">S.O.</option>
+          </select>
+          <select class="coll-sort-select" id="fCompSort" onchange="renderFriendCompliments()">
+            <option value="dateDesc">Date — Newest</option>
+            <option value="dateAsc">Date — Oldest</option>
+            <option value="relation">Complimenter type</option>
+            <option value="houseAZ">House A–Z</option>
+            <option value="houseZA">House Z–A</option>
+            <option value="nameAZ">Name A–Z</option>
+            <option value="nameZA">Name Z–A</option>
           </select>
         </div>
         <div id="fCompCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
@@ -1104,7 +1123,7 @@ input,select,textarea{font-size:16px;}
         <div id="fWishCount" style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;"></div>
         <div class="mob-scroll-wrap">
         <table class="tbl"><thead><tr>
-          <th>Fragrance</th><th>Added</th><th>Avg Price</th>
+          <th>Fragrance</th><th>Added</th><th>Avg Price</th><th>Accords</th>
         </tr></thead>
         <tbody id="ft-wish-body"></tbody></table>
         <div class="mob-scroll-hint" style="display:none;font-family:var(--mono);font-size:9px;color:var(--ink3);text-align:center;letter-spacing:.1em;text-transform:uppercase;padding:4px 0;">&larr; scroll &rarr;</div>
@@ -3395,6 +3414,7 @@ function initCollectionSort() {
     'comps':    ['comps','compsAsc'],
     'size':     ['size','sizeDesc'],
     'added':    ['added','addedOld'],
+    'status':   ['status','statusDesc'],
   };
   thead.querySelectorAll('th[data-sort]').forEach(function(th) {
     th.style.cursor = 'pointer';
@@ -3422,9 +3442,10 @@ function updateSortArrows() {
     'ratingHL': 'ratingHL', 'ratingLH': 'ratingHL',
     'comps': 'comps', 'compsAsc': 'comps',
     'size': 'size', 'sizeDesc': 'size',
-    'added': 'added', 'addedOld': 'added'
+    'added': 'added', 'addedOld': 'added',
+    'status': 'status', 'statusDesc': 'status'
   };
-  var ascSorts = ['nameAZ', 'ratingHL', 'comps', 'size', 'added'];
+  var ascSorts = ['nameAZ', 'ratingHL', 'comps', 'size', 'added', 'status'];
   thead.querySelectorAll('th[data-sort]').forEach(function(th) {
     var arrow = th.querySelector('.sort-arrow');
     if (!arrow) return;
@@ -4430,8 +4451,7 @@ function renderAnalytics(){
         var relForFrag={}; MC.filter(function(c){return c.primaryFragId===fragId;}).forEach(function(c){relForFrag[c.relation]=(relForFrag[c.relation]||0)+1;});
         var topRelFrag=Object.keys(relForFrag).sort(function(a,b){return relForFrag[b]-relForFrag[a];})[0]||'';
         var _pcd=getCommunityData(frag.name,frag.house)||{}; var noteTip=_pcd.notes?_pcd.notes.split(',').slice(0,4).map(function(n){return n.trim();}).join(' · '):'';
-        var card=document.createElement('div'); card.className='perf-card';
-        (function(id){card.onclick=function(){openDetail(id);};})(fragId);
+        var card=document.createElement('div'); card.className='perf-card'; card.style.cursor='pointer';
         card.title=noteTip;
         var rank=document.createElement('div'); rank.className='perf-rank'; rank.textContent='#'+(idx+1);
         var nameWrap=document.createElement('div'); nameWrap.style.flex='1';
@@ -4447,6 +4467,17 @@ function renderAnalytics(){
           var sc2=sPerfCounts[fragId]||0;
           var sylv=document.createElement('div'); sylv.style.cssText='font-family:var(--mono);font-size:10px;color:var(--rose);width:40px;text-align:right;flex-shrink:0;margin-left:8px;'; sylv.textContent=sc2?'S: '+sc2:''; card.appendChild(sylv);
         }
+        // Expandable compliment details
+        var _perfDetail=document.createElement('div'); _perfDetail.style.cssText='display:none;width:100%;padding:8px 0 4px 28px;border-top:1px solid var(--b1);margin-top:8px;';
+        var _perfMN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        MC.filter(function(c){return c.primaryFragId===fragId;}).forEach(function(c){
+          var _pi=document.createElement('div'); _pi.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);padding:2px 0;cursor:pointer;';
+          _pi.textContent=(c.relation||'')+' · '+(_perfMN[parseInt(c.month)-1]||c.month)+' '+(c.year||'')+(c.notes?' — '+c.notes:'');
+          (function(cid){_pi.onclick=function(ev){ev.stopPropagation();editCompliment(cid);};})(c.id);
+          _perfDetail.appendChild(_pi);
+        });
+        card.appendChild(_perfDetail);
+        card.onclick=function(){_perfDetail.style.display=_perfDetail.style.display==='none'?'flex':'none';_perfDetail.style.flexDirection='column';};
         perfSection.appendChild(card);
       });
       // Sylvia's own top performers
@@ -4860,12 +4891,16 @@ function renderFriendCollection(){
   var frags=FF.filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
   var FC=friendCompliments();
   var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Status filter
+  var statusFilter=(document.getElementById('fCollStatus')||{}).value||'';
+  if(statusFilter) frags=frags.filter(function(f){return f.status===statusFilter;});
   // Search
   var q=(document.getElementById('fCollSearch')||{}).value;
   if(q&&q.length>=2){
     q=q.toLowerCase();
     frags=frags.filter(function(f){
-      return (f.name||'').toLowerCase().includes(q)||(f.house||'').toLowerCase().includes(q);
+      var _cd=getCommunityData(f.name,f.house)||{};
+      return (f.name||'').toLowerCase().includes(q)||(f.house||'').toLowerCase().includes(q)||(_cd.notes||'').toLowerCase().includes(q);
     });
   }
   // Sort
@@ -4876,36 +4911,39 @@ function renderFriendCollection(){
     if(sort==='nameZA') return b.name.localeCompare(a.name);
     if(sort==='ratingHL') return (parseRating(b.personalRating)||0)-(parseRating(a.personalRating)||0);
     if(sort==='ratingLH') return (parseRating(a.personalRating)||0)-(parseRating(b.personalRating)||0);
+    if(sort==='priceHL') return (parseFloat(b.purchasePrice)||0)-(parseFloat(a.purchasePrice)||0);
+    if(sort==='priceLH') return (parseFloat(a.purchasePrice)||0)-(parseFloat(b.purchasePrice)||0);
+    if(sort==='dupes') return (b.isDupe?1:0)-(a.isDupe?1:0);
     if(sort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
     if(sort==='comps') return (_compMap[b.fragranceId||b.id]||0)-(_compMap[a.fragranceId||a.id]||0);
+    if(sort==='recent') return parseInt((b.id||'0').replace(/\D/g,''))-parseInt((a.id||'0').replace(/\D/g,''));
     return a.name.localeCompare(b.name);
   });
   // Count
   var countEl=document.getElementById('fCollCount');
-  if(countEl) countEl.textContent=frags.length+' fragrance'+(frags.length!==1?'s':'');
+  if(countEl) countEl.textContent=frags.length+' fragrance'+(frags.length!==1?'s':'')+(statusFilter||q?' — filtered':'');
   // Table
-  var myOwnedSet=new Set(myFragrances().map(function(f){return f.name.toLowerCase();}));
   var body=document.getElementById('ft-col-body');
   if(!body) return;
   if(frags.length){
     body.innerHTML=frags.map(function(f){
-      var hasMyMatch=myOwnedSet.has(f.name.toLowerCase());
       var compCount=getCompCount(f.fragranceId||f.id, friend.id);
-      var _cd=getCommunityData(f.name,f.house)||{};
       var addedStr=f.purchaseDate||'';
       if(!addedStr&&f.createdAt){ var _d=new Date(f.createdAt); addedStr=_MN[_d.getMonth()]+' '+_d.getFullYear(); }
+      var dupeBadge=f.isDupe?'<span style="font-size:9px;background:var(--ink3);color:var(--off);border-radius:3px;padding:1px 4px;margin-left:4px;letter-spacing:.04em;vertical-align:middle;" title="Dupe of: '+f.dupeFor+'">DUPE</span>':'';
       var sizeStr=(f.sizes||[]).join(', ')||'—';
       return '<tr onclick="openDetail(\''+f.id+'\')">'
-        +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
+        +'<td><div class="tn">'+fragDisplayName(f)+dupeBadge+'</div><div class="th_">'+f.house+'</div></td>'
         +'<td class="tmono" style="font-size:11px;">'+sizeStr+'</td>'
         +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
         +'<td><span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">'+(addedStr||'—')+'</span></td>'
         +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(getAccords(f).join(', ')||'—')+'</td>'
         +'<td class="tmono">'+(compCount>0?compCount:'—')+'</td>'
+        +'<td><div class="ts '+STATUS_CSS[f.status]+'">'+STATUS_LABELS[f.status]+'</div></td>'
         +'</tr>';
     }).join('');
   } else {
-    body.innerHTML='<tr><td colspan="6"><div class="empty-state">No fragrances'+(q?' match your search':'')+'</div></td></tr>';
+    body.innerHTML='<tr><td colspan="7"><div class="empty-state">No fragrances'+(q?' match your search':'')+'</div></td></tr>';
   }
 }
 
@@ -4924,6 +4962,29 @@ function renderFriendCompliments(){
       return (c.primaryFrag||'').toLowerCase().includes(q)||(c.notes||'').toLowerCase().includes(q)||(c.relation||'').toLowerCase().includes(q);
     });
   }
+  // Sort
+  var _sv=(document.getElementById('fCompSort')||{}).value||'dateDesc';
+  function _fcFrag(c){ return FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;})||{}; }
+  function _mnum(m){var n=parseInt(m);return isNaN(n)?_MN.indexOf(m)+1:n;}
+  FC=FC.slice().sort(function(a,b){
+    if(_sv==='dateDesc'||_sv==='dateAsc'){
+      var da=(parseInt(a.year)||0)*100+_mnum(a.month);
+      var db=(parseInt(b.year)||0)*100+_mnum(b.month);
+      return _sv==='dateDesc'?db-da:da-db;
+    }
+    if(_sv==='relation') return (a.relation||'').localeCompare(b.relation||'');
+    if(_sv==='houseAZ'||_sv==='houseZA'){
+      var ha=(_fcFrag(a).house||a.primaryFrag||'').toLowerCase();
+      var hb=(_fcFrag(b).house||b.primaryFrag||'').toLowerCase();
+      return _sv==='houseAZ'?ha.localeCompare(hb):hb.localeCompare(ha);
+    }
+    if(_sv==='nameAZ'||_sv==='nameZA'){
+      var na=(_fcFrag(a).name||a.primaryFrag||'').toLowerCase();
+      var nb=(_fcFrag(b).name||b.primaryFrag||'').toLowerCase();
+      return _sv==='nameAZ'?na.localeCompare(nb):nb.localeCompare(na);
+    }
+    return 0;
+  });
   // Count
   var countEl=document.getElementById('fCompCount');
   if(countEl) countEl.textContent=FC.length+' compliment'+(FC.length!==1?'s':'');
@@ -4984,16 +5045,18 @@ function renderFriendWishlist(){
   if(frags.length){
     body.innerHTML=frags.map(function(f){
       var _cd=getCommunityData(f.name,f.house)||{};
+      var _accords=getAccords(f);
       var addedStr=f.purchaseDate||'';
       if(!addedStr&&f.createdAt){ var _d=new Date(f.createdAt); addedStr=_MN[_d.getMonth()]+' '+_d.getFullYear(); }
       return '<tr>'
         +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div></td>'
         +'<td><span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">'+(addedStr||'—')+'</span></td>'
         +'<td class="tmono">'+((_cd.avgPrice||'').replace(/~/g,'')||'—')+'</td>'
+        +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(_accords.slice(0,3).join(', ')||'—')+'</td>'
         +'</tr>';
     }).join('');
   } else {
-    body.innerHTML='<tr><td colspan="3" style="padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No wishlist items'+(q?' match':'')+'</td></tr>';
+    body.innerHTML='<tr><td colspan="4" style="padding:24px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No wishlist items'+(q?' match':'')+'</td></tr>';
   }
 }
 
@@ -5016,17 +5079,47 @@ function renderFriendAnalytics(){
       +'<div class="sbox"><div class="snum">'+spct+'%</div><div class="slbl">From Strangers</div></div>'
       +'<div class="sbox"><div class="snum">'+avgR+'</div><div class="slbl">Avg Rating</div></div>';
   }
-  // Top performers
+  // Top performers — interactive cards with expandable compliment details
   var title=document.getElementById('ft-ana-title'); if(title) title.textContent=friend.name+"'s top performers";
-  var maxV=fragSorted[0]?fragSorted[0][1]:1;
-  bldChart('bc-f',fragSorted.map(function(e){
-    var _fn=e[0]; var _cnt=e[1];
-    var _fObj=FF.find(function(f){return f.name===_fn;});
-    var _house=_fObj?_fObj.house:'';
-    var _rels={}; FC.filter(function(c){return c.primaryFrag===_fn;}).forEach(function(c){_rels[c.relation]=(_rels[c.relation]||0)+1;});
-    var _topRel=Object.entries(_rels).sort(function(a,b){return b[1]-a[1];}).map(function(r){return r[0]+': '+r[1];}).join(', ');
-    return {l:_fn.split(' ')[0],v:_cnt,h:Math.round((_cnt/maxV)*100),house:_house,details:_topRel};
-  }));
+  var perfEl=document.getElementById('bc-f');
+  if(perfEl){
+    perfEl.innerHTML='';
+    if(!fragSorted.length){
+      perfEl.innerHTML='<div style="padding:16px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliment data yet</div>';
+    } else {
+      // Use fragranceId-based lookup for proper linking
+      var byFragId={}; FC.forEach(function(c){if(c.primaryFragId)byFragId[c.primaryFragId]=(byFragId[c.primaryFragId]||0)+1;});
+      var fragIdSorted=Object.entries(byFragId).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+      fragIdSorted.forEach(function(entry,idx){
+        var fragId=entry[0]; var cnt=entry[1];
+        var frag=FF.find(function(f){return (f.fragranceId||f.id)===fragId;}); if(!frag) return;
+        var relForFrag={}; FC.filter(function(c){return c.primaryFragId===fragId;}).forEach(function(c){relForFrag[c.relation]=(relForFrag[c.relation]||0)+1;});
+        var topRelFrag=Object.keys(relForFrag).sort(function(a,b){return relForFrag[b]-relForFrag[a];})[0]||'';
+        var card=document.createElement('div'); card.className='perf-card'; card.style.cursor='pointer';
+        var rank=document.createElement('div'); rank.className='perf-rank'; rank.textContent='#'+(idx+1);
+        var nameWrap=document.createElement('div'); nameWrap.style.flex='1';
+        var pname=document.createElement('div'); pname.className='perf-name'; pname.innerHTML=fragDisplayName(frag);
+        var phouse=document.createElement('div'); phouse.className='perf-house'; phouse.textContent=frag.house;
+        nameWrap.appendChild(pname); nameWrap.appendChild(phouse);
+        var countWrap=document.createElement('div'); countWrap.style.cssText='text-align:right;flex-shrink:0;min-width:80px;';
+        var pcount=document.createElement('div'); pcount.className='perf-count'; pcount.textContent=cnt;
+        var pmeta=document.createElement('div'); pmeta.className='perf-meta'; pmeta.textContent=topRelFrag;
+        countWrap.appendChild(pcount); countWrap.appendChild(pmeta);
+        card.appendChild(rank); card.appendChild(nameWrap); card.appendChild(countWrap);
+        // Expandable compliment details
+        var detail=document.createElement('div'); detail.style.cssText='display:none;width:100%;padding:8px 0 4px 28px;border-top:1px solid var(--b1);margin-top:8px;';
+        var _MNC=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        FC.filter(function(c){return c.primaryFragId===fragId;}).forEach(function(c){
+          var item=document.createElement('div'); item.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);padding:2px 0;';
+          item.textContent=(c.relation||'')+' · '+(_MNC[parseInt(c.month)-1]||c.month)+' '+(c.year||'')+(c.notes?' — '+c.notes:'');
+          detail.appendChild(item);
+        });
+        card.appendChild(detail);
+        card.onclick=function(){detail.style.display=detail.style.display==='none'?'flex':'none';detail.style.flexDirection='column';};
+        perfEl.appendChild(card);
+      });
+    }
+  }
   var legend=document.getElementById('bc-f-legend'); if(legend) legend.textContent='';
   var insightsEl=document.getElementById('ft-ana-insights');
   if(insightsEl){
@@ -5034,7 +5127,7 @@ function renderFriendAnalytics(){
       insightsEl.innerHTML='<div class="ins"><div class="ins-t">'+fragSorted[0][0]+' is '+friend.name+"'s top performer</div>"
         +'<div class="ins-b">'+fragSorted[0][1]+' compliment'+(fragSorted[0][1]>1?'s':'')+' — '+Math.round((fragSorted[0][1]/ftotal)*100)+'% of total.</div></div>';
     } else {
-      insightsEl.innerHTML='<div style="padding:16px 0;font-family:var(--mono);font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;">No compliment data yet</div>';
+      insightsEl.innerHTML='';
     }
   }
   // Accord distribution
@@ -5081,11 +5174,22 @@ function renderFriendAnalytics(){
     var nHtml='<div style="font-family:var(--serif);font-size:15px;color:var(--ink);margin-bottom:16px;">Top notes</div>';
     noteSorted.forEach(function(e){
       var pct=Math.round((e[1]/friendOwned.length)*100);
-      nHtml+='<div style="display:flex;align-items:center;gap:10px;padding:4px 0;">'
+      var noteL=e[0].toLowerCase();
+      var matching=friendOwned.filter(function(f){
+        var _cd=getCommunityData(f.name,f.house)||{};
+        return [_cd.topNotes,_cd.middleNotes,_cd.baseNotes].some(function(ns){return ns&&ns.toLowerCase().indexOf(noteL)!==-1;});
+      });
+      nHtml+='<div style="margin-bottom:6px;">'
+        +'<div style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">'
         +'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);width:90px;text-transform:uppercase;letter-spacing:.06em;">'+noteDisplayName(e[0])+'</span>'
         +'<div style="flex:1;height:14px;background:var(--b2);border-radius:4px;overflow:hidden;"><div style="height:100%;background:var(--blue);border-radius:4px;width:'+Math.round((e[1]/nMax)*100)+'%;"></div></div>'
         +'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);min-width:36px;text-align:right;">'+pct+'%</span>'
-        +'</div>';
+        +'</div>'
+        +'<div style="display:none;padding:4px 0 8px 16px;">';
+      matching.forEach(function(mf){
+        nHtml+='<div style="font-family:var(--mono);font-size:10px;color:var(--ink3);padding:2px 0;">'+mf.name+' — '+mf.house+'</div>';
+      });
+      nHtml+='</div></div>';
     });
     notesEl.innerHTML=nHtml;
   }
