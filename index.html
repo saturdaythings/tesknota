@@ -175,7 +175,7 @@ input,select,textarea{font-size:16px;}
 .cr-f:hover{text-decoration:underline;}
 .cr-layer{font-family:var(--mono);font-size:9px;font-style:normal;color:#9A7040;letter-spacing:.04em;}
 .cr-m{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
-.cr-n{font-size:12px;color:var(--ink2);margin-top:4px;font-style:normal;}
+.cr-n{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:4px;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;letter-spacing:.04em;}
 .cr-d{font-family:var(--mono);font-size:11px;color:var(--ink3);white-space:nowrap;margin-left:16px;letter-spacing:.06em;flex-shrink:0;}
 .crow-acts{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;transition:opacity .12s;}
 .crow:hover .crow-acts{opacity:1;}
@@ -3960,12 +3960,12 @@ function renderCompliments(filter='all'){
   function crowHtml(c){
     var _pf=FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;});
     var _pname=_pf?fragDisplayName(_pf):c.primaryFrag;
-    var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':'';
-    var _notePrev=c.notes?'<div class="cr-n" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.65;font-size:11px;">'+c.notes+'</div>':'';
+    var _house=_pf?_pf.house:'';
+    var _notePrev=c.notes?'<div class="cr-n">'+c.notes+'</div>':'';
     return '<div class="crow" data-rel="'+c.relation+'" onclick="editCompliment(\''+c.id+'\')" style="cursor:pointer;" title="Click to edit">'
       +'<div style="flex:1;">'
-      +'<div class="cr-f" onclick="event.stopPropagation();openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'
-      +_house
+      +'<div class="tn" style="cursor:pointer;" onclick="event.stopPropagation();openDetail(\''+c.primaryFragId+'\')">'+_pname+(c.secondaryFrag?'<span class="cr-layer"> + '+c.secondaryFrag+'</span>':'')+'</div>'
+      +(_house?'<div class="th_">'+_house+'</div>':'')
       +'<div class="cr-m">'+c.relation+(c.gender?' · '+c.gender:'')+(renderComplimentLocation(c)!=='—'?' · '+renderComplimentLocation(c):'')+'</div>'
       +_notePrev
       +'</div>'
