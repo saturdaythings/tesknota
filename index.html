@@ -2763,6 +2763,14 @@ var typeBadgeText={
 function fragDisplayName(f){
   var t=f.type||'';
   var badge=typeBadgeText[t]||'';
+  if(!badge){
+    var _n=function(s){return(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');};
+    var _db=FRAG_DB.find(function(d){return _n(d.n)===_n(f.name)&&_n(d.h)===_n(f.house);});
+    if(_db&&_db.conc){
+      var concMap={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum'};
+      badge=typeBadgeText[concMap[_db.conc]||_db.conc]||'';
+    }
+  }
   if(!badge) return f.name;
   return f.name+'<span class="type-badge">'+badge+'</span>';
 }
@@ -2915,7 +2923,7 @@ function renderDashboard(){
         <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td><div class="tstars">${renderStars(f.personalRating)}</div></td>
-        <td class="tmono" style="font-size:11px;color:var(--ink3);">${getAccords(f).join(', ')}</td>
+        <td class="tmono" style="font-size:11px;color:var(--ink3);">${getAccords(f).join(', ')||'—'}</td>
         <td class="tmono">${getCompCount(f.id)>0?`<span onclick="event.stopPropagation();filterComplimentsByFrag('${f.id}')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;" title="View compliments for this fragrance">${getCompCount(f.id)}</span>`:'—'}</td>
         <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
       </tr>`).join('');
@@ -3545,7 +3553,7 @@ function renderCollection(){
         +'<td><div class="tn">'+fragDisplayName(f)+dupeBadge+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
         +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
         +'<td>'+addedTdHtml+'</td>'
-        +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+getAccords(f).join(', ')+'</td>'
+        +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(getAccords(f).join(', ')||'—')+'</td>'
         +'<td class="tmono">'+compCount+'</td>'
         +'<td class="tact">'
         +'<button class="btn-bare" onclick="event.stopPropagation();openAddComp(\''+f.id+'\')">+ Compliment</button>'
@@ -4975,8 +4983,6 @@ function saveFragrance(){
     type: document.getElementById('afType').value,
     sizes, personalRating: parseInt(document.getElementById('afRating').value)||null,
     statusRating: null,
-    personalLong: null,
-    personalSill: null,
     whereBought: document.getElementById('afWhere').value||null,
     purchasePrice: parseFloat(document.getElementById('afPrice').value)||null,
     purchaseDate: (month&&year)?month+' '+year:null,
