@@ -1921,6 +1921,34 @@ async function loadAllData(){
   var _newDbRows = [];
   var _seenDbKeys = {};
   var _normKey = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); };
+  // Build from FRAG_DB first — it's the source of truth for community data
+  var _concToType = {'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum','Extrait de Parfum':'Extrait de Parfum','Body Spray':'Body Spray','Oil':'Perfume Oil','Cologne':'Cologne','Perfume Concentré':'Perfume Concentré','Other':'Other'};
+  FRAG_DB.forEach(function(db){
+    var _key = _normKey(db.n)+'|'+_normKey(db.h)+'|'+_normKey(db.conc||'');
+    if(_seenDbKeys[_key]) return;
+    _seenDbKeys[_key] = true;
+    var _top = db.top||'';
+    var _mid = db.mid||'';
+    var _base = db.base||'';
+    if(!_top && !_mid && !_base && db.notes) _top = db.notes;
+    // Find a matching FRAGRANCES entry for the ID
+    var _nk = _normKey(db.n), _hk = _normKey(db.h);
+    var match = FRAGRANCES.find(function(f){ return _normKey(f.name)===_nk && _normKey(f.house)===_hk; });
+    _newDbRows.push({
+      fragranceId: match ? match.id : '',
+      fragranceName: db.n,
+      fragranceHouse: db.h,
+      fragranceType: _concToType[db.conc]||db.conc||'',
+      fragranceAccords: db.accords||'',
+      topNotes: _top,
+      middleNotes: _mid,
+      baseNotes: _base,
+      avgPrice: (db.p||'').replace(/~/g,'').trim(),
+      addedBy: 'system',
+      addedAt: match ? (match.createdAt||new Date().toISOString()) : new Date().toISOString(),
+    });
+  });
+  // Then add any FRAGRANCES entries not already covered by FRAG_DB
   FRAGRANCES.forEach(function(f){
     var nm = (f.name||'').trim();
     if(!nm || nm.toLowerCase().startsWith('qa ') || !f.id) return;
@@ -2055,7 +2083,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v19';
+const FRAG_DB_VERSION = '2026-04-03-v20';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
