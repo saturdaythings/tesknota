@@ -861,6 +861,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
       <table class="tbl" id="collTable"><thead id="collThead"><tr>
     <th data-sort="nameAZ">Fragrance <span class="sort-arrow"></span></th>
+    <th>Size</th>
     <th data-sort="ratingHL">Rating <span class="sort-arrow"></span></th>
     <th data-sort="added">Added <span class="sort-arrow"></span></th>
     <th>Accords</th>
@@ -3579,8 +3580,10 @@ function renderCollection(){
         ? '<span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">' + addedStr + '</span>'
         : '<span style="color:var(--ink3);">—</span>';
       var dupeBadge = f.isDupe ? '<span style="font-size:9px;background:var(--ink3);color:var(--off);border-radius:3px;padding:1px 4px;margin-left:4px;letter-spacing:.04em;vertical-align:middle;" title="Dupe of: '+f.dupeFor+'">DUPE</span>' : '';
+      var sizeStr=(f.sizes||[]).join(', ')||'—';
       return '<tr onclick="openDetail(\''+f.id+'\')">'
         +'<td><div class="tn">'+fragDisplayName(f)+dupeBadge+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
+        +'<td class="tmono" style="font-size:11px;">'+sizeStr+'</td>'
         +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
         +'<td>'+addedTdHtml+'</td>'
         +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(getAccords(f).join(', ')||'—')+'</td>'
@@ -3593,7 +3596,7 @@ function renderCollection(){
     }).join('');
   } else {
     var msg=hasActiveFilter()?'No fragrances match your filters.':'Your collection is empty \u2014 <span onclick="openAddFrag(\'CURRENT\')">add your first one</span>.';
-    document.getElementById('collBody').innerHTML='<tr><td colspan="6"><div class="empty-state">'+msg+'</div></td></tr>';
+    document.getElementById('collBody').innerHTML='<tr><td colspan="7"><div class="empty-state">'+msg+'</div></td></tr>';
   }
   updateCounts();
 }
