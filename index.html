@@ -955,6 +955,7 @@ input,select,textarea{font-size:16px;}
         </div>
         <div id="anaCollection" class="fpanel on">
           <div class="ana-section" id="anaCollectionSection"></div>
+          <div class="ana-section" id="anaTopNotesSection"></div>
           <div class="ana-section" id="anaNotesSection"></div>
           <div class="ana-section" id="anaNoteLibrarySection"></div>
         </div>
@@ -1952,6 +1953,12 @@ async function loadAllData(){
     if(f.name==='Miss Girl Extrait'&&f.house==='Oakcha'){ f.name='Miss Girl'; f.type='Extrait de Parfum'; }
     if(f.name==='Amber'&&f.house==='Nemat') f.name='Amber Perfume Oil';
     if(f.name==='Coco Vanille'&&f.house==='Comptoir Sud Pacifique'){ f.name='Vanille Coco'; f.type='Eau de Toilette'; }
+    // Fix type mismatches for Extrait-only fragrances written as EDP
+    if(f.name==='Beirut Baklava'&&f.house==='Kheir Fragrance House'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
+    if(f.name==='That Girl Viral Vanilla'&&f.house==='Oakcha'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
+    if(f.name==='Miss Girl'&&f.house==='Oakcha'&&f.type==='Eau de Parfum') f.type='Extrait de Parfum';
+    if(f.name==='Matcha Ice Cream'&&f.house==='Theodoros Kalotinis'&&f.type==='Extrait de Parfum') f.type='Eau de Parfum';
+    if(f.name==='Vanilla Skin'&&f.house==='Phlur'&&f.type==='Eau de Parfum') f.type='Body Spray';
     if(f.type!==origType||f.name!==origName) _migNeedsWrite=true;
   });
   if(_migNeedsWrite){
@@ -2131,7 +2138,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-04-v29';
+const FRAG_DB_VERSION = '2026-04-04-v30';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2513,7 +2520,7 @@ const FRAG_DB = [
   {n:'Jimmy Choo I Want Choo EDP',h:'Jimmy Choo',conc:'EDP',fam:'Floral Fruity',top:'Bergamot, Mandarin, Pineapple',mid:'Tuberose, Jasmine',base:'Sandalwood, Musk, Amber',r:'4.0',l:'6–8h',s:'Moderate',p:'~$95'},
   {n:'Angels\' Share',h:'By Kilian',conc:'EDP',fam:'Gourmand Oriental',top:'Cognac',mid:'Cinnamon, Tonka Bean, Oak, Hedione',base:'Vanilla, Praline, Sandalwood, Candied Almond',r:'4.5',l:'8–12h',s:'Strong',p:'~$275',accords:'Warm Spicy, Boozy, Sweet, Gourmand, Vanilla'},
   {n:'Apple Brandy on the Rocks',h:'By Kilian',conc:'EDP',fam:'Gourmand Fruity',top:'Cardamom, Bergamot',mid:'Apple, Rum, Brandy, Pineapple, Vanilla, Moss',base:'Cedar, Ambroxan',r:'4.3',l:'8–12h',s:'Moderate',p:'~$275',accords:'Fruity, Boozy, Sweet, Gourmand, Vanilla'},
-  {n:'Matcha Ice Cream',h:'Theodoros Kalotinis',conc:'Extrait de Parfum',fam:'Gourmand',top:'Lime, Matcha Tea',mid:'Ice Cream, Sugar, Waffle Cone',base:'Vanilla',r:'4.4',l:'8–12h',s:'Moderate',p:'~$160',accords:'Gourmand, Sweet, Green, Citrus, Creamy'},
+  {n:'Matcha Ice Cream',h:'Theodoros Kalotinis',conc:'EDP',fam:'Gourmand',top:'Lime, Matcha Tea',mid:'Ice Cream, Sugar, Waffle Cone',base:'Vanilla',r:'4.4',l:'8–12h',s:'Moderate',p:'~$160',accords:'Gourmand, Sweet, Green, Citrus, Creamy'},
   {n:'Crème Brûlée',h:'Theodoros Kalotinis',conc:'Extrait de Parfum',fam:'Gourmand',top:'Burnt Sugar',mid:'Coconut Milk',base:'Vanilla',r:'4.4',l:'8–12h',s:'Moderate',p:'~$165',accords:'Gourmand, Sweet, Vanilla, Coconut, Tropical, Lactonic'},
   {n:'Vanille Extreme',h:'Comptoir Sud Pacifique',conc:'EDT',fam:'Vanilla Milky',top:'Sugar Vanilla, Heliotrope',mid:'Vanilla Absolute, Milk',base:'Vanilla Absolute, Milk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$32',accords:'Vanilla, Sweet, Gourmand, Powdery, Milky'},
   {n:'Vanille Coco',h:'Comptoir Sud Pacifique',conc:'EDT',fam:'Vanilla Coconut',top:'Whipped Cream, Banana, Heliotrope',mid:'Vanilla, Coconut',base:'Vanille, Coconut',r:'4.0',l:'4–6h',s:'Moderate',p:'~$32',accords:'Vanilla, Coconut, Sweet, Gourmand, Milky'},
@@ -2643,7 +2650,7 @@ let FRAGRANCES = [
   {id:'k11',userId:'u1',name:'Eclair',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2026',purchasePrice:7.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k12',userId:'u1',name:'Bianco Latte',house:'Giardini di Toscana',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Nov 2023',purchasePrice:123.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k13',userId:'u1',name:'Crème Brûlée',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Sep 2024',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k14',userId:'u1',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Jul 2025',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k14',userId:'u1',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Jul 2025',purchasePrice:132.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k15',userId:'u1',name:'Beirut Baklava',house:'Kheir Fragrance House',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Scentsplit',purchaseDate:'Aug 2025',purchasePrice:144.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k16',userId:'u1',name:'Ruhe',house:'Oakcha',status:'CURRENT',sizes:['Decant'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:20.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k17',userId:'u1',name:'That Girl Viral Vanilla',house:'Oakcha',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Brand Direct',purchaseDate:'Jun 2024',purchasePrice:47.14,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
@@ -2686,7 +2693,7 @@ let FRAGRANCES = [
   {id:'s1',userId:'u2',name:'Lost Cherry',house:'Tom Ford',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Fruity, Sweet, Gourmand, Floral, Boozy',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s2',userId:'u2',name:'Yum Pistachio Gelato | 33',house:'Kayali Fragrances',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Nutty, Fruity, Vanilla',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s3',userId:'u2',name:'Angels\' Share',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Warm Spicy, Boozy, Sweet, Gourmand, Vanilla',createdAt:'2024-01-01T00:00:00.000Z'},
-  {id:'s4',userId:'u2',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Green, Citrus, Creamy',createdAt:'2024-01-01T00:00:00.000Z'},
+  {id:'s4',userId:'u2',name:'Matcha Ice Cream',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Green, Citrus, Creamy',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s5',userId:'u2',name:'Crème Brûlée',house:'Theodoros Kalotinis',status:'CURRENT',sizes:['Full Bottle'],type:'Extrait de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Vanilla, Coconut, Tropical, Lactonic',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s6',userId:'u2',name:'Eclair',house:'Lattafa',status:'CURRENT',sizes:['Full Bottle'],type:'Body Spray',purchaseDate:'',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s7',userId:'u2',name:'Lune Féline',house:'Atelier des Ors',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Oriental, Gourmand, Spicy',createdAt:'2024-01-01T00:00:00.000Z'},
@@ -4134,7 +4141,8 @@ function renderCompMap(containerId, mapData, dotColor){
   el.innerHTML=''; el.appendChild(gridEl);
 }
 
-function renderHouseList(containerId, frags){
+function renderHouseList(containerId, frags, barColor){
+  var _barColor=barColor||'var(--blue)';
   var counts={};
   frags.forEach(function(f){if(f.house)counts[f.house]=(counts[f.house]||0)+1;});
   var sorted=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];}).slice(0,10);
@@ -4147,7 +4155,7 @@ function renderHouseList(containerId, frags){
     var rn=document.createElement('div'); rn.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);width:16px;flex-shrink:0;'; rn.textContent=i+1;
     var hn=document.createElement('div'); hn.style.cssText='font-family:var(--body);font-size:13px;color:var(--ink);flex:1;'; hn.textContent=house;
     var bar=document.createElement('div'); bar.style.cssText='width:80px;height:4px;background:var(--off2);position:relative;flex-shrink:0;';
-    var fill=document.createElement('div'); fill.style.cssText='position:absolute;left:0;top:0;height:100%;background:var(--blue);width:'+pct+'%;'; bar.appendChild(fill);
+    var fill=document.createElement('div'); fill.style.cssText='position:absolute;left:0;top:0;height:100%;background:'+_barColor+';width:'+pct+'%;'; bar.appendChild(fill);
     var ct=document.createElement('div'); ct.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:24px;text-align:right;flex-shrink:0;'; ct.textContent=count;
     row.appendChild(rn); row.appendChild(hn); row.appendChild(bar); row.appendChild(ct); el.appendChild(row);
   });
@@ -4326,6 +4334,93 @@ function renderAnalytics(){
         row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); apList.appendChild(row);
       });
       accordPerfSection.appendChild(apList);
+      // Sylvia's accord performance comparison
+      if(showSylviaOverlay&&SC.length>=2){
+        var sApHd=document.createElement('div'); sApHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:16px;margin-bottom:4px;padding-top:12px;border-top:1px solid var(--b1);'; sApHd.textContent='Sylvia — Accord Performance'; accordPerfSection.appendChild(sApHd);
+        var sAccordComps={};
+        var sFF=friendFragrances();
+        SC.forEach(function(c){
+          var frag=sFF.find(function(f){return (f.fragranceId||f.id)===c.primaryFragId;});
+          if(!frag) return;
+          getAccords(frag).forEach(function(acc){ if(!acc) return; sAccordComps[acc]=(sAccordComps[acc]||0)+1; });
+        });
+        var sSortedAcc=Object.entries(sAccordComps).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+        var sMaxAP=sSortedAcc[0]?sSortedAcc[0][1]:1;
+        var sApList=document.createElement('div'); sApList.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px;';
+        sSortedAcc.forEach(function(entry){
+          var acc=entry[0]; var cnt=entry[1]; var pct=Math.round(cnt/sMaxAP*100);
+          var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+          var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:90px;flex-shrink:0;'; lbl.textContent=acc;
+          var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;';
+          var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--rose);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
+          var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:20px;text-align:right;flex-shrink:0;'; countEl.textContent=cnt;
+          row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); sApList.appendChild(row);
+        });
+        accordPerfSection.appendChild(sApList);
+      }
+    }
+  }
+
+  // TOP NOTES IN HIGHEST RATED
+  var topNotesSection=document.getElementById('anaTopNotesSection');
+  if(topNotesSection){
+    while(topNotesSection.firstChild) topNotesSection.removeChild(topNotesSection.firstChild);
+    var tnHdr=document.createElement('div'); tnHdr.className='ana-sh';
+    var tnH2=document.createElement('h2'); tnH2.textContent='Top notes in highest rated';
+    var tnSub=document.createElement('div'); tnSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:6px;'; tnSub.textContent='notes from your 4+ star fragrances';
+    tnHdr.appendChild(tnH2); tnHdr.appendChild(tnSub); topNotesSection.appendChild(tnHdr);
+    var rated4Plus=MFC.filter(function(f){return f.personalRating&&f.personalRating>=4;});
+    if(rated4Plus.length<2){
+      var tnEmpty=document.createElement('div'); tnEmpty.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:12px 0;'; tnEmpty.textContent='Rate 2+ fragrances 4 stars or above to unlock.'; topNotesSection.appendChild(tnEmpty);
+    } else {
+      var topNoteCounts={};
+      rated4Plus.forEach(function(f){
+        var _cd=getCommunityData(f.name,f.house)||{};
+        [_cd.topNotes,_cd.middleNotes,_cd.baseNotes].forEach(function(ns){
+          if(!ns) return;
+          ns.split(',').forEach(function(n){ var note=n.trim(); if(note.length>1) topNoteCounts[note]=(topNoteCounts[note]||0)+1; });
+        });
+      });
+      var sortedTN=Object.entries(topNoteCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,12);
+      var maxTN=sortedTN[0]?sortedTN[0][1]:1;
+      var tnList=document.createElement('div'); tnList.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px;';
+      sortedTN.forEach(function(entry){
+        var note=entry[0]; var cnt=entry[1]; var pct=Math.round(cnt/maxTN*100);
+        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+        var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:100px;flex-shrink:0;text-transform:capitalize;'; lbl.textContent=note;
+        var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;'; barWrap.title=cnt+' fragrance'+(cnt>1?'s':'');
+        var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--blue);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
+        var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:20px;text-align:right;flex-shrink:0;'; countEl.textContent=cnt;
+        row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); tnList.appendChild(row);
+      });
+      topNotesSection.appendChild(tnList);
+      if(showSylviaOverlay){
+        var sRated4Plus=SF.filter(function(f){return f.personalRating&&f.personalRating>=4;});
+        if(sRated4Plus.length>=2){
+          var sTnHd=document.createElement('div'); sTnHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:16px;margin-bottom:4px;padding-top:12px;border-top:1px solid var(--b1);'; sTnHd.textContent='Sylvia — Top Notes in Highest Rated'; topNotesSection.appendChild(sTnHd);
+          var sTopNoteCounts={};
+          sRated4Plus.forEach(function(f){
+            var _cd=getCommunityData(f.name,f.house)||{};
+            [_cd.topNotes,_cd.middleNotes,_cd.baseNotes].forEach(function(ns){
+              if(!ns) return;
+              ns.split(',').forEach(function(n){ var note=n.trim(); if(note.length>1) sTopNoteCounts[note]=(sTopNoteCounts[note]||0)+1; });
+            });
+          });
+          var sSortedTN=Object.entries(sTopNoteCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,12);
+          var sMaxTN=sSortedTN[0]?sSortedTN[0][1]:1;
+          var sTnList=document.createElement('div'); sTnList.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px;';
+          sSortedTN.forEach(function(entry){
+            var note=entry[0]; var cnt=entry[1]; var pct=Math.round(cnt/sMaxTN*100);
+            var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+            var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:100px;flex-shrink:0;text-transform:capitalize;'; lbl.textContent=note;
+            var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;';
+            var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--rose);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
+            var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:20px;text-align:right;flex-shrink:0;'; countEl.textContent=cnt;
+            row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); sTnList.appendChild(row);
+          });
+          topNotesSection.appendChild(sTnList);
+        }
+      }
     }
   }
 
@@ -4336,6 +4431,11 @@ function renderAnalytics(){
     var houseHd=document.createElement('div'); houseHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;'; houseHd.textContent='By House'; collSection.appendChild(houseHd);
     var houseListEl=document.createElement('div'); houseListEl.id='anaHouseList'; collSection.appendChild(houseListEl);
     renderHouseList('anaHouseList',MFC);
+    if(showSylviaOverlay&&SF.length){
+      var sylvHouseHd=document.createElement('div'); sylvHouseHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:16px;margin-bottom:6px;padding-top:12px;border-top:1px solid var(--b1);'; sylvHouseHd.textContent='Sylvia — By House'; collSection.appendChild(sylvHouseHd);
+      var sylvHouseEl=document.createElement('div'); sylvHouseEl.id='anaSylviaHouseList'; collSection.appendChild(sylvHouseEl);
+      renderHouseList('anaSylviaHouseList',SF,'var(--rose)');
+    }
     var typeHd=document.createElement('div'); typeHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:8px;'; typeHd.textContent='By Type'; collSection.appendChild(typeHd);
     var typeCounts={}; MFC.forEach(function(f){var t=f.type||'Unknown';typeCounts[t]=(typeCounts[t]||0)+1;});
     var totalMFC=MFC.length||1;
@@ -4356,35 +4456,48 @@ function renderAnalytics(){
       var t=entry[0]; var ct=entry[1]; var pct=ct/totalMFC*100;
       var seg=document.createElement('div'); seg.style.cssText='height:100%;background:'+(typeColors[t]||'var(--b2)')+';width:'+pct+'%;'; typeBar.appendChild(seg);
     });
-    // BY ACCORD
+    // BY ACCORD — horizontal bar chart
     var accordHd=document.createElement('div'); accordHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:8px;'; accordHd.textContent='By Accord'; collSection.appendChild(accordHd);
     var accordCounts=getCollectionAccordBreakdown();
     var totalAccordFrags=MFC.length||1;
-    var accordRow=document.createElement('div'); accordRow.style.cssText='display:flex;flex-wrap:wrap;gap:16px;margin-bottom:8px;'; collSection.appendChild(accordRow);
-    Object.entries(accordCounts).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry){
-      var ac=entry[0]; var ct=entry[1]; var pct=Math.round(ct/totalAccordFrags*100);
-      var seg=document.createElement('div'); seg.style.cssText='display:flex;flex-direction:column;';
-      var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:14px;font-weight:600;color:var(--blue);'; pctEl.textContent=pct+'%';
-      var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;'; lbl.textContent=ac;
-      seg.appendChild(pctEl); seg.appendChild(lbl); accordRow.appendChild(seg);
+    var sortedAccordColl=Object.entries(accordCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+    var maxAccordColl=sortedAccordColl[0]?sortedAccordColl[0][1]:1;
+    var accordBarList=document.createElement('div'); accordBarList.style.cssText='display:flex;flex-direction:column;gap:8px;';
+    sortedAccordColl.forEach(function(entry){
+      var ac=entry[0]; var ct=entry[1]; var pct=Math.round(ct/maxAccordColl*100); var pctOfTotal=Math.round(ct/totalAccordFrags*100);
+      var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+      var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:90px;flex-shrink:0;'; lbl.textContent=ac;
+      var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;position:relative;'; barWrap.title=pctOfTotal+'% of collection';
+      var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--blue);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
+      var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:36px;text-align:right;flex-shrink:0;'; countEl.textContent=pctOfTotal+'%';
+      row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); accordBarList.appendChild(row);
     });
+    collSection.appendChild(accordBarList);
     if(showSylviaOverlay&&SF.length){
       var sylvAccordHd=document.createElement('div'); sylvAccordHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:6px;padding-top:12px;border-top:1px solid var(--b1);'; sylvAccordHd.textContent='Sylvia — By Accord'; collSection.appendChild(sylvAccordHd);
       var sylvAccordCounts={};
       SF.forEach(function(f){getAccords(f).forEach(function(a){sylvAccordCounts[a]=(sylvAccordCounts[a]||0)+1;});});
       var totalSylvFrags=SF.length||1;
-      var sylvAccordRow=document.createElement('div'); sylvAccordRow.style.cssText='display:flex;flex-wrap:wrap;gap:16px;margin-bottom:8px;'; collSection.appendChild(sylvAccordRow);
-      Object.entries(sylvAccordCounts).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry){
-        var ac=entry[0]; var ct=entry[1]; var pct=Math.round(ct/totalSylvFrags*100);
-        var seg=document.createElement('div'); seg.style.cssText='display:flex;flex-direction:column;';
-        var pctEl=document.createElement('div'); pctEl.style.cssText='font-family:var(--serif);font-size:14px;font-weight:600;color:var(--rose);'; pctEl.textContent=pct+'%';
-        var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;'; lbl.textContent=ac;
-        seg.appendChild(pctEl); seg.appendChild(lbl); sylvAccordRow.appendChild(seg);
+      var sortedSylvAcc=Object.entries(sylvAccordCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+      var maxSylvAcc=sortedSylvAcc[0]?sortedSylvAcc[0][1]:1;
+      var sylvAccBarList=document.createElement('div'); sylvAccBarList.style.cssText='display:flex;flex-direction:column;gap:8px;';
+      sortedSylvAcc.forEach(function(entry){
+        var ac=entry[0]; var ct=entry[1]; var pct=Math.round(ct/maxSylvAcc*100); var pctOfTotal=Math.round(ct/totalSylvFrags*100);
+        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+        var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:90px;flex-shrink:0;'; lbl.textContent=ac;
+        var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;position:relative;'; barWrap.title=pctOfTotal+'% of collection';
+        var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--rose);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
+        var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:36px;text-align:right;flex-shrink:0;'; countEl.textContent=pctOfTotal+'%';
+        row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); sylvAccBarList.appendChild(row);
       });
+      collSection.appendChild(sylvAccBarList);
     }
     var allF=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
     var priceRecs=allF.map(function(f){
       var knownPrice=f.purchasePrice&&parseFloat(f.purchasePrice)>0;
+      // Free samples: Sample size with no known purchase price → exclude from spend
+      var isFree=(f.sizes||[]).indexOf('Sample')!==-1&&!knownPrice&&!(f.personalNotes||'').match(/\$/);
+      if(isFree) return null;
       var p=getPurchasePrice(f);
       return p!==null?{f:f,price:p,isEstimated:!knownPrice&&!(f.personalNotes||'').match(/\$/)}:null;
     }).filter(Boolean);
