@@ -81,8 +81,9 @@ fragranceAccords | topNotes | middleNotes | baseNotes |
 avgPrice | addedBy | addedAt
 ```
 - **Auto-generated** from `FRAG_DB` (hardcoded JS array in index.html) on each page load when `FRAG_DB_VERSION` changes
-- One row per `fragranceId` in `userFragrances` — the ID must match exactly
-- Community data (accords, notes, price) is looked up from `FRAG_DB` by normalized name+house
+- One row per FRAG_DB entry with **neutral IDs** (f1, f2, ...) based on array position — not tied to any user
+- `userFragrances` still uses per-user IDs (k1, s1, etc.) — these link to fragranceDB by name+house lookup, not by ID
+- Community data (accords, notes, price) comes directly from FRAG_DB — no lookup needed since rows ARE FRAG_DB entries
 - `resolveFragById()` reads this tab to resolve fragrance names from IDs
 
 ---
@@ -96,7 +97,7 @@ avgPrice | addedBy | addedAt
 1. **Read** all sheet tabs in parallel (users, userFragrances, userCompliments, fragranceDB)
 2. **Merge** sheet data into seed arrays — sheet data overrides seeds for matching IDs
 3. **Migrate** — fix known name variants in FRAGRANCES (e.g. "Eclair EDP" → "Eclair", "That Girl Viral Vanilla Extrait" → "That Girl Viral Vanilla")
-4. **Rebuild fragranceDB** — iterate FRAGRANCES, look up FRAG_DB by normalized name+house, write one row per fragranceId
+4. **Rebuild fragranceDB** — iterate FRAG_DB directly, assign neutral f-IDs (f1, f2, ...) by array position, write one row per unique fragrance
 5. **Version gate** — `FRAG_DB_VERSION` in code vs `fragDBSyncedVersion` in localStorage. Only rewrites sheet when they differ.
 6. **Error handling** — `writeSheet` checks `response.ok` and throws on HTTP errors. On failure, localStorage version is cleared so the next load retries.
 

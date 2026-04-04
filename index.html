@@ -861,7 +861,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
       </div>
       <table class="tbl" id="collTable"><thead id="collThead"><tr>
     <th data-sort="nameAZ">Fragrance <span class="sort-arrow"></span></th>
-    <th>Size</th>
+    <th data-sort="size">Size <span class="sort-arrow"></span></th>
     <th data-sort="ratingHL">Rating <span class="sort-arrow"></span></th>
     <th data-sort="added">Added <span class="sort-arrow"></span></th>
     <th>Accords</th>
@@ -3119,6 +3119,7 @@ function initCollectionSort() {
     'nameAZ':   ['nameAZ','nameZA'],
     'ratingHL': ['ratingHL','ratingLH'],
     'comps':    ['comps','compsAsc'],
+    'size':     ['size','sizeDesc'],
     'added':    ['added','addedOld'],
   };
   thead.querySelectorAll('th[data-sort]').forEach(function(th) {
@@ -3146,9 +3147,10 @@ function updateSortArrows() {
     'nameAZ': 'nameAZ', 'nameZA': 'nameAZ',
     'ratingHL': 'ratingHL', 'ratingLH': 'ratingHL',
     'comps': 'comps', 'compsAsc': 'comps',
+    'size': 'size', 'sizeDesc': 'size',
     'added': 'added', 'addedOld': 'added'
   };
-  var ascSorts = ['nameAZ', 'ratingHL', 'comps', 'added'];
+  var ascSorts = ['nameAZ', 'ratingHL', 'comps', 'size', 'added'];
   thead.querySelectorAll('th[data-sort]').forEach(function(th) {
     var arrow = th.querySelector('.sort-arrow');
     if (!arrow) return;
@@ -3554,6 +3556,7 @@ function renderCollection(){
     if(collSort==='dupes') return (b.isDupe?1:0)-(a.isDupe?1:0);
     if(collSort==='comps') return (_compMap[b.id]||0)-(_compMap[a.id]||0);
     if(collSort==='compsAsc') return (_compMap[a.id]||0)-(_compMap[b.id]||0);
+    if(collSort==='size'||collSort==='sizeDesc'){ var _so={'Sample':1,'Decant':2,'Travel':3,'Full Bottle':4}; var as=Math.max.apply(null,(a.sizes||[]).map(function(s){return _so[s]||0;}).concat([0])); var bs=Math.max.apply(null,(b.sizes||[]).map(function(s){return _so[s]||0;}).concat([0])); return collSort==='size'?as-bs:bs-as; }
     if(collSort==='recent') return parseInt((b.id||'0').replace(/\D/g,''))-parseInt((a.id||'0').replace(/\D/g,''));
     if(collSort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
     return a.name.localeCompare(b.name);
