@@ -39,7 +39,7 @@ input,select,textarea{font-size:16px;}
 .sb-sub{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:4px;}
 .sb-def{font-family:'Cormorant Garamond',var(--script);font-size:13px;font-style:italic;color:rgba(200,185,154,.92);line-height:1.45;margin-top:10px;letter-spacing:.01em;}
 .sb-body{flex:1;overflow-y:auto;padding:16px 0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
-.sb-label{font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:0 20px;margin-top:24px;margin-bottom:2px;pointer-events:none;cursor:default;opacity:.32;}
+.sb-label{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.55);padding:0 20px;margin-top:24px;margin-bottom:4px;pointer-events:none;cursor:default;}
 .sb-link{display:flex;align-items:center;justify-content:space-between;padding:5px 20px;cursor:pointer;color:rgba(255,255,255,.65);font-size:13px;letter-spacing:.02em;transition:all .14s;user-select:none;opacity:.65;}
 .sb-link:hover{color:var(--warm2);background:rgba(255,255,255,.05);opacity:1;}
 .sb-link.on{color:var(--warm2);background:rgba(200,185,154,.14);border-right:2px solid var(--warm);opacity:1;}
@@ -866,10 +866,10 @@ input,select,textarea{font-size:16px;}
       <div class="stats" id="dashStats"></div>
       <div id="dashOnboard" style="display:none"></div>
       <div id="dashUnidentified" style="display:none"></div>
-      <div class="sh"><h2>Recent Collection</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
+      <div class="sh"><h2>Recent Purchases</h2><div class="sh-r"><button class="btn btn-ghost btn-sm" onclick="goPage('collection')">View all</button></div></div>
       <div class="mob-scroll-wrap">
       <table class="tbl tbl-spaced" id="dashTable">
-        <thead><tr><th>Fragrance</th><th>Status</th><th>Rating</th><th>Accords</th><th>Compliments</th><th></th></tr></thead>
+        <thead><tr><th>Fragrance</th><th>Size</th><th>Rating</th><th>Added</th><th>Accords</th><th>Compliments</th><th>Status</th></tr></thead>
         <tbody id="dashBody"></tbody>
       </table>
       <div class="mob-scroll-hint" style="display:none;font-family:var(--mono);font-size:9px;color:var(--ink3);text-align:center;letter-spacing:.1em;text-transform:uppercase;padding:4px 0;">&larr; scroll &rarr;</div>
@@ -927,6 +927,7 @@ input,select,textarea{font-size:16px;}
     <th data-sort="added">Added <span class="sort-arrow"></span></th>
     <th>Accords</th>
     <th data-sort="comps">Compliments <span class="sort-arrow"></span></th>
+    <th data-sort="status">Status <span class="sort-arrow"></span></th>
     <th></th>
   </tr></thead>
       <tbody id="collBody"></tbody></table>
@@ -1617,7 +1618,7 @@ const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets/' + (window._
 const FRAG_HEADERS = [
   'userId','fragranceId','status','bottleSize','type',
   'boughtFrom','purchaseMonth','purchaseYear','purchasePrice',
-  'personalRating','notes','addedAt','isDupe','dupeFor'
+  'personalRating','notes','addedAt'
 ];
 
 const COMP_HEADERS = [
@@ -1801,6 +1802,8 @@ function fragToDbRow(f){
     middleNotes: _mid,
     baseNotes: _base,
     avgPrice: (cd.avgPrice||'').replace(/~/g,'').trim(),
+    isDupe: (cd.dupe||f.isDupe)?'TRUE':'FALSE',
+    dupeFor: cd.dupe||f.dupeFor||'',
     addedBy: 'system',
     addedAt: f.createdAt||new Date().toISOString(),
   };
@@ -1846,8 +1849,6 @@ function fragToRow(f){
     personalRating: f.personalRating||'',
     notes: (f.personalNotes||'').replace(/^Purchased for \$[\d.]+\.?\s*/,'').trim(),
     addedAt: f.createdAt||new Date().toISOString(),
-    isDupe: f.isDupe?'TRUE':'FALSE',
-    dupeFor: f.dupeFor||'',
   };
 }
 
@@ -1883,8 +1884,8 @@ function rowToFrag(row){
     purchaseMonth: row.purchaseMonth||null,
     purchaseYear: row.purchaseYear||null,
     purchasePrice: row.purchasePrice||null,
-    isDupe: (row.isDupe||'').toUpperCase()==='TRUE',
-    dupeFor: row.dupeFor||'',
+    isDupe: false,
+    dupeFor: '',
     personalNotes: (row.notes||'').replace(/^Purchased for \$[\d.]+\.?\s*/,'').trim(),
     createdAt: row.addedAt||'',
   };
@@ -2002,6 +2003,8 @@ async function loadAllData(){
     var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.fragranceId||f.id) && !_fragSeedIds.has(f.id);});
     FRAGRANCES=fragsRaw.map(rowToFrag).concat(fragSeed);
   }
+
+
   // Remove blank-name entries (QA test artifacts or orphaned Sheet rows with no resolved fragrance)
   FRAGRANCES = FRAGRANCES.filter(function(f){ return !!(f.name||'').trim(); });
   // Dedup FRAGRANCES by ID, then by name+house+user (catch same frag under different IDs/types)
@@ -2130,6 +2133,8 @@ async function loadAllData(){
       middleNotes: _mid,
       baseNotes: _base,
       avgPrice: (db.p||'').replace(/~/g,'').trim(),
+      isDupe: db.dupe?'TRUE':'FALSE',
+      dupeFor: db.dupe||'',
       addedBy: 'system',
       addedAt: new Date().toISOString(),
     });
@@ -2150,6 +2155,15 @@ async function loadAllData(){
   FRAGRANCES = FRAGRANCES.map(function(f){
     var resolved = resolveFragById(f.id);
     return (resolved.name && resolved.name !== f.name) ? Object.assign({}, f, {name: resolved.name, house: resolved.house}) : f;
+  });
+  // Populate isDupe/dupeFor from community data (fragranceDB) onto FRAGRANCES entries
+  FRAGRANCES.forEach(function(f){
+    var cf = COMMUNITY_FRAGS.find(function(c){ return (c.fragranceId||c.id)===(f.fragranceId||f.id); });
+    if(!cf) cf = COMMUNITY_FRAGS.find(function(c){ return normStr(c.name||c.fragranceName||'')===normStr(f.name) && normStr(c.house||c.fragranceHouse||'')===normStr(f.house); });
+    if(cf){
+      f.isDupe = (cf.isDupe||'').toUpperCase()==='TRUE';
+      f.dupeFor = cf.dupeFor||'';
+    }
   });
 
   // Clean up QA test entries that were added during automated testing
@@ -2259,7 +2273,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-04-v32';
+const FRAG_DB_VERSION = '2026-04-04-v33';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2649,9 +2663,9 @@ const FRAG_DB = [
   {n:'Eucalyptus 18',h:'Le Labo',conc:'EDP',fam:'Fresh Aromatic',top:'Eucalyptus, Mint, Bergamot',mid:'Rosemary, Cedarwood, Cypress',base:'Musk, Amber, Vetiver',r:'4.0',l:'4–6h',s:'Moderate',p:'~$250',accords:'Fresh, Aromatic, Woody'},
   {n:'Tonka 25',h:'Le Labo',conc:'EDP',fam:'Vanilla Woody',notes:'Musk, Atlas Cedar, Tonka Bean, Orange Blossom, Styrax, Vanilla',r:'4.3',l:'8–12h',s:'Moderate',p:'~$210',accords:'Vanilla, Sweet, Powdery, Woody, Musky'},
   {n:'Match Made in Heaven',h:'Sorce',conc:'Extrait de Parfum',fam:'Gourmand Green',notes:'Matcha, Vanilla Soft Serve, Cherry Blossom, Almond, Waffle Cone, Powdered Sugar, Creamy Sandalwood',r:'4.4',l:'8–12h',s:'Moderate',p:'~$140',accords:'Gourmand, Sweet, Green, Floral, Creamy'},
-  {n:'Affection',h:'Lattafa',conc:'EDP',fam:'Fruity Gourmand',top:'Pistachio, Hazelnut, Black Currant',mid:'Lactones, Jasmine, Lily of the Valley, Raspberry',base:'Lactones, Vanilla, Tonka Bean',r:'4.0',l:'6–8h',s:'Moderate',p:'~$22',accords:'Fruity, Lactonic, Gourmand, Sweet, Floral'},
-  {n:'Eclair',h:'Lattafa',conc:'EDP',fam:'Gourmand Sweet',top:'Caramel, Milk, Sugar',mid:'Honey, White Flowers',base:'Vanilla, Praline, Musk',r:'4.1',l:'6–8h',s:'Moderate',p:'~$37',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky'},
-  {n:'Eclair',h:'Lattafa',conc:'Body Spray',fam:'Gourmand Sweet',top:'Caramel, Sugar, Milk',mid:'Honey, White Flowers',base:'Vanilla, Praline, Musk',r:'3.8',l:'2–4h',s:'Soft',p:'~$8',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky'},
+  {n:'Affection',h:'Lattafa',conc:'EDP',fam:'Fruity Gourmand',top:'Pistachio, Hazelnut, Black Currant',mid:'Lactones, Jasmine, Lily of the Valley, Raspberry',base:'Lactones, Vanilla, Tonka Bean',r:'4.0',l:'6–8h',s:'Moderate',p:'~$22',accords:'Fruity, Lactonic, Gourmand, Sweet, Floral',dupe:'Yum Pistachio Gelato | 33'},
+  {n:'Eclair',h:'Lattafa',conc:'EDP',fam:'Gourmand Sweet',top:'Caramel, Milk, Sugar',mid:'Honey, White Flowers',base:'Vanilla, Praline, Musk',r:'4.1',l:'6–8h',s:'Moderate',p:'~$37',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky',dupe:'Bianco Latte'},
+  {n:'Eclair',h:'Lattafa',conc:'Body Spray',fam:'Gourmand Sweet',top:'Caramel, Sugar, Milk',mid:'Honey, White Flowers',base:'Vanilla, Praline, Musk',r:'3.8',l:'2–4h',s:'Soft',p:'~$8',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky',dupe:'Bianco Latte'},
   {n:'Yara',h:'Lattafa',conc:'Body Spray',fam:'Sweet Fruity',top:'Orchid, Heliotrope, Tangerine',mid:'Gourmand Accord, Tropical Fruits',base:'Vanilla, Musk, Sandalwood',r:'3.9',l:'2–4h',s:'Soft',p:'~$8',accords:'Sweet, Vanilla, Powdery, Tropical, Fruity'},
   {n:'Eclaire Pistache',h:'Lattafa',conc:'EDP',fam:'Gourmand Nutty',top:'Pistachio Spread Cream, Pistachio',mid:'Cacao, Whipped Cream, Coconut',base:'Vanilla, Milk, Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$30',accords:'Gourmand, Sweet, Nutty, Creamy, Lactonic'},
   {n:'Eau Duelle',h:'Diptyque',conc:'EDT',fam:'Oriental Vanilla',notes:'Bourbon Vanilla, Elemi Resin, Juniper, Cardamom, Pink Pepper, Olibanum, Black Tea, Bergamot, Ambergris, Musk, Saffron',r:'3.9',l:'4–6h',s:'Soft',p:'~$190',accords:'Vanilla, Spicy, Woody, Aromatic, Resinous'},
@@ -2660,10 +2674,10 @@ const FRAG_DB = [
   {n:'Vanilla Skin',h:'Phlur',conc:'Body Spray',fam:'Gourmand Vanilla',top:'Pink Pepper, Pink Apple, Sugar Crystals',mid:'Cashmere Wood, Jasmine, Lily',base:'Vanilla, Sandalwood, Agarwood, Benzoin',r:'4.1',l:'2–4h',s:'Soft',p:'~$39',accords:'Vanilla, Sweet, Woody, Warm Spicy, Gourmand'},
   {n:'Viva La Juicy',h:'Juicy Couture',conc:'EDP',fam:'Fruity Floral',top:'Wild Berries, Mandarin Orange',mid:'Gardenia, Honeysuckle, Jasmine',base:'Caramel, Praline, Vanilla, Amber, Sandalwood',r:'3.9',l:'6–8h',s:'Moderate',p:'~$111',accords:'Sweet, Fruity, Floral, Gourmand, Vanilla'},
   {n:'Bianco Latte',h:'Giardini di Toscana',conc:'EDP',fam:'Gourmand Caramel',top:'Caramel',mid:'Coumarin, Honey',base:'Vanilla, White Musk',r:'4.3',l:'8–12h',s:'Moderate',p:'~$160',accords:'Vanilla, Sweet, Gourmand, Caramel, Musky'},
-  {n:'Cocktail Intense',h:'Fragrance World',conc:'EDP',fam:'Gourmand Boozy',top:'Cognac, Cinnamon, Plum',mid:'Myrrh, Cashmeran, Iris',base:'Vanille, Tonka Bean, Sandalwood',r:'4.1',l:'8–12h',s:'Strong',p:'~$18',accords:'Gourmand, Boozy, Sweet, Warm Spicy, Woody'},
-  {n:'Kismet Angel',h:'Maison Alhambra',conc:'EDP',fam:'Gourmand Boozy',top:'Vanilla, Honeycomb, Amber',mid:'Cognac, Cinnamon, Caramel, Tonka Bean',base:'Dark Chocolate',r:'4.0',l:'6–8h',s:'Moderate',p:'~$22',accords:'Gourmand, Boozy, Sweet, Warm Spicy, Vanilla'},
-  {n:'Ruhe',h:'Oakcha',conc:'Extrait de Parfum',fam:'Woody Spicy',top:'Cardamom, Violet',mid:'Iris',base:'Sandalwood, Leather, Cedarwood',r:'4.1',l:'8–12h',s:'Moderate',p:'~$45',accords:'Woody, Warm Spicy, Powdery, Leather, Violet'},
-  {n:'That Girl Viral Vanilla',h:'Oakcha',conc:'Extrait de Parfum',fam:'Gourmand',top:'Caramel, Coconut Milk',mid:'Tonka Bean, Honey',base:'Vanilla, Marshmallow, White Musk, Amber',r:'4.2',l:'12–24h',s:'Strong',p:'~$47',accords:'Gourmand, Sweet, Vanilla, Caramel, Musky'},
+  {n:'Cocktail Intense',h:'Fragrance World',conc:'EDP',fam:'Gourmand Boozy',top:'Cognac, Cinnamon, Plum',mid:'Myrrh, Cashmeran, Iris',base:'Vanille, Tonka Bean, Sandalwood',r:'4.1',l:'8–12h',s:'Strong',p:'~$18',accords:'Gourmand, Boozy, Sweet, Warm Spicy, Woody',dupe:'Angels\' Share'},
+  {n:'Kismet Angel',h:'Maison Alhambra',conc:'EDP',fam:'Gourmand Boozy',top:'Vanilla, Honeycomb, Amber',mid:'Cognac, Cinnamon, Caramel, Tonka Bean',base:'Dark Chocolate',r:'4.0',l:'6–8h',s:'Moderate',p:'~$22',accords:'Gourmand, Boozy, Sweet, Warm Spicy, Vanilla',dupe:'Angels\' Share'},
+  {n:'Ruhe',h:'Oakcha',conc:'Extrait de Parfum',fam:'Woody Spicy',top:'Cardamom, Violet',mid:'Iris',base:'Sandalwood, Leather, Cedarwood',r:'4.1',l:'8–12h',s:'Moderate',p:'~$45',accords:'Woody, Warm Spicy, Powdery, Leather, Violet',dupe:'Santal 33'},
+  {n:'That Girl Viral Vanilla',h:'Oakcha',conc:'Extrait de Parfum',fam:'Gourmand',top:'Caramel, Coconut Milk',mid:'Tonka Bean, Honey',base:'Vanilla, Marshmallow, White Musk, Amber',r:'4.2',l:'12–24h',s:'Strong',p:'~$47',accords:'Gourmand, Sweet, Vanilla, Caramel, Musky',dupe:'Bianco Latte'},
   {n:'Miss Girl',h:'Oakcha',conc:'Extrait de Parfum',fam:'Amber Oriental',top:'Black Cherry, Saffron, Bitter Almond',mid:'Jasmine Sambac, Turkish Rose, Tonka Bean, Tobacco',base:'Amber, Moss, Vanilla, Caramel, Sandalwood',r:'4.2',l:'12–24h',s:'Strong',p:'~$40',accords:'Cherry, Warm Spicy, Amber, Sweet, Vanilla'},
   {n:'Amber Musk',h:'Aerin',conc:'EDP',fam:'Musky Floral',notes:'Ambrox, Coconut Water, Rose Centifolia, Muguet, Benzoin, Sandalwood, Musk',r:'3.9',l:'4–6h',s:'Soft',p:'~$145',accords:'Musky, Amber, Floral, Powdery, Woody'},
   {n:'Pure Vanilla',h:'Lavanila',conc:'EDP',fam:'Vanilla Powdery',notes:'Madagascar Vanilla, Tonka Bean, Heliotrope',r:'3.9',l:'4–6h',s:'Soft',p:'~$38',accords:'Vanilla, Sweet, Powdery, Musky, Woody'},
@@ -2679,7 +2693,7 @@ const FRAG_DB = [
   {n:'Perle Sensuelle',h:'Pardon My French & Co',conc:'EDP',fam:'Fresh Musky',notes:'Bergamot, Lavender, Musk',r:'3.9',l:'4–6h',s:'Moderate',p:'~$30',accords:'Fresh, Aromatic, Musky, Floral, Clean'},
   {n:'Beirut Baklava',h:'Kheir Fragrance House',conc:'Extrait de Parfum',fam:'Gourmand Oriental',top:'Orange Blossom, Bergamot, Cardamom',mid:'Vanilla, Baklava, Pistachio, Whipped Cream, Heliotrope',base:'Vanilla, Honey, Tonka Bean, Leather, Cedarwood, Guaiac Wood, Amber, White Musk',r:'4.2',l:'4–6h',s:'Moderate',p:'~$144',accords:'Gourmand, Sweet, Vanilla, Floral, Warm Spicy'},
   {n:'Badee Al Oud Sublime',h:'Lattafa',conc:'EDP',fam:'Fruity Floral',top:'Apple, Litchi, Rose',mid:'Plum, Jasmine',base:'Moss, Vanilla, Patchouli',r:'4.0',l:'8–12h',s:'Strong',p:'~$22',accords:'Fruity, Sweet, Woody, Floral, Musky'},
-  {n:'Khamrah',h:'Lattafa',conc:'EDP',fam:'Gourmand Spicy',top:'Cinnamon, Nutmeg, Bergamot',mid:'Dates, Praline, Tuberose, Mahonial',base:'Vanilla, Tonka Bean, Amberwood, Myrrh, Benzoin, Akigalawood',r:'4.3',l:'12–24h',s:'Strong',p:'~$41',accords:'Gourmand, Sweet, Warm Spicy, Vanilla, Boozy'},
+  {n:'Khamrah',h:'Lattafa',conc:'EDP',fam:'Gourmand Spicy',top:'Cinnamon, Nutmeg, Bergamot',mid:'Dates, Praline, Tuberose, Mahonial',base:'Vanilla, Tonka Bean, Amberwood, Myrrh, Benzoin, Akigalawood',r:'4.3',l:'12–24h',s:'Strong',p:'~$41',accords:'Gourmand, Sweet, Warm Spicy, Vanilla, Boozy',dupe:'Angels\' Share'},
   {n:'J\'Adore',h:'Dior',conc:'EDP',fam:'Floral',top:'Ylang-Ylang, Peach, Bergamot, Mandarin',mid:'Rose, Jasmine, Violet, Lily, Muguet',base:'Sandalwood, Musk, Cedar, Vanilla',r:'4.4',l:'6–8h',s:'Moderate',p:'~$140',accords:'Floral, Fresh, Powdery'},
   {n:'Inspiration',h:'Lacoste',conc:'EDP',fam:'Fresh Floral',top:'Bergamot, Lemon, Green Tea',mid:'Rose, Jasmine, Lily of the Valley',base:'Cedar, Sandalwood, Musk, White Musk',r:'4.0',l:'4–6h',s:'Moderate',p:'~$55',accords:'Fresh, Floral, Woody'},
   {n:'Vanille Café',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Gourmand',top:'Coffee, Vanilla, Sandalwood',mid:'Tonka Bean, Musk, Caramel',base:'Sandalwood, Vanilla, Amber',r:'4.1',l:'6–8h',s:'Moderate',p:'~$85',accords:'Gourmand, Boozy, Vanilla'},
@@ -2751,7 +2765,7 @@ let COMMUNITY_FRAGS = [];
 const COMMUNITY_FRAG_HEADERS = [
   'fragranceId','fragranceName','fragranceHouse','fragranceType',
   'fragranceAccords','topNotes','middleNotes','baseNotes',
-  'avgPrice',
+  'avgPrice','isDupe','dupeFor',
   'addedBy','addedAt'
 ];
 
@@ -3199,23 +3213,57 @@ function renderDashboard(){
     <div class="sbox"><div class="snum">${avgRating()}</div><div class="slbl">Avg Rating</div></div>
     <div class="sbox"><div class="snum">${finished.length}</div><div class="slbl">Finished</div></div>
     <div class="sbox"><div class="snum">${dupes.length}</div><div class="slbl">Dupes</div></div>`;
-  // Recent 4 CURRENT fragrances — sorted by most recent purchase date
+  // Recent 3 purchases — sorted by most recent purchase date
   var _MONTH_NUM={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
   function _parsePurchase(d){if(!d)return 0;var p=d.split(' ');return (parseInt(p[1])||0)*100+(_MONTH_NUM[p[0]]||0);}
-  const recent = MF.filter(f=>f.status==='CURRENT').sort((a,b)=>_parsePurchase(b.purchaseDate)-_parsePurchase(a.purchaseDate)).slice(0,4);
-  if(recent.length){
-    document.getElementById('dashBody').innerHTML = recent.map(f=>`
-      <tr onclick="openDetail('${f.id}')">
-        <td><div class="tn">${fragDisplayName(f)}</div><div class="th_">${f.house}</div></td>
-        <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
-        <td><div class="tstars">${renderStars(f.personalRating)}</div></td>
-        <td class="tmono" style="font-size:11px;color:var(--ink3);">${getAccords(f).join(', ')||'—'}</td>
-        <td class="tmono">${getCompCount(f.fragranceId||f.id)>0?`<span onclick="event.stopPropagation();filterComplimentsByFrag('${f.id}')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;" title="View compliments for this fragrance">${getCompCount(f.fragranceId||f.id)}</span>`:'—'}</td>
-        <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
-      </tr>`).join('');
-  } else {
-    document.getElementById('dashBody').innerHTML = '<tr><td colspan="6"><div class="empty-state">Your collection is empty.</div></td></tr>';
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function _dashRow(f){
+    var compCount=getCompCount(f.fragranceId||f.id);
+    var addedStr=f.purchaseDate||'';
+    if(!addedStr&&f.createdAt){var d=new Date(f.createdAt);addedStr=months[d.getMonth()]+' '+d.getFullYear();}
+    var dupeBadge=f.isDupe?'<span style="font-size:9px;background:var(--ink3);color:var(--off);border-radius:3px;padding:1px 4px;margin-left:4px;letter-spacing:.04em;vertical-align:middle;" title="Dupe of: '+f.dupeFor+'">DUPE</span>':'';
+    var sizeStr=(f.sizes||[]).join(', ')||'—';
+    return '<tr onclick="openDetail(\''+f.id+'\')">'
+      +'<td><div class="tn">'+fragDisplayName(f)+dupeBadge+'</div><div class="th_">'+f.house+'</div></td>'
+      +'<td class="tmono" style="font-size:11px;">'+sizeStr+'</td>'
+      +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
+      +'<td><span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">'+(addedStr||'—')+'</span></td>'
+      +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(getAccords(f).join(', ')||'—')+'</td>'
+      +'<td class="tmono">'+(compCount>0?'<span onclick="event.stopPropagation();filterComplimentsByFrag(\''+f.id+'\')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;">'+compCount+'</span>':'—')+'</td>'
+      +'<td><div class="ts '+STATUS_CSS[f.status]+'">'+STATUS_LABELS[f.status]+'</div></td>'
+      +'</tr>';
   }
+  const recent = MF.filter(f=>f.status==='CURRENT').sort((a,b)=>_parsePurchase(b.purchaseDate)-_parsePurchase(a.purchaseDate)).slice(0,3);
+  var html='';
+  if(recent.length){
+    html=recent.map(_dashRow).join('');
+  } else {
+    html='<tr><td colspan="7"><div class="empty-state">Your collection is empty.</div></td></tr>';
+  }
+  // Sylvia's recent purchases
+  var friend=getFriend();
+  if(friend){
+    var FF=friendFragrances();
+    var friendRecent=FF.filter(function(f){return f.status==='CURRENT';}).sort(function(a,b){return _parsePurchase(b.purchaseDate)-_parsePurchase(a.purchaseDate);}).slice(0,3);
+    if(friendRecent.length){
+      html+='<tr><td colspan="7" style="padding:12px 14px 6px;border-bottom:1px solid var(--b2);"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);">'+friend.name+'\'s Recent</span></td></tr>';
+      html+=friendRecent.map(function(f){
+        var addedStr=f.purchaseDate||'';
+        if(!addedStr&&f.createdAt){var d=new Date(f.createdAt);addedStr=months[d.getMonth()]+' '+d.getFullYear();}
+        var sizeStr=(f.sizes||[]).join(', ')||'—';
+        return '<tr onclick="openDetail(\''+f.id+'\')" style="opacity:.7;">'
+          +'<td><div class="tn">'+fragDisplayName(f)+'</div><div class="th_">'+f.house+'</div></td>'
+          +'<td class="tmono" style="font-size:11px;">'+sizeStr+'</td>'
+          +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
+          +'<td><span style="font-family:var(--mono);font-size:11px;color:var(--ink3);">'+(addedStr||'—')+'</span></td>'
+          +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(getAccords(f).join(', ')||'—')+'</td>'
+          +'<td class="tmono">—</td>'
+          +'<td><div class="ts '+STATUS_CSS[f.status]+'">'+STATUS_LABELS[f.status]+'</div></td>'
+          +'</tr>';
+      }).join('');
+    }
+  }
+  document.getElementById('dashBody').innerHTML=html;
 }
 
 function avgRating(){
@@ -3780,6 +3828,8 @@ function renderCollection(){
     if(collSort==='priceHL') return (parseFloat(b.purchasePrice)||0)-(parseFloat(a.purchasePrice)||0);
     if(collSort==='priceLH') return (parseFloat(a.purchasePrice)||0)-(parseFloat(b.purchasePrice)||0);
     if(collSort==='dupes') return (b.isDupe?1:0)-(a.isDupe?1:0);
+    if(collSort==='status') return (STATUS_LABELS[a.status]||'').localeCompare(STATUS_LABELS[b.status]||'');
+    if(collSort==='statusDesc') return (STATUS_LABELS[b.status]||'').localeCompare(STATUS_LABELS[a.status]||'');
     if(collSort==='comps') return (_compMap[b.fragranceId]||0)-(_compMap[a.fragranceId]||0);
     if(collSort==='compsAsc') return (_compMap[a.fragranceId]||0)-(_compMap[b.fragranceId]||0);
     if(collSort==='size'||collSort==='sizeDesc'){ var _so={'Sample':1,'Decant':2,'Travel':3,'Full Bottle':4}; var as=Math.max.apply(null,(a.sizes||[]).map(function(s){return _so[s]||0;}).concat([0])); var bs=Math.max.apply(null,(b.sizes||[]).map(function(s){return _so[s]||0;}).concat([0])); return collSort==='size'?as-bs:bs-as; }
@@ -3837,12 +3887,13 @@ function renderCollection(){
       var dupeBadge = f.isDupe ? '<span style="font-size:9px;background:var(--ink3);color:var(--off);border-radius:3px;padding:1px 4px;margin-left:4px;letter-spacing:.04em;vertical-align:middle;" title="Dupe of: '+f.dupeFor+'">DUPE</span>' : '';
       var sizeStr=(f.sizes||[]).join(', ')||'—';
       return '<tr onclick="openDetail(\''+f.id+'\')">'
-        +'<td><div class="tn">'+fragDisplayName(f)+dupeBadge+'</div><div class="th_">'+f.house+'</div>'+(f.status!=='CURRENT'?statusChip(f.status):'')+'</td>'
+        +'<td><div class="tn">'+fragDisplayName(f)+dupeBadge+'</div><div class="th_">'+f.house+'</div></td>'
         +'<td class="tmono" style="font-size:11px;">'+sizeStr+'</td>'
         +'<td><div class="tstars">'+renderStars(f.personalRating)+'</div></td>'
         +'<td>'+addedTdHtml+'</td>'
         +'<td class="tmono" style="font-size:11px;color:var(--ink3);">'+(getAccords(f).join(', ')||'—')+'</td>'
         +'<td class="tmono">'+(compCount>0?'<span onclick="event.stopPropagation();filterComplimentsByFrag(\''+f.id+'\')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;">'+compCount+'</span>':'—')+'</td>'
+        +'<td><div class="ts '+STATUS_CSS[f.status]+'">'+STATUS_LABELS[f.status]+'</div></td>'
         +'<td class="tact">'
         +'<button class="btn-bare" onclick="event.stopPropagation();openAddComp(\''+f.id+'\')">+ Compliment</button>'
         +(hasFriendMatch?'<button class="btn-bare" style="color:var(--warm);" onclick="event.stopPropagation();openCompare(\''+f.name+'\',\''+f.id+'\')" title="Compare with friend">Compare</button>':'')
@@ -3851,7 +3902,7 @@ function renderCollection(){
     }).join('');
   } else {
     var msg=hasActiveFilter()?'No fragrances match your filters.':'Your collection is empty \u2014 <span onclick="openAddFrag(\'CURRENT\')">add your first one</span>.';
-    document.getElementById('collBody').innerHTML='<tr><td colspan="7"><div class="empty-state">'+msg+'</div></td></tr>';
+    document.getElementById('collBody').innerHTML='<tr><td colspan="8"><div class="empty-state">'+msg+'</div></td></tr>';
   }
   updateCounts();
 }
@@ -5687,12 +5738,24 @@ function saveFragrance(){
     accords: _accords,
   };
   if(combinedNotes) data.notes = combinedNotes;
+  // Sync dupe info to fragranceDB (community data shared by both users)
+  function _syncDupeToDb(fragName, fragHouse, isDupeVal, dupeForVal){
+    var cf=COMMUNITY_FRAGS.find(function(c){return normStr(c.name||c.fragranceName||'')===normStr(fragName)&&normStr(c.house||c.fragranceHouse||'')===normStr(fragHouse);});
+    if(cf){
+      cf.isDupe=isDupeVal?'TRUE':'FALSE';
+      cf.dupeFor=isDupeVal?dupeForVal:'';
+      var rows=COMMUNITY_FRAGS.map(function(c){return {fragranceId:c.fragranceId||c.id,fragranceName:c.fragranceName||c.name,fragranceHouse:c.fragranceHouse||c.house,fragranceType:c.fragranceType||'',fragranceAccords:c.fragranceAccords||'',topNotes:c.topNotes||'',middleNotes:c.middleNotes||'',baseNotes:c.baseNotes||'',avgPrice:c.avgPrice||'',isDupe:c.isDupe||'FALSE',dupeFor:c.dupeFor||'',addedBy:c.addedBy||'system',addedAt:c.addedAt||''};});
+      writeSheet('fragranceDB',rows,COMMUNITY_FRAG_HEADERS).catch(function(e){console.error('fragranceDB dupe sync failed',e);});
+    }
+  }
+
   if(editingFragId){
     const idx = FRAGRANCES.findIndex(f=>f.id===editingFragId);
     if(idx>=0){
       var oldStatus=FRAGRANCES[idx].status;
       FRAGRANCES[idx]={...FRAGRANCES[idx],...data};
       writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+      _syncDupeToDb(data.name||FRAGRANCES[idx].name, FRAGRANCES[idx].house, data.isDupe, data.dupeFor);
       var wasWishlist=oldStatus==='WANT_TO_BUY'||oldStatus==='WANT_TO_SMELL';
       toast(wasWishlist&&data.status==='CURRENT'?'Moved to your collection':'Fragrance updated');
     }
