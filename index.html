@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>tęsknota</title>
 <!-- Credentials injected at build time by build.js -->
 <script src="config.js"></script>
@@ -23,10 +23,13 @@
   --body:'Jost',system-ui,sans-serif;
   --sw:216px;--th:56px;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 @keyframes spin{to{transform:rotate(360deg);}}
 html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;}
-.shell{display:flex;height:100vh;overflow:hidden;}
+/* iOS: 16px min on inputs/selects to prevent auto-zoom */
+input,select,textarea{font-size:16px;}
+.shell{display:flex;height:100dvh;overflow:hidden;}
+@supports not (height:100dvh){.shell{height:100vh;}}
 
 /* SIDEBAR */
 .sidebar{width:var(--sw);flex-shrink:0;background:var(--blue3);display:flex;flex-direction:column;z-index:200;transition:transform .28s ease;}
@@ -83,7 +86,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.content{flex:1;overflow-y:auto;padding:26px;}
+.content{flex:1;overflow-y:auto;padding:26px;padding-bottom:calc(26px + env(safe-area-inset-bottom,0px));}
 .page{display:none;}.page.on{display:block;}
 
 /* STATS */
@@ -95,7 +98,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 
 /* SECTION HEADER */
 .sh{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--b2);padding-bottom:9px;margin-bottom:16px;}
-.sh h2{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--blue);font-style:italic;}
+.sh h2{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--blue);font-style:normal;}
 .sh-r{display:flex;gap:8px;align-items:center;}
 
 /* FILTER BAR */
@@ -168,11 +171,11 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 /* COMPLIMENT ROWS */
 .crow{display:flex;justify-content:space-between;align-items:flex-start;padding:15px 0;border-bottom:1px solid var(--b1);position:relative;}
 .crow:hover{background:var(--blue4);padding-left:8px;padding-right:8px;margin:0 -8px;}
-.cr-f{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--blue);margin-bottom:3px;cursor:pointer;}
+.cr-f{font-family:var(--body);font-size:14px;font-style:normal;color:var(--blue);margin-bottom:3px;cursor:pointer;font-weight:500;}
 .cr-f:hover{text-decoration:underline;}
 .cr-layer{font-family:var(--mono);font-size:9px;font-style:normal;color:#9A7040;letter-spacing:.04em;}
 .cr-m{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;}
-.cr-n{font-size:12px;color:var(--ink2);margin-top:4px;font-style:italic;}
+.cr-n{font-size:12px;color:var(--ink2);margin-top:4px;font-style:normal;}
 .cr-d{font-family:var(--mono);font-size:11px;color:var(--ink3);white-space:nowrap;margin-left:16px;letter-spacing:.06em;flex-shrink:0;}
 .crow-acts{display:none;position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;gap:4px;opacity:0;transition:opacity .12s;}
 .crow:hover .crow-acts{opacity:1;}
@@ -202,8 +205,9 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .ana-pill-num{font-family:var(--serif);font-size:26px;color:var(--blue);line-height:1;}
 .ana-pill-lbl{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase;margin-top:3px;}
 .ana-section{margin-bottom:32px;}
-.ana-sh{display:flex;align-items:baseline;border-bottom:1px solid var(--b2);padding-bottom:9px;margin-bottom:14px;}
-.ana-sh h2{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--blue);font-style:italic;}
+.ana-sh{display:flex;align-items:baseline;border-bottom:1px solid var(--b2);padding-bottom:9px;margin-bottom:14px;margin-top:28px;}
+.ana-sh:first-child{margin-top:0;}
+.ana-sh h2{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--blue);font-style:normal;}
 .comp-map-grid{display:grid;grid-template-columns:80px repeat(6,1fr);gap:1px;background:var(--b2);margin-bottom:8px;}
 .comp-map-cell{background:var(--off);height:52px;display:flex;align-items:center;justify-content:center;position:relative;}
 .comp-map-dot{border-radius:50%;transition:transform .14s;}
@@ -211,7 +215,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .perf-card{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .12s;gap:12px;}
 .perf-card:hover{background:var(--blue4);}
 .perf-rank{font-family:var(--mono);font-size:11px;color:var(--ink3);width:24px;flex-shrink:0;}
-.perf-name{font-family:var(--serif);font-size:15px;color:var(--blue);font-style:italic;}
+.perf-name{font-family:var(--body);font-size:14px;color:var(--blue);font-style:normal;font-weight:500;}
 .perf-house{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
 .perf-count{font-family:var(--serif);font-size:22px;color:var(--blue);text-align:right;line-height:1;}
 .perf-meta{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-align:right;text-transform:uppercase;margin-top:3px;}
@@ -605,7 +609,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
 .ct-meta{font-family:var(--mono);font-size:10px;color:var(--ink3);}
 
 /* CHATBOT */
-.fab-btn{position:fixed;bottom:26px;right:26px;width:48px;height:48px;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:400;box-shadow:0 4px 20px rgba(26,46,92,.32);transition:all .15s;border-radius:2px;}
+.fab-btn{position:fixed;bottom:calc(26px + env(safe-area-inset-bottom,0px));right:calc(26px + env(safe-area-inset-right,0px));width:48px;height:48px;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:400;box-shadow:0 4px 20px rgba(26,46,92,.32);transition:all .15s;border-radius:2px;}
 .fab-btn:hover{background:var(--blue2);transform:scale(1.06);}
 .fab-btn svg{width:22px;height:22px;fill:white;}
 
@@ -699,7 +703,7 @@ html,body{height:100%;background:var(--off);color:var(--ink);font-family:var(--b
   .mob-nav{display:block;}
   .mob-srch-btn{display:block;}
   .mob-srch-row.on{display:block;}
-  .content{padding:18px;padding-bottom:68px;}
+  .content{padding:18px;padding-bottom:calc(68px + env(safe-area-inset-bottom,0px));}
   .stats{grid-template-columns:1fr 1fr;}
   .frow{grid-template-columns:1fr;}
   .im-tabs{grid-template-columns:1fr;}
@@ -1689,10 +1693,17 @@ function resolveFragById(fragId){
   // Check COMMUNITY_FRAGS (fragranceDB sheet rows) first
   var cf = COMMUNITY_FRAGS.find(function(f){ return (f.fragranceId||f.id)===fragId; });
   if(cf) return { name: cf.fragranceName||cf.name||'', house: cf.fragranceHouse||cf.house||'' };
-  // Fall back to seed FRAGRANCES already in memory
-  var sf = FRAGRANCES.find(function(f){ return f.id===fragId; });
+  // Fall back to seed FRAGRANCES already in memory (by id or fragranceId)
+  var sf = FRAGRANCES.find(function(f){ return f.id===fragId || f.fragranceId===fragId; });
   if(sf) return { name: sf.name||'', house: sf.house||'' };
   return { name: '', house: '' };
+}
+
+// Find a FRAGRANCES entry by its neutral fragranceId (f-ID), optionally scoped to userId
+function findFragByFid(fid, userId){
+  if(!fid) return null;
+  if(userId) return FRAGRANCES.find(function(f){ return f.fragranceId===fid && f.userId===userId; }) || FRAGRANCES.find(function(f){ return f.fragranceId===fid; });
+  return FRAGRANCES.find(function(f){ return f.fragranceId===fid; });
 }
 
 function fragToRow(f){
@@ -1705,7 +1716,7 @@ function fragToRow(f){
   }
   return {
     userId: f.userId||'',
-    fragranceId: f.id||'',
+    fragranceId: f.fragranceId||f.id||'',
     status: f.status||'',
     bottleSize: (f.sizes||[]).join(', '),
     type: f.type||'',
@@ -1719,14 +1730,23 @@ function fragToRow(f){
   };
 }
 
+var _rowToFragCounter = 0;
 function rowToFrag(row){
-  var resolved = resolveFragById(row.fragranceId||'');
+  var fid = row.fragranceId||'';
+  var resolved = resolveFragById(fid);
+  // If fragranceId is an old k/s ID, look up the neutral f-ID
+  var neutralFid = fid;
+  if(fid && !/^f\d+$/.test(fid)){
+    // Old k/s ID — resolve name then look up f-ID
+    if(resolved.name) neutralFid = lookupFragDbId(resolved.name, resolved.house, row.type) || fid;
+  }
   // Reconstruct purchaseDate from separate month/year columns
   var purchaseDate = '';
   if(row.purchaseMonth && row.purchaseYear) purchaseDate = row.purchaseMonth+' '+row.purchaseYear;
   else if(row.purchaseYear) purchaseDate = row.purchaseYear;
   return {
-    id: row.fragranceId||'',
+    id: 'e'+(++_rowToFragCounter),
+    fragranceId: neutralFid,
     userId: row.userId,
     name: resolved.name,
     house: resolved.house,
@@ -1768,20 +1788,39 @@ function compToRow(c){
   };
 }
 
+var _monthNames=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function _normalizeMonth(m){
+  if(!m) return '';
+  // Already 3-letter abbreviation
+  if(/^[A-Z][a-z]{2}$/.test(m)) return m;
+  // Numeric (e.g. '9, 9, 09)
+  var n=parseInt((m+'').replace(/'/g,''));
+  if(n>=1&&n<=12) return _monthNames[n];
+  // Full month name
+  var idx=_monthNames.findIndex(function(mn){return mn&&m.toLowerCase().startsWith(mn.toLowerCase());});
+  if(idx>0) return _monthNames[idx];
+  return m;
+}
+
 function rowToComp(row){
   // Resolve display names from fragranceId at load time
   var primary = resolveFragById(row.primaryFragranceId||'');
   var secondary = row.secondaryFragranceId ? resolveFragById(row.secondaryFragranceId) : null;
+  // Migrate k/s IDs to neutral f-IDs
+  var pFid = row.primaryFragranceId||'';
+  if(pFid && !/^f\d+$/.test(pFid) && primary.name) pFid = lookupFragDbId(primary.name, primary.house) || pFid;
+  var sFid = row.secondaryFragranceId||null;
+  if(sFid && !/^f\d+$/.test(sFid) && secondary && secondary.name) sFid = lookupFragDbId(secondary.name, secondary.house) || sFid;
   return {
     id: row.complimentId,
     userId: row.userId,
-    primaryFragId: row.primaryFragranceId,
+    primaryFragId: pFid,
     primaryFrag: primary.name,
-    secondaryFragId: row.secondaryFragranceId||null,
+    secondaryFragId: sFid,
     secondaryFrag: secondary ? secondary.name : null,
     gender: row.complimenterGender||null,
     relation: row.relation,
-    month: row.month,
+    month: _normalizeMonth(row.month),
     year: row.year,
     location: row.locationName||null,
     city: row.city||null,
@@ -1839,7 +1878,7 @@ async function loadAllData(){
   // until real data is added).
   if(fragsRaw.length){
     var _fragSeedIds=new Set(fragsRaw.map(function(r){return r.fragranceId||'';}));
-    var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.id);});
+    var fragSeed=FRAGRANCES.filter(function(f){return !_fragSeedIds.has(f.fragranceId||f.id);});
     FRAGRANCES=fragSeed.concat(fragsRaw.map(rowToFrag));
   }
   // Remove blank-name entries (QA test artifacts or orphaned Sheet rows with no resolved fragrance)
@@ -1860,7 +1899,7 @@ async function loadAllData(){
   }
   // Write any seed fragrances missing from Sheets so they persist
   var _sheetFragIds=new Set(fragsRaw.map(function(r){return r.fragranceId||'';}));
-  var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.id);});
+  var _missingFrags=FRAGRANCES.filter(function(f){return !_sheetFragIds.has(f.fragranceId||f.id);});
   if(_missingFrags.length){
     await syncMissingRows('userFragrances',_missingFrags.map(fragToRow),FRAG_HEADERS,'syncFrags');
   }
@@ -1987,8 +2026,9 @@ async function loadAllData(){
   var _qaFrags = FRAGRANCES.filter(function(f){ return (f.name||'').toLowerCase().startsWith('qa '); });
   if(_qaFrags.length){
     var _qaIds = new Set(_qaFrags.map(function(f){return f.id;}));
+    var _qaFids = new Set(_qaFrags.map(function(f){return f.fragranceId||f.id;}));
     FRAGRANCES = FRAGRANCES.filter(function(f){ return !_qaIds.has(f.id); });
-    COMPLIMENTS = COMPLIMENTS.filter(function(c){ return !_qaIds.has(c.primaryFragId); });
+    COMPLIMENTS = COMPLIMENTS.filter(function(c){ return !_qaFids.has(c.primaryFragId); });
     await Promise.all([
       writeSheet('userFragrances', FRAGRANCES.map(fragToRow), FRAG_HEADERS),
       writeSheet('userCompliments', COMPLIMENTS.map(compToRow), COMP_HEADERS),
@@ -2090,7 +2130,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-04-v28';
+const FRAG_DB_VERSION = '2026-04-04-v29';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2553,6 +2593,29 @@ const FRAG_DB = [
   {n:'Vanille',h:'Outremer',conc:'EDT',fam:'Vanilla Gourmand',top:'Vanilla',r:'3.8',l:'2–4h',s:'Soft',p:'~$22',accords:'Vanilla, Sweet, Gourmand, Powdery, Creamy'},
 ];
 
+// ── lookupFragDbId: find neutral f-ID from FRAG_DB by name+house+type ──
+var _typeToConc={'Eau de Parfum':'EDP','Eau de Toilette':'EDT','Extrait de Parfum':'Extrait','Body Spray':'Body Spray','Perfume Oil':'Oil','Cologne':'Cologne','Perfume Concentré':'Perfume Concentré','Parfum':'Parfum','Other':'Other'};
+function lookupFragDbId(name, house, type){
+  var norm=function(s){return(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');};
+  var nN=norm(name),nH=norm(house),conc=type?(_typeToConc[type]||type):'';
+  // Exact match: name+house+conc
+  for(var i=0;i<FRAG_DB.length;i++){
+    var db=FRAG_DB[i];if(norm(db.h)!==nH)continue;
+    var nDb=norm(db.n);
+    // FRAG_DB name may include house prefix and/or conc suffix — try all combos
+    if((nDb===nN||nDb===norm(house+' '+name)||nDb===norm(name+' '+(db.conc||''))||nDb===norm(house+' '+name+' '+(db.conc||'')))&&(!conc||(db.conc||'')===conc))
+      return 'f'+(i+1);
+  }
+  // Loose match: name+house only (ignore conc)
+  for(var i=0;i<FRAG_DB.length;i++){
+    var db=FRAG_DB[i];if(norm(db.h)!==nH)continue;
+    var nDb=norm(db.n);
+    if(nDb===nN||nDb===norm(house+' '+name)||nDb===norm(name+' '+(db.conc||''))||nDb===norm(house+' '+name+' '+(db.conc||'')))
+      return 'f'+(i+1);
+  }
+  return null;
+}
+
 // COMMUNITY_FRAGS — user-contributed metadata (Layer 0 search, loaded from fragranceDB sheet tab)
 let COMMUNITY_FRAGS = [];
 
@@ -2666,8 +2729,10 @@ let FRAGRANCES = [
   {id:'s43',userId:'u2',name:'Charisma',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Cologne',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'',purchasePrice:null,whereBought:'',personalNotes:'Pierrette clown milk glass decanter (pair with Pierrot above)',createdAt:'2026-04-03T00:00:00.000Z'},
   {id:'s44',userId:'u2',name:'Moonwind (Perfume Concentré)',house:'Avon',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Perfume Concentré',personalRating:null,statusRating:null,personalLong:null,isDupe:false,dupeFor:'',purchaseDate:'',purchasePrice:null,whereBought:'',personalNotes:'La Belle Telephone rotary phone decanter, 3" tall, NEW/filled',createdAt:'2026-04-03T00:00:00.000Z'},
 ];
-// Ensure all seed fragrances have fragranceId for id-linked architecture
-FRAGRANCES.forEach(function(f){ if(!f.fragranceId) f.fragranceId = f.id; });
+// Assign neutral fragranceId (f-ID from FRAG_DB) to all seeds
+FRAGRANCES.forEach(function(f){
+  f.fragranceId = lookupFragDbId(f.name, f.house, f.type) || f.id;
+});
 
 // COMPLIMENTS — main compliment log (loaded from Google Sheets)
 let COMPLIMENTS = [
@@ -2688,6 +2753,15 @@ let COMPLIMENTS = [
   {id:'c15',userId:'u2',primaryFragId:'s22',primaryFrag:'Mistpouffer',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Colleague / Client',month:'Mar',year:'2026',location:'Daycare',city:'McHenry',state:'Illinois',country:'US',notes:'Brosy\'s daycare teachers',createdAt:'2026-03-01T00:00:00.000Z'},
   {id:'c16',userId:'u2',primaryFragId:'s22',primaryFrag:'Mistpouffer',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Apr',year:'2026',location:'Kiana\'s house',city:'Arvada',state:'Colorado',country:'US',notes:'Kiana',createdAt:'2026-04-01T00:00:00.000Z'},
 ];
+// Migrate comp seeds: convert k/s primaryFragId → neutral f-ID
+(function(){
+  var _ksToFid={};
+  FRAGRANCES.forEach(function(f){ _ksToFid[f.id]=f.fragranceId; });
+  COMPLIMENTS.forEach(function(c){
+    if(c.primaryFragId && _ksToFid[c.primaryFragId]) c.primaryFragId=_ksToFid[c.primaryFragId];
+    if(c.secondaryFragId && _ksToFid[c.secondaryFragId]) c.secondaryFragId=_ksToFid[c.secondaryFragId];
+  });
+})();
 
 // IMPORT QUEUE
 let importQueue = [];
@@ -3001,7 +3075,7 @@ function renderDashboard(){
         <td><div class="ts ${STATUS_CSS[f.status]}">${STATUS_LABELS[f.status]}</div></td>
         <td><div class="tstars">${renderStars(f.personalRating)}</div></td>
         <td class="tmono" style="font-size:11px;color:var(--ink3);">${getAccords(f).join(', ')||'—'}</td>
-        <td class="tmono">${getCompCount(f.id)>0?`<span onclick="event.stopPropagation();filterComplimentsByFrag('${f.id}')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;" title="View compliments for this fragrance">${getCompCount(f.id)}</span>`:'—'}</td>
+        <td class="tmono">${getCompCount(f.fragranceId||f.id)>0?`<span onclick="event.stopPropagation();filterComplimentsByFrag('${f.id}')" style="cursor:pointer;color:var(--blue);text-decoration:underline;text-underline-offset:2px;" title="View compliments for this fragrance">${getCompCount(f.fragranceId||f.id)}</span>`:'—'}</td>
         <td class="tact"><button class="btn-bare" onclick="event.stopPropagation();openAddComp('${f.id}')">+ Compliment</button></td>
       </tr>`).join('');
   } else {
@@ -3571,8 +3645,8 @@ function renderCollection(){
     if(collSort==='priceHL') return (parseFloat(b.purchasePrice)||0)-(parseFloat(a.purchasePrice)||0);
     if(collSort==='priceLH') return (parseFloat(a.purchasePrice)||0)-(parseFloat(b.purchasePrice)||0);
     if(collSort==='dupes') return (b.isDupe?1:0)-(a.isDupe?1:0);
-    if(collSort==='comps') return (_compMap[b.id]||0)-(_compMap[a.id]||0);
-    if(collSort==='compsAsc') return (_compMap[a.id]||0)-(_compMap[b.id]||0);
+    if(collSort==='comps') return (_compMap[b.fragranceId]||0)-(_compMap[a.fragranceId]||0);
+    if(collSort==='compsAsc') return (_compMap[a.fragranceId]||0)-(_compMap[b.fragranceId]||0);
     if(collSort==='size'||collSort==='sizeDesc'){ var _so={'Sample':1,'Decant':2,'Travel':3,'Full Bottle':4}; var as=Math.max.apply(null,(a.sizes||[]).map(function(s){return _so[s]||0;}).concat([0])); var bs=Math.max.apply(null,(b.sizes||[]).map(function(s){return _so[s]||0;}).concat([0])); return collSort==='size'?as-bs:bs-as; }
     if(collSort==='recent') return parseInt((b.id||'0').replace(/\D/g,''))-parseInt((a.id||'0').replace(/\D/g,''));
     if(collSort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
@@ -3615,7 +3689,7 @@ function renderCollection(){
     var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     document.getElementById('collBody').innerHTML=frags.map(function(f){
       var hasFriendMatch=friendOwnsSet.has(f.name.toLowerCase());
-      var compCount=getCompCount(f.id);
+      var compCount=getCompCount(f.fragranceId||f.id);
       var _cd = getCommunityData(f.name, f.house) || {};
       var addedStr = f.purchaseDate || '';
       if (!addedStr && f.createdAt) {
@@ -3772,7 +3846,7 @@ function renderDiscovery(){
 function quickAddWishlist(name, house){
   var db=FRAG_DB.find(function(d){return normStr(d.n)===normStr(name)&&normStr(d.h)===normStr(house);})||{};
   var allNotes=[db.top||'',db.mid||'',db.base||''].filter(Boolean).join(', ')||'';
-  var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:name,house:house,status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communitySill:db.s||null,avgPrice:db.p||null,notes:allNotes,topNotes:db.top||'',middleNotes:db.mid||'',baseNotes:db.base||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''};
+  var _nfId='f'+nextId++; var newFrag={id:_nfId,fragranceId:lookupFragDbId(name,house)||_nfId,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:name,house:house,status:'WANT_TO_BUY',sizes:[],personalRating:null,statusRating:null,personalLong:null,personalSill:null,communitySill:db.s||null,avgPrice:db.p||null,notes:allNotes,topNotes:db.top||'',middleNotes:db.mid||'',baseNotes:db.base||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''};
   FRAGRANCES.push(newFrag);
   appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
   renderWishlist();
@@ -3827,11 +3901,11 @@ function renderCompliments(filter='all'){
   var ffName=document.getElementById('cffName');
   if(ffBar){ ffBar.style.display=compFragFilter?'':'none'; if(ffName&&compFragFilter) ffName.textContent=compFragFilter.name; }
   // Apply frag filter first, then relation filter
-  var base = compFragFilter ? MC.filter(function(c){return c.primaryFragId===compFragFilter.id||c.secondaryFragId===compFragFilter.id;}) : MC;
+  var base = compFragFilter ? MC.filter(function(c){return c.primaryFragId===(compFragFilter.fragranceId||compFragFilter.id)||c.secondaryFragId===(compFragFilter.fragranceId||compFragFilter.id);}) : MC;
   var filtered = (filter==='all' ? base : base.filter(c=>c.relation===filter)).slice();
   // Apply sort
   var _sv = compSortVal || 'dateDesc';
-  function _compFrag(c){ return FRAGRANCES.find(function(x){return x.id===c.primaryFragId;})||{}; }
+  function _compFrag(c){ return FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;})||{}; }
   var _MNS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function _mnum(m){var n=parseInt(m);return isNaN(n)?_MNS.indexOf(m)+1:n;}
   filtered.sort(function(a,b){
@@ -3864,7 +3938,7 @@ function renderCompliments(filter='all'){
   const allEmpty = MC.length === 0;
   var _MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function crowHtml(c){
-    var _pf=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;});
+    var _pf=FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;});
     var _pname=_pf?fragDisplayName(_pf):c.primaryFrag;
     var _house=_pf?'<div class="th_">'+(_pf.house||'').toUpperCase()+'</div>':'';
     var _notePrev=c.notes?'<div class="cr-n" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.65;font-size:11px;">'+c.notes+'</div>':'';
@@ -4156,7 +4230,7 @@ function renderAnalytics(){
       var sPerfCounts={}; if(showSylviaOverlay) SC.forEach(function(c){if(c.primaryFragId)sPerfCounts[c.primaryFragId]=(sPerfCounts[c.primaryFragId]||0)+1;});
       Object.entries(perfCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,8).forEach(function(entry,idx){
         var fragId=entry[0]; var cnt=entry[1];
-        var frag=MF.find(function(f){return f.id===fragId;}); if(!frag) return;
+        var frag=MF.find(function(f){return (f.fragranceId||f.id)===fragId;}); if(!frag) return;
         var relForFrag={}; MC.filter(function(c){return c.primaryFragId===fragId;}).forEach(function(c){relForFrag[c.relation]=(relForFrag[c.relation]||0)+1;});
         var topRelFrag=Object.keys(relForFrag).sort(function(a,b){return relForFrag[b]-relForFrag[a];})[0]||'';
         var _pcd=getCommunityData(frag.name,frag.house)||{}; var noteTip=_pcd.notes?_pcd.notes.split(',').slice(0,4).map(function(n){return n.trim();}).join(' · '):'';
@@ -4219,7 +4293,7 @@ function renderAnalytics(){
       // Build accord → compliment count map
       var accordComps={};
       MC.forEach(function(c){
-        var frag=MF.find(function(f){return f.id===c.primaryFragId;});
+        var frag=MF.find(function(f){return (f.fragranceId||f.id)===c.primaryFragId;});
         if(!frag) return;
         getAccords(frag).forEach(function(acc){
           if(!acc) return;
@@ -4393,7 +4467,7 @@ function renderFriend(){
       var td3=document.createElement('td');
       var dr=document.createElement('div'); dr.className='tstars'; dr.innerHTML=renderStars(f.statusRating||f.personalRating); td3.appendChild(dr); tr.appendChild(td3);
       var _cd=getCommunityData(f.name,f.house)||{}; var td4=document.createElement('td'); td4.className='tscript'; td4.textContent=(_cd.notes||'').replace(/·/g,',').split(',').slice(0,2).map(function(n){return noteDisplayName(n);}).join(', '); tr.appendChild(td4);
-      var td5=document.createElement('td'); td5.className='tmono'; td5.textContent=getCompCount(f.id); tr.appendChild(td5);
+      var td5=document.createElement('td'); td5.className='tmono'; td5.textContent=getCompCount(f.fragranceId||f.id); tr.appendChild(td5);
       var td6=document.createElement('td'); td6.className='tact';
       var btn=document.createElement('button'); btn.className='btn-bare'; btn.textContent='Compare';
       (function(fn){ btn.onclick=function(){ openCompare(fn,fn); }; })(f.name);
@@ -4414,7 +4488,7 @@ function renderFriend(){
     FC.slice(0,10).forEach(function(c){
       var row=document.createElement('div'); row.className='crow';
       var left=document.createElement('div'); left.style.flex='1';
-      var cf=document.createElement('div'); cf.className='cr-f'; var _cfrag=FRAGRANCES.find(function(x){return x.id===c.primaryFragId;}); if(_cfrag){cf.innerHTML=fragDisplayName(_cfrag);}else{cf.textContent=c.primaryFrag;}
+      var cf=document.createElement('div'); cf.className='cr-f'; var _cfrag=FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;}); if(_cfrag){cf.innerHTML=fragDisplayName(_cfrag);}else{cf.textContent=c.primaryFrag;}
       if(c.secondaryFrag){ var cfl=document.createElement('span'); cfl.className='cr-layer'; cfl.textContent=' + '+c.secondaryFrag; cf.appendChild(cfl); }
       left.appendChild(cf);
       var cm=document.createElement('div'); cm.className='cr-m';
@@ -4541,8 +4615,9 @@ document.getElementById('friendTabs').addEventListener('click',e=>{
 // ═══════════════════════════════════════════════════════
 
 function openDetail(fragId){
-  const f = FRAGRANCES.find(x=>x.id===fragId);
+  const f = FRAGRANCES.find(x=>x.id===fragId) || FRAGRANCES.find(x=>(x.fragranceId||x.id)===fragId);
   if(!f)return;
+  fragId = f.id; // normalize to internal id
   currentDetailId = fragId;
   document.getElementById('d-house').textContent = f.house.toUpperCase();
   document.getElementById('d-name').innerHTML = fragDisplayName(f);
@@ -4589,8 +4664,8 @@ function openDetail(fragId){
     expAddBtn.style.display=expEmpty?'block':'none';
   }
   document.getElementById('d-notebox').textContent = f.personalNotes||'No personal notes yet.';
-  document.getElementById('d-compct').textContent = getCompCount(fragId);
-  document.getElementById('d-compdist').textContent = getCompDist(fragId);
+  document.getElementById('d-compct').textContent = getCompCount(f.fragranceId||fragId);
+  document.getElementById('d-compdist').textContent = getCompDist(f.fragranceId||fragId);
   // Dupe section
   const dupeS = document.getElementById('d-dupe-sec');
   var reverseD = myFragrances().filter(function(x){ return x.isDupe && x.dupeFor && x.dupeFor.toLowerCase()===f.name.toLowerCase() && x.id!==f.id; });
@@ -4738,9 +4813,10 @@ function executeMerge(){
   var keep=FRAGRANCES.find(function(f){ return f.id===keepId; });
   var remove=FRAGRANCES.find(function(f){ return f.id===removeId; });
   if(!keep||!remove){ toast('Fragrance not found'); return; }
+  var removeFid=remove.fragranceId||removeId, keepFid=keep.fragranceId||keepId;
   COMPLIMENTS.forEach(function(c){
-    if(c.primaryFragId===removeId){ c.primaryFragId=keepId; c.primaryFrag=keep.name; }
-    if(c.secondaryFragId===removeId){ c.secondaryFragId=keepId; c.secondaryFrag=keep.name; }
+    if(c.primaryFragId===removeFid){ c.primaryFragId=keepFid; c.primaryFrag=keep.name; }
+    if(c.secondaryFragId===removeFid){ c.secondaryFragId=keepFid; c.secondaryFrag=keep.name; }
   });
   if(!keep.notes&&remove.notes) keep.notes=remove.notes;
   if(!keep.personalNotes&&remove.personalNotes) keep.personalNotes=remove.personalNotes;
@@ -4796,7 +4872,7 @@ function viewFragCompliments(){
 }
 
 function filterComplimentsByFrag(fragId){
-  const f = FRAGRANCES.find(x=>x.id===fragId);
+  const f = FRAGRANCES.find(x=>x.id===fragId) || FRAGRANCES.find(x=>(x.fragranceId||x.id)===fragId);
   if(!f)return;
   compFragFilter = f;
   goPage('compliments');
@@ -5084,8 +5160,10 @@ function saveFragrance(){
     // Find metadata from DB (fuzzy match)
     var dbHits=fragSearch(name,1);
     var db=dbHits.find(function(f){return normStr(f.n)===normStr(name);})||dbHits[0];
+    var _nfId2='f'+nextId++;
     const newFrag = {
-      id:'f'+nextId++,
+      id:_nfId2,
+      fragranceId:lookupFragDbId(data.name||name,db?db.h:'',data.type)||_nfId2,
       userId:CURRENT_USER?CURRENT_USER.id:'u1',
       house:db?db.h:'',
       ...data
@@ -5191,8 +5269,8 @@ function cfSearch(v){
   eligible=eligible.slice().sort(function(a,b){
     var _MN2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     function _mn2(m){var n=parseInt(m);return isNaN(n)?_MN2.indexOf(m)+1:n;}
-    var aLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===a.id;}).map(function(c){return parseInt(c.year||'0')*100+_mn2(c.month||'0');}));
-    var bLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===b.id;}).map(function(c){return parseInt(c.year||'0')*100+_mn2(c.month||'0');}));
+    var aLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===(a.fragranceId||a.id);}).map(function(c){return parseInt(c.year||'0')*100+_mn2(c.month||'0');}));
+    var bLast=Math.max.apply(null,MC2.filter(function(c){return c.primaryFragId===(b.fragranceId||b.id);}).map(function(c){return parseInt(c.year||'0')*100+_mn2(c.month||'0');}));
     if(!isFinite(aLast)) aLast=0; if(!isFinite(bLast)) bLast=0;
     return bLast-aLast;
   });
@@ -5505,8 +5583,8 @@ function saveCompliment(){
     var idx = COMPLIMENTS.findIndex(function(x){ return x.id===editingCompId; });
     if(idx>-1){
       COMPLIMENTS[idx] = Object.assign({}, COMPLIMENTS[idx], {
-        primaryFragId: fragId, primaryFrag: f.name,
-        secondaryFragId: f2?f2Id:null, secondaryFrag: f2?f2.name:null,
+        primaryFragId: (f&&f.fragranceId)||fragId, primaryFrag: f.name,
+        secondaryFragId: f2?(f2.fragranceId||f2Id):null, secondaryFrag: f2?f2.name:null,
         gender: document.getElementById('compGender').value||null,
         relation, month, year,
         location: document.getElementById('compLoc').value.trim()||null,
@@ -5527,9 +5605,9 @@ function saveCompliment(){
   var newComp = {
     id: genCompId(),
     userId: CURRENT_USER?CURRENT_USER.id:'u1',
-    primaryFragId: fragId,
+    primaryFragId: (f&&f.fragranceId)||fragId,
     primaryFrag: f.name,
-    secondaryFragId: f2?f2Id:null,
+    secondaryFragId: f2?(f2.fragranceId||f2Id):null,
     secondaryFrag: f2?f2.name:null,
     gender: document.getElementById('compGender').value||null,
     relation,
@@ -5571,8 +5649,10 @@ function importToCollection(data){
 function importToWishlist(data){
   const exists = FRAGRANCES.find(f=>f.name.toLowerCase()===data.name.toLowerCase());
   if(exists){ toast(data.name+' is already in your collection'); return; }
+  var _nfId3='f'+nextId++;
   const newFrag = {
-    id:'f'+nextId++, userId:CURRENT_USER?CURRENT_USER.id:'u1', name:data.name, house:data.house||'',
+    id:_nfId3, fragranceId:lookupFragDbId(data.name,data.house||'')||_nfId3,
+    userId:CURRENT_USER?CURRENT_USER.id:'u1', name:data.name, house:data.house||'',
     status:'WANT_TO_BUY', sizes:[], personalRating:null, statusRating:null,
     personalLong:null, whereBought:null, purchaseDate:null, isDupe:false, dupeFor:'', personalNotes:'',
   };
@@ -5710,7 +5790,7 @@ async function confirmBulkImport(){
     if(!chk||!chk.checked){skipped++;continue;}
     var collDup=myFragrances().find(function(f){return f.name.toLowerCase().trim()===d.name.toLowerCase().trim();});
     if(d.isDup||collDup){dups++;continue;}
-    var newFrag={id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:new Date().toISOString()};
+    var _nfId4='f'+nextId++; var newFrag={id:_nfId4,fragranceId:lookupFragDbId(d.name,d.house)||_nfId4,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:d.name,house:d.house,status:'CURRENT',sizes:['Full Bottle'],personalRating:null,statusRating:null,personalLong:null,whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:new Date().toISOString()};
     FRAGRANCES.push(newFrag);
     await appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
     added++;
@@ -6290,8 +6370,9 @@ function showScanNotFound(nameHint,houseHint){
 function saveUnknownScan(){
   var rawText=document.getElementById('camRawText').textContent||'Unknown Fragrance';
   var d=window._scannedFragData||{};
+  var _nfId5='f'+nextId++;
   var newFrag={
-    id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',
+    id:_nfId5,fragranceId:lookupFragDbId(d.name||'',d.house||'')||_nfId5,userId:CURRENT_USER?CURRENT_USER.id:'u1',
     name:d.name||rawText.split('\n')[0].slice(0,60)||'Unknown Fragrance',
     house:d.house||'',status:'WANT_TO_IDENTIFY',sizes:[],
     personalRating:null,statusRating:null,personalLong:null,personalSill:null,
@@ -6477,7 +6558,7 @@ function togDupe(yes){
 function exportData(){
   var esc=function(v){ var s=String(v||''); return s.includes(',')||s.includes('"')?'"'+s.replace(/"/g,'""')+'"':s; };
   var fragRows=[['Name','House','Status','Personal Rating','Compliments'],
-    ...myFragrances().map(function(f){ return [esc(f.name),esc(f.house),STATUS_LABELS[f.status],f.personalRating||'',getCompCount(f.id)]; })];
+    ...myFragrances().map(function(f){ return [esc(f.name),esc(f.house),STATUS_LABELS[f.status],f.personalRating||'',getCompCount(f.fragranceId||f.id)]; })];
   var compRows=[[''],['Fragrance','Secondary','Relation','Gender','Month','Year','Location','Notes'],
     ...myCompliments().map(function(c){ return [esc(c.primaryFrag),esc(c.secondaryFrag||''),c.relation||'',c.gender||'',c.month||'',c.year||'',esc(c.location||''),esc(c.notes||'')]; })];
   var csv=fragRows.concat(compRows).map(function(r){ return r.join(','); }).join('\n');
@@ -6550,7 +6631,7 @@ function importCSVSelected(){
     if(existing.has(r.name.toLowerCase())) return;
     var valid=['CURRENT','PREVIOUSLY_OWNED','WANT_TO_BUY','WANT_TO_SMELL','DONT_LIKE'];
     var status=valid.includes(r.status)?r.status:'CURRENT';
-    FRAGRANCES.push({id:'f'+nextId++,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:r.name,house:r.house,status:status,sizes:['Full Bottle'],personalRating:r.rating,statusRating:null,personalLong:null,personalSill:null,communitySill:null,avgPrice:null,notes:r.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
+    var _nfId6='f'+nextId++; FRAGRANCES.push({id:_nfId6,fragranceId:lookupFragDbId(r.name,r.house)||_nfId6,userId:CURRENT_USER?CURRENT_USER.id:'u1',name:r.name,house:r.house,status:status,sizes:['Full Bottle'],personalRating:r.rating,statusRating:null,personalLong:null,personalSill:null,communitySill:null,avgPrice:null,notes:r.notes||'',whereBought:null,purchaseDate:null,isDupe:false,dupeFor:'',personalNotes:''});
     added++;
   });
   if(added>0) writeSheet('userFragrances',FRAGRANCES.map(fragToRow),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
@@ -6591,7 +6672,7 @@ function computeNotesIntel(){
   myFragrances().filter(f=>f.status==='CURRENT').forEach(f=>{
     const _cd=getCommunityData(f.name,f.house)||{};
     const notes = (_cd.notes||'').split(/[·,]/).map(n=>n.trim()).filter(n=>n.length>1);
-    const compCount = getCompCount(f.id);
+    const compCount = getCompCount(f.fragranceId||f.id);
     notes.forEach(note=>{
       if(!noteMap[note]) noteMap[note]={name:note,frags:0,totalComps:0};
       noteMap[note].frags++;
@@ -6691,7 +6772,7 @@ document.querySelectorAll('#sizeOpts .opt').forEach(function(el){
 function openCompare(fragName, myFragIdOrName){
   var friend=getFriend();
   const mine = myFragrances().find(f=>f.id===myFragIdOrName||f.name===myFragIdOrName||f.name===fragName);
-  const myComps = mine ? myCompliments().filter(c=>c.primaryFragId===mine.id) : [];
+  const myComps = mine ? myCompliments().filter(c=>c.primaryFragId===(mine.fragranceId||mine.id)) : [];
   const herComps = friendCompliments().filter(c=>c.primaryFrag===fragName);
   var herFrag = friendFragrances().find(function(f){return f.name===fragName;});
   document.getElementById('compareTitle').textContent = fragName;
@@ -6848,7 +6929,7 @@ function auditDataIntegrity(){
 
   // COMPLIMENT INTEGRITY — orphaned references
   var orphanedComps=[];
-  var fragIds=FRAGRANCES.map(function(f){return f.id;});
+  var fragIds=FRAGRANCES.map(function(f){return f.fragranceId||f.id;});
   myComps.forEach(function(c){
     if(c.primaryFragId&&fragIds.indexOf(c.primaryFragId)===-1){
       orphanedComps.push('compliment '+c.id+' → missing frag '+c.primaryFragId);
@@ -7329,7 +7410,7 @@ function palFlows() {
         display: function(f) { return f.name; },
         sub: function(f) { return f.house; },
         onPick: function(f) {
-          PAL.answers.primaryFragId = f.id;
+          PAL.answers.primaryFragId = f.fragranceId||f.id;
           PAL.answers.primaryFrag = f.name;
         },
       },
@@ -7340,7 +7421,7 @@ function palFlows() {
         optional: true,
         skipLabel: 'No layering',
         source: function() {
-          return myFrags.filter(function(f) { return f.id !== PAL.answers.primaryFragId; });
+          return myFrags.filter(function(f) { return (f.fragranceId||f.id) !== PAL.answers.primaryFragId; });
         },
         display: function(f) { return f.name; },
         sub: function(f) { return f.house; },

@@ -57,9 +57,10 @@ Pre-seeded with two rows (Kiana = u1, Sylvia = u2).
 ```
 userId | fragranceId | status | bottleSize | type |
 boughtFrom | purchaseMonth | purchaseYear | purchasePrice |
-personalLongevity | personalSillage | personalRating | notes | addedAt
+personalRating | notes | addedAt
 ```
-- `fragranceId` (e.g. k17, s13) is the primary key — links to `fragranceDB.fragranceId` and `userCompliments.primaryFragranceId`
+- `fragranceId` uses **neutral f-IDs** (f1, f2, ...) that link to `fragranceDB.fragranceId` and `userCompliments.primaryFragranceId`
+- Rows uniquely identified by (userId, fragranceId) — both users can share the same fragranceId
 - `status`: CURRENT, USED_UP, SOLD, WANT_TO_BUY
 - `bottleSize`: comma-separated (Sample, Travel, Full Bottle, Decant)
 - `type`: Eau de Parfum, Eau de Toilette, Extrait de Parfum, Body Spray, Perfume Oil, Cologne, Perfume Concentre, Other
@@ -71,7 +72,7 @@ complimentId | userId | primaryFragranceId | secondaryFragranceId |
 complimenterGender | relation | month | year |
 locationName | city | state | country | notes | createdAt
 ```
-- `primaryFragranceId` links to `userFragrances.fragranceId`
+- `primaryFragranceId` uses neutral f-IDs — links to `fragranceDB.fragranceId` and `userFragrances.fragranceId`
 - `relation`: Stranger, Friend, Colleague / Client, Family, Significant Other, Other
 
 ### Tab: `fragranceDB`
@@ -173,6 +174,8 @@ Two users only. Identity chosen on each visit via landing screen.
 | `rowToFrag(row)` | Parse a userFragrances sheet row into an in-memory fragrance object |
 | `compToRow(c)` | Build a userCompliments sheet row from an in-memory compliment object |
 | `rowToComp(row)` | Parse a userCompliments sheet row into an in-memory compliment object |
+| `lookupFragDbId(name, house, type)` | Find neutral f-ID from FRAG_DB by name+house+type |
+| `findFragByFid(fid, userId)` | Find a FRAGRANCES entry by its neutral fragranceId, optionally scoped to userId |
 | `resolveFragById(fragId)` | Resolve a fragranceId to {name, house} via COMMUNITY_FRAGS → FRAGRANCES fallback |
 | `writeSheet(tab, rows, headers)` | Clear + rewrite an entire sheet tab (checks response.ok, throws on error) |
 | `appendRow(tab, row, headers)` | Append a single row to a sheet tab |
