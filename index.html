@@ -215,7 +215,7 @@ input,select,textarea{font-size:16px;}
 .perf-card{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .12s;gap:12px;}
 .perf-card:hover{background:var(--blue4);}
 .perf-rank{font-family:var(--mono);font-size:11px;color:var(--ink3);width:24px;flex-shrink:0;}
-.perf-name{font-family:var(--body);font-size:14px;color:var(--blue);font-style:normal;font-weight:500;}
+.perf-name{font-family:var(--serif);font-size:15px;color:var(--ink);font-style:normal;font-weight:400;}
 .perf-house{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
 .perf-count{font-family:var(--serif);font-size:22px;color:var(--blue);text-align:right;line-height:1;}
 .perf-meta{font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-align:right;text-transform:uppercase;margin-top:3px;}
@@ -4285,7 +4285,7 @@ function renderAnalytics(){
         var FF=friendFragrances();
         Object.entries(sPerfCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,5).forEach(function(entry,idx){
           var fragId=entry[0]; var cnt=entry[1];
-          var frag=FF.find(function(f){return f.id===fragId;}); if(!frag) return;
+          var frag=FF.find(function(f){return (f.fragranceId||f.id)===fragId;}); if(!frag) return;
           var sRelForFrag={}; SC.filter(function(c){return c.primaryFragId===fragId;}).forEach(function(c){sRelForFrag[c.relation]=(sRelForFrag[c.relation]||0)+1;});
           var sTopRelFrag=Object.keys(sRelForFrag).sort(function(a,b){return sRelForFrag[b]-sRelForFrag[a];})[0]||'';
           var sCard=document.createElement('div'); sCard.className='perf-card'; sCard.style.borderLeft='2px solid rgba(184,112,104,.4)';
@@ -4311,7 +4311,7 @@ function renderAnalytics(){
     while(accordPerfSection.firstChild) accordPerfSection.removeChild(accordPerfSection.firstChild);
     var apHdr=document.createElement('div'); apHdr.className='ana-sh';
     var apH2=document.createElement('h2'); apH2.textContent='Accord performance';
-    var apSub=document.createElement('div'); apSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:6px;'; apSub.textContent='compliments by scent family';
+    var apSub=document.createElement('div'); apSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-left:12px;'; apSub.textContent='compliments by scent family';
     apHdr.appendChild(apH2); apHdr.appendChild(apSub); accordPerfSection.appendChild(apHdr);
     if(MC.length<2){
       var apEmpty=document.createElement('div'); apEmpty.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;padding:12px 0;'; apEmpty.textContent='Log more compliments to unlock accord insights.'; accordPerfSection.appendChild(apEmpty);
@@ -4328,15 +4328,28 @@ function renderAnalytics(){
       });
       var sortedAccords=Object.entries(accordComps).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
       var maxAP=sortedAccords[0]?sortedAccords[0][1]:1;
-      var apList=document.createElement('div'); apList.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px;';
+      var apList=document.createElement('div'); apList.style.cssText='display:flex;flex-direction:column;gap:2px;margin-top:10px;';
       sortedAccords.forEach(function(entry){
         var acc=entry[0]; var cnt=entry[1]; var pct=Math.round(cnt/maxAP*100);
-        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+        var wrap=document.createElement('div');
+        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;';
         var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:90px;flex-shrink:0;'; lbl.textContent=acc;
         var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;';
         var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--blue);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
         var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:20px;text-align:right;flex-shrink:0;'; countEl.textContent=cnt;
-        row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); apList.appendChild(row);
+        row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); wrap.appendChild(row);
+        var detail=document.createElement('div'); detail.style.cssText='display:none;padding:4px 0 8px 16px;';
+        MC.filter(function(c){
+          var frag=MF.find(function(f){return (f.fragranceId||f.id)===c.primaryFragId;});
+          return frag&&getAccords(frag).some(function(a){return a===acc;});
+        }).forEach(function(c){
+          var item=document.createElement('div'); item.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);padding:2px 0;';
+          item.textContent=(c.primaryFrag||'Unknown')+' — '+(c.relation||'')+' · '+(c.month||'')+' '+(c.year||'');
+          detail.appendChild(item);
+        });
+        wrap.appendChild(detail);
+        row.onclick=function(){detail.style.display=detail.style.display==='none'?'block':'none';};
+        apList.appendChild(wrap);
       });
       accordPerfSection.appendChild(apList);
       // Sylvia's accord performance comparison
@@ -4372,7 +4385,7 @@ function renderAnalytics(){
     while(topNotesSection.firstChild) topNotesSection.removeChild(topNotesSection.firstChild);
     var tnHdr=document.createElement('div'); tnHdr.className='ana-sh';
     var tnH2=document.createElement('h2'); tnH2.textContent='Top notes in highest rated';
-    var tnSub=document.createElement('div'); tnSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:6px;'; tnSub.textContent='notes from your 4+ star fragrances';
+    var tnSub=document.createElement('div'); tnSub.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-left:12px;'; tnSub.textContent='notes from your 4+ star fragrances';
     tnHdr.appendChild(tnH2); tnHdr.appendChild(tnSub); topNotesSection.appendChild(tnHdr);
     var rated4Plus=MFC.filter(function(f){return f.personalRating&&f.personalRating>=4;});
     if(rated4Plus.length<2){
@@ -4388,15 +4401,31 @@ function renderAnalytics(){
       });
       var sortedTN=Object.entries(topNoteCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,12);
       var maxTN=sortedTN[0]?sortedTN[0][1]:1;
-      var tnList=document.createElement('div'); tnList.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px;';
+      var tnList=document.createElement('div'); tnList.style.cssText='display:flex;flex-direction:column;gap:2px;margin-top:10px;';
       sortedTN.forEach(function(entry){
         var note=entry[0]; var cnt=entry[1]; var pct=Math.round(cnt/maxTN*100);
-        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+        var wrap=document.createElement('div');
+        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;';
         var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:100px;flex-shrink:0;text-transform:capitalize;'; lbl.textContent=note;
         var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;'; barWrap.title=cnt+' fragrance'+(cnt>1?'s':'');
         var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--blue);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
         var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:20px;text-align:right;flex-shrink:0;'; countEl.textContent=cnt;
-        row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); tnList.appendChild(row);
+        row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); wrap.appendChild(row);
+        var detail=document.createElement('div'); detail.style.cssText='display:none;padding:4px 0 8px 16px;';
+        var noteL=note.toLowerCase();
+        var matching=rated4Plus.filter(function(f){
+          var _cd=getCommunityData(f.name,f.house)||{};
+          return [_cd.topNotes,_cd.middleNotes,_cd.baseNotes].some(function(ns){return ns&&ns.toLowerCase().indexOf(noteL)!==-1;});
+        });
+        matching.forEach(function(mf){
+          var item=document.createElement('div'); item.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);padding:2px 0;cursor:pointer;';
+          item.textContent=mf.name+' — '+mf.house;
+          item.onclick=function(e){e.stopPropagation();openDetail(mf.id);};
+          detail.appendChild(item);
+        });
+        wrap.appendChild(detail);
+        row.onclick=function(){detail.style.display=detail.style.display==='none'?'block':'none';};
+        tnList.appendChild(wrap);
       });
       topNotesSection.appendChild(tnList);
       if(showSylviaOverlay){
@@ -4467,15 +4496,27 @@ function renderAnalytics(){
     var totalAccordFrags=MFC.length||1;
     var sortedAccordColl=Object.entries(accordCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
     var maxAccordColl=sortedAccordColl[0]?sortedAccordColl[0][1]:1;
-    var accordBarList=document.createElement('div'); accordBarList.style.cssText='display:flex;flex-direction:column;gap:8px;';
+    var accordBarList=document.createElement('div'); accordBarList.style.cssText='display:flex;flex-direction:column;gap:2px;';
     sortedAccordColl.forEach(function(entry){
       var ac=entry[0]; var ct=entry[1]; var pct=Math.round(ct/maxAccordColl*100); var pctOfTotal=Math.round(ct/totalAccordFrags*100);
-      var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
+      var wrap=document.createElement('div');
+      var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;';
       var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:90px;flex-shrink:0;'; lbl.textContent=ac;
       var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;position:relative;'; barWrap.title=pctOfTotal+'% of collection';
       var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--blue);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
       var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:36px;text-align:right;flex-shrink:0;'; countEl.textContent=pctOfTotal+'%';
-      row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); accordBarList.appendChild(row);
+      row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); wrap.appendChild(row);
+      var detail=document.createElement('div'); detail.style.cssText='display:none;padding:4px 0 8px 16px;';
+      var matching=MFC.filter(function(f){return getAccords(f).some(function(a){return a===ac;});});
+      matching.forEach(function(mf){
+        var item=document.createElement('div'); item.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);padding:2px 0;cursor:pointer;';
+        item.textContent=mf.name+' — '+mf.house;
+        item.onclick=function(e){e.stopPropagation();openDetail(mf.id);};
+        detail.appendChild(item);
+      });
+      wrap.appendChild(detail);
+      row.onclick=function(){detail.style.display=detail.style.display==='none'?'block':'none';};
+      accordBarList.appendChild(wrap);
     });
     collSection.appendChild(accordBarList);
     if(showSylviaOverlay&&SF.length){
@@ -4498,25 +4539,30 @@ function renderAnalytics(){
       collSection.appendChild(sylvAccBarList);
     }
     var allF=myFragrances().filter(function(f){return f.status==='CURRENT'||f.status==='PREVIOUSLY_OWNED'||f.status==='FINISHED';});
+    // Build price records: Samples default to $0, non-samples default to community price
     var priceRecs=allF.map(function(f){
+      var isSample=(f.sizes||[]).indexOf('Sample')!==-1;
       var knownPrice=f.purchasePrice&&parseFloat(f.purchasePrice)>0;
-      // Free samples: Sample size with no known purchase price → exclude from spend
-      var isFree=(f.sizes||[]).indexOf('Sample')!==-1&&!knownPrice&&!(f.personalNotes||'').match(/\$/);
-      if(isFree) return null;
-      var p=getPurchasePrice(f);
-      return p!==null?{f:f,price:p,isEstimated:!knownPrice&&!(f.personalNotes||'').match(/\$/)}:null;
-    }).filter(Boolean);
-    var _noPrice=allF.length-priceRecs.length;
+      var p;
+      if(knownPrice){ p=parseFloat(f.purchasePrice); }
+      else if(isSample){ p=0; }
+      else {
+        var cd=getCommunityData(f.name,f.house);
+        if(cd&&cd.avgPrice){ var m2=(cd.avgPrice+'').match(/(\d+(?:\.\d+)?)/); p=m2?parseFloat(m2[1]):0; }
+        else { p=0; }
+      }
+      return {f:f,price:p,isSample:isSample,hasUserPrice:knownPrice};
+    });
     if(priceRecs.length>=1){
       var spendHd=document.createElement('div'); spendHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:8px;'; spendHd.textContent='Spend'; collSection.appendChild(spendHd);
       var total2=priceRecs.reduce(function(a,r){return a+r.price;},0);
-      var avg=(total2/priceRecs.length).toFixed(0);
-      priceRecs.sort(function(a,b){return b.price-a.price;});
-      var mostExp=priceRecs[0];
+      var nonSample=priceRecs.filter(function(r){return !r.isSample;});
+      var avg=nonSample.length?(total2/nonSample.length).toFixed(0):'0';
+      // Most expensive: only non-samples with user-entered purchasePrice
+      var expCandidates=priceRecs.filter(function(r){return !r.isSample&&r.hasUserPrice;});
+      expCandidates.sort(function(a,b){return b.price-a.price;});
+      var mostExp=expCandidates[0]||null;
       var spendGrid=document.createElement('div'); spendGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;'; collSection.appendChild(spendGrid);
-      if(_noPrice>0){
-        var excNote=document.createElement('div'); excNote.style.cssText='grid-column:1/-1;font-family:var(--mono);font-size:10px;color:var(--ink3);'; excNote.textContent=_noPrice+' fragrance'+((_noPrice>1)?'s':'')+' not included — no price data'; spendGrid.appendChild(excNote);
-      }
       function addSpendRow(lbl,name,price){
         var d=document.createElement('div'); d.style.cssText='border-bottom:1px solid var(--b1);padding:6px 0;';
         var l=document.createElement('div'); l.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;'; l.textContent=lbl;
@@ -4527,7 +4573,7 @@ function renderAnalytics(){
       }
       spendGrid.appendChild(addSpendRow('Total Spent',null,'$'+Math.round(total2)));
       spendGrid.appendChild(addSpendRow('Avg per Bottle',null,'$'+avg));
-      spendGrid.appendChild(addSpendRow('Most Expensive',mostExp.f.name,mostExp.price));
+      if(mostExp) spendGrid.appendChild(addSpendRow('Most Expensive',mostExp.f.name,mostExp.price));
     }
   }
   // Note library — all notes across user's collection
@@ -4619,9 +4665,10 @@ function renderFriend(){
     FC.slice(0,10).forEach(function(c){
       var row=document.createElement('div'); row.className='crow';
       var left=document.createElement('div'); left.style.flex='1';
-      var cf=document.createElement('div'); cf.className='cr-f'; var _cfrag=FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;}); if(_cfrag){cf.innerHTML=fragDisplayName(_cfrag);}else{cf.textContent=c.primaryFrag;}
+      var cf=document.createElement('div'); cf.className='tn'; var _cfrag=FRAGRANCES.find(function(x){return (x.fragranceId||x.id)===c.primaryFragId;}); if(_cfrag){cf.innerHTML=fragDisplayName(_cfrag);}else{cf.textContent=c.primaryFrag;}
       if(c.secondaryFrag){ var cfl=document.createElement('span'); cfl.className='cr-layer'; cfl.textContent=' + '+c.secondaryFrag; cf.appendChild(cfl); }
       left.appendChild(cf);
+      if(_cfrag){ var cfh=document.createElement('div'); cfh.className='th_'; cfh.textContent=_cfrag.house; left.appendChild(cfh); }
       var cm=document.createElement('div'); cm.className='cr-m';
       var _loc=renderComplimentLocation(c); cm.textContent=c.relation+(c.gender?' · '+c.gender:'')+(_loc!=='—'?' · '+_loc:''); left.appendChild(cm);
       if(c.notes){ var cn=document.createElement('div'); cn.className='cr-n'; cn.textContent=c.notes; left.appendChild(cn); }
