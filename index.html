@@ -1838,12 +1838,15 @@ async function loadAllData(){
   }
   // Remove blank-name entries (QA test artifacts or orphaned Sheet rows with no resolved fragrance)
   FRAGRANCES = FRAGRANCES.filter(function(f){ return !!(f.name||'').trim(); });
-  // Dedup FRAGRANCES by ID (Sheets may have accumulated duplicate rows from prior syncs)
+  // Dedup FRAGRANCES by ID, then by name+house+user (catch same frag under different IDs)
   var _fragDupeBefore = FRAGRANCES.length;
-  var _seenFids = {};
+  var _seenFids = {}, _seenNameUser = {};
   FRAGRANCES = FRAGRANCES.filter(function(f){
     if(!f.id || _seenFids[f.id]) return false;
     _seenFids[f.id] = true;
+    var nk=(f.name||'').toLowerCase()+'|'+(f.house||'').toLowerCase()+'|'+(f.userId||'')+'|'+(f.status||'');
+    if(_seenNameUser[nk]) return false;
+    _seenNameUser[nk] = true;
     return true;
   });
   if(FRAGRANCES.length < _fragDupeBefore){
@@ -2033,7 +2036,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v12';
+const FRAG_DB_VERSION = '2026-04-03-v13';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2435,13 +2438,13 @@ const FRAG_DB = [
   {n:'Vanilla Skin',h:'Phlur',conc:'Body Spray',fam:'Gourmand Vanilla',top:'Pink Pepper, Pink Apple, Sugar Crystals',mid:'Cashmere Wood, Jasmine, Lily',base:'Vanilla, Sandalwood, Agarwood, Benzoin',r:'4.1',l:'2–4h',s:'Soft',p:'~$39',accords:'Vanilla, Sweet, Woody, Warm Spicy, Gourmand'},
   {n:'Viva La Juicy',h:'Juicy Couture',conc:'EDP',fam:'Fruity Floral',top:'Wild Berries, Mandarin Orange',mid:'Gardenia, Honeysuckle, Jasmine',base:'Caramel, Praline, Vanilla, Amber, Sandalwood',r:'3.9',l:'6–8h',s:'Moderate',p:'~$111',accords:'Sweet, Fruity, Floral, Gourmand, Vanilla'},
   {n:'Bianco Latte',h:'Giardini di Toscana',conc:'EDP',fam:'Gourmand Caramel',top:'Caramel',mid:'Coumarin, Honey',base:'Vanilla, White Musk',r:'4.3',l:'8–12h',s:'Moderate',p:'~$160',accords:'Vanilla, Sweet, Gourmand, Caramel, Musky'},
-  {n:'Cocktail Intense',h:'Fragrance World',conc:'EDP',fam:'Gourmand Boozy',top:'Cognac, Cinnamon, Plum',mid:'Myrrh, Cashmeran, Iris',base:'Vanilla, Tonka Bean, Sandalwood',r:'4.1',l:'8–12h',s:'Strong',p:'~$18',accords:'Gourmand, Boozy, Sweet, Warm Spicy, Woody'},
+  {n:'Cocktail Intense',h:'Fragrance World',conc:'EDP',fam:'Gourmand Boozy',top:'Cognac, Cinnamon, Plum',mid:'Myrrh, Cashmeran, Iris',base:'Vanille, Tonka Bean, Sandalwood',r:'4.1',l:'8–12h',s:'Strong',p:'~$18',accords:'Gourmand, Boozy, Sweet, Warm Spicy, Woody'},
   {n:'Kismet Angel',h:'Maison Alhambra',conc:'EDP',fam:'Gourmand Boozy',top:'Vanilla, Honeycomb, Amber',mid:'Cognac, Cinnamon, Caramel, Tonka Bean',base:'Dark Chocolate',r:'4.0',l:'6–8h',s:'Moderate',p:'~$22',accords:'Gourmand, Boozy, Sweet, Warm Spicy, Vanilla'},
   {n:'Ruhe',h:'Oakcha',conc:'Extrait de Parfum',fam:'Woody Spicy',top:'Cardamom, Violet',mid:'Iris',base:'Sandalwood, Leather, Cedarwood',r:'4.1',l:'8–12h',s:'Moderate',p:'~$45',accords:'Woody, Warm Spicy, Powdery, Leather, Violet'},
   {n:'That Girl Viral Vanilla',h:'Oakcha',conc:'Extrait de Parfum',fam:'Gourmand',top:'Caramel, Coconut Milk',mid:'Tonka Bean, Honey',base:'Vanilla, Marshmallow, White Musk, Amber',r:'4.2',l:'12–24h',s:'Strong',p:'~$47',accords:'Gourmand, Sweet, Vanilla, Caramel, Musky'},
   {n:'Miss Girl',h:'Oakcha',conc:'Extrait de Parfum',fam:'Amber Oriental',top:'Black Cherry, Saffron, Bitter Almond',mid:'Jasmine Sambac, Turkish Rose, Tonka Bean, Tobacco',base:'Amber, Moss, Vanilla, Caramel, Sandalwood',r:'4.2',l:'12–24h',s:'Strong',p:'~$40',accords:'Cherry, Warm Spicy, Amber, Sweet, Vanilla'},
   {n:'Amber Musk',h:'Aerin',conc:'EDP',fam:'Musky Floral',notes:'Ambrox, Coconut Water, Rose Centifolia, Muguet, Benzoin, Sandalwood, Musk',r:'3.9',l:'4–6h',s:'Soft',p:'~$145',accords:'Musky, Amber, Floral, Powdery, Woody'},
-  {n:'Pure Vanilla',h:'Lavanila',conc:'EDP',fam:'Vanilla Powdery',top:'Madagascar Vanilla',mid:'Tonka Bean, Heliotrope',base:'Vanilla, Musk',r:'3.9',l:'4–6h',s:'Soft',p:'~$38',accords:'Vanilla, Sweet, Powdery, Musky, Woody'},
+  {n:'Pure Vanilla',h:'Lavanila',conc:'EDP',fam:'Vanilla Powdery',notes:'Madagascar Vanilla, Tonka Bean, Heliotrope',r:'3.9',l:'4–6h',s:'Soft',p:'~$38',accords:'Vanilla, Sweet, Powdery, Musky, Woody'},
   {n:'Choco Musk',h:'Al Rehab',conc:'EDP',fam:'Gourmand Sweet',top:'Vanilla, Chocolate',mid:'Cinnamon, Spices, Musk',base:'Rose, Sandalwood',r:'3.9',l:'6–8h',s:'Moderate',p:'~$8',accords:'Gourmand, Sweet, Chocolate, Vanilla, Musky'},
   {n:'Amber Perfume Oil',h:'Nemat',conc:'Oil',fam:'Amber Musky',notes:'Amber',r:'4.1',l:'8–12h',s:'Moderate',p:'~$13',accords:'Amber, Musky, Woody, Sweet, Clean'},
   {n:'Persian Garden',h:'Kuumba Made',conc:'Oil',fam:'Floral Musky',notes:'Warm Florals, Ocean Air, Light Amber',r:'3.8',l:'6–8h',s:'Moderate',p:'~$8',accords:'Floral, Musky, Amber, Clean, Sweet'},
@@ -2464,7 +2467,7 @@ const FRAG_DB = [
   {n:'Mooncake',h:"d'Annam",conc:'EDP',fam:'Gourmand Earthy',notes:'Golden Syrup, Salted Egg Yolk, Mung Bean, Lotus Seed, Honey, Vanilla',r:'4.1',l:'8–12h',s:'Strong',p:'~$160',accords:'Gourmand, Sweet, Honey, Earthy, Creamy'},
   {n:'Crema di Latte',h:'Hilde Soliani',conc:'EDP',fam:'Gourmand Creamy',notes:'Milk, Caramel, Sugar, Vanilla, Cinnamon, Lemon',r:'4.1',l:'6–8h',s:'Moderate',p:'~$165',accords:'Gourmand, Creamy, Sweet, Vanilla, Lactonic'},
   {n:'Sweet Parmesan Violet',h:'Hilde Soliani',conc:'EDP',fam:'Floral Sweet',notes:'Violet, Sugar',r:'3.9',l:'6–8h',s:'Moderate',p:'~$165',accords:'Floral, Sweet, Powdery, Violet, Candy'},
-  {n:'Orgasmo',h:'Hilde Soliani',conc:'EDP',fam:'Gourmand Nutty',top:'Amaretto',mid:'Bitter Almond',base:'Almond, Musk',r:'4.0',l:'4–6h',s:'Soft',p:'~$165',accords:'Gourmand, Nutty, Sweet, Creamy, Boozy'},
+  {n:'Orgasmo',h:'Hilde Soliani',conc:'EDP',fam:'Gourmand Nutty',notes:'Amaretto, Almond',r:'4.0',l:'4–6h',s:'Soft',p:'~$165',accords:'Gourmand, Nutty, Sweet, Creamy, Boozy'},
   {n:"SOL Cheirosa '62",h:'Sol de Janeiro',conc:'EDP',fam:'Gourmand Nutty',top:'Pistachio, Almond',mid:'Heliotrope, Jasmine',base:'Caramel, Vanilla, Salt, Sandalwood',r:'4.1',l:'4–6h',s:'Moderate',p:'~$80',accords:'Gourmand, Sweet, Nutty, Vanilla, Caramel'},
   {n:'Good Girl',h:'Carolina Herrera',conc:'EDP',fam:'Floral Gourmand',top:'Almond, Coffee, Bergamot, Lemon',mid:'Tuberose, Jasmine Sambac, Orange Blossom, Bulgarian Rose, Orris',base:'Tonka Bean, Cacao, Vanilla, Praline, Sandalwood, Musk, Amber, Cashmere Wood, Patchouli, Cinnamon, Cedar',r:'4.2',l:'8–12h',s:'Strong',p:'~$130',accords:'Floral, Sweet, Gourmand, Coffee, Warm Spicy'},
   {n:'Dandelion Butter',h:'Clue Perfumery',conc:'EDP',fam:'Green Gourmand',top:'Pollen, Dandelion Greens',mid:'Yellow Dandelion, Snapped Stem, Milky Sap',base:'Salted Butter, Dandelion-Stained Chin',r:'4.3',l:'4–6h',s:'Soft',p:'~$140',accords:'Green, Creamy, Floral, Fresh, Earthy'},
@@ -2755,9 +2758,9 @@ function fragNameHtml(name){
 }
 
 var typeBadgeText={
-  'Extrait de Parfum':'Extrait',
-  'Eau de Parfum':'EDP',
-  'Eau de Toilette':'EDT',
+  'Extrait de Parfum':'Extrait de Parfum',
+  'Eau de Parfum':'Eau de Parfum',
+  'Eau de Toilette':'Eau de Toilette',
   'Cologne':'Cologne',
   'Perfume Concentré':'Concentré',
   'Body Spray':'Body Spray',
