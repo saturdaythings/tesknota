@@ -1908,6 +1908,7 @@ async function loadAllData(){
     if(f.name==='That Girl Viral Vanilla Extrait'&&f.house==='Oakcha'){ f.name='That Girl Viral Vanilla'; f.type='Extrait de Parfum'; }
     if(f.name==='Miss Girl Extrait'&&f.house==='Oakcha'){ f.name='Miss Girl'; f.type='Extrait de Parfum'; }
     if(f.name==='Amber'&&f.house==='Nemat') f.name='Amber Perfume Oil';
+    if(f.name==='Coco Vanille'&&f.house==='Comptoir Sud Pacifique'){ f.name='Vanille Coco'; f.type='Eau de Toilette'; }
     if(f.type!==origType||f.name!==origName) _migNeedsWrite=true;
   });
   if(_migNeedsWrite){
@@ -1923,6 +1924,12 @@ async function loadAllData(){
   var _normKey = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,''); };
   // Build from FRAG_DB first — it's the source of truth for community data
   var _concToType = {'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum','Extrait de Parfum':'Extrait de Parfum','Body Spray':'Body Spray','Oil':'Perfume Oil','Cologne':'Cologne','Perfume Concentré':'Perfume Concentré','Other':'Other'};
+  // Pre-build ID lookup from FRAGRANCES (post-migration names) for fast matching
+  var _fragIdMap = {};
+  FRAGRANCES.forEach(function(f){
+    var k = _normKey(f.name)+'|'+_normKey(f.house);
+    if(!_fragIdMap[k]) _fragIdMap[k] = f.id;
+  });
   FRAG_DB.forEach(function(db){
     var _key = _normKey(db.n)+'|'+_normKey(db.h)+'|'+_normKey(db.conc||'');
     if(_seenDbKeys[_key]) return;
@@ -1931,11 +1938,9 @@ async function loadAllData(){
     var _mid = db.mid||'';
     var _base = db.base||'';
     if(!_top && !_mid && !_base && db.notes) _top = db.notes;
-    // Find a matching FRAGRANCES entry for the ID
-    var _nk = _normKey(db.n), _hk = _normKey(db.h);
-    var match = FRAGRANCES.find(function(f){ return _normKey(f.name)===_nk && _normKey(f.house)===_hk; });
+    var _nk = _normKey(db.n)+'|'+_normKey(db.h);
     _newDbRows.push({
-      fragranceId: match ? match.id : '',
+      fragranceId: _fragIdMap[_nk]||'',
       fragranceName: db.n,
       fragranceHouse: db.h,
       fragranceType: _concToType[db.conc]||db.conc||'',
@@ -1945,7 +1950,7 @@ async function loadAllData(){
       baseNotes: _base,
       avgPrice: (db.p||'').replace(/~/g,'').trim(),
       addedBy: 'system',
-      addedAt: match ? (match.createdAt||new Date().toISOString()) : new Date().toISOString(),
+      addedAt: new Date().toISOString(),
     });
   });
   // FRAG_DB is the sole source of truth for community data — no FRAGRANCES fallback needed
@@ -2075,7 +2080,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v22';
+const FRAG_DB_VERSION = '2026-04-03-v23';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2462,7 +2467,6 @@ const FRAG_DB = [
   {n:'Vanille Extreme',h:'Comptoir Sud Pacifique',conc:'EDT',fam:'Vanilla Milky',top:'Sugar Vanilla, Heliotrope',mid:'Vanilla Absolute, Milk',base:'Vanilla Absolute, Milk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$32',accords:'Vanilla, Sweet, Gourmand, Powdery, Milky'},
   {n:'Vanille Coco',h:'Comptoir Sud Pacifique',conc:'EDT',fam:'Vanilla Coconut',top:'Whipped Cream, Banana, Heliotrope',mid:'Vanilla, Coconut',base:'Vanille, Coconut',r:'4.0',l:'4–6h',s:'Moderate',p:'~$32',accords:'Vanilla, Coconut, Sweet, Gourmand, Milky'},
   {n:'Lick Me All Over',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Fruity Gourmand',top:'Coconut, Vanilla, Bergamot',mid:'Jasmine, Ylang-Ylang, Mango',base:'Vanilla, Musk, Sandalwood',r:'4.1',l:'4–6h',s:'Moderate',p:'~$75',accords:'Fruity, Gourmand, Floral'},
-  {n:'Coco Vanille',h:'Comptoir Sud Pacifique',conc:'EDP',fam:'Gourmand',top:'Coconut, Bergamot, Mandarin',mid:'Vanilla, Heliotrope, Jasmine',base:'Musk, Sandalwood, White Cedar, Amber',r:'4.0',l:'4–6h',s:'Moderate',p:'~$85',accords:'Gourmand, Floral, Fresh'},
   {n:'Eucalyptus 18',h:'Le Labo',conc:'EDP',fam:'Fresh Aromatic',top:'Eucalyptus, Mint, Bergamot',mid:'Rosemary, Cedarwood, Cypress',base:'Musk, Amber, Vetiver',r:'4.0',l:'4–6h',s:'Moderate',p:'~$250',accords:'Fresh, Aromatic, Woody'},
   {n:'Tonka 25',h:'Le Labo',conc:'EDP',fam:'Vanilla Woody',notes:'Musk, Atlas Cedar, Tonka Bean, Orange Blossom, Styrax, Vanilla',r:'4.3',l:'8–12h',s:'Moderate',p:'~$210',accords:'Vanilla, Sweet, Powdery, Woody, Musky'},
   {n:'Match Made in Heaven',h:'Sorce',conc:'Extrait de Parfum',fam:'Gourmand Green',notes:'Matcha, Vanilla Soft Serve, Cherry Blossom, Almond, Waffle Cone, Powdered Sugar, Creamy Sandalwood',r:'4.4',l:'8–12h',s:'Moderate',p:'~$140',accords:'Gourmand, Sweet, Green, Floral, Creamy'},
@@ -2592,7 +2596,7 @@ let FRAGRANCES = [
   {id:'k38',userId:'u1',name:'Ambre Etoile',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:12.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k39',userId:'u1',name:'Crème Brûlée',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:12.99,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k40',userId:'u1',name:'Vanille Extreme',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
-  {id:'k41',userId:'u1',name:'Coco Vanille',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
+  {id:'k41',userId:'u1',name:'Vanille Coco',house:'Comptoir Sud Pacifique',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Toilette',personalRating:null,statusRating:null,personalLong:null,whereBought:'TJ Maxx / Marshalls',purchaseDate:'Jan 2024',purchasePrice:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k42',userId:'u1',name:'Pistachio Brûlée',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jul 2023',purchasePrice:25.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k43',userId:'u1',name:'Chai Épicé',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jun 2023',purchasePrice:25.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k44',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:5,statusRating:null,personalLong:null,whereBought:'Scent Split',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
@@ -3543,8 +3547,10 @@ function renderCollection(){
       return (_cd.notes||'').toLowerCase().includes(activeNoteFilter);
     });
   }
-  // Sort
+  // Sort — pre-compute comp counts to avoid O(n²) in comparator
   var MC=myCompliments();
+  var _compMap={};
+  MC.forEach(function(c){ _compMap[c.primaryFragId]=(_compMap[c.primaryFragId]||0)+1; if(c.secondaryFragId) _compMap[c.secondaryFragId]=(_compMap[c.secondaryFragId]||0)+1; });
   frags=frags.slice().sort(function(a,b){
     if(collSort==='nameZA') return b.name.localeCompare(a.name);
     if(collSort==='ratingHL') return (parseRating(b.personalRating)||0)-(parseRating(a.personalRating)||0);
@@ -3552,7 +3558,8 @@ function renderCollection(){
     if(collSort==='priceHL') return (parseFloat(b.purchasePrice)||0)-(parseFloat(a.purchasePrice)||0);
     if(collSort==='priceLH') return (parseFloat(a.purchasePrice)||0)-(parseFloat(b.purchasePrice)||0);
     if(collSort==='dupes') return (b.isDupe?1:0)-(a.isDupe?1:0);
-    if(collSort==='comps'){ var ca=MC.filter(function(c){return c.primaryFragId===a.id;}).length; var cb=MC.filter(function(c){return c.primaryFragId===b.id;}).length; return cb-ca; }
+    if(collSort==='comps') return (_compMap[b.id]||0)-(_compMap[a.id]||0);
+    if(collSort==='compsAsc') return (_compMap[a.id]||0)-(_compMap[b.id]||0);
     if(collSort==='recent') return parseInt((b.id||'0').replace(/\D/g,''))-parseInt((a.id||'0').replace(/\D/g,''));
     if(collSort==='houseAZ') return (a.house||'').localeCompare(b.house||'');
     return a.name.localeCompare(b.name);
@@ -3562,13 +3569,6 @@ function renderCollection(){
       var av = _parsePurchaseDate(a.purchaseDate);
       var bv = _parsePurchaseDate(b.purchaseDate);
       return collSort==='added' ? bv-av : av-bv;
-    });
-  }
-  if (collSort === 'compsAsc') {
-    frags.sort(function(a,b){
-      var av = MC.filter(function(c){return c.primaryFragId===a.id;}).length;
-      var bv = MC.filter(function(c){return c.primaryFragId===b.id;}).length;
-      return av-bv;
     });
   }
   // Count + clear link
