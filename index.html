@@ -2036,7 +2036,7 @@ function checkIdentity(){
 
 // Bump this string whenever FRAG_DB entries are corrected or added.
 // Each browser checks localStorage and only rewrites the fragranceDB sheet when this changes.
-const FRAG_DB_VERSION = '2026-04-03-v13';
+const FRAG_DB_VERSION = '2026-04-03-v14';
 
 // Fragrance database for search autocomplete (377 entries across 41 houses)
 const FRAG_DB = [
@@ -2432,7 +2432,7 @@ const FRAG_DB = [
   {n:'Eclair',h:'Lattafa',conc:'Body Spray',fam:'Gourmand Sweet',top:'Caramel, Sugar, Milk',mid:'Honey, White Flowers',base:'Vanilla, Praline, Musk',r:'3.8',l:'2–4h',s:'Soft',p:'~$8',accords:'Gourmand, Sweet, Vanilla, Lactonic, Musky'},
   {n:'Yara',h:'Lattafa',conc:'Body Spray',fam:'Sweet Fruity',top:'Orchid, Heliotrope, Tangerine',mid:'Gourmand Accord, Tropical Fruits',base:'Vanilla, Musk, Sandalwood',r:'3.9',l:'2–4h',s:'Soft',p:'~$8',accords:'Sweet, Vanilla, Powdery, Tropical, Fruity'},
   {n:'Eclaire Pistache',h:'Lattafa',conc:'EDP',fam:'Gourmand Nutty',top:'Pistachio Spread Cream, Pistachio',mid:'Cacao, Whipped Cream, Coconut',base:'Vanilla, Milk, Musk',r:'4.2',l:'6–8h',s:'Moderate',p:'~$30',accords:'Gourmand, Sweet, Nutty, Creamy, Lactonic'},
-  {n:'Eau Duelle',h:'Diptyque',conc:'EDT',fam:'Oriental Vanilla',top:'Bergamot, Black Tea, Elemi Resin',mid:'Cardamom, Pink Pepper, Juniper, Olibanum',base:'Bourbon Vanilla, Ambergris, Musk, Saffron',r:'3.9',l:'4–6h',s:'Soft',p:'~$190',accords:'Vanilla, Spicy, Woody, Aromatic, Resinous'},
+  {n:'Eau Duelle',h:'Diptyque',conc:'EDT',fam:'Oriental Vanilla',notes:'Bourbon Vanilla, Elemi Resin, Juniper, Cardamom, Pink Pepper, Olibanum, Black Tea, Bergamot, Ambergris, Musk, Saffron',r:'3.9',l:'4–6h',s:'Soft',p:'~$190',accords:'Vanilla, Spicy, Woody, Aromatic, Resinous'},
   {n:'Lune Féline',h:'Atelier des Ors',conc:'EDP',fam:'Amber Vanilla',top:'Cardamom, Cinnamon, Pink Pepper',mid:'Woodsy Notes, Ambergris, Styrax, Cedar, Green Notes',base:'Tahitian Vanilla, Peru Balsam, Musk',r:'4.4',l:'8–12h',s:'Strong',p:'~$275',accords:'Amber, Vanilla, Warm Spicy, Woody, Balsamic'},
   {n:'Heavy Cream',h:'Phlur',conc:'Body Spray',fam:'Gourmand Creamy',top:'Marshmallow, Sugar, Lemon, Orange',mid:'Coconut, Ambrettolide, Jasmine',base:'Whipped Cream, Vanilla, Caramel',r:'4.1',l:'2–4h',s:'Soft',p:'~$39',accords:'Sweet, Gourmand, Lactonic, Creamy, Vanilla'},
   {n:'Vanilla Skin',h:'Phlur',conc:'Body Spray',fam:'Gourmand Vanilla',top:'Pink Pepper, Pink Apple, Sugar Crystals',mid:'Cashmere Wood, Jasmine, Lily',base:'Vanilla, Sandalwood, Agarwood, Benzoin',r:'4.1',l:'2–4h',s:'Soft',p:'~$39',accords:'Vanilla, Sweet, Woody, Warm Spicy, Gourmand'},
@@ -2551,6 +2551,7 @@ let FRAGRANCES = [
   {id:'k43',userId:'u1',name:'Chai Épicé',house:'Le Monde Gourmand',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'Amazon',purchaseDate:'Jun 2023',purchasePrice:25.00,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-28T00:00:00.000Z'},
   {id:'k44',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'CURRENT',sizes:['Decant'],type:'Eau de Parfum',personalRating:5,statusRating:null,personalLong:null,whereBought:'Scent Split',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
   {id:'k45',userId:'u1',name:'Lick Me',house:'Michela Mezzetti Parfums',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'',purchaseDate:'',isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-03-29T00:00:00.000Z'},
+  {id:'k46',userId:'u1',name:'Mistpouffer',house:'Stora Skuggan',status:'WANT_TO_BUY',sizes:['Full Bottle'],type:'Eau de Parfum',personalRating:null,statusRating:null,personalLong:null,whereBought:'',purchaseDate:'',purchasePrice:null,isDupe:false,dupeFor:'',personalNotes:'',createdAt:'2026-04-03T00:00:00.000Z'},
   {id:'s1',userId:'u2',name:'Lost Cherry',house:'Tom Ford',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Fruity, Sweet, Gourmand, Floral, Boozy',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s2',userId:'u2',name:'Yum Pistachio Gelato | 33',house:'Kayali Fragrances',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Gourmand, Sweet, Nutty, Fruity, Vanilla',createdAt:'2024-01-01T00:00:00.000Z'},
   {id:'s3',userId:'u2',name:'Angels\' Share',house:'By Kilian',status:'CURRENT',sizes:['Full Bottle'],type:'Eau de Parfum',purchaseDate:'',accords:'Warm Spicy, Boozy, Sweet, Gourmand, Vanilla',createdAt:'2024-01-01T00:00:00.000Z'},
@@ -2617,6 +2618,8 @@ let COMPLIMENTS = [
   {id:'c12',userId:'u2',primaryFragId:'s3',primaryFrag:'Angels\' Share',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Stranger',month:'Nov',year:'2024',location:'Sushi burrito bar',city:'Kauai',state:'Hawaii',country:'US',notes:'Asked what kind it was',createdAt:'2024-11-01T00:00:00.000Z'},
   {id:'c13',userId:'u1',primaryFragId:'k12',primaryFrag:'Bianco Latte',secondaryFragId:null,secondaryFrag:null,gender:'Male',relation:'Significant Other',month:'Mar',year:'2026',location:'Home',city:'Rochester',state:'New York',country:'US',notes:'Mike',createdAt:'2026-03-01T00:00:00.000Z'},
   {id:'c14',userId:'u1',primaryFragId:'k17',primaryFrag:'That Girl Viral Vanilla',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Apr',year:'2026',location:'Bluegrass Lounge',city:'Arvada',state:'Colorado',country:'US',notes:'Lauren',createdAt:'2026-04-01T00:00:00.000Z'},
+  {id:'c15',userId:'u2',primaryFragId:'s22',primaryFrag:'Mistpouffer',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Colleague / Client',month:'Mar',year:'2026',location:'Daycare',city:'McHenry',state:'Illinois',country:'US',notes:'Brosy\'s daycare teachers',createdAt:'2026-03-01T00:00:00.000Z'},
+  {id:'c16',userId:'u2',primaryFragId:'s22',primaryFrag:'Mistpouffer',secondaryFragId:null,secondaryFrag:null,gender:'Female',relation:'Friend',month:'Apr',year:'2026',location:'Kiana\'s house',city:'Arvada',state:'Colorado',country:'US',notes:'Kiana',createdAt:'2026-04-01T00:00:00.000Z'},
 ];
 
 // IMPORT QUEUE
