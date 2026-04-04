@@ -5406,6 +5406,12 @@ function afGoStep(n, skipValidation){
     if(!skipValidation && !document.getElementById('afSrch').value.trim()){
       document.getElementById('afSrchErr').style.display='block'; return;
     }
+    // Wishlist + known DB fragrance → skip step 2, save immediately with DB defaults
+    var _status=(document.getElementById('afStatus')||{}).value||'';
+    var _isWish=_status==='WANT_TO_BUY'||_status==='WANT_TO_SMELL';
+    if(_isWish && prefetchedData && !editingFragId){
+      quickSaveWishlist(); return;
+    }
     document.getElementById('afSrchErr').style.display='none';
     document.getElementById('af-s1').style.display='none';
     document.getElementById('af-s2').style.display='block';
@@ -5474,6 +5480,46 @@ function initAFMoreState(){
   try{ expanded=localStorage.getItem('afStep2Expanded')==='1'; }catch(e){}
   wrap.style.display=expanded?'block':'none';
   toggle.textContent=expanded?'— LESS DETAILS':'+ MORE DETAILS';
+}
+
+function quickSaveWishlist(){
+  var name=document.getElementById('afSrch').value.trim();
+  if(!name){ toast('No fragrance selected'); return; }
+  var d=prefetchedData||{};
+  var _concMap={'EDP':'Eau de Parfum','EDT':'Eau de Toilette','Extrait':'Extrait de Parfum'};
+  var status=(document.getElementById('afStatus')||{}).value||'WANT_TO_BUY';
+  var topN=d.topNotes||'', midN=d.middleNotes||'', baseN=d.baseNotes||'';
+  var combinedNotes=[topN,midN,baseN].filter(Boolean).join(' · ');
+  var dbHits=fragSearch(name,1);
+  var db=dbHits.find(function(f){return normStr(f.n)===normStr(name);})||dbHits[0];
+  var type=_concMap[d.type]||d.type||'';
+  var accords=d._accords||(db?db.accords:'')||'';
+  var _nfId2='f'+nextId++;
+  var newFrag={
+    id:_nfId2,
+    fragranceId:lookupFragDbId(name,db?db.h:'',type)||_nfId2,
+    userId:CURRENT_USER?CURRENT_USER.id:'u1',
+    name:name, house:db?db.h:'', status:status, type:type,
+    sizes:[], personalRating:null, statusRating:null,
+    whereBought:null, purchasePrice:null, purchaseDate:null,
+    isDupe:false, dupeFor:'', personalNotes:'',
+    topNotes:topN, middleNotes:midN, baseNotes:baseN,
+    accords:accords, createdAt:new Date().toISOString()
+  };
+  if(combinedNotes) newFrag.notes=combinedNotes;
+  // Duplicate check
+  var duplicate=myFragrances().find(function(f){
+    if(f.name.toLowerCase().trim()!==newFrag.name.toLowerCase().trim()) return false;
+    var _ew=f.status==='WANT_TO_BUY'||f.status==='WANT_TO_SMELL';
+    return _ew;
+  });
+  if(duplicate){ toast('You already have '+newFrag.name+' on your wishlist.'); return; }
+  FRAGRANCES.push(newFrag);
+  appendRow('userFragrances',fragToRow(newFrag),FRAG_HEADERS).catch(function(e){console.error('Sheet write failed',e);});
+  closeModal('addFragM');
+  renderCurrentPage(); updateCounts();
+  prefetchedData=null; editingFragId=null;
+  toast('Added '+name+' to wishlist');
 }
 
 function saveFragrance(){
