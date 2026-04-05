@@ -1214,6 +1214,7 @@ input,select,textarea{font-size:16px;}
         </div>
         <div class="fpanel" id="ftana-collection">
           <div id="ft-ana-accords"></div>
+          <div class="in-common" id="ftana-inCommon" style="margin-top:24px;"></div>
         </div>
         <div class="fpanel" id="ftana-notes">
           <div id="ft-ana-notes"></div>
@@ -4361,7 +4362,7 @@ function renderCompliments(filter='all'){
   if(ffBar){ ffBar.style.display=compFragFilter?'':'none'; if(ffName&&compFragFilter) ffName.textContent=compFragFilter.name; }
   // Apply frag filter first, then relation filter, then month filter
   var base = compFragFilter ? MC.filter(function(c){return c.primaryFragId===(compFragFilter.fragranceId||compFragFilter.id)||c.secondaryFragId===(compFragFilter.fragranceId||compFragFilter.id);}) : MC;
-  if(_compMonthFilter&&_compYearFilter){ base=base.filter(function(c){return parseInt(c.month)===_compMonthFilter&&parseInt(c.year)===_compYearFilter;}); }
+  if(_compMonthFilter&&_compYearFilter){ var _MNS0=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; function _pmf(m){var n=parseInt(m);return isNaN(n)?_MNS0.indexOf(m)+1:n;} base=base.filter(function(c){return _pmf(c.month)===_compMonthFilter&&parseInt(c.year)===_compYearFilter;}); }
   var filtered = (filter==='all' ? base : base.filter(c=>c.relation===filter)).slice();
   // Apply sort
   var _sv = compSortVal || 'dateDesc';
@@ -4682,14 +4683,33 @@ function renderAnalytics(){
       pill.appendChild(num); pill.appendChild(lbl); pillsEl.appendChild(pill);
     });
     if(showSylviaOverlay&&SC.length){
-      var sdiv=document.createElement('div'); sdiv.style.cssText='width:100%;font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;padding-top:8px;'; sdiv.textContent='Sylvia'; pillsEl.appendChild(sdiv);
+      // Compare stat strip — K vs S split for each stat
       var sRelCounts={}; SC.forEach(function(c){sRelCounts[c.relation]=(sRelCounts[c.relation]||0)+1;});
       var sTopRel=Object.keys(sRelCounts).sort(function(a,b){return sRelCounts[b]-sRelCounts[a];})[0]||'—';
-      [{num:SC.length,lbl:'Compliments'},{num:new Set(SC.map(function(c){return c.primaryFrag;})).size,lbl:'Fragrances'},{num:SF.length,lbl:'Collection'},{num:sTopRel,lbl:'Top Relation'}].forEach(function(p){
-        var pill=document.createElement('div'); pill.className='ana-pill'; pill.style.borderColor='rgba(184,112,104,.35)';
-        var num=document.createElement('div'); num.className='ana-pill-num'; num.style.color='var(--rose)'; num.textContent=p.num;
-        var lbl=document.createElement('div'); lbl.className='ana-pill-lbl'; lbl.textContent=p.lbl;
-        pill.appendChild(num); pill.appendChild(lbl); pillsEl.appendChild(pill);
+      var cmpStats=[
+        {lbl:'Compliments',k:MC.length,s:SC.length},
+        {lbl:'Fragrances',k:new Set(MC.map(function(c){return c.primaryFrag;})).size,s:new Set(SC.map(function(c){return c.primaryFrag;})).size},
+        {lbl:'Collection',k:MFC.length,s:SF.length}
+      ];
+      var sepDiv=document.createElement('div'); sepDiv.style.cssText='width:100%;height:1px;background:var(--b2);margin:12px 0 8px;'; pillsEl.appendChild(sepDiv);
+      var cmpLbl=document.createElement('div'); cmpLbl.style.cssText='width:100%;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;display:flex;gap:16px;';
+      var kk=document.createElement('span'); kk.style.color='var(--blue)'; kk.textContent='■ Kiana';
+      var ss=document.createElement('span'); ss.style.color='var(--rose)'; ss.textContent='■ Sylvia';
+      cmpLbl.appendChild(kk); cmpLbl.appendChild(ss); pillsEl.appendChild(cmpLbl);
+      cmpStats.forEach(function(cs){
+        var total=cs.k+cs.s||1;
+        var cmpPill=document.createElement('div'); cmpPill.style.cssText='background:var(--off2);border:1px solid var(--b2);padding:10px 16px;min-width:80px;';
+        var top=document.createElement('div'); top.style.cssText='display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;';
+        var kv=document.createElement('span'); kv.style.cssText='font-family:var(--serif);font-size:20px;color:var(--blue);line-height:1;'; kv.textContent=cs.k;
+        var sv=document.createElement('span'); sv.style.cssText='font-family:var(--serif);font-size:20px;color:var(--rose);line-height:1;'; sv.textContent=cs.s;
+        top.appendChild(kv); top.appendChild(sv);
+        var barWrap=document.createElement('div'); barWrap.style.cssText='height:3px;background:var(--b2);border-radius:2px;overflow:hidden;margin:4px 0;display:flex;';
+        var kBar=document.createElement('div'); kBar.style.cssText='height:100%;width:'+Math.round(cs.k/total*100)+'%;background:var(--blue);';
+        var sBar=document.createElement('div'); sBar.style.cssText='height:100%;width:'+Math.round(cs.s/total*100)+'%;background:var(--rose);';
+        barWrap.appendChild(kBar); barWrap.appendChild(sBar);
+        var lbl2=document.createElement('div'); lbl2.className='ana-pill-lbl'; lbl2.textContent=cs.lbl;
+        cmpPill.appendChild(top); cmpPill.appendChild(barWrap); cmpPill.appendChild(lbl2);
+        pillsEl.appendChild(cmpPill);
       });
     }
   }
@@ -4848,29 +4868,39 @@ function renderAnalytics(){
         apList.appendChild(wrap);
       });
       accordPerfSection.appendChild(apList);
-      // Sylvia's accord performance comparison
+      // Compare mode: overlapping dual bars when Sylvia overlay is active
       if(showSylviaOverlay&&SC.length>=2){
-        var sApHd=document.createElement('div'); sApHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--rose);letter-spacing:.12em;text-transform:uppercase;margin-top:16px;margin-bottom:4px;padding-top:12px;border-top:1px solid var(--b1);'; sApHd.textContent='Sylvia — Accord Performance'; accordPerfSection.appendChild(sApHd);
-        var sAccordComps={};
-        var sFF=friendFragrances();
+        var cmpHd=document.createElement('div'); cmpHd.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:20px;margin-bottom:4px;padding-top:12px;border-top:1px solid var(--b1);display:flex;gap:16px;';
+        var kLbl=document.createElement('span'); kLbl.style.cssText='color:var(--blue);'; kLbl.textContent='■ Kiana';
+        var sLbl=document.createElement('span'); sLbl.style.cssText='color:var(--rose);'; sLbl.textContent='■ Sylvia';
+        cmpHd.appendChild(kLbl); cmpHd.appendChild(sLbl); accordPerfSection.appendChild(cmpHd);
+        var sAccordComps2={};
+        var sFF2=friendFragrances();
         SC.forEach(function(c){
-          var frag=sFF.find(function(f){return (f.fragranceId||f.id)===c.primaryFragId;});
+          var frag=sFF2.find(function(f){return (f.fragranceId||f.id)===c.primaryFragId;});
           if(!frag) return;
-          getAccords(frag).forEach(function(acc){ if(!acc) return; sAccordComps[acc]=(sAccordComps[acc]||0)+1; });
+          getAccords(frag).forEach(function(acc){ if(!acc) return; sAccordComps2[acc]=(sAccordComps2[acc]||0)+1; });
         });
-        var sSortedAcc=Object.entries(sAccordComps).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
-        var sMaxAP=sSortedAcc[0]?sSortedAcc[0][1]:1;
-        var sApList=document.createElement('div'); sApList.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px;';
-        sSortedAcc.forEach(function(entry){
-          var acc=entry[0]; var cnt=entry[1]; var pct=Math.round(cnt/sMaxAP*100);
+        // Union of all accords from both users, sorted by Kiana's count
+        var allAccords=Array.from(new Set(Object.keys(accordComps).concat(Object.keys(sAccordComps2)))).sort(function(a,b){return (accordComps[b]||0)-(accordComps[a]||0);}).slice(0,8);
+        var cmpMax=Math.max.apply(null,allAccords.map(function(a){return Math.max(accordComps[a]||0,sAccordComps2[a]||0);}))||1;
+        var cmpList=document.createElement('div'); cmpList.style.cssText='display:flex;flex-direction:column;gap:6px;margin-top:8px;';
+        allAccords.forEach(function(acc){
+          var kCnt=accordComps[acc]||0; var sCnt=sAccordComps2[acc]||0;
+          var wrap=document.createElement('div');
           var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:10px;';
           var lbl=document.createElement('div'); lbl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.04em;width:90px;flex-shrink:0;'; lbl.textContent=acc;
-          var barWrap=document.createElement('div'); barWrap.style.cssText='flex:1;height:6px;background:var(--b2);border-radius:3px;overflow:hidden;';
-          var bar=document.createElement('div'); bar.style.cssText='height:100%;width:'+pct+'%;background:var(--rose);border-radius:3px;transition:width .4s;'; barWrap.appendChild(bar);
-          var countEl=document.createElement('div'); countEl.style.cssText='font-family:var(--mono);font-size:11px;color:var(--ink3);width:20px;text-align:right;flex-shrink:0;'; countEl.textContent=cnt;
-          row.appendChild(lbl); row.appendChild(barWrap); row.appendChild(countEl); sApList.appendChild(row);
+          var dualBar=document.createElement('div'); dualBar.style.cssText='flex:1;display:flex;flex-direction:column;gap:2px;';
+          var kWrap=document.createElement('div'); kWrap.style.cssText='height:4px;background:var(--b2);border-radius:2px;overflow:hidden;';
+          var kFill=document.createElement('div'); kFill.style.cssText='height:100%;width:'+Math.round(kCnt/cmpMax*100)+'%;background:var(--blue);border-radius:2px;transition:width .4s;'; kWrap.appendChild(kFill);
+          var sWrap=document.createElement('div'); sWrap.style.cssText='height:4px;background:var(--b2);border-radius:2px;overflow:hidden;';
+          var sFill=document.createElement('div'); sFill.style.cssText='height:100%;width:'+Math.round(sCnt/cmpMax*100)+'%;background:var(--rose);border-radius:2px;transition:width .4s;'; sWrap.appendChild(sFill);
+          dualBar.appendChild(kWrap); dualBar.appendChild(sWrap);
+          var counts=document.createElement('div'); counts.style.cssText='font-family:var(--mono);font-size:10px;color:var(--ink3);min-width:44px;text-align:right;flex-shrink:0;'; counts.textContent=kCnt+'/'+sCnt;
+          row.appendChild(lbl); row.appendChild(dualBar); row.appendChild(counts); wrap.appendChild(row);
+          cmpList.appendChild(wrap);
         });
-        accordPerfSection.appendChild(sApList);
+        accordPerfSection.appendChild(cmpList);
       }
     }
   }
@@ -5181,7 +5211,7 @@ function renderAnalytics(){
     } else {
       var relGroups={'Stranger':0,'Friend':0,'Significant Other':0,'Colleague / Client':0,'Family':0,'Other':0};
       MC.forEach(function(c){ var r=c.relation||'Other'; if(relGroups[r]!==undefined)relGroups[r]++;else relGroups['Other']++; });
-      var dnColors={'Stranger':'var(--blue)','Friend':'var(--warm)','Significant Other':'var(--rose)','Colleague / Client':'var(--sage)','Family':'var(--sky)','Other':'var(--b3)'};
+      var dnColors={'Stranger':'var(--blue)','Friend':'var(--warm)','Significant Other':'var(--rose)','Colleague / Client':'var(--sage)','Family':'var(--muted)','Other':'var(--ink3)'};
       var dnTotal=MC.length; var dnParts=Object.entries(relGroups).filter(function(e){return e[1]>0;});
       var dnWrap=document.createElement('div'); dnWrap.className='donut-wrap';
       // SVG donut
@@ -5197,7 +5227,7 @@ function renderAnalytics(){
         var d='M '+x1+' '+y1+' A '+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2;
         path.setAttribute('d',d); path.setAttribute('fill','none');
         // Resolve CSS var to approximate hex for SVG stroke
-        var colorMap={'var(--blue)':'#3A5699','var(--warm)':'#c9a96e','var(--rose)':'#c4848a','var(--sage)':'#8aab96','var(--sky)':'#7fa8c4','var(--b3)':'#2e2d36'};
+        var colorMap={'var(--blue)':'#2B4480','var(--warm)':'#C8B99A','var(--rose)':'#B87068','var(--sage)':'#5E8A6E','var(--muted)':'#7A8FAA','var(--ink3)':'#556070'};
         path.setAttribute('stroke',colorMap[dnColors[e[0]]]||'#3A5699');
         path.setAttribute('stroke-width',stroke); svg.appendChild(path);
         startAngle=endAngle;
@@ -5677,6 +5707,26 @@ function renderFriendAnalytics(){
     });
     notesEl.innerHTML=nHtml;
   }
+  // In Common section in Collection tab
+  renderInCommon();
+}
+
+function renderInCommonToEl(el, shared, FF, friend){
+  while(el.firstChild) el.removeChild(el.firstChild);
+  if(!shared.length) return;
+  var lbl=document.createElement('div'); lbl.className='ic-label';
+  lbl.textContent='In common — '+shared.length+' fragrance'+(shared.length>1?'s':'')+' you both own'; el.appendChild(lbl);
+  shared.forEach(function(mine){
+    var hers=FF.find(function(f){return f.name.toLowerCase()===mine.name.toLowerCase()&&(f.house||'').toLowerCase()===(mine.house||'').toLowerCase();});
+    var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b2);cursor:pointer;';
+    var nm=document.createElement('div'); nm.style.cssText='font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);'; nm.textContent=mine.name; row.appendChild(nm);
+    var rt=document.createElement('div'); rt.style.cssText='text-align:right;';
+    var stars=document.createElement('div'); stars.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);';
+    stars.textContent='You: '+starsStr(mine.personalRating)+' · '+(friend?friend.name:'Friend')+': '+starsStr(hers?hers.personalRating:null);
+    rt.appendChild(stars); row.appendChild(rt);
+    (function(id){row.onclick=function(){openDetail(id);};})(mine.id);
+    el.appendChild(row);
+  });
 }
 
 function renderInCommon(){
@@ -5690,21 +5740,10 @@ function renderInCommon(){
   var wishShared=myWishList.filter(function(f){return friendWishKeys.indexOf(f.name.toLowerCase()+'|'+(f.house||'').toLowerCase())>=0;});
 
   var ic=document.getElementById('inCommon');
-  if(ic){
-    while(ic.firstChild) ic.removeChild(ic.firstChild);
-    if(shared.length){
-      var lbl=document.createElement('div'); lbl.className='ic-label';
-      lbl.textContent='In common — '+shared.length+' fragrance'+(shared.length>1?'s':'')+' you both own'; ic.appendChild(lbl);
-      shared.forEach(function(mine){
-        var hers=FF.find(function(f){return f.name.toLowerCase()===mine.name.toLowerCase()&&(f.house||'').toLowerCase()===(mine.house||'').toLowerCase();});
-        var row=document.createElement('div'); row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--b2);';
-        var nm=document.createElement('div'); nm.style.cssText='font-family:var(--serif);font-size:13px;font-style:italic;color:var(--blue);'; nm.textContent=mine.name; row.appendChild(nm);
-        var rt=document.createElement('div'); rt.style.cssText='font-family:var(--mono);font-size:9px;color:var(--ink3);';
-        rt.textContent='You: '+starsStr(mine.personalRating)+' · '+(friend?friend.name:'Friend')+': '+starsStr(hers?hers.personalRating:null); row.appendChild(rt);
-        ic.appendChild(row);
-      });
-    }
-  }
+  if(ic) renderInCommonToEl(ic, shared, FF, friend);
+  // Also render in friend analytics collection tab
+  var ftanaIc=document.getElementById('ftana-inCommon');
+  if(ftanaIc) renderInCommonToEl(ftanaIc, shared, FF, friend);
   var wic=document.getElementById('wishInCommon');
   if(wic){
     while(wic.firstChild) wic.removeChild(wic.firstChild);
