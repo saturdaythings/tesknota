@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FragForm } from "@/components/ui/frag-form";
+import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import type { CommunityFrag, FragranceStatus } from "@/types";
 
 type AddTarget = "CURRENT" | "WANT_TO_BUY" | "WANT_TO_SMELL";
 
 export default function ImportPage() {
+  const { user } = useUser();
   const { communityFrags } = useData();
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
@@ -38,6 +40,7 @@ export default function ImportPage() {
           onClose={() => setFormOpen(false)}
           prefill={prefillFrag}
           status={formStatus}
+          userId={user?.id ?? "u1"}
         />
       )}
       <Topbar category="Manage" title="Import" />
@@ -55,7 +58,7 @@ export default function ImportPage() {
         )}
 
         {results.length > 0 && (
-          <div className="border border-[var(--b2)] max-w-[600px]">
+          <div className="border border-[var(--b2)] max-w-[460px]">
             {results.map((cf) => (
               <div
                 key={cf.fragranceId}
@@ -100,17 +103,19 @@ function FragFormWithPrefill({
   onClose,
   prefill,
   status,
+  userId,
 }: {
   open: boolean;
   onClose: () => void;
   prefill: CommunityFrag | null;
   status: FragranceStatus;
+  userId: "u1" | "u2";
 }) {
   const editing = prefill
     ? {
         id: "",
         fragranceId: prefill.fragranceId,
-        userId: "u1" as const,
+        userId,
         name: prefill.fragranceName,
         house: prefill.fragranceHouse,
         status,

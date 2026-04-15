@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { useUser, getFriend } from "@/lib/user-context";
 import { DataProvider } from "@/lib/data-context";
 import { ToastProvider } from "@/components/ui/toast";
+import { MobileNavProvider } from "@/lib/mobile-nav-context";
 
 const NAV_SECTIONS_BASE = [
   {
@@ -53,22 +54,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <AppShell
-      sidebar={
-        <Sidebar
-          navSections={navSections}
-          userName={user.name}
-          onSignOut={() => {
-            signOut();
-            router.push("/");
-          }}
-          onUserClick={() => router.push("/settings")}
-        />
-      }
-    >
-      <DataProvider>
-        <ToastProvider>{children}</ToastProvider>
-      </DataProvider>
-    </AppShell>
+    <MobileNavProvider>
+      <AppShell
+        sidebar={
+          <Sidebar
+            navSections={navSections}
+            userName={user.name}
+            onSignOut={() => {
+              signOut();
+              router.push("/");
+            }}
+            onUserClick={() => router.push("/settings")}
+          />
+        }
+      >
+        <DataProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </DataProvider>
+      </AppShell>
+    </MobileNavProvider>
   );
 }

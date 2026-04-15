@@ -6,8 +6,10 @@ import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { FragForm } from "@/components/ui/frag-form";
+import { FragDetail } from "@/components/ui/frag-detail";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
+import { useToast } from "@/components/ui/toast";
 import { MONTHS, getAccords } from "@/lib/frag-utils";
 import type { UserFragrance, CommunityFrag } from "@/types";
 
@@ -30,12 +32,24 @@ function getPrice(f: UserFragrance, communityFrags: CommunityFrag[]): string {
 
 export default function WishlistPage() {
   const { user } = useUser();
-  const { fragrances, communityFrags, isLoaded } = useData();
+  const { fragrances, compliments, communityFrags, isLoaded, removeFrag } = useData();
+  const { toast } = useToast();
   const [filter, setFilter] = useState<WishFilter>("all");
   const [sort, setSort] = useState<SortKey>("nameAZ");
   const [boughtFrag, setBoughtFrag] = useState<UserFragrance | null>(null);
+  const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
+  const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   if (!user) return null;
+
+  const MC = compliments.filter((c) => c.userId === user.id);
+
+  async function handleDeleteFrag(frag: UserFragrance) {
+    await removeFrag(frag.id);
+    setDetailFrag(null);
+    toast("Fragrance deleted.");
+  }
 
   const MF = fragrances.filter((f) => f.userId === user.id);
   const wish = MF.filter(
@@ -66,6 +80,21 @@ export default function WishlistPage() {
 
   return (
     <>
+      <FragDetail
+        open={!!detailFrag}
+        onClose={() => setDetailFrag(null)}
+        frag={detailFrag}
+        communityFrags={communityFrags}
+        compliments={MC}
+        userId={user.id}
+        onEdit={(frag) => { setEditingFrag(frag); setFormOpen(true); }}
+        onDelete={handleDeleteFrag}
+      />
+      <FragForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        editing={editingFrag}
+      />
       <FragForm
         open={!!boughtFrag}
         onClose={() => setBoughtFrag(null)}
@@ -139,6 +168,7 @@ export default function WishlistPage() {
                         <tr
                           key={f.id}
                           className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+                          onClick={() => setDetailFrag(f)}
                         >
                           <td className="px-4 py-3">
                             <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>

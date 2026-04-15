@@ -45,8 +45,9 @@ interface Props {
   communityFrags: CommunityFrag[];
   compliments: UserCompliment[];
   userId: UserId;
-  onEdit: (frag: UserFragrance) => void;
-  onDelete: (frag: UserFragrance) => void;
+  onEdit?: (frag: UserFragrance) => void;
+  onDelete?: (frag: UserFragrance) => void;
+  readOnly?: boolean;
 }
 
 export function FragDetail({
@@ -58,6 +59,7 @@ export function FragDetail({
   userId,
   onEdit,
   onDelete,
+  readOnly = false,
 }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -71,7 +73,7 @@ export function FragDetail({
 
   function handleDelete() {
     if (!confirmDelete) { setConfirmDelete(true); return; }
-    onDelete(frag!);
+    onDelete?.(frag!);
   }
 
   function handleClose() {
@@ -89,14 +91,15 @@ export function FragDetail({
       footer={
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            {!confirmDelete ? (
+            {!readOnly && onDelete && !confirmDelete && (
               <button
                 onClick={handleDelete}
                 className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)] border border-[var(--rose-tk)] px-3 py-[5px] hover:bg-[var(--rose-tk)] hover:text-white transition-colors"
               >
                 Delete
               </button>
-            ) : (
+            )}
+            {!readOnly && onDelete && confirmDelete && (
               <>
                 <span className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)]">Remove permanently?</span>
                 <button
@@ -115,12 +118,14 @@ export function FragDetail({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => { handleClose(); onEdit(frag!); }}
-              className="px-4 py-[7px] font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-            >
-              Edit
-            </button>
+            {!readOnly && onEdit && (
+              <button
+                onClick={() => { handleClose(); onEdit(frag!); }}
+                className="px-4 py-[7px] font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+              >
+                Edit
+              </button>
+            )}
             <button
               onClick={handleClose}
               className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90"

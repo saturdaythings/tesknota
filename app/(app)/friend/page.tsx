@@ -6,6 +6,7 @@ import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { FragRow } from "@/components/ui/frag-row";
+import { FragDetail } from "@/components/ui/frag-detail";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS, getAccords, monthNum } from "@/lib/frag-utils";
@@ -25,6 +26,7 @@ export default function FriendPage() {
   const { user } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded } = useData();
   const [tab, setTab] = useState<FriendTab>("collection");
+  const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
 
   if (!user) return null;
 
@@ -51,6 +53,15 @@ export default function FriendPage() {
 
   return (
     <>
+      <FragDetail
+        open={!!detailFrag}
+        onClose={() => setDetailFrag(null)}
+        frag={detailFrag}
+        communityFrags={communityFrags}
+        compliments={compliments.filter((c) => c.userId === friend.id)}
+        userId={friend.id as UserId}
+        readOnly
+      />
       <Topbar category="Social" title={`${friendName}'s Profile`} />
       <main className="flex-1 overflow-y-auto p-[26px]">
         {!isLoaded && (
@@ -85,6 +96,7 @@ export default function FriendPage() {
                 compliments={FC}
                 communityFrags={communityFrags}
                 friendId={friend.id as UserId}
+                onFragClick={setDetailFrag}
               />
             )}
             {tab === "compliments" && (
@@ -122,11 +134,13 @@ function FriendCollectionTab({
   compliments,
   communityFrags,
   friendId,
+  onFragClick,
 }: {
   frags: UserFragrance[];
   compliments: UserCompliment[];
   communityFrags: CommunityFrag[];
   friendId: UserId;
+  onFragClick: (frag: UserFragrance) => void;
 }) {
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
   return (
@@ -152,6 +166,7 @@ function FriendCollectionTab({
                   communityFrags={communityFrags}
                   compliments={compliments}
                   userId={friendId}
+                  onClick={onFragClick}
                 />
               ))}
             </tbody>
@@ -200,7 +215,7 @@ function FriendComplimentsTab({
                 return (
                   <tr
                     key={c.id}
-                    className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+                    className="border-b border-[var(--b1)] last:border-0"
                   >
                     <td className="px-4 py-3">
                       <div className="font-[var(--body)] text-sm text-[var(--ink)]">{fragName}</div>
@@ -260,7 +275,7 @@ function FriendWishlistTab({
                 return (
                   <tr
                     key={f.id}
-                    className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+                    className="border-b border-[var(--b1)] last:border-0"
                   >
                     <td className="px-4 py-3">
                       <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
@@ -327,7 +342,7 @@ function InCommonTab({
                 return (
                   <tr
                     key={f.id}
-                    className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+                    className="border-b border-[var(--b1)] last:border-0"
                   >
                     <td className="px-4 py-3">
                       <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>

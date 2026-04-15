@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
+import { FragDetail } from "@/components/ui/frag-detail";
+import { FragForm } from "@/components/ui/frag-form";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AccordCloud } from "@/components/ui/accord-cloud";
@@ -26,7 +29,10 @@ const WISHLIST_STATUSES = new Set(["WANT_TO_BUY", "WANT_TO_SMELL", "WANT_TO_IDEN
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const { fragrances, compliments, communityFrags, isLoaded } = useData();
+  const { fragrances, compliments, communityFrags, isLoaded, removeFrag } = useData();
+  const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
+  const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
 
   if (!user) return null;
 
@@ -53,8 +59,28 @@ export default function DashboardPage() {
 
   const hasCurrent = current.length > 0;
 
+  async function handleDeleteFrag(frag: UserFragrance) {
+    await removeFrag(frag.id);
+    setDetailFrag(null);
+  }
+
   return (
     <>
+      <FragDetail
+        open={!!detailFrag}
+        onClose={() => setDetailFrag(null)}
+        frag={detailFrag}
+        communityFrags={communityFrags}
+        compliments={MC}
+        userId={user.id}
+        onEdit={(frag) => { setEditingFrag(frag); setFormOpen(true); }}
+        onDelete={handleDeleteFrag}
+      />
+      <FragForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        editing={editingFrag}
+      />
       <Topbar category="My Space" title="Dashboard" />
       <main className="flex-1 overflow-y-auto p-[26px]">
         {!isLoaded && (
@@ -64,7 +90,9 @@ export default function DashboardPage() {
         )}
 
         {isLoaded && !hasCurrent && (
-          <Onboarding />
+          <Onboarding
+            onAddFrag={() => { setEditingFrag(null); setFormOpen(true); }}
+          />
         )}
 
         {isLoaded && hasCurrent && (
@@ -78,12 +106,12 @@ export default function DashboardPage() {
               <StatBox value={avgRat} label="Avg Rating" delta={avgRatDelta} />
             </StatsGrid>
 
-            <div className="grid gap-6 [grid-template-columns:1fr_1fr] mb-6">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 mb-6">
               <Spotlight MF={MF} MC={MC} />
               <ScentSignature frags={current} communityFrags={communityFrags} />
             </div>
 
-            <RecentFragrances frags={MF} compliments={MC} communityFrags={communityFrags} userId={user.id} />
+            <RecentFragrances frags={MF} compliments={MC} communityFrags={communityFrags} userId={user.id} onFragClick={setDetailFrag} />
 
             <FriendActivity fragrances={fragrances} compliments={compliments} currentUserId={user.id} />
           </>
@@ -95,7 +123,7 @@ export default function DashboardPage() {
 
 // ── Onboarding ───────────────────────────────────────────
 
-function Onboarding() {
+function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
   return (
     <div className="max-w-[440px] mt-8">
       <div className="font-[var(--serif)] text-[26px] text-[var(--blue)] mb-1">
@@ -105,38 +133,27 @@ function Onboarding() {
         Your fragrance journey starts here
       </div>
       <div className="flex flex-col gap-4">
-        <OnboardStep
-          num="1"
-          title="Add your first fragrance"
-          desc="Search by name or import from a spreadsheet"
-        />
-        <OnboardStep
-          num="2"
-          title="Log your first compliment"
-          desc="Record who complimented you, when, and what you were wearing"
-        />
-      </div>
-    </div>
-  );
-}
-
-function OnboardStep({
-  num,
-  title,
-  desc,
-}: {
-  num: string;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="flex items-start gap-4 p-4 bg-[var(--off2)] border border-[var(--b2)]">
-      <div className="w-6 h-6 shrink-0 rounded-full bg-[var(--blue)] text-white font-[var(--mono)] text-xs flex items-center justify-center">
-        {num}
-      </div>
-      <div>
-        <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-[2px]">{title}</div>
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{desc}</div>
+        <button
+          onClick={onAddFrag}
+          className="flex items-start gap-4 p-4 bg-[var(--off2)] border border-[var(--b2)] text-left w-full hover:bg-[var(--off3)] transition-colors"
+        >
+          <div className="w-6 h-6 shrink-0 rounded-full bg-[var(--blue)] text-white font-[var(--mono)] text-xs flex items-center justify-center">
+            1
+          </div>
+          <div>
+            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-[2px]">Add your first fragrance</div>
+            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">Search by name or import from a spreadsheet</div>
+          </div>
+        </button>
+        <div className="flex items-start gap-4 p-4 bg-[var(--off2)] border border-[var(--b2)] opacity-50">
+          <div className="w-6 h-6 shrink-0 rounded-full bg-[var(--b3)] text-[var(--ink3)] font-[var(--mono)] text-xs flex items-center justify-center">
+            2
+          </div>
+          <div>
+            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-[2px]">Log your first compliment</div>
+            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">Record who complimented you, when, and what you were wearing</div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -253,11 +270,13 @@ function RecentFragrances({
   compliments,
   communityFrags,
   userId,
+  onFragClick,
 }: {
   frags: UserFragrance[];
   compliments: UserCompliment[];
   communityFrags: CommunityFrag[];
   userId: UserId;
+  onFragClick: (frag: UserFragrance) => void;
 }) {
   const sorted = frags
     .filter((f) => !WISHLIST_STATUSES.has(f.status))
@@ -287,6 +306,7 @@ function RecentFragrances({
                   compliments={compliments}
                   communityFrags={communityFrags}
                   userId={userId}
+                  onClick={onFragClick}
                 />
               ))}
             </tbody>
@@ -302,18 +322,23 @@ function RecentRow({
   compliments,
   communityFrags,
   userId,
+  onClick,
 }: {
   frag: UserFragrance;
   compliments: UserCompliment[];
   communityFrags: CommunityFrag[];
   userId: UserId;
+  onClick: (frag: UserFragrance) => void;
 }) {
   const compCount = getCompCount(f.fragranceId || f.id, compliments, userId);
   const accords = getAccords(f, communityFrags).join(", ") || "\u2014";
   const addedStr = f.purchaseDate ?? (f.createdAt ? `${MONTHS[new Date(f.createdAt).getMonth()]} ${new Date(f.createdAt).getFullYear()}` : "");
 
   return (
-    <tr className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer">
+    <tr
+      className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+      onClick={() => onClick(f)}
+    >
       <td className="px-4 py-3">
         <div className="font-[var(--body)] text-sm text-[var(--ink)]">
           {f.name}
@@ -336,7 +361,7 @@ function RecentRow({
       </td>
       <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
       <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
-        {compCount > 0 ? <span className="text-[var(--blue)] underline underline-offset-2 cursor-pointer">{compCount}</span> : "\u2014"}
+        {compCount > 0 ? <span className="text-[var(--blue)]">{compCount}</span> : "\u2014"}
       </td>
       <td className="px-4 py-3">
         <span className={`font-[var(--mono)] text-[11px] tracking-[0.04em] ${statusColorClass(f.status)}`}>
@@ -358,6 +383,7 @@ function FriendActivity({
   compliments: UserCompliment[];
   currentUserId: UserId;
 }) {
+  const router = useRouter();
   const friends = USERS.filter((u) => u.id !== currentUserId);
   const sections: React.ReactNode[] = [];
 
@@ -394,6 +420,7 @@ function FriendActivity({
               label="Latest purchase"
               name={recentPurchase.name}
               sub={recentPurchase.house}
+              onClick={() => router.push("/friend")}
             />
           )}
           {recentComp && (
@@ -408,6 +435,7 @@ function FriendActivity({
               ]
                 .filter(Boolean)
                 .join(" \u00B7 ")}
+              onClick={() => router.push("/friend")}
             />
           )}
         </div>
@@ -419,9 +447,12 @@ function FriendActivity({
   return <>{sections}</>;
 }
 
-function FriendCard({ label, name, sub }: { label: string; name: string; sub: string }) {
+function FriendCard({ label, name, sub, onClick }: { label: string; name: string; sub: string; onClick?: () => void }) {
   return (
-    <div className="flex-1 bg-[var(--off2)] border border-[var(--b2)] p-4 cursor-pointer hover:bg-[var(--off3)]">
+    <div
+      onClick={onClick}
+      className="flex-1 bg-[var(--off2)] border border-[var(--b2)] p-4 cursor-pointer hover:bg-[var(--off3)] transition-colors"
+    >
       <div className="font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
         {label}
       </div>
