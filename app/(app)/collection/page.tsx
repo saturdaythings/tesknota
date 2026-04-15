@@ -186,13 +186,9 @@ export default function CollectionPage() {
                   <table className="w-full min-w-[640px]">
                     <thead>
                       <tr className="border-b border-[var(--b2)]">
-                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
-                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Size</th>
-                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Rating</th>
-                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Added</th>
-                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Accords</th>
-                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
-                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Status</th>
+                        {["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"].map((h) => (
+                          <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">{h}</th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>

@@ -216,9 +216,12 @@
   --color-ink2: var(--ink2);
   --color-ink3: var(--ink3);
   --color-green: var(--green);
-  --color-s-want: var(--s-want);
-  --color-s-unknown: var(--s-unknown);
-  --color-s-sold: var(--s-sold);
+  --color-s-cur: var(--s-cur);
+  --color-s-prv: var(--s-prv);
+  --color-s-wnt: var(--s-wnt);
+  --color-s-no: var(--s-no);
+  --color-s-unk: var(--s-unk);
+  --color-s-fin: var(--s-fin);
 
   /* fonts */
   --font-sans: var(--body);

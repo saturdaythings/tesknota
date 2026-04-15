@@ -370,7 +370,7 @@ function CSVImportTab({ userId }: { userId: string }) {
           onClick={() => fileRef.current?.click()}
         >
           <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.06em]">Click to select file</div>
-          <div className="font-[var(--mono)] text-[10px] text-[var(--ink4)]">.xlsx or .csv</div>
+          <div className="font-[var(--mono)] text-xs text-[var(--ink4)]">.xlsx or .csv</div>
         </div>
         <input ref={fileRef} type="file" accept=".xlsx,.csv,.xls" className="hidden" onChange={handleFile} />
       </div>
@@ -384,7 +384,7 @@ function CSVImportTab({ userId }: { userId: string }) {
           {rows.length} rows ready to import{skipped > 0 ? ` · ${skipped} blank rows skipped` : ""}.
         </div>
         {communityCount > 0 && (
-          <div className="font-[var(--mono)] text-[10px] text-[var(--blue)] mb-4">
+          <div className="font-[var(--mono)] text-xs text-[var(--blue)] mb-4">
             {communityCount} {communityCount === 1 ? "row has" : "rows have"} community data (notes, accords, ratings) — these will be written to the shared fragrance database.
           </div>
         )}
@@ -393,7 +393,7 @@ function CSVImportTab({ userId }: { userId: string }) {
             <thead>
               <tr className="border-b border-[var(--b2)]">
                 {["Name", "House", "Status", "Type", "Rating", "Month / Year", "Community data"].map((h) => (
-                  <th key={h} className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--ink3)] px-3 py-2 text-left font-normal whitespace-nowrap">{h}</th>
+                  <th key={h} className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)] px-3 py-2 text-left font-normal whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -402,15 +402,15 @@ function CSVImportTab({ userId }: { userId: string }) {
                 <tr key={i} className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)]">
                   <td className="font-[var(--body)] text-sm text-[var(--ink)] px-3 py-2 max-w-[180px] truncate">{row.name}</td>
                   <td className="font-[var(--mono)] text-xs text-[var(--ink3)] px-3 py-2 whitespace-nowrap">{row.house}</td>
-                  <td className="font-[var(--mono)] text-[10px] text-[var(--ink3)] px-3 py-2 whitespace-nowrap">{row.status}</td>
-                  <td className="font-[var(--mono)] text-[10px] text-[var(--ink3)] px-3 py-2 whitespace-nowrap">{row.type ?? "—"}</td>
+                  <td className="font-[var(--mono)] text-xs text-[var(--ink3)] px-3 py-2 whitespace-nowrap">{row.status}</td>
+                  <td className="font-[var(--mono)] text-xs text-[var(--ink3)] px-3 py-2 whitespace-nowrap">{row.type ?? "—"}</td>
                   <td className="font-[var(--mono)] text-xs text-[var(--ink3)] px-3 py-2">{row.personalRating ?? "—"}</td>
-                  <td className="font-[var(--mono)] text-[10px] text-[var(--ink3)] px-3 py-2 whitespace-nowrap">
+                  <td className="font-[var(--mono)] text-xs text-[var(--ink3)] px-3 py-2 whitespace-nowrap">
                     {[row.purchaseMonth, row.purchaseYear].filter(Boolean).join(" ") || "—"}
                   </td>
                   <td className="px-3 py-2">
                     {row.hasCommunityData ? (
-                      <span className="font-[var(--mono)] text-[10px] text-[var(--blue)]">
+                      <span className="font-[var(--mono)] text-xs text-[var(--blue)]">
                         {[
                           row.topNotes.length ? "top" : "",
                           row.middleNotes.length ? "mid" : "",
@@ -420,7 +420,7 @@ function CSVImportTab({ userId }: { userId: string }) {
                         ].filter(Boolean).join(", ")}
                       </span>
                     ) : (
-                      <span className="font-[var(--mono)] text-[10px] text-[var(--ink4)]">—</span>
+                      <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">—</span>
                     )}
                   </td>
                 </tr>
@@ -428,7 +428,7 @@ function CSVImportTab({ userId }: { userId: string }) {
             </tbody>
           </table>
           {rows.length > 25 && (
-            <div className="font-[var(--mono)] text-[10px] text-[var(--ink4)] px-3 py-2 border-t border-[var(--b1)]">
+            <div className="font-[var(--mono)] text-xs text-[var(--ink4)] px-3 py-2 border-t border-[var(--b1)]">
               +{rows.length - 25} more rows not shown
             </div>
           )}
@@ -471,7 +471,7 @@ function CSVImportTab({ userId }: { userId: string }) {
       {errors.length > 0 && (
         <div className="border border-[var(--b3)] bg-[var(--off2)] px-3 py-2 mb-4 max-w-[460px]">
           {errors.map((e, i) => (
-            <div key={i} className="font-[var(--mono)] text-[10px] text-[var(--rose-tk)] py-0.5">{e}</div>
+            <div key={i} className="font-[var(--mono)] text-xs text-[var(--rose-tk)] py-0.5">{e}</div>
           ))}
         </div>
       )}

@@ -8,10 +8,9 @@ import { FragForm } from "@/components/ui/frag-form";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AccordCloud } from "@/components/ui/accord-cloud";
-import { statusColorClass } from "@/components/ui/frag-row";
+import { StatusBadge } from "@/components/ui/frag-row";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
-import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 import {
   starsStr,
@@ -302,7 +301,7 @@ function RecentFragrances({
               <thead>
                 <tr className="border-b border-[var(--b2)]">
                   {["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"].map((h) => (
-                    <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">{h}</th>
+                    <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -350,9 +349,7 @@ function RecentCard({
       <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
       <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mb-1">{f.house}</div>
       <div className="flex flex-wrap gap-x-4 gap-y-[2px]">
-        <span className={`font-[var(--mono)] text-xs tracking-[0.04em] ${statusColorClass(f.status)}`}>
-          {STATUS_LABELS[f.status] ?? f.status}
-        </span>
+        <StatusBadge status={f.status} />
         {f.personalRating ? (
           <span className="font-[var(--mono)] text-xs text-[var(--warm-text)]">{starsStr(parseRating(f.personalRating))}</span>
         ) : null}
@@ -403,9 +400,7 @@ function RecentRow({
         {compCount > 0 ? <span className="text-[var(--blue)]">{compCount}</span> : "\u2014"}
       </td>
       <td className="px-4 py-3">
-        <span className={`font-[var(--mono)] text-xs tracking-[0.04em] ${statusColorClass(f.status)}`}>
-          {STATUS_LABELS[f.status] ?? f.status}
-        </span>
+        <StatusBadge status={f.status} />
       </td>
     </tr>
   );
@@ -493,7 +488,7 @@ function FriendCard({ label, name, sub, onClick }: { label: string; name: string
       onClick={onClick}
       className="flex-1 bg-[var(--off2)] border border-[var(--b2)] p-4 cursor-pointer hover:bg-[var(--off3)] transition-colors"
     >
-      <div className="font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
         {label}
       </div>
       <div className="font-[var(--body)] text-sm text-[var(--ink)]">{name}</div>

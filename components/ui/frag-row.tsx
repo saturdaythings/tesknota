@@ -15,10 +15,6 @@ const STATUS_STYLE: Record<string, { text: string; bg: string }> = {
   FINISHED:         { text: "var(--s-fin)",  bg: "transparent" },
 };
 
-export function statusColorClass(status: FragranceStatus): string {
-  return ""; // kept for backward compat — use StatusBadge instead
-}
-
 export function StatusBadge({ status }: { status: FragranceStatus }) {
   const style = STATUS_STYLE[status] ?? { text: "var(--ink3)", bg: "transparent" };
   return (
