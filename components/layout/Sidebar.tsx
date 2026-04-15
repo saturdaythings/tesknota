@@ -63,7 +63,7 @@ export function Sidebar({
           <div className="font-[var(--script)] text-2xl italic text-[var(--warm2)] tracking-[0.02em] leading-none">
             tesknota
           </div>
-          <div className="font-[var(--mono)] text-[10px] tracking-[0.22em] uppercase text-white/70 mt-1">
+          <div className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-white/70 mt-1">
             Fragrance Journal
           </div>
           <div className="font-[var(--script)] text-sm italic text-[rgba(var(--warm-ch),0.92)] leading-[1.45] mt-[10px] tracking-[0.01em]">
@@ -75,7 +75,7 @@ export function Sidebar({
         <nav className="flex-1 overflow-y-auto py-4 overscroll-contain">
           {navSections.map((section) => (
             <div key={section.label}>
-              <div className="font-[var(--mono)] text-[10px] tracking-[0.22em] uppercase text-white/55 px-5 mt-6 mb-1 pointer-events-none select-none">
+              <div className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-white/55 px-5 mt-6 mb-1 pointer-events-none select-none">
                 {section.label}
               </div>
               {section.items.map((item) => {
@@ -121,7 +121,7 @@ export function Sidebar({
           </div>
           <div
             onClick={onSignOut}
-            className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-white/25 cursor-pointer mt-[10px] transition-colors duration-[140ms] hover:text-white/55"
+            className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-white/25 cursor-pointer mt-[10px] transition-colors duration-[140ms] hover:text-white/55"
           >
             Sign out
           </div>

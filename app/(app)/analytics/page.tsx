@@ -37,7 +37,7 @@ export default function AnalyticsPage() {
   return (
     <>
       <Topbar category="Experiences" title="Analytics" />
-      <main className="flex-1 overflow-y-auto p-[26px]">
+      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
             Loading...
@@ -117,9 +117,9 @@ function ComplimentsTab({
             <table className="w-full min-w-[400px]">
               <thead>
                 <tr className="border-b border-[var(--b2)]">
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
-                  <th className="px-4 py-2 text-right font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">%</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
+                  <th className="px-4 py-2 text-right font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">%</th>
                 </tr>
               </thead>
               <tbody>
@@ -240,8 +240,8 @@ function CollectionTab({
             <table className="w-full min-w-[300px]">
               <thead>
                 <tr className="border-b border-[var(--b2)]">
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">House</th>
-                  <th className="px-4 py-2 text-right font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Count</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">House</th>
+                  <th className="px-4 py-2 text-right font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Count</th>
                 </tr>
               </thead>
               <tbody>

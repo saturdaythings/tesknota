@@ -62,7 +62,7 @@ export default function IdentityScreen() {
         <div className="font-[var(--script)] text-[64px] italic text-[var(--warm2)] tracking-[0.02em] leading-none">
           tęsknota
         </div>
-        <div className="font-[var(--mono)] text-[11px] tracking-[0.28em] uppercase text-white/70 mt-3">
+        <div className="font-[var(--mono)] text-xs tracking-[0.22em] uppercase text-white/70 mt-3">
           Fragrance Tracker
         </div>
         <div className="h-5" />
@@ -127,7 +127,7 @@ export default function IdentityScreen() {
           <button
             type="button"
             onClick={reset}
-            className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-white/30 hover:text-white/50 transition-colors pt-1"
+            className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-white/30 hover:text-white/50 transition-colors pt-1"
           >
             Back
           </button>
@@ -180,7 +180,7 @@ export default function IdentityScreen() {
           <button
             type="button"
             onClick={reset}
-            className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-white/30 hover:text-white/50 transition-colors pt-1"
+            className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-white/30 hover:text-white/50 transition-colors pt-1"
           >
             Back
           </button>

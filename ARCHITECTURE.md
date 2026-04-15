@@ -1,125 +1,124 @@
-# tesknota-fragrance — Architecture
+# tesknota — Architecture
 
-Next.js rewrite of the vanilla JS tesknota app. Reference app: oliver-chase/tesknota (do not modify).
+Fragrance journal. Next.js 15 App Router, static export, Cloudflare Pages.
 
 ## Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 16 with App Router + TypeScript |
+| Framework | Next.js 15, App Router, TypeScript |
 | Styling | Tailwind CSS v4 + shadcn/ui |
-| Auth + DB | Supabase (stubbed — wired in a later session) |
-| Data (dev) | Google Sheets API (ported from reference app) |
-| Hosting | Cloudflare Pages (static export via `output: "export"`) |
+| Auth + DB | Supabase (email+password, Postgres, RLS) |
+| Hosting | Cloudflare Pages (static export, `out/`) |
 
 ## File Map
 
 ```
 app/
-  layout.tsx          — root layout: fonts, metadata, UserProvider
-  globals.css         — all design tokens + shadcn + Tailwind theme
-  page.tsx            — identity screen: Kiana / Sylvia selector
+  layout.tsx              -- root layout: fonts, metadata, UserProvider
+  globals.css             -- design tokens, Tailwind v4 theme, shadcn mappings
+  page.tsx                -- login screen (profile picker + password)
   (app)/
-    layout.tsx        — AppShell layout for authenticated routes; redirects to / if no user
-    dashboard/page.tsx
-    collection/page.tsx
-    wishlist/page.tsx
-    compliments/page.tsx
-    analytics/page.tsx
-    friend/page.tsx   — dynamic title from getFriend(user)
-    import/page.tsx
-    settings/page.tsx
+    layout.tsx            -- AppShell + auth guard; redirects to / if no user
+    dashboard/page.tsx    -- stats, spotlight, scent signature, recent frags
+    collection/page.tsx   -- full collection table with search + filter
+    wishlist/page.tsx     -- want-to-buy / want-to-smell / identify later
+    compliments/page.tsx  -- compliment log
+    analytics/page.tsx    -- accord heatmap, compliment map, collection timeline
+    friend/page.tsx       -- friend's dashboard view
+    import/page.tsx       -- search community DB, add to collection
+    settings/page.tsx     -- account info, data export, admin link
+    admin/page.tsx        -- API spend, usage, errors, audit (Kiana only)
 
 components/
   layout/
-    AppShell.tsx      — full-height flex shell (sidebar + main)
-    Sidebar.tsx       — dark navy sidebar: logo, nav sections, user footer
-    Topbar.tsx        — topbar: category/title + search slot + actions slot
+    AppShell.tsx          -- full-height flex shell (sidebar + main)
+    Sidebar.tsx           -- dark navy nav sidebar with mobile drawer
+    Topbar.tsx            -- category/title header with mobile hamburger
   ui/
-    button.tsx        — Button with tesknota variants: blue, warm, ghost, bare, danger
-    stat-box.tsx      — StatBox + StatsGrid (stats row pattern)
-    section-header.tsx — SectionHeader with title + right slot
-    filter-bar.tsx    — FilterBar + FilterChip + FamilyChip
-    modal.tsx         — Modal with overlay, header, body, footer + focus trap
-    form.tsx          — FormGroup, FormRow, FieldOptions + fieldClass/textareaClass
+    frag-form.tsx         -- 2-step add/edit fragrance modal
+    comp-form.tsx         -- add/edit compliment modal
+    frag-row.tsx          -- table row for a user fragrance
+    frag-detail.tsx       -- slide-in detail panel for a fragrance
+    filter-bar.tsx        -- FilterBar + FilterChip + FamilyChip
+    stat-box.tsx          -- StatBox + StatsGrid
+    section-header.tsx    -- SectionHeader (title + optional right slot)
+    modal.tsx             -- Modal with overlay, header, body, footer, focus trap
+    accord-cloud.tsx      -- horizontal accord bar chart
+    bot-drawer.tsx        -- AI assistant drawer
+    cmd-palette.tsx       -- command palette (Cmd+K)
+    toast.tsx             -- toast notifications
 
 lib/
-  utils.ts            — shadcn cn() utility
-  user-context.tsx    — UserProvider, useUser, USERS, getFriend; localStorage persistence
-  data/               — stub data functions (Phase 4), real calls (Phase 5+)
+  utils.ts                -- cn() utility (clsx + twMerge)
+  user-context.tsx        -- UserProvider, useUser, signIn, signOut, profiles
+  data-context.tsx        -- DataProvider: fragrances, compliments, communityFrags + CRUD
+  mobile-nav-context.tsx  -- MobileNavProvider for sidebar open/close
+  frag-utils.ts           -- starsStr, getAccords, getCompCount, addedThisMonth, etc.
+  data/
+    index.ts              -- loadAllData (fragrances + compliments + community frags)
+    mutations.ts          -- appendFrag, updateFrag, deleteFrag, appendComp, updateComp, deleteComp
+  supabase.ts             -- Supabase client (publishable key)
 
 types/
-  index.ts            — barrel export for all TypeScript interfaces (Phase 4)
-
-next.config.ts        — static export + Cloudflare Pages config
+  index.ts                -- UserFragrance, UserCompliment, CommunityFrag, enums
 ```
 
-## Design Token Mapping
+## Data Model
 
-All tokens from `css/tokens.css` in the reference app are preserved in `app/globals.css`.
+### Supabase tables
 
-Two tokens are renamed to avoid shadcn semantic conflicts:
-- `--muted` (#5A6E85 slate color) → `--slate` / `--color-slate`
-- `--rose` (#B87068) → `--rose-tk` / `--color-rose-tk`
+| Table | Key columns |
+|-------|------------|
+| `user_profiles` | id (UUID), name, email |
+| `fragrances` | id, name, house, type, name_normalized, house_normalized, source, avg_price, top_notes, mid_notes, base_notes, accords |
+| `user_fragrances` | id, user_id, fragrance_id (FK → fragrances), name, house, status, sizes, type, personal_rating, personal_notes, created_at |
+| `user_compliments` | id, user_id, primary_frag_id (FK → fragrances), primary_frag_name, gender, relation, month, year, city, country, notes |
+| `activity_log` | id, user_id, action_type, created_at |
+| `api_log` | id, user_id, feature, tokens_in, tokens_out, cost_usd, latency_ms, status, error_message |
+| `pending_entries` | id, user_id, raw_input, resolved |
 
-shadcn `--muted` is mapped to `--off2` (#EAE7DF) as a subtle background surface.
+### Deduplication
+
+Community fragrances (`fragrances` table) deduplicate on `(name_normalized, house_normalized, lower(coalesce(type,'')))`. Different types (EDP vs Extrait vs Body Spray) are distinct rows. `findOrCreateFragId` in `mutations.ts` handles upsert on save.
+
+## Design Tokens
+
+All tokens defined in `app/globals.css` under `:root`. Key groups:
+
+| Group | Prefix | Examples |
+|-------|--------|---------|
+| Blues | `--blue` | `--blue` #2B4480, `--blue3` #1A2E5C (sidebar) |
+| Off-whites | `--off` | `--off` #F4F2ED (page bg), `--off2` #EAE7DF |
+| Warm tones | `--warm` | `--warm` #C8B99A, `--warm2` #E6D9C4 |
+| Ink / text | `--ink` | `--ink` #1A2030, `--ink3` #556070 (secondary) |
+| Blue alpha | `--b1`–`--b4` | Borders and overlays |
 
 ## Fonts
 
-Loaded via `next/font/google` in `app/layout.tsx`. CSS variables:
+Loaded via `next/font/google`. CSS variables:
 
 | Variable | Font | Use |
 |----------|------|-----|
-| `--font-playfair` | Playfair Display | `--serif` — headings |
-| `--font-cormorant` | Cormorant Garamond | `--script` — editorial |
-| `--font-dm-mono` | DM Mono | `--mono` — labels, data |
-| `--font-jost` | Jost | `--body` — body text, default |
+| `--serif` | Playfair Display | Headings, fragrance names |
+| `--script` | Cormorant Garamond | Editorial, sidebar logo |
+| `--mono` | DM Mono | Labels, data, metadata |
+| `--body` | Jost | Body text, inputs |
 
-## Pages (from reference app)
+## Mobile
 
-| Route | Page | JS module(s) |
-|-------|------|-------------|
-| `/` | Identity screen | `identity.js` |
-| `/dashboard` | Dashboard | `dashboard.js` |
-| `/collection` | My Collection | `collection.js`, `detail.js`, `add-frag.js` |
-| `/wishlist` | Wishlist | `wishlist.js` |
-| `/compliments` | Compliments | `compliments.js`, `add-comp.js` |
-| `/analytics` | Analytics | `analytics.js`, `analytics-collection.js` |
-| `/friend` | Friend profile | `friend.js` |
-| `/import` | Import | `import.js` |
-| `/settings` | Settings | — |
-| `/admin` | Admin | `admin.js` |
+- Sidebar is a fixed drawer on mobile, toggled by hamburger in Topbar
+- All page `<main>` elements use `px-4 py-5 md:p-[26px]` for responsive padding
+- Dashboard "Recently added" shows table on desktop, cards on mobile
+- Topbar always visible; sidebar collapses to off-canvas
 
-## Data Models (from reference app)
+## Auth
 
-Defined in Phase 4. Sourced from: `state.js`, `data.js`, `seed.js`, `fragdb.js`.
+`UserProvider` (Supabase Auth) persists session in localStorage. On load, fetches `user_profiles` to populate app profile (name, etc.). `signIn`/`signOut` delegate to `supabase.auth`.
 
-| Sheet tab | Model | Key fields |
-|-----------|-------|-----------|
-| users | User | id, name, createdAt |
-| userFragrances | UserFragrance | userId, fragranceId, status, bottleSize, type, personalRating, notes |
-| userCompliments | UserCompliment | complimentId, userId, primaryFragranceId, complimenterGender, relation, month, year, locationName |
-| fragranceDB | FragranceDB | fragranceId, fragranceName, fragranceHouse, fragranceType, fragranceAccords, topNotes, middleNotes, baseNotes, avgPrice |
+## Deployment
 
-## Identity Model
-
-Two users: Kiana (u1) and Sylvia (u2). Selected on each visit via landing screen.
-No session persistence beyond localStorage selection.
-
-## Cloudflare Pages
-
-- `output: "export"` in `next.config.ts` — fully static build
-- `images: { unoptimized: true }` — required for static export
-- `trailingSlash: true` — Cloudflare Pages routing compatibility
-- Build command: `npm run build`
-- Output directory: `out/`
-
-## Phase Status
-
-| Phase | Status |
-|-------|--------|
-| 1 — Scaffold + tokens | Complete |
-| 2 — Component library | Complete |
-| 3 — Route shells | Complete |
-| 4 — TypeScript interfaces + data stubs | Pending |
-| 5+ — Feature port (page by page) | Pending |
+- Static export: `npm run build` → `out/`
+- Cloudflare Pages: auto-deploys from `main` branch of `oliver-chase/tesknota`
+- Build command: `npm run build`, output: `out/`
+- No server-side rendering — all dynamic data via Supabase client SDK

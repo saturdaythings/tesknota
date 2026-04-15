@@ -224,7 +224,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       <div className="space-y-5">
         {/* Fragrance picker */}
         <div>
-          <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
             Fragrance
           </label>
           <div className="relative">
@@ -260,7 +260,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
 
         {/* Relation */}
         <div>
-          <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
             Relation
           </label>
           <div className="flex flex-wrap gap-2">
@@ -284,7 +284,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
 
         {/* Gender */}
         <div>
-          <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
             Complimenter
           </label>
           <div className="flex gap-2">
@@ -309,7 +309,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
         {/* Month + Year */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Month
             </label>
             <select
@@ -321,7 +321,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
             </select>
           </div>
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Year
             </label>
             <select
@@ -336,7 +336,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
 
         {/* Location (optional) */}
         <div className="space-y-3">
-          <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase">
+          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase">
             Location (optional)
           </label>
           <input
@@ -363,7 +363,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
 
         {/* Notes */}
         <div>
-          <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
             Notes (optional)
           </label>
           <textarea

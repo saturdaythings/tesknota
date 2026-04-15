@@ -47,7 +47,7 @@ export function FragRow({
         <div className="font-[var(--body)] text-sm text-[var(--ink)]">
           {frag.name}
           {frag.isDupe && (
-            <span className="ml-2 text-[11px] bg-[var(--ink3)] text-[var(--off)] px-[4px] py-[1px] align-middle tracking-[0.04em]">
+            <span className="ml-2 text-xs bg-[var(--ink3)] text-[var(--off)] px-[4px] py-[1px] align-middle tracking-[0.04em]">
               DUPE
             </span>
           )}
@@ -68,7 +68,7 @@ export function FragRow({
         {compCount > 0 ? <span className="text-[var(--blue)]">{compCount}</span> : "\u2014"}
       </td>
       <td className="px-4 py-3">
-        <span className={`font-[var(--mono)] text-[11px] tracking-[0.04em] ${statusColorClass(frag.status)}`}>
+        <span className={`font-[var(--mono)] text-xs tracking-[0.04em] ${statusColorClass(frag.status)}`}>
           {STATUS_LABELS[frag.status] ?? frag.status}
         </span>
       </td>

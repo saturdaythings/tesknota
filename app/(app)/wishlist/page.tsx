@@ -102,7 +102,7 @@ export default function WishlistPage() {
         forceStatus="CURRENT"
       />
       <Topbar category="My Space" title="Wishlist" />
-      <main className="flex-1 overflow-y-auto p-[26px]">
+      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
             Loading...
@@ -155,7 +155,7 @@ export default function WishlistPage() {
                     No matches.
                     <button
                       onClick={() => setFilter("all")}
-                      className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                      className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                     >
                       Clear filter
                     </button>
@@ -167,10 +167,10 @@ export default function WishlistPage() {
                 <table className="w-full min-w-[520px]">
                   <thead>
                     <tr className="border-b border-[var(--b2)]">
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Added</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Avg Price</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Accords</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Added</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Avg Price</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Accords</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -201,7 +201,7 @@ export default function WishlistPage() {
                           <td className="px-4 py-3">
                             <button
                               onClick={(e) => { e.stopPropagation(); setBoughtFrag(f); }}
-                              className="font-[var(--mono)] text-[11px] tracking-[0.08em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                              className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                             >
                               Bought it
                             </button>
@@ -219,7 +219,7 @@ export default function WishlistPage() {
                 <SectionHeader title="Discover" />
                 {friendSignals.length > 0 && (
                   <div className="mb-5">
-                    <div className="font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-3">
+                    <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-3">
                       From {friend?.name ?? "friend"}'s collection
                     </div>
                     <div className="grid gap-px bg-[var(--b2)] border border-[var(--b2)] [grid-template-columns:repeat(auto-fill,minmax(180px,1fr))]">
@@ -231,13 +231,13 @@ export default function WishlistPage() {
                 )}
                 {qualityPicks.length > 0 && (
                   <div>
-                    <div className="font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-3">
+                    <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-3">
                       Highly rated
                     </div>
                     <div className="grid gap-px bg-[var(--b2)] border border-[var(--b2)] [grid-template-columns:repeat(auto-fill,minmax(180px,1fr))]">
                       {qualityPicks.map((cf) => (
                         <div key={cf.fragranceId} className="bg-[var(--off)] p-4">
-                          <div className="font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.08em] uppercase mb-1">
+                          <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.08em] uppercase mb-1">
                             {cf.fragranceHouse}
                           </div>
                           <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">{cf.fragranceName}</div>
@@ -274,7 +274,7 @@ function DiscoverCard({
   );
   return (
     <div className="bg-[var(--off)] p-4">
-      <div className="font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.08em] uppercase mb-1">
+      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.08em] uppercase mb-1">
         {house}
       </div>
       <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">{name}</div>

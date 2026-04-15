@@ -7,7 +7,6 @@ import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
 import { getCommunityData } from "@/lib/data";
 import { useToast } from "@/components/ui/toast";
-import { supabase } from "@/lib/supabase";
 import type { UserFragrance, FragranceStatus, FragranceType, BottleSize } from "@/types";
 
 const STATUSES: { value: FragranceStatus; label: string }[] = [
@@ -140,37 +139,10 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
     setDropOpen(val.trim().length >= 2);
   }
 
-  async function advanceStep() {
+  function advanceStep() {
     if (!search.trim()) { setErr("Enter a fragrance name."); return; }
     if (!selectedName) {
-      // No local match — query Supabase directly before treating as custom.
-      // This catches fragrances added by the other user that aren't in local cache.
-      setSaving(true);
-      const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-      const q = search.trim();
-      const { data: liveMatches } = await supabase
-        .from("fragrances")
-        .select("id, name, house, type")
-        .ilike("name", `%${q}%`)
-        .limit(8);
-      setSaving(false);
-
-      if (liveMatches && liveMatches.length > 0) {
-        // Found in community DB — point user to existing entry
-        const exact = liveMatches.find(
-          (r) => norm(r.name) === norm(q)
-        ) ?? liveMatches[0];
-        setSelectedName(exact.name);
-        setSelectedHouse(exact.house ?? "");
-        setSelectedFragId(exact.id);
-        setSearch(exact.name);
-        setErr("");
-        setStep(2);
-        return;
-      }
-
-      // Truly new — proceed as custom
-      setSelectedName(q);
+      setSelectedName(search.trim());
       setSelectedHouse("");
       setSelectedFragId("");
     }
@@ -270,7 +242,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
         <div className="space-y-5">
           {/* Search */}
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Fragrance Name
             </label>
             <div className="relative">
@@ -315,7 +287,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Status */}
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Status
             </label>
             <select
@@ -355,7 +327,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Size */}
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Size
             </label>
             <div className="flex flex-wrap gap-2">
@@ -379,7 +351,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Type */}
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Concentration
             </label>
             <select
@@ -396,7 +368,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Rating */}
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Personal Rating
             </label>
             <div className="flex gap-1">
@@ -417,7 +389,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Where bought */}
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Where Bought
             </label>
             <input
@@ -431,7 +403,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
           {/* Purchase date + price */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+              <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
                 Month
               </label>
               <select
@@ -444,7 +416,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               </select>
             </div>
             <div>
-              <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+              <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
                 Year
               </label>
               <select
@@ -457,7 +429,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               </select>
             </div>
             <div>
-              <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+              <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
                 Price
               </label>
               <input
@@ -471,7 +443,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Notes */}
           <div>
-            <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Personal Notes
             </label>
             <textarea

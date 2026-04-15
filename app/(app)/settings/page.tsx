@@ -53,48 +53,77 @@ export default function SettingsPage() {
   return (
     <>
       <Topbar category="Manage" title="Settings" />
-      <main className="flex-1 overflow-y-auto p-[26px]">
+      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px] max-w-[560px]">
+
         <SectionHeader title="Account" />
         {user && (
-          <div className="border border-[var(--b2)] p-4 mb-6 max-w-[380px]">
-            <div className="font-[var(--serif)] text-lg italic text-[var(--blue)] mb-1">
-              {user.name}
+          <div className="border border-[var(--b2)] bg-[var(--off)] mb-4">
+            <div className="px-5 py-4 border-b border-[var(--b1)]">
+              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-1">
+                Name
+              </div>
+              <div className="font-[var(--serif)] text-lg text-[var(--blue)]">
+                {user.name}
+              </div>
             </div>
-            <div className="font-[var(--mono)] text-[11px] text-[var(--ink3)] tracking-[0.08em] uppercase">
-              {user.id}
+            <div className="px-5 py-4">
+              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-1">
+                User ID
+              </div>
+              <div className="font-[var(--mono)] text-xs text-[var(--ink4)] break-all">
+                {user.id}
+              </div>
             </div>
           </div>
         )}
-        <div className="flex gap-3 mb-10">
-          <button
-            onClick={handleSignOut}
-            className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[7px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--rose-tk)] hover:text-[var(--rose-tk)] transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
+
+        <button
+          onClick={handleSignOut}
+          className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--rose-tk)] hover:text-[var(--rose-tk)] transition-colors mb-10"
+        >
+          Sign out
+        </button>
 
         <SectionHeader title="Data" />
-        <div className="mb-10 max-w-[380px]">
-          <p className="font-[var(--mono)] text-[11px] text-[var(--ink3)] mb-3">
-            Export your fragrances and compliments as a CSV file.
-          </p>
-          <button
-            onClick={exportCSV}
-            className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[7px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-          >
-            Export CSV
-          </button>
+        <div className="border border-[var(--b2)] bg-[var(--off)] mb-6">
+          <div className="px-5 py-4 border-b border-[var(--b1)]">
+            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">
+              Export your data
+            </div>
+            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+              Downloads your fragrances and compliment history as a CSV file.
+            </div>
+          </div>
+          <div className="px-5 py-4">
+            <button
+              onClick={exportCSV}
+              className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+            >
+              Export CSV
+            </button>
+          </div>
         </div>
 
-        <div className="mt-16 pt-4 border-t border-[var(--b1)]">
-          <button
-            onClick={() => router.push("/admin")}
-            className="font-[var(--mono)] text-[10px] tracking-[0.08em] text-[var(--ink4)] hover:text-[var(--ink3)] bg-none border-none cursor-pointer p-0 transition-colors"
-          >
-            ↳ admin
-          </button>
+        <SectionHeader title="Admin" />
+        <div className="border border-[var(--b2)] bg-[var(--off)]">
+          <div className="px-5 py-4 border-b border-[var(--b1)]">
+            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">
+              System dashboard
+            </div>
+            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+              API spend, usage analytics, error logs, and data audit.
+            </div>
+          </div>
+          <div className="px-5 py-4">
+            <button
+              onClick={() => router.push("/admin")}
+              className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+            >
+              Open Admin
+            </button>
+          </div>
         </div>
+
       </main>
     </>
   );

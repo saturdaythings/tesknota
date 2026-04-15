@@ -63,7 +63,7 @@ export default function ComplimentsPage() {
         editing={editingComp}
       />
       <Topbar category="Experiences" title="Compliments" />
-      <main className="flex-1 overflow-y-auto p-[26px]">
+      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
             Loading...
@@ -98,7 +98,7 @@ export default function ComplimentsPage() {
                   </span>
                   <button
                     onClick={() => { setEditingComp(null); setFormOpen(true); }}
-                    className="font-[var(--mono)] text-[11px] tracking-[0.08em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                    className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                   >
                     + Log
                   </button>
@@ -113,7 +113,7 @@ export default function ComplimentsPage() {
                     No matches.
                     <button
                       onClick={() => setRelation("all")}
-                      className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                      className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                     >
                       Clear filter
                     </button>
@@ -125,10 +125,10 @@ export default function ComplimentsPage() {
                 <table className="w-full min-w-[480px]">
                   <thead>
                     <tr className="border-b border-[var(--b2)]">
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Relation</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">When</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Location</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Relation</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">When</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Location</th>
                     </tr>
                   </thead>
                   <tbody>

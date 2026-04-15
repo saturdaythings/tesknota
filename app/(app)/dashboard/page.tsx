@@ -81,7 +81,7 @@ export default function DashboardPage() {
         editing={editingFrag}
       />
       <Topbar category="My Space" title="Dashboard" />
-      <main className="flex-1 overflow-y-auto p-[26px]">
+      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
             Loading...
@@ -128,7 +128,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
       <div className="font-[var(--serif)] text-[26px] text-[var(--blue)] mb-1">
         Welcome to t&#x0119;sknota
       </div>
-      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] mb-6">
+      <div className="font-[var(--mono)] text-sm text-[var(--ink3)] tracking-[0.06em] mb-6">
         Your fragrance journey starts here
       </div>
       <div className="flex flex-col gap-4">
@@ -228,7 +228,7 @@ function SpotStat({ value, label }: { value: string | number; label: string }) {
   return (
     <div>
       <div className="font-[var(--serif)] text-[20px] text-[var(--blue)] leading-none">{value}</div>
-      <div className="font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mt-[3px]">
+      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mt-[3px]">
         {label}
       </div>
     </div>
@@ -295,34 +295,70 @@ function RecentFragrances({
           Your collection is empty.
         </div>
       ) : (
-        <div className="overflow-x-auto border border-[var(--b2)]">
-          <table className="w-full min-w-[640px]">
-            <thead>
-              <tr className="border-b border-[var(--b2)]">
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Size</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Rating</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Added</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Accords</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((f) => (
-                <RecentRow
-                  key={f.id}
-                  frag={f}
-                  compliments={compliments}
-                  communityFrags={communityFrags}
-                  userId={userId}
-                  onClick={onFragClick}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto border border-[var(--b2)]">
+            <table className="w-full min-w-[600px]">
+              <thead>
+                <tr className="border-b border-[var(--b2)]">
+                  {["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"].map((h) => (
+                    <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((f) => (
+                  <RecentRow key={f.id} frag={f} compliments={compliments} communityFrags={communityFrags} userId={userId} onClick={onFragClick} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden flex flex-col border border-[var(--b2)]">
+            {sorted.map((f) => (
+              <RecentCard key={f.id} frag={f} compliments={compliments} communityFrags={communityFrags} userId={userId} onClick={onFragClick} />
+            ))}
+          </div>
+        </>
       )}
+    </div>
+  );
+}
+
+function RecentCard({
+  frag: f,
+  compliments,
+  communityFrags,
+  userId,
+  onClick,
+}: {
+  frag: UserFragrance;
+  compliments: UserCompliment[];
+  communityFrags: CommunityFrag[];
+  userId: string;
+  onClick: (frag: UserFragrance) => void;
+}) {
+  const compCount = getCompCount(f.fragranceId || f.id, compliments, userId);
+  const addedStr = f.purchaseDate ?? (f.createdAt ? `${MONTHS[new Date(f.createdAt).getMonth()]} ${new Date(f.createdAt).getFullYear()}` : "");
+
+  return (
+    <div
+      className="px-4 py-3 border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+      onClick={() => onClick(f)}
+    >
+      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
+      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mb-1">{f.house}</div>
+      <div className="flex flex-wrap gap-x-4 gap-y-[2px]">
+        <span className={`font-[var(--mono)] text-xs tracking-[0.04em] ${statusColorClass(f.status)}`}>
+          {STATUS_LABELS[f.status] ?? f.status}
+        </span>
+        {f.personalRating ? (
+          <span className="font-[var(--mono)] text-xs text-[var(--warm-text)]">{starsStr(parseRating(f.personalRating))}</span>
+        ) : null}
+        {addedStr && <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">{addedStr}</span>}
+        {compCount > 0 && <span className="font-[var(--mono)] text-xs text-[var(--blue)]">{compCount} compliment{compCount !== 1 ? "s" : ""}</span>}
+      </div>
     </div>
   );
 }
@@ -350,14 +386,7 @@ function RecentRow({
       onClick={() => onClick(f)}
     >
       <td className="px-4 py-3">
-        <div className="font-[var(--body)] text-sm text-[var(--ink)]">
-          {f.name}
-          {f.isDupe && (
-            <span className="ml-2 text-[11px] bg-[var(--ink3)] text-[var(--off)] rounded px-[4px] py-[1px] align-middle tracking-[0.04em]">
-              DUPE
-            </span>
-          )}
-        </div>
+        <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
         <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
       </td>
       <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">
@@ -374,7 +403,7 @@ function RecentRow({
         {compCount > 0 ? <span className="text-[var(--blue)]">{compCount}</span> : "\u2014"}
       </td>
       <td className="px-4 py-3">
-        <span className={`font-[var(--mono)] text-[11px] tracking-[0.04em] ${statusColorClass(f.status)}`}>
+        <span className={`font-[var(--mono)] text-xs tracking-[0.04em] ${statusColorClass(f.status)}`}>
           {STATUS_LABELS[f.status] ?? f.status}
         </span>
       </td>

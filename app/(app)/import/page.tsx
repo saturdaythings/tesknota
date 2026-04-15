@@ -44,7 +44,7 @@ export default function ImportPage() {
         />
       )}
       <Topbar category="Manage" title="Import" />
-      <main className="flex-1 overflow-y-auto p-[26px]">
+      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         <SectionHeader title="Search Fragrance Database" />
         <input
           value={search}
