@@ -32,6 +32,18 @@
   --font-serif: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
 
+  /* --- Token aliases (v1 names → v2 values) --- */
+  --color-surface: var(--color-cream);
+  --color-surface-raised: var(--color-cream-dark);
+  --color-text-primary: var(--color-navy);
+  --color-text-muted: var(--color-sand);
+  --color-success: #2A7A4B;
+  --color-danger: var(--color-destructive);
+  --color-accent-subtle: rgba(45, 74, 107, 0.1);
+  --radius-full: 9999px;
+  --transition-base: 150ms ease;
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+
   /* --- Type scale --- */
   --text-xs:   11px;
   --text-sm:   13px;
@@ -170,6 +182,15 @@
     line-height: 1.6;
   }
 }
+
+/* Typography utility classes (v1 compat) */
+.text-body    { font-family: var(--font-sans); font-size: 15px; color: var(--color-navy); }
+.text-secondary { font-family: var(--font-sans); font-size: 13px; color: var(--color-sand); }
+.text-label   { font-family: var(--font-sans); font-size: 11px; font-weight: 500;
+                letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-sand); }
+.text-subheading { font-family: var(--font-serif); font-size: 20px; font-style: italic;
+                   font-weight: 400; color: var(--color-navy); }
+.text-meta    { font-family: var(--font-sans); font-size: 11px; color: var(--color-sand); }
 
 /* Dashboard responsive grids */
 .dash-stat-grid {
