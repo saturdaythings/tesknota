@@ -14,7 +14,7 @@ Status key: [x] = fixed, [ ] = pending.
 | # | Severity | Gap | Reference | Next.js location |
 |---|----------|-----|-----------|-----------------|
 | S1 | MINOR [x] | Subtitle text differs | "FRAGRANCE TRACKER" (uppercase mono) | Fixed: "Fragrance Tracker" |
-| S2 | MINOR [x] | Tagline present in Next.js but absent in reference | None | Fixed: removed |
+| S2 | MINOR [x] | Tagline: wrong text removed, correct tagline restored | `[ tɛsk-'no-ta ] · a deep longing...` | Fixed: correct tagline restored in Sidebar |
 | S3 | MINOR | Nav section headers present in Next.js; reference has flat list with no headers | No section groups | "My Space", "Experiences", "Social", "Manage" groups — `app/(app)/layout.tsx:26-66` |
 | S4 | MINOR | Nav items use `<Link>` in Next.js; reference uses `div.sb-link[data-page]` | DOM-navigated divs | `<Link href>` — `Sidebar.tsx:82` |
 
@@ -24,7 +24,7 @@ Status key: [x] = fixed, [ ] = pending.
 
 | # | Severity | Gap | Reference | Next.js location |
 |---|----------|-----|-----------|-----------------|
-| T1 | MINOR [x] | Topbar shows stacked category + title; reference shows only the page title | Single serif title only | Fixed: category prop removed from interface + all callers |
+| T1 | MINOR [x] | Topbar: category removed but "TĘSKNOTA" app label also missing; reference shows app name above page title | Small mono "TĘSKNOTA" above serif title | Fixed: "TĘSKNOTA" restored above page title |
 
 ---
 
@@ -45,11 +45,11 @@ Status key: [x] = fixed, [ ] = pending.
 
 | # | Severity | Gap | Reference | Next.js location |
 |---|----------|-----|-----------|-----------------|
-| C1 | MAJOR | Filter bar always visible in Next.js; reference has collapsed "+ FILTERS" toggle | Collapsed, expands on click | `FilterBar` always rendered — `collection/page.tsx:141` |
-| C2 | MAJOR | Reference has 4 filter dropdowns: Accords, Rating, Houses, plus status chips; Next.js has status chips only | Accords / Rating / Houses dropdowns | No such dropdowns — `collection/page.tsx:141-150` |
+| C1 | MAJOR [x] | Filter bar always visible; reference has collapsed "+ FILTERS" toggle | Collapsed, expands on click | Fixed: "+ FILTERS" toggle with collapsible panel |
+| C2 | MAJOR [x] | Reference has Accords/Rating/Houses dropdowns; Next.js had status chips only | Accords / Rating / Houses dropdowns | Fixed: Accords (search + list + clear), Rating (1-5 stars), Houses dropdowns added |
 | C3 | MINOR [x] | Add button label | Fixed: "+ Add to Collection" |
 | C4 | MINOR | Sort is a native `<select>` in both; labels match ✓ | Matches | `collection/page.tsx:126-138` |
-| C5 | MAJOR | Mobile: collection uses scrolling table (`overflow-x-auto`); reference shows card-per-row layout on mobile | Card layout on mobile | `collection/page.tsx:185` — no mobile card fallback (compare `dashboard/page.tsx:320-325` which does have one) |
+| C5 | MAJOR [x] | Mobile: scrolling table vs. card layout | Card layout on mobile | Fixed: `hidden md:block` table + `md:hidden` card list |
 | C6 | MATCH | 3-stat row (Total / Current / Avg Rating) | Matches | `collection/page.tsx:112-116` |
 
 ---
@@ -107,9 +107,9 @@ Status key: [x] = fixed, [ ] = pending.
 
 | # | Severity | Gap | Reference | Next.js location |
 |---|----------|-----|-----------|-----------------|
-| I1 | CRITICAL | Reference has 3 tabs: "Paste a Link", "Scan a Bottle", "CSV"; Next.js has 2 tabs: "Search Database", "Import File" | 3 tabs | `import/page.tsx:595-617` — `ImportTabId = "search" | "csv"` |
-| I2 | CRITICAL | "Paste a Link" tab (paste Fragrantica/Parfumo URL, scrape community data) absent | Present in reference | Not implemented |
-| I3 | CRITICAL | "Scan a Bottle" tab (camera/barcode scan to identify fragrance) absent | Present in reference | Not implemented |
+| I1 | CRITICAL [x] | Import tabs mismatch | 4 tabs: Paste a Link / Scan a Bottle / Search Database / Import File | Fixed: all 4 tabs added |
+| I2 | CRITICAL [x] | "Paste a Link" tab absent | URL input, FETCH METADATA, bulk queue textarea | Fixed: URL parse (Fragrantica/Parfumo), community DB lookup, bulk queue |
+| I3 | CRITICAL [x] | "Scan a Bottle" tab absent | Webcam / QR phone scan / photo upload | Fixed: 3-panel layout with getUserMedia webcam, QR placeholder, file upload |
 | I4 | MATCH | "Import File" tab (XLSX/CSV upload with template download) | Reference "CSV" tab roughly matches; Next.js version is richer (template, community data) | `import/page.tsx:263-486` |
 | I5 | MATCH | "Search Database" tab searches community frags and adds directly | Reference equivalent is inline search | `import/page.tsx:492-591` |
 
@@ -145,7 +145,7 @@ Status key: [x] = fixed, [ ] = pending.
 | # | Severity | Gap | Reference | Next.js location |
 |---|----------|-----|-----------|-----------------|
 | M1 | MATCH | Hamburger menu + sidebar drawer | Matches | `Topbar.tsx:32-40`, `Sidebar.tsx:39-55` |
-| M2 | MAJOR | Mobile collection: reference renders stacked cards; Next.js renders horizontal-scroll table | Card layout | `collection/page.tsx:185` — no mobile card path |
+| M2 | MAJOR [x] | Mobile collection: scroll table vs. stacked cards | Card layout | Fixed: same as C5 |
 | M3 | MATCH | Mobile dashboard: stat boxes wrap, cards stack | Matches | `dashboard/page.tsx:320-325` has mobile card path |
 | M4 | MATCH | Mobile sidebar backdrop | Matches | `Sidebar.tsx:39-45` |
 
