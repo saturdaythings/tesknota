@@ -46,7 +46,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
       fontFamily: "var(--font-sans)",
-      fontSize: "11px",
+      fontSize: "12px",
       fontWeight: 500,
       letterSpacing: "0.1em",
       textTransform: "uppercase",
@@ -160,7 +160,7 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
                   border: "1px solid var(--color-sand)",
                   color: "var(--color-sand)",
                   fontFamily: "var(--font-sans)",
-                  fontSize: "10px",
+                  fontSize: "12px",
                   fontWeight: 500,
                   padding: "2px 6px",
                   borderRadius: "2px",
@@ -217,7 +217,7 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
                     ].map(({ label, notes }) =>
                       notes?.length ? (
                         <div key={label} style={{ marginBottom: "var(--space-2)" }}>
-                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", color: "var(--color-sand)" }}>
+                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", color: "var(--color-sand)" }}>
                             {label}
                           </span>
                           <span style={{ fontFamily: "var(--font-serif)", fontSize: "14px", fontStyle: "italic", color: "var(--color-navy)", marginLeft: "8px" }}>
@@ -268,13 +268,13 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" }}>
                       {cd.communityRating && (
                         <div>
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>Rating</div>
+                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>Rating</div>
                           <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 600, color: "var(--color-navy)" }}>{parseFloat(cd.communityRating).toFixed(1)} ★</div>
                         </div>
                       )}
                       {cd.communityLongevityLabel && (
                         <div>
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>Longevity</div>
+                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>Longevity</div>
                           <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>{cd.communityLongevityLabel}</div>
                         </div>
                       )}

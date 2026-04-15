@@ -108,7 +108,7 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
         gap: "6px",
       }}
     >
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-sand)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-sand)" }}>
         {house}
       </div>
       <div
@@ -182,7 +182,7 @@ function DiscoverRow({ title, children }: { title: string; children: React.React
       <div
         style={{
           fontFamily: "var(--font-sans)",
-          fontSize: "11px",
+          fontSize: "12px",
           fontWeight: 500,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
@@ -353,7 +353,7 @@ function WishlistMobileCard({
             {frag.name}
           </span>
           {concLabel && (
-            <span style={{ border: "1px solid var(--color-sand)", color: "var(--color-sand)", fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 500, padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", flexShrink: 0 }}>
+            <span style={{ border: "1px solid var(--color-sand)", color: "var(--color-sand)", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", flexShrink: 0 }}>
               {concLabel}
             </span>
           )}
@@ -647,7 +647,7 @@ function WishlistInner() {
                 <thead>
                   <tr style={{ background: "rgba(237,232,223,0.5)", height: "40px" }}>
                     {["FRAGRANCE", "ADDED", "AVG PRICE", "ACCORDS", ""].map((h) => (
-                      <th key={h} style={{ padding: "0 16px", fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, color: "var(--color-sand)", letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "left" }}>
+                      <th key={h} style={{ padding: "0 16px", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, color: "var(--color-sand)", letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "left" }}>
                         {h}
                       </th>
                     ))}
@@ -698,7 +698,7 @@ function WishlistInner() {
                           style={{
                             padding: "0 16px",
                             fontFamily: "var(--font-sans)",
-                            fontSize: "11px",
+                            fontSize: "12px",
                             fontWeight: 500,
                             color: "var(--color-sand)",
                             letterSpacing: "0.1em",
@@ -741,7 +741,7 @@ function WishlistInner() {
                                 {frag.name}
                               </span>
                               {concLabel && (
-                                <span style={{ border: "1px solid var(--color-sand)", color: "var(--color-sand)", fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 500, padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                                <span style={{ border: "1px solid var(--color-sand)", color: "var(--color-sand)", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", whiteSpace: "nowrap" }}>
                                   {concLabel}
                                 </span>
                               )}

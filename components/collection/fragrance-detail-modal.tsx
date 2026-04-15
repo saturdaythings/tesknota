@@ -134,7 +134,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <div
       style={{
         fontFamily: "var(--font-sans)",
-        fontSize: "11px",
+        fontSize: "12px",
         fontWeight: 500,
         letterSpacing: "0.1em",
         textTransform: "uppercase",
@@ -389,7 +389,7 @@ export function FragranceDetailModal({
                       border: "1px solid var(--color-sand)",
                       color: "var(--color-sand)",
                       fontFamily: "var(--font-sans)",
-                      fontSize: "10px",
+                      fontSize: "12px",
                       fontWeight: 500,
                       padding: "2px 6px",
                       borderRadius: "2px",
@@ -534,7 +534,7 @@ export function FragranceDetailModal({
 
                 {cd?.avgPrice && (
                   <div style={{ marginBottom: "var(--space-3)" }}>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
                       Avg Price
                     </div>
                     <div style={{ fontFamily: "var(--font-sans)", fontSize: "15px", fontWeight: 600, color: "var(--color-navy)" }}>
@@ -553,7 +553,7 @@ export function FragranceDetailModal({
                     ].map(({ label, notes }) =>
                       notes?.length ? (
                         <div key={label} style={{ marginBottom: "var(--space-2)" }}>
-                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", color: "var(--color-sand)" }}>
+                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", color: "var(--color-sand)" }}>
                             {label}
                           </span>
                           <span style={{ fontFamily: "var(--font-serif)", fontSize: "14px", fontStyle: "italic", color: "var(--color-navy)", marginLeft: "8px" }}>
@@ -579,7 +579,7 @@ export function FragranceDetailModal({
                 <SectionLabel>My Purchase</SectionLabel>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
                   <div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
                       Purchase Price
                     </div>
                     <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>
@@ -587,7 +587,7 @@ export function FragranceDetailModal({
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
                       Where Bought
                     </div>
                     <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>
@@ -605,7 +605,7 @@ export function FragranceDetailModal({
                 </div>
                 {dateAdded && (
                   <div>
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)" }}>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)" }}>
                       Added
                     </span>
                     <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-sand)", marginLeft: "8px" }}>

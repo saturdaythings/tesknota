@@ -82,7 +82,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
               border: "1px solid var(--color-sand)",
               color: "var(--color-sand)",
               fontFamily: "var(--font-sans)",
-              fontSize: "10px",
+              fontSize: "12px",
               fontWeight: 500,
               padding: "2px 6px",
               borderRadius: "2px",
@@ -101,7 +101,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
               background: "var(--color-sand-light)",
               color: "var(--color-navy)",
               fontFamily: "var(--font-sans)",
-              fontSize: "10px",
+              fontSize: "12px",
               fontWeight: 500,
               padding: "2px 6px",
               borderRadius: "2px",
@@ -136,7 +136,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-navy)" }}>
           {sizeDisplay}
         </span>
-        <span style={{ color: "var(--color-cream-dark)", fontSize: "10px" }}>·</span>
+        <span style={{ color: "var(--color-cream-dark)", fontSize: "12px" }}>·</span>
         <div style={{ display: "flex", gap: "1px" }}>
           {[1, 2, 3, 4, 5].map((s) => (
             <span
@@ -152,7 +152,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         </div>
         {addedDate && (
           <>
-            <span style={{ color: "var(--color-cream-dark)", fontSize: "10px" }}>·</span>
+            <span style={{ color: "var(--color-cream-dark)", fontSize: "12px" }}>·</span>
             <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-sand)" }}>
               {addedDate}
             </span>

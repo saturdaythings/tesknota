@@ -220,7 +220,7 @@ function RankedRow({ rank, name, sub, count, maxCount, unit }: {
   const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
   return (
     <div style={{ display: "flex", alignItems: "center", height: 44 }}>
-      <span style={{ width: 24, flexShrink: 0, fontFamily: "var(--font-sans)", fontSize: "11px", color: "var(--color-sand)", fontWeight: 500 }}>
+      <span style={{ width: 24, flexShrink: 0, fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", fontWeight: 500 }}>
         {rank}
       </span>
       <div style={{ display: "flex", flexDirection: "column", width: 140, flexShrink: 0, minWidth: 0, overflow: "hidden" }}>
@@ -236,7 +236,7 @@ function RankedRow({ rank, name, sub, count, maxCount, unit }: {
       <div style={{ flex: 1, height: 4, background: "var(--color-cream-dark)", borderRadius: "9999px", margin: "0 16px", overflow: "hidden" }}>
         <div style={{ height: "100%", width: `${pct}%`, background: "var(--color-accent)", borderRadius: "9999px" }} />
       </div>
-      <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontFamily: "var(--font-sans)", fontSize: "11px", color: "var(--color-sand)" }}>
+      <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>
         {count} {unit}
       </span>
     </div>
@@ -281,7 +281,7 @@ function ChartCard({ title, sub, children, wide }: {
 function StatCard({ label, value, delta }: { label: string; value: string | number; delta?: string }) {
   return (
     <div style={{ background: "#FFFFFF", border: "1px solid var(--color-cream-dark)", borderRadius: "6px", padding: "24px 24px 20px" }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "11px", color: "var(--color-sand)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "8px" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "12px", color: "var(--color-sand)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "8px" }}>
         {label}
       </div>
       <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "48px", lineHeight: 1, color: "var(--color-navy)", marginBottom: "8px" }}>
@@ -590,7 +590,7 @@ export default function AnalyticsPage() {
                   {statusData.map((d) => (
                     <div key={d.status} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color, flexShrink: 0 }} />
-                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", color: "var(--color-sand)" }}>{d.name}</span>
+                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>{d.name}</span>
                     </div>
                   ))}
                 </div>
