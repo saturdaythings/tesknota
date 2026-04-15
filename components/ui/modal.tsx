@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef } from 'react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { X } from '@/components/ui/Icons';
 
 interface ModalProps {
   open: boolean;
@@ -30,14 +31,12 @@ interface ModalFooterProps {
 export function Modal({ open, onClose, children, className }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape
+  // Escape key
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
   }, [open, onClose]);
 
   // Focus trap
@@ -52,96 +51,44 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
     first?.focus();
 
     const trap = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return;
+      if (e.key !== 'Tab') return;
       if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last?.focus();
-        }
+        if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
       } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first?.focus();
-        }
+        if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
       }
     };
-    document.addEventListener("keydown", trap);
-    return () => document.removeEventListener("keydown", trap);
+    document.addEventListener('keydown', trap);
+    return () => document.removeEventListener('keydown', trap);
   }, [open]);
 
   if (!open) return null;
 
   return (
     <>
-      <style>{`
-        @keyframes modal-fade-in {
-          from { opacity: 0; transform: translate(-50%, -50%) scale(0.97); }
-          to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-        @keyframes sheet-slide-up {
-          from { transform: translateY(100%); }
-          to   { transform: translateY(0); }
-        }
-        .modal-panel {
-          animation: modal-fade-in 180ms ease-out forwards;
-        }
-        @media (max-width: 640px) {
-          .modal-panel {
-            animation: sheet-slide-up 220ms ease-out forwards;
-          }
-        }
-      `}</style>
-
-      {/* Overlay */}
+      {/* Backdrop */}
       <div
         aria-hidden="true"
         onClick={onClose}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(26,24,22,0.5)",
-          zIndex: "var(--z-modal)",
-          backdropFilter: "blur(2px)",
-        }}
+        className="fixed inset-0 z-40"
+        style={{ background: 'rgba(30, 45, 69, 0.6)' }}
       />
 
-      {/* Desktop: centered panel */}
+      {/* Panel */}
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        className={cn("modal-panel", className)}
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: "var(--z-modal)",
-          width: "90vw",
-          maxWidth: "520px",
-          background: "var(--color-surface)",
-          borderRadius: "var(--radius-lg)",
-          boxShadow: "var(--shadow-lg)",
-          maxHeight: "90dvh",
-          overflowY: "auto",
-        }}
+        className={cn(
+          'fixed z-50 bg-[var(--color-cream)] rounded-[6px] overflow-y-auto',
+          // Desktop: centered, max 560px
+          'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[560px] max-h-[90dvh]',
+          // Mobile: full screen bottom sheet
+          'max-sm:top-auto max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:w-full max-sm:max-w-full max-sm:rounded-b-none max-sm:max-h-[90dvh]',
+          className,
+        )}
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}
       >
-        {/* Mobile override via CSS — bottom sheet */}
-        <style>{`
-          @media (max-width: 640px) {
-            .modal-panel {
-              top: auto !important;
-              left: 0 !important;
-              right: 0 !important;
-              bottom: 0 !important;
-              transform: none !important;
-              width: 100% !important;
-              max-width: 100% !important;
-              border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
-              max-height: 90dvh !important;
-            }
-          }
-        `}</style>
         {children}
       </div>
     </>
@@ -151,26 +98,19 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
 export function ModalHeader({ title, onClose, className }: ModalHeaderProps) {
   return (
     <div
-      style={{
-        padding: "var(--space-6)",
-        borderBottom: "1px solid var(--color-border)",
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-      className={className}
+      className={cn(
+        'flex items-center justify-between px-8 py-6',
+        'border-b border-[var(--color-cream-dark)]',
+        className,
+      )}
     >
-      <h2 className="text-subheading">{title}</h2>
-      <Button variant="icon" size="sm" aria-label="Close" onClick={onClose}>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path
-            d="M12 4L4 12M4 4l8 8"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
+      <h2
+        className="font-serif italic text-[22px] leading-tight text-[var(--color-navy)]"
+      >
+        {title}
+      </h2>
+      <Button variant="icon" aria-label="Close" onClick={onClose}>
+        <X size={16} />
       </Button>
     </div>
   );
@@ -178,7 +118,7 @@ export function ModalHeader({ title, onClose, className }: ModalHeaderProps) {
 
 export function ModalBody({ children, className }: ModalBodyProps) {
   return (
-    <div style={{ padding: "var(--space-6)" }} className={className}>
+    <div className={cn('px-8 py-6', className)}>
       {children}
     </div>
   );
@@ -187,15 +127,11 @@ export function ModalBody({ children, className }: ModalBodyProps) {
 export function ModalFooter({ children, className }: ModalFooterProps) {
   return (
     <div
-      style={{
-        padding: "var(--space-4) var(--space-6)",
-        borderTop: "1px solid var(--color-border)",
-        display: "flex",
-        flexDirection: "row",
-        gap: "var(--space-3)",
-        justifyContent: "flex-end",
-      }}
-      className={className}
+      className={cn(
+        'flex items-center justify-end gap-3 px-8 py-4',
+        'border-t border-[var(--color-cream-dark)]',
+        className,
+      )}
     >
       {children}
     </div>

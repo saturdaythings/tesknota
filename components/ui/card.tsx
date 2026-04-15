@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 interface CardProps {
   children: React.ReactNode;
@@ -11,74 +11,64 @@ interface CardProps {
 export function Card({ children, className, padding, style, onClick }: CardProps) {
   return (
     <div
+      onClick={onClick}
+      className={cn(
+        'rounded-[6px] min-w-0',
+        'border border-[var(--color-cream-dark)]',
+        !padding && 'p-6',
+        onClick && 'cursor-pointer',
+        className,
+      )}
       style={{
-        background: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
-        borderRadius: "var(--radius-lg)",
-        padding: padding ?? "var(--space-6)",
-        boxShadow: "var(--shadow-sm)",
+        background: 'rgba(237, 232, 223, 0.3)',
+        padding: padding ?? undefined,
         ...style,
       }}
-      className={cn("min-w-0", className)}
-      onClick={onClick}
     >
       {children}
     </div>
   );
 }
 
-interface CardHeaderProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export function CardHeader({ children, className }: CardHeaderProps) {
+export function CardHeader({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      style={{ marginBottom: "var(--space-4)" }}
-      className={cn("flex flex-row items-start justify-between", className)}
-    >
+    <div className={cn('flex items-start justify-between mb-4', className)}>
       {children}
     </div>
   );
 }
 
-interface CardTitleProps {
-  children: React.ReactNode;
-  className?: string;
+export function CardTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <h3 className={cn('font-serif italic text-[20px] leading-tight text-[var(--color-navy)]', className)}>
+      {children}
+    </h3>
+  );
 }
 
-export function CardTitle({ children, className }: CardTitleProps) {
-  return <h3 className={cn("text-subheading", className)}>{children}</h3>;
-}
-
-interface CardBodyProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export function CardBody({ children, className }: CardBodyProps) {
+export function CardBody({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn(className)}>{children}</div>;
 }
 
-interface CardFooterProps {
+export function CardFooter({
+  children,
+  className,
+  style,
+}: {
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
-}
-
-export function CardFooter({ children, className, style }: CardFooterProps) {
+}) {
   return (
     <div
-      style={{
-        marginTop: "var(--space-4)",
-        paddingTop: "var(--space-4)",
-        borderTop: "1px solid var(--color-border)",
-        ...style,
-      }}
-      className={cn("flex items-center", className)}
+      className={cn('flex items-center mt-4 pt-4 border-t border-[var(--color-cream-dark)]', className)}
+      style={style}
     >
       {children}
     </div>
   );
+}
+
+export function Divider({ className }: { className?: string }) {
+  return <hr className={cn('border-0 border-t border-[var(--color-cream-dark)]', className)} />;
 }

@@ -1,15 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { useMobileNav } from "@/lib/mobile-nav-context";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { useMobileNav } from '@/lib/mobile-nav-context';
+import { LogOut } from '@/components/ui/Icons';
 
 interface NavItem {
   href: string;
   label: string;
+  icon: React.ReactNode;
   count?: number;
-  badge?: React.ReactNode;
+  hasNewActivity?: boolean;
 }
 
 interface NavSection {
@@ -21,15 +23,30 @@ interface SidebarProps {
   navSections: NavSection[];
   userName: string;
   onSignOut?: () => void;
-  className?: string;
 }
 
-export function Sidebar({
-  navSections,
-  userName,
-  onSignOut,
-  className,
-}: SidebarProps) {
+function CountBadge({ count }: { count: number }) {
+  return (
+    <span
+      className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full font-sans font-medium leading-none"
+      style={{ fontSize: '11px', background: 'var(--color-cream)', color: 'var(--color-navy)' }}
+    >
+      {count}
+    </span>
+  );
+}
+
+function LiveDot() {
+  return (
+    <span
+      className="ml-1 inline-block w-2 h-2 rounded-full flex-shrink-0"
+      style={{ background: '#22c55e' }}
+      aria-label="New activity"
+    />
+  );
+}
+
+export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
   const pathname = usePathname();
   const { open, close } = useMobileNav();
 
@@ -37,65 +54,94 @@ export function Sidebar({
     <>
       {/* Mobile backdrop */}
       <div
-        className={cn(
-          "fixed inset-0 z-[299] bg-black/40 md:hidden transition-opacity duration-200",
-          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
-        )}
+        aria-hidden="true"
         onClick={close}
+        className={cn(
+          'fixed inset-0 z-[299] md:hidden transition-opacity duration-200',
+          open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+        )}
+        style={{ background: 'rgba(30,45,69,0.5)' }}
       />
 
       <aside
         className={cn(
-          "flex flex-col flex-shrink-0 z-[300] bg-[var(--blue3)]",
-          "w-[var(--sw)]",
-          // Mobile: fixed drawer, slide in/out
-          "fixed inset-y-0 left-0 transition-transform duration-200",
-          open ? "translate-x-0" : "-translate-x-full",
-          // Desktop: back to normal flow
-          "md:relative md:inset-auto md:translate-x-0",
-          className,
+          'flex flex-col flex-shrink-0 z-[300] h-dvh overflow-hidden',
+          'w-[220px]',
+          'fixed top-0 left-0 transition-transform duration-200',
+          'md:relative md:translate-x-0',
+          open ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
         )}
+        style={{ background: 'var(--color-navy)' }}
       >
-        {/* Logo */}
-        <div className="px-5 pt-7 pb-[22px] border-b border-white/[0.07]">
-          <div className="font-[var(--script)] text-2xl italic text-[var(--warm2)] tracking-[0.02em] leading-none">
-            tesknota
+        {/* Logo area */}
+        <div className="px-5 pt-8 pb-4 flex-shrink-0">
+          <div
+            className="font-serif italic leading-none mb-1"
+            style={{ fontSize: '28px', color: 'var(--color-cream)' }}
+          >
+            t&#281;sknota
           </div>
-          <div className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-white/70 mt-1">
+          <div
+            className="font-sans font-medium uppercase leading-none mb-3"
+            style={{
+              fontSize: '10px',
+              color: 'rgba(245,240,232,0.7)',
+              letterSpacing: '0.22em',
+            }}
+          >
             Fragrance Tracker
           </div>
-          <div className="font-[var(--body)] text-[11px] text-white/35 mt-2 italic leading-snug">
-            [ t\u025bsk-&apos;no-ta ] &middot; a deep longing for what is absent or past
+          <div
+            className="font-serif italic leading-snug"
+            style={{ fontSize: '13px', color: 'var(--color-sand)' }}
+          >
+            [ t&#603;sk-&#712;n&#596;-ta ] &middot; a deep longing for what is absent or past
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-4 overscroll-contain">
+        <nav className="flex-1 overflow-y-auto pb-2">
           {navSections.map((section) => (
-            <div key={section.label}>
+            <div key={section.label} className="mt-4">
+              <div
+                className="px-5 mb-1 font-sans font-medium uppercase"
+                style={{
+                  fontSize: '10px',
+                  color: 'rgba(200,184,154,0.6)',
+                  letterSpacing: '0.15em',
+                  lineHeight: 1,
+                }}
+              >
+                {section.label}
+              </div>
               {section.items.map((item) => {
-                const active = pathname === item.href;
+                const isActive =
+                  pathname === item.href || pathname.startsWith(item.href + '/');
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={close}
-                    className={cn(
-                      "flex items-center justify-between px-5 py-[5px] text-[13px] tracking-[0.02em] select-none transition-all duration-[140ms]",
-                      active
-                        ? "text-[var(--warm2)] bg-[rgba(var(--warm-ch),0.14)] border-r-2 border-[var(--warm)] opacity-100"
-                        : "text-white/65 opacity-65 hover:text-[var(--warm2)] hover:bg-white/[0.05] hover:opacity-100",
-                    )}
+                    className="flex items-center gap-3 transition-colors duration-100"
+                    style={{
+                      height: '40px',
+                      paddingLeft: '17px',
+                      paddingRight: '20px',
+                      borderLeft: isActive
+                        ? '3px solid var(--color-cream)'
+                        : '3px solid transparent',
+                      background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+                      color: isActive
+                        ? 'var(--color-cream)'
+                        : 'rgba(200,184,154,0.8)',
+                      fontSize: '14px',
+                      fontFamily: 'var(--font-sans)',
+                    }}
                   >
-                    <span className="flex items-center gap-1.5">
-                      {item.label}
-                      {item.badge}
-                    </span>
-                    {item.count !== undefined && item.count > 0 && (
-                      <span className="font-[var(--mono)] text-xs text-[rgba(var(--warm-ch),0.8)]">
-                        {item.count}
-                      </span>
-                    )}
+                    <span className="flex-shrink-0">{item.icon}</span>
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {item.hasNewActivity && <LiveDot />}
+                    {item.count !== undefined && <CountBadge count={item.count} />}
                   </Link>
                 );
               })}
@@ -103,17 +149,32 @@ export function Sidebar({
           ))}
         </nav>
 
-        {/* User footer */}
-        <div className="px-5 py-4 border-t border-white/[0.06]">
-          <div className="font-normal text-[13px] text-white/70 mb-[10px]">
+        {/* Bottom user section */}
+        <div
+          className="flex-shrink-0 px-5 py-5 border-t"
+          style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+        >
+          <div
+            className="font-sans font-medium mb-1 truncate"
+            style={{ fontSize: '15px', color: 'var(--color-cream)' }}
+          >
             {userName}
           </div>
-          <div
-            onClick={onSignOut}
-            className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-white/25 cursor-pointer transition-colors duration-[140ms] hover:text-white/55"
+          <Link
+            href="/settings"
+            className="block font-sans mb-2 transition-opacity hover:opacity-100"
+            style={{ fontSize: '13px', color: 'var(--color-sand)', opacity: 0.8 }}
           >
-            Sign out
-          </div>
+            Settings
+          </Link>
+          <button
+            onClick={onSignOut}
+            className="flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.12em] transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
+            style={{ fontSize: '11px', color: 'rgba(200,184,154,0.6)' }}
+          >
+            <LogOut size={12} />
+            Sign Out
+          </button>
         </div>
       </aside>
     </>

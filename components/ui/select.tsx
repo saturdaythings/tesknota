@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect, useId, useCallback } from "react";
-import { cn } from "@/lib/utils";
+import { useId, useState, useRef, useEffect, useCallback, SelectHTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
 
 interface SelectOption {
   value: string;
@@ -20,11 +20,18 @@ interface SelectProps {
   id?: string;
 }
 
+const triggerBase =
+  'flex items-center justify-between w-full h-10 px-3 ' +
+  'bg-[var(--color-cream)] border border-[var(--color-cream-dark)] rounded-[3px] ' +
+  'font-sans text-[15px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
+  'focus-visible:border-[var(--color-accent)] ' +
+  'disabled:opacity-60 disabled:cursor-not-allowed';
+
 export function Select({
   options,
   value,
   onChange,
-  placeholder = "Select...",
+  placeholder = 'Select...',
   label,
   error,
   disabled,
@@ -34,7 +41,6 @@ export function Select({
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
   const generatedId = useId();
   const id = idProp ?? generatedId;
   const listId = `${id}-list`;
@@ -46,62 +52,48 @@ export function Select({
     setFocusedIndex(-1);
   }, []);
 
-  // Outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        close();
-      }
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) close();
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, [open, close]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
     switch (e.key) {
-      case "Enter":
-      case " ":
+      case 'Enter':
+      case ' ':
         e.preventDefault();
         if (!open) {
           setOpen(true);
-          setFocusedIndex(options.findIndex((o) => o.value === value) ?? 0);
+          setFocusedIndex(options.findIndex((o) => o.value === value));
         } else if (focusedIndex >= 0) {
           onChange(options[focusedIndex].value);
           close();
         }
         break;
-      case "ArrowDown":
+      case 'ArrowDown':
         e.preventDefault();
-        if (!open) {
-          setOpen(true);
-          setFocusedIndex(0);
-        } else {
-          setFocusedIndex((i) => Math.min(i + 1, options.length - 1));
-        }
+        if (!open) { setOpen(true); setFocusedIndex(0); }
+        else setFocusedIndex((i) => Math.min(i + 1, options.length - 1));
         break;
-      case "ArrowUp":
+      case 'ArrowUp':
         e.preventDefault();
         setFocusedIndex((i) => Math.max(i - 1, 0));
         break;
-      case "Escape":
+      case 'Escape':
         close();
         break;
     }
   };
 
-  // Scroll focused option into view
-  useEffect(() => {
-    if (!open || focusedIndex < 0 || !listRef.current) return;
-    const items = listRef.current.querySelectorAll<HTMLElement>("[role='option']");
-    items[focusedIndex]?.scrollIntoView({ block: "nearest" });
-  }, [focusedIndex, open]);
-
   return (
-    <div className={cn("relative flex flex-col w-full", className)} ref={containerRef}>
+    <div className={cn('relative flex flex-col w-full', className)} ref={containerRef}>
       {label && (
-        <label id={`${id}-label`} className="text-label mb-[var(--space-1)]">
+        <label id={`${id}-label`} className="mb-1 text-[13px] font-medium font-sans text-[var(--color-navy)]">
           {label}
         </label>
       )}
@@ -122,21 +114,11 @@ export function Select({
         }}
         onKeyDown={handleKeyDown}
         className={cn(
-          "flex items-center justify-between w-full h-10 px-3 bg-[var(--color-surface)] border border-[1.5px] rounded-[var(--radius-sm)] font-sans text-[length:var(--text-base)] outline-none transition-[border-color,box-shadow] cursor-pointer focus-visible:border-[var(--color-accent)] focus-visible:shadow-[0_0_0_3px_var(--color-accent-subtle)] disabled:bg-[var(--color-surface-raised)] disabled:opacity-60 disabled:cursor-not-allowed",
-          error
-            ? "border-[var(--color-danger)]"
-            : open
-              ? "border-[var(--color-accent)] shadow-[0_0_0_3px_var(--color-accent-subtle)]"
-              : "border-[var(--color-border)]",
+          triggerBase,
+          error ? 'border-[var(--color-destructive)]' : open ? 'border-[var(--color-accent)]' : '',
         )}
       >
-        <span
-          className={
-            selectedOption
-              ? "text-[var(--color-text-primary)]"
-              : "text-[var(--color-text-muted)]"
-          }
-        >
+        <span className={selectedOption ? 'text-[var(--color-navy)]' : 'text-[var(--color-sand)]'}>
           {selectedOption?.label ?? placeholder}
         </span>
         <svg
@@ -146,41 +128,34 @@ export function Select({
           fill="none"
           aria-hidden="true"
           style={{
-            color: "var(--color-text-muted)",
-            transform: open ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform var(--transition-fast)",
+            color: 'var(--color-sand)',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 150ms',
             flexShrink: 0,
           }}
         >
-          <path
-            d="M4 6l4 4 4-4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
       {open && (
         <div
           id={listId}
-          ref={listRef}
           role="listbox"
           aria-labelledby={label ? `${id}-label` : undefined}
           style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
             left: 0,
-            minWidth: "100%",
-            zIndex: "var(--z-dropdown)",
-            background: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-md)",
-            boxShadow: "var(--shadow-md)",
-            maxHeight: "280px",
-            overflowY: "auto",
-            padding: "var(--space-1) 0",
+            minWidth: '100%',
+            zIndex: 50,
+            background: 'var(--color-cream)',
+            border: '1px solid var(--color-cream-dark)',
+            borderRadius: '3px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+            maxHeight: '280px',
+            overflowY: 'auto',
+            padding: '4px 0',
           }}
         >
           {options.map((option, i) => {
@@ -191,27 +166,23 @@ export function Select({
                 key={option.value}
                 role="option"
                 aria-selected={isSelected}
-                onClick={() => {
-                  onChange(option.value);
-                  close();
-                }}
+                onClick={() => { onChange(option.value); close(); }}
                 onMouseEnter={() => setFocusedIndex(i)}
                 style={{
-                  height: "38px",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "0 var(--space-3)",
-                  fontSize: "var(--text-sm)",
-                  cursor: "pointer",
-                  color: isSelected
-                    ? "var(--color-accent)"
-                    : "var(--color-text-primary)",
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0 12px',
+                  fontSize: '15px',
+                  fontFamily: 'var(--font-sans)',
+                  cursor: 'pointer',
+                  color: isSelected ? 'var(--color-accent)' : 'var(--color-navy)',
                   fontWeight: isSelected ? 500 : 400,
                   background: isSelected
-                    ? "var(--color-accent-subtle)"
+                    ? 'var(--color-sand-light)'
                     : isFocused
-                      ? "var(--color-surface-raised)"
-                      : "transparent",
+                    ? 'var(--color-cream-dark)'
+                    : 'transparent',
                 }}
               >
                 {option.label}
@@ -222,10 +193,7 @@ export function Select({
       )}
 
       {error && (
-        <p
-          role="alert"
-          className="mt-[var(--space-1)] text-[length:var(--text-xs)] text-[var(--color-danger)]"
-        >
+        <p role="alert" className="mt-1 text-[13px] text-[var(--color-destructive)]">
           {error}
         </p>
       )}

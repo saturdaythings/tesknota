@@ -1,73 +1,35 @@
-import type { Metadata } from "next";
-import {
-  Playfair_Display,
-  Cormorant_Garamond,
-  DM_Mono,
-  Jost,
-  IBM_Plex_Mono,
-  Newsreader,
-} from "next/font/google";
-import "./globals.css";
-import { UserProvider } from "@/lib/user-context";
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  display: "swap",
-});
+import type { Metadata } from 'next';
+import { Cormorant_Garamond, Inter } from 'next/font/google';
+import './globals.css';
+import { UserProvider } from '@/lib/user-context';
 
 const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
+  variable: '--font-cormorant',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  style: ['normal', 'italic'],
+  display: 'swap',
 });
 
-const dmMono = DM_Mono({
-  variable: "--font-dm-mono",
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  display: "swap",
-});
-
-const jost = Jost({
-  variable: "--font-jost",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-ibm-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-});
-
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-  display: "swap",
+const inter = Inter({
+  variable: '--font-inter',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "tesknota",
-  description: "Fragrance tracker for Kiana and Sylvia",
+  title: 'tesknota',
+  description: 'Fragrance tracker',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${playfair.variable} ${cormorant.variable} ${dmMono.variable} ${jost.variable} ${ibmPlexMono.variable} ${newsreader.variable} h-full antialiased`}
-    >
-      <body className="h-full overflow-hidden bg-[var(--off)] text-[var(--ink)]">
+    <html lang="en" className={`${cormorant.variable} ${inter.variable} h-full`}>
+      <body
+        className="h-full overflow-hidden"
+        style={{ background: 'var(--color-cream)', color: 'var(--color-navy)', fontFamily: 'var(--font-sans)' }}
+      >
         <UserProvider>{children}</UserProvider>
       </body>
     </html>

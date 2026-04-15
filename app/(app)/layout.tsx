@@ -1,94 +1,134 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { AppShell } from "@/components/layout/AppShell";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { useUser, getFriend } from "@/lib/user-context";
-import { DataProvider } from "@/lib/data-context";
-import { ToastProvider } from "@/components/ui/toast";
-import { MobileNavProvider } from "@/lib/mobile-nav-context";
-import { BotDrawer } from "@/components/ui/bot-drawer";
-import { CmdPalette } from "@/components/ui/cmd-palette";
-import { useData } from "@/lib/data-context";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { AppShell } from '@/components/layout/AppShell';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { FloatingActionButton } from '@/components/layout/FloatingActionButton';
+import { useUser, getFriend } from '@/lib/user-context';
+import { DataProvider, useData } from '@/lib/data-context';
+import { ToastProvider } from '@/components/ui/toast';
+import { MobileNavProvider } from '@/lib/mobile-nav-context';
+import { BotDrawer } from '@/components/ui/bot-drawer';
+import { CmdPalette } from '@/components/ui/cmd-palette';
+import {
+  LayoutDashboard,
+  FlaskConical,
+  Heart,
+  MessageCircle,
+  BarChart2,
+  Upload,
+  Settings2,
+  Users,
+} from '@/components/ui/Icons';
 
 function DataErrorBanner() {
   const { loadError, reload } = useData();
   if (!loadError) return null;
   return (
-    <div className="bg-[var(--rose-tk)] text-white font-[var(--mono)] text-xs px-4 py-2 flex items-center justify-between shrink-0">
+    <div
+      className="flex items-center justify-between px-5 py-2 font-sans text-[13px] flex-shrink-0"
+      style={{ background: 'var(--color-destructive)', color: 'var(--color-cream)' }}
+    >
       <span>Failed to load data. Check your connection.</span>
-      <button onClick={reload} className="underline ml-4 hover:no-underline">Retry</button>
+      <button
+        onClick={reload}
+        className="underline ml-4 hover:no-underline bg-transparent border-none cursor-pointer"
+        style={{ color: 'inherit' }}
+      >
+        Retry
+      </button>
     </div>
   );
 }
 
-const NAV_SECTIONS_BASE = [
-  {
-    label: "My Space",
-    items: [
-      { href: "/dashboard", label: "Dashboard" },
-      { href: "/collection", label: "My Collection" },
-      { href: "/wishlist", label: "Wishlist" },
-    ],
-  },
-  {
-    label: "Experiences",
-    items: [
-      { href: "/compliments", label: "Compliments" },
-      { href: "/analytics", label: "Analytics" },
-    ],
-  },
-];
+function AppLayoutInner({ children, user, profiles, signOut }: {
+  children: React.ReactNode;
+  user: NonNullable<ReturnType<typeof useUser>['user']>;
+  profiles: ReturnType<typeof useUser>['profiles'];
+  signOut: () => Promise<void>;
+}) {
+  const router = useRouter();
+  const { fragrances, compliments } = useData();
+  const friend = getFriend(user, profiles);
+
+  const collectionCount = fragrances.filter((f) => f.status === 'CURRENT').length;
+  const wishlistCount = fragrances.filter((f) => f.status === 'WANT_TO_BUY' || f.status === 'WANT_TO_SMELL').length;
+  const complimentsCount = compliments.length;
+
+  const navSections = [
+    {
+      label: 'My Space',
+      items: [
+        { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+        { href: '/collection', label: 'My Collection', icon: <FlaskConical size={16} />, count: collectionCount },
+        { href: '/wishlist', label: 'Wishlist', icon: <Heart size={16} />, count: wishlistCount },
+      ],
+    },
+    {
+      label: 'Experiences',
+      items: [
+        { href: '/compliments', label: 'Compliments', icon: <MessageCircle size={16} />, count: complimentsCount },
+        { href: '/analytics', label: 'Analytics', icon: <BarChart2 size={16} /> },
+      ],
+    },
+    {
+      label: 'Social',
+      items: [
+        { href: '/friend', label: friend?.name ?? 'Friend', icon: <Users size={16} /> },
+      ],
+    },
+    {
+      label: 'Manage',
+      items: [
+        { href: '/import', label: 'Import', icon: <Upload size={16} /> },
+        { href: '/settings', label: 'Settings', icon: <Settings2 size={16} /> },
+        ...(user.isAdmin ? [{ href: '/admin', label: 'Admin', icon: <Settings2 size={16} /> }] : []),
+      ],
+    },
+  ];
+
+  return (
+    <AppShell
+      sidebar={
+        <Sidebar
+          navSections={navSections}
+          userName={user.name}
+          onSignOut={async () => {
+            await signOut();
+            router.push('/');
+          }}
+        />
+      }
+    >
+      <ToastProvider>
+        <DataErrorBanner />
+        {children}
+        <BotDrawer />
+        <CmdPalette />
+      </ToastProvider>
+      <FloatingActionButton />
+    </AppShell>
+  );
+}
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, profiles, isLoaded, signOut } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoaded && !user) router.replace("/");
+    if (isLoaded && !user) router.replace('/');
   }, [isLoaded, user, router]);
 
   if (!isLoaded || !user) return null;
 
-  const friend = getFriend(user, profiles);
-  const manageItems = [
-    { href: "/import", label: "Import" },
-    { href: "/settings", label: "Settings" },
-    ...(user.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
-  ];
-  const navSections = [
-    ...NAV_SECTIONS_BASE,
-    {
-      label: "Social",
-      items: [{ href: "/friend", label: friend?.name ?? "Friend" }],
-    },
-    { label: "Manage", items: manageItems },
-  ];
-
   return (
     <MobileNavProvider>
-      <AppShell
-        sidebar={
-          <Sidebar
-            navSections={navSections}
-            userName={user.name}
-            onSignOut={async () => {
-              await signOut();
-              router.push("/");
-            }}
-          />
-        }
-      >
-        <DataProvider>
-          <ToastProvider>
-            <DataErrorBanner />
-            {children}
-            <BotDrawer />
-            <CmdPalette />
-          </ToastProvider>
-        </DataProvider>
-      </AppShell>
+      <DataProvider>
+        <AppLayoutInner user={user} profiles={profiles} signOut={signOut}>
+          {children}
+        </AppLayoutInner>
+      </DataProvider>
     </MobileNavProvider>
   );
 }

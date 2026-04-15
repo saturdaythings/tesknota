@@ -1,70 +1,71 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { forwardRef, ButtonHTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "icon";
-type ButtonSize = "md" | "sm";
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'danger' | 'icon';
+type ButtonSize = 'md' | 'sm';
 
-type BaseButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  className?: string;
-};
-
-type IconButtonProps = BaseButtonProps & {
-  variant: "icon";
-  "aria-label": string;
-};
-
-type NonIconButtonProps = BaseButtonProps & {
-  variant?: Exclude<ButtonVariant, "icon">;
-};
-
-type ButtonProps = IconButtonProps | NonIconButtonProps;
+}
 
 const base =
-  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap select-none cursor-pointer border-none font-sans font-medium transition-[background-color,border-color,color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0";
+  'inline-flex items-center justify-center gap-2 cursor-pointer transition-colors duration-150 ' +
+  'font-sans font-medium select-none disabled:opacity-50 disabled:pointer-events-none ' +
+  '[&_svg]:pointer-events-none [&_svg]:shrink-0';
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--color-accent)] text-[var(--color-text-inverse)] hover:bg-[var(--color-accent-hover)]",
+    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] ' +
+    'bg-[var(--color-navy)] text-[var(--color-cream)] hover:bg-[var(--color-accent)]',
   secondary:
-    "bg-transparent border border-[1.5px] border-[var(--color-border-strong)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-raised)]",
+    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-transparent ' +
+    'border border-[var(--color-navy)] text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]',
   ghost:
-    "bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-overlay)] hover:text-[var(--color-text-primary)]",
+    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-transparent ' +
+    'text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]',
+  destructive:
+    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] ' +
+    'bg-[var(--color-destructive)] text-[var(--color-cream)] hover:opacity-85',
   danger:
-    "bg-[var(--color-danger)] text-[var(--color-text-inverse)] hover:bg-[var(--color-danger-hover)]",
-  icon: "bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-overlay)] hover:text-[var(--color-text-primary)]",
+    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] ' +
+    'bg-[var(--color-destructive)] text-[var(--color-cream)] hover:opacity-85',
+  icon: 'rounded-[3px] bg-transparent text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]',
 };
 
 const sizes: Record<ButtonSize, Record<ButtonVariant, string>> = {
   md: {
-    primary: "h-10 px-4 text-[length:var(--text-sm)] rounded-[var(--radius-sm)]",
-    secondary: "h-10 px-4 text-[length:var(--text-sm)] rounded-[var(--radius-sm)]",
-    ghost: "h-10 px-4 text-[length:var(--text-sm)] rounded-[var(--radius-sm)]",
-    danger: "h-10 px-4 text-[length:var(--text-sm)] rounded-[var(--radius-sm)]",
-    icon: "h-10 w-10 rounded-[var(--radius-sm)]",
+    primary: 'min-h-10',
+    secondary: 'min-h-10',
+    ghost: 'min-h-10',
+    destructive: 'min-h-10',
+    danger: 'min-h-10',
+    icon: 'w-10 h-10',
   },
   sm: {
-    primary: "h-8 px-3 text-[length:var(--text-sm)] rounded-[var(--radius-sm)]",
-    secondary: "h-8 px-3 text-[length:var(--text-sm)] rounded-[var(--radius-sm)]",
-    ghost: "h-8 px-3 text-[length:var(--text-sm)] rounded-[var(--radius-sm)]",
-    danger: "h-8 px-3 text-[length:var(--text-sm)] rounded-[var(--radius-sm)]",
-    icon: "h-8 w-8 rounded-[var(--radius-sm)]",
+    primary: 'min-h-8',
+    secondary: 'min-h-8',
+    ghost: 'min-h-8',
+    destructive: 'min-h-8',
+    danger: 'min-h-8',
+    icon: 'w-8 h-8',
   },
 };
 
-export function Button({
-  className,
-  variant = "primary",
-  size = "md",
-  ...props
-}: ButtonProps) {
-  return (
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant = 'primary', size = 'md', className, children, ...props }, ref) => (
     <button
-      style={{ transition: `background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast)` }}
+      ref={ref}
       className={cn(base, variants[variant], sizes[size][variant], className)}
       {...props}
-    />
-  );
-}
+    >
+      {children}
+    </button>
+  ),
+);
+
+Button.displayName = 'Button';
+
+export { Button };
