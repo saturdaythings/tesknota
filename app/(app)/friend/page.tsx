@@ -5,12 +5,13 @@ import { Topbar } from "@/components/layout/Topbar";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
-import { FragRow } from "@/components/ui/frag-row";
 import { FragDetail } from "@/components/ui/frag-detail";
+import { AccordCloud } from "@/components/ui/accord-cloud";
 import { Pagination } from "@/components/ui/pagination";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS, getAccords, monthNum } from "@/lib/frag-utils";
+import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 
 type FriendTab = "collection" | "compliments" | "wishlist" | "incommon";
@@ -52,6 +53,16 @@ export default function FriendPage() {
     (f) => f.status === "CURRENT" && myCurrentNames.has(f.name.toLowerCase())
   );
 
+  const friendAccordCounts: [string, number][] = (() => {
+    const counts: Record<string, number> = {};
+    FFOwned.forEach((f) => {
+      getAccords(f, communityFrags).forEach((a) => {
+        counts[a] = (counts[a] ?? 0) + 1;
+      });
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  })();
+
   return (
     <>
       <FragDetail
@@ -79,6 +90,20 @@ export default function FriendPage() {
               <StatBox value={FFWish.length} label="Wishlist" />
               <StatBox value={inCommon.length} label="In Common" />
             </StatsGrid>
+
+            {friendAccordCounts.length > 0 && (
+              <div className="mb-6">
+                <SectionHeader
+                  title="Scent signature"
+                  right={
+                    <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                      {friendName}'s accords
+                    </span>
+                  }
+                />
+                <AccordCloud accords={friendAccordCounts} />
+              </div>
+            )}
 
             <FilterBar className="mb-6">
               {FRIEND_TABS.map((t) => (
@@ -134,7 +159,6 @@ function FriendCollectionTab({
   frags,
   compliments,
   communityFrags,
-  friendId,
   onFragClick,
 }: {
   frags: UserFragrance[];
@@ -144,8 +168,9 @@ function FriendCollectionTab({
   onFragClick: (frag: UserFragrance) => void;
 }) {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(24);
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const pageFrags = pageSize === 0 ? sorted : sorted.slice((page - 1) * pageSize, page * pageSize);
   return (
     <>
       <SectionHeader
@@ -160,32 +185,35 @@ function FriendCollectionTab({
         <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No fragrances.</div>
       ) : (
         <>
-          <div className="overflow-x-auto border border-[var(--b2)]">
-            <table className="w-full min-w-[640px]">
-              <thead>
-                <tr className="border-b border-[var(--b2)]">
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Fragrance</th>
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Size</th>
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Rating</th>
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Added</th>
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Accords</th>
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Compliments</th>
-                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(pageSize === 0 ? sorted : sorted.slice((page - 1) * pageSize, page * pageSize)).map((f) => (
-                  <FragRow
-                    key={f.id}
-                    frag={f}
-                    communityFrags={communityFrags}
-                    compliments={compliments}
-                    userId={friendId}
-                    onClick={onFragClick}
-                  />
-                ))}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
+            {pageFrags.map((f) => {
+              const comps = compliments.filter((c) => c.primaryFragId === (f.fragranceId || f.id)).length;
+              const accords = getAccords(f, communityFrags).slice(0, 3).join(", ");
+              return (
+                <div
+                  key={f.id}
+                  onClick={() => onFragClick(f)}
+                  className="border border-[var(--b2)] px-4 py-3 hover:bg-[var(--b1)] cursor-pointer"
+                >
+                  <div className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink3)] mb-0.5 truncate">{f.house}</div>
+                  <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-2 leading-snug">{f.name}</div>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                    <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                      {STATUS_LABELS[f.status as keyof typeof STATUS_LABELS] ?? f.status}
+                    </span>
+                    {f.personalRating ? (
+                      <span className="font-[var(--mono)] text-xs text-[var(--warm-text)]">{"★".repeat(f.personalRating)}</span>
+                    ) : null}
+                    {comps > 0 ? (
+                      <span className="font-[var(--mono)] text-xs text-[var(--blue)]">{comps} comp{comps !== 1 ? "s" : ""}</span>
+                    ) : null}
+                    {accords ? (
+                      <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{accords}</span>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
           </div>
           <Pagination
             total={sorted.length}
