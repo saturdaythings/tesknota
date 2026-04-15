@@ -5,190 +5,165 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================================
-   TESKNOTA DESIGN SYSTEM
-   Single source of truth for all colors, fonts, spacing,
-   radii, and typography. Nothing else defines these.
+   TESKNOTA DESIGN TOKENS — mapped from css/tokens.css
+   All original variable names preserved.
+   shadcn semantic tokens override only where needed.
    ============================================================ */
 
 :root {
-  /* Backgrounds */
-  --color-bg: #F9F8F6;
-  --color-surface: #FFFFFF;
-  --color-surface-raised: #F3F1EE;
-  --color-surface-overlay: #EDEAE5;
+  /* --- Brand blues --- */
+  --blue: #2B4480;
+  --blue1: #6B9AF2;
+  --blue2: #3A5699;
+  --blue3: #1A2E5C;
+  --blue4: #EEF1F8;
+  --blue5: #D4DCEE;
+  --blue-tint: rgba(43, 68, 128, 0.06);
 
-  /* Borders */
-  --color-border: #E2DED8;
-  --color-border-strong: #C8C3BB;
+  /* --- Off-whites / surfaces --- */
+  --off: #F4F2ED;
+  --off2: #EAE7DF;
+  --off3: #DDD9CF;
 
-  /* Text */
-  --color-text-primary: #1A1816;
-  --color-text-secondary: #5C574F;
-  --color-text-muted: #9C9690;
-  --color-text-disabled: #C4BFB8;
-  --color-text-inverse: #FFFFFF;
+  /* --- Warm tones --- */
+  --warm: #C8B99A;
+  --warm2: #E6D9C4;
+  --warm3: #F2EBD9;
+  --warm-text: #786545;
+  --warm-hover: #b5a485;
+  --warm-layer: #9A7040;
+  --warm-tint: rgba(200, 185, 154, 0.18);
 
-  /* Accent */
-  --color-accent: #2C4A3E;
-  --color-accent-hover: #1E352C;
-  --color-accent-subtle: #E8EFEC;
-  --color-accent-subtle-hover: #D8E8E2;
+  /* --- Accents --- */
+  --slate: #5A6E85;    /* original --muted; renamed to avoid shadcn conflict */
+  --rose-tk: #B87068;  /* original --rose; renamed to avoid shadcn conflict */
+  --sage: #5E8A6E;
+  --green: #4a7c59;
 
-  /* Destructive */
-  --color-danger: #9B2335;
-  --color-danger-hover: #7A1B29;
-  --color-danger-subtle: #FAECED;
+  /* --- Ink / text --- */
+  --ink: #1A2030;
+  --ink2: #3D4A60;
+  --ink3: #556070;
+  --ink4: rgba(26, 32, 48, 0.32);
 
-  /* Success */
-  --color-success: #2D6A4F;
-  --color-success-subtle: #E8F5EE;
+  /* --- Blue opacity layers --- */
+  --b1: rgba(43, 68, 128, 0.07);
+  --b2: rgba(43, 68, 128, 0.14);
+  --b3: rgba(43, 68, 128, 0.24);
+  --b4: rgba(43, 68, 128, 0.40);
 
-  /* Warning */
-  --color-warning: #92520A;
-  --color-warning-subtle: #FDF3E3;
+  /* --- Status colors (text on --off background, WCAG AA) --- */
+  --s-cur:     #1A5C3A;   /* current — dark green */
+  --s-prv:     #3D4A60;   /* prev owned — ink2 */
+  --s-wnt:     #5A3A0A;   /* want to buy/smell — dark amber */
+  --s-no:      #8B2020;   /* don't like — dark red */
+  --s-unk:     #3A2880;   /* identify later — dark purple */
+  --s-fin:     #4A4040;   /* finished — dark neutral */
+  /* Status badge backgrounds */
+  --s-cur-bg:  rgba(26,92,58,0.10);
+  --s-wnt-bg:  rgba(90,58,10,0.10);
+  --s-no-bg:   rgba(139,32,32,0.10);
+  --s-unk-bg:  rgba(58,40,128,0.10);
+  --save-green: rgba(60, 180, 90, 0.85);
+  --save-green-border: rgba(60, 180, 90, 0.4);
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(26,24,22,0.07), 0 1px 2px rgba(26,24,22,0.04);
-  --shadow-md: 0 4px 12px rgba(26,24,22,0.08), 0 2px 4px rgba(26,24,22,0.05);
-  --shadow-lg: 0 12px 32px rgba(26,24,22,0.10), 0 4px 8px rgba(26,24,22,0.06);
-
-  /* Spacing — 4px base */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
-
-  /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  /* Typography scale — 14px minimum */
-  --text-xs: 14px;
-  --text-sm: 15px;
-  --text-base: 16px;
-  --text-md: 18px;
-  --text-lg: 22px;
-  --text-xl: 28px;
-  --text-2xl: 36px;
-
-  /* Line heights */
-  --leading-tight: 1.2;
-  --leading-snug: 1.4;
-  --leading-normal: 1.6;
-
-  /* Transitions */
-  --transition-fast: 120ms ease;
-  --transition-base: 200ms ease;
-  --transition-slow: 350ms ease;
-
-  /* Z-index */
-  --z-base: 1;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-overlay: 300;
-  --z-modal: 400;
-  --z-toast: 500;
-
-  /* ---- Application: status badge colors ---- */
-  --s-cur: #1A5C3A;
-  --s-prv: #3D4A60;
-  --s-wnt: #5A3A0A;
-  --s-no: #8B2020;
-  --s-unk: #3A2880;
-  --s-fin: #4A4040;
-  --s-cur-bg: rgba(26,92,58,0.10);
-  --s-wnt-bg: rgba(90,58,10,0.10);
-  --s-no-bg: rgba(139,32,32,0.10);
-  --s-unk-bg: rgba(58,40,128,0.10);
-  --save-green: rgba(60,180,90,0.85);
-  --save-green-border: rgba(60,180,90,0.4);
-
-  /* ---- Application: heatmap ---- */
+  /* --- Heatmap --- */
   --hm-1: #D5D5D5;
   --hm-2: #AAAAAA;
   --hm-3: #777777;
   --hm-4: #444444;
 
-  /* ---- Layout ---- */
+  /* --- Admin panel (monochrome) --- */
+  --adm-bg: #FAFAFA;
+  --adm-bg2: #F0F0F0;
+  --adm-bg3: #E6E6E6;
+  --adm-fg: #0A0A0A;
+  --adm-fg2: #333333;
+  --adm-fg3: #666666;
+  --adm-fg4: #999999;
+  --adm-border: #D0D0D0;
+  --adm-border2: #E8E8E8;
+  --adm-red: #C0392B;
+  --adm-red-bg: #FDF2F1;
+  --adm-green: #1E8449;
+  --adm-green-bg: #F0FAF4;
+  --adm-blue: #2471A3;
+  --adm-blue-bg: #EBF5FB;
+
+  /* --- Fonts (referenced by next/font/google variables) --- */
+  --serif: var(--font-playfair), Georgia, serif;
+  --script: var(--font-cormorant), Georgia, serif;
+  --mono: var(--font-dm-mono), monospace;
+  --body: var(--font-jost), system-ui, sans-serif;
+  --adm-mono: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
+  --adm-serif: var(--font-newsreader), Newsreader, Georgia, serif;
+
+  /* --- Layout --- */
   --sw: 216px;
   --th: 56px;
 
-  /* ---- shadcn semantic tokens — mapped to design system ---- */
-  --background: var(--color-bg);
-  --foreground: var(--color-text-primary);
-  --card: var(--color-surface);
-  --card-foreground: var(--color-text-primary);
-  --popover: var(--color-surface);
-  --popover-foreground: var(--color-text-primary);
-  --primary: var(--color-accent);
-  --primary-foreground: var(--color-text-inverse);
-  --secondary: var(--color-surface-raised);
-  --secondary-foreground: var(--color-text-primary);
-  --muted: var(--color-surface-overlay);
-  --muted-foreground: var(--color-text-secondary);
-  --accent: var(--color-accent-subtle);
-  --accent-foreground: var(--color-accent);
-  --destructive: var(--color-danger);
-  --border: var(--color-border);
-  --input: var(--color-surface-raised);
-  --ring: var(--color-accent);
-  --radius: var(--radius-md);
-  --sidebar: var(--color-accent);
-  --sidebar-foreground: var(--color-text-inverse);
-  --sidebar-primary: var(--color-accent-subtle);
-  --sidebar-primary-foreground: var(--color-accent);
-  --sidebar-accent: var(--color-accent-hover);
-  --sidebar-accent-foreground: var(--color-text-inverse);
-  --sidebar-border: var(--color-border);
-  --sidebar-ring: var(--color-accent-subtle);
+  /* --- RGB channel tokens (for rgba() with variable alpha) --- */
+  --white-ch: 255, 255, 255;
+  --black-ch: 0, 0, 0;
+  --blue-ch: 43, 68, 128;
+  --blue1-ch: 107, 154, 242;
+  --blue-mid-ch: 74, 111, 165;
+  --blue3-ch: 26, 46, 92;
+  --ink-ch: 26, 32, 48;
+  --near-black-ch: 13, 12, 15;
+  --warm-ch: 200, 185, 154;
+  --warm2-ch: 230, 217, 196;
+  --rose-ch: 184, 112, 104;
+  --sage-ch: 94, 138, 110;
+  --off-ch: 244, 242, 237;
+  --hm-warm-ch: 201, 169, 110;
+
+  /* ============================================================
+     shadcn SEMANTIC TOKENS — mapped to tesknota colors
+     ============================================================ */
+  --background: #F4F2ED;         /* --off */
+  --foreground: #1A2030;         /* --ink */
+  --card: #F4F2ED;               /* --off */
+  --card-foreground: #1A2030;    /* --ink */
+  --popover: #ffffff;
+  --popover-foreground: #1A2030;
+  --primary: #2B4480;            /* --blue */
+  --primary-foreground: #ffffff;
+  --secondary: #F2EBD9;          /* --warm3 */
+  --secondary-foreground: #1A2030;
+  --muted: #EAE7DF;              /* --off2; shadcn surface muted */
+  --muted-foreground: #556070;   /* --ink3 */
+  --accent: #C8B99A;             /* --warm */
+  --accent-foreground: #1A2030;
+  --destructive: #B87068;        /* --rose-tk */
+  --border: #DDD9CF;             /* --off3 */
+  --input: #EAE7DF;              /* --off2 */
+  --ring: #6B9AF2;               /* --blue1 */
+  --radius: 0.5rem;
+
+  /* chart colors */
+  --chart-1: #2B4480;
+  --chart-2: #C8B99A;
+  --chart-3: #5E8A6E;
+  --chart-4: #B87068;
+  --chart-5: #9088C0;
+
+  /* sidebar — dark navy matching existing app */
+  --sidebar: #1A2E5C;               /* --blue3 */
+  --sidebar-foreground: #EEF1F8;    /* --blue4 */
+  --sidebar-primary: #6B9AF2;       /* --blue1 */
+  --sidebar-primary-foreground: #1A2E5C;
+  --sidebar-accent: #2B4480;        /* --blue */
+  --sidebar-accent-foreground: #EEF1F8;
+  --sidebar-border: rgba(43, 68, 128, 0.24); /* --b3 */
+  --sidebar-ring: #6B9AF2;
 }
 
 /* ============================================================
-   TAILWIND v4 THEME — expose design tokens as utilities
-   bg-surface, text-text-primary, border-border-strong, etc.
+   TAILWIND v4 THEME — expose tesknota tokens as utilities
    ============================================================ */
 @theme inline {
-  /* Background utilities */
-  --color-bg: var(--color-bg);
-  --color-surface: var(--color-surface);
-  --color-surface-raised: var(--color-surface-raised);
-  --color-surface-overlay: var(--color-surface-overlay);
-
-  /* Border utilities */
-  --color-border: var(--color-border);
-  --color-border-strong: var(--color-border-strong);
-
-  /* Text utilities */
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-text-muted: var(--color-text-muted);
-  --color-text-disabled: var(--color-text-disabled);
-  --color-text-inverse: var(--color-text-inverse);
-
-  /* Accent utilities */
-  --color-accent: var(--color-accent);
-  --color-accent-hover: var(--color-accent-hover);
-  --color-accent-subtle: var(--color-accent-subtle);
-  --color-accent-subtle-hover: var(--color-accent-subtle-hover);
-
-  /* Semantic utilities */
-  --color-danger: var(--color-danger);
-  --color-danger-hover: var(--color-danger-hover);
-  --color-danger-subtle: var(--color-danger-subtle);
-  --color-success: var(--color-success);
-  --color-success-subtle: var(--color-success-subtle);
-  --color-warning: var(--color-warning);
-  --color-warning-subtle: var(--color-warning-subtle);
-
-  /* shadcn semantic utilities (keep bg-background, text-foreground, etc. working) */
+  /* shadcn semantic tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -201,9 +176,17 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -213,7 +196,28 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Status colors as utilities */
+  /* tesknota brand colors as Tailwind utilities */
+  --color-blue: var(--blue);
+  --color-blue1: var(--blue1);
+  --color-blue2: var(--blue2);
+  --color-blue3: var(--blue3);
+  --color-blue4: var(--blue4);
+  --color-blue5: var(--blue5);
+  --color-blue-tint: var(--blue-tint);
+  --color-off: var(--off);
+  --color-off2: var(--off2);
+  --color-off3: var(--off3);
+  --color-warm: var(--warm);
+  --color-warm2: var(--warm2);
+  --color-warm3: var(--warm3);
+  --color-warm-text: var(--warm-text);
+  --color-slate: var(--slate);
+  --color-rose-tk: var(--rose-tk);
+  --color-sage: var(--sage);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink2);
+  --color-ink3: var(--ink3);
+  --color-green: var(--green);
   --color-s-cur: var(--s-cur);
   --color-s-prv: var(--s-prv);
   --color-s-wnt: var(--s-wnt);
@@ -221,128 +225,28 @@
   --color-s-unk: var(--s-unk);
   --color-s-fin: var(--s-fin);
 
-  /* Shadow utilities */
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
+  /* fonts */
+  --font-sans: var(--body);
+  --font-serif: var(--serif);
+  --font-script: var(--script);
+  --font-mono: var(--mono);
 
-  /* Radius utilities */
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-full: var(--radius-full);
+  /* radius */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 
-  /* Spacing utilities */
-  --spacing-1: var(--space-1);
-  --spacing-2: var(--space-2);
-  --spacing-3: var(--space-3);
-  --spacing-4: var(--space-4);
-  --spacing-5: var(--space-5);
-  --spacing-6: var(--space-6);
-  --spacing-8: var(--space-8);
-  --spacing-10: var(--space-10);
-  --spacing-12: var(--space-12);
-  --spacing-16: var(--space-16);
-
-  /* Font families */
-  --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
-
-  /* Layout */
+  /* layout */
   --width-sidebar: var(--sw);
   --height-topbar: var(--th);
 }
 
-/* ============================================================
-   BASE RESETS
-   ============================================================ */
 @layer base {
   * {
-    box-sizing: border-box;
     @apply border-border outline-ring/50;
   }
-
-  html {
-    font-family: var(--font-sans), system-ui, sans-serif;
-    font-size: 16px;
-    background: var(--color-bg);
-    color: var(--color-text-primary);
-    -webkit-font-smoothing: antialiased;
-  }
-
   body {
-    min-height: 100dvh;
-  }
-
-  a {
-    color: inherit;
-    text-decoration: inherit;
-  }
-}
-
-/* ============================================================
-   TYPOGRAPHY UTILITIES
-   ============================================================ */
-@layer utilities {
-  .font-display {
-    font-family: var(--font-display);
-  }
-
-  .text-display {
-    font-family: var(--font-display);
-    font-size: var(--text-2xl);
-    line-height: var(--leading-tight);
-    font-weight: 500;
-  }
-
-  .text-page-title {
-    font-size: var(--text-xl);
-    font-weight: 600;
-    line-height: var(--leading-tight);
-    color: var(--color-text-primary);
-  }
-
-  .text-section-title {
-    font-size: var(--text-lg);
-    font-weight: 600;
-    line-height: var(--leading-snug);
-    color: var(--color-text-primary);
-  }
-
-  .text-subheading {
-    font-size: var(--text-md);
-    font-weight: 500;
-    line-height: var(--leading-snug);
-    color: var(--color-text-primary);
-  }
-
-  .text-body {
-    font-size: var(--text-base);
-    font-weight: 400;
-    line-height: var(--leading-normal);
-    color: var(--color-text-primary);
-  }
-
-  .text-secondary {
-    font-size: var(--text-sm);
-    font-weight: 400;
-    line-height: var(--leading-normal);
-    color: var(--color-text-secondary);
-  }
-
-  .text-meta {
-    font-size: var(--text-xs);
-    font-weight: 500;
-    line-height: var(--leading-snug);
-    color: var(--color-text-muted);
-    letter-spacing: 0.02em;
-  }
-
-  .text-label {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
+    @apply bg-background text-foreground font-sans;
   }
 }

@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
-import { Button } from "@/components/ui/button";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
@@ -39,41 +38,6 @@ const YEARS = Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) =>
 
 function genId(): string {
   return "f" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-}
-
-const fieldLabel: React.CSSProperties = {
-  display: "block",
-  fontSize: "var(--text-xs)",
-  fontWeight: 600,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-  color: "var(--color-text-muted)",
-  marginBottom: "var(--space-2)",
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "var(--space-2) var(--space-3)",
-  border: "1px solid var(--color-border)",
-  borderRadius: "var(--radius-sm)",
-  background: "var(--color-surface)",
-  fontSize: "var(--text-sm)",
-  color: "var(--color-text-primary)",
-  outline: "none",
-};
-
-function chipStyle(active: boolean): React.CSSProperties {
-  return {
-    padding: "var(--space-1) var(--space-3)",
-    border: "1px solid",
-    borderRadius: "var(--radius-sm)",
-    fontSize: "var(--text-xs)",
-    cursor: "pointer",
-    transition: "background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast)",
-    borderColor: active ? "var(--color-accent)" : "var(--color-border)",
-    color: active ? "var(--color-accent)" : "var(--color-text-secondary)",
-    background: active ? "var(--color-accent-subtle)" : "transparent",
-  };
 }
 
 interface Props {
@@ -257,11 +221,13 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       <ModalHeader title={title} onClose={onClose} />
       <ModalBody>
       {step === 1 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+        <div className="space-y-5">
           {/* Search */}
           <div>
-            <label style={fieldLabel}>Fragrance Name</label>
-            <div style={{ position: "relative" }}>
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+              Fragrance Name
+            </label>
+            <div className="relative">
               <input
                 ref={searchRef}
                 value={search}
@@ -269,97 +235,58 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                 onFocus={() => search.trim().length >= 2 && setDropOpen(true)}
                 onBlur={() => setTimeout(() => setDropOpen(false), 150)}
                 placeholder="Search by name or house..."
-                style={inputStyle}
-                className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
+                className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
               />
               {dropOpen && matches.length > 0 && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 2px)",
-                    left: 0,
-                    right: 0,
-                    zIndex: "var(--z-dropdown)" as unknown as number,
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "var(--radius-sm)",
-                    background: "var(--color-surface)",
-                    boxShadow: "var(--shadow-md)",
-                    maxHeight: "220px",
-                    overflowY: "auto",
-                  }}
-                >
+                <div className="absolute top-full left-0 right-0 z-50 border border-[var(--b3)] border-t-0 bg-[var(--off)] shadow-sm max-h-[220px] overflow-y-auto">
                   {matches.map((cf) => (
                     <div
                       key={cf.fragranceId}
                       onMouseDown={() => selectMatch(cf)}
-                      style={{
-                        padding: "var(--space-2) var(--space-3)",
-                        cursor: "pointer",
-                        borderBottom: "1px solid var(--color-border)",
-                      }}
-                      className="last:border-0 hover:bg-[var(--color-surface-raised)]"
+                      className="px-3 py-[9px] cursor-pointer hover:bg-[var(--b1)] border-b border-[var(--b1)] last:border-0"
                     >
-                      <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)" }}>{cf.fragranceName}</div>
-                      <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{cf.fragranceHouse}</div>
+                      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{cf.fragranceName}</div>
+                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{cf.fragranceHouse}</div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
             {selectedName && (
-              <div
-                style={{
-                  marginTop: "var(--space-2)",
-                  padding: "var(--space-2) var(--space-3)",
-                  background: "var(--color-surface-raised)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius-sm)",
-                }}
-              >
-                <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)", fontWeight: 500 }}>{selectedName}</div>
+              <div className="mt-2 px-3 py-3 bg-[var(--b1)] border border-[var(--b2)]">
+                <div className="font-[var(--body)] text-sm text-[var(--ink)]">{selectedName}</div>
                 {selectedHouse && (
-                  <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: "var(--space-1)" }}>{selectedHouse}</div>
+                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
                 )}
                 {(cd?.avgPrice || cd?.communityRating) && (
-                  <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginTop: "var(--space-1)" }}>
+                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mt-[3px]">
                     {[cd.avgPrice?.replace(/~/g, ""), cd.communityRating ? cd.communityRating + "/10" : ""].filter(Boolean).join(" · ")}
                   </div>
                 )}
                 {cd && cd.accords.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)", marginTop: "var(--space-3)" }}>
+                  <div className="flex flex-wrap gap-1 mt-3">
                     {cd.accords.slice(0, 8).map((a) => (
-                      <span
-                        key={a}
-                        style={{
-                          fontSize: "var(--text-xs)",
-                          padding: "var(--space-1) var(--space-2)",
-                          border: "1px solid var(--color-border)",
-                          borderRadius: "var(--radius-sm)",
-                          color: "var(--color-text-secondary)",
-                        }}
-                      >
-                        {a}
-                      </span>
+                      <span key={a} className="font-[var(--mono)] text-xs px-2 py-[3px] border border-[var(--b3)] text-[var(--ink3)]">{a}</span>
                     ))}
                   </div>
                 )}
                 {cd && (cd.topNotes.length > 0 || cd.middleNotes.length > 0 || cd.baseNotes.length > 0) && (
-                  <div style={{ marginTop: "var(--space-3)", display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
+                  <div className="mt-3 space-y-[6px]">
                     {cd.topNotes.length > 0 && (
-                      <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
-                        <span style={{ letterSpacing: "0.08em", textTransform: "uppercase", marginRight: "var(--space-2)" }}>Top</span>
+                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                        <span className="tracking-[0.08em] uppercase mr-2">Top</span>
                         {cd.topNotes.join(", ")}
                       </div>
                     )}
                     {cd.middleNotes.length > 0 && (
-                      <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
-                        <span style={{ letterSpacing: "0.08em", textTransform: "uppercase", marginRight: "var(--space-2)" }}>Mid</span>
+                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                        <span className="tracking-[0.08em] uppercase mr-2">Mid</span>
                         {cd.middleNotes.join(", ")}
                       </div>
                     )}
                     {cd.baseNotes.length > 0 && (
-                      <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
-                        <span style={{ letterSpacing: "0.08em", textTransform: "uppercase", marginRight: "var(--space-2)" }}>Base</span>
+                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                        <span className="tracking-[0.08em] uppercase mr-2">Base</span>
                         {cd.baseNotes.join(", ")}
                       </div>
                     )}
@@ -371,15 +298,21 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Status */}
           <div>
-            <label style={fieldLabel}>Status</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+              Status
+            </label>
+            <div className="flex flex-wrap gap-2">
               {STATUSES.map((s) => (
                 <button
                   key={s.value}
                   type="button"
                   onClick={() => setStatus(s.value)}
-                  style={chipStyle(status === s.value)}
-                  className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                  className={
+                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
+                    (status === s.value
+                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
+                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
+                  }
                 >
                   {s.label}
                 </button>
@@ -390,52 +323,44 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       )}
 
       {step === 2 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+        <div className="space-y-5">
           {/* Selected frag header */}
           {selectedName && (
-            <div
-              style={{
-                padding: "var(--space-2) var(--space-3)",
-                background: "var(--color-surface-raised)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-sm)",
-              }}
-            >
-              <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)", fontWeight: 500 }}>{selectedName}</div>
+            <div className="px-3 py-2 bg-[var(--b1)] border border-[var(--b2)]">
+              <div className="font-[var(--body)] text-sm text-[var(--ink)]">{selectedName}</div>
               {selectedHouse && (
-                <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: "var(--space-1)" }}>{selectedHouse}</div>
+                <div className="font-[var(--mono)] text-xs text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
               )}
-              {!isEdit && (
-                <button
-                  onClick={() => setStep(1)}
-                  style={{
-                    fontSize: "var(--text-xs)",
-                    color: "var(--color-accent)",
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                    marginTop: "var(--space-1)",
-                  }}
-                  className="hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-                >
-                  Change
-                </button>
-              )}
+              <button
+                onClick={() => { if (!isEdit) setStep(1); }}
+                className={
+                  isEdit
+                    ? "hidden"
+                    : "font-[var(--mono)] text-xs text-[var(--blue)] mt-1 hover:underline bg-transparent border-none cursor-pointer p-0"
+                }
+              >
+                Change
+              </button>
             </div>
           )}
 
           {/* Status (always shown in step 2 so edit mode can change it) */}
           <div>
-            <label style={fieldLabel}>Status</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+              Status
+            </label>
+            <div className="flex flex-wrap gap-2">
               {STATUSES.map((s) => (
                 <button
                   key={s.value}
                   type="button"
                   onClick={() => setStatus(s.value)}
-                  style={chipStyle(status === s.value)}
-                  className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                  className={
+                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
+                    (status === s.value
+                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
+                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
+                  }
                 >
                   {s.label}
                 </button>
@@ -445,15 +370,21 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Size */}
           <div>
-            <label style={fieldLabel}>Size</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+              Size
+            </label>
+            <div className="flex flex-wrap gap-2">
               {SIZES.map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => toggleSize(s)}
-                  style={chipStyle(sizes.includes(s))}
-                  className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                  className={
+                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
+                    (sizes.includes(s)
+                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
+                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
+                  }
                 >
                   {s}
                 </button>
@@ -463,15 +394,21 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Type */}
           <div>
-            <label style={fieldLabel}>Concentration</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+              Concentration
+            </label>
+            <div className="flex flex-wrap gap-2">
               {TYPES.map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setType(type === t ? "" : t)}
-                  style={chipStyle(type === t)}
-                  className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                  className={
+                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
+                    (type === t
+                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
+                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
+                  }
                 >
                   {t}
                 </button>
@@ -481,24 +418,17 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Rating */}
           <div>
-            <label style={fieldLabel}>Personal Rating</label>
-            <div style={{ display: "flex", gap: "var(--space-1)" }}>
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+              Personal Rating
+            </label>
+            <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button
                   key={n}
                   type="button"
                   onClick={() => setRating(rating === n ? 0 : n)}
-                  style={{
-                    fontSize: "22px",
-                    lineHeight: 1,
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0,
-                    color: n <= rating ? "var(--color-accent)" : "var(--color-border-strong)",
-                    transition: "opacity var(--transition-fast)",
-                  }}
-                  className="hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                  className="text-[22px] leading-none bg-transparent border-none cursor-pointer p-0 transition-opacity hover:opacity-80"
+                  style={{ color: n <= rating ? "var(--blue)" : "var(--b4)" }}
                   aria-label={`${n} star${n > 1 ? "s" : ""}`}
                 >
                   {n <= rating ? "\u2605" : "\u2606"}
@@ -512,16 +442,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <button
               type="button"
               onClick={() => setMoreOpen(true)}
-              style={{
-                fontSize: "var(--text-xs)",
-                color: "var(--color-accent)",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                textAlign: "left",
-              }}
-              className="hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+              className="font-[var(--mono)] text-xs text-[var(--blue)] hover:underline text-left"
             >
               + More Details
             </button>
@@ -531,77 +452,82 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <>
               {/* Where bought */}
               <div>
-                <label style={fieldLabel}>Where Bought</label>
+                <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                  Where Bought
+                </label>
                 <input
                   value={whereBought}
                   onChange={(e) => setWhereBought(e.target.value)}
                   placeholder="Sephora, Fragrantica, etc."
-                  style={inputStyle}
-                  className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
+                  className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
                 />
               </div>
 
               {/* Purchase date + price */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "var(--space-4)" }}>
+              <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label style={fieldLabel}>Month</label>
+                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                    Month
+                  </label>
                   <select
                     value={purchaseMonth}
                     onChange={(e) => setPurchaseMonth(e.target.value)}
-                    style={{ ...inputStyle, cursor: "pointer" }}
-                    className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)]"
+                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
                   >
                     <option value="">—</option>
                     {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={fieldLabel}>Year</label>
+                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                    Year
+                  </label>
                   <select
                     value={purchaseYear}
                     onChange={(e) => setPurchaseYear(e.target.value)}
-                    style={{ ...inputStyle, cursor: "pointer" }}
-                    className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)]"
+                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
                   >
                     <option value="">—</option>
                     {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={fieldLabel}>Price</label>
+                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                    Price
+                  </label>
                   <input
                     value={purchasePrice}
                     onChange={(e) => setPurchasePrice(e.target.value)}
                     placeholder="$0"
-                    style={inputStyle}
-                    className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
+                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
                   />
                 </div>
               </div>
 
               {/* Notes */}
               <div>
-                <label style={fieldLabel}>Personal Notes</label>
+                <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                  Personal Notes
+                </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder="Your impressions, context, memories..."
-                  style={{ ...inputStyle, resize: "none" }}
-                  className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
+                  className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)] resize-none"
                 />
               </div>
 
               {/* Dupe */}
               <div>
-                <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer" }}>
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={isDupe}
                     onChange={(e) => setIsDupe(e.target.checked)}
-                    className="accent-[var(--color-accent)]"
+                    className="accent-[var(--blue)]"
                   />
-                  <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                  <span className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.05em] uppercase">
                     This is a dupe of another fragrance
                   </span>
                 </label>
@@ -610,8 +536,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                     value={dupeFor}
                     onChange={(e) => setDupeFor(e.target.value)}
                     placeholder="Original fragrance name..."
-                    style={{ ...inputStyle, marginTop: "var(--space-2)" }}
-                    className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
+                    className="mt-2 w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
                   />
                 )}
               </div>
@@ -621,22 +546,24 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       )}
       </ModalBody>
       <ModalFooter>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-          <div style={{ fontSize: "var(--text-xs)", color: "var(--color-danger)" }}>{err}</div>
-          <div style={{ display: "flex", gap: "var(--space-2)" }}>
+        <div className="flex items-center justify-between w-full">
+          <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">{err}</div>
+          <div className="flex gap-2">
             {step === 2 && !isEdit && (
-              <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
+              <button
+                onClick={() => setStep(1)}
+                className="px-4 py-[7px] font-[var(--mono)] text-xs text-[var(--ink3)] border border-[var(--b3)] hover:border-[var(--b4)] transition-colors"
+              >
                 Back
-              </Button>
+              </button>
             )}
-            <Button
-              variant="primary"
-              size="sm"
+            <button
               onClick={save}
               disabled={saving}
+              className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {saving ? "Saving..." : step === 1 ? "Next" : isEdit ? "Update" : "Save Fragrance"}
-            </Button>
+            </button>
           </div>
         </div>
       </ModalFooter>

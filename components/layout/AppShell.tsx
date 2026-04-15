@@ -11,27 +11,13 @@ interface AppShellProps {
 export function AppShell({ sidebar, children, className }: AppShellProps) {
   return (
     <div
-      style={{
-        display: "flex",
-        height: "100dvh",
-        overflow: "hidden",
-        background: "var(--color-bg)",
-        color: "var(--color-text-primary)",
-      }}
-      className={cn(className)}
+      className={cn(
+        "flex h-dvh overflow-hidden bg-[var(--off)] text-[var(--ink)] font-[var(--body)] text-sm leading-normal",
+        className,
+      )}
     >
       {sidebar}
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          flexDirection: "column",
-          overflow: "hidden",
-          minWidth: 0,
-        }}
-      >
-        {children}
-      </div>
+      <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
     </div>
   );
 }

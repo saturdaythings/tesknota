@@ -1,242 +1,129 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { SlidersHorizontal } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
-import { Card, CardHeader, CardTitle, CardBody, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Divider } from "@/components/ui/divider";
-import { EmptyState } from "@/components/ui/empty-state";
+import { SectionHeader } from "@/components/ui/section-header";
 import { useUser } from "@/lib/user-context";
-import { useToast } from "@/components/ui/toast";
-import { supabase } from "@/lib/supabase";
+import { useData } from "@/lib/data-context";
+import { STATUS_LABELS } from "@/types";
+import { getCompCount } from "@/lib/frag-utils";
 
-// ── Row helper for Account section ───────────────────────
-
-function AccountRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: "var(--space-4)",
-        padding: "var(--space-4) 0",
-        borderBottom: "1px solid var(--color-border)",
-      }}
-      className="last:border-b-0"
-    >
-      <span className="text-body" style={{ paddingTop: 6 }}>
-        {label}
-      </span>
-      <div style={{ flexShrink: 0 }}>{children}</div>
-    </div>
-  );
+function esc(v: unknown): string {
+  const s = String(v ?? "");
+  return s.includes(",") || s.includes('"') ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
-
-// ── Page ──────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const { user, signOut } = useUser();
-  const { toast } = useToast();
+  const { fragrances, compliments } = useData();
   const router = useRouter();
 
-  const [displayName, setDisplayName] = useState("");
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [pwResetSent, setPwResetSent] = useState(false);
-  const [sendingReset, setSendingReset] = useState(false);
-
-  useEffect(() => {
-    if (user) setDisplayName(user.name ?? "");
-  }, [user]);
-
-  async function saveProfile() {
-    if (!user || !displayName.trim()) return;
-    setSavingProfile(true);
-    try {
-      const { error } = await supabase
-        .from("user_profiles")
-        .update({ name: displayName.trim() })
-        .eq("id", user.id);
-      if (error) throw error;
-      toast("Profile updated.", "success");
-    } catch (e) {
-      console.error(e);
-      toast("Failed to save. Try again.", "error");
-    } finally {
-      setSavingProfile(false);
-    }
-  }
-
-  async function sendPasswordReset() {
-    if (!user?.email) return;
-    setSendingReset(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(user.email);
-      if (error) throw error;
-      setPwResetSent(true);
-    } catch (e) {
-      console.error(e);
-      toast("Failed to send reset email.", "error");
-    } finally {
-      setSendingReset(false);
-    }
-  }
-
-  async function handleSignOut() {
-    await signOut();
+  function handleSignOut() {
+    signOut();
     router.push("/");
   }
 
-  if (!user) return null;
-
-  const initial = (user.name ?? "?")[0].toUpperCase();
+  function exportCSV() {
+    const myFrags = fragrances.filter((f) => f.userId === user?.id);
+    const myComps = compliments.filter((c) => c.userId === user?.id);
+    const fragRows = [
+      ["Name", "House", "Status", "Personal Rating", "Compliments"],
+      ...myFrags.map((f) => [
+        esc(f.name), esc(f.house), STATUS_LABELS[f.status],
+        String(f.personalRating ?? ""), String(getCompCount(f.fragranceId || f.id, myComps)),
+      ]),
+    ];
+    const compRows: string[][] = [
+      [],
+      ["Fragrance", "Secondary", "Relation", "Gender", "Month", "Year", "Location", "Notes"],
+      ...myComps.map((c) => [
+        esc(c.primaryFrag), esc(c.secondaryFrag ?? ""), c.relation ?? "",
+        c.gender ?? "", c.month ?? "", c.year ?? "", esc(c.location ?? ""), esc(c.notes ?? ""),
+      ]),
+    ];
+    const csv = [...fragRows, ...compRows].map((r) => r.join(",")).join("\n");
+    const name = user?.name?.toLowerCase() ?? "export";
+    const date = new Date().toISOString().split("T")[0];
+    const a = document.createElement("a");
+    a.href = "data:text/csv," + encodeURIComponent(csv);
+    a.download = "tesknota-export-" + name + "-" + date + ".csv";
+    a.click();
+  }
 
   return (
     <>
       <Topbar title="Settings" />
-      <main style={{ flex: 1, overflowY: "auto" }}>
-        <div
-          style={{
-            maxWidth: 640,
-            margin: "0 auto",
-            padding: "var(--space-8)",
-          }}
-          className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
-        >
-          {/* ── Profile ── */}
-          <Card padding="var(--space-6)">
-            <CardHeader>
-              <CardTitle>Profile</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--space-5)",
-                }}
-              >
-                <Input
-                  label="Display Name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                />
+      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px] max-w-[560px]">
 
-                <Input
-                  label="Email"
-                  type="email"
-                  value={user.email ?? ""}
-                  disabled
-                  hint="Contact support to change your email"
-                />
-
-                {/* Avatar */}
-                <div>
-                  <div className="text-label" style={{ marginBottom: "var(--space-2)" }}>
-                    Avatar
-                  </div>
-                  <div
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: "var(--radius-full)",
-                      background: "var(--color-accent-subtle)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "var(--text-md)",
-                      fontWeight: 700,
-                      color: "var(--color-accent)",
-                      marginBottom: "var(--space-2)",
-                    }}
-                    aria-hidden="true"
-                  >
-                    {initial}
-                  </div>
-                  <p className="text-meta" style={{ color: "var(--color-text-muted)" }}>
-                    Avatars use your display name initials
-                  </p>
-                </div>
+        <SectionHeader title="Account" />
+        {user && (
+          <div className="border border-[var(--b2)] bg-[var(--off)] mb-4">
+            <div className="px-5 py-4 border-b border-[var(--b1)]">
+              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-1">
+                Name
               </div>
-            </CardBody>
-            <CardFooter style={{ justifyContent: "flex-end" }}>
-              <Button
-                variant="primary"
-                onClick={saveProfile}
-                disabled={savingProfile || !displayName.trim()}
-              >
-                {savingProfile ? "Saving..." : "Save Changes"}
-              </Button>
-            </CardFooter>
-          </Card>
+              <div className="font-[var(--serif)] text-lg text-[var(--ink)]">
+                {user.name}
+              </div>
+            </div>
+            <div className="px-5 py-4">
+              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-1">
+                User ID
+              </div>
+              <div className="font-[var(--mono)] text-xs text-[var(--ink4)] break-all">
+                {user.id}
+              </div>
+            </div>
+          </div>
+        )}
 
-          <Divider style={{ margin: "var(--space-6) 0" }} />
+        <button
+          onClick={handleSignOut}
+          className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--rose-tk)] hover:text-[var(--rose-tk)] transition-colors mb-10"
+        >
+          Sign out
+        </button>
 
-          {/* ── Account ── */}
-          <Card padding="var(--space-6)">
-            <CardHeader>
-              <CardTitle>Account</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <AccountRow label="Password">
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end",
-                    gap: "var(--space-2)",
-                  }}
-                >
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={sendPasswordReset}
-                    disabled={sendingReset || pwResetSent}
-                  >
-                    {sendingReset ? "Sending..." : "Change Password"}
-                  </Button>
-                  {pwResetSent && (
-                    <span
-                      className="text-meta"
-                      style={{ color: "var(--color-success)" }}
-                    >
-                      Password reset email sent
-                    </span>
-                  )}
-                </div>
-              </AccountRow>
-              <AccountRow label="Sign Out">
-                <Button variant="danger" size="sm" onClick={handleSignOut}>
-                  Sign Out
-                </Button>
-              </AccountRow>
-            </CardBody>
-          </Card>
-
-          <Divider style={{ margin: "var(--space-6) 0" }} />
-
-          {/* ── Preferences ── */}
-          <Card padding="var(--space-6)">
-            <CardHeader>
-              <CardTitle>Preferences</CardTitle>
-            </CardHeader>
-            <CardBody>
-              <EmptyState
-                icon={<SlidersHorizontal size={32} />}
-                title="More preferences coming soon"
-              />
-            </CardBody>
-          </Card>
+        <SectionHeader title="Data" />
+        <div className="border border-[var(--b2)] bg-[var(--off)] mb-6">
+          <div className="px-5 py-4 border-b border-[var(--b1)]">
+            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">
+              Export your data
+            </div>
+            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+              Downloads your fragrances and compliment history as a CSV file.
+            </div>
+          </div>
+          <div className="px-5 py-4">
+            <button
+              onClick={exportCSV}
+              className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+            >
+              Export CSV
+            </button>
+          </div>
         </div>
+
+        <SectionHeader title="Admin" />
+        <div className="border border-[var(--b2)] bg-[var(--off)]">
+          <div className="px-5 py-4 border-b border-[var(--b1)]">
+            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">
+              System dashboard
+            </div>
+            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+              API spend, usage analytics, error logs, and data audit.
+            </div>
+          </div>
+          <div className="px-5 py-4">
+            <button
+              onClick={() => router.push("/admin")}
+              className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+            >
+              Open Admin
+            </button>
+          </div>
+        </div>
+
       </main>
     </>
   );

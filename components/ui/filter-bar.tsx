@@ -19,10 +19,10 @@ export function FilterChip({
     <button
       onClick={onClick}
       className={cn(
-        "px-[var(--space-4)] h-9 text-[length:var(--text-xs)] font-medium tracking-[0.06em] uppercase cursor-pointer select-none whitespace-nowrap transition-[background-color,color,border-color] border-r border-[var(--color-border)] last:border-r-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+        "px-[14px] py-[5px] font-[var(--mono)] text-xs tracking-[0.12em] uppercase cursor-pointer select-none whitespace-nowrap transition-all duration-[140ms] border-r border-[var(--b2)] last:border-r-0",
         active
-          ? "bg-[var(--color-accent)] text-[var(--color-text-inverse)]"
-          : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-raised)]",
+          ? "bg-[var(--blue)] text-[var(--warm2)]"
+          : "text-[var(--ink3)] hover:text-[var(--blue)] hover:bg-[var(--blue4)]",
         className,
       )}
     >
@@ -39,15 +39,10 @@ interface FilterBarProps {
 export function FilterBar({ children, className }: FilterBarProps) {
   return (
     <div
-      style={{
-        display: "flex",
-        border: "1px solid var(--color-border)",
-        borderRadius: "var(--radius-sm)",
-        overflow: "hidden",
-        width: "fit-content",
-        flexWrap: "wrap",
-      }}
-      className={cn(className)}
+      className={cn(
+        "flex border border-[var(--b3)] w-fit flex-wrap mb-[18px]",
+        className,
+      )}
     >
       {children}
     </div>
@@ -71,10 +66,10 @@ export function FamilyChip({
     <button
       onClick={onClick}
       className={cn(
-        "px-[var(--space-3)] h-8 border rounded-[var(--radius-full)] text-[length:var(--text-xs)] font-medium tracking-[0.04em] cursor-pointer transition-[background-color,color,border-color] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]",
+        "px-[10px] py-[3px] border rounded-xl font-[var(--mono)] text-xs tracking-[0.06em] cursor-pointer transition-all duration-[140ms]",
         active
-          ? "border-[var(--color-accent)] bg-[var(--color-accent-subtle)] text-[var(--color-accent)]"
-          : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
+          ? "border-[var(--blue1)] bg-[rgba(var(--blue1-ch),0.15)] text-[var(--blue1)]"
+          : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue1)] hover:text-[var(--blue1)]",
         className,
       )}
     >
