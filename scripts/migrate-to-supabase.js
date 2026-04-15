@@ -2,18 +2,17 @@
 // Reads Google Sheets data, inserts into Supabase.
 // Run once after schema.sql has been applied.
 //
-// Required env vars (set in your shell before running):
+// Required env vars:
 //   SUPABASE_URL              — https://tofzctbkxuzvwirgobgh.supabase.co
-//   SUPABASE_SERVICE_ROLE_KEY — from Supabase dashboard > Settings > API > service_role secret
+//   SUPABASE_SERVICE_ROLE_KEY — Supabase dashboard > Settings > API > service_role secret
 //   SPREADSHEET_ID            — 1QUUSvFZvLvdS6b9XZgRfO1JKyqGKWMi4j7HiZuHOyas
 //   SA_EMAIL                  — tesknota-sheets@singular-cache-491415-q6.iam.gserviceaccount.com
-//   SA_KEY                    — the PEM private key (set as multiline or escaped \n)
+//   SA_KEY                    — PEM private key (escaped \n or multiline)
 //
-// Run: node scripts/migrate-to-supabase.js
+// Run: node --input-type=module < scripts/migrate-to-supabase.js
 
 import { createClient } from "@supabase/supabase-js";
 import { createSign } from "crypto";
-import https from "https";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -27,11 +26,6 @@ const USER_MAP = {
 };
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-function splitArr(val) {
-  if (!val) return [];
-  return val.split(",").map((s) => s.trim()).filter(Boolean);
-}
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SPREADSHEET_ID || !SA_EMAIL || !SA_KEY) {
   console.error("Missing required env vars. See comments at top of this file.");
@@ -61,11 +55,10 @@ async function getGoogleToken() {
   const sig = b64url(signer.sign(SA_KEY));
   const jwt = `${header}.${claim}.${sig}`;
 
-  const body = `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`;
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
+    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
   });
   const d = await res.json();
   if (!d.access_token) throw new Error("Google auth failed: " + JSON.stringify(d));
@@ -96,6 +89,11 @@ function normalizeMonth(m) {
   return m;
 }
 
+function splitArr(val) {
+  if (!val) return [];
+  return val.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
 // ── Main ─────────────────────────────────────────────────────
 
 async function main() {
@@ -113,13 +111,27 @@ async function main() {
     ]);
 
   console.log("\n── Row counts from Google Sheets ──────────────────────");
-  console.log(`fragranceDB:    ${fragranceDB.length}`);
-  console.log(`userFragrances: ${userFragrances.length}`);
-  console.log(`userCompliments:${userCompliments.length}`);
-  console.log(`pendingEntries: ${pendingEntries.length}`);
-  console.log(`api_log:        ${apiLog.length}`);
-  console.log(`activityLog:    ${activityLog.length}`);
+  console.log(`fragranceDB:     ${fragranceDB.length}`);
+  console.log(`userFragrances:  ${userFragrances.length}`);
+  console.log(`userCompliments: ${userCompliments.length}`);
+  console.log(`pendingEntries:  ${pendingEntries.length}`);
+  console.log(`api_log:         ${apiLog.length}`);
+  console.log(`activityLog:     ${activityLog.length}`);
   console.log("───────────────────────────────────────────────────────\n");
+
+  // ── Build legacy ID → {name, house} lookup from fragranceDB ──
+  // userFragrances and userCompliments store fragranceId only (no name/house columns)
+
+  const fragLookup = {};
+  for (const r of fragranceDB) {
+    const id = r.fragranceId;
+    if (id) {
+      fragLookup[id] = {
+        name: r.fragranceName || r.name || "",
+        house: r.fragranceHouse || r.house || "",
+      };
+    }
+  }
 
   // ── 1. fragranceDB → fragrances ────────────────────────────
 
@@ -173,34 +185,46 @@ async function main() {
   console.log(`  Inserted/mapped ${Object.keys(legacyIdToUuid).length} fragrances`);
 
   // ── 2. userFragrances → user_fragrances ────────────────────
+  // Sheet columns: userId, fragranceId, status, bottleSize, type, boughtFrom,
+  //   purchaseMonth, purchaseYear, purchasePrice, personalRating,
+  //   personalLongevity, personalSillage, notes, addedAt
+  // No fragranceName/fragranceHouse columns — resolve from fragLookup.
 
   console.log("Inserting user_fragrances...");
   let fragCount = 0;
+  let fragSkipped = 0;
 
   for (const r of userFragrances) {
     const userId = USER_MAP[r.userId];
-    if (!userId) { console.warn(`  [skip] unknown userId: ${r.userId}`); continue; }
-    const name = r.fragranceName || r.name || "";
-    const house = r.fragranceHouse || r.house || "";
-    if (!name) continue;
+    if (!userId) {
+      console.warn(`  [skip] unknown userId: ${r.userId}`);
+      fragSkipped++;
+      continue;
+    }
+
+    const fragInfo = fragLookup[r.fragranceId];
+    if (!fragInfo || !fragInfo.name) {
+      console.warn(`  [skip] unknown fragranceId: ${r.fragranceId}`);
+      fragSkipped++;
+      continue;
+    }
 
     const sizes = r.bottleSize
       ? r.bottleSize.split(",").map((s) => s.trim()).filter(Boolean)
       : [];
 
-    const pm = r.purchaseMonth ?? "";
     const personalNotes = (r.notes ?? "").replace(/^Purchased for \$[\d.]+\.?\s*/, "").trim();
 
     const row = {
       user_id: userId,
       fragrance_id: legacyIdToUuid[r.fragranceId] ?? null,
-      name,
-      house,
+      name: fragInfo.name,
+      house: fragInfo.house,
       status: r.status || "CURRENT",
       sizes,
       type: r.type || null,
       where_bought: r.boughtFrom || null,
-      purchase_month: pm || null,
+      purchase_month: r.purchaseMonth || null,
       purchase_year: r.purchaseYear || null,
       purchase_price: r.purchasePrice || null,
       personal_rating: r.personalRating ? parseInt(r.personalRating) : null,
@@ -209,26 +233,50 @@ async function main() {
     };
 
     const { error } = await supabase.from("user_fragrances").insert(row);
-    if (error) console.warn(`  [warn] user_frag insert failed: ${name} — ${error.message}`);
-    else fragCount++;
+    if (error) {
+      console.warn(`  [warn] user_frag insert failed: ${fragInfo.name} — ${error.message}`);
+      fragSkipped++;
+    } else {
+      fragCount++;
+    }
   }
-  console.log(`  Inserted ${fragCount} user_fragrances`);
+  console.log(`  Inserted ${fragCount} user_fragrances (skipped ${fragSkipped})`);
 
   // ── 3. userCompliments → user_compliments ──────────────────
+  // Sheet columns: complimentId, userId, primaryFragranceId, secondaryFragranceId,
+  //   complimenterGender, relation, month, year, locationName, city, state, country,
+  //   notes, createdAt
+  // No name columns — resolve from fragLookup.
 
   console.log("Inserting user_compliments...");
   let compCount = 0;
+  let compSkipped = 0;
 
   for (const r of userCompliments) {
     const userId = USER_MAP[r.userId];
-    if (!userId) { console.warn(`  [skip] unknown userId: ${r.userId}`); continue; }
+    if (!userId) {
+      console.warn(`  [skip] unknown userId: ${r.userId}`);
+      compSkipped++;
+      continue;
+    }
+
+    const primaryFragInfo = fragLookup[r.primaryFragranceId] ?? null;
+    const primaryFragName = primaryFragInfo?.name || "";
+
+    if (!primaryFragName || !r.month || !r.year) {
+      console.warn(`  [skip] compliment missing required fields: id=${r.complimentId} fragId=${r.primaryFragranceId} month=${r.month} year=${r.year}`);
+      compSkipped++;
+      continue;
+    }
+
+    const secondaryFragInfo = r.secondaryFragranceId ? (fragLookup[r.secondaryFragranceId] ?? null) : null;
 
     const row = {
       user_id: userId,
-      primary_frag_id: r.primaryFragranceId || null,
-      primary_frag_name: r.primaryFragranceName || r.primaryFrag || "",
-      secondary_frag_id: r.secondaryFragranceId || null,
-      secondary_frag_name: r.secondaryFrag || null,
+      primary_frag_id: legacyIdToUuid[r.primaryFragranceId] ?? r.primaryFragranceId ?? null,
+      primary_frag_name: primaryFragName,
+      secondary_frag_id: r.secondaryFragranceId ? (legacyIdToUuid[r.secondaryFragranceId] ?? r.secondaryFragranceId ?? null) : null,
+      secondary_frag_name: secondaryFragInfo?.name ?? null,
       gender: r.complimenterGender || null,
       relation: r.relation || "Other",
       month: normalizeMonth(r.month ?? ""),
@@ -241,16 +289,15 @@ async function main() {
       created_at: r.createdAt || new Date().toISOString(),
     };
 
-    if (!row.primary_frag_name || !row.month || !row.year) {
-      console.warn(`  [skip] compliment missing required fields: ${JSON.stringify(row)}`);
-      continue;
-    }
-
     const { error } = await supabase.from("user_compliments").insert(row);
-    if (error) console.warn(`  [warn] compliment insert failed: ${error.message}`);
-    else compCount++;
+    if (error) {
+      console.warn(`  [warn] compliment insert failed: ${error.message}`);
+      compSkipped++;
+    } else {
+      compCount++;
+    }
   }
-  console.log(`  Inserted ${compCount} user_compliments`);
+  console.log(`  Inserted ${compCount} user_compliments (skipped ${compSkipped})`);
 
   // ── 4. pendingEntries → pending_entries ────────────────────
 

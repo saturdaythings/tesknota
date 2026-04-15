@@ -168,7 +168,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
     const now = new Date().toISOString();
     const frag: UserFragrance = {
       id: editing?.id ?? genId(),
-      fragranceId: selectedFragId || editing?.fragranceId || selectedName.toLowerCase().replace(/\s+/g, "-"),
+      fragranceId: selectedFragId || editing?.fragranceId || "",
       userId: user.id,
       name: selectedName,
       house: selectedHouse || editing?.house || "",
