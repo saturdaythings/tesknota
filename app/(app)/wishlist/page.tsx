@@ -11,6 +11,7 @@ import { FragRow } from "@/components/ui/frag-row";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
+import { useFilterSync } from "@/lib/hooks/useFilterSync";
 import type { UserFragrance, CommunityFrag } from "@/types";
 
 type WishFilter = "all" | "WANT_TO_BUY" | "WANT_TO_SMELL";
@@ -26,9 +27,15 @@ export default function WishlistPage() {
   const { user, profiles } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded, removeFrag } = useData();
   const { toast } = useToast();
-  const [filter, setFilter] = useState<WishFilter>("all");
-  const [sort, setSort] = useState<SortKey>("nameAZ");
-  const [search, setSearch] = useState("");
+
+  // URL-synced filter state
+  const [filters, setFilters] = useFilterSync({
+    q: "",
+    filter: "all" as WishFilter,
+    sort: "nameAZ" as SortKey,
+  });
+
+  // Local UI state (not in URL)
   const [boughtFrag, setBoughtFrag] = useState<UserFragrance | null>(null);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
@@ -51,13 +58,13 @@ export default function WishlistPage() {
   const wantToBuy = wish.filter((f) => f.status === "WANT_TO_BUY");
   const wantToSmell = wish.filter((f) => f.status === "WANT_TO_SMELL");
 
-  const sq = search.trim().toLowerCase();
-  let filtered = filter === "all" ? wish : wish.filter((f) => f.status === filter);
+  const sq = filters.q.trim().toLowerCase();
+  let filtered = filters.filter === "all" ? wish : wish.filter((f) => f.status === filters.filter);
   if (sq) filtered = filtered.filter((f) => f.name.toLowerCase().includes(sq) || (f.house ?? "").toLowerCase().includes(sq));
   filtered = filtered.slice().sort((a, b) => {
-    if (sort === "nameZA") return b.name.localeCompare(a.name);
-    if (sort === "houseAZ") return (a.house ?? "").localeCompare(b.house ?? "");
-    if (sort === "added") return (b.createdAt ?? "") > (a.createdAt ?? "") ? 1 : -1;
+    if (filters.sort === "nameZA") return b.name.localeCompare(a.name);
+    if (filters.sort === "houseAZ") return (a.house ?? "").localeCompare(b.house ?? "");
+    if (filters.sort === "added") return (b.createdAt ?? "") > (a.createdAt ?? "") ? 1 : -1;
     return a.name.localeCompare(b.name);
   });
 
@@ -113,8 +120,8 @@ export default function WishlistPage() {
 
             <div className="mb-4">
               <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={filters.q}
+                onChange={(e) => setFilters({ q: e.target.value })}
                 placeholder="Search wishlist..."
                 className="w-full px-3 py-[9px] mb-3 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
               />
@@ -125,14 +132,14 @@ export default function WishlistPage() {
                   <FilterChip
                     key={f.value}
                     label={f.label}
-                    active={filter === f.value}
-                    onClick={() => setFilter(f.value)}
+                    active={filters.filter === f.value}
+                    onClick={() => setFilters({ filter: f.value })}
                   />
                 ))}
               </FilterBar>
               <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
+                value={filters.sort}
+                onChange={(e) => setFilters({ sort: e.target.value as SortKey })}
                 className="px-3 py-[6px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink3)] focus:outline-none cursor-pointer"
               >
                 <option value="nameAZ">Name A–Z</option>
@@ -165,7 +172,7 @@ export default function WishlistPage() {
                   <>
                     No matches.
                     <button
-                      onClick={() => setFilter("all")}
+                      onClick={() => setFilters({ filter: "all", q: "" })}
                       className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                     >
                       Clear filter
