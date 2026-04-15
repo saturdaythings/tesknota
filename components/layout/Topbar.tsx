@@ -22,7 +22,7 @@ export function Topbar({
     <header
       className={cn(
         "flex items-center gap-3 px-[18px] md:px-[26px] flex-shrink-0 z-[100]",
-        "h-[var(--th)] bg-[var(--off)] border-b border-[var(--b2)]",
+        "h-[var(--header-height)] bg-[var(--color-cream)] border-b border-[var(--color-cream-dark)]",
         className,
       )}
     >
@@ -30,7 +30,7 @@ export function Topbar({
       <button
         onClick={toggle}
         aria-label="Open menu"
-        className="md:hidden flex flex-col gap-[5px] p-1 mr-1 text-[var(--ink3)] hover:text-[var(--ink)] transition-colors"
+        className="md:hidden flex flex-col gap-[5px] p-1 mr-1 text-[var(--color-sand)] hover:text-[var(--color-navy)] transition-colors"
       >
         <span className="block w-[18px] h-[1.5px] bg-current" />
         <span className="block w-[18px] h-[1.5px] bg-current" />
@@ -38,10 +38,10 @@ export function Topbar({
       </button>
 
       <div className="flex-1 min-w-0">
-        <div className="font-[var(--mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--ink4)] leading-none mb-[3px]">
+        <div className="font-[var(--font-sans)] text-[12px] tracking-[0.14em] uppercase text-[var(--color-sand)] leading-none mb-[3px]">
           T\u0118SKNOTA
         </div>
-        <div className="font-[var(--serif)] text-[32px] font-normal text-[var(--ink)] leading-[1.2] truncate">
+        <div className="font-[var(--font-serif)] text-[32px] italic font-normal text-[var(--color-navy)] leading-[1.2] truncate">
           {title}
         </div>
       </div>

@@ -15,23 +15,22 @@ const TYPE_ABBR: Record<FragranceType, string> = {
 };
 import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } from "@/types";
 
-// Status badge: colored pill with per-status color token
-const STATUS_STYLE: Record<string, { text: string; bg: string }> = {
-  CURRENT:          { text: "var(--s-cur)",  bg: "var(--s-cur-bg)" },
-  PREVIOUSLY_OWNED: { text: "var(--s-prv)",  bg: "transparent" },
-  WANT_TO_BUY:      { text: "var(--s-wnt)",  bg: "var(--s-wnt-bg)" },
-  WANT_TO_SMELL:    { text: "var(--s-wnt)",  bg: "var(--s-wnt-bg)" },
-  DONT_LIKE:        { text: "var(--s-no)",   bg: "var(--s-no-bg)" },
-  WANT_TO_IDENTIFY: { text: "var(--s-unk)",  bg: "var(--s-unk-bg)" },
-  FINISHED:         { text: "var(--s-fin)",  bg: "transparent" },
+const STATUS_STYLE: Record<string, { color: string }> = {
+  CURRENT:          { color: "var(--color-navy)" },
+  PREVIOUSLY_OWNED: { color: "var(--color-sand)" },
+  WANT_TO_BUY:      { color: "#8B6F4E" },
+  WANT_TO_SMELL:    { color: "#8B6F4E" },
+  DONT_LIKE:        { color: "var(--color-destructive)" },
+  WANT_TO_IDENTIFY: { color: "var(--color-accent-light)" },
+  FINISHED:         { color: "#6B7280" },
 };
 
 export function StatusBadge({ status }: { status: FragranceStatus }) {
-  const style = STATUS_STYLE[status] ?? { text: "var(--ink3)", bg: "transparent" };
+  const style = STATUS_STYLE[status] ?? { color: "var(--color-sand)" };
   return (
     <span
-      className="font-[var(--mono)] text-xs tracking-[0.04em] px-2 py-[2px] whitespace-nowrap"
-      style={{ color: style.text, background: style.bg }}
+      className="font-[var(--font-sans)] text-xs tracking-[0.04em] px-2 py-[2px] whitespace-nowrap border"
+      style={{ color: style.color, borderColor: style.color }}
     >
       {STATUS_LABELS[status] ?? status}
     </span>
@@ -65,37 +64,37 @@ export function FragRow({
 
   return (
     <tr
-      className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+      className="border-b border-[var(--color-cream-dark)] last:border-0 hover:bg-[var(--color-cream-dark)] cursor-pointer"
       onClick={() => onClick?.(frag)}
     >
       <td className="px-4 py-3">
-        <div className="font-[var(--body)] text-sm text-[var(--ink)]">
+        <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">
           {frag.name}
           {frag.isDupe && (
-            <span className="ml-2 font-[var(--mono)] text-[10px] tracking-[0.06em] text-[var(--ink3)] uppercase align-middle">
+            <span className="ml-2 font-[var(--font-sans)] text-[12px] tracking-[0.06em] text-[var(--color-sand)] uppercase align-middle">
               dupe
             </span>
           )}
         </div>
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+        <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
           {frag.house}
           {frag.type && TYPE_ABBR[frag.type] && (
-            <span className="ml-[6px] text-[var(--ink4)]">· {TYPE_ABBR[frag.type]}</span>
+            <span className="ml-[6px]">· {TYPE_ABBR[frag.type]}</span>
           )}
         </div>
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">
+      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
         {(frag.sizes ?? []).join(", ") || "\u2014"}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--warm-text)] tracking-[1px]">
+      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-accent)] tracking-[1px]">
         {starsStr(parseRating(frag.personalRating))}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
+      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
         {addedStr || "\u2014"}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
-        {compCount > 0 ? <span className="text-[var(--blue)]">{compCount}</span> : "\u2014"}
+      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-sand)]">{accords}</td>
+      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
+        {compCount > 0 ? <span className="text-[var(--color-accent)]">{compCount}</span> : "\u2014"}
       </td>
       <td className="px-4 py-3">
         <StatusBadge status={frag.status} />
@@ -104,7 +103,7 @@ export function FragRow({
         <td className="px-4 py-3">
           <button
             onClick={(e) => { e.stopPropagation(); onAction(frag, e); }}
-            className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors whitespace-nowrap"
+            className="font-[var(--font-sans)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--color-cream-dark)] text-[var(--color-sand)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors whitespace-nowrap"
           >
             {actionLabel ?? "Action"}
           </button>

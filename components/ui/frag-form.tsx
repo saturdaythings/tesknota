@@ -53,7 +53,6 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
 
-  // Step 1 fields
   const [search, setSearch] = useState("");
   const [dropOpen, setDropOpen] = useState(false);
   const [selectedName, setSelectedName] = useState("");
@@ -61,7 +60,6 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const [selectedFragId, setSelectedFragId] = useState("");
   const [status, setStatus] = useState<FragranceStatus>("CURRENT");
 
-  // Step 2 fields
   const [sizes, setSizes] = useState<BottleSize[]>(["Full Bottle"]);
   const [type, setType] = useState<FragranceType | "">("");
   const [rating, setRating] = useState(0);
@@ -80,7 +78,6 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
   const isEdit = !!(editing && editing.id);
 
-  // Reset form when opened
   useEffect(() => {
     if (!open) return;
     if (editing) {
@@ -213,8 +210,11 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   }
 
   const cd = selectedName ? getCommunityData(selectedName, selectedHouse, communityFrags) : null;
-
   const title = isEdit ? "Edit Fragrance" : "Add Fragrance";
+
+  const activeButtonClass = "border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent-subtle)]";
+  const inactiveButtonClass = "border-[var(--color-cream-dark)] text-[var(--color-sand)] hover:border-[var(--color-navy)]";
+  const inputClass = "w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]";
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -224,7 +224,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
         <div className="space-y-5">
           {/* Search */}
           <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
               Fragrance Name
             </label>
             <div className="relative">
@@ -235,57 +235,57 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                 onFocus={() => search.trim().length >= 2 && setDropOpen(true)}
                 onBlur={() => setTimeout(() => setDropOpen(false), 150)}
                 placeholder="Search by name or house..."
-                className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                className={inputClass}
               />
               {dropOpen && matches.length > 0 && (
-                <div className="absolute top-full left-0 right-0 z-50 border border-[var(--b3)] border-t-0 bg-[var(--off)] shadow-sm max-h-[220px] overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 z-50 border border-[var(--color-cream-dark)] border-t-0 bg-[var(--color-cream)] shadow-sm max-h-[220px] overflow-y-auto">
                   {matches.map((cf) => (
                     <div
                       key={cf.fragranceId}
                       onMouseDown={() => selectMatch(cf)}
-                      className="px-3 py-[9px] cursor-pointer hover:bg-[var(--b1)] border-b border-[var(--b1)] last:border-0"
+                      className="px-3 py-[9px] cursor-pointer hover:bg-[var(--color-cream-dark)] border-b border-[var(--color-cream-dark)] last:border-0"
                     >
-                      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{cf.fragranceName}</div>
-                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{cf.fragranceHouse}</div>
+                      <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{cf.fragranceName}</div>
+                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">{cf.fragranceHouse}</div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
             {selectedName && (
-              <div className="mt-2 px-3 py-3 bg-[var(--b1)] border border-[var(--b2)]">
-                <div className="font-[var(--body)] text-sm text-[var(--ink)]">{selectedName}</div>
+              <div className="mt-2 px-3 py-3 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
+                <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
                 {selectedHouse && (
-                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
                 )}
                 {(cd?.avgPrice || cd?.communityRating) && (
-                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mt-[3px]">
+                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] mt-[3px]">
                     {[cd.avgPrice?.replace(/~/g, ""), cd.communityRating ? cd.communityRating + "/10" : ""].filter(Boolean).join(" · ")}
                   </div>
                 )}
                 {cd && cd.accords.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {cd.accords.slice(0, 8).map((a) => (
-                      <span key={a} className="font-[var(--mono)] text-xs px-2 py-[3px] border border-[var(--b3)] text-[var(--ink3)]">{a}</span>
+                      <span key={a} className="font-[var(--font-sans)] text-xs px-2 py-[3px] border border-[var(--color-cream-dark)] text-[var(--color-sand)]">{a}</span>
                     ))}
                   </div>
                 )}
                 {cd && (cd.topNotes.length > 0 || cd.middleNotes.length > 0 || cd.baseNotes.length > 0) && (
                   <div className="mt-3 space-y-[6px]">
                     {cd.topNotes.length > 0 && (
-                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
                         <span className="tracking-[0.08em] uppercase mr-2">Top</span>
                         {cd.topNotes.join(", ")}
                       </div>
                     )}
                     {cd.middleNotes.length > 0 && (
-                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
                         <span className="tracking-[0.08em] uppercase mr-2">Mid</span>
                         {cd.middleNotes.join(", ")}
                       </div>
                     )}
                     {cd.baseNotes.length > 0 && (
-                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
                         <span className="tracking-[0.08em] uppercase mr-2">Base</span>
                         {cd.baseNotes.join(", ")}
                       </div>
@@ -298,7 +298,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Status */}
           <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
               Status
             </label>
             <div className="flex flex-wrap gap-2">
@@ -307,12 +307,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   key={s.value}
                   type="button"
                   onClick={() => setStatus(s.value)}
-                  className={
-                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
-                    (status === s.value
-                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
-                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
-                  }
+                  className={"px-3 py-[5px] font-[var(--font-sans)] text-xs border transition-colors " + (status === s.value ? activeButtonClass : inactiveButtonClass)}
                 >
                   {s.label}
                 </button>
@@ -326,27 +321,25 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
         <div className="space-y-5">
           {/* Selected frag header */}
           {selectedName && (
-            <div className="px-3 py-2 bg-[var(--b1)] border border-[var(--b2)]">
-              <div className="font-[var(--body)] text-sm text-[var(--ink)]">{selectedName}</div>
+            <div className="px-3 py-2 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
+              <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
               {selectedHouse && (
-                <div className="font-[var(--mono)] text-xs text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
               )}
-              <button
-                onClick={() => { if (!isEdit) setStep(1); }}
-                className={
-                  isEdit
-                    ? "hidden"
-                    : "font-[var(--mono)] text-xs text-[var(--blue)] mt-1 hover:underline bg-transparent border-none cursor-pointer p-0"
-                }
-              >
-                Change
-              </button>
+              {!isEdit && (
+                <button
+                  onClick={() => setStep(1)}
+                  className="font-[var(--font-sans)] text-xs text-[var(--color-accent)] mt-1 hover:underline bg-transparent border-none cursor-pointer p-0"
+                >
+                  Change
+                </button>
+              )}
             </div>
           )}
 
-          {/* Status (always shown in step 2 so edit mode can change it) */}
+          {/* Status */}
           <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
               Status
             </label>
             <div className="flex flex-wrap gap-2">
@@ -355,12 +348,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   key={s.value}
                   type="button"
                   onClick={() => setStatus(s.value)}
-                  className={
-                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
-                    (status === s.value
-                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
-                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
-                  }
+                  className={"px-3 py-[5px] font-[var(--font-sans)] text-xs border transition-colors " + (status === s.value ? activeButtonClass : inactiveButtonClass)}
                 >
                   {s.label}
                 </button>
@@ -370,7 +358,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Size */}
           <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
               Size
             </label>
             <div className="flex flex-wrap gap-2">
@@ -379,12 +367,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   key={s}
                   type="button"
                   onClick={() => toggleSize(s)}
-                  className={
-                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
-                    (sizes.includes(s)
-                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
-                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
-                  }
+                  className={"px-3 py-[5px] font-[var(--font-sans)] text-xs border transition-colors " + (sizes.includes(s) ? activeButtonClass : inactiveButtonClass)}
                 >
                   {s}
                 </button>
@@ -394,7 +377,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Type */}
           <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
               Concentration
             </label>
             <div className="flex flex-wrap gap-2">
@@ -403,12 +386,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   key={t}
                   type="button"
                   onClick={() => setType(type === t ? "" : t)}
-                  className={
-                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
-                    (type === t
-                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
-                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
-                  }
+                  className={"px-3 py-[5px] font-[var(--font-sans)] text-xs border transition-colors " + (type === t ? activeButtonClass : inactiveButtonClass)}
                 >
                   {t}
                 </button>
@@ -418,7 +396,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Rating */}
           <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
               Personal Rating
             </label>
             <div className="flex gap-1">
@@ -428,7 +406,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   type="button"
                   onClick={() => setRating(rating === n ? 0 : n)}
                   className="text-[22px] leading-none bg-transparent border-none cursor-pointer p-0 transition-opacity hover:opacity-80"
-                  style={{ color: n <= rating ? "var(--blue)" : "var(--b4)" }}
+                  style={{ color: n <= rating ? "var(--color-accent)" : "var(--color-cream-dark)" }}
                   aria-label={`${n} star${n > 1 ? "s" : ""}`}
                 >
                   {n <= rating ? "\u2605" : "\u2606"}
@@ -437,12 +415,11 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             </div>
           </div>
 
-          {/* More details toggle */}
           {!moreOpen && (
             <button
               type="button"
               onClick={() => setMoreOpen(true)}
-              className="font-[var(--mono)] text-xs text-[var(--blue)] hover:underline text-left"
+              className="font-[var(--font-sans)] text-xs text-[var(--color-accent)] hover:underline text-left"
             >
               + More Details
             </button>
@@ -452,61 +429,61 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <>
               {/* Where bought */}
               <div>
-                <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
                   Where Bought
                 </label>
                 <input
                   value={whereBought}
                   onChange={(e) => setWhereBought(e.target.value)}
                   placeholder="Sephora, Fragrantica, etc."
-                  className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                  className={inputClass}
                 />
               </div>
 
               {/* Purchase date + price */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
                     Month
                   </label>
                   <select
                     value={purchaseMonth}
                     onChange={(e) => setPurchaseMonth(e.target.value)}
-                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
+                    className="w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-xs text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
                   >
                     <option value="">—</option>
                     {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
                     Year
                   </label>
                   <select
                     value={purchaseYear}
                     onChange={(e) => setPurchaseYear(e.target.value)}
-                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
+                    className="w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-xs text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
                   >
                     <option value="">—</option>
                     {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
                     Price
                   </label>
                   <input
                     value={purchasePrice}
                     onChange={(e) => setPurchasePrice(e.target.value)}
                     placeholder="$0"
-                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                    className={inputClass}
                   />
                 </div>
               </div>
 
               {/* Notes */}
               <div>
-                <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
                   Personal Notes
                 </label>
                 <textarea
@@ -514,7 +491,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder="Your impressions, context, memories..."
-                  className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)] resize-none"
+                  className="w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)] resize-none"
                 />
               </div>
 
@@ -525,9 +502,9 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                     type="checkbox"
                     checked={isDupe}
                     onChange={(e) => setIsDupe(e.target.checked)}
-                    className="accent-[var(--blue)]"
+                    className="accent-[var(--color-accent)]"
                   />
-                  <span className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.05em] uppercase">
+                  <span className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.05em] uppercase">
                     This is a dupe of another fragrance
                   </span>
                 </label>
@@ -536,7 +513,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                     value={dupeFor}
                     onChange={(e) => setDupeFor(e.target.value)}
                     placeholder="Original fragrance name..."
-                    className="mt-2 w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                    className={"mt-2 " + inputClass}
                   />
                 )}
               </div>
@@ -547,12 +524,12 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       </ModalBody>
       <ModalFooter>
         <div className="flex items-center justify-between w-full">
-          <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">{err}</div>
+          <div className="font-[var(--font-sans)] text-xs text-[var(--color-destructive)]">{err}</div>
           <div className="flex gap-2">
             {step === 2 && !isEdit && (
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-[7px] font-[var(--mono)] text-xs text-[var(--ink3)] border border-[var(--b3)] hover:border-[var(--b4)] transition-colors"
+                className="px-4 py-[7px] font-[var(--font-sans)] text-xs text-[var(--color-sand)] border border-[var(--color-cream-dark)] hover:border-[var(--color-navy)] transition-colors"
               >
                 Back
               </button>
@@ -560,7 +537,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <button
               onClick={save}
               disabled={saving}
-              className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="px-5 py-[7px] font-[var(--font-sans)] text-xs bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {saving ? "Saving..." : step === 1 ? "Next" : isEdit ? "Update" : "Save Fragrance"}
             </button>

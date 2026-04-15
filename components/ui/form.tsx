@@ -15,12 +15,12 @@ export function FormGroup({
 }: FormGroupProps) {
   return (
     <div className={cn("flex flex-col gap-1 mb-4", className)}>
-      <label className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-[var(--ink3)]">
+      <label className="font-[var(--font-sans)] text-xs tracking-[0.18em] uppercase text-[var(--color-sand)]">
         {label}
       </label>
       {children}
       {error && (
-        <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">
+        <span className="font-[var(--font-sans)] text-xs text-[var(--color-destructive)]">
           {error}
         </span>
       )}
@@ -35,9 +35,7 @@ interface FormRowProps {
 
 export function FormRow({ children, className }: FormRowProps) {
   return (
-    <div
-      className={cn("grid grid-cols-2 gap-5", className)}
-    >
+    <div className={cn("grid grid-cols-2 gap-5", className)}>
       {children}
     </div>
   );
@@ -69,10 +67,10 @@ export function FieldOptions({
           type="button"
           onClick={() => onChange?.(opt.value)}
           className={cn(
-            "px-[11px] py-[5px] border font-[var(--mono)] text-xs tracking-[0.1em] uppercase cursor-pointer select-none transition-all duration-[130ms]",
+            "px-[11px] py-[5px] border font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase cursor-pointer select-none transition-all duration-[130ms]",
             value === opt.value
-              ? "bg-[var(--blue)] border-[var(--blue)] text-[var(--warm2)]"
-              : "border-[var(--b2)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]",
+              ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-[var(--color-cream)]"
+              : "border-[var(--color-cream-dark)] text-[var(--color-sand)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
           )}
         >
           {opt.label}
@@ -83,8 +81,8 @@ export function FieldOptions({
 }
 
 // Base input/textarea field classes for use in FormGroup children
-const fieldClass =
-  "border-0 border-b border-[var(--b3)] bg-transparent py-[7px] text-[13px] font-[var(--body)] text-[var(--ink)] outline-none transition-[border-color] duration-[140ms] w-full focus:border-[var(--blue)] placeholder:text-[var(--ink3)]";
+export const fieldClass =
+  "border-0 border-b border-[var(--color-cream-dark)] bg-transparent py-[7px] text-[13px] font-[var(--font-sans)] text-[var(--color-navy)] outline-none transition-[border-color] duration-[140ms] w-full focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]";
 
-const textareaClass =
-  "border border-[var(--b2)] bg-transparent p-[8px_10px] text-[13px] font-[var(--body)] text-[var(--ink)] outline-none transition-[border-color] duration-[140ms] w-full resize-y min-h-[60px] leading-[1.5] focus:border-[var(--blue)] placeholder:text-[var(--ink3)]";
+export const textareaClass =
+  "border border-[var(--color-cream-dark)] bg-transparent p-[8px_10px] text-[13px] font-[var(--font-sans)] text-[var(--color-navy)] outline-none transition-[border-color] duration-[140ms] w-full resize-y min-h-[60px] leading-[1.5] focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]";
