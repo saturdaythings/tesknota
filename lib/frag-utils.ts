@@ -26,6 +26,9 @@ export function avgRatingStr(frags: UserFragrance[]): string {
 }
 
 export function getAccords(f: UserFragrance, communityFrags: CommunityFrag[]): string[] {
+  // Prefer exact FK match (correct type variant); fall back to name+house
+  const byId = f.fragranceId ? communityFrags.find((c) => c.fragranceId === f.fragranceId) : null;
+  if (byId) return byId.fragranceAccords ?? [];
   const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const cf = communityFrags.find(
     (c) => norm(c.fragranceName) === norm(f.name) && norm(c.fragranceHouse) === norm(f.house)

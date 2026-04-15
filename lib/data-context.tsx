@@ -56,8 +56,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { load(); }, [load]);
 
   const addFragCb = useCallback(async (frag: UserFragrance) => {
-    await appendFrag(frag);
-    setFrags((prev) => [frag, ...prev]);
+    const { id, fragranceId } = await appendFrag(frag);
+    setFrags((prev) => [{ ...frag, id, fragranceId: fragranceId ?? frag.fragranceId }, ...prev]);
   }, []);
 
   const editFragCb = useCallback(async (frag: UserFragrance) => {
@@ -66,8 +66,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addCompCb = useCallback(async (comp: UserCompliment) => {
-    await appendComp(comp);
-    setComps((prev) => [comp, ...prev]);
+    const { id } = await appendComp(comp);
+    setComps((prev) => [{ ...comp, id }, ...prev]);
   }, []);
 
   const editCompCb = useCallback(async (comp: UserCompliment) => {

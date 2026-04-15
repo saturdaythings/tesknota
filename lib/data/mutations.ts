@@ -85,10 +85,16 @@ function compToDb(c: UserCompliment): Record<string, unknown> {
 
 // ── Fragrance mutations ───────────────────────────────────────
 
-export async function appendFrag(frag: UserFragrance): Promise<void> {
+// Returns { id, fragranceId } assigned by DB so local state can be updated with real UUIDs.
+export async function appendFrag(frag: UserFragrance): Promise<{ id: string; fragranceId: string | null }> {
   const fragId = await findOrCreateFragId(frag.fragranceId, frag.name, frag.house, frag.type ?? null);
-  const { error } = await supabase.from("user_fragrances").insert(fragToDb(frag, fragId));
+  const { data, error } = await supabase
+    .from("user_fragrances")
+    .insert(fragToDb(frag, fragId))
+    .select("id, fragrance_id")
+    .single();
   if (error) throw new Error(error.message);
+  return { id: data.id, fragranceId: data.fragrance_id ?? null };
 }
 
 export async function updateFrag(frag: UserFragrance): Promise<void> {
@@ -107,9 +113,14 @@ export async function deleteFrag(id: string): Promise<void> {
 
 // ── Compliment mutations ──────────────────────────────────────
 
-export async function appendComp(comp: UserCompliment): Promise<void> {
-  const { error } = await supabase.from("user_compliments").insert(compToDb(comp));
+export async function appendComp(comp: UserCompliment): Promise<{ id: string }> {
+  const { data, error } = await supabase
+    .from("user_compliments")
+    .insert(compToDb(comp))
+    .select("id")
+    .single();
   if (error) throw new Error(error.message);
+  return { id: data.id };
 }
 
 export async function updateComp(comp: UserCompliment): Promise<void> {
