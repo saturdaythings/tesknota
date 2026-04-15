@@ -8,6 +8,8 @@ import { useUser, getFriend } from "@/lib/user-context";
 import { DataProvider } from "@/lib/data-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { MobileNavProvider } from "@/lib/mobile-nav-context";
+import { BotDrawer } from "@/components/ui/bot-drawer";
+import { CmdPalette } from "@/components/ui/cmd-palette";
 
 const NAV_SECTIONS_BASE = [
   {
@@ -69,7 +71,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         }
       >
         <DataProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            {children}
+            <BotDrawer />
+            <CmdPalette />
+          </ToastProvider>
         </DataProvider>
       </AppShell>
     </MobileNavProvider>

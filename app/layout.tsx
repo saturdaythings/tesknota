@@ -4,6 +4,8 @@ import {
   Cormorant_Garamond,
   DM_Mono,
   Jost,
+  IBM_Plex_Mono,
+  Newsreader,
 } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/lib/user-context";
@@ -34,6 +36,21 @@ const jost = Jost({
   display: "swap",
 });
 
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "tesknota",
   description: "Fragrance tracker for Kiana and Sylvia",
@@ -47,7 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${cormorant.variable} ${dmMono.variable} ${jost.variable} h-full antialiased`}
+      className={`${playfair.variable} ${cormorant.variable} ${dmMono.variable} ${jost.variable} ${ibmPlexMono.variable} ${newsreader.variable} h-full antialiased`}
     >
       <body className="h-full overflow-hidden bg-[var(--off)] text-[var(--ink)]">
         <UserProvider>{children}</UserProvider>

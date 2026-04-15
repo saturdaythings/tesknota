@@ -86,6 +86,8 @@
   --script: var(--font-cormorant), Georgia, serif;
   --mono: var(--font-dm-mono), monospace;
   --body: var(--font-jost), system-ui, sans-serif;
+  --adm-mono: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
+  --adm-serif: var(--font-newsreader), Newsreader, Georgia, serif;
 
   /* --- Layout --- */
   --sw: 216px;
