@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, Suspense } from "react";
+import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Plus, Heart, SearchX } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FragForm } from "@/components/ui/frag-form";
 import { AddToWishlistModal } from "@/components/wishlist/add-to-wishlist-modal";
 import { WishlistDetailPanel } from "@/components/wishlist/wishlist-detail-panel";
+import { Pagination } from "@/components/ui/pagination";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -100,7 +101,7 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
         width: "180px",
         flexShrink: 0,
         background: "var(--color-cream)",
-        border: "1px solid var(--color-cream-dark)",
+        border: "1px solid var(--color-sand-light)",
         borderRadius: "6px",
         padding: "14px",
         display: "flex",
@@ -341,7 +342,7 @@ function WishlistMobileCard({
     <div
       style={{
         background: "var(--color-cream)",
-        border: "1px solid var(--color-cream-dark)",
+        border: "1px solid var(--color-sand-light)",
         borderRadius: "6px",
         padding: "16px",
         marginBottom: "8px",
@@ -404,6 +405,8 @@ function WishlistInner() {
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [moveFormFrag, setMoveFormFrag] = useState<UserFragrance | null>(null);
   const [moveFormOpen, setMoveFormOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const setSort = useCallback(
     (v: string) => {
@@ -503,6 +506,14 @@ function WishlistInner() {
       .slice(0, 6);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [communityFrags, ownedKeys]);
+
+  // Reset to page 1 when search/sort changes
+  useEffect(() => { setPage(1); }, [search, sort]);
+
+  const paginated = useMemo(
+    () => pageSize === 0 ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize),
+    [filtered, page, pageSize],
+  );
 
   function wishlistKeySet(): Set<string> {
     return new Set(wishlist.map((f) => f.fragranceId ?? f.name.toLowerCase()));
@@ -617,8 +628,8 @@ function WishlistInner() {
                   height: "40px",
                   paddingLeft: "30px",
                   paddingRight: "10px",
-                  background: "var(--color-cream)",
-                  border: "1px solid var(--color-cream-dark)",
+                  background: "#FFFFFF",
+                  border: "1px solid var(--color-sand-light)",
                   borderRadius: "3px",
                   fontFamily: "var(--font-sans)",
                   fontSize: "14px",
@@ -645,7 +656,7 @@ function WishlistInner() {
             <div className="hidden md:block">
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "rgba(237,232,223,0.5)", height: "40px" }}>
+                  <tr style={{ background: "var(--color-cream-dark)", height: "40px" }}>
                     {["FRAGRANCE", "ADDED", "AVG PRICE", "ACCORDS", ""].map((h) => (
                       <th key={h} style={{ padding: "0 16px", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, color: "var(--color-sand)", letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "left" }}>
                         {h}
@@ -685,7 +696,7 @@ function WishlistInner() {
               <div className="hidden md:block">
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
-                    <tr style={{ background: "rgba(237,232,223,0.5)", height: "40px", borderBottom: "1px solid var(--color-cream-dark)" }}>
+                    <tr style={{ background: "var(--color-cream-dark)", height: "40px", borderBottom: "1px solid var(--color-sand-light)" }}>
                       {[
                         { label: "FRAGRANCE", flex: true },
                         { label: "ADDED", w: 100 },
@@ -714,7 +725,7 @@ function WishlistInner() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((frag, i) => {
+                    {paginated.map((frag, i) => {
                       const cf = cfMap.get(frag.id) ?? null;
                       const accords = cf?.fragranceAccords?.slice(0, 4) ?? [];
                       const extra = (cf?.fragranceAccords?.length ?? 0) > 4 ? (cf!.fragranceAccords.length - 4) : 0;
@@ -728,8 +739,8 @@ function WishlistInner() {
                           onClick={() => setDetailFrag(frag)}
                           style={{
                             height: "64px",
-                            background: isEven ? "var(--color-cream)" : "rgba(237,232,223,0.3)",
-                            borderBottom: "1px solid var(--color-cream-dark)",
+                            background: isEven ? "#FFFFFF" : "var(--color-cream)",
+                            borderBottom: "1px solid var(--color-sand-light)",
                             cursor: "pointer",
                           }}
                           className="group hover:bg-[rgba(232,224,208,0.4)]!"
@@ -792,9 +803,18 @@ function WishlistInner() {
                 </table>
               </div>
 
+              {/* Pagination */}
+              <Pagination
+                total={filtered.length}
+                page={page}
+                pageSize={pageSize}
+                onPage={setPage}
+                onPageSize={setPageSize}
+              />
+
               {/* Mobile cards */}
               <div className="md:hidden">
-                {filtered.map((frag) => (
+                {paginated.map((frag) => (
                   <WishlistMobileCard
                     key={frag.id}
                     frag={frag}

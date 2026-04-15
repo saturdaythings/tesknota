@@ -6,6 +6,26 @@ const PAGE_SIZES = [
   { label: "All", value: 0 },
 ];
 
+const BTN = {
+  fontFamily: "var(--font-sans)",
+  fontSize: "12px",
+  fontWeight: 500 as const,
+  padding: "4px 10px",
+  border: "1px solid var(--color-sand-light)",
+  background: "transparent",
+  cursor: "pointer",
+  borderRadius: "2px",
+  transition: "border-color 120ms, color 120ms",
+  color: "var(--color-navy-mid)",
+  lineHeight: 1.4,
+} as const;
+
+const BTN_ACTIVE = {
+  ...BTN,
+  borderColor: "var(--color-accent)",
+  color: "var(--color-accent)",
+};
+
 interface Props {
   total: number;
   page: number;
@@ -22,45 +42,129 @@ export function Pagination({ total, page, pageSize, onPage, onPageSize }: Props)
   if (total === 0) return null;
 
   return (
-    <div className="flex items-center justify-between py-3 px-1 mb-4">
-      <div className="flex items-center gap-1">
-        <span className="font-[var(--mono)] text-xs text-[var(--ink4)] mr-2">Show</span>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingTop: "16px",
+        paddingBottom: "8px",
+        flexWrap: "wrap",
+        gap: "8px",
+      }}
+    >
+      {/* Left: Show X per page */}
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "12px",
+            color: "var(--color-sand)",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            marginRight: "2px",
+          }}
+        >
+          Show
+        </span>
         {PAGE_SIZES.map((ps) => (
           <button
             key={ps.value}
             onClick={() => { onPageSize(ps.value); onPage(1); }}
-            className={`font-[var(--mono)] text-xs px-2 py-[3px] border transition-colors ${pageSize === ps.value ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
+            style={pageSize === ps.value ? BTN_ACTIVE : BTN}
+            onMouseEnter={(e) => {
+              if (pageSize !== ps.value) {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--color-accent)";
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--color-accent)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (pageSize !== ps.value) {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--color-sand-light)";
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--color-navy-mid)";
+              }
+            }}
           >
             {ps.label}
           </button>
         ))}
-      </div>
-      <div className="flex items-center gap-3">
-        <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">
-          {from}-{to} of {total}
+        <span
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "12px",
+            color: "var(--color-sand)",
+            marginLeft: "8px",
+          }}
+        >
+          {from}&ndash;{to} of {total}
         </span>
-        {totalPages > 1 && (
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => onPage(page - 1)}
-              disabled={page <= 1}
-              className="font-[var(--mono)] text-xs px-2 py-[3px] border border-[var(--b3)] text-[var(--ink3)] disabled:opacity-30 hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-            >
-              &lsaquo;
-            </button>
-            <span className="font-[var(--mono)] text-xs text-[var(--ink3)] px-2">
-              {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => onPage(page + 1)}
-              disabled={page >= totalPages}
-              className="font-[var(--mono)] text-xs px-2 py-[3px] border border-[var(--b3)] text-[var(--ink3)] disabled:opacity-30 hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-            >
-              &rsaquo;
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Right: page navigation */}
+      {totalPages > 1 && (
+        <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+          {/* First */}
+          <button
+            style={{ ...BTN, opacity: page <= 1 ? 0.3 : 1, cursor: page <= 1 ? "default" : "pointer" }}
+            disabled={page <= 1}
+            onClick={() => onPage(1)}
+            title="First page"
+          >
+            «
+          </button>
+          {/* Prev */}
+          <button
+            style={{ ...BTN, opacity: page <= 1 ? 0.3 : 1, cursor: page <= 1 ? "default" : "pointer" }}
+            disabled={page <= 1}
+            onClick={() => onPage(page - 1)}
+            title="Previous page"
+          >
+            ‹
+          </button>
+
+          {/* Page numbers: show up to 5, centered around current */}
+          {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+            let p: number;
+            if (totalPages <= 5) {
+              p = i + 1;
+            } else if (page <= 3) {
+              p = i + 1;
+            } else if (page >= totalPages - 2) {
+              p = totalPages - 4 + i;
+            } else {
+              p = page - 2 + i;
+            }
+            return (
+              <button
+                key={p}
+                onClick={() => onPage(p)}
+                style={p === page ? BTN_ACTIVE : BTN}
+              >
+                {p}
+              </button>
+            );
+          })}
+
+          {/* Next */}
+          <button
+            style={{ ...BTN, opacity: page >= totalPages ? 0.3 : 1, cursor: page >= totalPages ? "default" : "pointer" }}
+            disabled={page >= totalPages}
+            onClick={() => onPage(page + 1)}
+            title="Next page"
+          >
+            ›
+          </button>
+          {/* Last */}
+          <button
+            style={{ ...BTN, opacity: page >= totalPages ? 0.3 : 1, cursor: page >= totalPages ? "default" : "pointer" }}
+            disabled={page >= totalPages}
+            onClick={() => onPage(totalPages)}
+            title="Last page"
+          >
+            »
+          </button>
+        </div>
+      )}
     </div>
   );
 }

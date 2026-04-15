@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, Suspense } from "react";
+import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Plus, X, FlaskConical, SearchX, SlidersHorizontal } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
@@ -14,6 +14,7 @@ import { FragForm } from "@/components/ui/frag-form";
 import { AddFragranceModal } from "@/components/collection/add-fragrance-modal";
 import { FragranceCard } from "@/components/collection/fragrance-card";
 import { FragranceDetailModal } from "@/components/collection/fragrance-detail-modal";
+import { Pagination } from "@/components/ui/pagination";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -280,6 +281,8 @@ function CollectionInner() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const setSort = useCallback(
     (value: string) => {
@@ -380,6 +383,14 @@ function CollectionInner() {
     ratingFilter !== "any" ||
     statusFilter !== "all" ||
     houseFilter.length > 0;
+
+  // Reset to page 1 whenever filters/sort change
+  useEffect(() => { setPage(1); }, [search, sort, statusFilter, ratingFilter, accordFilter, houseFilter]);
+
+  const paginated = useMemo(
+    () => pageSize === 0 ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize),
+    [filtered, page, pageSize],
+  );
 
   function clearFilters() {
     setSearch("");
@@ -512,7 +523,7 @@ function CollectionInner() {
                     paddingLeft: "30px",
                     paddingRight: "10px",
                     background: "#FFFFFF",
-                    border: "1px solid var(--color-cream-dark)",
+                    border: "1px solid var(--color-sand-light)",
                     borderRadius: "3px",
                     fontFamily: "var(--font-sans)",
                     fontSize: "14px",
@@ -538,7 +549,7 @@ function CollectionInner() {
                 onClick={() => setFiltersOpen((v) => !v)}
                 style={{
                   background: "transparent",
-                  border: "1px solid var(--color-cream-dark)",
+                  border: "1px solid var(--color-sand-light)",
                   borderRadius: "3px",
                   padding: "0 14px",
                   height: "40px",
@@ -554,7 +565,7 @@ function CollectionInner() {
                   gap: "6px",
                   marginLeft: "auto",
                   transition: "border-color 150ms, color 150ms",
-                  borderColor: filtersOpen ? "var(--color-navy)" : "var(--color-cream-dark)",
+                  borderColor: filtersOpen ? "var(--color-navy)" : "var(--color-sand-light)",
                 }}
               >
                 <SlidersHorizontal size={13} />
@@ -592,7 +603,7 @@ function CollectionInner() {
                   gap: "8px",
                   marginTop: "var(--space-3)",
                   paddingTop: "var(--space-3)",
-                  borderTop: "1px solid var(--color-cream-dark)",
+                  borderTop: "1px solid var(--color-sand-light)",
                 }}
               >
                 <div style={{ width: "160px" }}>
@@ -709,9 +720,9 @@ function CollectionInner() {
                   <thead>
                     <tr
                       style={{
-                        background: "rgba(237,232,223,0.5)",
+                        background: "var(--color-cream-dark)",
                         height: "40px",
-                        borderBottom: "1px solid var(--color-cream-dark)",
+                        borderBottom: "1px solid var(--color-sand-light)",
                       }}
                     >
                       {[
@@ -744,7 +755,7 @@ function CollectionInner() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((frag, i) => {
+                    {paginated.map((frag, i) => {
                       const accords = getAccords(frag, communityFrags);
                       const visibleAccords = accords.slice(0, 4);
                       const extraAccords = accords.length > 4 ? accords.length - 4 : 0;
@@ -759,10 +770,8 @@ function CollectionInner() {
                           onClick={() => setDetailFrag(frag)}
                           style={{
                             height: "64px",
-                            background: isEven
-                              ? "var(--color-cream)"
-                              : "rgba(237,232,223,0.3)",
-                            borderBottom: "1px solid var(--color-cream-dark)",
+                            background: isEven ? "#FFFFFF" : "var(--color-cream)",
+                            borderBottom: "1px solid var(--color-sand-light)",
                             cursor: "pointer",
                             transition: "background 100ms",
                           }}
@@ -915,9 +924,18 @@ function CollectionInner() {
                 </table>
               </div>
 
+              {/* Pagination */}
+              <Pagination
+                total={filtered.length}
+                page={page}
+                pageSize={pageSize}
+                onPage={setPage}
+                onPageSize={setPageSize}
+              />
+
               {/* Mobile card list */}
               <div className="md:hidden">
-                {filtered.map((frag) => {
+                {paginated.map((frag) => {
                   const accords = getAccords(frag, communityFrags);
                   const compCount = compMap[frag.fragranceId ?? frag.id] ?? 0;
                   const added = addedStr(frag.createdAt);
