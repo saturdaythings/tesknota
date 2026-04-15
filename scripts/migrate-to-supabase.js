@@ -28,6 +28,11 @@ const USER_MAP = {
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+function splitArr(val) {
+  if (!val) return [];
+  return val.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !SPREADSHEET_ID || !SA_EMAIL || !SA_KEY) {
   console.error("Missing required env vars. See comments at top of this file.");
   process.exit(1);
@@ -127,10 +132,10 @@ async function main() {
       name: r.fragranceName || r.name || "",
       house: r.fragranceHouse || r.house || "",
       type: r.fragranceType || null,
-      accords: r.fragranceAccords || null,
-      top_notes: r.topNotes || null,
-      middle_notes: r.middleNotes || null,
-      base_notes: r.baseNotes || null,
+      accords: splitArr(r.fragranceAccords),
+      top_notes: splitArr(r.topNotes),
+      middle_notes: splitArr(r.middleNotes),
+      base_notes: splitArr(r.baseNotes),
       avg_price: r.avgPrice || null,
       is_dupe: r.isDupe === "true" || r.isDupe === true,
       dupe_for: r.dupeFor || null,

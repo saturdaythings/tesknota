@@ -84,10 +84,10 @@ export interface CommunityFrag {
   fragranceName: string;
   fragranceHouse: string;
   fragranceType: string;
-  fragranceAccords: string;
-  topNotes: string;
-  middleNotes: string;
-  baseNotes: string;
+  fragranceAccords: string[];
+  topNotes: string[];
+  middleNotes: string[];
+  baseNotes: string[];
   avgPrice: string | null;
   isDupe: string;
   dupeFor: string;
@@ -105,10 +105,10 @@ export interface CommunityFrag {
 export interface CommunityData {
   avgPrice: string | null;
   notes: string;
-  accords: string;
-  topNotes: string;
-  middleNotes: string;
-  baseNotes: string;
+  accords: string[];
+  topNotes: string[];
+  middleNotes: string[];
+  baseNotes: string[];
   communityRating: string;
   parfumoRating: string;
   parfumoLongevity: string;

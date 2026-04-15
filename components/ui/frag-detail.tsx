@@ -20,9 +20,9 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
   );
 }
 
-function NoteChips({ raw }: { raw: string }) {
-  if (!raw.trim()) return null;
-  const items = raw.split(",").map((s) => s.trim()).filter(Boolean);
+function NoteChips({ raw }: { raw: string[] }) {
+  if (!raw.length) return null;
+  const items = raw;
   return (
     <div className="flex flex-wrap gap-1 mt-1">
       {items.map((n) => (
@@ -203,22 +203,22 @@ export function FragDetail({
             {accords.length > 0 && (
               <div className="mt-3">
                 <div className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--ink3)] mb-1">Accords</div>
-                <NoteChips raw={accords.join(", ")} />
+                <NoteChips raw={accords} />
               </div>
             )}
-            {cd?.topNotes && (
+            {cd?.topNotes && cd.topNotes.length > 0 && (
               <div className="mt-3">
                 <div className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--ink3)] mb-1">Top Notes</div>
                 <NoteChips raw={cd.topNotes} />
               </div>
             )}
-            {cd?.middleNotes && (
+            {cd?.middleNotes && cd.middleNotes.length > 0 && (
               <div className="mt-3">
                 <div className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--ink3)] mb-1">Middle Notes</div>
                 <NoteChips raw={cd.middleNotes} />
               </div>
             )}
-            {cd?.baseNotes && (
+            {cd?.baseNotes && cd.baseNotes.length > 0 && (
               <div className="mt-3">
                 <div className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--ink3)] mb-1">Base Notes</div>
                 <NoteChips raw={cd.baseNotes} />

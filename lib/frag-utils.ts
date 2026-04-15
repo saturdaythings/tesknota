@@ -30,9 +30,7 @@ export function getAccords(f: UserFragrance, communityFrags: CommunityFrag[]): s
   const cf = communityFrags.find(
     (c) => norm(c.fragranceName) === norm(f.name) && norm(c.fragranceHouse) === norm(f.house)
   );
-  const raw = cf?.fragranceAccords ?? "";
-  if (!raw) return [];
-  return raw.split(",").map((a) => a.trim()).filter(Boolean);
+  return cf?.fragranceAccords ?? [];
 }
 
 export function getCompCount(

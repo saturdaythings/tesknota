@@ -1,8 +1,19 @@
 -- ============================================================
 -- tesknota — Supabase schema
--- Paste this entire file into the Supabase SQL Editor and run.
+-- Run via: supabase db query --db-url "$DB_URL" -f scripts/schema.sql
 -- Project: tofzctbkxuzvwirgobgh
 -- ============================================================
+
+-- ── Drop existing tables (safe re-run) ───────────────────────
+DROP TABLE IF EXISTS activity_log      CASCADE;
+DROP TABLE IF EXISTS api_log           CASCADE;
+DROP TABLE IF EXISTS pending_entries   CASCADE;
+DROP TABLE IF EXISTS user_compliments  CASCADE;
+DROP TABLE IF EXISTS user_fragrances   CASCADE;
+DROP TABLE IF EXISTS fragrances        CASCADE;
+DROP TABLE IF EXISTS user_profiles     CASCADE;
+DROP FUNCTION IF EXISTS handle_new_user CASCADE;
+DROP FUNCTION IF EXISTS touch_updated_at CASCADE;
 
 -- ── 1. user_profiles ────────────────────────────────────────
 
@@ -13,18 +24,15 @@ CREATE TABLE user_profiles (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Seed the two existing users
 INSERT INTO user_profiles (id, name, email) VALUES
   ('7a23b975-5839-473c-9415-9f669938c313', 'Kiana',  'kianamicari1@gmail.com'),
   ('3531e75c-05bb-489e-b02c-2cc19b7ddbfd', 'Sylvia', 'sylvia.m.safin@gmail.com');
 
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
--- Public read: identity screen fetches profiles before login
 CREATE POLICY "public_read_profiles" ON user_profiles FOR SELECT USING (true);
 CREATE POLICY "own_profile_insert"   ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "own_profile_update"   ON user_profiles FOR UPDATE USING (auth.uid() = id);
 
--- Auto-insert profile row on new signup
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
@@ -53,10 +61,10 @@ CREATE TABLE fragrances (
   name_normalized           TEXT GENERATED ALWAYS AS (lower(regexp_replace(name,  '[^a-zA-Z0-9]', '', 'g'))) STORED,
   house_normalized          TEXT GENERATED ALWAYS AS (lower(regexp_replace(house, '[^a-zA-Z0-9]', '', 'g'))) STORED,
   type                      TEXT,
-  accords                   TEXT,
-  top_notes                 TEXT,
-  middle_notes              TEXT,
-  base_notes                TEXT,
+  accords                   TEXT[] NOT NULL DEFAULT '{}',
+  top_notes                 TEXT[] NOT NULL DEFAULT '{}',
+  middle_notes              TEXT[] NOT NULL DEFAULT '{}',
+  base_notes                TEXT[] NOT NULL DEFAULT '{}',
   avg_price                 TEXT,
   is_dupe                   BOOLEAN NOT NULL DEFAULT false,
   dupe_for                  TEXT,
@@ -75,8 +83,13 @@ CREATE TABLE fragrances (
 );
 
 ALTER TABLE fragrances ENABLE ROW LEVEL SECURITY;
--- Authenticated users can read; writes are service-role only (migration + worker)
 CREATE POLICY "auth_read_fragrances" ON fragrances FOR SELECT USING (auth.uid() IS NOT NULL);
+
+-- Array search indexes (GIN required for @> and ANY())
+CREATE INDEX fragrances_accords_gin     ON fragrances USING GIN (accords);
+CREATE INDEX fragrances_top_notes_gin   ON fragrances USING GIN (top_notes);
+CREATE INDEX fragrances_mid_notes_gin   ON fragrances USING GIN (middle_notes);
+CREATE INDEX fragrances_base_notes_gin  ON fragrances USING GIN (base_notes);
 
 -- ── 3. user_fragrances ──────────────────────────────────────
 
@@ -102,11 +115,14 @@ CREATE TABLE user_fragrances (
 );
 
 ALTER TABLE user_fragrances ENABLE ROW LEVEL SECURITY;
--- Any authenticated user can read (friend view)
 CREATE POLICY "auth_read_user_fragrances"  ON user_fragrances FOR SELECT USING (auth.uid() IS NOT NULL);
 CREATE POLICY "own_insert_user_fragrances" ON user_fragrances FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "own_update_user_fragrances" ON user_fragrances FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "own_delete_user_fragrances" ON user_fragrances FOR DELETE USING (auth.uid() = user_id);
+
+CREATE INDEX uf_user_status  ON user_fragrances (user_id, status);
+CREATE INDEX uf_user_created ON user_fragrances (user_id, created_at DESC);
+CREATE INDEX uf_fragrance_id ON user_fragrances (fragrance_id);
 
 -- ── 4. user_compliments ─────────────────────────────────────
 
@@ -134,6 +150,10 @@ CREATE POLICY "auth_read_user_compliments"  ON user_compliments FOR SELECT USING
 CREATE POLICY "own_insert_user_compliments" ON user_compliments FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "own_update_user_compliments" ON user_compliments FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "own_delete_user_compliments" ON user_compliments FOR DELETE USING (auth.uid() = user_id);
+
+CREATE INDEX uc_user_created ON user_compliments (user_id, created_at DESC);
+CREATE INDEX uc_user_year    ON user_compliments (user_id, year, month);
+CREATE INDEX uc_frag_id      ON user_compliments (primary_frag_id);
 
 -- ── 5. pending_entries ──────────────────────────────────────
 
@@ -178,9 +198,7 @@ CREATE TABLE api_log (
 );
 
 ALTER TABLE api_log ENABLE ROW LEVEL SECURITY;
--- Both users can read all logs for the admin panel aggregate view
 CREATE POLICY "auth_read_api_log" ON api_log FOR SELECT USING (auth.uid() IS NOT NULL);
--- Inserts are service-role only (worker bypasses RLS)
 
 -- ── 7. activity_log ─────────────────────────────────────────
 
@@ -194,4 +212,3 @@ CREATE TABLE activity_log (
 
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "auth_read_activity_log" ON activity_log FOR SELECT USING (auth.uid() IS NOT NULL);
--- Inserts are service-role only
