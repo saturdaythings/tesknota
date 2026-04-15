@@ -137,8 +137,7 @@ export default function DashboardPage() {
               <ScentSignature frags={MF} communityFrags={communityFrags} />
             </div>
 
-            {/* ── Notification Banner ─────────────────── */}
-            <NotifBanner frags={collectionFrags} />
+
 
             {/* ── Friend's Recent Activity ─────────────── */}
             <FriendActivity
@@ -542,70 +541,6 @@ function ScentSignature({
   );
 }
 
-// ── Notification Banner ────────────────────────────────────
-
-function NotifBanner({ frags }: { frags: UserFragrance[] }) {
-  const [dismissed, setDismissed] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("dashboard-notif-dismissed") === "1";
-  });
-
-  if (dismissed) return null;
-
-  const missing = frags.filter(
-    (f) => !(f.personalNotes ?? "").trim() || !f.personalRating
-  ).length;
-
-  if (!missing) return null;
-
-  function dismiss() {
-    localStorage.setItem("dashboard-notif-dismissed", "1");
-    setDismissed(true);
-  }
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        background: "var(--color-cream-dark)",
-        borderRadius: "4px",
-        padding: "14px 20px",
-        marginBottom: "24px",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontWeight: 400,
-          fontSize: "14px",
-          color: "var(--color-navy)",
-        }}
-      >
-        {missing} {missing === 1 ? "fragrance is" : "fragrances are"} missing notes — add it to improve your insights.
-      </span>
-      <button
-        onClick={dismiss}
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontWeight: 500,
-          fontSize: "12px",
-          color: "var(--color-sand)",
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          marginLeft: "16px",
-          flexShrink: 0,
-        }}
-      >
-        Dismiss
-      </button>
-    </div>
-  );
-}
 
 // ── Friend Activity ────────────────────────────────────────
 
