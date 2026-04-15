@@ -8,6 +8,7 @@ import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { FragForm } from "@/components/ui/frag-form";
 import { FragDetail } from "@/components/ui/frag-detail";
 import { FragRow } from "@/components/ui/frag-row";
+import { Dropdown } from "@/components/ui/dropdown";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -123,7 +124,7 @@ export default function WishlistPage() {
                 value={filters.q}
                 onChange={(e) => setFilters({ q: e.target.value })}
                 placeholder="Search wishlist..."
-                className="w-full px-3 py-[9px] mb-3 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                className="w-full px-3 py-[9px] mb-3 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
               />
             </div>
             <div className="flex items-center gap-3 mb-4">
@@ -137,16 +138,16 @@ export default function WishlistPage() {
                   />
                 ))}
               </FilterBar>
-              <select
+              <Dropdown
                 value={filters.sort}
-                onChange={(e) => setFilters({ sort: e.target.value as SortKey })}
-                className="px-3 py-[6px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink3)] focus:outline-none cursor-pointer"
-              >
-                <option value="nameAZ">Name A–Z</option>
-                <option value="nameZA">Name Z–A</option>
-                <option value="houseAZ">House A–Z</option>
-                <option value="added">Recently Added</option>
-              </select>
+                onChange={(value) => setFilters({ sort: value as SortKey })}
+                options={[
+                  { label: "Name A–Z", value: "nameAZ" },
+                  { label: "Name Z–A", value: "nameZA" },
+                  { label: "House A–Z", value: "houseAZ" },
+                  { label: "Recently Added", value: "added" },
+                ]}
+              />
             </div>
 
             <SectionHeader

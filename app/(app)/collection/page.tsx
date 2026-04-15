@@ -160,7 +160,7 @@ export default function CollectionPage() {
                 placeholder="Search name or house..."
                 value={filters.q}
                 onChange={(e) => { setFilters({ q: e.target.value }); setPage(1); }}
-                className="flex-1 min-w-[160px] max-w-[280px] px-3 py-[8px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-sm text-[var(--ink)] placeholder:text-[var(--ink3)] focus:outline-none focus:border-[var(--blue)]"
+                className="flex-1 min-w-[160px] max-w-[280px] px-3 py-[8px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] placeholder:text-[var(--ink3)] focus:outline-none focus:border-[var(--blue)]"
               />
               <Dropdown
                 value={filters.sort}

@@ -87,7 +87,7 @@ export function Modal({
           <div>
             <div
               id={titleId}
-              className="font-[var(--serif)] text-xl italic text-[var(--blue)]"
+              className="font-[var(--serif)] text-xl text-[var(--ink)]"
             >
               {title}
             </div>
