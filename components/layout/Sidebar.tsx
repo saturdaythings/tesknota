@@ -21,7 +21,6 @@ interface SidebarProps {
   navSections: NavSection[];
   userName: string;
   onSignOut?: () => void;
-  onUserClick?: () => void;
   className?: string;
 }
 
@@ -29,7 +28,6 @@ export function Sidebar({
   navSections,
   userName,
   onSignOut,
-  onUserClick,
   className,
 }: SidebarProps) {
   const pathname = usePathname();
@@ -110,18 +108,12 @@ export function Sidebar({
 
         {/* User footer */}
         <div className="px-5 py-4 border-t border-white/[0.06]">
-          <div
-            onClick={() => { close(); onUserClick?.(); }}
-            className="text-xs text-white/45 cursor-pointer transition-all duration-[140ms] hover:text-[var(--warm2)]"
-          >
-            <b className="block font-normal text-[13px] text-white/70 mb-[1px]">
-              {userName}
-            </b>
-            Settings
+          <div className="font-normal text-[13px] text-white/70 mb-[10px]">
+            {userName}
           </div>
           <div
             onClick={onSignOut}
-            className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-white/25 cursor-pointer mt-[10px] transition-colors duration-[140ms] hover:text-white/55"
+            className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-white/25 cursor-pointer transition-colors duration-[140ms] hover:text-white/55"
           >
             Sign out
           </div>

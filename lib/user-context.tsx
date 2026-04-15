@@ -21,6 +21,7 @@ function dbRowToProfile(r: Record<string, unknown>): UserProfile {
     name: r.name as string,
     email: r.email as string,
     createdAt: (r.created_at as string) ?? "",
+    isAdmin: (r.is_admin as boolean) ?? false,
   };
 }
 

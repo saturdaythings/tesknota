@@ -3,6 +3,7 @@ export interface UserProfile {
   name: string;
   email: string;
   createdAt: string;
+  isAdmin: boolean;
 }
 
 export type FragranceStatus =

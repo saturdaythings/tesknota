@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
@@ -32,6 +33,16 @@ interface AdminUser {
   userId?: string;
   name?: string;
   displayName?: string;
+  email?: string;
+  isAdmin?: boolean;
+}
+
+interface DQFrag {
+  id: string;
+  name: string;
+  house: string;
+  missingAccords: boolean;
+  missingNotes: boolean;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -766,9 +777,101 @@ function FlagsTab({ flags, users, onResolve }: { flags: CommunityFlag[]; users: 
   );
 }
 
+// ── Users tab ─────────────────────────────────────────────────────────────────
+
+function UsersTab({ users, currentUserId, onToggleAdmin }: {
+  users: AdminUser[];
+  currentUserId: string;
+  onToggleAdmin: (id: string, current: boolean) => void;
+}) {
+  return (
+    <div>
+      <BigNumGrid items={[
+        { val: String(users.length), label: "Total users" },
+        { val: String(users.filter((u) => u.isAdmin).length), label: "Admins" },
+      ]} />
+      <SecHead title="User Access" />
+      <div className="flex flex-col">
+        {users.map((u) => (
+          <div key={u.id} className="flex items-center justify-between px-3 py-3 border-b border-[var(--adm-border2)] hover:bg-[var(--adm-bg2)]">
+            <div>
+              <div className="font-[var(--adm-mono)] text-xs text-[var(--adm-fg)] font-medium">{u.name ?? u.displayName ?? u.id}</div>
+              <div className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] mt-0.5">{u.email}</div>
+            </div>
+            <div className="flex items-center gap-3">
+              {u.isAdmin && (
+                <span className="font-[var(--adm-mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--adm-green)] border border-[var(--adm-green)] px-2 py-0.5">Admin</span>
+              )}
+              {u.id !== currentUserId && (
+                <button
+                  onClick={() => onToggleAdmin(u.id!, u.isAdmin ?? false)}
+                  className="font-[var(--adm-mono)] text-[10px] tracking-[0.08em] uppercase text-[var(--adm-fg4)] border border-[var(--adm-border)] px-2.5 py-1 hover:border-[var(--adm-fg)] hover:text-[var(--adm-fg)] transition-colors"
+                >
+                  {u.isAdmin ? "Revoke admin" : "Grant admin"}
+                </button>
+              )}
+              {u.id === currentUserId && (
+                <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] italic">you</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Data Quality tab ──────────────────────────────────────────────────────────
+
+function DataQualityTab({ frags }: { frags: DQFrag[] }) {
+  const missingAccords = frags.filter((f) => f.missingAccords);
+  const missingNotes = frags.filter((f) => f.missingNotes);
+  const missingBoth = frags.filter((f) => f.missingAccords && f.missingNotes);
+  const [filter, setFilter] = useState<"accords" | "notes" | "both">("accords");
+
+  const displayed = filter === "accords" ? missingAccords : filter === "notes" ? missingNotes : missingBoth;
+
+  return (
+    <div>
+      <BigNumGrid items={[
+        { val: String(frags.length), label: "Total in library" },
+        { val: String(missingAccords.length), label: "Missing accords", valClass: missingAccords.length > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
+        { val: String(missingNotes.length), label: "Missing notes", valClass: missingNotes.length > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
+        { val: String(missingBoth.length), label: "Missing both" },
+      ]} />
+
+      <div className="flex items-center gap-1 mb-5">
+        {(["accords", "notes", "both"] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`font-[var(--adm-mono)] text-[10px] tracking-[0.1em] uppercase px-3 py-1 border transition-colors ${filter === f ? "border-[var(--adm-fg)] bg-[var(--adm-fg)] text-[var(--adm-bg)]" : "border-[var(--adm-border)] text-[var(--adm-fg4)] hover:text-[var(--adm-fg)]"}`}
+          >
+            Missing {f}
+          </button>
+        ))}
+      </div>
+
+      {displayed.length === 0 ? (
+        <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-green)] py-3">All fragrances have {filter} data.</div>
+      ) : (
+        <DataTable
+          headers={["Fragrance", "House", "Accords", "Notes"]}
+          rows={displayed.map((f) => [
+            f.name,
+            f.house,
+            f.missingAccords ? <span className="text-[var(--adm-red)]">missing</span> : <span className="text-[var(--adm-green)]">ok</span>,
+            f.missingNotes ? <span className="text-[var(--adm-red)]">missing</span> : <span className="text-[var(--adm-green)]">ok</span>,
+          ])}
+        />
+      )}
+    </div>
+  );
+}
+
 // ── Admin page ───────────────────────────────────────────────────────────────
 
-const TABS = ["Spend", "Usage", "Errors", "Audit", "Flags"] as const;
+const TABS = ["Spend", "Usage", "Errors", "Audit", "Flags", "Users", "Data Quality"] as const;
 type TabId = typeof TABS[number];
 
 interface AdminData {
@@ -776,25 +879,32 @@ interface AdminData {
   activityLogs: ActivityLog[];
   users: AdminUser[];
   flags: CommunityFlag[];
+  dqFrags: DQFrag[];
 }
 
 export default function AdminPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
   const [tab, setTab] = useState<TabId>("Spend");
-  const [data, setData] = useState<AdminData>({ apiLogs: [], activityLogs: [], users: [], flags: [] });
+  const [data, setData] = useState<AdminData>({ apiLogs: [], activityLogs: [], users: [], flags: [], dqFrags: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isLoaded && (!user || !user.isAdmin)) router.replace("/dashboard");
+  }, [isLoaded, user, router]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [apiRes, actRes, profilesRes, flagsRes] = await Promise.all([
+      const [apiRes, actRes, profilesRes, flagsRes, fragsRes] = await Promise.all([
         supabase.from("api_log").select("*").order("created_at", { ascending: false }),
         supabase.from("activity_log").select("*").order("created_at", { ascending: false }),
-        supabase.from("user_profiles").select("id, name, email, created_at"),
+        supabase.from("user_profiles").select("id, name, email, created_at, is_admin"),
         supabase.from("community_flags").select("*").order("created_at", { ascending: false }),
+        supabase.from("fragrances").select("id, name, house, accords, top_notes"),
       ]);
       const mapApiLog = (r: Record<string, unknown>): ApiLog => ({
         timestamp: (r.created_at as string) ?? "",
@@ -818,6 +928,15 @@ export default function AdminPage() {
         userId: r.id as string,
         name: r.name as string,
         displayName: r.name as string,
+        email: r.email as string,
+        isAdmin: (r.is_admin as boolean) ?? false,
+      });
+      const mapDQFrag = (r: Record<string, unknown>): DQFrag => ({
+        id: r.id as string,
+        name: r.name as string,
+        house: r.house as string,
+        missingAccords: !r.accords || (r.accords as string[]).length === 0,
+        missingNotes: !r.top_notes || (r.top_notes as string[]).length === 0,
       });
       const mapFlag = (r: Record<string, unknown>): CommunityFlag => ({
         id: r.id as string,
@@ -829,11 +948,13 @@ export default function AdminPage() {
         resolved: (r.resolved as boolean) ?? false,
         createdAt: r.created_at as string,
       });
+      const allDQFrags = (fragsRes.data ?? []).map(mapDQFrag);
       setData({
         apiLogs: (apiRes.data ?? []).map(mapApiLog),
         activityLogs: (actRes.data ?? []).map(mapActivityLog),
         users: (profilesRes.data ?? []).map(mapProfile),
         flags: (flagsRes.data ?? []).map(mapFlag),
+        dqFrags: allDQFrags.filter((f) => f.missingAccords || f.missingNotes),
       });
       setLastSync("Just now");
     } catch (e: unknown) {
@@ -852,6 +973,16 @@ export default function AdminPage() {
       flags: prev.flags.map((f) => f.id === id ? { ...f, resolved: true } : f),
     }));
   }
+
+  async function toggleAdmin(id: string, current: boolean) {
+    await supabase.from("user_profiles").update({ is_admin: !current }).eq("id", id);
+    setData((prev) => ({
+      ...prev,
+      users: prev.users.map((u) => u.id === id ? { ...u, isAdmin: !current } : u),
+    }));
+  }
+
+  if (!isLoaded || !user?.isAdmin) return null;
 
   const errors24h = data.apiLogs.filter((l) => {
     return (Date.now() - new Date(l.timestamp).getTime()) < 86_400_000 && isError(l);
@@ -921,6 +1052,8 @@ export default function AdminPage() {
               {tab === "Errors" && <ErrorsTab apiLogs={data.apiLogs} />}
               {tab === "Audit" && <AuditTab />}
               {tab === "Flags" && <FlagsTab flags={data.flags} users={data.users} onResolve={resolveFlag} />}
+              {tab === "Users" && <UsersTab users={data.users} currentUserId={user.id} onToggleAdmin={toggleAdmin} />}
+              {tab === "Data Quality" && <DataQualityTab frags={data.dqFrags} />}
             </>
           )}
         </div>

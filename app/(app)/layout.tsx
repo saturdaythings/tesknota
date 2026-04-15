@@ -41,14 +41,6 @@ const NAV_SECTIONS_BASE = [
   },
 ];
 
-const NAV_MANAGE = {
-  label: "Manage",
-  items: [
-    { href: "/import", label: "Import" },
-    { href: "/settings", label: "Settings" },
-  ],
-};
-
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, profiles, isLoaded, signOut } = useUser();
   const router = useRouter();
@@ -60,13 +52,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!isLoaded || !user) return null;
 
   const friend = getFriend(user, profiles);
+  const manageItems = [
+    { href: "/import", label: "Import" },
+    { href: "/settings", label: "Settings" },
+    ...(user.isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
   const navSections = [
     ...NAV_SECTIONS_BASE,
     {
       label: "Social",
       items: [{ href: "/friend", label: friend?.name ?? "Friend" }],
     },
-    NAV_MANAGE,
+    { label: "Manage", items: manageItems },
   ];
 
   return (
@@ -80,7 +77,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               await signOut();
               router.push("/");
             }}
-            onUserClick={() => router.push("/settings")}
           />
         }
       >
