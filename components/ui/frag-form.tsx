@@ -70,6 +70,8 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const [purchaseYear, setPurchaseYear] = useState("");
   const [purchasePrice, setPurchasePrice] = useState("");
   const [notes, setNotes] = useState("");
+  const [isDupe, setIsDupe] = useState(false);
+  const [dupeFor, setDupeFor] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
@@ -95,6 +97,8 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       setPurchaseYear(editing.purchaseYear ?? "");
       setPurchasePrice(editing.purchasePrice ?? "");
       setNotes(editing.personalNotes ?? "");
+      setIsDupe(editing.isDupe ?? false);
+      setDupeFor(editing.dupeFor ?? "");
     } else {
       setStep(1);
       setSearch("");
@@ -110,6 +114,8 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       setPurchaseYear("");
       setPurchasePrice("");
       setNotes("");
+      setIsDupe(false);
+      setDupeFor("");
     }
     setDropOpen(false);
     setErr("");
@@ -181,8 +187,8 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       purchaseMonth: purchaseMonth || null,
       purchaseYear: purchaseYear || null,
       purchasePrice: purchasePrice.trim() || null,
-      isDupe: false,
-      dupeFor: "",
+      isDupe,
+      dupeFor: isDupe ? dupeFor.trim() : "",
       personalNotes: notes.trim(),
       createdAt: editing?.createdAt ?? now,
     };
@@ -325,6 +331,22 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             </div>
           )}
 
+          {/* Status (always shown in step 2 so edit mode can change it) */}
+          <div>
+            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+              Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as FragranceStatus)}
+              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
+            >
+              {STATUSES.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Size */}
           <div>
             <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
@@ -453,6 +475,29 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               placeholder="Your impressions, context, memories..."
               className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)] resize-none"
             />
+          </div>
+
+          {/* Dupe */}
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isDupe}
+                onChange={(e) => setIsDupe(e.target.checked)}
+                className="accent-[var(--blue)]"
+              />
+              <span className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.05em] uppercase">
+                This is a dupe of another fragrance
+              </span>
+            </label>
+            {isDupe && (
+              <input
+                value={dupeFor}
+                onChange={(e) => setDupeFor(e.target.value)}
+                placeholder="Original fragrance name..."
+                className="mt-2 w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+              />
+            )}
           </div>
         </div>
       )}

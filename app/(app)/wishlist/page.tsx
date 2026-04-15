@@ -28,6 +28,7 @@ export default function WishlistPage() {
   const { toast } = useToast();
   const [filter, setFilter] = useState<WishFilter>("all");
   const [sort, setSort] = useState<SortKey>("nameAZ");
+  const [search, setSearch] = useState("");
   const [boughtFrag, setBoughtFrag] = useState<UserFragrance | null>(null);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
@@ -50,7 +51,9 @@ export default function WishlistPage() {
   const wantToBuy = wish.filter((f) => f.status === "WANT_TO_BUY");
   const wantToSmell = wish.filter((f) => f.status === "WANT_TO_SMELL");
 
+  const sq = search.trim().toLowerCase();
   let filtered = filter === "all" ? wish : wish.filter((f) => f.status === filter);
+  if (sq) filtered = filtered.filter((f) => f.name.toLowerCase().includes(sq) || (f.house ?? "").toLowerCase().includes(sq));
   filtered = filtered.slice().sort((a, b) => {
     if (sort === "nameZA") return b.name.localeCompare(a.name);
     if (sort === "houseAZ") return (a.house ?? "").localeCompare(b.house ?? "");
@@ -108,6 +111,14 @@ export default function WishlistPage() {
               <StatBox value={wantToSmell.length} label="Want to Smell" />
             </StatsGrid>
 
+            <div className="mb-4">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search wishlist..."
+                className="w-full px-3 py-[9px] mb-3 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+              />
+            </div>
             <div className="flex items-center gap-3 mb-4">
               <FilterBar className="mb-0">
                 {WISH_FILTERS.map((f) => (
@@ -188,7 +199,7 @@ export default function WishlistPage() {
                 {friendSignals.length > 0 && (
                   <div className="mb-5">
                     <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-3">
-                      From {friend?.name ?? "friend"}'s collection
+                      From your friend's collection
                     </div>
                     <div className="grid gap-px bg-[var(--b2)] border border-[var(--b2)] [grid-template-columns:repeat(auto-fill,minmax(180px,1fr))]">
                       {friendSignals.map((f) => (

@@ -22,8 +22,8 @@ function dbRowToFrag(r: Record<string, unknown>): UserFragrance {
     purchaseMonth: pm || null,
     purchaseYear: py || null,
     purchasePrice: (r.purchase_price as string) ?? null,
-    isDupe: false,
-    dupeFor: "",
+    isDupe: (r.is_dupe as boolean) ?? false,
+    dupeFor: (r.dupe_for as string) ?? "",
     personalNotes: (r.personal_notes as string) ?? "",
     createdAt: (r.created_at as string) ?? "",
   };
