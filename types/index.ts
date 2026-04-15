@@ -27,7 +27,7 @@ export type FragranceType =
 
 export type BottleSize = "Sample" | "Travel" | "Full Bottle" | "Decant";
 
-export type ComplimenterGender = "Female" | "Male" | "Non-binary" | "Unknown";
+export type ComplimenterGender = "Female" | "Male";
 
 export type Relation =
   | "Stranger"

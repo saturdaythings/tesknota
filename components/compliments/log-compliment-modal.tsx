@@ -23,8 +23,6 @@ const RELATIONS: { value: Relation; label: string }[] = [
 const GENDERS: { value: ComplimenterGender; label: string }[] = [
   { value: 'Female', label: 'Female' },
   { value: 'Male', label: 'Male' },
-  { value: 'Non-binary', label: 'Non-binary' },
-  { value: 'Unknown', label: 'Unknown' },
 ];
 
 const ELIGIBLE_STATUSES = new Set(['CURRENT', 'PREVIOUSLY_OWNED', 'FINISHED']);
