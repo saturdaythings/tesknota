@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Topbar } from "@/components/layout/Topbar";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
@@ -875,6 +875,12 @@ export default function AdminPage() {
           >
             Refresh
           </button>
+          <Link
+            href="/dashboard"
+            className="text-[11px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-3 py-1 tracking-[0.1em] uppercase hover:bg-[var(--adm-fg)] hover:text-[var(--adm-bg)] transition-all"
+          >
+            Dashboard
+          </Link>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { FragRow } from "@/components/ui/frag-row";
 import { FragDetail } from "@/components/ui/frag-detail";
+import { Pagination } from "@/components/ui/pagination";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS, getAccords, monthNum } from "@/lib/frag-utils";
@@ -142,6 +143,8 @@ function FriendCollectionTab({
   friendId: string;
   onFragClick: (frag: UserFragrance) => void;
 }) {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
   return (
     <>
@@ -156,33 +159,42 @@ function FriendCollectionTab({
       {sorted.length === 0 ? (
         <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No fragrances.</div>
       ) : (
-        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-          <table className="w-full min-w-[640px]">
-            <thead>
-              <tr className="border-b border-[var(--b2)]">
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Size</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Rating</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Added</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Accords</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((f) => (
-                <FragRow
-                  key={f.id}
-                  frag={f}
-                  communityFrags={communityFrags}
-                  compliments={compliments}
-                  userId={friendId}
-                  onClick={onFragClick}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <div className="overflow-x-auto border border-[var(--b2)]">
+            <table className="w-full min-w-[640px]">
+              <thead>
+                <tr className="border-b border-[var(--b2)]">
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Size</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Rating</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Added</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Accords</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(pageSize === 0 ? sorted : sorted.slice((page - 1) * pageSize, page * pageSize)).map((f) => (
+                  <FragRow
+                    key={f.id}
+                    frag={f}
+                    communityFrags={communityFrags}
+                    compliments={compliments}
+                    userId={friendId}
+                    onClick={onFragClick}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            total={sorted.length}
+            page={page}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={setPageSize}
+          />
+        </>
       )}
     </>
   );

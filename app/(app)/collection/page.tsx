@@ -8,6 +8,7 @@ import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { FragRow } from "@/components/ui/frag-row";
 import { FragForm } from "@/components/ui/frag-form";
 import { FragDetail } from "@/components/ui/frag-detail";
+import { Pagination } from "@/components/ui/pagination";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -38,6 +39,8 @@ export default function CollectionPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   if (!user) return null;
 
@@ -117,12 +120,12 @@ export default function CollectionPage() {
                 type="text"
                 placeholder="Search name or house..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 className="flex-1 min-w-[160px] max-w-[280px] px-3 py-[8px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-sm text-[var(--ink)] placeholder:text-[var(--ink3)] focus:outline-none focus:border-[var(--blue)]"
               />
               <select
                 value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
+                onChange={(e) => { setSort(e.target.value as SortKey); setPage(1); }}
                 className="px-3 py-[6px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink3)] focus:outline-none cursor-pointer"
               >
                 <option value="nameAZ">Name A–Z</option>
@@ -141,7 +144,7 @@ export default function CollectionPage() {
                   key={f.value}
                   label={f.label}
                   active={statusFilter === f.value}
-                  onClick={() => setStatusFilter(f.value)}
+                  onClick={() => { setStatusFilter(f.value); setPage(1); }}
                 />
               ))}
             </FilterBar>
@@ -169,7 +172,7 @@ export default function CollectionPage() {
                   <>
                     No matches.
                     <button
-                      onClick={() => { setSearch(""); setStatusFilter("all"); }}
+                      onClick={() => { setSearch(""); setStatusFilter("all"); setPage(1); }}
                       className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                     >
                       Clear filters
@@ -178,33 +181,42 @@ export default function CollectionPage() {
                 )}
               </div>
             ) : (
-              <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-                <table className="w-full min-w-[640px]">
-                  <thead>
-                    <tr className="border-b border-[var(--b2)]">
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Size</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Rating</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Added</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Accords</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((f) => (
-                      <FragRow
-                        key={f.id}
-                        frag={f}
-                        communityFrags={communityFrags}
-                        compliments={MC}
-                        userId={user.id}
-                        onClick={(frag) => setDetailFrag(frag)}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <>
+                <div className="overflow-x-auto border border-[var(--b2)]">
+                  <table className="w-full min-w-[640px]">
+                    <thead>
+                      <tr className="border-b border-[var(--b2)]">
+                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Size</th>
+                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Rating</th>
+                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Added</th>
+                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Accords</th>
+                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
+                        <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(pageSize === 0 ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize)).map((f) => (
+                        <FragRow
+                          key={f.id}
+                          frag={f}
+                          communityFrags={communityFrags}
+                          compliments={MC}
+                          userId={user.id}
+                          onClick={(frag) => setDetailFrag(frag)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <Pagination
+                  total={filtered.length}
+                  page={page}
+                  pageSize={pageSize}
+                  onPage={setPage}
+                  onPageSize={setPageSize}
+                />
+              </>
             )}
           </>
         )}
