@@ -8,6 +8,7 @@ Fragrance journal for Kiana and Sylvia. Live at **tesknota.pages.dev**.
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Auth + DB**: Supabase (email+password auth, Postgres with RLS)
 - **Hosting**: Cloudflare Pages (`out/` static build)
+- **XLSX**: SheetJS — import template download + file parsing
 
 ## Dev
 
@@ -26,7 +27,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
 ## Architecture
 
-See `ARCHITECTURE.md` for file map, data models, and design token reference.
+See `ARCHITECTURE.md` for file map, data models, import format, and design token reference.
 
 ## Deployment
 

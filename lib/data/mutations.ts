@@ -136,6 +136,40 @@ export async function deleteComp(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+// ── Community data enrichment ─────────────────────────────────
+// Called after import when the user supplies community fields (notes, accords, etc.).
+// Only updates non-null fields so we don't wipe existing data.
+
+export interface CommunityImportFields {
+  topNotes?: string[];
+  middleNotes?: string[];
+  baseNotes?: string[];
+  accords?: string[];
+  avgPrice?: string;
+  communityRating?: string;
+  parfumoRating?: string;
+  communityLongevityLabel?: string;
+  communitySillageLabel?: string;
+}
+
+export async function enrichFragranceCommunityData(
+  fragranceId: string,
+  fields: CommunityImportFields
+): Promise<void> {
+  const patch: Record<string, unknown> = {};
+  if (fields.topNotes?.length) patch.top_notes = fields.topNotes;
+  if (fields.middleNotes?.length) patch.middle_notes = fields.middleNotes;
+  if (fields.baseNotes?.length) patch.base_notes = fields.baseNotes;
+  if (fields.accords?.length) patch.accords = fields.accords;
+  if (fields.avgPrice) patch.avg_price = fields.avgPrice;
+  if (fields.communityRating) patch.community_rating = fields.communityRating;
+  if (fields.parfumoRating) patch.parfumo_rating = fields.parfumoRating;
+  if (fields.communityLongevityLabel) patch.community_longevity_label = fields.communityLongevityLabel;
+  if (fields.communitySillageLabel) patch.community_sillage_label = fields.communitySillageLabel;
+  if (Object.keys(patch).length === 0) return;
+  await supabase.from("fragrances").update(patch).eq("id", fragranceId);
+}
+
 // ── Community flagging ────────────────────────────────────────
 
 export async function submitCommunityFlag(flag: {
