@@ -69,7 +69,7 @@ export default function LoginPage() {
           Fragrance Tracker
         </div>
         <div
-          className="font-serif italic mt-4"
+          className="font-serif italic mt-3"
           style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}
         >
           [ t&#603;sk-&#712;n&#596;-ta ] &nbsp;&middot;&nbsp; a deep longing for what is absent or past
