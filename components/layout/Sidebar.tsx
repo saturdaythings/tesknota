@@ -64,6 +64,9 @@ export function Sidebar({
           <div className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-white/70 mt-1">
             Fragrance Tracker
           </div>
+          <div className="font-[var(--body)] text-[11px] text-white/35 mt-2 italic leading-snug">
+            [ t\u025bsk-&apos;no-ta ] &middot; a deep longing for what is absent or past
+          </div>
         </div>
 
         {/* Nav */}

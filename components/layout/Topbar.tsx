@@ -38,6 +38,9 @@ export function Topbar({
       </button>
 
       <div className="flex-1 min-w-0">
+        <div className="font-[var(--mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--ink4)] leading-none mb-[3px]">
+          T\u0118SKNOTA
+        </div>
         <div className="font-[var(--serif)] text-base font-normal text-[var(--ink)] leading-[1.3] truncate">
           {title}
         </div>

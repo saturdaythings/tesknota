@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { Topbar } from "@/components/layout/Topbar";
 import { FragForm } from "@/components/ui/frag-form";
@@ -485,6 +485,295 @@ function CSVImportTab({ userId }: { userId: string }) {
   );
 }
 
+// ── Link import tab ───────────────────────────────────────────────────────────
+
+function parseFragranceUrl(url: string): { name: string; house: string } | null {
+  try {
+    const parts = new URL(url).pathname.replace(/^\/+|\/+$/g, "").split("/");
+    const toWords = (slug: string) =>
+      slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    // Fragrantica: /perfume/{House}/{Name-ID}.html
+    if (parts[0] === "perfume" && parts.length >= 3) {
+      return {
+        house: toWords(parts[1]),
+        name: toWords(parts[2].replace(/\.html$/, "").replace(/-\d+$/, "")),
+      };
+    }
+    // Parfumo: /fragrance/{house}/{name}
+    if (parts[0] === "fragrance" && parts.length >= 3) {
+      return { house: toWords(parts[1]), name: toWords(parts[2]) };
+    }
+  } catch { /* not a valid URL */ }
+  return null;
+}
+
+function mkEditing(cf: CommunityFrag, userId: string, status: FragranceStatus): UserFragrance {
+  return {
+    id: "", fragranceId: cf.fragranceId, userId,
+    name: cf.fragranceName, house: cf.fragranceHouse,
+    status, sizes: ["Full Bottle" as BottleSize], type: null,
+    personalRating: null, statusRating: null, whereBought: null,
+    purchaseDate: null, purchaseMonth: null, purchaseYear: null,
+    purchasePrice: null, isDupe: false, dupeFor: "",
+    personalNotes: "", createdAt: "",
+  };
+}
+
+function LinkImportTab({ userId }: { userId: string }) {
+  const { communityFrags } = useData();
+  const [url, setUrl] = useState("");
+  const [result, setResult] = useState<CommunityFrag | "not-found" | null>(null);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkResults, setBulkResults] = useState<CommunityFrag[]>([]);
+  const [formOpen, setFormOpen] = useState(false);
+  const [formStatus, setFormStatus] = useState<FragranceStatus>("CURRENT");
+  const [prefillFrag, setPrefillFrag] = useState<CommunityFrag | null>(null);
+
+  const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  function findCf(name: string, house: string) {
+    return (
+      communityFrags.find((cf) => norm(cf.fragranceName) === norm(name) && norm(cf.fragranceHouse) === norm(house)) ??
+      communityFrags.find((cf) => norm(cf.fragranceName) === norm(name))
+    );
+  }
+
+  function handleFetch() {
+    const parsed = parseFragranceUrl(url.trim());
+    if (!parsed) { setResult("not-found"); return; }
+    setResult(findCf(parsed.name, parsed.house) ?? "not-found");
+  }
+
+  function handleImportSelected() {
+    const names = bulkText.split("\n").map((l) => l.trim()).filter(Boolean);
+    setBulkResults(
+      names.map((n) => communityFrags.find((cf) => norm(cf.fragranceName) === norm(n))).filter(Boolean) as CommunityFrag[]
+    );
+  }
+
+  function openAdd(cf: CommunityFrag, status: FragranceStatus) {
+    setPrefillFrag(cf);
+    setFormStatus(status);
+    setFormOpen(true);
+  }
+
+  return (
+    <>
+      {formOpen && prefillFrag && (
+        <FragForm open onClose={() => setFormOpen(false)} editing={mkEditing(prefillFrag, userId, formStatus)} forceStatus={formStatus} />
+      )}
+      <div className="max-w-[520px]">
+        <div className="flex gap-2 mb-4">
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleFetch()}
+            placeholder="https://www.fragrantica.com/perfume/..."
+            className="flex-1 px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+          />
+          <button
+            onClick={handleFetch}
+            className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors whitespace-nowrap"
+          >
+            FETCH METADATA
+          </button>
+        </div>
+
+        {result === "not-found" && (
+          <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)] mb-5">
+            Not found in database. Try the Search Database tab.
+          </div>
+        )}
+        {result && result !== "not-found" && (
+          <div className="border border-[var(--b2)] p-4 mb-5">
+            <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.08em] uppercase mb-0.5">{result.fragranceHouse}</div>
+            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">{result.fragranceName}</div>
+            <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mb-3">
+              {[result.communityRating ? result.communityRating + "/10" : "", result.avgPrice ? result.avgPrice.replace(/~/g, "") : ""].filter(Boolean).join(" · ")}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => openAdd(result as CommunityFrag, "WANT_TO_BUY")} className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors">Wishlist</button>
+              <button onClick={() => openAdd(result as CommunityFrag, "CURRENT")} className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[5px] border border-[var(--blue)] text-[var(--blue)] hover:bg-[var(--blue-tint)] transition-colors">Add to Collection</button>
+            </div>
+          </div>
+        )}
+
+        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.08em] uppercase mb-2 mt-6">Bulk Search Queue</div>
+        <textarea
+          value={bulkText}
+          onChange={(e) => setBulkText(e.target.value)}
+          placeholder={"Type fragrance name to queue for import..."}
+          rows={5}
+          className="w-full px-3 py-2 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)] resize-none mb-3"
+        />
+        <button
+          onClick={handleImportSelected}
+          className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-2.5 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors mb-4"
+        >
+          IMPORT SELECTED
+        </button>
+
+        {bulkResults.length > 0 && (
+          <div className="border border-[var(--b2)]">
+            {bulkResults.map((cf) => (
+              <div key={cf.fragranceId} className="flex items-center justify-between px-4 py-3 border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)]">
+                <div className="min-w-0 mr-4">
+                  <div className="font-[var(--body)] text-sm text-[var(--ink)]">{cf.fragranceName}</div>
+                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{cf.fragranceHouse}</div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={() => openAdd(cf, "WANT_TO_BUY")} className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors">Wishlist</button>
+                  <button onClick={() => openAdd(cf, "CURRENT")} className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[5px] border border-[var(--blue)] text-[var(--blue)] hover:bg-[var(--blue-tint)] transition-colors">Add</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ── Scan tab ──────────────────────────────────────────────────────────────────
+
+function ScanTab({ userId }: { userId: string }) {
+  const { communityFrags } = useData();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [search, setSearch] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const [prefillFrag, setPrefillFrag] = useState<CommunityFrag | null>(null);
+
+  useEffect(() => {
+    return () => {
+      const video = videoRef.current;
+      if (video?.srcObject) {
+        (video.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
+      }
+    };
+  }, []);
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+        setCameraActive(true);
+      }
+    } catch { /* camera unavailable */ }
+  }
+
+  function stopCamera() {
+    const video = videoRef.current;
+    if (video?.srcObject) {
+      (video.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
+      video.srcObject = null;
+    }
+    setCameraActive(false);
+  }
+
+  const results = search.trim().length >= 2
+    ? communityFrags.filter(
+        (cf) => cf.fragranceName.toLowerCase().includes(search.toLowerCase()) || cf.fragranceHouse.toLowerCase().includes(search.toLowerCase())
+      ).slice(0, 10)
+    : [];
+
+  return (
+    <>
+      {formOpen && prefillFrag && (
+        <FragForm open onClose={() => setFormOpen(false)} editing={mkEditing(prefillFrag, userId, "CURRENT")} />
+      )}
+      <div className="max-w-[560px]">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Or search by name..."
+          className="w-full px-3 py-[9px] mb-4 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+        />
+        {results.length > 0 && (
+          <div className="border border-[var(--b2)] mb-5">
+            {results.map((cf) => (
+              <div key={cf.fragranceId} className="flex items-center justify-between px-4 py-3 border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)]">
+                <div className="min-w-0 mr-4">
+                  <div className="font-[var(--body)] text-sm text-[var(--ink)]">{cf.fragranceName}</div>
+                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{cf.fragranceHouse}</div>
+                </div>
+                <button onClick={() => { setPrefillFrag(cf); setFormOpen(true); }} className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[5px] border border-[var(--blue)] text-[var(--blue)] hover:bg-[var(--blue-tint)] transition-colors shrink-0">Add</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 gap-px bg-[var(--b2)] border border-[var(--b2)]">
+          {/* Open Webcam */}
+          <div className="bg-[var(--off)] p-4 flex flex-col gap-2">
+            <div className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink)] mb-1">Open Webcam</div>
+            <div className="font-[var(--mono)] text-[10px] tracking-[0.06em] uppercase text-[var(--ink4)] mb-2">Point at Bottle Label</div>
+            {cameraActive ? (
+              <>
+                <video ref={videoRef} className="w-full aspect-video bg-black object-cover mb-2" autoPlay playsInline muted />
+                <button onClick={stopCamera} className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-2 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors">STOP CAMERA</button>
+              </>
+            ) : (
+              <button onClick={startCamera} className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-2 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors">OPEN CAMERA</button>
+            )}
+          </div>
+          {/* Scan with Phone */}
+          <div className="bg-[var(--off)] p-4 flex flex-col gap-2">
+            <div className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink)] mb-1">Scan with Phone</div>
+            <div className="font-[var(--mono)] text-[10px] tracking-[0.06em] uppercase text-[var(--ink4)] mb-2">Open on Mobile</div>
+            <div className="w-[72px] h-[72px] bg-[var(--b1)] border border-[var(--b3)] flex items-center justify-center">
+              <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                <rect x="2" y="2" width="16" height="16" stroke="currentColor" strokeWidth="1.5" fill="none" className="text-[var(--ink3)]"/>
+                <rect x="5" y="5" width="10" height="10" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="38" y="2" width="16" height="16" stroke="currentColor" strokeWidth="1.5" fill="none" className="text-[var(--ink3)]"/>
+                <rect x="41" y="5" width="10" height="10" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="2" y="38" width="16" height="16" stroke="currentColor" strokeWidth="1.5" fill="none" className="text-[var(--ink3)]"/>
+                <rect x="5" y="41" width="10" height="10" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="22" y="4" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="27" y="4" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="22" y="9" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="27" y="14" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="22" y="22" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="27" y="22" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="32" y="22" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="22" y="27" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="32" y="32" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="37" y="27" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="42" y="32" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="47" y="22" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="47" y="27" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="4" y="22" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="4" y="27" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="9" y="22" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="14" y="27" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="4" y="47" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="9" y="47" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="22" y="38" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="27" y="43" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="32" y="47" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="37" y="42" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="42" y="47" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+                <rect x="47" y="42" width="3" height="3" fill="currentColor" className="text-[var(--ink3)]"/>
+              </svg>
+            </div>
+            <div className="font-[var(--mono)] text-[10px] text-[var(--ink4)]">tesknota.pages.dev</div>
+          </div>
+          {/* Upload Photo */}
+          <div className="bg-[var(--off)] p-4 flex flex-col gap-2">
+            <div className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink)] mb-1">Upload Photo</div>
+            <div className="font-[var(--mono)] text-[10px] tracking-[0.06em] uppercase text-[var(--ink4)] mb-2">From Camera Roll</div>
+            <button onClick={() => fileRef.current?.click()} className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-2 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors">CHOOSE PHOTO</button>
+            <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ── Search tab ────────────────────────────────────────────────────────────────
 
 type AddTarget = "CURRENT" | "WANT_TO_BUY" | "WANT_TO_SMELL";
@@ -592,31 +881,37 @@ function SearchTab({ userId }: { userId: string }) {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-type ImportTabId = "search" | "csv";
+type ImportTabId = "link" | "scan" | "search" | "csv";
+
+const IMPORT_TABS: { id: ImportTabId; label: string }[] = [
+  { id: "link", label: "Paste a Link" },
+  { id: "scan", label: "Scan a Bottle" },
+  { id: "search", label: "Search Database" },
+  { id: "csv", label: "Import File" },
+];
 
 export default function ImportPage() {
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState<ImportTabId>("search");
+  const [activeTab, setActiveTab] = useState<ImportTabId>("link");
 
   return (
     <>
       <Topbar title="Import" />
       <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
-        <div className="flex gap-0 border-b border-[var(--b2)] mb-6 max-w-[820px]">
-          <button
-            onClick={() => setActiveTab("search")}
-            className={`font-[var(--mono)] text-xs tracking-[0.1em] uppercase px-4 py-2 border-b-2 transition-all ${activeTab === "search" ? "border-[var(--blue)] text-[var(--blue)]" : "border-transparent text-[var(--ink3)] hover:text-[var(--ink)]"}`}
-          >
-            Search Database
-          </button>
-          <button
-            onClick={() => setActiveTab("csv")}
-            className={`font-[var(--mono)] text-xs tracking-[0.1em] uppercase px-4 py-2 border-b-2 transition-all ${activeTab === "csv" ? "border-[var(--blue)] text-[var(--blue)]" : "border-transparent text-[var(--ink3)] hover:text-[var(--ink)]"}`}
-          >
-            Import File
-          </button>
+        <div className="flex gap-0 border-b border-[var(--b2)] mb-6 max-w-[820px] overflow-x-auto">
+          {IMPORT_TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`font-[var(--mono)] text-xs tracking-[0.1em] uppercase px-4 py-2 border-b-2 transition-all whitespace-nowrap ${activeTab === t.id ? "border-[var(--blue)] text-[var(--blue)]" : "border-transparent text-[var(--ink3)] hover:text-[var(--ink)]"}`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
+        {activeTab === "link" && <LinkImportTab userId={user?.id ?? ""} />}
+        {activeTab === "scan" && <ScanTab userId={user?.id ?? ""} />}
         {activeTab === "search" && <SearchTab userId={user?.id ?? ""} />}
         {activeTab === "csv" && <CSVImportTab userId={user?.id ?? ""} />}
       </main>

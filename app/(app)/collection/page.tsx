@@ -41,12 +41,29 @@ export default function CollectionPage() {
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [accordFilter, setAccordFilter] = useState("");
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+  const [houseFilter, setHouseFilter] = useState("");
+  const [accordSearch, setAccordSearch] = useState("");
+  const [accordDDOpen, setAccordDDOpen] = useState(false);
+  const [ratingDDOpen, setRatingDDOpen] = useState(false);
+  const [houseDDOpen, setHouseDDOpen] = useState(false);
 
   if (!user) return null;
 
   const MF = fragrances.filter((f) => f.userId === user.id);
   const MC = compliments.filter((c) => c.userId === user.id);
   const current = MF.filter((f) => f.status === "CURRENT");
+
+  const normStr = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const getCf = (f: UserFragrance) =>
+    communityFrags.find(
+      (c) => (f.fragranceId && c.fragranceId === f.fragranceId) ||
+             (normStr(c.fragranceName) === normStr(f.name) && normStr(c.fragranceHouse) === normStr(f.house ?? ""))
+    );
+  const allAccords = Array.from(new Set(MF.flatMap((f) => getCf(f)?.accords ?? []))).sort();
+  const allHouses = Array.from(new Set(MF.map((f) => f.house).filter(Boolean) as string[])).sort();
 
   const compMap: Record<string, number> = {};
   MC.forEach((c) => {
@@ -65,6 +82,9 @@ export default function CollectionPage() {
       (f) => f.name.toLowerCase().includes(q) || (f.house ?? "").toLowerCase().includes(q)
     );
   }
+  if (accordFilter) filtered = filtered.filter((f) => getCf(f)?.accords?.includes(accordFilter) ?? false);
+  if (ratingFilter !== null) filtered = filtered.filter((f) => (f.personalRating ?? 0) >= ratingFilter);
+  if (houseFilter) filtered = filtered.filter((f) => f.house === houseFilter);
   filtered = filtered.slice().sort((a, b) => {
     if (sort === "nameZA") return b.name.localeCompare(a.name);
     if (sort === "houseAZ") return (a.house ?? "").localeCompare(b.house ?? "");
@@ -115,7 +135,8 @@ export default function CollectionPage() {
               <StatBox value={avgRatingStr(MF)} label="Avg Rating" />
             </StatsGrid>
 
-            <div className="flex flex-wrap items-center gap-3 mb-4">
+            {/* Search + sort + filter toggle row */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
               <input
                 type="text"
                 placeholder="Search name or house..."
@@ -136,18 +157,104 @@ export default function CollectionPage() {
                 <option value="added">Recently Added</option>
                 <option value="comps">Most Compliments</option>
               </select>
+              <button
+                onClick={() => setFiltersOpen((o) => !o)}
+                className={`font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[7px] border transition-colors ${filtersOpen ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
+              >
+                {filtersOpen ? "– FILTERS" : "+ FILTERS"}
+              </button>
+              {accordFilter && (
+                <span className="flex items-center gap-1 font-[var(--mono)] text-xs px-2 py-1 border border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]">
+                  {accordFilter} <button onClick={() => { setAccordFilter(""); setPage(1); }} className="hover:opacity-70 leading-none">×</button>
+                </span>
+              )}
+              {ratingFilter !== null && (
+                <span className="flex items-center gap-1 font-[var(--mono)] text-xs px-2 py-1 border border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]">
+                  {ratingFilter}+ stars <button onClick={() => { setRatingFilter(null); setPage(1); }} className="hover:opacity-70 leading-none">×</button>
+                </span>
+              )}
+              {houseFilter && (
+                <span className="flex items-center gap-1 font-[var(--mono)] text-xs px-2 py-1 border border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]">
+                  {houseFilter} <button onClick={() => { setHouseFilter(""); setPage(1); }} className="hover:opacity-70 leading-none">×</button>
+                </span>
+              )}
             </div>
 
-            <FilterBar className="mb-4">
-              {STATUS_FILTERS.map((f) => (
-                <FilterChip
-                  key={f.value}
-                  label={f.label}
-                  active={statusFilter === f.value}
-                  onClick={() => { setStatusFilter(f.value); setPage(1); }}
-                />
-              ))}
-            </FilterBar>
+            {/* Collapsible filter panel */}
+            {filtersOpen && (
+              <div className="flex flex-wrap items-start gap-2 mb-4 py-3 border border-[var(--b2)] px-3">
+                {/* Accords dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => { setAccordDDOpen((o) => !o); setRatingDDOpen(false); setHouseDDOpen(false); }}
+                    className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${accordFilter ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
+                  >
+                    {accordFilter || "Accords"} &#9662;
+                  </button>
+                  {accordDDOpen && (
+                    <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[200px]">
+                      <div className="p-2 border-b border-[var(--b2)]">
+                        <input
+                          value={accordSearch}
+                          onChange={(e) => setAccordSearch(e.target.value)}
+                          placeholder="Search accords..."
+                          className="w-full px-2 py-1 text-xs font-[var(--mono)] border border-[var(--b3)] bg-[var(--off)] text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                        />
+                      </div>
+                      <div className="overflow-y-auto max-h-[220px]">
+                        {allAccords.filter((a) => !accordSearch || a.toLowerCase().includes(accordSearch.toLowerCase())).map((a) => (
+                          <button key={a} onClick={() => { setAccordFilter(a); setAccordDDOpen(false); setAccordSearch(""); setPage(1); }} className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${accordFilter === a ? "text-[var(--blue)] bg-[var(--blue-tint)]" : "text-[var(--ink2)] hover:bg-[var(--b1)]"}`}>{a}</button>
+                        ))}
+                      </div>
+                      <button onClick={() => { setAccordFilter(""); setAccordDDOpen(false); setAccordSearch(""); setPage(1); }} className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left">CLEAR</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rating dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => { setRatingDDOpen((o) => !o); setAccordDDOpen(false); setHouseDDOpen(false); }}
+                    className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${ratingFilter !== null ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
+                  >
+                    {ratingFilter !== null ? `${ratingFilter}+ stars` : "Rating"} &#9662;
+                  </button>
+                  {ratingDDOpen && (
+                    <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[160px]">
+                      {[5, 4, 3, 2, 1].map((r) => (
+                        <button key={r} onClick={() => { setRatingFilter(r); setRatingDDOpen(false); setPage(1); }} className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${ratingFilter === r ? "text-[var(--blue)] bg-[var(--blue-tint)]" : "text-[var(--ink2)] hover:bg-[var(--b1)]"}`}>{r}+ stars</button>
+                      ))}
+                      <button onClick={() => { setRatingFilter(null); setRatingDDOpen(false); setPage(1); }} className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left">CLEAR</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Houses dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => { setHouseDDOpen((o) => !o); setAccordDDOpen(false); setRatingDDOpen(false); }}
+                    className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${houseFilter ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
+                  >
+                    {houseFilter || "Houses"} &#9662;
+                  </button>
+                  {houseDDOpen && (
+                    <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[220px] max-h-[280px] overflow-y-auto">
+                      {allHouses.map((h) => (
+                        <button key={h} onClick={() => { setHouseFilter(h); setHouseDDOpen(false); setPage(1); }} className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${houseFilter === h ? "text-[var(--blue)] bg-[var(--blue-tint)]" : "text-[var(--ink2)] hover:bg-[var(--b1)]"}`}>{h}</button>
+                      ))}
+                      <button onClick={() => { setHouseFilter(""); setHouseDDOpen(false); setPage(1); }} className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left">CLEAR</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Status chips */}
+                <FilterBar className="mb-0">
+                  {STATUS_FILTERS.map((f) => (
+                    <FilterChip key={f.value} label={f.label} active={statusFilter === f.value} onClick={() => { setStatusFilter(f.value); setPage(1); }} />
+                  ))}
+                </FilterBar>
+              </div>
+            )}
 
             <SectionHeader
               title="Fragrances"
@@ -172,7 +279,7 @@ export default function CollectionPage() {
                   <>
                     No matches.
                     <button
-                      onClick={() => { setSearch(""); setStatusFilter("all"); setPage(1); }}
+                      onClick={() => { setSearch(""); setStatusFilter("all"); setAccordFilter(""); setRatingFilter(null); setHouseFilter(""); setPage(1); }}
                       className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                     >
                       Clear filters
@@ -180,40 +287,52 @@ export default function CollectionPage() {
                   </>
                 )}
               </div>
-            ) : (
-              <>
-                <div className="overflow-x-auto border border-[var(--b2)]">
-                  <table className="w-full min-w-[640px]">
-                    <thead>
-                      <tr className="border-b border-[var(--b2)]">
-                        {["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"].map((h) => (
-                          <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">{h}</th>
+            ) : (() => {
+              const pageFrags = pageSize === 0 ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize);
+              return (
+                <>
+                  {/* Desktop table */}
+                  <div className="hidden md:block overflow-x-auto border border-[var(--b2)]">
+                    <table className="w-full min-w-[640px]">
+                      <thead>
+                        <tr className="border-b border-[var(--b2)]">
+                          {["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"].map((h) => (
+                            <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pageFrags.map((f) => (
+                          <FragRow key={f.id} frag={f} communityFrags={communityFrags} compliments={MC} userId={user.id} onClick={(frag) => setDetailFrag(frag)} />
                         ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(pageSize === 0 ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize)).map((f) => (
-                        <FragRow
-                          key={f.id}
-                          frag={f}
-                          communityFrags={communityFrags}
-                          compliments={MC}
-                          userId={user.id}
-                          onClick={(frag) => setDetailFrag(frag)}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <Pagination
-                  total={filtered.length}
-                  page={page}
-                  pageSize={pageSize}
-                  onPage={setPage}
-                  onPageSize={setPageSize}
-                />
-              </>
-            )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile cards */}
+                  <div className="md:hidden flex flex-col border border-[var(--b2)]">
+                    {pageFrags.map((f) => {
+                      const comps = compMap[f.fragranceId || f.id] ?? 0;
+                      const cf = getCf(f);
+                      return (
+                        <div key={f.id} onClick={() => setDetailFrag(f)} className="px-4 py-3 border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer">
+                          <div className="font-[var(--mono)] text-[10px] tracking-[0.08em] uppercase text-[var(--ink3)] mb-0.5">{f.house}</div>
+                          <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">{f.name}</div>
+                          <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                            <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</span>
+                            {f.personalRating ? <span className="font-[var(--mono)] text-xs text-[var(--warm-text)]">{"★".repeat(f.personalRating)}</span> : null}
+                            {comps > 0 ? <span className="font-[var(--mono)] text-xs text-[var(--blue)]">{comps} comp{comps !== 1 ? "s" : ""}</span> : null}
+                            {cf?.accords?.[0] ? <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{cf.accords.slice(0, 2).join(", ")}</span> : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <Pagination total={filtered.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} />
+                </>
+              );
+            })()}
           </>
         )}
       </main>
