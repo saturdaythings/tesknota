@@ -157,9 +157,10 @@ function StarRating({
 interface Props {
   open: boolean;
   onClose: () => void;
+  defaultStatus?: FragranceStatus;
 }
 
-export function AddFragranceModal({ open, onClose }: Props) {
+export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
   const { user } = useUser();
   const { communityFrags, addFrag } = useData();
   const { toast } = useToast();
@@ -199,7 +200,7 @@ export function AddFragranceModal({ open, onClose }: Props) {
     setSelected(null);
     setIdentifyLater(false);
     setStep1Error("");
-    setStatus("CURRENT");
+    setStatus(defaultStatus ?? "CURRENT");
     setSizeInput("");
     setFragType("");
     setRating(0);
@@ -209,7 +210,7 @@ export function AddFragranceModal({ open, onClose }: Props) {
     setNotes("");
     setSaving(false);
     setSearchKey((k) => k + 1);
-  }, [open]);
+  }, [open, defaultStatus]);
 
   // Debounce query
   useEffect(() => {

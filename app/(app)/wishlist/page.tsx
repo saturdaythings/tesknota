@@ -1,284 +1,373 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Plus, Heart } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
-import { StatBox, StatsGrid } from "@/components/ui/stat-box";
-import { SectionHeader } from "@/components/ui/section-header";
-import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
-import { FragForm } from "@/components/ui/frag-form";
-import { FragDetail } from "@/components/ui/frag-detail";
-import { FragRow } from "@/components/ui/frag-row";
-import { Dropdown } from "@/components/ui/dropdown";
-import { useUser, getFriend } from "@/lib/user-context";
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Card, CardFooter } from "@/components/ui/card";
+import { AddFragranceModal } from "@/components/collection/add-fragrance-modal";
+import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
-import { useFilterSync } from "@/lib/hooks/useFilterSync";
-import type { UserFragrance, CommunityFrag } from "@/types";
+import type { UserFragrance, CommunityFrag, FragranceStatus } from "@/types";
 
-type WishFilter = "all" | "WANT_TO_BUY" | "WANT_TO_SMELL";
-type SortKey = "nameAZ" | "nameZA" | "houseAZ" | "added";
+// ── Constants ─────────────────────────────────────────────
 
-const WISH_FILTERS: { label: string; value: WishFilter }[] = [
-  { label: "All", value: "all" },
-  { label: "Want to Buy", value: "WANT_TO_BUY" },
-  { label: "Want to Smell", value: "WANT_TO_SMELL" },
+const WISHLIST_STATUSES = new Set<FragranceStatus>([
+  "WANT_TO_BUY",
+  "WANT_TO_SMELL",
+  "WANT_TO_IDENTIFY",
+]);
+
+type SortKey = "name_asc" | "name_desc" | "price_asc" | "price_desc" | "newest" | "oldest";
+
+const SORT_OPTIONS = [
+  { value: "name_asc", label: "Name A\u2013Z" },
+  { value: "name_desc", label: "Name Z\u2013A" },
+  { value: "price_asc", label: "Avg Price Low\u2013High" },
+  { value: "price_desc", label: "Avg Price High\u2013Low" },
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" },
 ];
 
-export default function WishlistPage() {
-  const { user, profiles } = useUser();
-  const { fragrances, compliments, communityFrags, isLoaded, removeFrag } = useData();
+// ── Helpers ───────────────────────────────────────────────
+
+function parsePrice(p: string | null): number {
+  if (!p) return -1;
+  const m = p.match(/\d+/);
+  return m ? parseInt(m[0], 10) : -1;
+}
+
+function getCF(frag: UserFragrance, communityFrags: CommunityFrag[]): CommunityFrag | null {
+  if (frag.fragranceId) {
+    const hit = communityFrags.find((c) => c.fragranceId === frag.fragranceId);
+    if (hit) return hit;
+  }
+  const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  return (
+    communityFrags.find(
+      (c) =>
+        norm(c.fragranceName) === norm(frag.name) &&
+        norm(c.fragranceHouse) === norm(frag.house),
+    ) ?? null
+  );
+}
+
+// ── WishlistCard ──────────────────────────────────────────
+
+interface WishlistCardProps {
+  frag: UserFragrance;
+  cf: CommunityFrag | null;
+  onMoveToCollection: (frag: UserFragrance) => void;
+  onRemove: (frag: UserFragrance) => void;
+  removing: boolean;
+}
+
+function WishlistCard({ frag, cf, onMoveToCollection, onRemove, removing }: WishlistCardProps) {
+  const [confirming, setConfirming] = useState(false);
+
+  const avgPrice = cf?.avgPrice ?? "\u2014";
+  const type = cf?.fragranceType ?? frag.type ?? "\u2014";
+  const profile =
+    cf?.fragranceAccords && cf.fragranceAccords.length > 0
+      ? cf.fragranceAccords.slice(0, 3).join(", ")
+      : "\u2014";
+
+  return (
+    <Card padding="var(--space-5)" style={{ opacity: removing ? 0.5 : 1, transition: "opacity 0.15s" }}>
+      {/* Top row */}
+      <div style={{ marginBottom: "var(--space-3)" }}>
+        <div
+          className="text-subheading"
+          style={{
+            fontWeight: 600,
+            color: "var(--color-text-primary)",
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {frag.name}
+        </div>
+        <div className="text-secondary" style={{ marginTop: 2 }}>
+          {frag.house}
+        </div>
+      </div>
+
+      {/* Middle: label+value pairs */}
+      <div
+        style={{
+          display: "flex",
+          gap: "var(--space-4)",
+          flexWrap: "wrap",
+        }}
+      >
+        {(
+          [
+            { label: "Avg Price", value: avgPrice },
+            { label: "Type", value: type },
+            { label: "Fragrance Profile", value: profile },
+          ] as const
+        ).map(({ label, value }) => (
+          <div key={label} style={{ minWidth: 0, flex: "1 1 0" }}>
+            <div className="text-label">{label}</div>
+            <div className="text-body">{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <CardFooter className="justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onMoveToCollection(frag)}
+          disabled={removing}
+        >
+          <Plus size={13} aria-hidden="true" />
+          Add to Collection
+        </Button>
+
+        {confirming ? (
+          <div style={{ display: "flex", gap: "var(--space-2)" }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[var(--color-danger,#dc2626)]"
+              onClick={() => {
+                onRemove(frag);
+                setConfirming(false);
+              }}
+            >
+              Remove
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setConfirming(false)}>
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hover:text-[var(--color-danger,#dc2626)]"
+            onClick={() => setConfirming(true)}
+          >
+            Remove
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  );
+}
+
+// ── Inner page (uses useSearchParams, must be inside Suspense) ─
+
+function WishlistInner() {
+  const { user } = useUser();
+  const { fragrances, communityFrags, isLoaded, removeFrag, editFrag } = useData();
   const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // URL-synced filter state
-  const [filters, setFilters] = useFilterSync({
-    q: "",
-    filter: "all" as WishFilter,
-    sort: "nameAZ" as SortKey,
-  });
+  const sort = (searchParams.get("sort") as SortKey) || "name_asc";
+  const [addOpen, setAddOpen] = useState(false);
+  const [removing, setRemoving] = useState<Set<string>>(new Set());
 
-  // Local UI state (not in URL)
-  const [boughtFrag, setBoughtFrag] = useState<UserFragrance | null>(null);
-  const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
-  const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
-  const [formOpen, setFormOpen] = useState(false);
+  const setSort = useCallback(
+    (v: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (v && v !== "name_asc") {
+        params.set("sort", v);
+      } else {
+        params.delete("sort");
+      }
+      router.push(`?${params.toString()}`);
+    },
+    [searchParams, router],
+  );
 
   if (!user) return null;
 
-  const MC = compliments.filter((c) => c.userId === user.id);
+  const wishlist = fragrances.filter(
+    (f) => f.userId === user.id && WISHLIST_STATUSES.has(f.status),
+  );
 
-  async function handleDeleteFrag(frag: UserFragrance) {
-    await removeFrag(frag.id);
-    setDetailFrag(null);
-    toast("Fragrance deleted.");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const cfMap = useMemo(() => {
+    const m = new Map<string, CommunityFrag | null>();
+    wishlist.forEach((f) => m.set(f.id, getCF(f, communityFrags)));
+    return m;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fragrances, communityFrags, user.id]);
+
+  const sorted = useMemo(() => {
+    return [...wishlist].sort((a, b) => {
+      switch (sort) {
+        case "name_desc":
+          return b.name.localeCompare(a.name);
+        case "price_asc": {
+          const pa = parsePrice(cfMap.get(a.id)?.avgPrice ?? null);
+          const pb = parsePrice(cfMap.get(b.id)?.avgPrice ?? null);
+          return pa - pb;
+        }
+        case "price_desc": {
+          const pa = parsePrice(cfMap.get(a.id)?.avgPrice ?? null);
+          const pb = parsePrice(cfMap.get(b.id)?.avgPrice ?? null);
+          return pb - pa;
+        }
+        case "newest":
+          return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
+        case "oldest":
+          return (a.createdAt ?? "").localeCompare(b.createdAt ?? "");
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fragrances, sort, cfMap]);
+
+  async function handleMoveToCollection(frag: UserFragrance) {
+    setRemoving((prev) => new Set(prev).add(frag.id));
+    try {
+      await editFrag({ ...frag, status: "CURRENT" });
+      toast("Moved to collection");
+    } finally {
+      setRemoving((prev) => {
+        const s = new Set(prev);
+        s.delete(frag.id);
+        return s;
+      });
+    }
   }
 
-  const MF = fragrances.filter((f) => f.userId === user.id);
-  const wish = MF.filter(
-    (f) => f.status === "WANT_TO_BUY" || f.status === "WANT_TO_SMELL"
-  );
-  const wantToBuy = wish.filter((f) => f.status === "WANT_TO_BUY");
-  const wantToSmell = wish.filter((f) => f.status === "WANT_TO_SMELL");
-
-  const sq = filters.q.trim().toLowerCase();
-  let filtered = filters.filter === "all" ? wish : wish.filter((f) => f.status === filters.filter);
-  if (sq) filtered = filtered.filter((f) => f.name.toLowerCase().includes(sq) || (f.house ?? "").toLowerCase().includes(sq));
-  filtered = filtered.slice().sort((a, b) => {
-    if (filters.sort === "nameZA") return b.name.localeCompare(a.name);
-    if (filters.sort === "houseAZ") return (a.house ?? "").localeCompare(b.house ?? "");
-    if (filters.sort === "added") return (b.createdAt ?? "") > (a.createdAt ?? "") ? 1 : -1;
-    return a.name.localeCompare(b.name);
-  });
-
-  const friend = user ? getFriend(user, profiles) : null;
-  const FF = fragrances.filter((f) => f.userId === friend?.id && f.status === "CURRENT");
-  const myNames = new Set(MF.map((f) => f.name.toLowerCase()));
-  const friendSignals = FF.filter((f) => !myNames.has(f.name.toLowerCase())).slice(0, 4);
-  const qualityPicks = communityFrags
-    .filter((cf) => {
-      const rating = parseFloat(cf.communityRating ?? "0");
-      return rating >= 4.3 && !myNames.has(cf.fragranceName.toLowerCase());
-    })
-    .sort((a, b) => parseFloat(b.communityRating ?? "0") - parseFloat(a.communityRating ?? "0"))
-    .slice(0, 4);
+  async function handleRemove(frag: UserFragrance) {
+    setRemoving((prev) => new Set(prev).add(frag.id));
+    try {
+      await removeFrag(frag.id);
+      toast("Fragrance removed.");
+    } finally {
+      setRemoving((prev) => {
+        const s = new Set(prev);
+        s.delete(frag.id);
+        return s;
+      });
+    }
+  }
 
   return (
     <>
-      <FragDetail
-        open={!!detailFrag}
-        onClose={() => setDetailFrag(null)}
-        frag={detailFrag}
-        communityFrags={communityFrags}
-        compliments={MC}
-        userId={user.id}
-        onEdit={(frag) => { setEditingFrag(frag); setFormOpen(true); }}
-        onDelete={handleDeleteFrag}
+      <AddFragranceModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        defaultStatus="WANT_TO_BUY"
       />
-      <FragForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        editing={editingFrag}
-      />
-      <FragForm
-        open={!!boughtFrag}
-        onClose={() => setBoughtFrag(null)}
-        editing={boughtFrag}
-        forceStatus="CURRENT"
-      />
+
       <Topbar title="Wishlist" />
-      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
-        {!isLoaded && (
-          <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
-            Loading...
+
+      <main style={{ flex: 1, overflowY: "auto" }}>
+        <div
+          style={{
+            maxWidth: "1200px",
+            margin: "0 auto",
+            padding: "var(--space-8)",
+          }}
+          className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
+        >
+          {/* Page header */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "var(--space-6)",
+            }}
+          >
+            <h1 className="text-page-title">Wishlist</h1>
+            <Button variant="primary" onClick={() => setAddOpen(true)}>
+              <Plus size={15} aria-hidden="true" />
+              Add to Wishlist
+            </Button>
           </div>
-        )}
 
-        {isLoaded && (
-          <>
-            <StatsGrid className="mb-6">
-              <StatBox value={wantToBuy.length} label="Want to Buy" />
-              <StatBox value={wantToSmell.length} label="Want to Smell" />
-            </StatsGrid>
-
-            <div className="mb-4">
-              <input
-                value={filters.q}
-                onChange={(e) => setFilters({ q: e.target.value })}
-                placeholder="Search wishlist..."
-                className="w-full px-3 py-[9px] mb-3 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
-              />
+          {/* Filter/sort toolbar */}
+          <div
+            style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-md)",
+              padding: "var(--space-3) var(--space-4)",
+              display: "flex",
+              gap: "var(--space-3)",
+              flexWrap: "wrap",
+              alignItems: "center",
+              marginBottom: "var(--space-6)",
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <div style={{ width: "220px" }}>
+                <Select
+                  options={SORT_OPTIONS}
+                  value={sort}
+                  onChange={setSort}
+                  placeholder="Sort by"
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-3 mb-4">
-              <FilterBar className="mb-0">
-                {WISH_FILTERS.map((f) => (
-                  <FilterChip
-                    key={f.value}
-                    label={f.label}
-                    active={filters.filter === f.value}
-                    onClick={() => setFilters({ filter: f.value })}
-                  />
-                ))}
-              </FilterBar>
-              <Dropdown
-                value={filters.sort}
-                onChange={(value) => setFilters({ sort: value as SortKey })}
-                options={[
-                  { label: "Name A–Z", value: "nameAZ" },
-                  { label: "Name Z–A", value: "nameZA" },
-                  { label: "House A–Z", value: "houseAZ" },
-                  { label: "Recently Added", value: "added" },
-                ]}
-              />
-            </div>
+            {isLoaded && (
+              <span className="text-secondary" style={{ flexShrink: 0 }}>
+                {sorted.length} {sorted.length === 1 ? "fragrance" : "fragrances"}
+              </span>
+            )}
+          </div>
 
-            <SectionHeader
-              title="Wishlist"
-              right={
-                <div className="flex items-center gap-3">
-                  <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                    {filtered.length} {filtered.length === 1 ? "item" : "items"}
-                  </span>
-                  <button
-                    onClick={() => { setEditingFrag(null); setFormOpen(true); }}
-                    className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[7px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-                  >
-                    + Add to Wishlist
-                  </button>
-                </div>
+          {/* Content */}
+          {wishlist.length === 0 ? (
+            <EmptyState
+              icon={<Heart size={48} />}
+              title="Your wishlist is empty"
+              description="Save fragrances you want to explore."
+              action={
+                <Button variant="primary" onClick={() => setAddOpen(true)}>
+                  <Plus size={15} aria-hidden="true" />
+                  Add to Wishlist
+                </Button>
               }
             />
-
-            {filtered.length === 0 ? (
-              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4 flex items-center gap-3">
-                {wish.length === 0 ? "Nothing on your wishlist yet." : (
-                  <>
-                    No matches.
-                    <button
-                      onClick={() => setFilters({ filter: "all", q: "" })}
-                      className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-                    >
-                      Clear filter
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-                <table className="w-full min-w-[640px]">
-                  <thead>
-                    <tr className="border-b border-[var(--b2)]">
-                      {["Fragrance", "Size", "Rating", "Added", "Accords", "Comps", "Status", ""].map((h) => (
-                        <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase text-[var(--ink3)] font-normal">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((f) => (
-                      <FragRow
-                        key={f.id}
-                        frag={f}
-                        communityFrags={communityFrags}
-                        compliments={MC}
-                        userId={user.id}
-                        onClick={setDetailFrag}
-                        actionLabel="Bought it"
-                        onAction={(frag, e) => { void e; setBoughtFrag(frag); }}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {(friendSignals.length > 0 || qualityPicks.length > 0) && (
-              <div className="mb-6">
-                <SectionHeader title="Discover" />
-                {friendSignals.length > 0 && (
-                  <div className="mb-5">
-                    <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-3">
-                      From your friend's collection
-                    </div>
-                    <div className="grid gap-px bg-[var(--b2)] border border-[var(--b2)] [grid-template-columns:repeat(auto-fill,minmax(180px,1fr))]">
-                      {friendSignals.map((f) => (
-                        <DiscoverCard key={f.id} name={f.name} house={f.house} communityFrags={communityFrags} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {qualityPicks.length > 0 && (
-                  <div>
-                    <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-3">
-                      Highly rated
-                    </div>
-                    <div className="grid gap-px bg-[var(--b2)] border border-[var(--b2)] [grid-template-columns:repeat(auto-fill,minmax(180px,1fr))]">
-                      {qualityPicks.map((cf) => (
-                        <div key={cf.fragranceId} className="bg-[var(--off)] p-4">
-                          <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.08em] uppercase mb-1">
-                            {cf.fragranceHouse}
-                          </div>
-                          <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">{cf.fragranceName}</div>
-                          <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                            {cf.communityRating ? `${cf.communityRating}/10` : ""}
-                            {cf.avgPrice ? ` · ${cf.avgPrice.replace(/~/g, "")}` : ""}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: "var(--space-4)",
+              }}
+              className="max-sm:grid-cols-1"
+            >
+              {sorted.map((frag) => (
+                <WishlistCard
+                  key={frag.id}
+                  frag={frag}
+                  cf={cfMap.get(frag.id) ?? null}
+                  onMoveToCollection={handleMoveToCollection}
+                  onRemove={handleRemove}
+                  removing={removing.has(frag.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </>
   );
 }
 
-function DiscoverCard({
-  name,
-  house,
-  communityFrags,
-}: {
-  name: string;
-  house: string;
-  communityFrags: CommunityFrag[];
-}) {
-  const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const cf = communityFrags.find(
-    (c) => norm(c.fragranceName) === norm(name) && norm(c.fragranceHouse) === norm(house)
-  );
+export default function WishlistPage() {
   return (
-    <div className="bg-[var(--off)] p-4">
-      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.08em] uppercase mb-1">
-        {house}
-      </div>
-      <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">{name}</div>
-      {cf && (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-          {cf.communityRating ? `${cf.communityRating}/10` : ""}
-          {cf.avgPrice ? ` · ${cf.avgPrice.replace(/~/g, "")}` : ""}
-        </div>
-      )}
-    </div>
+    <Suspense>
+      <WishlistInner />
+    </Suspense>
   );
 }
