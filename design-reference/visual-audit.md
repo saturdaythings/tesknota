@@ -119,9 +119,9 @@ Status key: [x] = fixed, [ ] = pending.
 
 | # | Severity | Gap | Reference | Next.js location |
 |---|----------|-----|-----------|-----------------|
-| A1 | MAJOR | Reference shows horizontal bar charts for top fragrances by compliment count; Next.js shows plain table | Visual bar chart | `analytics/page.tsx:116-145` — `<table>` only |
-| A2 | MAJOR | Reference shows a "By Month" time-series bar chart (compliments per month); Next.js has no time axis | Monthly chart | Absent entirely from `analytics/page.tsx` |
-| A3 | MAJOR | Reference shows a donut/ring chart for status breakdown; Next.js uses StatBox grid (numbers only) | Visual donut chart | `analytics/page.tsx:213-220` — `<StatsGrid>` of numbers |
+| A1 | MAJOR [x] | Reference shows horizontal bar charts for top fragrances by compliment count; Next.js shows plain table | Visual bar chart | Fixed: CSS flex horizontal bars |
+| A2 | MAJOR [x] | Reference shows a "By Month" time-series bar chart (compliments per month); Next.js has no time axis | Monthly chart | Fixed: vertical bar chart, sorted chronologically |
+| A3 | MAJOR [x] | Reference shows a donut/ring chart for status breakdown; Next.js uses StatBox grid (numbers only) | Visual donut chart | Fixed: conic-gradient donut with legend |
 | A4 | MINOR | Next.js has tab toggle (Compliments / Collection); reference single-page with all sections stacked | Single page | `analytics/page.tsx:49-52` — tab UI |
 | A5 | MATCH | Accord cloud (compliment-worn frags) | Matches | `analytics/page.tsx:157-169` |
 | A6 | MATCH | By Relation stat boxes | Matches | `analytics/page.tsx:148-155` |
@@ -132,8 +132,8 @@ Status key: [x] = fixed, [ ] = pending.
 
 | # | Severity | Gap | Reference | Next.js location |
 |---|----------|-----|-----------|-----------------|
-| FP1 | MAJOR | Reference shows friend's collection as a card/grid layout; Next.js uses table with tabs | Card grid | `friend/page.tsx:162-189` — table layout |
-| FP2 | MAJOR | Reference shows friend's "scent signature" accord cloud on their profile; Next.js has no accord cloud | Accord cloud section | Absent from `friend/page.tsx` |
+| FP1 | MAJOR [x] | Reference shows friend's collection as a card/grid layout; Next.js uses table with tabs | Card grid | Fixed: 1/2/3-col responsive card grid |
+| FP2 | MAJOR [x] | Reference shows friend's "scent signature" accord cloud on their profile; Next.js has no accord cloud | Accord cloud section | Fixed: AccordCloud above tabs, friend's collection accords |
 | FP3 | MINOR | Next.js has "In Common" tab not in reference | "In Common" tab is new | `friend/page.tsx:16-23` |
 | FP4 | MATCH | Stats row (Collection / Compliments / Wishlist) | Matches (Next.js adds In Common stat) | `friend/page.tsx:77-80` |
 | FP5 | MATCH | Compliments tab | Matches | `friend/page.tsx:203-273` |
