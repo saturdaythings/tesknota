@@ -6,7 +6,15 @@ import { starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-util
 import { STATUS_LABELS } from "@/types";
 import { statusColorClass } from "@/components/ui/frag-row";
 import { getCommunityData } from "@/lib/data";
+import { submitCommunityFlag } from "@/lib/data/mutations";
+import { useUser } from "@/lib/user-context";
+import { useToast } from "@/components/ui/toast";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
+
+const FLAG_FIELDS = [
+  "Accords", "Top Notes", "Middle Notes", "Base Notes",
+  "Avg Price", "Longevity", "Sillage", "Community Rating", "Other",
+];
 
 function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
@@ -60,7 +68,13 @@ export function FragDetail({
   onDelete,
   readOnly = false,
 }: Props) {
+  const { user } = useUser();
+  const { toast } = useToast();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [flagOpen, setFlagOpen] = useState(false);
+  const [flagField, setFlagField] = useState(FLAG_FIELDS[0]);
+  const [flagNote, setFlagNote] = useState("");
+  const [flagging, setFlagging] = useState(false);
 
   if (!frag) return null;
 
@@ -75,8 +89,35 @@ export function FragDetail({
     onDelete?.(frag!);
   }
 
+  async function submitFlag() {
+    if (!user || !frag) return;
+    setFlagging(true);
+    try {
+      const cf = communityFrags.find((c) => c.fragranceId === frag.fragranceId);
+      await submitCommunityFlag({
+        userId: user.id,
+        fragranceId: frag.fragranceId,
+        fragranceName: frag.name,
+        fragranceHouse: frag.house,
+        fieldFlagged: flagField,
+        userNote: flagNote,
+      });
+      void cf;
+      toast("Flag submitted. Thanks!");
+      setFlagOpen(false);
+      setFlagNote("");
+      setFlagField(FLAG_FIELDS[0]);
+    } catch {
+      toast("Failed to submit flag.");
+    } finally {
+      setFlagging(false);
+    }
+  }
+
   function handleClose() {
     setConfirmDelete(false);
+    setFlagOpen(false);
+    setFlagNote("");
     onClose();
   }
 
@@ -190,9 +231,49 @@ export function FragDetail({
         {/* Community section */}
         {(cd || accords.length > 0) && (
           <div>
-            <div className="font-[var(--mono)] text-xs tracking-[0.12em] uppercase text-[var(--ink3)] mb-2">
-              Community
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-[var(--mono)] text-xs tracking-[0.12em] uppercase text-[var(--ink3)]">
+                Community
+              </div>
+              <button
+                onClick={() => setFlagOpen((v) => !v)}
+                className="font-[var(--mono)] text-[10px] tracking-[0.08em] text-[var(--ink4)] hover:text-[var(--rose-tk)] transition-colors border-none bg-none cursor-pointer p-0"
+              >
+                {flagOpen ? "Cancel flag" : "Flag incorrect data"}
+              </button>
             </div>
+
+            {flagOpen && (
+              <div className="border border-[var(--b3)] bg-[var(--off2)] px-3 py-3 mb-3 flex flex-col gap-2">
+                <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mb-1">Which field is incorrect?</div>
+                <div className="flex flex-wrap gap-1.5 mb-1">
+                  {FLAG_FIELDS.map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setFlagField(f)}
+                      className={`font-[var(--mono)] text-[10px] px-2 py-1 border transition-colors cursor-pointer ${flagField === f ? "bg-[var(--blue)] border-[var(--blue)] text-white" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={flagNote}
+                  onChange={(e) => setFlagNote(e.target.value)}
+                  placeholder="What's wrong? (optional)"
+                  rows={2}
+                  className="w-full px-2 py-1.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] resize-none"
+                />
+                <button
+                  onClick={submitFlag}
+                  disabled={flagging}
+                  className="self-start px-4 py-1.5 font-[var(--mono)] text-[10px] tracking-[0.08em] uppercase bg-[var(--blue)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                >
+                  {flagging ? "Submitting..." : "Submit flag"}
+                </button>
+              </div>
+            )}
+
             <div className="border border-[var(--b2)] px-3 py-1">
               <DetailRow label="Avg price" value={cd?.avgPrice?.replace(/~/g, "") ?? null} />
               <DetailRow label="Community rating" value={cd?.communityRating ? `${cd.communityRating}${cd.ratingVoteCount ? ` (${cd.ratingVoteCount} votes)` : ""}` : null} />

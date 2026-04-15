@@ -688,21 +688,100 @@ function AuditTab() {
   );
 }
 
+// ── Flags tab ────────────────────────────────────────────────────────────────
+
+interface CommunityFlag {
+  id: string;
+  userId: string;
+  fragranceName: string;
+  fragranceHouse: string;
+  fieldFlagged: string;
+  userNote: string | null;
+  resolved: boolean;
+  createdAt: string;
+}
+
+function FlagsTab({ flags, users, onResolve }: { flags: CommunityFlag[]; users: AdminUser[]; onResolve: (id: string) => void }) {
+  const open = flags.filter((f) => !f.resolved);
+  const resolved = flags.filter((f) => f.resolved);
+  const [showResolved, setShowResolved] = useState(false);
+  const displayed = showResolved ? flags : open;
+
+  return (
+    <div>
+      <BigNumGrid items={[
+        { val: String(open.length), label: "Open flags" },
+        { val: String(resolved.length), label: "Resolved" },
+        { val: String(flags.length), label: "Total" },
+        { val: flags.length > 0 ? open.length === 0 ? "Clean" : "Needs review" : "—", label: "Status", valClass: open.length === 0 ? "text-[var(--adm-green)]" : "text-[var(--adm-red)]" },
+      ]} />
+
+      <div className="mb-4 flex items-center gap-4">
+        <SecHead title={showResolved ? "All flags" : "Open flags"} />
+        <button
+          onClick={() => setShowResolved((v) => !v)}
+          className="font-[var(--adm-mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--adm-fg4)] hover:text-[var(--adm-fg)] transition-colors border-none bg-none cursor-pointer p-0 mb-4"
+        >
+          {showResolved ? "Hide resolved" : "Show resolved"}
+        </button>
+      </div>
+
+      {displayed.length === 0 ? (
+        <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] py-3">
+          {open.length === 0 ? "No open flags." : "No flags yet."}
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          {displayed.map((f) => (
+            <div key={f.id} className="flex items-start gap-3 px-3 py-3 border-b border-[var(--adm-border2)] hover:bg-[var(--adm-bg2)]">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="font-[var(--adm-mono)] text-xs text-[var(--adm-fg)] font-medium">{f.fragranceName}</span>
+                  <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)]">{f.fragranceHouse}</span>
+                  <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-1.5 py-0.5">{f.fieldFlagged}</span>
+                </div>
+                {f.userNote && (
+                  <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg2)] mt-1">{f.userNote}</div>
+                )}
+                <div className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] mt-1">
+                  {userName(f.userId, users)} &middot; {new Date(f.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </div>
+              </div>
+              {!f.resolved && (
+                <button
+                  onClick={() => onResolve(f.id)}
+                  className="font-[var(--adm-mono)] text-[10px] tracking-[0.08em] uppercase text-[var(--adm-green)] border border-[var(--adm-green)] px-2.5 py-1 hover:bg-[var(--adm-green)] hover:text-[var(--adm-bg)] transition-colors shrink-0"
+                >
+                  Resolve
+                </button>
+              )}
+              {f.resolved && (
+                <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-green)] shrink-0">Resolved</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Admin page ───────────────────────────────────────────────────────────────
 
-const TABS = ["Spend", "Usage", "Errors", "Audit"] as const;
+const TABS = ["Spend", "Usage", "Errors", "Audit", "Flags"] as const;
 type TabId = typeof TABS[number];
 
 interface AdminData {
   apiLogs: ApiLog[];
   activityLogs: ActivityLog[];
   users: AdminUser[];
+  flags: CommunityFlag[];
 }
 
 export default function AdminPage() {
   const { user } = useUser();
   const [tab, setTab] = useState<TabId>("Spend");
-  const [data, setData] = useState<AdminData>({ apiLogs: [], activityLogs: [], users: [] });
+  const [data, setData] = useState<AdminData>({ apiLogs: [], activityLogs: [], users: [], flags: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -711,10 +790,11 @@ export default function AdminPage() {
     setLoading(true);
     setError(null);
     try {
-      const [apiRes, actRes, profilesRes] = await Promise.all([
+      const [apiRes, actRes, profilesRes, flagsRes] = await Promise.all([
         supabase.from("api_log").select("*").order("created_at", { ascending: false }),
         supabase.from("activity_log").select("*").order("created_at", { ascending: false }),
         supabase.from("user_profiles").select("id, name, email, created_at"),
+        supabase.from("community_flags").select("*").order("created_at", { ascending: false }),
       ]);
       const mapApiLog = (r: Record<string, unknown>): ApiLog => ({
         timestamp: (r.created_at as string) ?? "",
@@ -739,10 +819,21 @@ export default function AdminPage() {
         name: r.name as string,
         displayName: r.name as string,
       });
+      const mapFlag = (r: Record<string, unknown>): CommunityFlag => ({
+        id: r.id as string,
+        userId: r.user_id as string,
+        fragranceName: r.fragrance_name as string,
+        fragranceHouse: r.fragrance_house as string,
+        fieldFlagged: r.field_flagged as string,
+        userNote: (r.user_note as string) ?? null,
+        resolved: (r.resolved as boolean) ?? false,
+        createdAt: r.created_at as string,
+      });
       setData({
         apiLogs: (apiRes.data ?? []).map(mapApiLog),
         activityLogs: (actRes.data ?? []).map(mapActivityLog),
         users: (profilesRes.data ?? []).map(mapProfile),
+        flags: (flagsRes.data ?? []).map(mapFlag),
       });
       setLastSync("Just now");
     } catch (e: unknown) {
@@ -753,6 +844,14 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  async function resolveFlag(id: string) {
+    await supabase.from("community_flags").update({ resolved: true }).eq("id", id);
+    setData((prev) => ({
+      ...prev,
+      flags: prev.flags.map((f) => f.id === id ? { ...f, resolved: true } : f),
+    }));
+  }
 
   const errors24h = data.apiLogs.filter((l) => {
     return (Date.now() - new Date(l.timestamp).getTime()) < 86_400_000 && isError(l);
@@ -815,6 +914,7 @@ export default function AdminPage() {
               {tab === "Usage" && <UsageTab apiLogs={data.apiLogs} activityLogs={data.activityLogs} users={data.users} />}
               {tab === "Errors" && <ErrorsTab apiLogs={data.apiLogs} />}
               {tab === "Audit" && <AuditTab />}
+              {tab === "Flags" && <FlagsTab flags={data.flags} users={data.users} onResolve={resolveFlag} />}
             </>
           )}
         </div>
@@ -823,7 +923,7 @@ export default function AdminPage() {
       {/* Footer */}
       <div className="border-t border-[var(--adm-border)] px-8 py-3 flex justify-between text-[10px] text-[var(--adm-fg4)] tracking-[0.08em] shrink-0">
         <span>tesknota admin</span>
-        <span>api_log + activityLog + users tabs</span>
+        <span>api_log + activity_log + community_flags</span>
       </div>
     </div>
   );

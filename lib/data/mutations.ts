@@ -135,3 +135,24 @@ export async function deleteComp(id: string): Promise<void> {
   const { error } = await supabase.from("user_compliments").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
+
+// ── Community flagging ────────────────────────────────────────
+
+export async function submitCommunityFlag(flag: {
+  userId: string;
+  fragranceId: string | null;
+  fragranceName: string;
+  fragranceHouse: string;
+  fieldFlagged: string;
+  userNote: string;
+}): Promise<void> {
+  const { error } = await supabase.from("community_flags").insert({
+    user_id: flag.userId,
+    fragrance_id: flag.fragranceId || null,
+    fragrance_name: flag.fragranceName,
+    fragrance_house: flag.fragranceHouse,
+    field_flagged: flag.fieldFlagged,
+    user_note: flag.userNote || null,
+  });
+  if (error) throw new Error(error.message);
+}

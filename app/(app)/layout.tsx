@@ -10,6 +10,18 @@ import { ToastProvider } from "@/components/ui/toast";
 import { MobileNavProvider } from "@/lib/mobile-nav-context";
 import { BotDrawer } from "@/components/ui/bot-drawer";
 import { CmdPalette } from "@/components/ui/cmd-palette";
+import { useData } from "@/lib/data-context";
+
+function DataErrorBanner() {
+  const { loadError, reload } = useData();
+  if (!loadError) return null;
+  return (
+    <div className="bg-[var(--rose-tk)] text-white font-[var(--mono)] text-xs px-4 py-2 flex items-center justify-between shrink-0">
+      <span>Failed to load data. Check your connection.</span>
+      <button onClick={reload} className="underline ml-4 hover:no-underline">Retry</button>
+    </div>
+  );
+}
 
 const NAV_SECTIONS_BASE = [
   {
@@ -74,6 +86,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <DataProvider>
           <ToastProvider>
+            <DataErrorBanner />
             {children}
             <BotDrawer />
             <CmdPalette />

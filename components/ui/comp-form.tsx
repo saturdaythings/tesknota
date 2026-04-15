@@ -40,8 +40,16 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
   const isEdit = !!editing;
 
   const now = new Date();
-  const curMonth = MONTHS[now.getMonth()];
+  const curMonth = String(now.getMonth() + 1).padStart(2, "0");
   const curYear = String(now.getFullYear());
+
+  // Normalize month to numeric "01"-"12" whether stored as "Apr" or "04"
+  function normalizeMonth(m: string): string {
+    if (!m) return curMonth;
+    if (/^\d{1,2}$/.test(m)) return m.padStart(2, "0");
+    const idx = MONTHS.findIndex((mn) => mn.toLowerCase() === m.toLowerCase().slice(0, 3));
+    return idx >= 0 ? String(idx + 1).padStart(2, "0") : curMonth;
+  }
 
   // Fields
   const [fragSearch, setFragSearch] = useState("");
@@ -83,7 +91,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       setPrimaryFragName(editing.primaryFrag);
       setRelation(editing.relation);
       setGender(editing.gender ?? "Female");
-      setMonth(editing.month || curMonth);
+      setMonth(normalizeMonth(editing.month || curMonth));
       setYear(editing.year || curYear);
       setLocation(editing.location ?? "");
       setCity(editing.city ?? "");
@@ -317,7 +325,9 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
               onChange={(e) => setMonth(e.target.value)}
               className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
             >
-              {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+              {MONTHS.map((m, i) => (
+                <option key={m} value={String(i + 1).padStart(2, "0")}>{m}</option>
+              ))}
             </select>
           </div>
           <div>

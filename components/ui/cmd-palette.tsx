@@ -259,11 +259,13 @@ export function CmdPalette() {
         toast(orig.name + " updated");
       } else if (pal.flow === "comp-add") {
         const fragName = (a.fragName as string) || (a.name as string) || "";
+        const fragId = (a.fragId as string) || "";
+        if (!fragId || !fragName) { toast("Select a fragrance first."); return; }
         const comp: UserCompliment = {
           id: genCompId(),
           userId: user.id,
-          primaryFragId: (a.fragId as string) || "",
-          primaryFrag: fragName,
+          primaryFragId: fragId,
+          primaryFrag: fragName || "",
           secondaryFragId: null,
           secondaryFrag: null,
           gender: (a.gender as ComplimenterGender) || null,
@@ -353,7 +355,7 @@ export function CmdPalette() {
   function selectFragFromPick(f: UserFragrance) {
     const step = getCurrentStep();
     if (!step) return;
-    const answers = { ...pal.answers, [step.id]: f.id, name: f.name, house: f.house, fragranceId: f.fragranceId, fragName: f.name, fragId: f.fragranceId };
+    const answers = { ...pal.answers, [step.id]: f.id, name: f.name, house: f.house, fragranceId: f.fragranceId, fragName: f.name, fragId: f.fragranceId || f.id };
     setPal((p) => ({ ...p, step: p.step + 1, answers, editTarget: f }));
     setSearchQuery(""); setSelectedMulti([]); setTextValue("");
   }
