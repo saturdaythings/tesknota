@@ -1,8 +1,7 @@
 "use client";
-
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import { Plus, MessageCircle, Search, X } from '@/components/ui/Icons';
+import { Plus, Search, X } from '@/components/ui/Icons';
 
 interface ActionItem {
   label: string;
@@ -17,7 +16,6 @@ interface ActionSection {
 
 interface FloatingActionButtonProps {
   onAction?: (action: string) => void;
-  onFeedback?: () => void;
 }
 
 const DEFAULT_SECTIONS: ActionSection[] = [
@@ -49,7 +47,6 @@ const DEFAULT_SECTIONS: ActionSection[] = [
 
 export function FloatingActionButton({
   onAction,
-  onFeedback,
 }: FloatingActionButtonProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -59,7 +56,9 @@ export function FloatingActionButton({
     if (!q) return DEFAULT_SECTIONS;
     return DEFAULT_SECTIONS.map((section) => ({
       ...section,
-      items: section.items.filter((item) => item.label.toLowerCase().includes(q)),
+      items: section.items.filter((item) =>
+        item.label.toLowerCase().includes(q)
+      ),
     })).filter((section) => section.items.length > 0);
   }, [search]);
 
@@ -71,23 +70,8 @@ export function FloatingActionButton({
 
   return (
     <>
-      {/* FAB stack */}
-      <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3 z-[200]">
-        {/* Feedback button */}
-        <button
-          onClick={onFeedback}
-          aria-label="Send feedback"
-          className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer transition-opacity hover:opacity-80"
-          style={{
-            background: 'var(--color-sand-light)',
-            color: 'var(--color-navy)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-          }}
-        >
-          <MessageCircle size={18} />
-        </button>
-
-        {/* Main add button */}
+      {/* FAB — single + button, bottom-right */}
+      <div className="fixed bottom-6 right-6 z-[200]">
         <button
           onClick={() => setMenuOpen(true)}
           aria-label="Open actions"
@@ -112,7 +96,6 @@ export function FloatingActionButton({
             className="fixed inset-0 z-[210]"
             style={{ background: 'rgba(30,45,69,0.6)' }}
           />
-
           {/* Panel */}
           <div
             className={cn(
@@ -131,11 +114,7 @@ export function FloatingActionButton({
             >
               <span
                 className="font-sans font-medium uppercase"
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--color-sand)',
-                  letterSpacing: '0.12em',
-                }}
+                style={{ fontSize: '11px', color: 'var(--color-sand)', letterSpacing: '0.12em' }}
               >
                 Actions
               </span>
@@ -177,14 +156,12 @@ export function FloatingActionButton({
             <div className="overflow-y-auto" style={{ maxHeight: 'calc(80dvh - 140px)' }}>
               {filteredSections.map((section, si) => (
                 <div key={section.label}>
-                  {si > 0 && <div style={{ height: '1px', background: 'var(--color-cream-dark)', margin: '0 24px' }} />}
+                  {si > 0 && (
+                    <div style={{ height: '1px', background: 'var(--color-cream-dark)', margin: '0 24px' }} />
+                  )}
                   <div
                     className="px-6 pt-4 pb-1 font-sans font-medium uppercase"
-                    style={{
-                      fontSize: '11px',
-                      color: 'var(--color-sand)',
-                      letterSpacing: '0.12em',
-                    }}
+                    style={{ fontSize: '11px', color: 'var(--color-sand)', letterSpacing: '0.12em' }}
                   >
                     {section.label}
                   </div>
@@ -208,7 +185,6 @@ export function FloatingActionButton({
                   ))}
                 </div>
               ))}
-
               {filteredSections.length === 0 && (
                 <div
                   className="px-6 py-8 text-center font-sans"
