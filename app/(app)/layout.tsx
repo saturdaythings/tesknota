@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useUser, getFriend } from "@/lib/user-context";
+import { DataProvider } from "@/lib/data-context";
 
 const NAV_SECTIONS_BASE = [
   {
@@ -64,7 +65,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         />
       }
     >
-      {children}
+      <DataProvider>{children}</DataProvider>
     </AppShell>
   );
 }
