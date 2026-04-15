@@ -15,6 +15,8 @@ import {
   updateFrag,
   appendComp,
   updateComp,
+  deleteFrag,
+  deleteComp,
 } from "@/lib/data/mutations";
 
 interface DataContextValue {
@@ -26,8 +28,10 @@ interface DataContextValue {
   reload: () => void;
   addFrag: (frag: UserFragrance) => Promise<void>;
   editFrag: (frag: UserFragrance) => Promise<void>;
+  removeFrag: (id: string) => Promise<void>;
   addComp: (comp: UserCompliment) => Promise<void>;
   editComp: (comp: UserCompliment) => Promise<void>;
+  removeComp: (id: string) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -74,12 +78,22 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setComps([...COMPLIMENTS]);
   }, []);
 
+  const removeFragCb = useCallback(async (id: string) => {
+    await deleteFrag(id);
+    setFrags([...FRAGRANCES]);
+  }, []);
+
+  const removeCompCb = useCallback(async (id: string) => {
+    await deleteComp(id);
+    setComps([...COMPLIMENTS]);
+  }, []);
+
   return (
     <DataContext.Provider
       value={{
         fragrances, compliments, communityFrags, isLoaded, loadError, reload: load,
-        addFrag: addFragCb, editFrag: editFragCb,
-        addComp: addCompCb, editComp: editCompCb,
+        addFrag: addFragCb, editFrag: editFragCb, removeFrag: removeFragCb,
+        addComp: addCompCb, editComp: editCompCb, removeComp: removeCompCb,
       }}
     >
       {children}

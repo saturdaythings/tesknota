@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useUser, getFriend } from "@/lib/user-context";
 import { DataProvider } from "@/lib/data-context";
+import { ToastProvider } from "@/components/ui/toast";
 
 const NAV_SECTIONS_BASE = [
   {
@@ -65,7 +66,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         />
       }
     >
-      <DataProvider>{children}</DataProvider>
+      <DataProvider>
+        <ToastProvider>{children}</ToastProvider>
+      </DataProvider>
     </AppShell>
   );
 }

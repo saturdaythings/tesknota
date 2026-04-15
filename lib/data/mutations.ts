@@ -38,6 +38,26 @@ export async function updateComp(comp: UserCompliment): Promise<void> {
   );
 }
 
+// ── Delete mutations ─────────────────────────────────────
+
+export async function deleteFrag(id: string): Promise<void> {
+  setFragrances(FRAGRANCES.filter((f) => f.id !== id));
+  await writeSheet(
+    "userFragrances",
+    FRAGRANCES.map(fragToRow),
+    [...FRAG_HEADERS]
+  );
+}
+
+export async function deleteComp(id: string): Promise<void> {
+  setCompliments(COMPLIMENTS.filter((c) => c.id !== id));
+  await writeSheet(
+    "userCompliments",
+    COMPLIMENTS.map(compToRow),
+    [...COMP_HEADERS]
+  );
+}
+
 // ── Row serialisers ──────────────────────────────────────
 
 function fragToRow(f: UserFragrance): Record<string, string> {

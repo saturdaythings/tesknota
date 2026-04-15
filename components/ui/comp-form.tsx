@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/modal";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
+import { useToast } from "@/components/ui/toast";
 import type { UserCompliment, Relation, ComplimenterGender } from "@/types";
 
 const RELATIONS: Relation[] = [
@@ -33,7 +34,8 @@ interface Props {
 
 export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
   const { user } = useUser();
-  const { fragrances, addComp, editComp } = useData();
+  const { fragrances, addComp, editComp, removeComp } = useData();
+  const { toast } = useToast();
 
   const isEdit = !!editing;
 
@@ -56,6 +58,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const eligibleFrags = user
     ? fragrances.filter(
@@ -104,6 +107,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
     setFragDropOpen(false);
     setErr("");
     setSaving(false);
+    setConfirmDelete(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, editing, prefillFragId]);
 
@@ -144,8 +148,10 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
     try {
       if (isEdit) {
         await editComp(comp);
+        toast("Compliment updated.");
       } else {
         await addComp(comp);
+        toast("Compliment logged.");
       }
       onClose();
     } catch (e) {
@@ -153,6 +159,19 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       console.error(e);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!editing) return;
+    if (!confirmDelete) { setConfirmDelete(true); return; }
+    try {
+      await removeComp(editing.id);
+      toast("Compliment deleted.");
+      onClose();
+    } catch (e) {
+      setErr("Delete failed.");
+      console.error(e);
     }
   }
 
@@ -164,10 +183,37 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       subtitle="Record who, where, and what you were wearing"
       footer={
         <div className="flex items-center justify-between w-full">
-          <div className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)]">{err}</div>
+          <div className="flex items-center gap-2">
+            {isEdit && !confirmDelete && (
+              <button
+                onClick={handleDelete}
+                className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)] border border-[var(--rose-tk)] px-3 py-[5px] hover:bg-[var(--rose-tk)] hover:text-white transition-colors"
+              >
+                Delete
+              </button>
+            )}
+            {isEdit && confirmDelete && (
+              <>
+                <span className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)]">Remove permanently?</span>
+                <button
+                  onClick={handleDelete}
+                  className="font-[var(--mono)] text-[11px] bg-[var(--rose-tk)] text-white px-3 py-[5px] hover:opacity-90"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="font-[var(--mono)] text-[11px] border border-[var(--b3)] text-[var(--ink3)] px-3 py-[5px]"
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+            {err && <span className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)]">{err}</span>}
+          </div>
           <button
             onClick={save}
-            disabled={saving}
+            disabled={saving || confirmDelete}
             className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {saving ? "Saving..." : isEdit ? "Update" : "Log"}

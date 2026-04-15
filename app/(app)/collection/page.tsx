@@ -7,8 +7,10 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { FragRow } from "@/components/ui/frag-row";
 import { FragForm } from "@/components/ui/frag-form";
+import { FragDetail } from "@/components/ui/frag-detail";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
+import { useToast } from "@/components/ui/toast";
 import { avgRatingStr } from "@/lib/frag-utils";
 import type { UserFragrance, FragranceStatus } from "@/types";
 
@@ -28,12 +30,14 @@ const STATUS_FILTERS: { label: string; value: StatusFilter }[] = [
 
 export default function CollectionPage() {
   const { user } = useUser();
-  const { fragrances, compliments, communityFrags, isLoaded } = useData();
+  const { fragrances, compliments, communityFrags, isLoaded, removeFrag } = useData();
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sort, setSort] = useState<SortKey>("nameAZ");
   const [formOpen, setFormOpen] = useState(false);
   const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
+  const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
 
   if (!user) return null;
 
@@ -69,8 +73,24 @@ export default function CollectionPage() {
     return a.name.localeCompare(b.name);
   });
 
+  async function handleDeleteFrag(frag: UserFragrance) {
+    await removeFrag(frag.id);
+    setDetailFrag(null);
+    toast("Fragrance deleted.");
+  }
+
   return (
     <>
+      <FragDetail
+        open={!!detailFrag}
+        onClose={() => setDetailFrag(null)}
+        frag={detailFrag}
+        communityFrags={communityFrags}
+        compliments={MC}
+        userId={user.id}
+        onEdit={(frag) => { setEditingFrag(frag); setFormOpen(true); }}
+        onDelete={handleDeleteFrag}
+      />
       <FragForm
         open={formOpen}
         onClose={() => setFormOpen(false)}
@@ -158,7 +178,7 @@ export default function CollectionPage() {
                         communityFrags={communityFrags}
                         compliments={MC}
                         userId={user.id}
-                        onClick={(frag) => { setEditingFrag(frag); setFormOpen(true); }}
+                        onClick={(frag) => setDetailFrag(frag)}
                       />
                     ))}
                   </tbody>

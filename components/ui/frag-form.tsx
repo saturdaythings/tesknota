@@ -6,6 +6,7 @@ import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
 import { getCommunityData } from "@/lib/data";
+import { useToast } from "@/components/ui/toast";
 import type { UserFragrance, FragranceStatus, FragranceType, BottleSize } from "@/types";
 
 const STATUSES: { value: FragranceStatus; label: string }[] = [
@@ -52,6 +53,7 @@ interface Props {
 export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const { user } = useUser();
   const { communityFrags, addFrag, editFrag } = useData();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
 
   // Step 1 fields
@@ -200,8 +202,10 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
     try {
       if (isEdit) {
         await editFrag(frag);
+        toast("Fragrance updated.");
       } else {
         await addFrag(frag);
+        toast("Fragrance added.");
       }
       onClose();
     } catch (e) {
