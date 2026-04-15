@@ -402,10 +402,7 @@ export default function AnalyticsPage() {
   return (
     <>
       <Topbar title="Analytics" />
-      <main
-        className="flex-1 overflow-y-auto"
-        style={{ padding: "var(--space-8)" }}
-      >
+      <main className="flex-1 overflow-y-auto p-4 lg:p-8">
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
 
           <h1 className="text-page-title" style={{ marginBottom: "var(--space-6)" }}>

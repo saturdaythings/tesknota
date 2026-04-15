@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useMobileNav } from "@/lib/mobile-nav-context";
+import { Menu } from "lucide-react";
 
 interface TopbarProps {
   title: string;
@@ -10,43 +11,94 @@ interface TopbarProps {
   className?: string;
 }
 
-export function Topbar({
-  title,
-  search,
-  actions,
-  className,
-}: TopbarProps) {
+export function Topbar({ title, search, actions, className }: TopbarProps) {
   const { toggle } = useMobileNav();
 
   return (
     <header
-      className={cn(
-        "flex items-center gap-3 px-[18px] md:px-[26px] flex-shrink-0 z-[100]",
-        "h-[var(--th)] bg-[var(--off)] border-b border-[var(--b2)]",
-        className,
-      )}
+      style={{
+        height: "64px",
+        background: "var(--color-surface)",
+        borderBottom: "1px solid var(--color-border)",
+        padding: "0 var(--space-6)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        position: "sticky",
+        top: 0,
+        zIndex: "var(--z-sticky)",
+        gap: "var(--space-4)",
+        flexShrink: 0,
+      }}
+      className={cn(className)}
     >
-      {/* Mobile hamburger */}
-      <button
-        onClick={toggle}
-        aria-label="Open menu"
-        className="md:hidden flex flex-col gap-[5px] p-1 mr-1 text-[var(--ink3)] hover:text-[var(--ink)] transition-colors"
+      {/* Left: hamburger + title */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "var(--space-3)",
+          minWidth: 0,
+          flex: 1,
+        }}
       >
-        <span className="block w-[18px] h-[1.5px] bg-current" />
-        <span className="block w-[18px] h-[1.5px] bg-current" />
-        <span className="block w-[18px] h-[1.5px] bg-current" />
-      </button>
+        <button
+          onClick={toggle}
+          aria-label="Open menu"
+          className="md:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "36px",
+            height: "36px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--color-text-secondary)",
+            borderRadius: "var(--radius-sm)",
+            padding: 0,
+            flexShrink: 0,
+            transition: "color var(--transition-fast)",
+          }}
+        >
+          <Menu size={20} aria-hidden="true" />
+        </button>
 
-      <div className="flex-1 min-w-0">
-        <div className="font-[var(--mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--ink4)] leading-none mb-[3px]">
-          T\u0118SKNOTA
-        </div>
-        <div className="font-[var(--serif)] text-[32px] font-normal text-[var(--ink)] leading-[1.2] truncate">
+        <h1
+          className="text-page-title truncate"
+          style={{ minWidth: 0 }}
+        >
           {title}
-        </div>
+        </h1>
       </div>
-      {search && <div className="flex-shrink-0">{search}</div>}
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+
+      {/* Center: search slot */}
+      {search && (
+        <div
+          style={{
+            maxWidth: "360px",
+            flex: 1,
+            flexShrink: 0,
+          }}
+        >
+          {search}
+        </div>
+      )}
+
+      {/* Right: actions slot */}
+      {actions && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--space-2)",
+            flexShrink: 0,
+          }}
+        >
+          {actions}
+        </div>
+      )}
     </header>
   );
 }

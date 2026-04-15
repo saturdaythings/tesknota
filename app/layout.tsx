@@ -1,54 +1,19 @@
 import type { Metadata } from "next";
-import {
-  Playfair_Display,
-  Cormorant_Garamond,
-  DM_Mono,
-  Jost,
-  IBM_Plex_Mono,
-  Newsreader,
-} from "next/font/google";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/lib/user-context";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
-const dmMono = DM_Mono({
-  variable: "--font-dm-mono",
+const dmSans = DM_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  display: "swap",
-});
-
-const jost = Jost({
-  variable: "--font-jost",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-ibm-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-});
-
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -65,9 +30,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${cormorant.variable} ${dmMono.variable} ${jost.variable} ${ibmPlexMono.variable} ${newsreader.variable} h-full antialiased`}
+      className={`${cormorant.variable} ${dmSans.variable}`}
     >
-      <body className="h-full overflow-hidden bg-[var(--off)] text-[var(--ink)]">
+      <body>
         <UserProvider>{children}</UserProvider>
       </body>
     </html>
