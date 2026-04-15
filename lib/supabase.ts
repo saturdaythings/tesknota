@@ -1,6 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from '@supabase/ssr';
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-build-key";
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(url, key);
+// Singleton browser client — stores auth session in cookies for SSR/middleware access
+export const supabase = createBrowserClient(url, key);

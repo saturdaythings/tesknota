@@ -1,108 +1,113 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useUser } from "@/lib/user-context";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
-export default function IdentityScreen() {
-  const { user, profiles, isLoaded, signIn, signUp } = useUser();
+const USERS = [
+  { name: 'Kiana', email: process.env.NEXT_PUBLIC_USER_KIANA_EMAIL ?? '' },
+  { name: 'Sylvia', email: process.env.NEXT_PUBLIC_USER_SYLVIA_EMAIL ?? '' },
+];
+
+export default function LoginPage() {
   const router = useRouter();
-
-  const [mode, setMode] = useState<"select" | "signin" | "signup">("select");
-  const [selectedEmail, setSelectedEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [error, setError] = useState("");
+  const [selected, setSelected] = useState<{ name: string; email: string } | null>(null);
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isLoaded && user) router.replace("/dashboard");
-  }, [isLoaded, user, router]);
+  function pick(user: { name: string; email: string }) {
+    setSelected(user);
+    setPassword('');
+    setError('');
+  }
 
-  function pickProfile(email: string) {
-    setSelectedEmail(email);
-    setPassword("");
-    setError("");
-    setMode("signin");
+  function back() {
+    setSelected(null);
+    setPassword('');
+    setError('');
   }
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    if (!selected) return;
+    setError('');
     setLoading(true);
-    const { error: err } = await signIn(selectedEmail, password);
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: selected.email,
+      password,
+    });
     setLoading(false);
-    if (err) { setError(err); return; }
-    router.push("/dashboard");
-  }
-
-  async function handleSignUp(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    if (!name.trim()) { setError("Name is required."); return; }
-    setLoading(true);
-    const { error: err } = await signUp(selectedEmail, password, name.trim());
-    setLoading(false);
-    if (err) { setError(err); return; }
-    router.push("/dashboard");
-  }
-
-  function reset() {
-    setMode("select");
-    setSelectedEmail("");
-    setPassword("");
-    setName("");
-    setError("");
+    if (err) {
+      setError('Incorrect password');
+      return;
+    }
+    router.push('/dashboard');
   }
 
   return (
-    <div className="fixed inset-0 bg-[var(--blue3)] flex flex-col items-center justify-start pt-[22dvh] px-8">
+    <div
+      className="fixed inset-0 flex flex-col items-center justify-center px-6"
+      style={{ background: 'var(--color-navy)' }}
+    >
       {/* Wordmark */}
-      <div className="text-center mb-14">
-        <div className="font-[var(--script)] text-[64px] italic text-[var(--warm2)] tracking-[0.02em] leading-none">
-          tęsknota
+      <div className="text-center mb-12">
+        <div
+          className="font-serif italic leading-none"
+          style={{ fontSize: '72px', color: 'var(--color-cream)' }}
+        >
+          t&#281;sknota
         </div>
-        <div className="font-[var(--mono)] text-xs tracking-[0.22em] uppercase text-white/70 mt-3">
+        <div
+          className="font-sans font-medium uppercase mt-3"
+          style={{
+            fontSize: '11px',
+            color: 'rgba(245,240,232,0.6)',
+            letterSpacing: '0.22em',
+          }}
+        >
           Fragrance Tracker
         </div>
-        <div className="h-5" />
-        <div className="font-[var(--script)] text-[15px] italic text-[rgba(var(--warm-ch),0.72)] leading-[1.5] tracking-[0.01em]">
-          [ tɛsk-ˈnɔ-ta ] &nbsp;·&nbsp; a deep longing for what is absent or past
+        <div
+          className="font-serif italic mt-4"
+          style={{ fontSize: '15px', color: 'var(--color-sand)', lineHeight: 1.5 }}
+        >
+          [ t&#603;sk-&#712;n&#596;-ta ] &nbsp;&middot;&nbsp; a deep longing for what is absent or past
         </div>
       </div>
 
-      {/* Profile select */}
-      {mode === "select" && (
-        <div className="flex flex-col items-center w-full max-w-[320px]">
-          <div className="font-[var(--body)] text-sm text-white/70 mb-6 tracking-[0.04em] text-center">
+      {/* User selection */}
+      {!selected && (
+        <div className="flex flex-col items-center w-full">
+          <div
+            className="font-sans text-center mb-4"
+            style={{ fontSize: '14px', color: 'var(--color-sand)' }}
+          >
             Who are you?
           </div>
-          <div className="flex flex-col gap-3 w-full">
-            {profiles.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => pickProfile(p.email)}
-                className="w-full min-h-[56px] bg-[rgba(var(--warm-ch),0.15)] border border-[rgba(var(--warm-ch),0.35)] text-[rgba(var(--warm2-ch),0.92)] font-[var(--script)] text-2xl italic px-11 cursor-pointer tracking-[0.04em] transition-all duration-[180ms] hover:bg-[rgba(var(--warm-ch),0.28)]"
-              >
-                {p.name}
-              </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            {USERS.map((u) => (
+              <UserButton key={u.name} name={u.name} onClick={() => pick(u)} />
             ))}
-            <button
-              onClick={() => { setMode("signup"); setSelectedEmail(""); setPassword(""); setName(""); setError(""); }}
-              className="w-full py-2.5 font-[var(--mono)] text-xs tracking-[0.14em] uppercase text-white/40 hover:text-white/60 transition-colors border border-white/10 hover:border-white/20 mt-1"
-            >
-              Create account
-            </button>
           </div>
         </div>
       )}
 
-      {/* Sign in */}
-      {mode === "signin" && (
-        <form onSubmit={handleSignIn} className="flex flex-col gap-3 w-full max-w-[320px]">
-          <div className="font-[var(--body)] text-sm text-white/70 mb-2 tracking-[0.04em] text-center">
-            Enter your password
+      {/* Password form */}
+      {selected && (
+        <form
+          onSubmit={handleSignIn}
+          className="flex flex-col items-center gap-4 w-full"
+          style={{ maxWidth: '320px' }}
+        >
+          <div
+            className="font-serif italic text-center"
+            style={{ fontSize: '22px', color: 'var(--color-cream)', marginBottom: '4px' }}
+          >
+            {selected.name}
           </div>
+
+          {/* Dark-adapted password input */}
           <input
             type="password"
             value={password}
@@ -110,82 +115,117 @@ export default function IdentityScreen() {
             placeholder="Password"
             autoFocus
             required
-            className="w-full px-4 py-3 bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.15)] text-white font-[var(--body)] text-sm placeholder:text-white/30 focus:outline-none focus:border-[rgba(var(--warm-ch),0.6)]"
+            className="w-full h-10 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150"
+            style={{
+              fontSize: '15px',
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.25)',
+              color: 'var(--color-cream)',
+              width: '320px',
+            }}
           />
-          {error && (
-            <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)] tracking-[0.04em]">
-              {error}
-            </div>
-          )}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full min-h-[48px] bg-[rgba(var(--warm-ch),0.22)] border border-[rgba(var(--warm-ch),0.45)] text-[rgba(var(--warm2-ch),0.92)] font-[var(--mono)] text-xs tracking-[0.14em] uppercase disabled:opacity-50 hover:bg-[rgba(var(--warm-ch),0.32)] transition-colors"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-          <button
-            type="button"
-            onClick={reset}
-            className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-white/30 hover:text-white/50 transition-colors pt-1"
-          >
-            Back
-          </button>
-        </form>
-      )}
 
-      {/* Sign up */}
-      {mode === "signup" && (
-        <form onSubmit={handleSignUp} className="flex flex-col gap-3 w-full max-w-[320px]">
-          <div className="font-[var(--body)] text-sm text-white/70 mb-2 tracking-[0.04em] text-center">
-            Create your account
-          </div>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-            required
-            className="w-full px-4 py-3 bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.15)] text-white font-[var(--body)] text-sm placeholder:text-white/30 focus:outline-none focus:border-[rgba(var(--warm-ch),0.6)]"
-          />
-          <input
-            type="email"
-            value={selectedEmail}
-            onChange={(e) => setSelectedEmail(e.target.value)}
-            placeholder="Email"
-            required
-            className="w-full px-4 py-3 bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.15)] text-white font-[var(--body)] text-sm placeholder:text-white/30 focus:outline-none focus:border-[rgba(var(--warm-ch),0.6)]"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            required
-            minLength={6}
-            className="w-full px-4 py-3 bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.15)] text-white font-[var(--body)] text-sm placeholder:text-white/30 focus:outline-none focus:border-[rgba(var(--warm-ch),0.6)]"
-          />
+          {/* Error */}
           {error && (
-            <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)] tracking-[0.04em]">
+            <div
+              className="font-sans text-center"
+              style={{ fontSize: '13px', color: 'var(--color-sand)' }}
+            >
               {error}
             </div>
           )}
+
+          {/* Sign in button — cream bg, navy text */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full min-h-[48px] bg-[rgba(var(--warm-ch),0.22)] border border-[rgba(var(--warm-ch),0.45)] text-[rgba(var(--warm2-ch),0.92)] font-[var(--mono)] text-xs tracking-[0.14em] uppercase disabled:opacity-50 hover:bg-[rgba(var(--warm-ch),0.32)] transition-colors"
+            className="flex items-center justify-center gap-2 rounded-[3px] font-sans font-medium tracking-[0.08em] transition-opacity disabled:opacity-60 hover:opacity-90"
+            style={{
+              width: '320px',
+              height: '40px',
+              fontSize: '13px',
+              background: 'var(--color-cream)',
+              color: 'var(--color-navy)',
+            }}
           >
-            {loading ? "Creating account..." : "Create account"}
+            {loading ? (
+              <>
+                <Spinner />
+                Signing in...
+              </>
+            ) : (
+              'SIGN IN'
+            )}
           </button>
+
+          {/* Back */}
           <button
             type="button"
-            onClick={reset}
-            className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-white/30 hover:text-white/50 transition-colors pt-1"
+            onClick={back}
+            className="font-sans bg-transparent border-none cursor-pointer transition-opacity hover:opacity-100"
+            style={{ fontSize: '13px', color: 'var(--color-sand)', opacity: 0.7 }}
           >
-            Back
+            BACK
           </button>
         </form>
       )}
     </div>
+  );
+}
+
+function UserButton({ name, onClick }: { name: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="font-serif italic transition-all duration-150 border-none cursor-pointer"
+      style={{
+        width: '180px',
+        height: '56px',
+        fontSize: '24px',
+        color: 'var(--color-cream)',
+        background: 'rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        borderRadius: '4px',
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget;
+        el.style.background = 'rgba(255,255,255,0.18)';
+        el.style.borderColor = 'rgba(255,255,255,0.35)';
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget;
+        el.style.background = 'rgba(255,255,255,0.1)';
+        el.style.borderColor = 'rgba(255,255,255,0.2)';
+      }}
+      onMouseDown={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.25)';
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.background = 'rgba(255,255,255,0.18)';
+      }}
+    >
+      {name}
+    </button>
+  );
+}
+
+function Spinner() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      className="animate-spin"
+      aria-hidden="true"
+    >
+      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.25" />
+      <path
+        d="M7 1.5a5.5 5.5 0 015.5 5.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
