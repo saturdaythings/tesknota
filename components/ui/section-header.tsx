@@ -14,7 +14,7 @@ export function SectionHeader({ title, right, className }: SectionHeaderProps) {
         className,
       )}
     >
-      <h2 className="font-[var(--serif)] text-[19px] font-normal text-[var(--blue)]">
+      <h2 className="font-[var(--serif)] text-[19px] font-normal text-[var(--ink)]">
         {title}
       </h2>
       {right && <div className="flex items-center gap-2">{right}</div>}

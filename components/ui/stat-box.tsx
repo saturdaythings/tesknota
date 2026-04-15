@@ -10,7 +10,7 @@ interface StatBoxProps {
 export function StatBox({ value, label, delta, className }: StatBoxProps) {
   return (
     <div className={cn("bg-[var(--off)] px-5 py-[14px]", className)}>
-      <div className="font-[var(--serif)] text-[34px] font-normal leading-none text-[var(--blue)]">
+      <div className="font-[var(--serif)] text-[34px] font-600 leading-none text-[var(--ink)]">
         {value}
       </div>
       <div className="font-[var(--mono)] text-xs tracking-[0.16em] uppercase text-[var(--ink3)] mt-[5px]">

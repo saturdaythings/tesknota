@@ -41,7 +41,7 @@ export function Topbar({
         <div className="font-[var(--mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--ink4)] leading-none mb-[3px]">
           T\u0118SKNOTA
         </div>
-        <div className="font-[var(--serif)] text-base font-normal text-[var(--ink)] leading-[1.3] truncate">
+        <div className="font-[var(--serif)] text-[32px] font-normal text-[var(--ink)] leading-[1.2] truncate">
           {title}
         </div>
       </div>
