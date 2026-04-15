@@ -1,6 +1,6 @@
 # tesknota
 
-Fragrance journal for Kiana and Sylvia. Live at **tesknota.pages.dev**.
+Live at **tesknota.pages.dev**.
 
 ## Stack
 
