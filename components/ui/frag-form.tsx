@@ -7,6 +7,7 @@ import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
 import { getCommunityData } from "@/lib/data";
 import { useToast } from "@/components/ui/toast";
+import { supabase } from "@/lib/supabase";
 import type { UserFragrance, FragranceStatus, FragranceType, BottleSize } from "@/types";
 
 const STATUSES: { value: FragranceStatus; label: string }[] = [
@@ -139,11 +140,37 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
     setDropOpen(val.trim().length >= 2);
   }
 
-  function advanceStep() {
+  async function advanceStep() {
     if (!search.trim()) { setErr("Enter a fragrance name."); return; }
     if (!selectedName) {
-      // Allow free text: treat typed name as custom
-      setSelectedName(search.trim());
+      // No local match — query Supabase directly before treating as custom.
+      // This catches fragrances added by the other user that aren't in local cache.
+      setSaving(true);
+      const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const q = search.trim();
+      const { data: liveMatches } = await supabase
+        .from("fragrances")
+        .select("id, name, house, type")
+        .ilike("name", `%${q}%`)
+        .limit(8);
+      setSaving(false);
+
+      if (liveMatches && liveMatches.length > 0) {
+        // Found in community DB — point user to existing entry
+        const exact = liveMatches.find(
+          (r) => norm(r.name) === norm(q)
+        ) ?? liveMatches[0];
+        setSelectedName(exact.name);
+        setSelectedHouse(exact.house ?? "");
+        setSelectedFragId(exact.id);
+        setSearch(exact.name);
+        setErr("");
+        setStep(2);
+        return;
+      }
+
+      // Truly new — proceed as custom
+      setSelectedName(q);
       setSelectedHouse("");
       setSelectedFragId("");
     }
