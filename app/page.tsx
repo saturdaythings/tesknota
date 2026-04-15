@@ -89,7 +89,7 @@ export default function IdentityScreen() {
             ))}
             <button
               onClick={() => { setMode("signup"); setSelectedEmail(""); setPassword(""); setName(""); setError(""); }}
-              className="w-full py-2.5 font-[var(--mono)] text-[11px] tracking-[0.14em] uppercase text-white/40 hover:text-white/60 transition-colors border border-white/10 hover:border-white/20 mt-1"
+              className="w-full py-2.5 font-[var(--mono)] text-xs tracking-[0.14em] uppercase text-white/40 hover:text-white/60 transition-colors border border-white/10 hover:border-white/20 mt-1"
             >
               Create account
             </button>
@@ -113,14 +113,14 @@ export default function IdentityScreen() {
             className="w-full px-4 py-3 bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.15)] text-white font-[var(--body)] text-sm placeholder:text-white/30 focus:outline-none focus:border-[rgba(var(--warm-ch),0.6)]"
           />
           {error && (
-            <div className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)] tracking-[0.04em]">
+            <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)] tracking-[0.04em]">
               {error}
             </div>
           )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full min-h-[48px] bg-[rgba(var(--warm-ch),0.22)] border border-[rgba(var(--warm-ch),0.45)] text-[rgba(var(--warm2-ch),0.92)] font-[var(--mono)] text-[11px] tracking-[0.14em] uppercase disabled:opacity-50 hover:bg-[rgba(var(--warm-ch),0.32)] transition-colors"
+            className="w-full min-h-[48px] bg-[rgba(var(--warm-ch),0.22)] border border-[rgba(var(--warm-ch),0.45)] text-[rgba(var(--warm2-ch),0.92)] font-[var(--mono)] text-xs tracking-[0.14em] uppercase disabled:opacity-50 hover:bg-[rgba(var(--warm-ch),0.32)] transition-colors"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
@@ -166,14 +166,14 @@ export default function IdentityScreen() {
             className="w-full px-4 py-3 bg-[rgba(255,255,255,0.07)] border border-[rgba(255,255,255,0.15)] text-white font-[var(--body)] text-sm placeholder:text-white/30 focus:outline-none focus:border-[rgba(var(--warm-ch),0.6)]"
           />
           {error && (
-            <div className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)] tracking-[0.04em]">
+            <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)] tracking-[0.04em]">
               {error}
             </div>
           )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full min-h-[48px] bg-[rgba(var(--warm-ch),0.22)] border border-[rgba(var(--warm-ch),0.45)] text-[rgba(var(--warm2-ch),0.92)] font-[var(--mono)] text-[11px] tracking-[0.14em] uppercase disabled:opacity-50 hover:bg-[rgba(var(--warm-ch),0.32)] transition-colors"
+            className="w-full min-h-[48px] bg-[rgba(var(--warm-ch),0.22)] border border-[rgba(var(--warm-ch),0.45)] text-[rgba(var(--warm2-ch),0.92)] font-[var(--mono)] text-xs tracking-[0.14em] uppercase disabled:opacity-50 hover:bg-[rgba(var(--warm-ch),0.32)] transition-colors"
           >
             {loading ? "Creating account..." : "Create account"}
           </button>

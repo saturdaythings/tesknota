@@ -173,7 +173,7 @@ export default function CollectionPage() {
                     No matches.
                     <button
                       onClick={() => { setSearch(""); setStatusFilter("all"); setPage(1); }}
-                      className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                      className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                     >
                       Clear filters
                     </button>

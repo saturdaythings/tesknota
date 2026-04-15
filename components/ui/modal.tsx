@@ -92,7 +92,7 @@ export function Modal({
               {title}
             </div>
             {subtitle && (
-              <div className="font-[var(--mono)] text-[11px] text-[var(--ink3)] mt-[3px] tracking-[0.1em] uppercase">
+              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mt-[3px] tracking-[0.1em] uppercase">
                 {subtitle}
               </div>
             )}

@@ -20,7 +20,7 @@ export function FormGroup({
       </label>
       {children}
       {error && (
-        <span className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)]">
+        <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">
           {error}
         </span>
       )}

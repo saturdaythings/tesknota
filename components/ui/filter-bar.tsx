@@ -19,7 +19,7 @@ export function FilterChip({
     <button
       onClick={onClick}
       className={cn(
-        "px-[14px] py-[5px] font-[var(--mono)] text-[11px] tracking-[0.12em] uppercase cursor-pointer select-none whitespace-nowrap transition-all duration-[140ms] border-r border-[var(--b2)] last:border-r-0",
+        "px-[14px] py-[5px] font-[var(--mono)] text-xs tracking-[0.12em] uppercase cursor-pointer select-none whitespace-nowrap transition-all duration-[140ms] border-r border-[var(--b2)] last:border-r-0",
         active
           ? "bg-[var(--blue)] text-[var(--warm2)]"
           : "text-[var(--ink3)] hover:text-[var(--blue)] hover:bg-[var(--blue4)]",

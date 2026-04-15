@@ -195,29 +195,29 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
             {isEdit && !confirmDelete && (
               <button
                 onClick={handleDelete}
-                className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)] border border-[var(--rose-tk)] px-3 py-[5px] hover:bg-[var(--rose-tk)] hover:text-white transition-colors"
+                className="font-[var(--mono)] text-xs text-[var(--rose-tk)] border border-[var(--rose-tk)] px-3 py-[5px] hover:bg-[var(--rose-tk)] hover:text-white transition-colors"
               >
                 Delete
               </button>
             )}
             {isEdit && confirmDelete && (
               <>
-                <span className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)]">Remove permanently?</span>
+                <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">Remove permanently?</span>
                 <button
                   onClick={handleDelete}
-                  className="font-[var(--mono)] text-[11px] bg-[var(--rose-tk)] text-white px-3 py-[5px] hover:opacity-90"
+                  className="font-[var(--mono)] text-xs bg-[var(--rose-tk)] text-white px-3 py-[5px] hover:opacity-90"
                 >
                   Confirm
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
-                  className="font-[var(--mono)] text-[11px] border border-[var(--b3)] text-[var(--ink3)] px-3 py-[5px]"
+                  className="font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] px-3 py-[5px]"
                 >
                   Cancel
                 </button>
               </>
             )}
-            {err && <span className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)]">{err}</span>}
+            {err && <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">{err}</span>}
           </div>
           <button
             onClick={save}
@@ -258,7 +258,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
                     className="px-3 py-[9px] cursor-pointer hover:bg-[var(--b1)] border-b border-[var(--b1)] last:border-0"
                   >
                     <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-                    <div className="font-[var(--mono)] text-[11px] text-[var(--ink3)]">{f.house}</div>
+                    <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
                   </div>
                 ))}
               </div>
@@ -278,9 +278,9 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
                 type="button"
                 onClick={() => setRelation(r)}
                 className={
-                  "px-3 py-[5px] font-[var(--mono)] text-[11px] border transition-colors " +
+                  "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
                   (relation === r
-                    ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint,rgba(0,80,140,0.06))]"
+                    ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
                     : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
                 }
               >
@@ -302,9 +302,9 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
                 type="button"
                 onClick={() => setGender(g)}
                 className={
-                  "px-3 py-[5px] font-[var(--mono)] text-[11px] border transition-colors " +
+                  "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
                   (gender === g
-                    ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint,rgba(0,80,140,0.06))]"
+                    ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
                     : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
                 }
               >

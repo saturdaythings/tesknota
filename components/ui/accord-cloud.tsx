@@ -11,7 +11,7 @@ export function AccordCloud({ accords }: AccordCloudProps) {
           key={accord}
           className={[
             "font-[var(--mono)] tracking-[0.08em] px-3 py-[5px] bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] cursor-default",
-            i === 0 ? "text-[15px]" : i <= 2 ? "text-[13px]" : "text-[11px]",
+            i === 0 ? "text-[15px]" : i <= 2 ? "text-[13px]" : "text-xs",
           ].join(" ")}
         >
           {accord}

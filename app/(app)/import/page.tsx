@@ -355,7 +355,7 @@ function CSVImportTab({ userId }: { userId: string }) {
       <div>
         <button
           onClick={downloadXLSXTemplate}
-          className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-4 py-2.5 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors mb-5"
+          className="font-[var(--mono)] text-xs tracking-[0.06em] px-4 py-2.5 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors mb-5"
         >
           Download template (.xlsx)
         </button>
@@ -436,13 +436,13 @@ function CSVImportTab({ userId }: { userId: string }) {
         <div className="flex gap-3">
           <button
             onClick={runImport}
-            className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-5 py-2.5 bg-[var(--blue)] text-white hover:opacity-90 transition-opacity"
+            className="font-[var(--mono)] text-xs tracking-[0.06em] px-5 py-2.5 bg-[var(--blue)] text-white hover:opacity-90 transition-opacity"
           >
             Import {rows.length} fragrances
           </button>
           <button
             onClick={reset}
-            className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-4 py-2.5 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+            className="font-[var(--mono)] text-xs tracking-[0.06em] px-4 py-2.5 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
           >
             Cancel
           </button>
@@ -477,7 +477,7 @@ function CSVImportTab({ userId }: { userId: string }) {
       )}
       <button
         onClick={reset}
-        className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-4 py-2.5 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+        className="font-[var(--mono)] text-xs tracking-[0.06em] px-4 py-2.5 border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
       >
         Import another file
       </button>
@@ -571,13 +571,13 @@ function SearchTab({ userId }: { userId: string }) {
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => openAddForm(cf, "WANT_TO_BUY")}
-                  className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors whitespace-nowrap"
+                  className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors whitespace-nowrap"
                 >
                   Wishlist
                 </button>
                 <button
                   onClick={() => openAddForm(cf, "CURRENT")}
-                  className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-3 py-[5px] border border-[var(--blue)] text-[var(--blue)] hover:bg-[var(--blue-tint,rgba(0,80,140,0.06))] transition-colors whitespace-nowrap"
+                  className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[5px] border border-[var(--blue)] text-[var(--blue)] hover:bg-[var(--blue-tint)] transition-colors whitespace-nowrap"
                 >
                   Add to Collection
                 </button>
@@ -605,13 +605,13 @@ export default function ImportPage() {
         <div className="flex gap-0 border-b border-[var(--b2)] mb-6 max-w-[820px]">
           <button
             onClick={() => setActiveTab("search")}
-            className={`font-[var(--mono)] text-[11px] tracking-[0.1em] uppercase px-4 py-2 border-b-2 transition-all ${activeTab === "search" ? "border-[var(--blue)] text-[var(--blue)]" : "border-transparent text-[var(--ink3)] hover:text-[var(--ink)]"}`}
+            className={`font-[var(--mono)] text-xs tracking-[0.1em] uppercase px-4 py-2 border-b-2 transition-all ${activeTab === "search" ? "border-[var(--blue)] text-[var(--blue)]" : "border-transparent text-[var(--ink3)] hover:text-[var(--ink)]"}`}
           >
             Search Database
           </button>
           <button
             onClick={() => setActiveTab("csv")}
-            className={`font-[var(--mono)] text-[11px] tracking-[0.1em] uppercase px-4 py-2 border-b-2 transition-all ${activeTab === "csv" ? "border-[var(--blue)] text-[var(--blue)]" : "border-transparent text-[var(--ink3)] hover:text-[var(--ink)]"}`}
+            className={`font-[var(--mono)] text-xs tracking-[0.1em] uppercase px-4 py-2 border-b-2 transition-all ${activeTab === "csv" ? "border-[var(--blue)] text-[var(--blue)]" : "border-transparent text-[var(--ink3)] hover:text-[var(--ink)]"}`}
           >
             Import File
           </button>

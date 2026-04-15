@@ -217,7 +217,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       subtitle={subtitle}
       footer={
         <div className="flex items-center justify-between w-full">
-          <div className="font-[var(--mono)] text-[11px] text-[var(--rose-tk)]">{err}</div>
+          <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">{err}</div>
           <div className="flex gap-2">
             {step === 2 && !isEdit && (
               <button
@@ -264,7 +264,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                       className="px-3 py-[9px] cursor-pointer hover:bg-[var(--b1)] border-b border-[var(--b1)] last:border-0"
                     >
                       <div className="font-[var(--body)] text-sm text-[var(--ink)]">{cf.fragranceName}</div>
-                      <div className="font-[var(--mono)] text-[11px] text-[var(--ink3)]">{cf.fragranceHouse}</div>
+                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{cf.fragranceHouse}</div>
                     </div>
                   ))}
                 </div>
@@ -274,10 +274,10 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               <div className="mt-2 px-3 py-2 bg-[var(--b1)] border border-[var(--b2)]">
                 <div className="font-[var(--body)] text-sm text-[var(--ink)]">{selectedName}</div>
                 {selectedHouse && (
-                  <div className="font-[var(--mono)] text-[11px] text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
                 )}
                 {cd?.avgPrice && (
-                  <div className="font-[var(--mono)] text-[11px] text-[var(--ink3)] mt-[2px]">
+                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mt-[2px]">
                     {cd.avgPrice.replace(/~/g, "")}
                   </div>
                 )}
@@ -310,14 +310,14 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <div className="px-3 py-2 bg-[var(--b1)] border border-[var(--b2)]">
               <div className="font-[var(--body)] text-sm text-[var(--ink)]">{selectedName}</div>
               {selectedHouse && (
-                <div className="font-[var(--mono)] text-[11px] text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                <div className="font-[var(--mono)] text-xs text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
               )}
               <button
                 onClick={() => { if (!isEdit) setStep(1); }}
                 className={
                   isEdit
                     ? "hidden"
-                    : "font-[var(--mono)] text-[11px] text-[var(--blue)] mt-1 hover:underline bg-transparent border-none cursor-pointer p-0"
+                    : "font-[var(--mono)] text-xs text-[var(--blue)] mt-1 hover:underline bg-transparent border-none cursor-pointer p-0"
                 }
               >
                 Change
@@ -337,9 +337,9 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   type="button"
                   onClick={() => toggleSize(s)}
                   className={
-                    "px-3 py-[5px] font-[var(--mono)] text-[11px] border transition-colors " +
+                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
                     (sizes.includes(s)
-                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint,rgba(0,80,140,0.06))]"
+                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
                       : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
                   }
                 >
