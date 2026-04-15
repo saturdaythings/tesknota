@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
 
-const AI_WORKER_URL = process.env.WORKER_URL ?? "";
+const AI_WORKER_URL = process.env.NEXT_PUBLIC_AI_WORKER_URL ?? "";
 
 interface BotMessage { role: "bot" | "user"; text: string }
 interface BotButton { label: string; action: () => void }

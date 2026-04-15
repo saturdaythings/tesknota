@@ -7,9 +7,7 @@ const nextConfig: NextConfig = {
   },
   trailingSlash: true,
   env: {
-    SUPABASE_URL: process.env.SUPABASE_URL ?? "",
-    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ?? "",
-    WORKER_URL: process.env.WORKER_URL ?? "",
+    NEXT_PUBLIC_AI_WORKER_URL: process.env.WORKER_URL ?? "",
   },
 };
 
