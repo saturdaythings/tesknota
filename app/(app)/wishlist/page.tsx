@@ -5,6 +5,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
+import { FragForm } from "@/components/ui/frag-form";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS, getAccords } from "@/lib/frag-utils";
@@ -32,6 +33,7 @@ export default function WishlistPage() {
   const { fragrances, communityFrags, isLoaded } = useData();
   const [filter, setFilter] = useState<WishFilter>("all");
   const [sort, setSort] = useState<SortKey>("nameAZ");
+  const [boughtFrag, setBoughtFrag] = useState<UserFragrance | null>(null);
 
   if (!user) return null;
 
@@ -64,6 +66,12 @@ export default function WishlistPage() {
 
   return (
     <>
+      <FragForm
+        open={!!boughtFrag}
+        onClose={() => setBoughtFrag(null)}
+        editing={boughtFrag}
+        forceStatus="CURRENT"
+      />
       <Topbar category="My Space" title="Wishlist" />
       <main className="flex-1 overflow-y-auto p-[26px]">
         {!isLoaded && (
@@ -143,7 +151,7 @@ export default function WishlistPage() {
                           <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
                           <td className="px-4 py-3">
                             <button
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(e) => { e.stopPropagation(); setBoughtFrag(f); }}
                               className="font-[var(--mono)] text-[11px] tracking-[0.08em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                             >
                               Bought it

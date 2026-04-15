@@ -23,11 +23,13 @@ export function FragRow({
   communityFrags,
   compliments,
   userId,
+  onClick,
 }: {
   frag: UserFragrance;
   communityFrags: CommunityFrag[];
   compliments: UserCompliment[];
   userId: UserId;
+  onClick?: (frag: UserFragrance) => void;
 }) {
   const compCount = getCompCount(frag.fragranceId || frag.id, compliments, userId);
   const accords = getAccords(frag, communityFrags).slice(0, 3).join(", ") || "\u2014";
@@ -38,7 +40,10 @@ export function FragRow({
       : "");
 
   return (
-    <tr className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer">
+    <tr
+      className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+      onClick={() => onClick?.(frag)}
+    >
       <td className="px-4 py-3">
         <div className="font-[var(--body)] text-sm text-[var(--ink)]">
           {frag.name}

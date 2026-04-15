@@ -6,10 +6,11 @@ import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { FragRow } from "@/components/ui/frag-row";
+import { FragForm } from "@/components/ui/frag-form";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { avgRatingStr } from "@/lib/frag-utils";
-import type { FragranceStatus } from "@/types";
+import type { UserFragrance, FragranceStatus } from "@/types";
 
 type StatusFilter = "all" | "wish" | FragranceStatus;
 type SortKey = "nameAZ" | "nameZA" | "houseAZ" | "ratingHL" | "ratingLH" | "added" | "comps";
@@ -31,6 +32,8 @@ export default function CollectionPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sort, setSort] = useState<SortKey>("nameAZ");
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
 
   if (!user) return null;
 
@@ -68,6 +71,11 @@ export default function CollectionPage() {
 
   return (
     <>
+      <FragForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        editing={editingFrag}
+      />
       <Topbar category="My Space" title="My Collection" />
       <main className="flex-1 overflow-y-auto p-[26px]">
         {!isLoaded && (
@@ -121,9 +129,17 @@ export default function CollectionPage() {
             <SectionHeader
               title="Fragrances"
               right={
-                <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                  {filtered.length} {filtered.length === 1 ? "item" : "items"}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                    {filtered.length} {filtered.length === 1 ? "item" : "items"}
+                  </span>
+                  <button
+                    onClick={() => { setEditingFrag(null); setFormOpen(true); }}
+                    className="font-[var(--mono)] text-[11px] tracking-[0.08em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                  >
+                    + Add
+                  </button>
+                </div>
               }
             />
 
@@ -142,6 +158,7 @@ export default function CollectionPage() {
                         communityFrags={communityFrags}
                         compliments={MC}
                         userId={user.id}
+                        onClick={(frag) => { setEditingFrag(frag); setFormOpen(true); }}
                       />
                     ))}
                   </tbody>

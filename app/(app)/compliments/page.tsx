@@ -5,10 +5,11 @@ import { Topbar } from "@/components/layout/Topbar";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
+import { CompForm } from "@/components/ui/comp-form";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS, monthNum } from "@/lib/frag-utils";
-import type { Relation } from "@/types";
+import type { Relation, UserCompliment } from "@/types";
 
 const RELATIONS: (Relation | "all")[] = [
   "all",
@@ -29,6 +30,8 @@ export default function ComplimentsPage() {
   const { user } = useUser();
   const { compliments, fragrances, isLoaded } = useData();
   const [relation, setRelation] = useState<Relation | "all">("all");
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingComp, setEditingComp] = useState<UserCompliment | null>(null);
 
   if (!user) return null;
 
@@ -54,6 +57,11 @@ export default function ComplimentsPage() {
 
   return (
     <>
+      <CompForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        editing={editingComp}
+      />
       <Topbar category="Experiences" title="Compliments" />
       <main className="flex-1 overflow-y-auto p-[26px]">
         {!isLoaded && (
@@ -84,9 +92,17 @@ export default function ComplimentsPage() {
             <SectionHeader
               title="Compliments"
               right={
-                <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                  {filtered.length} {filtered.length === 1 ? "item" : "items"}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                    {filtered.length} {filtered.length === 1 ? "item" : "items"}
+                  </span>
+                  <button
+                    onClick={() => { setEditingComp(null); setFormOpen(true); }}
+                    className="font-[var(--mono)] text-[11px] tracking-[0.08em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                  >
+                    + Log
+                  </button>
+                </div>
               }
             />
 
@@ -109,6 +125,7 @@ export default function ComplimentsPage() {
                         <tr
                           key={c.id}
                           className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+                          onClick={() => { setEditingComp(c); setFormOpen(true); }}
                         >
                           <td className="px-4 py-3">
                             <div className="font-[var(--body)] text-sm text-[var(--ink)]">
