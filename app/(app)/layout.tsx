@@ -11,16 +11,6 @@ import { ToastProvider } from '@/components/ui/toast';
 import { MobileNavProvider } from '@/lib/mobile-nav-context';
 import { BotDrawer } from '@/components/ui/bot-drawer';
 import { CmdPalette } from '@/components/ui/cmd-palette';
-import {
-  LayoutDashboard,
-  FlaskConical,
-  Heart,
-  MessageCircle,
-  BarChart2,
-  Upload,
-  Settings2,
-  Users,
-} from '@/components/ui/Icons';
 
 function DataErrorBanner() {
   const { loadError, reload } = useData();
@@ -60,30 +50,29 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     {
       label: 'My Space',
       items: [
-        { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
-        { href: '/collection', label: 'My Collection', icon: <FlaskConical size={16} />, count: collectionCount },
-        { href: '/wishlist', label: 'Wishlist', icon: <Heart size={16} />, count: wishlistCount },
+        { href: '/dashboard', label: 'Dashboard' },
+        { href: '/collection', label: 'My Collection', count: collectionCount },
+        { href: '/wishlist', label: 'Wishlist', count: wishlistCount },
       ],
     },
     {
       label: 'Experiences',
       items: [
-        { href: '/compliments', label: 'Compliments', icon: <MessageCircle size={16} />, count: complimentsCount },
-        { href: '/analytics', label: 'Analytics', icon: <BarChart2 size={16} /> },
+        { href: '/compliments', label: 'Compliments', count: complimentsCount },
+        { href: '/analytics', label: 'Analytics' },
       ],
     },
     {
       label: 'Social',
       items: [
-        { href: '/friend', label: friend?.name ?? 'Friend', icon: <Users size={16} /> },
+        { href: '/friend', label: friend?.name ?? 'Friend' },
       ],
     },
     {
       label: 'Manage',
       items: [
-        { href: '/import', label: 'Import', icon: <Upload size={16} /> },
-        { href: '/settings', label: 'Settings', icon: <Settings2 size={16} /> },
-        ...(user.isAdmin ? [{ href: '/admin', label: 'Admin', icon: <Settings2 size={16} /> }] : []),
+        { href: '/import', label: 'Import' },
+        ...(user.isAdmin ? [{ href: '/admin', label: 'Admin' }] : []),
       ],
     },
   ];
@@ -124,7 +113,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <MobileNavProvider>
-      <DataProvider>
+      <DataProvider userId={user.id}>
         <AppLayoutInner user={user} profiles={profiles} signOut={signOut}>
           {children}
         </AppLayoutInner>

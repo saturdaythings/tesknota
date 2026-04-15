@@ -991,24 +991,28 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col h-full bg-[var(--adm-bg)] font-[var(--adm-mono)]">
       {/* Admin header */}
-      <div className="border-b-2 border-[var(--adm-fg)] px-8 py-4 flex justify-between items-baseline shrink-0">
-        <div className="flex items-baseline gap-3">
-          <div className="font-[var(--adm-serif)] text-lg font-normal italic text-[var(--adm-fg)]">
-            tesknota <span className="font-[var(--adm-mono)] text-[10px] not-italic tracking-[0.2em] uppercase text-[var(--adm-fg4)] ml-3">Admin</span>
+      <div className="border-b-2 border-[var(--adm-fg)] px-8 py-5 flex justify-between items-start shrink-0">
+        <div>
+          <div className="font-[var(--adm-mono)] text-[22px] font-bold tracking-[0.04em] text-[var(--adm-fg)] leading-none mb-1">
+            Admin
           </div>
-          {lastSync && <span className="text-[11px] text-[var(--adm-fg4)] tracking-[0.06em]">Last sync: {lastSync}</span>}
+          {lastSync && (
+            <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[0.06em]">
+              Last sync: {lastSync}
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-[11px] text-[var(--adm-fg4)]">{user?.name}</span>
+        <div className="flex items-center gap-3">
+          <span className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)]">{user?.name}</span>
           <button
             onClick={load}
-            className="text-[11px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-3 py-1 tracking-[0.1em] uppercase hover:bg-[var(--adm-fg)] hover:text-[var(--adm-bg)] transition-all"
+            className="font-[var(--adm-mono)] text-[11px] font-medium tracking-[0.1em] uppercase bg-[var(--adm-fg)] text-[var(--adm-bg)] px-4 py-1.5 hover:opacity-80 transition-opacity"
           >
-            Refresh
+            Sync Now
           </button>
           <Link
             href="/dashboard"
-            className="text-[11px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-3 py-1 tracking-[0.1em] uppercase hover:bg-[var(--adm-fg)] hover:text-[var(--adm-bg)] transition-all"
+            className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-3 py-1.5 tracking-[0.1em] uppercase hover:bg-[var(--adm-fg)] hover:text-[var(--adm-bg)] transition-all"
           >
             Dashboard
           </Link>
@@ -1060,9 +1064,9 @@ export default function AdminPage() {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[var(--adm-border)] px-8 py-3 flex justify-between text-[10px] text-[var(--adm-fg4)] tracking-[0.08em] shrink-0">
-        <span>tesknota admin</span>
-        <span>api_log + activity_log + community_flags</span>
+      <div className="border-t border-[var(--adm-border)] px-8 py-3 flex justify-between font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] tracking-[0.08em] shrink-0">
+        <span>tesknota / admin</span>
+        <span>api_log · activity_log · community_flags</span>
       </div>
     </div>
   );

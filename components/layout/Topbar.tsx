@@ -22,7 +22,7 @@ export function Topbar({
     <header
       className={cn(
         "flex items-center gap-3 px-[18px] md:px-[26px] flex-shrink-0 z-[100]",
-        "h-[var(--header-height)] bg-[var(--color-cream)] border-b border-[var(--color-cream-dark)]",
+        "h-[var(--header-height)] bg-white border-b border-[var(--color-sand-light)]",
         className,
       )}
     >
@@ -38,9 +38,6 @@ export function Topbar({
       </button>
 
       <div className="flex-1 min-w-0">
-        <div className="font-[var(--font-sans)] text-[12px] tracking-[0.14em] uppercase text-[var(--color-sand)] leading-none mb-[3px]">
-          T\u0118SKNOTA
-        </div>
         <div className="font-[var(--font-serif)] text-[32px] italic font-normal text-[var(--color-navy)] leading-[1.2] truncate">
           {title}
         </div>

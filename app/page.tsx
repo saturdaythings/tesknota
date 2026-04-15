@@ -61,7 +61,7 @@ export default function LoginPage() {
         <div
           className="font-sans font-medium uppercase mt-3"
           style={{
-            fontSize: '11px',
+            fontSize: '12px',
             color: 'rgba(245,240,232,0.6)',
             letterSpacing: '0.22em',
           }}

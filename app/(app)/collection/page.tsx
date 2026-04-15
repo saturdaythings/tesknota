@@ -480,7 +480,7 @@ function CollectionInner() {
               position: "sticky",
               top: 0,
               zIndex: 50,
-              background: "var(--color-cream)",
+              background: "#FFFFFF",
               paddingBottom: "var(--space-3)",
             }}
           >
@@ -511,7 +511,7 @@ function CollectionInner() {
                     height: "40px",
                     paddingLeft: "30px",
                     paddingRight: "10px",
-                    background: "var(--color-cream)",
+                    background: "#FFFFFF",
                     border: "1px solid var(--color-cream-dark)",
                     borderRadius: "3px",
                     fontFamily: "var(--font-sans)",

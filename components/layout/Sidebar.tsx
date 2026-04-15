@@ -9,7 +9,6 @@ import { LogOut } from '@/components/ui/Icons';
 interface NavItem {
   href: string;
   label: string;
-  icon: React.ReactNode;
   count?: number;
   hasNewActivity?: boolean;
 }
@@ -93,7 +92,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           </div>
           <div
             className="font-serif italic leading-snug"
-            style={{ fontSize: '13px', color: 'var(--color-sand)' }}
+            style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)' }}
           >
             [ t&#603;sk-&#712;n&#596;-ta ] &middot; a deep longing for what is absent or past
           </div>
@@ -122,10 +121,10 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                     key={item.href}
                     href={item.href}
                     onClick={close}
-                    className="flex items-center gap-3 transition-colors duration-100"
+                    className="flex items-center transition-colors duration-100"
                     style={{
                       height: '40px',
-                      paddingLeft: '17px',
+                      paddingLeft: '20px',
                       paddingRight: '20px',
                       borderLeft: isActive
                         ? '3px solid var(--color-cream)'
@@ -138,7 +137,6 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                       fontFamily: 'var(--font-sans)',
                     }}
                   >
-                    <span className="flex-shrink-0">{item.icon}</span>
                     <span className="flex-1 truncate">{item.label}</span>
                     {item.hasNewActivity && <LiveDot />}
                     {item.count !== undefined && <CountBadge count={item.count} />}

@@ -35,7 +35,7 @@ interface DataContextValue {
 
 const DataContext = createContext<DataContextValue | null>(null);
 
-export function DataProvider({ children }: { children: React.ReactNode }) {
+export function DataProvider({ children, userId }: { children: React.ReactNode; userId: string }) {
   const [fragrances, setFrags] = useState<UserFragrance[]>([]);
   const [compliments, setComps] = useState<UserCompliment[]>([]);
   const [communityFrags, setCF] = useState<CommunityFrag[]>([]);
@@ -45,13 +45,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const load = useCallback(async () => {
     setIsLoaded(false);
     setLoadError(false);
-    const { data, ok } = await loadAllData();
+    const { data, ok } = await loadAllData(userId);
     setFrags(data.fragrances);
     setComps(data.compliments);
     setCF(data.communityFrags);
     setIsLoaded(true);
     if (!ok) setLoadError(true);
-  }, []);
+  }, [userId]);
 
   useEffect(() => { load(); }, [load]);
 
