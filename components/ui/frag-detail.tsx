@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/modal";
 import { starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
-import { STATUS_LABELS } from "@/types";
-import { statusColorClass } from "@/components/ui/frag-row";
+import { StatusBadge } from "@/components/ui/frag-row";
 import { getCommunityData } from "@/lib/data";
 import { submitCommunityFlag } from "@/lib/data/mutations";
 import { useUser } from "@/lib/user-context";
@@ -179,12 +178,10 @@ export function FragDetail({
       <div className="space-y-5">
         {/* Status + accords header */}
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <span className={`font-[var(--mono)] text-xs tracking-[0.06em] ${statusColorClass(frag.status)}`}>
-              {STATUS_LABELS[frag.status] ?? frag.status}
-            </span>
+          <div className="flex items-center gap-2">
+            <StatusBadge status={frag.status} />
             {frag.isDupe && frag.dupeFor && (
-              <span className="ml-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
+              <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
                 Dupe for {frag.dupeFor}
               </span>
             )}

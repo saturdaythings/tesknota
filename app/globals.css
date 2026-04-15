@@ -51,10 +51,18 @@
   --b3: rgba(43, 68, 128, 0.24);
   --b4: rgba(43, 68, 128, 0.40);
 
-  /* --- Status colors --- */
-  --s-want: #7A6040;
-  --s-unknown: #9088C0;
-  --s-sold: #B08040;
+  /* --- Status colors (text on --off background, WCAG AA) --- */
+  --s-cur:     #1A5C3A;   /* current — dark green */
+  --s-prv:     #3D4A60;   /* prev owned — ink2 */
+  --s-wnt:     #5A3A0A;   /* want to buy/smell — dark amber */
+  --s-no:      #8B2020;   /* don't like — dark red */
+  --s-unk:     #3A2880;   /* identify later — dark purple */
+  --s-fin:     #4A4040;   /* finished — dark neutral */
+  /* Status badge backgrounds */
+  --s-cur-bg:  rgba(26,92,58,0.10);
+  --s-wnt-bg:  rgba(90,58,10,0.10);
+  --s-no-bg:   rgba(139,32,32,0.10);
+  --s-unk-bg:  rgba(58,40,128,0.10);
   --save-green: rgba(60, 180, 90, 0.85);
   --save-green-border: rgba(60, 180, 90, 0.4);
 

@@ -1,20 +1,34 @@
 "use client";
 
 import { MONTHS, starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
-import { STATUS_LABELS, STATUS_CSS } from "@/types";
+import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } from "@/types";
 
-export const STATUS_COLOR: Record<string, string> = {
-  "s-cur": "text-[var(--sage)]",
-  "s-prv": "text-[var(--ink3)]",
-  "s-wnt": "text-[var(--s-want)]",
-  "s-no": "text-[var(--rose-tk)]",
-  "s-unk": "text-[var(--s-unknown)]",
-  "s-fin": "text-[var(--s-sold)]",
+// Status badge: colored pill with per-status color token
+const STATUS_STYLE: Record<string, { text: string; bg: string }> = {
+  CURRENT:          { text: "var(--s-cur)",  bg: "var(--s-cur-bg)" },
+  PREVIOUSLY_OWNED: { text: "var(--s-prv)",  bg: "transparent" },
+  WANT_TO_BUY:      { text: "var(--s-wnt)",  bg: "var(--s-wnt-bg)" },
+  WANT_TO_SMELL:    { text: "var(--s-wnt)",  bg: "var(--s-wnt-bg)" },
+  DONT_LIKE:        { text: "var(--s-no)",   bg: "var(--s-no-bg)" },
+  WANT_TO_IDENTIFY: { text: "var(--s-unk)",  bg: "var(--s-unk-bg)" },
+  FINISHED:         { text: "var(--s-fin)",  bg: "transparent" },
 };
 
 export function statusColorClass(status: FragranceStatus): string {
-  return STATUS_COLOR[STATUS_CSS[status]] ?? "text-[var(--ink3)]";
+  return ""; // kept for backward compat — use StatusBadge instead
+}
+
+export function StatusBadge({ status }: { status: FragranceStatus }) {
+  const style = STATUS_STYLE[status] ?? { text: "var(--ink3)", bg: "transparent" };
+  return (
+    <span
+      className="font-[var(--mono)] text-xs tracking-[0.04em] px-2 py-[2px] whitespace-nowrap"
+      style={{ color: style.text, background: style.bg }}
+    >
+      {STATUS_LABELS[status] ?? status}
+    </span>
+  );
 }
 
 export function FragRow({
@@ -23,12 +37,16 @@ export function FragRow({
   compliments,
   userId,
   onClick,
+  actionLabel,
+  onAction,
 }: {
   frag: UserFragrance;
   communityFrags: CommunityFrag[];
   compliments: UserCompliment[];
   userId: string;
   onClick?: (frag: UserFragrance) => void;
+  actionLabel?: string;
+  onAction?: (frag: UserFragrance, e: React.MouseEvent) => void;
 }) {
   const compCount = getCompCount(frag.fragranceId || frag.id, compliments, userId);
   const accords = getAccords(frag, communityFrags).slice(0, 3).join(", ") || "\u2014";
@@ -68,10 +86,18 @@ export function FragRow({
         {compCount > 0 ? <span className="text-[var(--blue)]">{compCount}</span> : "\u2014"}
       </td>
       <td className="px-4 py-3">
-        <span className={`font-[var(--mono)] text-xs tracking-[0.04em] ${statusColorClass(frag.status)}`}>
-          {STATUS_LABELS[frag.status] ?? frag.status}
-        </span>
+        <StatusBadge status={frag.status} />
       </td>
+      {onAction && (
+        <td className="px-4 py-3">
+          <button
+            onClick={(e) => { e.stopPropagation(); onAction(frag, e); }}
+            className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors whitespace-nowrap"
+          >
+            {actionLabel ?? "Action"}
+          </button>
+        </td>
+      )}
     </tr>
   );
 }

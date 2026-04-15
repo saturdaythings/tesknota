@@ -7,10 +7,10 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { FragForm } from "@/components/ui/frag-form";
 import { FragDetail } from "@/components/ui/frag-detail";
+import { FragRow } from "@/components/ui/frag-row";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
-import { MONTHS, getAccords } from "@/lib/frag-utils";
 import type { UserFragrance, CommunityFrag } from "@/types";
 
 type WishFilter = "all" | "WANT_TO_BUY" | "WANT_TO_SMELL";
@@ -21,14 +21,6 @@ const WISH_FILTERS: { label: string; value: WishFilter }[] = [
   { label: "Want to Buy", value: "WANT_TO_BUY" },
   { label: "Want to Smell", value: "WANT_TO_SMELL" },
 ];
-
-function getPrice(f: UserFragrance, communityFrags: CommunityFrag[]): string {
-  const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const cf = communityFrags.find(
-    (c) => norm(c.fragranceName) === norm(f.name) && norm(c.fragranceHouse) === norm(f.house)
-  );
-  return (cf?.avgPrice ?? "").replace(/~/g, "") || "\u2014";
-}
 
 export default function WishlistPage() {
   const { user, profiles } = useUser();
@@ -164,51 +156,27 @@ export default function WishlistPage() {
               </div>
             ) : (
               <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-                <table className="w-full min-w-[520px]">
+                <table className="w-full min-w-[640px]">
                   <thead>
                     <tr className="border-b border-[var(--b2)]">
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Added</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Avg Price</th>
-                      <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] text-[var(--ink3)]">Accords</th>
-                      <th></th>
+                      {["Fragrance", "Size", "Rating", "Added", "Accords", "Comps", "Status", ""].map((h) => (
+                        <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase text-[var(--ink3)] font-normal">{h}</th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((f) => {
-                      const addedStr =
-                        f.purchaseDate ??
-                        (f.createdAt
-                          ? `${MONTHS[new Date(f.createdAt).getMonth()]} ${new Date(f.createdAt).getFullYear()}`
-                          : "");
-                      const accords = getAccords(f, communityFrags).slice(0, 3).join(", ") || "\u2014";
-                      const price = getPrice(f, communityFrags);
-                      return (
-                        <tr
-                          key={f.id}
-                          className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
-                          onClick={() => setDetailFrag(f)}
-                        >
-                          <td className="px-4 py-3">
-                            <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-                            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
-                          </td>
-                          <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
-                            {addedStr || "\u2014"}
-                          </td>
-                          <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">{price}</td>
-                          <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
-                          <td className="px-4 py-3">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setBoughtFrag(f); }}
-                              className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[5px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-                            >
-                              Bought it
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {filtered.map((f) => (
+                      <FragRow
+                        key={f.id}
+                        frag={f}
+                        communityFrags={communityFrags}
+                        compliments={MC}
+                        userId={user.id}
+                        onClick={setDetailFrag}
+                        actionLabel="Bought it"
+                        onAction={(frag, e) => { void e; setBoughtFrag(frag); }}
+                      />
+                    ))}
                   </tbody>
                 </table>
               </div>
