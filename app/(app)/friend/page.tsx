@@ -156,8 +156,19 @@ function FriendCollectionTab({
       {sorted.length === 0 ? (
         <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No fragrances.</div>
       ) : (
-        <div className="border border-[var(--b2)] mb-6">
-          <table className="w-full">
+        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
+          <table className="w-full min-w-[640px]">
+            <thead>
+              <tr className="border-b border-[var(--b2)]">
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Size</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Rating</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Added</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Accords</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Status</th>
+              </tr>
+            </thead>
             <tbody>
               {sorted.map((f) => (
                 <FragRow
@@ -201,8 +212,16 @@ function FriendComplimentsTab({
       {sorted.length === 0 ? (
         <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No compliments.</div>
       ) : (
-        <div className="border border-[var(--b2)] mb-6">
-          <table className="w-full">
+        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
+          <table className="w-full min-w-[480px]">
+            <thead>
+              <tr className="border-b border-[var(--b2)]">
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Relation</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">When</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Location</th>
+              </tr>
+            </thead>
             <tbody>
               {sorted.map((c) => {
                 const frag = frags.find((f) => (f.fragranceId || f.id) === c.primaryFragId);
@@ -262,8 +281,15 @@ function FriendWishlistTab({
       {sorted.length === 0 ? (
         <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No wishlist items.</div>
       ) : (
-        <div className="border border-[var(--b2)] mb-6">
-          <table className="w-full">
+        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
+          <table className="w-full min-w-[420px]">
+            <thead>
+              <tr className="border-b border-[var(--b2)]">
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Avg Price</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Accords</th>
+              </tr>
+            </thead>
             <tbody>
               {sorted.map((f) => {
                 const accords = getAccords(f, communityFrags).slice(0, 3).join(", ") || "\u2014";
@@ -327,8 +353,15 @@ function InCommonTab({
           No fragrances in common yet.
         </div>
       ) : (
-        <div className="border border-[var(--b2)] mb-6">
-          <table className="w-full">
+        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
+          <table className="w-full min-w-[420px]">
+            <thead>
+              <tr className="border-b border-[var(--b2)]">
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Accords</th>
+                <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
+              </tr>
+            </thead>
             <tbody>
               {sorted.map((f) => {
                 const myFrag = myFrags.find((mf) => mf.name.toLowerCase() === f.name.toLowerCase());

@@ -149,12 +149,31 @@ export default function WishlistPage() {
             />
 
             {filtered.length === 0 ? (
-              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">
-                {wish.length === 0 ? "Nothing on your wishlist yet." : "No matches."}
+              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4 flex items-center gap-3">
+                {wish.length === 0 ? "Nothing on your wishlist yet." : (
+                  <>
+                    No matches.
+                    <button
+                      onClick={() => setFilter("all")}
+                      className="font-[var(--mono)] text-[11px] tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                    >
+                      Clear filter
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
-              <div className="border border-[var(--b2)] mb-6">
-                <table className="w-full">
+              <div className="overflow-x-auto border border-[var(--b2)] mb-6">
+                <table className="w-full min-w-[520px]">
+                  <thead>
+                    <tr className="border-b border-[var(--b2)]">
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Added</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Avg Price</th>
+                      <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Accords</th>
+                      <th></th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {filtered.map((f) => {
                       const addedStr =

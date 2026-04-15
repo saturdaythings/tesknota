@@ -113,8 +113,15 @@ function ComplimentsTab({
         {topFrags.length === 0 ? (
           <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-2">None yet.</div>
         ) : (
-          <div className="border border-[var(--b2)]">
-            <table className="w-full">
+          <div className="overflow-x-auto border border-[var(--b2)]">
+            <table className="w-full min-w-[400px]">
+              <thead>
+                <tr className="border-b border-[var(--b2)]">
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Fragrance</th>
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Compliments</th>
+                  <th className="px-4 py-2 text-right font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">%</th>
+                </tr>
+              </thead>
               <tbody>
                 {topFrags.map(({ fragId, count, name, house }) => (
                   <tr key={fragId} className="border-b border-[var(--b1)] last:border-0">
@@ -229,8 +236,14 @@ function CollectionTab({
       {topHouses.length > 0 && (
         <div className="mb-6">
           <SectionHeader title="Top houses" />
-          <div className="border border-[var(--b2)]">
-            <table className="w-full">
+          <div className="overflow-x-auto border border-[var(--b2)]">
+            <table className="w-full min-w-[300px]">
+              <thead>
+                <tr className="border-b border-[var(--b2)]">
+                  <th className="px-4 py-2 text-left font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">House</th>
+                  <th className="px-4 py-2 text-right font-[var(--mono)] text-[11px] tracking-[0.06em] text-[var(--ink3)]">Count</th>
+                </tr>
+              </thead>
               <tbody>
                 {topHouses.map(([house, count]) => (
                   <tr key={house} className="border-b border-[var(--b1)] last:border-0">
