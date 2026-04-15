@@ -62,7 +62,7 @@ export default function SettingsPage() {
               <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-1">
                 Name
               </div>
-              <div className="font-[var(--serif)] text-lg text-[var(--blue)]">
+              <div className="font-[var(--serif)] text-lg text-[var(--ink)]">
                 {user.name}
               </div>
             </div>

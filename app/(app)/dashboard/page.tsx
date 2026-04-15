@@ -124,7 +124,7 @@ export default function DashboardPage() {
 function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
   return (
     <div className="max-w-[440px] mt-8">
-      <div className="font-[var(--serif)] text-[26px] text-[var(--blue)] mb-1">
+      <div className="font-[var(--serif)] text-[26px] text-[var(--ink)] mb-1">
         Welcome to t&#x0119;sknota
       </div>
       <div className="font-[var(--mono)] text-sm text-[var(--ink3)] tracking-[0.06em] mb-6">
@@ -211,7 +211,7 @@ function Spotlight({ MF, MC }: { MF: UserFragrance[]; MC: UserCompliment[] }) {
     <div>
       <SectionHeader title="Signature spotlight" />
       <div className="bg-[var(--blue4)] border border-[var(--b2)] p-5">
-        <div className="font-[var(--serif)] text-[22px] text-[var(--blue)] leading-tight mb-[2px]">
+        <div className="font-[var(--serif)] text-[22px] text-[var(--ink)] leading-tight mb-[2px]">
           {topFrag.name}
         </div>
         <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] mb-4">
@@ -230,7 +230,7 @@ function Spotlight({ MF, MC }: { MF: UserFragrance[]; MC: UserCompliment[] }) {
 function SpotStat({ value, label }: { value: string | number; label: string }) {
   return (
     <div>
-      <div className="font-[var(--serif)] text-[20px] text-[var(--blue)] leading-none">{value}</div>
+      <div className="font-[var(--serif)] text-[20px] text-[var(--ink)] leading-none">{value}</div>
       <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mt-[3px]">
         {label}
       </div>
