@@ -1,418 +1,359 @@
 "use client";
 
-import { useState, useMemo, useCallback, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Plus, MessageCircle, SearchX, MapPin } from "lucide-react";
-import { Topbar } from "@/components/layout/Topbar";
-import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/ui/empty-state";
-import { LogComplimentModal } from "@/components/compliments/log-compliment-modal";
-import { useUser } from "@/lib/user-context";
-import { useData } from "@/lib/data-context";
-import type { UserCompliment } from "@/types";
+import { useState, useMemo, Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
+import { Header } from '@/components/layout/Header';
+import { useUser } from '@/lib/user-context';
+import { useData } from '@/lib/data-context';
+import type { UserCompliment, Relation, FragranceType } from '@/types';
+import { MessageCircle } from '@/components/ui/Icons';
 
-// ── Constants ─────────────────────────────────────────────
+// ── Constants ──────────────────────────────────────────────
 
-const RELATION_OPTIONS = [
-  { value: "Significant Other", label: "Partner" },
-  { value: "Friend", label: "Friend" },
-  { value: "Family", label: "Family" },
-  { value: "Colleague / Client", label: "Colleague" },
-  { value: "Stranger", label: "Stranger" },
-  { value: "Other", label: "Other" },
+const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+const RELATION_TABS: { label: string; value: Relation | 'ALL' }[] = [
+  { label: 'All', value: 'ALL' },
+  { label: 'Strangers', value: 'Stranger' },
+  { label: 'Friends', value: 'Friend' },
+  { label: 'Colleagues', value: 'Colleague / Client' },
+  { label: 'Family', value: 'Family' },
+  { label: 'Partners', value: 'Significant Other' },
+  { label: 'Other', value: 'Other' },
+];
+
+const SORT_OPTIONS = [
+  { value: 'date-desc', label: 'Date — Newest first' },
+  { value: 'date-asc', label: 'Date — Oldest first' },
+  { value: 'frag-az', label: 'Fragrance A–Z' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────
 
-const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+function compSortNum(c: UserCompliment): number {
+  if (c.createdAt) return new Date(c.createdAt).getTime();
+  return parseInt(c.year || '0') * 100 + parseInt(c.month || '0');
+}
 
-function formatDate(createdAt: string, month: string, year: string): string {
-  if (createdAt) {
-    const d = new Date(createdAt);
-    if (!isNaN(d.getTime())) {
-      return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-    }
+function formatDate(c: UserCompliment): string {
+  if (c.createdAt) {
+    const d = new Date(c.createdAt);
+    if (!isNaN(d.getTime())) return `${MONTH_SHORT[d.getMonth()]} ${d.getFullYear()}`;
   }
-  const mn = parseInt(month, 10);
-  const mLabel = mn >= 1 && mn <= 12 ? MONTH_NAMES[mn - 1] : month;
-  return year ? `${mLabel} ${year}` : mLabel;
+  const mn = parseInt(c.month, 10);
+  const label = mn >= 1 && mn <= 12 ? MONTH_SHORT[mn - 1] : c.month;
+  return c.year ? `${label} ${c.year}` : label;
 }
 
-function compSortKey(c: UserCompliment): number {
-  if (c.createdAt) return -new Date(c.createdAt).getTime();
-  return -(parseInt(c.year || "0") * 100 + parseInt(c.month || "0"));
+function buildMeta(c: UserCompliment): string {
+  const parts: string[] = [];
+  if (c.relation) parts.push(c.relation.toUpperCase());
+  if (c.gender) parts.push(c.gender.toUpperCase());
+  const loc = [c.location, c.city, c.state || c.country]
+    .filter(Boolean)
+    .join(', ')
+    .toUpperCase();
+  if (loc) parts.push(loc);
+  return parts.join(' · ');
 }
 
-// convert YYYY-MM-DD to a ym number for range comparisons
-function toYM(dateStr: string): number {
-  if (!dateStr) return 0;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return 0;
-  return d.getFullYear() * 100 + (d.getMonth() + 1);
-}
+// ── Sub-components ─────────────────────────────────────────
 
-function compYM(c: UserCompliment): number {
-  return parseInt(c.year || "0") * 100 + parseInt(c.month || "0");
-}
-
-// ── Card skeleton ─────────────────────────────────────────
-
-function CardSkeleton() {
+function TabPill({
+  label,
+  count,
+  active,
+  onClick,
+}: {
+  label: string;
+  count: number;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
-    <div
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.1em] transition-colors duration-100 flex-shrink-0 cursor-pointer border-none"
       style={{
-        height: 96,
-        background: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
-        borderRadius: "var(--radius-lg)",
-        padding: "var(--space-5)",
-        display: "flex",
-        gap: "var(--space-4)",
+        fontSize: '12px',
+        height: '36px',
+        padding: '0 16px',
+        borderRadius: '2px',
+        background: active ? 'var(--color-navy)' : 'var(--color-cream-dark)',
+        color: active ? 'var(--color-cream)' : 'var(--color-sand)',
       }}
     >
-      <div style={{ flex: 1 }}>
-        <Skeleton className="h-5 w-3/5 mb-2" />
-        <Skeleton className="h-4 w-2/5" />
+      {label}
+      <span
+        className="font-sans font-medium"
+        style={{
+          fontSize: '11px',
+          opacity: 0.7,
+        }}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
+
+interface ComplimentRowProps {
+  comp: UserCompliment;
+  fragName: string;
+  fragHouse: string;
+  fragType: FragranceType | null;
+  onEdit: () => void;
+}
+
+function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: ComplimentRowProps) {
+  const meta = buildMeta(comp);
+  const date = formatDate(comp);
+
+  return (
+    <div
+      onClick={onEdit}
+      className="flex gap-4 items-start cursor-pointer transition-colors duration-100"
+      style={{
+        minHeight: '80px',
+        padding: '16px 0',
+        borderBottom: '1px solid var(--color-cream-dark)',
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+    >
+      {/* Left: fragrance info */}
+      <div className="flex-1 min-w-0 pr-4">
+        {/* Line 1: frag name + badge + layered */}
+        <div className="flex flex-wrap items-center gap-2 mb-1">
+          <span
+            className="font-serif italic"
+            style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}
+          >
+            {fragName}
+          </span>
+          {fragType && (
+            <Badge variant="neutral" className="text-[11px] py-[2px]">
+              {fragType}
+            </Badge>
+          )}
+          {comp.secondaryFrag && (
+            <span
+              className="font-serif italic"
+              style={{ fontSize: '14px', color: 'var(--color-sand)' }}
+            >
+              + {comp.secondaryFrag}
+            </span>
+          )}
+        </div>
+
+        {/* Line 2: house */}
+        {fragHouse && (
+          <div
+            className="font-sans uppercase tracking-[0.1em] mb-1"
+            style={{ fontSize: '12px', color: 'var(--color-sand)' }}
+          >
+            {fragHouse}
+          </div>
+        )}
+
+        {/* Line 3: relation · gender · location */}
+        {meta && (
+          <div
+            className="font-sans mb-1"
+            style={{ fontSize: '13px', color: 'var(--color-sand)' }}
+          >
+            {meta}
+          </div>
+        )}
+
+        {/* Line 4: notes */}
+        {comp.notes && (
+          <div
+            className="font-serif italic"
+            style={{ fontSize: '14px', color: 'rgba(200,184,154,0.8)', lineHeight: 1.4 }}
+          >
+            {comp.notes}
+          </div>
+        )}
       </div>
-      <div style={{ flexShrink: 0, width: 120 }}>
-        <Skeleton className="h-4 w-full mb-2" />
-        <Skeleton className="h-5 w-16 ml-auto" />
+
+      {/* Right: date */}
+      <div
+        className="font-sans flex-shrink-0 text-right"
+        style={{ fontSize: '14px', color: 'var(--color-sand)', minWidth: '72px' }}
+      >
+        {date}
       </div>
     </div>
   );
 }
 
-// ── Compliment row card ────────────────────────────────────
-
-interface ComplimentCardProps {
-  comp: UserCompliment;
-  fragName: string;
-  fragHouse: string;
-}
-
-function ComplimentCard({ comp, fragName, fragHouse }: ComplimentCardProps) {
-  const locationStr = [comp.city, comp.country].filter(Boolean).join(", ") || comp.location;
-
+function EmptyCompliments({ onAdd }: { onAdd: () => void }) {
   return (
-    <Card padding="var(--space-5)">
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <MessageCircle size={40} style={{ color: 'var(--color-sand)', marginBottom: '16px' }} />
       <div
-        style={{
-          display: "flex",
-          gap: "var(--space-4)",
-          alignItems: "flex-start",
-        }}
+        className="font-serif italic mb-2"
+        style={{ fontSize: '22px', color: 'var(--color-navy)' }}
       >
-        {/* Left column */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            className="text-subheading"
-            style={{ fontWeight: 500, marginBottom: 2 }}
-          >
-            {fragName}
-          </div>
-          <div
-            className="text-secondary"
-            style={{ marginBottom: "var(--space-2)" }}
-          >
-            {fragHouse}
-          </div>
-          {comp.notes && (
-            <div
-              className="text-body"
-              style={{
-                color: "var(--color-text-secondary)",
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
-              {comp.notes}
-            </div>
-          )}
-        </div>
-
-        {/* Right column */}
-        <div
-          style={{
-            flexShrink: 0,
-            minWidth: 160,
-            textAlign: "right",
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-1)",
-            alignItems: "flex-end",
-          }}
-        >
-          <span className="text-meta">
-            {formatDate(comp.createdAt, comp.month, comp.year)}
-          </span>
-          {comp.relation && (
-            <Badge variant="neutral">{comp.relation}</Badge>
-          )}
-          {locationStr && (
-            <span
-              className="text-meta"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 3,
-                color: "var(--color-text-muted)",
-                justifyContent: "flex-end",
-              }}
-            >
-              <MapPin size={12} aria-hidden="true" style={{ flexShrink: 0 }} />
-              {locationStr}
-            </span>
-          )}
-          {comp.secondaryFrag && (
-            <span className="text-meta" style={{ fontStyle: "italic" }}>
-              layered with {comp.secondaryFrag}
-            </span>
-          )}
-        </div>
+        No compliments yet
       </div>
-    </Card>
+      <div
+        className="font-sans mb-6"
+        style={{ fontSize: '14px', color: 'var(--color-sand)', maxWidth: '280px' }}
+      >
+        Start logging when someone notices your fragrance.
+      </div>
+      <Button variant="primary" onClick={onAdd}>
+        Log First Compliment
+      </Button>
+    </div>
   );
 }
 
-// ── Inner page ─────────────────────────────────────────────
+// ── Page ───────────────────────────────────────────────────
 
 function ComplimentsInner() {
   const { user } = useUser();
   const { compliments, fragrances, isLoaded } = useData();
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const fragFilter = searchParams.get("frag") || "";
-  const relationFilter = searchParams.get("relation") || "";
-  const fromFilter = searchParams.get("from") || "";
-  const toFilter = searchParams.get("to") || "";
-
-  const setParam = useCallback(
-    (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-      router.push(`?${params.toString()}`);
-    },
-    [searchParams, router],
-  );
-
-  const clearFilters = useCallback(() => {
-    router.push(window.location.pathname);
-  }, [router]);
-
-  const filtersActive = !!(fragFilter || relationFilter || fromFilter || toFilter);
+  const [logOpen, setLogOpen] = useState(false);
+  const [editingComp, setEditingComp] = useState<UserCompliment | null>(null);
+  const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
+  const [sort, setSort] = useState('date-desc');
 
   if (!user) return null;
 
-  const MC = compliments.filter((c) => c.userId === user.id);
-  const MF = fragrances.filter((f) => f.userId === user.id);
+  const myComps = compliments.filter((c) => c.userId === user.id);
+  const myFrags = fragrances.filter((f) => f.userId === user.id);
 
-  // Build fragrance select options from user's collection
-  const fragOptions = MF.map((f) => ({
-    value: f.fragranceId || f.id,
-    label: f.house ? `${f.name} — ${f.house}` : f.name,
-  }));
+  // Build lookup maps
+  const fragById = new Map(myFrags.map((f) => [f.fragranceId || f.id, f]));
 
-  // Build lookup map: fragId -> frag
-  const fragMap = new Map(MF.map((f) => [f.fragranceId || f.id, f]));
-
-  function getFragInfo(comp: UserCompliment): { name: string; house: string } {
-    const frag = fragMap.get(comp.primaryFragId ?? "");
+  function getFragInfo(comp: UserCompliment) {
+    const f = fragById.get(comp.primaryFragId ?? '') ?? null;
     return {
-      name: frag?.name ?? comp.primaryFrag ?? "-",
-      house: frag?.house ?? "",
+      name: f?.name ?? comp.primaryFrag ?? '-',
+      house: f?.house ?? '',
+      type: f?.type ?? null,
     };
   }
 
-  const filtered = useMemo(() => {
-    let result = [...MC];
+  // Tab counts
+  const tabCounts = useMemo(() => {
+    const map: Record<string, number> = { ALL: myComps.length };
+    for (const c of myComps) {
+      map[c.relation] = (map[c.relation] ?? 0) + 1;
+    }
+    return map;
+  }, [myComps]);
 
-    if (fragFilter) {
-      result = result.filter((c) => c.primaryFragId === fragFilter);
-    }
-    if (relationFilter) {
-      result = result.filter((c) => c.relation === relationFilter);
-    }
-    if (fromFilter) {
-      const fromYM = toYM(fromFilter);
-      result = result.filter((c) => compYM(c) >= fromYM);
-    }
-    if (toFilter) {
-      const toYM2 = toYM(toFilter);
-      result = result.filter((c) => compYM(c) <= toYM2);
-    }
-
-    return result.sort((a, b) => compSortKey(a) - compSortKey(b));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [compliments, fragFilter, relationFilter, fromFilter, toFilter, user.id]);
+  // Filtered + sorted
+  const displayed = useMemo(() => {
+    let result = relationTab === 'ALL' ? myComps : myComps.filter((c) => c.relation === relationTab);
+    if (sort === 'date-desc') result = [...result].sort((a, b) => compSortNum(b) - compSortNum(a));
+    else if (sort === 'date-asc') result = [...result].sort((a, b) => compSortNum(a) - compSortNum(b));
+    else if (sort === 'frag-az') result = [...result].sort((a, b) => (a.primaryFrag ?? '').localeCompare(b.primaryFrag ?? ''));
+    return result;
+  }, [myComps, relationTab, sort]);
 
   return (
     <>
-      <LogComplimentModal open={modalOpen} onClose={() => setModalOpen(false)} />
-      <Topbar title="Compliments" />
+      <LogComplimentModal
+        open={logOpen}
+        onClose={() => setLogOpen(false)}
+      />
+      <LogComplimentModal
+        open={!!editingComp}
+        onClose={() => setEditingComp(null)}
+        editing={editingComp}
+      />
 
-      <main style={{ flex: 1, overflowY: "auto" }}>
+      <Header pageTitle="Compliments" />
+
+      <main className="flex-1 overflow-y-auto">
         <div
-          style={{
-            maxWidth: 1200,
-            margin: "0 auto",
-            padding: "var(--space-8)",
-          }}
-          className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
+          className="mx-auto"
+          style={{ padding: '40px', maxWidth: '1000px' }}
         >
-          {/* Page header */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "var(--space-6)",
-            }}
-          >
-            <h1 className="text-page-title">Compliments</h1>
-            <Button variant="primary" onClick={() => setModalOpen(true)}>
-              <Plus size={15} aria-hidden="true" />
+          {/* Page header row */}
+          <div className="flex items-center justify-between mb-8">
+            <h1
+              className="font-serif italic"
+              style={{ fontSize: '26px', color: 'var(--color-navy)' }}
+            >
+              Compliment Log
+            </h1>
+            <Button variant="primary" onClick={() => setLogOpen(true)}>
               Log Compliment
             </Button>
           </div>
 
-          {/* Filter toolbar */}
-          <div
-            style={{
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-md)",
-              padding: "var(--space-3) var(--space-4)",
-              display: "flex",
-              gap: "var(--space-3)",
-              flexWrap: "wrap",
-              alignItems: "flex-end",
-              marginBottom: "var(--space-6)",
-            }}
-          >
-            {/* Filters */}
-            <div
-              style={{
-                display: "flex",
-                gap: "var(--space-3)",
-                flexWrap: "wrap",
-                flex: 1,
-                alignItems: "flex-end",
-              }}
-            >
-              <div style={{ width: 220 }}>
-                <Select
-                  options={fragOptions}
-                  value={fragFilter}
-                  onChange={(v) => setParam("frag", v)}
-                  placeholder="All Fragrances"
+          {/* Filter bar */}
+          <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+            {/* Tab pills */}
+            <div className="flex flex-wrap gap-2">
+              {RELATION_TABS.map((tab) => (
+                <TabPill
+                  key={tab.value}
+                  label={tab.label}
+                  count={tabCounts[tab.value] ?? 0}
+                  active={relationTab === tab.value}
+                  onClick={() => setRelationTab(tab.value)}
                 />
-              </div>
-              <div style={{ width: 160 }}>
-                <Select
-                  options={RELATION_OPTIONS}
-                  value={relationFilter}
-                  onChange={(v) => setParam("relation", v)}
-                  placeholder="All Relations"
-                />
-              </div>
-              <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "flex-end" }}>
-                <div style={{ width: 140 }}>
-                  <Input
-                    type="date"
-                    value={fromFilter}
-                    onChange={(e) => setParam("from", e.target.value)}
-                    placeholder="From"
-                  />
-                </div>
-                <div style={{ width: 140 }}>
-                  <Input
-                    type="date"
-                    value={toFilter}
-                    onChange={(e) => setParam("to", e.target.value)}
-                    placeholder="To"
-                  />
-                </div>
-              </div>
+              ))}
             </div>
 
-            {/* Right: count + clear */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--space-3)",
-                flexShrink: 0,
-              }}
-            >
-              {isLoaded && (
-                <span className="text-secondary">
-                  {filtered.length} compliment{filtered.length !== 1 ? "s" : ""}
-                </span>
-              )}
-              {filtersActive && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  Clear filters
-                </Button>
-              )}
+            {/* Sort */}
+            <div style={{ width: '220px', flexShrink: 0 }}>
+              <Select
+                options={SORT_OPTIONS}
+                value={sort}
+                onChange={setSort}
+              />
             </div>
           </div>
 
-          {/* Content */}
+          {/* List */}
           {!isLoaded ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <CardSkeleton key={i} />
+            /* Skeleton */
+            <div>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    height: '80px',
+                    borderBottom: '1px solid var(--color-cream-dark)',
+                    background: 'rgba(237,232,223,0.3)',
+                    borderRadius: '3px',
+                    marginBottom: '2px',
+                  }}
+                />
               ))}
             </div>
-          ) : MC.length === 0 ? (
-            <EmptyState
-              icon={<MessageCircle size={48} />}
-              title="No compliments yet"
-              description="Start logging when someone notices your fragrance."
-              action={
-                <Button variant="primary" onClick={() => setModalOpen(true)}>
-                  Log First Compliment
-                </Button>
-              }
-            />
-          ) : filtered.length === 0 ? (
-            <EmptyState
-              icon={<SearchX size={48} />}
-              title="No matches"
-              description="Try adjusting your filters."
-              action={
-                <Button variant="ghost" onClick={clearFilters}>
-                  Clear filters
-                </Button>
-              }
-            />
+          ) : myComps.length === 0 ? (
+            <EmptyCompliments onAdd={() => setLogOpen(true)} />
+          ) : displayed.length === 0 ? (
+            <div className="py-16 text-center">
+              <div className="font-sans" style={{ fontSize: '14px', color: 'var(--color-sand)' }}>
+                No compliments match this filter.
+              </div>
+            </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
-              {filtered.map((comp) => {
-                const { name, house } = getFragInfo(comp);
+            <div>
+              {displayed.map((comp) => {
+                const { name, house, type } = getFragInfo(comp);
                 return (
-                  <ComplimentCard
+                  <ComplimentRow
                     key={comp.id}
                     comp={comp}
                     fragName={name}
                     fragHouse={house}
+                    fragType={type}
+                    onEdit={() => setEditingComp(comp)}
                   />
                 );
               })}
