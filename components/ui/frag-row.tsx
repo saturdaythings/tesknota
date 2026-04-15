@@ -27,11 +27,19 @@ const STATUS_STYLE: Record<string, { text: string; bg: string }> = {
 };
 
 export function StatusBadge({ status }: { status: FragranceStatus }) {
-  const style = STATUS_STYLE[status] ?? { text: "var(--ink3)", bg: "transparent" };
+  const style = STATUS_STYLE[status] ?? { text: "var(--color-text-secondary)", bg: "transparent" };
   return (
     <span
-      className="font-[var(--mono)] text-xs tracking-[0.04em] px-2 py-[2px] whitespace-nowrap"
-      style={{ color: style.text, background: style.bg }}
+      style={{
+        color: style.text,
+        background: style.bg,
+        fontSize: "var(--text-xs)",
+        fontWeight: 500,
+        letterSpacing: "0.04em",
+        padding: "2px var(--space-2)",
+        borderRadius: "var(--radius-sm)",
+        whiteSpace: "nowrap",
+      }}
     >
       {STATUS_LABELS[status] ?? status}
     </span>
@@ -65,46 +73,123 @@ export function FragRow({
 
   return (
     <tr
-      className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
+      style={{
+        borderBottom: "1px solid var(--color-border)",
+        cursor: "pointer",
+        transition: "background var(--transition-fast)",
+      }}
+      className="last:border-0 hover:bg-[var(--color-surface-raised)]"
       onClick={() => onClick?.(frag)}
     >
-      <td className="px-4 py-3">
-        <div className="font-[var(--body)] text-sm text-[var(--ink)]">
+      <td style={{ padding: "var(--space-3) var(--space-4)" }}>
+        <div
+          style={{
+            fontSize: "var(--text-sm)",
+            color: "var(--color-text-primary)",
+            fontWeight: 500,
+          }}
+        >
           {frag.name}
           {frag.isDupe && (
-            <span className="ml-2 font-[var(--mono)] text-[10px] tracking-[0.06em] text-[var(--ink3)] uppercase align-middle">
+            <span
+              style={{
+                marginLeft: "var(--space-2)",
+                fontSize: "var(--text-xs)",
+                letterSpacing: "0.06em",
+                color: "var(--color-text-muted)",
+                textTransform: "uppercase",
+                verticalAlign: "middle",
+              }}
+            >
               dupe
             </span>
           )}
         </div>
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+        <div
+          style={{
+            fontSize: "var(--text-xs)",
+            color: "var(--color-text-secondary)",
+            marginTop: "var(--space-1)",
+          }}
+        >
           {frag.house}
           {frag.type && TYPE_ABBR[frag.type] && (
-            <span className="ml-[6px] text-[var(--ink4)]">· {TYPE_ABBR[frag.type]}</span>
+            <span style={{ marginLeft: "var(--space-1)", color: "var(--color-text-muted)" }}>
+              · {TYPE_ABBR[frag.type]}
+            </span>
           )}
         </div>
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">
+      <td
+        style={{
+          padding: "var(--space-3) var(--space-4)",
+          fontSize: "var(--text-xs)",
+          color: "var(--color-text-secondary)",
+        }}
+      >
         {(frag.sizes ?? []).join(", ") || "\u2014"}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--warm-text)] tracking-[1px]">
+      <td
+        style={{
+          padding: "var(--space-3) var(--space-4)",
+          fontSize: "var(--text-xs)",
+          color: "var(--color-accent)",
+          letterSpacing: "1px",
+        }}
+      >
         {starsStr(parseRating(frag.personalRating))}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
+      <td
+        style={{
+          padding: "var(--space-3) var(--space-4)",
+          fontSize: "var(--text-xs)",
+          color: "var(--color-text-secondary)",
+        }}
+      >
         {addedStr || "\u2014"}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
-        {compCount > 0 ? <span className="text-[var(--blue)]">{compCount}</span> : "\u2014"}
+      <td
+        style={{
+          padding: "var(--space-3) var(--space-4)",
+          fontSize: "var(--text-xs)",
+          color: "var(--color-text-secondary)",
+        }}
+      >
+        {accords}
       </td>
-      <td className="px-4 py-3">
+      <td
+        style={{
+          padding: "var(--space-3) var(--space-4)",
+          fontSize: "var(--text-xs)",
+          color: "var(--color-text-secondary)",
+        }}
+      >
+        {compCount > 0 ? (
+          <span style={{ color: "var(--color-accent)" }}>{compCount}</span>
+        ) : (
+          "\u2014"
+        )}
+      </td>
+      <td style={{ padding: "var(--space-3) var(--space-4)" }}>
         <StatusBadge status={frag.status} />
       </td>
       {onAction && (
-        <td className="px-4 py-3">
+        <td style={{ padding: "var(--space-3) var(--space-4)" }}>
           <button
             onClick={(e) => { e.stopPropagation(); onAction(frag, e); }}
-            className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors whitespace-nowrap"
+            style={{
+              fontSize: "var(--text-xs)",
+              letterSpacing: "0.04em",
+              padding: "var(--space-1) var(--space-3)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-sm)",
+              color: "var(--color-text-secondary)",
+              background: "transparent",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              transition: "border-color var(--transition-fast), color var(--transition-fast)",
+            }}
+            className="hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           >
             {actionLabel ?? "Action"}
           </button>

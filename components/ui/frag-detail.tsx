@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 import { starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
 import { StatusBadge } from "@/components/ui/frag-row";
 import { getCommunityData } from "@/lib/data";
@@ -18,24 +19,60 @@ const FLAG_FIELDS = [
 function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
   return (
-    <div className="flex gap-3 py-[5px] border-b border-[var(--b1)] last:border-0">
-      <span className="w-[110px] shrink-0 font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)]">
+    <div
+      style={{
+        display: "flex",
+        gap: "var(--space-3)",
+        padding: "var(--space-1) 0",
+        borderBottom: "1px solid var(--color-border)",
+      }}
+      className="last:border-0"
+    >
+      <span
+        className="text-label"
+        style={{
+          width: "110px",
+          flexShrink: 0,
+          color: "var(--color-text-muted)",
+          paddingTop: "1px",
+        }}
+      >
         {label}
       </span>
-      <span className="font-[var(--mono)] text-xs text-[var(--ink2)]">{value}</span>
+      <span
+        style={{
+          fontSize: "var(--text-xs)",
+          color: "var(--color-text-primary)",
+        }}
+      >
+        {value}
+      </span>
     </div>
   );
 }
 
 function NoteChips({ raw }: { raw: string[] }) {
   if (!raw.length) return null;
-  const items = raw;
   return (
-    <div className="flex flex-wrap gap-1 mt-1">
-      {items.map((n) => (
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "var(--space-1)",
+        marginTop: "var(--space-1)",
+      }}
+    >
+      {raw.map((n) => (
         <span
           key={n}
-          className="font-[var(--mono)] text-xs px-2 py-[3px] border border-[var(--b2)] text-[var(--ink3)] bg-[var(--b1)]"
+          style={{
+            fontSize: "var(--text-xs)",
+            padding: "var(--space-1) var(--space-2)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-sm)",
+            color: "var(--color-text-secondary)",
+            background: "var(--color-surface-raised)",
+          }}
         >
           {n}
         </span>
@@ -118,190 +155,271 @@ export function FragDetail({
     onClose();
   }
 
+  const sectionLabel: React.CSSProperties = {
+    fontSize: "var(--text-xs)",
+    fontWeight: 600,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "var(--color-text-muted)",
+    marginBottom: "var(--space-2)",
+  };
+
   return (
     <Modal open={open} onClose={handleClose} className="max-w-[600px]">
       <ModalHeader title={frag.name} onClose={handleClose} />
       <ModalBody>
-      <div className="space-y-5">
-        {frag.house && (
-          <div className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink3)]">
-            {frag.house}
-          </div>
-        )}
-        {/* Status + accords header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <StatusBadge status={frag.status} />
-            {frag.isDupe && frag.dupeFor && (
-              <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                Dupe for {frag.dupeFor}
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+          {frag.house && (
+            <div style={{ fontSize: "var(--text-xs)", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-text-secondary)", fontWeight: 500 }}>
+              {frag.house}
+            </div>
+          )}
+
+          {/* Status + accords header */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "var(--space-4)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+              <StatusBadge status={frag.status} />
+              {frag.isDupe && frag.dupeFor && (
+                <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-secondary)" }}>
+                  Dupe for {frag.dupeFor}
+                </span>
+              )}
+            </div>
+            {compCount > 0 && (
+              <span style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)", fontWeight: 500 }}>
+                {compCount} {compCount === 1 ? "compliment" : "compliments"}
               </span>
             )}
           </div>
-          {compCount > 0 && (
-            <span className="font-[var(--mono)] text-xs text-[var(--blue)]">
-              {compCount} {compCount === 1 ? "compliment" : "compliments"}
-            </span>
-          )}
-        </div>
 
-        {/* Personal section */}
-        <div>
-          <div className="font-[var(--mono)] text-xs tracking-[0.12em] uppercase text-[var(--ink3)] mb-2">
-            Personal
-          </div>
-          <div className="border border-[var(--b2)] px-3 py-1">
-            {frag.personalRating ? (
-              <div className="flex gap-3 py-[5px] border-b border-[var(--b1)]">
-                <span className="w-[110px] shrink-0 font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)]">Rating</span>
-                <span className="font-[var(--mono)] text-xs text-[var(--warm-text)] tracking-[1px]">{starsDisplay}</span>
-              </div>
-            ) : null}
-            <DetailRow label="Type" value={frag.type} />
-            <DetailRow label="Sizes" value={(frag.sizes ?? []).join(", ") || null} />
-            <DetailRow label="Bought from" value={frag.whereBought} />
-            <DetailRow label="Purchase date" value={purchaseStr} />
-            <DetailRow label="Price" value={frag.purchasePrice} />
-          </div>
-        </div>
-
-        {/* Personal notes */}
-        {frag.personalNotes && (
+          {/* Personal section */}
           <div>
-            <div className="font-[var(--mono)] text-xs tracking-[0.12em] uppercase text-[var(--ink3)] mb-2">
-              Notes
-            </div>
-            <p className="font-[var(--body)] text-sm text-[var(--ink2)] leading-relaxed whitespace-pre-wrap">
-              {frag.personalNotes}
-            </p>
-          </div>
-        )}
-
-        {/* Community section */}
-        {(cd || accords.length > 0) && (
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-[var(--mono)] text-xs tracking-[0.12em] uppercase text-[var(--ink3)]">
-                Community
-              </div>
-              <button
-                onClick={() => setFlagOpen((v) => !v)}
-                className="font-[var(--mono)] text-xs tracking-[0.08em] text-[var(--ink4)] hover:text-[var(--rose-tk)] transition-colors border-none bg-none cursor-pointer p-0"
-              >
-                {flagOpen ? "Cancel flag" : "Flag incorrect data"}
-              </button>
-            </div>
-
-            {flagOpen && (
-              <div className="border border-[var(--b3)] bg-[var(--off2)] px-3 py-3 mb-3 flex flex-col gap-2">
-                <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mb-1">Which field is incorrect?</div>
-                <div className="flex flex-wrap gap-1.5 mb-1">
-                  {FLAG_FIELDS.map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => setFlagField(f)}
-                      className={`font-[var(--mono)] text-xs px-2 py-1 border transition-colors cursor-pointer ${flagField === f ? "bg-[var(--blue)] border-[var(--blue)] text-white" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-                <textarea
-                  value={flagNote}
-                  onChange={(e) => setFlagNote(e.target.value)}
-                  placeholder="What's wrong? (optional)"
-                  rows={2}
-                  className="w-full px-2 py-1.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] resize-none"
-                />
-                <button
-                  onClick={submitFlag}
-                  disabled={flagging}
-                  className="self-start px-4 py-1.5 font-[var(--mono)] text-xs tracking-[0.08em] uppercase bg-[var(--blue)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+            <div style={sectionLabel}>Personal</div>
+            <div
+              style={{
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-sm)",
+                padding: "0 var(--space-3)",
+              }}
+            >
+              {frag.personalRating ? (
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "var(--space-3)",
+                    padding: "var(--space-1) 0",
+                    borderBottom: "1px solid var(--color-border)",
+                  }}
                 >
-                  {flagging ? "Submitting..." : "Submit flag"}
+                  <span
+                    className="text-label"
+                    style={{ width: "110px", flexShrink: 0, color: "var(--color-text-muted)" }}
+                  >
+                    Rating
+                  </span>
+                  <span style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)", letterSpacing: "1px" }}>
+                    {starsDisplay}
+                  </span>
+                </div>
+              ) : null}
+              <DetailRow label="Type" value={frag.type} />
+              <DetailRow label="Sizes" value={(frag.sizes ?? []).join(", ") || null} />
+              <DetailRow label="Bought from" value={frag.whereBought} />
+              <DetailRow label="Purchase date" value={purchaseStr} />
+              <DetailRow label="Price" value={frag.purchasePrice} />
+            </div>
+          </div>
+
+          {/* Personal notes */}
+          {frag.personalNotes && (
+            <div>
+              <div style={sectionLabel}>Notes</div>
+              <p
+                style={{
+                  fontSize: "var(--text-sm)",
+                  color: "var(--color-text-secondary)",
+                  lineHeight: "var(--leading-normal)",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {frag.personalNotes}
+              </p>
+            </div>
+          )}
+
+          {/* Community section */}
+          {(cd || accords.length > 0) && (
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "var(--space-2)",
+                }}
+              >
+                <div style={sectionLabel}>Community</div>
+                <button
+                  onClick={() => setFlagOpen((v) => !v)}
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-text-muted)",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    transition: "color var(--transition-fast)",
+                  }}
+                  className="hover:text-[var(--color-danger)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                >
+                  {flagOpen ? "Cancel flag" : "Flag incorrect data"}
                 </button>
               </div>
-            )}
 
-            <div className="border border-[var(--b2)] px-3 py-1">
-              <DetailRow label="Avg price" value={cd?.avgPrice?.replace(/~/g, "") ?? null} />
-              <DetailRow label="Community rating" value={cd?.communityRating ? `${cd.communityRating}${cd.ratingVoteCount ? ` (${cd.ratingVoteCount} votes)` : ""}` : null} />
-              <DetailRow label="Parfumo rating" value={cd?.parfumoRating || null} />
-              <DetailRow label="Longevity" value={cd?.communityLongevityLabel || null} />
-              <DetailRow label="Sillage" value={cd?.communitySillageLabel || null} />
+              {flagOpen && (
+                <div
+                  style={{
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-sm)",
+                    background: "var(--color-surface-raised)",
+                    padding: "var(--space-3)",
+                    marginBottom: "var(--space-3)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "var(--space-2)",
+                  }}
+                >
+                  <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-secondary)", marginBottom: "var(--space-1)" }}>
+                    Which field is incorrect?
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)" }}>
+                    {FLAG_FIELDS.map((f) => (
+                      <button
+                        key={f}
+                        onClick={() => setFlagField(f)}
+                        style={{
+                          fontSize: "var(--text-xs)",
+                          padding: "var(--space-1) var(--space-2)",
+                          border: "1px solid",
+                          borderRadius: "var(--radius-sm)",
+                          cursor: "pointer",
+                          transition: "background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast)",
+                          background: flagField === f ? "var(--color-accent)" : "transparent",
+                          borderColor: flagField === f ? "var(--color-accent)" : "var(--color-border)",
+                          color: flagField === f ? "var(--color-text-inverse)" : "var(--color-text-secondary)",
+                        }}
+                        className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={flagNote}
+                    onChange={(e) => setFlagNote(e.target.value)}
+                    placeholder="What's wrong? (optional)"
+                    rows={2}
+                    style={{
+                      width: "100%",
+                      padding: "var(--space-2) var(--space-3)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "var(--radius-sm)",
+                      background: "var(--color-surface)",
+                      fontSize: "var(--text-sm)",
+                      color: "var(--color-text-primary)",
+                      resize: "none",
+                      outline: "none",
+                    }}
+                    className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
+                  />
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={submitFlag}
+                    disabled={flagging}
+                    style={{ alignSelf: "flex-start" }}
+                  >
+                    {flagging ? "Submitting..." : "Submit flag"}
+                  </Button>
+                </div>
+              )}
+
+              <div
+                style={{
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-sm)",
+                  padding: "0 var(--space-3)",
+                }}
+              >
+                <DetailRow label="Avg price" value={cd?.avgPrice?.replace(/~/g, "") ?? null} />
+                <DetailRow label="Community rating" value={cd?.communityRating ? `${cd.communityRating}${cd.ratingVoteCount ? ` (${cd.ratingVoteCount} votes)` : ""}` : null} />
+                <DetailRow label="Parfumo rating" value={cd?.parfumoRating || null} />
+                <DetailRow label="Longevity" value={cd?.communityLongevityLabel || null} />
+                <DetailRow label="Sillage" value={cd?.communitySillageLabel || null} />
+              </div>
+              {accords.length > 0 && (
+                <div style={{ marginTop: "var(--space-3)" }}>
+                  <div style={{ ...sectionLabel, marginBottom: "var(--space-1)" }}>Accords</div>
+                  <NoteChips raw={accords} />
+                </div>
+              )}
+              {cd?.topNotes && cd.topNotes.length > 0 && (
+                <div style={{ marginTop: "var(--space-3)" }}>
+                  <div style={{ ...sectionLabel, marginBottom: "var(--space-1)" }}>Top Notes</div>
+                  <NoteChips raw={cd.topNotes} />
+                </div>
+              )}
+              {cd?.middleNotes && cd.middleNotes.length > 0 && (
+                <div style={{ marginTop: "var(--space-3)" }}>
+                  <div style={{ ...sectionLabel, marginBottom: "var(--space-1)" }}>Middle Notes</div>
+                  <NoteChips raw={cd.middleNotes} />
+                </div>
+              )}
+              {cd?.baseNotes && cd.baseNotes.length > 0 && (
+                <div style={{ marginTop: "var(--space-3)" }}>
+                  <div style={{ ...sectionLabel, marginBottom: "var(--space-1)" }}>Base Notes</div>
+                  <NoteChips raw={cd.baseNotes} />
+                </div>
+              )}
             </div>
-            {accords.length > 0 && (
-              <div className="mt-3">
-                <div className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)] mb-1">Accords</div>
-                <NoteChips raw={accords} />
-              </div>
-            )}
-            {cd?.topNotes && cd.topNotes.length > 0 && (
-              <div className="mt-3">
-                <div className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)] mb-1">Top Notes</div>
-                <NoteChips raw={cd.topNotes} />
-              </div>
-            )}
-            {cd?.middleNotes && cd.middleNotes.length > 0 && (
-              <div className="mt-3">
-                <div className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)] mb-1">Middle Notes</div>
-                <NoteChips raw={cd.middleNotes} />
-              </div>
-            )}
-            {cd?.baseNotes && cd.baseNotes.length > 0 && (
-              <div className="mt-3">
-                <div className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)] mb-1">Base Notes</div>
-                <NoteChips raw={cd.baseNotes} />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
       </ModalBody>
       <ModalFooter>
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             {!readOnly && onDelete && !confirmDelete && (
-              <button
-                onClick={handleDelete}
-                className="font-[var(--mono)] text-xs text-[var(--rose-tk)] border border-[var(--rose-tk)] px-3 py-[5px] hover:bg-[var(--rose-tk)] hover:text-white transition-colors"
-              >
+              <Button variant="danger" size="sm" onClick={handleDelete}>
                 Delete
-              </button>
+              </Button>
             )}
             {!readOnly && onDelete && confirmDelete && (
               <>
-                <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">Remove permanently?</span>
-                <button
-                  onClick={handleDelete}
-                  className="font-[var(--mono)] text-xs bg-[var(--rose-tk)] text-white px-3 py-[5px] hover:opacity-90"
-                >
+                <span style={{ fontSize: "var(--text-xs)", color: "var(--color-danger)" }}>
+                  Remove permanently?
+                </span>
+                <Button variant="danger" size="sm" onClick={handleDelete}>
                   Confirm
-                </button>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] px-3 py-[5px] hover:border-[var(--b4)]"
-                >
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
                   Cancel
-                </button>
+                </Button>
               </>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             {!readOnly && onEdit && (
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => { handleClose(); onEdit(frag!); }}
-                className="px-4 py-[7px] font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
               >
                 Edit
-              </button>
+              </Button>
             )}
-            <button
-              onClick={handleClose}
-              className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90"
-            >
+            <Button variant="primary" size="sm" onClick={handleClose}>
               Close
-            </button>
+            </Button>
           </div>
         </div>
       </ModalFooter>

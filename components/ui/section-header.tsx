@@ -9,15 +9,31 @@ interface SectionHeaderProps {
 export function SectionHeader({ title, right, className }: SectionHeaderProps) {
   return (
     <div
-      className={cn(
-        "flex items-baseline justify-between border-b border-[var(--b2)] pb-[9px] mb-4",
-        className,
-      )}
+      style={{
+        display: "flex",
+        alignItems: "baseline",
+        justifyContent: "space-between",
+        borderBottom: "1px solid var(--color-border)",
+        paddingBottom: "var(--space-2)",
+        marginBottom: "var(--space-4)",
+      }}
+      className={cn(className)}
     >
-      <h2 className="font-[var(--serif)] text-[19px] font-normal text-[var(--ink)]">
+      <h2
+        className="font-display"
+        style={{
+          fontSize: "var(--text-md)",
+          fontWeight: 500,
+          color: "var(--color-text-primary)",
+        }}
+      >
         {title}
       </h2>
-      {right && <div className="flex items-center gap-2">{right}</div>}
+      {right && (
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+          {right}
+        </div>
+      )}
     </div>
   );
 }

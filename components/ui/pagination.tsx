@@ -21,40 +21,63 @@ export function Pagination({ total, page, pageSize, onPage, onPageSize }: Props)
 
   if (total === 0) return null;
 
+  const btnBase =
+    "inline-flex items-center justify-center h-8 min-w-[32px] px-[var(--space-2)] rounded-[var(--radius-sm)] text-[length:var(--text-xs)] font-medium border border-[var(--color-border)] text-[var(--color-text-secondary)] bg-transparent cursor-pointer transition-[background-color,border-color,color] hover:bg-[var(--color-surface-raised)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-text-primary)] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]";
+
+  const activeBtnClass =
+    "border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent-subtle)]";
+
   return (
-    <div className="flex items-center justify-between py-3 px-1 mb-4">
-      <div className="flex items-center gap-1">
-        <span className="font-[var(--mono)] text-xs text-[var(--ink4)] mr-2">Show</span>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "var(--space-3) var(--space-1)",
+        marginBottom: "var(--space-4)",
+        flexWrap: "wrap",
+        gap: "var(--space-3)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-1)" }}>
+        <span
+          className="text-meta"
+          style={{ marginRight: "var(--space-2)", color: "var(--color-text-muted)" }}
+        >
+          Show
+        </span>
         {PAGE_SIZES.map((ps) => (
           <button
             key={ps.value}
             onClick={() => { onPageSize(ps.value); onPage(1); }}
-            className={`font-[var(--mono)] text-xs px-2 py-[3px] border transition-colors ${pageSize === ps.value ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
+            className={`${btnBase} ${pageSize === ps.value ? activeBtnClass : ""}`}
           >
             {ps.label}
           </button>
         ))}
       </div>
-      <div className="flex items-center gap-3">
-        <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+        <span className="text-meta" style={{ color: "var(--color-text-muted)" }}>
           {from}-{to} of {total}
         </span>
         {totalPages > 1 && (
-          <div className="flex items-center gap-1">
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-1)" }}>
             <button
               onClick={() => onPage(page - 1)}
               disabled={page <= 1}
-              className="font-[var(--mono)] text-xs px-2 py-[3px] border border-[var(--b3)] text-[var(--ink3)] disabled:opacity-30 hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+              className={btnBase}
+              aria-label="Previous page"
             >
               &lsaquo;
             </button>
-            <span className="font-[var(--mono)] text-xs text-[var(--ink3)] px-2">
+            <span className="text-meta" style={{ padding: "0 var(--space-2)", color: "var(--color-text-muted)" }}>
               {page} / {totalPages}
             </span>
             <button
               onClick={() => onPage(page + 1)}
               disabled={page >= totalPages}
-              className="font-[var(--mono)] text-xs px-2 py-[3px] border border-[var(--b3)] text-[var(--ink3)] disabled:opacity-30 hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+              className={btnBase}
+              aria-label="Next page"
             >
               &rsaquo;
             </button>

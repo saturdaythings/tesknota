@@ -13,9 +13,24 @@ interface FilterPanelProps {
   allAccords: string[];
   allHouses: string[];
   statusOptions: { label: string; value: string }[];
-  onFilterChange: (updates: Record<string, any>) => void;
+  onFilterChange: (updates: Record<string, unknown>) => void;
   onPageReset?: () => void;
 }
+
+const dropdownBase: React.CSSProperties = {
+  position: "absolute",
+  top: "calc(100% + 4px)",
+  left: 0,
+  zIndex: "var(--z-dropdown)" as unknown as number,
+  background: "var(--color-surface)",
+  border: "1px solid var(--color-border)",
+  borderRadius: "var(--radius-md)",
+  boxShadow: "var(--shadow-md)",
+  minWidth: "180px",
+};
+
+const dropItemBase =
+  "w-full text-left px-[var(--space-3)] py-[var(--space-2)] text-[length:var(--text-xs)] transition-colors cursor-pointer hover:bg-[var(--color-surface-raised)]";
 
 export function FilterPanel({
   filters,
@@ -54,50 +69,84 @@ export function FilterPanel({
     onPageReset?.();
   };
 
+  const triggerBase =
+    "text-[length:var(--text-xs)] font-medium px-[var(--space-3)] h-9 border rounded-[var(--radius-sm)] transition-[border-color,color] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]";
+
   return (
-    <div className="flex flex-wrap items-start gap-2 mb-4 py-3 border border-[var(--b2)] px-3">
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: "var(--space-2)",
+        marginBottom: "var(--space-4)",
+        padding: "var(--space-3) var(--space-3)",
+        border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-sm)",
+      }}
+    >
       {/* Accords dropdown */}
-      <div className="relative">
+      <div style={{ position: "relative" }}>
         <button
           onClick={() => {
             setAccordDDOpen((o) => !o);
             setRatingDDOpen(false);
             setHouseDDOpen(false);
           }}
-          className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${
+          className={`${triggerBase} ${
             filters.accord
-              ? "border-[var(--blue)] text-[var(--blue)]"
-              : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"
+              ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+              : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)]"
           }`}
         >
           {filters.accord || "Accords"} &#9662;
         </button>
         {accordDDOpen && (
-          <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[200px]">
-            <div className="p-2 border-b border-[var(--b2)]">
+          <div style={{ ...dropdownBase, width: "200px" }}>
+            <div
+              style={{
+                padding: "var(--space-2)",
+                borderBottom: "1px solid var(--color-border)",
+              }}
+            >
               <input
                 value={accordSearch}
                 onChange={(e) => setAccordSearch(e.target.value)}
                 placeholder="Search accords..."
-                className="w-full px-2 py-1 text-xs font-[var(--mono)] border border-[var(--b3)] bg-[var(--off)] text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                style={{
+                  width: "100%",
+                  padding: "var(--space-1) var(--space-2)",
+                  fontSize: "var(--text-xs)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-sm)",
+                  background: "var(--color-bg)",
+                  color: "var(--color-text-primary)",
+                  outline: "none",
+                }}
               />
             </div>
-            <div className="overflow-y-auto max-h-[220px]">
+            <div style={{ overflowY: "auto", maxHeight: "220px" }}>
               {allAccords
                 .filter(
                   (a) =>
                     !accordSearch ||
-                    a.toLowerCase().includes(accordSearch.toLowerCase())
+                    a.toLowerCase().includes(accordSearch.toLowerCase()),
                 )
                 .map((a) => (
                   <button
                     key={a}
                     onClick={() => handleAccordChange(a)}
-                    className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${
-                      filters.accord === a
-                        ? "text-[var(--blue)] bg-[var(--blue-tint)]"
-                        : "text-[var(--ink2)] hover:bg-[var(--b1)]"
-                    }`}
+                    style={{
+                      color:
+                        filters.accord === a
+                          ? "var(--color-accent)"
+                          : "var(--color-text-secondary)",
+                      background:
+                        filters.accord === a
+                          ? "var(--color-accent-subtle)"
+                          : undefined,
+                    }}
+                    className={dropItemBase}
                   >
                     {a}
                   </button>
@@ -105,92 +154,114 @@ export function FilterPanel({
             </div>
             <button
               onClick={() => handleAccordChange("")}
-              className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left"
+              className="text-label w-full text-left px-[var(--space-3)] py-[var(--space-2)] border-t border-[var(--color-border)] hover:bg-[var(--color-surface-raised)] cursor-pointer"
+              style={{ color: "var(--color-text-muted)" }}
             >
-              CLEAR
+              Clear
             </button>
           </div>
         )}
       </div>
 
       {/* Rating dropdown */}
-      <div className="relative">
+      <div style={{ position: "relative" }}>
         <button
           onClick={() => {
             setRatingDDOpen((o) => !o);
             setAccordDDOpen(false);
             setHouseDDOpen(false);
           }}
-          className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${
+          className={`${triggerBase} ${
             filters.rating !== null
-              ? "border-[var(--blue)] text-[var(--blue)]"
-              : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"
+              ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+              : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)]"
           }`}
         >
           {filters.rating !== null ? `${filters.rating}+ stars` : "Rating"}{" "}
           &#9662;
         </button>
         {ratingDDOpen && (
-          <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[160px]">
+          <div style={{ ...dropdownBase, width: "160px" }}>
             {[5, 4, 3, 2, 1].map((r) => (
               <button
                 key={r}
                 onClick={() => handleRatingChange(r)}
-                className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${
-                  filters.rating === r
-                    ? "text-[var(--blue)] bg-[var(--blue-tint)]"
-                    : "text-[var(--ink2)] hover:bg-[var(--b1)]"
-                }`}
+                style={{
+                  color:
+                    filters.rating === r
+                      ? "var(--color-accent)"
+                      : "var(--color-text-secondary)",
+                  background:
+                    filters.rating === r
+                      ? "var(--color-accent-subtle)"
+                      : undefined,
+                }}
+                className={dropItemBase}
               >
                 {r}+ stars
               </button>
             ))}
             <button
               onClick={() => handleRatingChange(null)}
-              className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left"
+              className="text-label w-full text-left px-[var(--space-3)] py-[var(--space-2)] border-t border-[var(--color-border)] hover:bg-[var(--color-surface-raised)] cursor-pointer"
+              style={{ color: "var(--color-text-muted)" }}
             >
-              CLEAR
+              Clear
             </button>
           </div>
         )}
       </div>
 
       {/* Houses dropdown */}
-      <div className="relative">
+      <div style={{ position: "relative" }}>
         <button
           onClick={() => {
             setHouseDDOpen((o) => !o);
             setAccordDDOpen(false);
             setRatingDDOpen(false);
           }}
-          className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${
+          className={`${triggerBase} ${
             filters.house
-              ? "border-[var(--blue)] text-[var(--blue)]"
-              : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"
+              ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+              : "border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-border-strong)]"
           }`}
         >
           {filters.house || "Houses"} &#9662;
         </button>
         {houseDDOpen && (
-          <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[220px] max-h-[280px] overflow-y-auto">
+          <div
+            style={{
+              ...dropdownBase,
+              width: "220px",
+              maxHeight: "280px",
+              overflowY: "auto",
+            }}
+          >
             {allHouses.map((h) => (
               <button
                 key={h}
                 onClick={() => handleHouseChange(h)}
-                className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${
-                  filters.house === h
-                    ? "text-[var(--blue)] bg-[var(--blue-tint)]"
-                    : "text-[var(--ink2)] hover:bg-[var(--b1)]"
-                }`}
+                style={{
+                  color:
+                    filters.house === h
+                      ? "var(--color-accent)"
+                      : "var(--color-text-secondary)",
+                  background:
+                    filters.house === h
+                      ? "var(--color-accent-subtle)"
+                      : undefined,
+                }}
+                className={dropItemBase}
               >
                 {h}
               </button>
             ))}
             <button
               onClick={() => handleHouseChange("")}
-              className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left"
+              className="text-label w-full text-left px-[var(--space-3)] py-[var(--space-2)] border-t border-[var(--color-border)] hover:bg-[var(--color-surface-raised)] cursor-pointer"
+              style={{ color: "var(--color-text-muted)" }}
             >
-              CLEAR
+              Clear
             </button>
           </div>
         )}

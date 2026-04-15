@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
@@ -23,6 +24,41 @@ const YEARS = Array.from({ length: new Date().getFullYear() - 2009 }, (_, i) =>
 
 function genId(): string {
   return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+const fieldLabel: React.CSSProperties = {
+  display: "block",
+  fontSize: "var(--text-xs)",
+  fontWeight: 600,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: "var(--color-text-muted)",
+  marginBottom: "var(--space-2)",
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "var(--space-2) var(--space-3)",
+  border: "1px solid var(--color-border)",
+  borderRadius: "var(--radius-sm)",
+  background: "var(--color-surface)",
+  fontSize: "var(--text-sm)",
+  color: "var(--color-text-primary)",
+  outline: "none",
+};
+
+function chipStyle(active: boolean): React.CSSProperties {
+  return {
+    padding: "var(--space-1) var(--space-3)",
+    border: "1px solid",
+    borderRadius: "var(--radius-sm)",
+    fontSize: "var(--text-xs)",
+    cursor: "pointer",
+    transition: "background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast)",
+    borderColor: active ? "var(--color-accent)" : "var(--color-border)",
+    color: active ? "var(--color-accent)" : "var(--color-text-secondary)",
+    background: active ? "var(--color-accent-subtle)" : "transparent",
+  };
 }
 
 interface Props {
@@ -206,17 +242,29 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
     }
   }
 
+  const dropdownStyle: React.CSSProperties = {
+    position: "absolute",
+    top: "calc(100% + 2px)",
+    left: 0,
+    right: 0,
+    zIndex: "var(--z-dropdown)" as unknown as number,
+    border: "1px solid var(--color-border)",
+    borderRadius: "var(--radius-sm)",
+    background: "var(--color-surface)",
+    boxShadow: "var(--shadow-md)",
+    maxHeight: "200px",
+    overflowY: "auto",
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
       <ModalHeader title={isEdit ? "Edit Compliment" : "Log a Compliment"} onClose={onClose} />
       <ModalBody>
-      <div className="space-y-5">
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
         {/* Fragrance picker */}
         <div>
-          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-            Fragrance
-          </label>
-          <div className="relative">
+          <label style={fieldLabel}>Fragrance</label>
+          <div style={{ position: "relative" }}>
             <input
               value={fragSearch}
               onChange={(e) => {
@@ -228,18 +276,20 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
               onFocus={() => setFragDropOpen(true)}
               onBlur={() => setTimeout(() => setFragDropOpen(false), 150)}
               placeholder="Search your collection..."
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+              style={inputStyle}
+              className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
             />
             {fragDropOpen && fragMatches.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-50 border border-[var(--b3)] border-t-0 bg-[var(--off)] shadow-sm max-h-[200px] overflow-y-auto">
+              <div style={dropdownStyle}>
                 {fragMatches.map((f) => (
                   <div
                     key={f.id}
                     onMouseDown={() => selectFrag(f)}
-                    className="px-3 py-[9px] cursor-pointer hover:bg-[var(--b1)] border-b border-[var(--b1)] last:border-0"
+                    style={{ padding: "var(--space-2) var(--space-3)", cursor: "pointer", borderBottom: "1px solid var(--color-border)" }}
+                    className="last:border-0 hover:bg-[var(--color-surface-raised)]"
                   >
-                    <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-                    <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
+                    <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)" }}>{f.name}</div>
+                    <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{f.house}</div>
                   </div>
                 ))}
               </div>
@@ -249,10 +299,11 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
 
         {/* Layering fragrance */}
         <div>
-          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-            Layering Fragrance <span className="normal-case tracking-normal text-[var(--ink4)]">(optional)</span>
+          <label style={fieldLabel}>
+            Layering Fragrance{" "}
+            <span style={{ textTransform: "none", letterSpacing: "normal", fontWeight: 400, color: "var(--color-text-muted)" }}>(optional)</span>
           </label>
-          <div className="relative">
+          <div style={{ position: "relative" }}>
             <input
               value={secSearch}
               onChange={(e) => {
@@ -264,18 +315,20 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
               onFocus={() => setSecDropOpen(true)}
               onBlur={() => setTimeout(() => setSecDropOpen(false), 150)}
               placeholder="Search your collection..."
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+              style={inputStyle}
+              className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
             />
             {secDropOpen && secMatches.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-50 border border-[var(--b3)] border-t-0 bg-[var(--off)] shadow-sm max-h-[200px] overflow-y-auto">
+              <div style={dropdownStyle}>
                 {secMatches.map((f) => (
                   <div
                     key={f.id}
                     onMouseDown={() => selectSecFrag(f)}
-                    className="px-3 py-[9px] cursor-pointer hover:bg-[var(--b1)] border-b border-[var(--b1)] last:border-0"
+                    style={{ padding: "var(--space-2) var(--space-3)", cursor: "pointer", borderBottom: "1px solid var(--color-border)" }}
+                    className="last:border-0 hover:bg-[var(--color-surface-raised)]"
                   >
-                    <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-                    <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
+                    <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)" }}>{f.name}</div>
+                    <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{f.house}</div>
                   </div>
                 ))}
               </div>
@@ -285,21 +338,15 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
 
         {/* Relation */}
         <div>
-          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-            Relation
-          </label>
-          <div className="flex flex-wrap gap-2">
+          <label style={fieldLabel}>Relation</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
             {RELATIONS.map((r) => (
               <button
                 key={r}
                 type="button"
                 onClick={() => setRelation(r)}
-                className={
-                  "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
-                  (relation === r
-                    ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
-                    : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
-                }
+                style={chipStyle(relation === r)}
+                className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
               >
                 {r}
               </button>
@@ -309,21 +356,15 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
 
         {/* Gender */}
         <div>
-          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-            Gender
-          </label>
-          <div className="flex gap-2">
+          <label style={fieldLabel}>Gender</label>
+          <div style={{ display: "flex", gap: "var(--space-2)" }}>
             {(["Female", "Male"] as ComplimenterGender[]).map((g) => (
               <button
                 key={g}
                 type="button"
                 onClick={() => setGender(g)}
-                className={
-                  "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
-                  (gender === g
-                    ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
-                    : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
-                }
+                style={chipStyle(gender === g)}
+                className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
               >
                 {g}
               </button>
@@ -332,15 +373,14 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
         </div>
 
         {/* Month + Year */}
-        <div className="grid grid-cols-2 gap-4">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
           <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-              Month
-            </label>
+            <label style={fieldLabel}>Month</label>
             <select
               value={month}
               onChange={(e) => setMonth(e.target.value)}
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
+              style={{ ...inputStyle, cursor: "pointer" }}
+              className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)]"
             >
               {MONTHS.map((m, i) => (
                 <option key={m} value={String(i + 1).padStart(2, "0")}>{m}</option>
@@ -348,13 +388,12 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
             </select>
           </div>
           <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-              Year
-            </label>
+            <label style={fieldLabel}>Year</label>
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
+              style={{ ...inputStyle, cursor: "pointer" }}
+              className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)]"
             >
               {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
@@ -362,84 +401,76 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
         </div>
 
         {/* Location (optional) */}
-        <div className="space-y-3">
-          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase">
-            Location (optional)
-          </label>
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+          <label style={{ ...fieldLabel, marginBottom: 0 }}>Location (optional)</label>
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Venue or occasion"
-            className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+            style={inputStyle}
+            className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
             <input
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="City"
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+              style={inputStyle}
+              className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
             />
             <input
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               placeholder="Country"
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+              style={inputStyle}
+              className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
             />
           </div>
         </div>
 
         {/* Notes */}
         <div>
-          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-            Notes (optional)
-          </label>
+          <label style={fieldLabel}>Notes (optional)</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             placeholder="Context, reaction, moment..."
-            className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)] resize-none"
+            style={{ ...inputStyle, resize: "none" }}
+            className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] placeholder:text-[var(--color-text-muted)]"
           />
         </div>
       </div>
       </ModalBody>
       <ModalFooter>
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
             {isEdit && !confirmDelete && (
-              <button
-                onClick={handleDelete}
-                className="font-[var(--mono)] text-xs text-[var(--rose-tk)] border border-[var(--rose-tk)] px-3 py-[5px] hover:bg-[var(--rose-tk)] hover:text-white transition-colors"
-              >
+              <Button variant="danger" size="sm" onClick={handleDelete}>
                 Delete
-              </button>
+              </Button>
             )}
             {isEdit && confirmDelete && (
               <>
-                <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">Remove permanently?</span>
-                <button
-                  onClick={handleDelete}
-                  className="font-[var(--mono)] text-xs bg-[var(--rose-tk)] text-white px-3 py-[5px] hover:opacity-90"
-                >
+                <span style={{ fontSize: "var(--text-xs)", color: "var(--color-danger)" }}>Remove permanently?</span>
+                <Button variant="danger" size="sm" onClick={handleDelete}>
                   Confirm
-                </button>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] px-3 py-[5px]"
-                >
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
                   Cancel
-                </button>
+                </Button>
               </>
             )}
-            {err && <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">{err}</span>}
+            {err && <span style={{ fontSize: "var(--text-xs)", color: "var(--color-danger)" }}>{err}</span>}
           </div>
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={save}
             disabled={saving || confirmDelete}
-            className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {saving ? "Saving..." : isEdit ? "Update" : "Log"}
-          </button>
+          </Button>
         </div>
       </ModalFooter>
     </Modal>

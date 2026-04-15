@@ -98,7 +98,7 @@ function buildMonthlyBars(items: { created_at: string }[]) {
 
 const STATUS_COLORS: Record<string, string> = {
   CURRENT: "var(--color-accent)",
-  WANT_TO_BUY: "#6366F1",
+  WANT_TO_BUY: "var(--s-unk)",
   PREVIOUSLY_OWNED: "var(--color-text-muted)",
   WANT_TO_SMELL: "var(--color-warning)",
   DONT_LIKE: "var(--color-danger)",
@@ -402,12 +402,8 @@ export default function AnalyticsPage() {
   return (
     <>
       <Topbar title="Analytics" />
-      <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+      <main className="flex-1 overflow-y-auto" style={{ padding: "var(--space-4)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-
-          <h1 className="text-page-title" style={{ marginBottom: "var(--space-6)" }}>
-            Analytics
-          </h1>
 
           {/* Time range segmented control */}
           <div style={{ marginBottom: "var(--space-8)" }}>
@@ -469,12 +465,12 @@ export default function AnalyticsPage() {
                     />
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11, fill: "var(--color-text-muted)" }}
+                      tick={{ fontSize: 14, fill: "var(--color-text-muted)" }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <YAxis
-                      tick={{ fontSize: 11, fill: "var(--color-text-muted)" }}
+                      tick={{ fontSize: 14, fill: "var(--color-text-muted)" }}
                       axisLine={false}
                       tickLine={false}
                       width={30}
@@ -518,12 +514,12 @@ export default function AnalyticsPage() {
                     />
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11, fill: "var(--color-text-muted)" }}
+                      tick={{ fontSize: 14, fill: "var(--color-text-muted)" }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <YAxis
-                      tick={{ fontSize: 11, fill: "var(--color-text-muted)" }}
+                      tick={{ fontSize: 14, fill: "var(--color-text-muted)" }}
                       axisLine={false}
                       tickLine={false}
                       width={30}
@@ -626,14 +622,14 @@ export default function AnalyticsPage() {
                     />
                     <XAxis
                       type="number"
-                      tick={{ fontSize: 11, fill: "var(--color-text-muted)" }}
+                      tick={{ fontSize: 14, fill: "var(--color-text-muted)" }}
                       axisLine={false}
                       tickLine={false}
                     />
                     <YAxis
                       type="category"
                       dataKey="star"
-                      tick={{ fontSize: 11, fill: "var(--color-text-muted)" }}
+                      tick={{ fontSize: 14, fill: "var(--color-text-muted)" }}
                       axisLine={false}
                       tickLine={false}
                       width={36}

@@ -57,7 +57,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             zIndex: "var(--z-toast)",
             display: "flex",
             flexDirection: "column",
-            gap: "8px",
+            gap: "var(--space-2)",
             pointerEvents: "none",
           }}
           className="sm:bottom-5 sm:right-5 max-sm:bottom-4 max-sm:right-4 max-sm:left-4"
@@ -71,7 +71,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 border: "1px solid var(--color-border)",
                 boxShadow: "var(--shadow-lg)",
                 borderRadius: "var(--radius-sm)",
-                padding: "12px 16px",
+                padding: "var(--space-3) var(--space-4)",
                 fontFamily: "var(--font-sans)",
                 fontSize: "var(--text-sm)",
                 color: "var(--color-text-primary)",

@@ -22,15 +22,15 @@ const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
     color: "var(--color-accent)",
   },
   wishlist: {
-    background: "#EEF2FF",
-    color: "#3730A3",
+    background: "var(--s-unk-bg)",
+    color: "var(--s-unk)",
   },
   previously_owned: {
     background: "var(--color-surface-overlay)",
     color: "var(--color-text-secondary)",
   },
   want_to_smell: {
-    background: "#FFF7ED",
+    background: "var(--color-warning-subtle)",
     color: "var(--color-warning)",
   },
   dont_like: {

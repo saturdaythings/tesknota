@@ -119,7 +119,7 @@ function SectionLabel({
     <div
       style={{
         fontSize: "var(--text-xs)",
-        fontWeight: 700,
+        fontWeight: 600,
         letterSpacing: "0.08em",
         textTransform: "uppercase",
         color: "var(--color-text-muted)",
@@ -198,7 +198,7 @@ export function Sidebar({
               fontSize: "var(--text-xs)",
               color: "var(--color-text-muted)",
               letterSpacing: "0.04em",
-              marginTop: "2px",
+              marginTop: "var(--space-1)",
             }}
           >
             fragrance tracker
@@ -365,7 +365,7 @@ export function Sidebar({
             alignItems: "center",
             justifyContent: "center",
             fontSize: "var(--text-xs)",
-            fontWeight: 700,
+            fontWeight: 600,
             color: "var(--color-accent)",
           }}
         >
@@ -400,14 +400,14 @@ export function Sidebar({
                 display: "inline-flex",
                 alignItems: "center",
                 height: "18px",
-                padding: "0 6px",
+                padding: "0 var(--space-1)",
                 borderRadius: "var(--radius-full)",
                 background: "var(--color-surface-overlay)",
                 color: "var(--color-text-secondary)",
-                fontSize: "11px", /* intentional exception per spec */
+                fontSize: "var(--text-xs)",
                 fontWeight: 600,
                 letterSpacing: "0.03em",
-                marginTop: "1px",
+                marginTop: "var(--space-1)",
                 width: "fit-content",
               }}
             >

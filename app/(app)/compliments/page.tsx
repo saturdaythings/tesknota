@@ -285,7 +285,7 @@ function ComplimentsInner() {
               marginBottom: "var(--space-6)",
             }}
           >
-            <h1 className="text-page-title">Compliments</h1>
+            <span className="text-page-title">Compliments</span>
             <Button variant="primary" onClick={() => setModalOpen(true)}>
               <Plus size={15} aria-hidden="true" />
               Log Compliment

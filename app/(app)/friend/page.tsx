@@ -23,6 +23,16 @@ const FRIEND_TABS: { label: string; value: FriendTab }[] = [
   { label: "In Common", value: "incommon" },
 ];
 
+const thStyle: React.CSSProperties = {
+  padding: "var(--space-2) var(--space-4)",
+  textAlign: "left",
+  fontSize: "var(--text-xs)",
+  fontWeight: 600,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  color: "var(--color-text-muted)",
+};
+
 export default function FriendPage() {
   const { user, profiles } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded } = useData();
@@ -75,9 +85,9 @@ export default function FriendPage() {
         readOnly
       />
       <Topbar title={`${friendName}'s Profile`} />
-      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
+      <main style={{ flex: 1, overflowY: "auto", padding: "var(--space-5) var(--space-4)" }}>
         {!isLoaded && (
-          <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
+          <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", letterSpacing: "0.1em", padding: "var(--space-6) 0" }}>
             Loading...
           </div>
         )}
@@ -92,12 +102,12 @@ export default function FriendPage() {
             </StatsGrid>
 
             {friendAccordCounts.length > 0 && (
-              <div className="mb-6">
+              <div style={{ marginBottom: "var(--space-6)" }}>
                 <SectionHeader
                   title="Scent signature"
                   right={
-                    <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                      {friendName}'s accords
+                    <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
+                      {friendName}&apos;s accords
                     </span>
                   }
                 />
@@ -121,7 +131,7 @@ export default function FriendPage() {
                 frags={FFOwned}
                 compliments={FC}
                 communityFrags={communityFrags}
-                friendId={friend.id }
+                friendId={friend.id}
                 onFragClick={setDetailFrag}
               />
             )}
@@ -144,7 +154,7 @@ export default function FriendPage() {
                 compliments={compliments}
                 communityFrags={communityFrags}
                 userId={user.id}
-                friendId={friend.id }
+                friendId={friend.id}
                 friendName={friendName}
               />
             )}
@@ -176,13 +186,13 @@ function FriendCollectionTab({
       <SectionHeader
         title="Collection"
         right={
-          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
             {sorted.length} {sorted.length === 1 ? "fragrance" : "fragrances"}
           </span>
         }
       />
       {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No fragrances.</div>
+        <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", padding: "var(--space-4) 0" }}>No fragrances.</div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
@@ -193,22 +203,29 @@ function FriendCollectionTab({
                 <div
                   key={f.id}
                   onClick={() => onFragClick(f)}
-                  className="border border-[var(--b2)] px-4 py-3 hover:bg-[var(--b1)] cursor-pointer"
+                  style={{
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-sm)",
+                    padding: "var(--space-3) var(--space-4)",
+                    cursor: "pointer",
+                    transition: "background var(--transition-fast)",
+                  }}
+                  className="hover:bg-[var(--color-surface-raised)]"
                 >
-                  <div className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink3)] mb-0.5 truncate">{f.house}</div>
-                  <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-2 leading-snug">{f.name}</div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                    <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                  <div style={{ fontSize: "var(--text-xs)", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-text-muted)", marginBottom: "var(--space-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.house}</div>
+                  <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)", marginBottom: "var(--space-2)", lineHeight: "var(--leading-snug)" }}>{f.name}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
+                    <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-secondary)" }}>
                       {STATUS_LABELS[f.status as keyof typeof STATUS_LABELS] ?? f.status}
                     </span>
                     {f.personalRating ? (
-                      <span className="font-[var(--mono)] text-xs text-[var(--warm-text)]">{"★".repeat(f.personalRating)}</span>
+                      <span style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)" }}>{"★".repeat(f.personalRating)}</span>
                     ) : null}
                     {comps > 0 ? (
-                      <span className="font-[var(--mono)] text-xs text-[var(--blue)]">{comps} comp{comps !== 1 ? "s" : ""}</span>
+                      <span style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)" }}>{comps} comp{comps !== 1 ? "s" : ""}</span>
                     ) : null}
                     {accords ? (
-                      <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{accords}</span>
+                      <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{accords}</span>
                     ) : null}
                   </div>
                 </div>
@@ -244,22 +261,22 @@ function FriendComplimentsTab({
       <SectionHeader
         title="Compliments"
         right={
-          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
             {sorted.length} {sorted.length === 1 ? "item" : "items"}
           </span>
         }
       />
       {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No compliments.</div>
+        <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", padding: "var(--space-4) 0" }}>No compliments.</div>
       ) : (
-        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-          <table className="w-full min-w-[480px]">
+        <div style={{ overflowX: "auto", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", marginBottom: "var(--space-6)" }}>
+          <table style={{ width: "100%", minWidth: "480px" }}>
             <thead>
-              <tr className="border-b border-[var(--b2)]">
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Fragrance</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Relation</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">When</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Location</th>
+              <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                <th style={thStyle}>Fragrance</th>
+                <th style={thStyle}>Relation</th>
+                <th style={thStyle}>When</th>
+                <th style={thStyle}>Location</th>
               </tr>
             </thead>
             <tbody>
@@ -274,19 +291,20 @@ function FriendComplimentsTab({
                 return (
                   <tr
                     key={c.id}
-                    className="border-b border-[var(--b1)] last:border-0"
+                    style={{ borderBottom: "1px solid var(--color-border)" }}
+                    className="last:border-0"
                   >
-                    <td className="px-4 py-3">
-                      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{fragName}</div>
+                    <td style={{ padding: "var(--space-3) var(--space-4)" }}>
+                      <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)" }}>{fragName}</div>
                       {fragHouse && (
-                        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{fragHouse}</div>
+                        <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{fragHouse}</div>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">
+                    <td style={{ padding: "var(--space-3) var(--space-4)", fontSize: "var(--text-xs)", color: "var(--color-text-secondary)" }}>
                       {c.relation}
                     </td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{when}</td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
+                    <td style={{ padding: "var(--space-3) var(--space-4)", fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{when}</td>
+                    <td style={{ padding: "var(--space-3) var(--space-4)", fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
                       {location}
                     </td>
                   </tr>
@@ -313,21 +331,21 @@ function FriendWishlistTab({
       <SectionHeader
         title="Wishlist"
         right={
-          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
             {sorted.length} {sorted.length === 1 ? "item" : "items"}
           </span>
         }
       />
       {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No wishlist items.</div>
+        <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", padding: "var(--space-4) 0" }}>No wishlist items.</div>
       ) : (
-        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-          <table className="w-full min-w-[420px]">
+        <div style={{ overflowX: "auto", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", marginBottom: "var(--space-6)" }}>
+          <table style={{ width: "100%", minWidth: "420px" }}>
             <thead>
-              <tr className="border-b border-[var(--b2)]">
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Fragrance</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Avg Price</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Accords</th>
+              <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                <th style={thStyle}>Fragrance</th>
+                <th style={thStyle}>Avg Price</th>
+                <th style={thStyle}>Accords</th>
               </tr>
             </thead>
             <tbody>
@@ -341,14 +359,15 @@ function FriendWishlistTab({
                 return (
                   <tr
                     key={f.id}
-                    className="border-b border-[var(--b1)] last:border-0"
+                    style={{ borderBottom: "1px solid var(--color-border)" }}
+                    className="last:border-0"
                   >
-                    <td className="px-4 py-3">
-                      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
+                    <td style={{ padding: "var(--space-3) var(--space-4)" }}>
+                      <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)" }}>{f.name}</div>
+                      <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{f.house}</div>
                     </td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">{price}</td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
+                    <td style={{ padding: "var(--space-3) var(--space-4)", fontSize: "var(--text-xs)", color: "var(--color-text-secondary)" }}>{price}</td>
+                    <td style={{ padding: "var(--space-3) var(--space-4)", fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{accords}</td>
                   </tr>
                 );
               })}
@@ -383,23 +402,23 @@ function InCommonTab({
       <SectionHeader
         title="In Common"
         right={
-          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
             Both own {sorted.length} {sorted.length === 1 ? "fragrance" : "fragrances"}
           </span>
         }
       />
       {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">
+        <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", padding: "var(--space-4) 0" }}>
           No fragrances in common yet.
         </div>
       ) : (
-        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-          <table className="w-full min-w-[420px]">
+        <div style={{ overflowX: "auto", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", marginBottom: "var(--space-6)" }}>
+          <table style={{ width: "100%", minWidth: "420px" }}>
             <thead>
-              <tr className="border-b border-[var(--b2)]">
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Fragrance</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Accords</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Compliments</th>
+              <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
+                <th style={thStyle}>Fragrance</th>
+                <th style={thStyle}>Accords</th>
+                <th style={thStyle}>Compliments</th>
               </tr>
             </thead>
             <tbody>
@@ -415,20 +434,21 @@ function InCommonTab({
                 return (
                   <tr
                     key={f.id}
-                    className="border-b border-[var(--b1)] last:border-0"
+                    style={{ borderBottom: "1px solid var(--color-border)" }}
+                    className="last:border-0"
                   >
-                    <td className="px-4 py-3">
-                      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
+                    <td style={{ padding: "var(--space-3) var(--space-4)" }}>
+                      <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text-primary)" }}>{f.name}</div>
+                      <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{f.house}</div>
                     </td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
+                    <td style={{ padding: "var(--space-3) var(--space-4)", fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>{accords}</td>
+                    <td style={{ padding: "var(--space-3) var(--space-4)", fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
                       {myComps > 0 ? (
-                        <span>You: <span className="text-[var(--blue)]">{myComps}</span></span>
+                        <span>You: <span style={{ color: "var(--color-accent)" }}>{myComps}</span></span>
                       ) : null}
                       {myComps > 0 && friendComps > 0 ? " · " : null}
                       {friendComps > 0 ? (
-                        <span>{friendName}: <span className="text-[var(--blue)]">{friendComps}</span></span>
+                        <span>{friendName}: <span style={{ color: "var(--color-accent)" }}>{friendComps}</span></span>
                       ) : null}
                       {myComps === 0 && friendComps === 0 ? "\u2014" : null}
                     </td>

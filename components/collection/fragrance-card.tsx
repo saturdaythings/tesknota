@@ -87,7 +87,7 @@ export function FragranceCard({ frag, compCount, onClick }: FragranceCardProps) 
           </div>
           <div
             className="text-secondary"
-            style={{ marginTop: "2px" }}
+            style={{ marginTop: "var(--space-1)" }}
           >
             {frag.house}
           </div>
@@ -135,7 +135,7 @@ export function FragranceCard({ frag, compCount, onClick }: FragranceCardProps) 
       >
         <span
           className="text-meta"
-          style={{ display: "flex", alignItems: "center", gap: "4px" }}
+          style={{ display: "flex", alignItems: "center", gap: "var(--space-1)" }}
         >
           <MessageCircle size={13} aria-hidden="true" style={{ flexShrink: 0 }} />
           {compCount} compliment{compCount !== 1 ? "s" : ""}

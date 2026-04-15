@@ -9,15 +9,38 @@ interface StatBoxProps {
 
 export function StatBox({ value, label, delta, className }: StatBoxProps) {
   return (
-    <div className={cn("bg-[var(--off)] px-5 py-[14px]", className)}>
-      <div className="font-[var(--serif)] text-[34px] font-600 leading-none text-[var(--ink)]">
+    <div
+      style={{
+        background: "var(--color-surface)",
+        padding: "var(--space-5)",
+      }}
+      className={cn(className)}
+    >
+      <div
+        className="font-display"
+        style={{
+          fontSize: "var(--text-2xl)",
+          fontWeight: 500,
+          lineHeight: "var(--leading-tight)",
+          color: "var(--color-text-primary)",
+        }}
+      >
         {value}
       </div>
-      <div className="font-[var(--mono)] text-xs tracking-[0.16em] uppercase text-[var(--ink3)] mt-[5px]">
+      <div
+        className="text-label"
+        style={{ marginTop: "var(--space-1)", color: "var(--color-text-muted)" }}
+      >
         {label}
       </div>
       {delta && (
-        <div className="font-[var(--mono)] text-xs text-[var(--s-cur)] mt-[2px]">
+        <div
+          style={{
+            fontSize: "var(--text-xs)",
+            color: "var(--color-success)",
+            marginTop: "var(--space-1)",
+          }}
+        >
           {delta}
         </div>
       )}
@@ -33,9 +56,14 @@ interface StatsGridProps {
 export function StatsGrid({ children, className }: StatsGridProps) {
   return (
     <div
+      style={{
+        border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-md)",
+        overflow: "hidden",
+        marginBottom: "var(--space-4)",
+      }}
       className={cn(
-        "grid gap-px bg-[var(--b2)] border border-[var(--b2)] mb-4",
-        "[grid-template-columns:repeat(auto-fit,minmax(110px,1fr))]",
+        "grid [grid-template-columns:repeat(auto-fit,minmax(110px,1fr))]",
         className,
       )}
     >

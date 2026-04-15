@@ -112,10 +112,6 @@ export default function SettingsPage() {
           }}
           className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
         >
-          <h1 className="text-page-title" style={{ marginBottom: "var(--space-8)" }}>
-            Settings
-          </h1>
-
           {/* ── Profile ── */}
           <Card padding="var(--space-6)">
             <CardHeader>

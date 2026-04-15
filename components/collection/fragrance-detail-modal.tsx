@@ -98,7 +98,7 @@ function FieldRow({
 }) {
   return (
     <div>
-      <div className="text-label" style={{ marginBottom: "2px" }}>
+      <div className="text-label" style={{ marginBottom: "var(--space-1)" }}>
         {label}
       </div>
       <div
@@ -315,7 +315,7 @@ export function FragranceDetailModal({
               <div className="grid gap-[var(--space-4)] grid-cols-2 max-sm:grid-cols-1">
                 <FieldRow label="Fragrance Type" value={cd?.fragranceType} />
                 <div>
-                  <div className="text-label" style={{ marginBottom: "2px" }}>
+                  <div className="text-label" style={{ marginBottom: "var(--space-1)" }}>
                     Notes &amp; Accords
                   </div>
                   {notesDisplay ? (
@@ -341,7 +341,7 @@ export function FragranceDetailModal({
                             cursor: "pointer",
                             color: "var(--color-accent)",
                             padding: 0,
-                            marginTop: "2px",
+                            marginTop: "var(--space-1)",
                             fontSize: "var(--text-xs)",
                           }}
                         >
@@ -432,7 +432,7 @@ export function FragranceDetailModal({
                     rows={4}
                     style={{
                       width: "100%",
-                      padding: "10px 12px",
+                      padding: "var(--space-2) var(--space-3)",
                       background: "var(--color-surface)",
                       border: "1.5px solid var(--color-border)",
                       borderRadius: "var(--radius-sm)",
@@ -510,7 +510,7 @@ export function FragranceDetailModal({
                     >
                       <div
                         className="text-secondary"
-                        style={{ marginBottom: "2px" }}
+                        style={{ marginBottom: "var(--space-1)" }}
                       >
                         {[c.month, c.year].filter(Boolean).join(" ")}
                         {c.relation && ` · ${c.relation}`}

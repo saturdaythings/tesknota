@@ -272,10 +272,6 @@ export default function DashboardPage() {
           }}
           className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
         >
-          <h1 className="text-page-title" style={{ marginBottom: "var(--space-6)" }}>
-            Dashboard
-          </h1>
-
           {/* ── Stat Row ─────────────────────────────── */}
           {!isLoaded ? (
             <div
@@ -424,7 +420,7 @@ export default function DashboardPage() {
                               alignItems: "center",
                               justifyContent: "center",
                               fontSize: "var(--text-xs)",
-                              fontWeight: 700,
+                              fontWeight: 600,
                               color: "var(--color-accent)",
                             }}
                           >
@@ -448,7 +444,7 @@ export default function DashboardPage() {
                               display: "flex",
                               flexDirection: "column",
                               alignItems: "flex-end",
-                              gap: "2px",
+                              gap: "var(--space-1)",
                               flexShrink: 0,
                             }}
                           >
@@ -529,7 +525,7 @@ export default function DashboardPage() {
                               alignItems: "center",
                               justifyContent: "center",
                               fontSize: "var(--text-xs)",
-                              fontWeight: 700,
+                              fontWeight: 600,
                               color: "var(--color-accent)",
                             }}
                           >
