@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -62,11 +62,13 @@ export default function CollectionPage() {
   const current = MF.filter((f) => f.status === "CURRENT");
 
   const normStr = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const getCf = (f: UserFragrance) =>
+  const getCf = useCallback((f: UserFragrance) =>
     communityFrags.find(
       (c) => (f.fragranceId && c.fragranceId === f.fragranceId) ||
              (normStr(c.fragranceName) === normStr(f.name) && normStr(c.fragranceHouse) === normStr(f.house ?? ""))
-    );
+    ),
+    [communityFrags],
+  );
 
   const allAccords = useMemo(
     () => Array.from(new Set(MF.flatMap((f) => getCf(f)?.fragranceAccords ?? []))).sort(),
