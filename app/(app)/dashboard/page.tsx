@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Topbar } from "@/components/layout/Topbar";
 import { FragDetail } from "@/components/ui/frag-detail";
 import { FragForm } from "@/components/ui/frag-form";
-import { StatBox, StatsGrid } from "@/components/ui/stat-box";
-import { SectionHeader } from "@/components/ui/section-header";
-import { AccordCloud } from "@/components/ui/accord-cloud";
+import { CompForm } from "@/components/ui/comp-form";
 import { StatusBadge } from "@/components/ui/frag-row";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
@@ -22,15 +21,19 @@ import {
   monthNum,
   MONTHS,
 } from "@/lib/frag-utils";
+import { Plus, MessageCircle, Upload, Flag } from "@/components/ui/Icons";
 
+const COLLECTION_STATUSES = new Set(["CURRENT", "PREVIOUSLY_OWNED", "FINISHED"]);
 const WISHLIST_STATUSES = new Set(["WANT_TO_BUY", "WANT_TO_SMELL", "WANT_TO_IDENTIFY"]);
 
 export default function DashboardPage() {
-  const { user } = useUser();
+  const router = useRouter();
+  const { user, profiles } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded, removeFrag } = useData();
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
-  const [formOpen, setFormOpen] = useState(false);
+  const [fragFormOpen, setFragFormOpen] = useState(false);
+  const [compFormOpen, setCompFormOpen] = useState(false);
 
   if (!user) return null;
 
@@ -40,27 +43,22 @@ export default function DashboardPage() {
 
   const MF = fragrances.filter((f) => f.userId === user.id);
   const MC = compliments.filter((c) => c.userId === user.id);
-  const current = MF.filter((f) => f.status === "CURRENT");
-  const wish = MF.filter((f) => WISHLIST_STATUSES.has(f.status));
 
-  const ratedThisMonth = MF.filter((f) => {
-    if (!f.personalRating || !f.createdAt) return false;
-    const dt = new Date(f.createdAt);
-    return dt.getMonth() + 1 === curMonth && dt.getFullYear() === curYear;
-  });
+  const collectionFrags = MF.filter((f) => COLLECTION_STATUSES.has(f.status));
+  const wishlistFrags = MF.filter((f) => WISHLIST_STATUSES.has(f.status));
+  const ratedFrags = MF.filter((f) => f.personalRating);
 
-  const collDelta = addedThisMonth(MF, curMonth, curYear);
+  const collDelta = addedThisMonth(collectionFrags, curMonth, curYear);
   const compDelta = addedThisMonth(MC, curMonth, curYear);
-  const wishDelta = addedThisMonth(wish, curMonth, curYear);
+  const wishDelta = addedThisMonth(wishlistFrags, curMonth, curYear);
   const avgRat = avgRatingStr(MF);
-  const avgRatDelta = ratedThisMonth.length > 0 ? `+${ratedThisMonth.length} rated` : "";
-
-  const hasCurrent = current.length > 0;
 
   async function handleDeleteFrag(frag: UserFragrance) {
     await removeFrag(frag.id);
     setDetailFrag(null);
   }
+
+  const hasCollection = collectionFrags.length > 0;
 
   return (
     <>
@@ -71,47 +69,93 @@ export default function DashboardPage() {
         communityFrags={communityFrags}
         compliments={MC}
         userId={user.id}
-        onEdit={(frag) => { setEditingFrag(frag); setFormOpen(true); }}
+        onEdit={(frag) => { setEditingFrag(frag); setFragFormOpen(true); }}
         onDelete={handleDeleteFrag}
       />
       <FragForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
+        open={fragFormOpen}
+        onClose={() => setFragFormOpen(false)}
         editing={editingFrag}
       />
+      <CompForm
+        open={compFormOpen}
+        onClose={() => setCompFormOpen(false)}
+      />
       <Topbar title="Dashboard" />
-      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
+      <main
+        className="flex-1 overflow-y-auto"
+        style={{ background: "var(--color-cream)", padding: "32px 24px 40px" }}
+      >
         {!isLoaded && (
-          <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
+          <div
+            className="text-xs tracking-[0.12em] py-6"
+            style={{ fontFamily: "var(--font-sans)", color: "var(--color-sand)" }}
+          >
             Loading...
           </div>
         )}
 
-        {isLoaded && !hasCurrent && (
-          <Onboarding
-            onAddFrag={() => { setEditingFrag(null); setFormOpen(true); }}
-          />
+        {isLoaded && !hasCollection && (
+          <Onboarding onAddFrag={() => { setEditingFrag(null); setFragFormOpen(true); }} />
         )}
 
-        {isLoaded && hasCurrent && (
+        {isLoaded && hasCollection && (
           <>
-            <DQBanner frags={current} />
-
-            <StatsGrid className="mb-6">
-              <StatBox value={MF.length} label="Collection" delta={collDelta > 0 ? `+${collDelta} this mo` : ""} />
-              <StatBox value={MC.length} label="Compliments" delta={compDelta > 0 ? `+${compDelta} this mo` : ""} />
-              <StatBox value={wish.length} label="Wishlist" delta={wishDelta > 0 ? `+${wishDelta} this mo` : ""} />
-              <StatBox value={avgRat} label="Avg Rating" delta={avgRatDelta} />
-            </StatsGrid>
-
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 mb-6">
-              <Spotlight MF={MF} MC={MC} />
-              <ScentSignature frags={current} communityFrags={communityFrags} />
+            {/* ── Stat Cards ─────────────────────────── */}
+            <div className="dash-stat-grid mb-5">
+              <StatCard
+                label="Collection"
+                value={collectionFrags.length}
+                delta={collDelta > 0 ? `+${collDelta} this mo` : undefined}
+              />
+              <StatCard
+                label="Compliments"
+                value={MC.length}
+                delta={compDelta > 0 ? `+${compDelta} this mo` : undefined}
+              />
+              <StatCard
+                label="Wishlist"
+                value={wishlistFrags.length}
+                delta={wishDelta > 0 ? `+${wishDelta} this mo` : undefined}
+              />
+              <StatCard
+                label="Avg Rating"
+                value={avgRat}
+                delta={ratedFrags.length > 0 ? `${ratedFrags.length} rated` : undefined}
+              />
             </div>
 
-            <RecentFragrances frags={MF} compliments={MC} communityFrags={communityFrags} userId={user.id} onFragClick={setDetailFrag} />
+            {/* ── Quick Actions ───────────────────────── */}
+            <QuickActions
+              onAddFrag={() => { setEditingFrag(null); setFragFormOpen(true); }}
+              onLogCompliment={() => setCompFormOpen(true)}
+            />
 
-            <FriendActivity fragrances={fragrances} compliments={compliments} currentUserId={user.id} />
+            {/* ── Spotlight + Scent Signature ─────────── */}
+            <div className="dash-spotlight-grid mb-6">
+              <SignatureSpotlight MF={MF} MC={MC} />
+              <ScentSignature frags={MF} communityFrags={communityFrags} />
+            </div>
+
+            {/* ── Notification Banner ─────────────────── */}
+            <NotifBanner frags={collectionFrags} />
+
+            {/* ── Friend's Recent Activity ─────────────── */}
+            <FriendActivity
+              fragrances={fragrances}
+              compliments={compliments}
+              currentUserId={user.id}
+              profiles={profiles}
+            />
+
+            {/* ── Recent Purchases Table ───────────────── */}
+            <RecentPurchases
+              frags={MF}
+              compliments={MC}
+              communityFrags={communityFrags}
+              userId={user.id}
+              onFragClick={setDetailFrag}
+            />
           </>
         )}
       </main>
@@ -119,126 +163,292 @@ export default function DashboardPage() {
   );
 }
 
-// ── Onboarding ───────────────────────────────────────────
+// ── Stat Card ─────────────────────────────────────────────
 
-function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
+function StatCard({ label, value, delta }: { label: string; value: string | number; delta?: string }) {
   return (
-    <div className="max-w-[440px] mt-8">
-      <div className="font-[var(--serif)] text-[26px] text-[var(--ink)] mb-1">
-        Welcome to t&#x0119;sknota
+    <div
+      style={{
+        background: "#FFFFFF",
+        border: "1px solid var(--color-cream-dark)",
+        borderRadius: "6px",
+        padding: "24px 24px 20px",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontWeight: 500,
+          fontSize: "11px",
+          color: "var(--color-sand)",
+          textTransform: "uppercase",
+          letterSpacing: "0.12em",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
       </div>
-      <div className="font-[var(--mono)] text-sm text-[var(--ink3)] tracking-[0.06em] mb-6">
-        Your fragrance journey starts here
+      <div
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontWeight: 400,
+          fontStyle: "italic",
+          fontSize: "48px",
+          lineHeight: 1,
+          color: "var(--color-navy)",
+          marginBottom: "8px",
+        }}
+      >
+        {value}
       </div>
-      <div className="flex flex-col gap-4">
-        <button
-          onClick={onAddFrag}
-          className="flex items-start gap-4 p-4 bg-[var(--off2)] border border-[var(--b2)] text-left w-full hover:bg-[var(--off3)] transition-colors"
+      {delta ? (
+        <div
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontWeight: 400,
+            fontSize: "13px",
+            color: "var(--color-sand)",
+          }}
         >
-          <div className="w-6 h-6 shrink-0 rounded-full bg-[var(--blue)] text-white font-[var(--mono)] text-xs flex items-center justify-center">
-            1
-          </div>
-          <div>
-            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-[2px]">Add your first fragrance</div>
-            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">Search by name or import from a spreadsheet</div>
-          </div>
-        </button>
-        <div className="flex items-start gap-4 p-4 bg-[var(--off2)] border border-[var(--b2)] opacity-50">
-          <div className="w-6 h-6 shrink-0 rounded-full bg-[var(--b3)] text-[var(--ink3)] font-[var(--mono)] text-xs flex items-center justify-center">
-            2
-          </div>
-          <div>
-            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-[2px]">Log your first compliment</div>
-            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">Record who complimented you, when, and what you were wearing</div>
-          </div>
+          {delta}
         </div>
-      </div>
+      ) : (
+        <div style={{ height: "20px" }} />
+      )}
     </div>
   );
 }
 
-// ── DQ Banner ────────────────────────────────────────────
+// ── Quick Actions ──────────────────────────────────────────
 
-function DQBanner({ frags }: { frags: UserFragrance[] }) {
-  const router = useRouter();
-  const [dismissed, setDismissed] = useState(false);
-  if (dismissed || !frags.length) return null;
+function QuickActions({
+  onAddFrag,
+  onLogCompliment,
+}: {
+  onAddFrag: () => void;
+  onLogCompliment: () => void;
+}) {
+  return (
+    <div className="dash-quick-actions mb-8">
+      <ActionBtn icon={<Plus size={16} />} label="Add Fragrance" onClick={onAddFrag} />
+      <ActionBtn icon={<MessageCircle size={16} />} label="Log Compliment" onClick={onLogCompliment} />
+      <ActionBtn icon={<Upload size={16} />} label="Import File" href="/import" />
+      <ActionBtn
+        icon={<Flag size={16} />}
+        label="Review Collection"
+        href="/collection?filter=missing"
+      />
+    </div>
+  );
+}
 
-  const missingRating = frags.filter((f) => !f.personalRating).length;
-  const missingNotes = frags.filter((f) => !(f.personalNotes ?? "").trim()).length;
-  const incomplete = frags.filter((f) => !f.personalRating || !(f.personalNotes ?? "").trim()).length;
+function ActionBtn({
+  icon,
+  label,
+  onClick,
+  href,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick?: () => void;
+  href?: string;
+}) {
+  const style: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    fontFamily: "var(--font-sans)",
+    fontWeight: 500,
+    fontSize: "13px",
+    color: "var(--color-navy)",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: "6px 10px",
+    borderRadius: "4px",
+    textDecoration: "none",
+    transition: "background 0.15s",
+  };
 
-  if (!incomplete) return null;
-
-  const topField = missingRating >= missingNotes ? "rating" : "personal notes";
+  if (href) {
+    return (
+      <Link href={href} style={style} className="hover:bg-[var(--color-cream-dark)]">
+        {icon}
+        {label}
+      </Link>
+    );
+  }
 
   return (
-    <div className="flex items-center justify-between bg-[var(--warm3)] border border-[var(--warm2)] px-4 py-[10px] mb-5 text-sm">
-      <button
-        onClick={() => router.push("/collection")}
-        className="font-[var(--body)] text-[var(--warm-text)] text-left hover:underline"
-      >
-        {incomplete} {incomplete === 1 ? "fragrance is" : "fragrances are"} missing {topField} &mdash; add it to improve your insights &rarr;
-      </button>
-      <button
-        onClick={() => setDismissed(true)}
-        className="font-[var(--mono)] text-xs text-[var(--ink3)] hover:text-[var(--ink)] ml-4 shrink-0"
-      >
-        ×
-      </button>
-    </div>
+    <button style={style} onClick={onClick} className="hover:bg-[var(--color-cream-dark)]">
+      {icon}
+      {label}
+    </button>
   );
 }
 
-// ── Signature Spotlight ──────────────────────────────────
+// ── Signature Spotlight ────────────────────────────────────
 
-function Spotlight({ MF, MC }: { MF: UserFragrance[]; MC: UserCompliment[] }) {
+function SignatureSpotlight({
+  MF,
+  MC,
+}: {
+  MF: UserFragrance[];
+  MC: UserCompliment[];
+}) {
   const fragCompCounts: Record<string, number> = {};
   MC.forEach((c) => {
-    if (c.primaryFragId) fragCompCounts[c.primaryFragId] = (fragCompCounts[c.primaryFragId] ?? 0) + 1;
+    const key = c.primaryFragId ?? "";
+    if (key) fragCompCounts[key] = (fragCompCounts[key] ?? 0) + 1;
   });
 
-  const sorted = Object.entries(fragCompCounts).sort((a, b) => b[1] - a[1]);
-  if (!sorted.length) return null;
+  let spotlight: UserFragrance | null = null;
 
-  const [topFragId, topCt] = sorted[0];
-  const topFrag = MF.find((f) => (f.fragranceId || f.id) === topFragId);
-  if (!topFrag) return null;
+  const hasCompliments = Object.keys(fragCompCounts).length > 0;
 
-  const pctOfTotal = MC.length > 0 ? Math.round((topCt / MC.length) * 100) : 0;
+  if (hasCompliments) {
+    const ranked = MF.filter((f) => {
+      const key = f.fragranceId || f.id;
+      return (fragCompCounts[key] ?? 0) > 0;
+    }).sort((a, b) => {
+      const ka = a.fragranceId || a.id;
+      const kb = b.fragranceId || b.id;
+      const ca = fragCompCounts[ka] ?? 0;
+      const cb = fragCompCounts[kb] ?? 0;
+      if (cb !== ca) return cb - ca;
+      return parseRating(b.personalRating) - parseRating(a.personalRating);
+    });
+    spotlight = ranked[0] ?? null;
+  } else {
+    const sorted = [...MF]
+      .filter((f) => !WISHLIST_STATUSES.has(f.status))
+      .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
+    spotlight = sorted[0] ?? null;
+  }
+
+  const totalComps = MC.length;
+  const spotKey = spotlight ? (spotlight.fragranceId || spotlight.id) : "";
+  const compCount = spotKey ? (fragCompCounts[spotKey] ?? 0) : 0;
+  const pct = totalComps > 0 ? Math.round((compCount / totalComps) * 100) : 0;
+  const rating = parseRating(spotlight?.personalRating);
 
   return (
     <div>
-      <SectionHeader title="Signature spotlight" />
-      <div className="bg-[var(--blue4)] border border-[var(--b2)] p-5">
-        <div className="font-[var(--serif)] text-[22px] text-[var(--ink)] leading-tight mb-[2px]">
-          {topFrag.name}
-        </div>
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] mb-4">
-          {topFrag.house}
-        </div>
-        <div className="flex gap-5">
-          <SpotStat value={topCt} label="compliments" />
-          <SpotStat value={`${pctOfTotal}%`} label="of total" />
-          <SpotStat value={starsStr(parseRating(topFrag.personalRating))} label="your rating" />
-        </div>
+      <div
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontStyle: "italic",
+          fontSize: "20px",
+          color: "var(--color-navy)",
+          marginBottom: "12px",
+        }}
+      >
+        Signature spotlight
       </div>
+      {spotlight ? (
+        <div
+          style={{
+            background: "var(--color-navy)",
+            borderRadius: "6px",
+            padding: "28px",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontStyle: "italic",
+              fontSize: "28px",
+              color: "var(--color-cream)",
+              lineHeight: 1.15,
+              marginBottom: "4px",
+            }}
+          >
+            {spotlight.name}
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontWeight: 500,
+              fontSize: "11px",
+              color: "rgba(200,184,154,0.8)",
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              marginBottom: "20px",
+            }}
+          >
+            {spotlight.house}
+          </div>
+          <div style={{ display: "flex", gap: "28px" }}>
+            <SpotStat value={compCount} label="Compliments" />
+            <SpotStat value={`${pct}%`} label="of total" />
+            <SpotStat value={<StarRow rating={rating} />} label="Your rating" />
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            background: "var(--color-navy)",
+            borderRadius: "6px",
+            padding: "28px",
+            color: "rgba(245,240,232,0.4)",
+            fontFamily: "var(--font-sans)",
+            fontSize: "13px",
+          }}
+        >
+          Add fragrances to see your spotlight.
+        </div>
+      )}
     </div>
   );
 }
 
-function SpotStat({ value, label }: { value: string | number; label: string }) {
+function SpotStat({ value, label }: { value: React.ReactNode; label: string }) {
   return (
     <div>
-      <div className="font-[var(--serif)] text-[20px] text-[var(--ink)] leading-none">{value}</div>
-      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mt-[3px]">
+      <div
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontWeight: 600,
+          fontSize: "16px",
+          color: "var(--color-cream)",
+          lineHeight: 1,
+          marginBottom: "4px",
+        }}
+      >
+        {value}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontWeight: 400,
+          fontSize: "12px",
+          color: "rgba(200,184,154,0.7)",
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+        }}
+      >
         {label}
       </div>
     </div>
   );
 }
 
-// ── Scent Signature ──────────────────────────────────────
+function StarRow({ rating }: { rating: number }) {
+  return (
+    <span>
+      {Array.from({ length: 5 }, (_, i) => (
+        <span
+          key={i}
+          style={{ color: i < rating ? "rgba(245,240,232,0.7)" : "rgba(245,240,232,0.25)" }}
+        >
+          ★
+        </span>
+      ))}
+    </span>
+  );
+}
+
+// ── Scent Signature ────────────────────────────────────────
 
 function ScentSignature({
   frags,
@@ -254,20 +464,307 @@ function ScentSignature({
     });
   });
 
-  const top = Object.entries(acCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  if (!top.length) return null;
+  const top = Object.entries(acCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7);
 
   return (
     <div>
-      <SectionHeader title="Scent signature" right={<span className="font-[var(--mono)] text-xs text-[var(--ink3)]">Top accords in your collection</span>} />
-      <AccordCloud accords={top} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          marginBottom: "12px",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontStyle: "italic",
+            fontSize: "20px",
+            color: "var(--color-navy)",
+          }}
+        >
+          Scent signature
+        </div>
+        <div
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontWeight: 500,
+            fontSize: "11px",
+            color: "var(--color-sand)",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+          }}
+        >
+          Top accords in your collection
+        </div>
+      </div>
+      {top.length === 0 ? (
+        <div
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "13px",
+            color: "var(--color-sand)",
+            paddingTop: "8px",
+          }}
+        >
+          No accords data yet.
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          {top.map(([accord], i) => (
+            <Link
+              key={accord}
+              href={`/collection?filter=accord:${encodeURIComponent(accord)}`}
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontWeight: 500,
+                fontSize: "12px",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                padding: "4px 12px",
+                borderRadius: "2px",
+                border: "1px solid var(--color-cream-dark)",
+                textDecoration: "none",
+                background: i === 0 ? "var(--color-navy)" : "var(--color-cream-dark)",
+                color: i === 0 ? "var(--color-cream)" : "var(--color-navy)",
+                transition: "opacity 0.15s",
+              }}
+            >
+              {accord}
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-// ── Recent Fragrances ────────────────────────────────────
+// ── Notification Banner ────────────────────────────────────
 
-function RecentFragrances({
+function NotifBanner({ frags }: { frags: UserFragrance[] }) {
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("dashboard-notif-dismissed") === "1";
+  });
+
+  if (dismissed) return null;
+
+  const missing = frags.filter(
+    (f) => !(f.personalNotes ?? "").trim() || !f.personalRating
+  ).length;
+
+  if (!missing) return null;
+
+  function dismiss() {
+    localStorage.setItem("dashboard-notif-dismissed", "1");
+    setDismissed(true);
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        background: "var(--color-cream-dark)",
+        borderRadius: "4px",
+        padding: "14px 20px",
+        marginBottom: "24px",
+      }}
+    >
+      <span
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontWeight: 400,
+          fontSize: "14px",
+          color: "var(--color-navy)",
+        }}
+      >
+        {missing} {missing === 1 ? "fragrance is" : "fragrances are"} missing notes — add it to improve your insights.
+      </span>
+      <button
+        onClick={dismiss}
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontWeight: 500,
+          fontSize: "12px",
+          color: "var(--color-sand)",
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          marginLeft: "16px",
+          flexShrink: 0,
+        }}
+      >
+        Dismiss
+      </button>
+    </div>
+  );
+}
+
+// ── Friend Activity ────────────────────────────────────────
+
+function FriendActivity({
+  fragrances,
+  compliments,
+  currentUserId,
+  profiles,
+}: {
+  fragrances: UserFragrance[];
+  compliments: UserCompliment[];
+  currentUserId: string;
+  profiles: ReturnType<typeof useUser>["profiles"];
+}) {
+  const router = useRouter();
+  const friends = profiles.filter((p) => p.id !== currentUserId);
+
+  if (!friends.length) return null;
+
+  const sections: React.ReactNode[] = [];
+
+  for (const friend of friends) {
+    const FF = fragrances.filter((f) => f.userId === friend.id);
+    const FC = compliments.filter((c) => c.userId === friend.id);
+
+    const recentPurchase = FF.filter((f) => !WISHLIST_STATUSES.has(f.status))
+      .slice()
+      .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))[0] ?? null;
+
+    const recentComp = FC.slice().sort(
+      (a, b) =>
+        parseInt(b.year) * 100 + monthNum(b.month) -
+        (parseInt(a.year) * 100 + monthNum(a.month))
+    )[0] ?? null;
+
+    if (!recentPurchase && !recentComp) continue;
+
+    const compFrag = recentComp
+      ? FF.find((f) => (f.fragranceId || f.id) === recentComp.primaryFragId) ?? null
+      : null;
+
+    const compMonthStr = recentComp
+      ? [
+          recentComp.relation,
+          recentComp.year
+            ? `${MONTHS[(monthNum(recentComp.month) - 1) || 0] ?? ""} ${recentComp.year}`
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" \u00B7 ")
+      : "";
+
+    sections.push(
+      <div key={friend.id} style={{ marginBottom: "24px" }}>
+        <div
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontStyle: "italic",
+            fontSize: "20px",
+            color: "var(--color-navy)",
+            marginBottom: "12px",
+          }}
+        >
+          <Link
+            href="/friend"
+            style={{ color: "inherit", textDecoration: "none" }}
+            className="hover:underline"
+          >
+            {friend.name}&rsquo;s recent activity
+          </Link>
+        </div>
+        <div className="dash-activity-grid">
+          {recentPurchase && (
+            <ActivityCard
+              label="Latest Purchase"
+              name={recentPurchase.name}
+              sub={recentPurchase.house}
+              onClick={() => router.push("/friend")}
+            />
+          )}
+          {recentComp && (
+            <ActivityCard
+              label="Latest Compliment"
+              name={compFrag?.name ?? recentComp.primaryFrag ?? "\u2014"}
+              sub={compMonthStr}
+              onClick={() => router.push("/friend")}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return <>{sections}</>;
+}
+
+function ActivityCard({
+  label,
+  name,
+  sub,
+  onClick,
+}: {
+  label: string;
+  name: string;
+  sub: string;
+  onClick?: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        border: "1px solid var(--color-cream-dark)",
+        borderRadius: "6px",
+        padding: "20px 24px",
+        cursor: onClick ? "pointer" : "default",
+      }}
+      className={onClick ? "hover:bg-[var(--color-cream-dark)] transition-colors" : ""}
+    >
+      <div
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontWeight: 500,
+          fontSize: "11px",
+          color: "var(--color-sand)",
+          textTransform: "uppercase",
+          letterSpacing: "0.12em",
+          marginBottom: "8px",
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontStyle: "italic",
+          fontSize: "20px",
+          color: "var(--color-navy)",
+          marginBottom: "2px",
+        }}
+      >
+        {name}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontWeight: 400,
+          fontSize: "13px",
+          color: "var(--color-sand)",
+        }}
+      >
+        {sub}
+      </div>
+    </div>
+  );
+}
+
+// ── Recent Purchases Table ─────────────────────────────────
+
+function RecentPurchases({
   frags,
   compliments,
   communityFrags,
@@ -283,53 +780,112 @@ function RecentFragrances({
   const sorted = frags
     .filter((f) => !WISHLIST_STATUSES.has(f.status))
     .slice()
-    .sort((a, b) => {
-      const da = a.createdAt ?? "";
-      const db = b.createdAt ?? "";
-      return db > da ? 1 : db < da ? -1 : 0;
-    })
-    .slice(0, 3);
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+    .slice(0, 5);
+
+  const COLS = ["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"];
 
   return (
-    <div className="mb-6">
-      <SectionHeader title="Recently added" />
+    <div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "12px",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontStyle: "italic",
+            fontSize: "20px",
+            color: "var(--color-navy)",
+          }}
+        >
+          Recent Purchases
+        </div>
+        <Link
+          href="/collection?sort=added-desc"
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontWeight: 500,
+            fontSize: "12px",
+            color: "var(--color-sand)",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            textDecoration: "none",
+          }}
+          className="hover:text-[var(--color-navy)] transition-colors"
+        >
+          View All
+        </Link>
+      </div>
+
       {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">
-          Your collection is empty.
+        <div
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "13px",
+            color: "var(--color-sand)",
+            paddingTop: "8px",
+          }}
+        >
+          No fragrances added yet.
         </div>
       ) : (
-        <>
-          {/* Desktop table */}
-          <div className="hidden md:block overflow-x-auto border border-[var(--b2)]">
-            <table className="w-full min-w-[600px]">
+        <div
+          style={{
+            border: "1px solid var(--color-cream-dark)",
+            borderRadius: "6px",
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", minWidth: "640px", borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-[var(--b2)]">
-                  {["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"].map((h) => (
-                    <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">{h}</th>
+                <tr style={{ borderBottom: "1px solid var(--color-cream-dark)" }}>
+                  {COLS.map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: "10px 16px",
+                        textAlign: "left",
+                        fontFamily: "var(--font-sans)",
+                        fontWeight: 500,
+                        fontSize: "11px",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        color: "var(--color-sand)",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {sorted.map((f) => (
-                  <RecentRow key={f.id} frag={f} compliments={compliments} communityFrags={communityFrags} userId={userId} onClick={onFragClick} />
+                  <PurchaseRow
+                    key={f.id}
+                    frag={f}
+                    compliments={compliments}
+                    communityFrags={communityFrags}
+                    userId={userId}
+                    onClick={onFragClick}
+                  />
                 ))}
               </tbody>
             </table>
           </div>
-
-          {/* Mobile cards */}
-          <div className="md:hidden flex flex-col border border-[var(--b2)]">
-            {sorted.map((f) => (
-              <RecentCard key={f.id} frag={f} compliments={compliments} communityFrags={communityFrags} userId={userId} onClick={onFragClick} />
-            ))}
-          </div>
-        </>
+        </div>
       )}
     </div>
   );
 }
 
-function RecentCard({
+function PurchaseRow({
   frag: f,
   compliments,
   communityFrags,
@@ -343,160 +899,208 @@ function RecentCard({
   onClick: (frag: UserFragrance) => void;
 }) {
   const compCount = getCompCount(f.fragranceId || f.id, compliments, userId);
-  const addedStr = f.purchaseDate ?? (f.createdAt ? `${MONTHS[new Date(f.createdAt).getMonth()]} ${new Date(f.createdAt).getFullYear()}` : "");
-
-  return (
-    <div
-      className="px-4 py-3 border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
-      onClick={() => onClick(f)}
-    >
-      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mb-1">{f.house}</div>
-      <div className="flex flex-wrap gap-x-4 gap-y-[2px]">
-        <StatusBadge status={f.status} />
-        {f.personalRating ? (
-          <span className="font-[var(--mono)] text-xs text-[var(--warm-text)]">{starsStr(parseRating(f.personalRating))}</span>
-        ) : null}
-        {addedStr && <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">{addedStr}</span>}
-        {compCount > 0 && <span className="font-[var(--mono)] text-xs text-[var(--blue)]">{compCount} compliment{compCount !== 1 ? "s" : ""}</span>}
-      </div>
-    </div>
-  );
-}
-
-function RecentRow({
-  frag: f,
-  compliments,
-  communityFrags,
-  userId,
-  onClick,
-}: {
-  frag: UserFragrance;
-  compliments: UserCompliment[];
-  communityFrags: CommunityFrag[];
-  userId: string;
-  onClick: (frag: UserFragrance) => void;
-}) {
-  const compCount = getCompCount(f.fragranceId || f.id, compliments, userId);
-  const accords = getAccords(f, communityFrags).join(", ") || "\u2014";
-  const addedStr = f.purchaseDate ?? (f.createdAt ? `${MONTHS[new Date(f.createdAt).getMonth()]} ${new Date(f.createdAt).getFullYear()}` : "");
+  const accords = getAccords(f, communityFrags).slice(0, 3).join(", ") || "\u2014";
+  const addedStr = f.purchaseDate ??
+    (f.createdAt
+      ? `${MONTHS[new Date(f.createdAt).getMonth()]} ${new Date(f.createdAt).getFullYear()}`
+      : "");
 
   return (
     <tr
-      className="border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer"
       onClick={() => onClick(f)}
+      style={{ borderBottom: "1px solid var(--color-cream-dark)", cursor: "pointer" }}
+      className="hover:bg-[var(--color-cream-dark)] transition-colors last:border-0"
     >
-      <td className="px-4 py-3">
-        <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
+      <td style={{ padding: "12px 16px" }}>
+        <div
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontStyle: "italic",
+            fontSize: "15px",
+            color: "var(--color-navy)",
+          }}
+        >
+          {f.name}
+        </div>
+        <div
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "12px",
+            color: "var(--color-sand)",
+            marginTop: "1px",
+          }}
+        >
+          {f.house}
+        </div>
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">
+      <td
+        style={{
+          padding: "12px 16px",
+          fontFamily: "var(--font-sans)",
+          fontSize: "12px",
+          color: "var(--color-sand)",
+          whiteSpace: "nowrap",
+        }}
+      >
         {(f.sizes ?? []).join(", ") || "\u2014"}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--warm-text)] tracking-[1px]">
+      <td
+        style={{
+          padding: "12px 16px",
+          fontFamily: "var(--font-sans)",
+          fontSize: "13px",
+          color: "var(--color-navy)",
+          whiteSpace: "nowrap",
+        }}
+      >
         {starsStr(parseRating(f.personalRating))}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
+      <td
+        style={{
+          padding: "12px 16px",
+          fontFamily: "var(--font-sans)",
+          fontSize: "12px",
+          color: "var(--color-sand)",
+          whiteSpace: "nowrap",
+        }}
+      >
         {addedStr || "\u2014"}
       </td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
-      <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
-        {compCount > 0 ? <span className="text-[var(--blue)]">{compCount}</span> : "\u2014"}
+      <td
+        style={{
+          padding: "12px 16px",
+          fontFamily: "var(--font-sans)",
+          fontSize: "12px",
+          color: "var(--color-sand)",
+        }}
+      >
+        {accords}
       </td>
-      <td className="px-4 py-3">
+      <td
+        style={{
+          padding: "12px 16px",
+          fontFamily: "var(--font-sans)",
+          fontSize: "12px",
+          color: compCount > 0 ? "var(--color-navy)" : "var(--color-sand)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {compCount > 0 ? compCount : "\u2014"}
+      </td>
+      <td style={{ padding: "12px 16px" }}>
         <StatusBadge status={f.status} />
       </td>
     </tr>
   );
 }
 
-// ── Friend Activity ──────────────────────────────────────
+// ── Onboarding ─────────────────────────────────────────────
 
-function FriendActivity({
-  fragrances,
-  compliments,
-  currentUserId,
-}: {
-  fragrances: UserFragrance[];
-  compliments: UserCompliment[];
-  currentUserId: string;
-}) {
-  const router = useRouter();
-  const { profiles } = useUser();
-  const friends = profiles.filter((p) => p.id !== currentUserId);
-  const sections: React.ReactNode[] = [];
-
-  for (const friend of friends) {
-    const FF = fragrances.filter((f) => f.userId === friend.id);
-    const FC = compliments.filter((c) => c.userId === friend.id);
-
-    const recentPurchase = FF.filter((f) => !WISHLIST_STATUSES.has(f.status))
-      .slice()
-      .sort((a, b) => {
-        const da = a.createdAt ?? "";
-        const db = b.createdAt ?? "";
-        return db > da ? 1 : db < da ? -1 : 0;
-      })[0] ?? null;
-
-    const recentComp = FC.slice().sort(
-      (a, b) =>
-        (parseInt(b.year) * 100 + monthNum(b.month)) -
-        (parseInt(a.year) * 100 + monthNum(a.month))
-    )[0] ?? null;
-
-    if (!recentPurchase && !recentComp) continue;
-
-    const compFrag = recentComp
-      ? FF.find((f) => (f.fragranceId || f.id) === recentComp.primaryFragId) ?? null
-      : null;
-
-    sections.push(
-      <div key={friend.id} className="mb-6">
-        <SectionHeader title={`${friend.name}'s recent activity`} />
-        <div className="flex gap-4">
-          {recentPurchase && (
-            <FriendCard
-              label="Latest purchase"
-              name={recentPurchase.name}
-              sub={recentPurchase.house}
-              onClick={() => router.push("/friend")}
-            />
-          )}
-          {recentComp && (
-            <FriendCard
-              label="Latest compliment"
-              name={compFrag?.name ?? recentComp.primaryFrag ?? "\u2014"}
-              sub={[
-                recentComp.relation,
-                recentComp.year
-                  ? `${MONTHS[(monthNum(recentComp.month) - 1) || 0] ?? ""} ${recentComp.year}`
-                  : "",
-              ]
-                .filter(Boolean)
-                .join(" \u00B7 ")}
-              onClick={() => router.push("/friend")}
-            />
-          )}
+function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
+  return (
+    <div style={{ maxWidth: "440px", marginTop: "32px" }}>
+      <div
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontSize: "26px",
+          color: "var(--color-navy)",
+          marginBottom: "4px",
+        }}
+      >
+        Welcome to t&#x0119;sknota
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontSize: "13px",
+          color: "var(--color-sand)",
+          letterSpacing: "0.06em",
+          marginBottom: "24px",
+        }}
+      >
+        Your fragrance journey starts here
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <button
+          onClick={onAddFrag}
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "16px",
+            padding: "16px",
+            background: "var(--color-cream-dark)",
+            border: "1px solid var(--color-cream-dark)",
+            borderRadius: "4px",
+            textAlign: "left",
+            width: "100%",
+            cursor: "pointer",
+          }}
+        >
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              flexShrink: 0,
+              borderRadius: "50%",
+              background: "var(--color-navy)",
+              color: "var(--color-cream)",
+              fontFamily: "var(--font-sans)",
+              fontSize: "11px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            1
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)", marginBottom: "2px" }}>
+              Add your first fragrance
+            </div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>
+              Search by name or import from a spreadsheet
+            </div>
+          </div>
+        </button>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "16px",
+            padding: "16px",
+            background: "var(--color-cream-dark)",
+            border: "1px solid var(--color-cream-dark)",
+            borderRadius: "4px",
+            opacity: 0.5,
+          }}
+        >
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              flexShrink: 0,
+              borderRadius: "50%",
+              background: "var(--color-sand)",
+              color: "var(--color-cream)",
+              fontFamily: "var(--font-sans)",
+              fontSize: "11px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            2
+          </div>
+          <div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)", marginBottom: "2px" }}>
+              Log your first compliment
+            </div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>
+              Record who complimented you, when, and what you were wearing
+            </div>
+          </div>
         </div>
       </div>
-    );
-  }
-
-  if (!sections.length) return null;
-  return <>{sections}</>;
-}
-
-function FriendCard({ label, name, sub, onClick }: { label: string; name: string; sub: string; onClick?: () => void }) {
-  return (
-    <div
-      onClick={onClick}
-      className="flex-1 bg-[var(--off2)] border border-[var(--b2)] p-4 cursor-pointer hover:bg-[var(--off3)] transition-colors"
-    >
-      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
-        {label}
-      </div>
-      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{name}</div>
-      <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mt-[2px]">{sub}</div>
     </div>
   );
 }

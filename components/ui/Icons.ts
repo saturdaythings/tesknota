@@ -24,4 +24,5 @@ export {
   LogOut,
   GitMerge,
   Menu,
+  Flag,
 } from 'lucide-react';
