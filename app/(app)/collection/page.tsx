@@ -132,7 +132,7 @@ export default function CollectionPage() {
       />
       <FragForm
         open={formOpen}
-        onClose={() => setFormOpen(false)}
+        onClose={() => { setFormOpen(false); setDetailFrag(null); }}
         editing={editingFrag}
       />
       <Topbar title="My Collection" />
