@@ -4,11 +4,13 @@ import { useState, useMemo } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
-import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
+import { FilterChip } from "@/components/ui/filter-bar";
 import { FragRow } from "@/components/ui/frag-row";
 import { FragForm } from "@/components/ui/frag-form";
 import { FragDetail } from "@/components/ui/frag-detail";
 import { Pagination } from "@/components/ui/pagination";
+import { Dropdown } from "@/components/ui/dropdown";
+import { FilterPanel } from "@/components/ui/filter-panel";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -52,10 +54,6 @@ export default function CollectionPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [accordSearch, setAccordSearch] = useState("");
-  const [accordDDOpen, setAccordDDOpen] = useState(false);
-  const [ratingDDOpen, setRatingDDOpen] = useState(false);
-  const [houseDDOpen, setHouseDDOpen] = useState(false);
 
   if (!user) return null;
 
@@ -161,19 +159,19 @@ export default function CollectionPage() {
                 onChange={(e) => { setFilters({ q: e.target.value }); setPage(1); }}
                 className="flex-1 min-w-[160px] max-w-[280px] px-3 py-[8px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-sm text-[var(--ink)] placeholder:text-[var(--ink3)] focus:outline-none focus:border-[var(--blue)]"
               />
-              <select
+              <Dropdown
                 value={filters.sort}
-                onChange={(e) => { setFilters({ sort: e.target.value as SortKey }); setPage(1); }}
-                className="px-3 py-[6px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink3)] focus:outline-none cursor-pointer"
-              >
-                <option value="nameAZ">Name A–Z</option>
-                <option value="nameZA">Name Z–A</option>
-                <option value="houseAZ">House A–Z</option>
-                <option value="ratingHL">Rating High–Low</option>
-                <option value="ratingLH">Rating Low–High</option>
-                <option value="added">Recently Added</option>
-                <option value="comps">Most Compliments</option>
-              </select>
+                onChange={(value) => { setFilters({ sort: value as SortKey }); setPage(1); }}
+                options={[
+                  { label: "Name A–Z", value: "nameAZ" },
+                  { label: "Name Z–A", value: "nameZA" },
+                  { label: "House A–Z", value: "houseAZ" },
+                  { label: "Rating High–Low", value: "ratingHL" },
+                  { label: "Rating Low–High", value: "ratingLH" },
+                  { label: "Recently Added", value: "added" },
+                  { label: "Most Compliments", value: "comps" },
+                ]}
+              />
               <button
                 onClick={() => setFiltersOpen((o) => !o)}
                 className={`font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[7px] border transition-colors ${filtersOpen ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
@@ -199,78 +197,19 @@ export default function CollectionPage() {
 
             {/* Collapsible filter panel */}
             {filtersOpen && (
-              <div className="flex flex-wrap items-start gap-2 mb-4 py-3 border border-[var(--b2)] px-3">
-                {/* Accords dropdown */}
-                <div className="relative">
-                  <button
-                    onClick={() => { setAccordDDOpen((o) => !o); setRatingDDOpen(false); setHouseDDOpen(false); }}
-                    className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${filters.accord ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
-                  >
-                    {filters.accord || "Accords"} &#9662;
-                  </button>
-                  {accordDDOpen && (
-                    <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[200px]">
-                      <div className="p-2 border-b border-[var(--b2)]">
-                        <input
-                          value={accordSearch}
-                          onChange={(e) => setAccordSearch(e.target.value)}
-                          placeholder="Search accords..."
-                          className="w-full px-2 py-1 text-xs font-[var(--mono)] border border-[var(--b3)] bg-[var(--off)] text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
-                        />
-                      </div>
-                      <div className="overflow-y-auto max-h-[220px]">
-                        {allAccords.filter((a) => !accordSearch || a.toLowerCase().includes(accordSearch.toLowerCase())).map((a) => (
-                          <button key={a} onClick={() => { setFilters({ accord: a }); setAccordDDOpen(false); setAccordSearch(""); setPage(1); }} className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${filters.accord === a ? "text-[var(--blue)] bg-[var(--blue-tint)]" : "text-[var(--ink2)] hover:bg-[var(--b1)]"}`}>{a}</button>
-                        ))}
-                      </div>
-                      <button onClick={() => { setFilters({ accord: "" }); setAccordDDOpen(false); setAccordSearch(""); setPage(1); }} className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left">CLEAR</button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Rating dropdown */}
-                <div className="relative">
-                  <button
-                    onClick={() => { setRatingDDOpen((o) => !o); setAccordDDOpen(false); setHouseDDOpen(false); }}
-                    className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${filters.rating !== null ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
-                  >
-                    {filters.rating !== null ? `${filters.rating}+ stars` : "Rating"} &#9662;
-                  </button>
-                  {ratingDDOpen && (
-                    <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[160px]">
-                      {[5, 4, 3, 2, 1].map((r) => (
-                        <button key={r} onClick={() => { setFilters({ rating: r }); setRatingDDOpen(false); setPage(1); }} className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${filters.rating === r ? "text-[var(--blue)] bg-[var(--blue-tint)]" : "text-[var(--ink2)] hover:bg-[var(--b1)]"}`}>{r}+ stars</button>
-                      ))}
-                      <button onClick={() => { setFilters({ rating: null }); setRatingDDOpen(false); setPage(1); }} className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left">CLEAR</button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Houses dropdown */}
-                <div className="relative">
-                  <button
-                    onClick={() => { setHouseDDOpen((o) => !o); setAccordDDOpen(false); setRatingDDOpen(false); }}
-                    className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${filters.house ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
-                  >
-                    {filters.house || "Houses"} &#9662;
-                  </button>
-                  {houseDDOpen && (
-                    <div className="absolute top-full left-0 z-50 bg-[var(--off)] border border-[var(--b3)] shadow-sm mt-1 w-[220px] max-h-[280px] overflow-y-auto">
-                      {allHouses.map((h) => (
-                        <button key={h} onClick={() => { setFilters({ house: h }); setHouseDDOpen(false); setPage(1); }} className={`w-full text-left px-3 py-1.5 font-[var(--mono)] text-xs transition-colors ${filters.house === h ? "text-[var(--blue)] bg-[var(--blue-tint)]" : "text-[var(--ink2)] hover:bg-[var(--b1)]"}`}>{h}</button>
-                      ))}
-                      <button onClick={() => { setFilters({ house: "" }); setHouseDDOpen(false); setPage(1); }} className="w-full font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink4)] hover:text-[var(--blue)] px-3 py-2 border-t border-[var(--b2)] text-left">CLEAR</button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Status chips */}
-                <FilterBar className="mb-0">
-                  {STATUS_FILTERS.map((f) => (
-                    <FilterChip key={f.value} label={f.label} active={filters.status === f.value} onClick={() => { setFilters({ status: f.value }); setPage(1); }} />
-                  ))}
-                </FilterBar>
-              </div>
+              <FilterPanel
+                filters={{
+                  accord: filters.accord,
+                  rating: filters.rating,
+                  house: filters.house,
+                  status: filters.status,
+                }}
+                allAccords={allAccords}
+                allHouses={allHouses}
+                statusOptions={STATUS_FILTERS}
+                onFilterChange={setFilters}
+                onPageReset={() => setPage(1)}
+              />
             )}
 
             <SectionHeader
