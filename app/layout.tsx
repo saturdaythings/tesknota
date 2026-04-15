@@ -48,7 +48,7 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${cormorant.variable} ${dmMono.variable} ${jost.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-background text-foreground">{children}</body>
+      <body className="h-full overflow-hidden bg-[var(--off)] text-[var(--ink)]">{children}</body>
     </html>
   );
 }

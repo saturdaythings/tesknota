@@ -18,12 +18,20 @@ Next.js rewrite of the vanilla JS tesknota app. Reference app: oliver-chase/tesk
 app/
   layout.tsx          — root layout: fonts, metadata, body wrapper
   globals.css         — all design tokens + shadcn + Tailwind theme
-  page.tsx            — root page (identity screen — Phase 3)
+  page.tsx            — AppShell preview shell (identity screen — Phase 3)
 
 components/
-  ui/                 — shadcn/ui auto-generated components
-  layout/             — AppShell, Sidebar, Topbar (Phase 2)
-  [feature]/          — feature-specific components (Phase 2+)
+  layout/
+    AppShell.tsx      — full-height flex shell (sidebar + main)
+    Sidebar.tsx       — dark navy sidebar: logo, nav sections, user footer
+    Topbar.tsx        — topbar: category/title + search slot + actions slot
+  ui/
+    button.tsx        — Button with tesknota variants: blue, warm, ghost, bare, danger
+    stat-box.tsx      — StatBox + StatsGrid (stats row pattern)
+    section-header.tsx — SectionHeader with title + right slot
+    filter-bar.tsx    — FilterBar + FilterChip + FamilyChip
+    modal.tsx         — Modal with overlay, header, body, footer + focus trap
+    form.tsx          — FormGroup, FormRow, FieldOptions + fieldClass/textareaClass
 
 lib/
   utils.ts            — shadcn cn() utility
@@ -100,7 +108,7 @@ No session persistence beyond localStorage selection.
 | Phase | Status |
 |-------|--------|
 | 1 — Scaffold + tokens | Complete |
-| 2 — Component library | Pending |
+| 2 — Component library | Complete |
 | 3 — Route shells | Pending |
 | 4 — TypeScript interfaces + data stubs | Pending |
 | 5+ — Feature port (page by page) | Pending |

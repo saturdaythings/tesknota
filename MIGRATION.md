@@ -12,7 +12,7 @@ New app: oliver-chase/tesknota-fragrance
 | Phase | Status | Commit |
 |-------|--------|--------|
 | 1 — Scaffold + tokens | Complete | — |
-| 2 — Component library | Pending | — |
+| 2 — Component library | Complete | — |
 | 3 — Route shells | Pending | — |
 | 4 — TypeScript interfaces + data stubs | Pending | — |
 | 5a — Dashboard | Pending | — |
@@ -41,6 +41,28 @@ New app: oliver-chase/tesknota-fragrance
 - `--rose` renamed to `--rose-tk` for same reason (shadcn uses `--rose` in some contexts).
 - Sidebar set to dark navy (`--blue3: #1A2E5C`) matching the visual treatment of the reference app.
 - Four fonts loaded via `next/font/google`: Playfair Display, Cormorant Garamond, DM Mono, Jost.
+
+---
+
+## Phase 2 — Component Library (Complete)
+
+**What was done:**
+- `components/layout/AppShell.tsx` — flex shell container (sidebar + main)
+- `components/layout/Sidebar.tsx` — dark navy sidebar: logo, nav sections with counts, user footer
+- `components/layout/Topbar.tsx` — topbar: category/title + search slot + actions slot
+- `components/ui/button.tsx` — replaced shadcn default with tesknota variants (blue, warm, ghost, bare, danger, sm)
+- `components/ui/stat-box.tsx` — StatBox + StatsGrid (the `.stats`/`.sbox` pattern)
+- `components/ui/section-header.tsx` — SectionHeader with title + right slot (the `.sh` pattern)
+- `components/ui/filter-bar.tsx` — FilterBar, FilterChip, FamilyChip (the `.fbar`/`.fc`/`.fam-chip` patterns)
+- `components/ui/modal.tsx` — Modal with overlay, sticky header/footer, focus trap, Escape key, WCAG ARIA
+- `components/ui/form.tsx` — FormGroup, FormRow, FieldOptions + `fieldClass`/`textareaClass` string exports
+- `app/page.tsx` — replaced Next.js boilerplate with AppShell preview using live components
+
+**Decisions:**
+- Button uses plain `<button>` element (not @base-ui/react/button) — tesknota buttons are simple native elements; no ARIA complexity needed.
+- Modal uses custom focus trap (not @base-ui/react/dialog) — avoids portal/hydration issues with static export.
+- `fieldClass`/`textareaClass` exported as strings (not components) — input elements vary too much per use case; let feature code compose them into `<input className={fieldClass} />`.
+- Sidebar uses Next.js `usePathname()` for active link state — works with App Router static export.
 
 ---
 
