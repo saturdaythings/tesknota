@@ -1,18 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
-import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 import { AccordCloud } from "@/components/ui/accord-cloud";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { getAccords, MONTHS, monthNum } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
-
-type Tab = "compliments" | "collection";
 
 function getAccordCounts(frags: UserFragrance[], communityFrags: CommunityFrag[]): [string, number][] {
   const counts: Record<string, number> = {};
@@ -27,7 +23,6 @@ function getAccordCounts(frags: UserFragrance[], communityFrags: CommunityFrag[]
 export default function AnalyticsPage() {
   const { user } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded } = useData();
-  const [tab, setTab] = useState<Tab>("compliments");
 
   if (!user) return null;
 
@@ -46,17 +41,14 @@ export default function AnalyticsPage() {
 
         {isLoaded && (
           <>
-            <FilterBar className="mb-6">
-              <FilterChip label="Compliments" active={tab === "compliments"} onClick={() => setTab("compliments")} />
-              <FilterChip label="Collection" active={tab === "collection"} onClick={() => setTab("collection")} />
-            </FilterBar>
-
-            {tab === "compliments" && (
+            <div className="mb-8">
+              <h2 className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-[var(--ink3)] mb-5">Compliments</h2>
               <ComplimentsTab MC={MC} MF={MF} communityFrags={communityFrags} />
-            )}
-            {tab === "collection" && (
+            </div>
+            <div>
+              <h2 className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-[var(--ink3)] mb-5">Collection</h2>
               <CollectionTab MF={MF} communityFrags={communityFrags} />
-            )}
+            </div>
           </>
         )}
       </main>

@@ -73,9 +73,6 @@ export function Sidebar({
         <nav className="flex-1 overflow-y-auto py-4 overscroll-contain">
           {navSections.map((section) => (
             <div key={section.label}>
-              <div className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-white/55 px-5 mt-6 mb-1 pointer-events-none select-none">
-                {section.label}
-              </div>
               {section.items.map((item) => {
                 const active = pathname === item.href;
                 return (
