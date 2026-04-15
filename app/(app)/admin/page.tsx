@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Topbar } from "@/components/layout/Topbar";
-import { readSheet } from "@/lib/sheets";
-import { FRAGRANCES, COMPLIMENTS, FRAG_HEADERS, COMP_HEADERS } from "@/lib/state";
+import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
+import { useData } from "@/lib/data-context";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -599,90 +599,57 @@ function ErrorsTab({ apiLogs }: { apiLogs: ApiLog[] }) {
 
 interface AuditResult { label: string; ok: boolean; detail?: string }
 
-function runAudit(): AuditResult[] {
-  const results: AuditResult[] = [];
-
-  function check(label: string, condition: boolean, detail?: string) {
-    results.push({ label, ok: condition, detail });
-  }
-
-  const fragrances = FRAGRANCES;
-  const compliments = COMPLIMENTS;
-
-  check("FRAGRANCES loaded", fragrances.length > 0, fragrances.length + " total");
-  check("COMPLIMENTS loaded", compliments !== undefined, compliments.length + " total");
-
-  const myFrags = fragrances.filter((f) => f.userId === "u1" || f.userId === "u2");
-  const fragIds = fragrances.map((f) => f.fragranceId || f.id);
-
-  // FRAG_HEADERS completeness
-  const expectedFragHeaders = ["userId", "fragranceId", "status", "bottleSize", "type", "boughtFrom", "purchaseMonth", "purchaseYear", "purchasePrice", "personalLongevity", "personalSillage", "personalRating", "notes", "addedAt"];
-  for (const h of expectedFragHeaders) {
-    check("FRAG_HEADERS contains " + h, FRAG_HEADERS.includes(h as typeof FRAG_HEADERS[number]));
-  }
-
-  // COMP_HEADERS completeness
-  const expectedCompHeaders = ["complimentId", "userId", "primaryFragranceId", "secondaryFragranceId", "complimenterGender", "relation", "month", "year", "locationName", "city", "state", "country", "notes", "createdAt"];
-  for (const h of expectedCompHeaders) {
-    check("COMP_HEADERS contains " + h, COMP_HEADERS.includes(h as typeof COMP_HEADERS[number]));
-  }
-
-  // Fragrance record integrity
-  const fragIssues: string[] = [];
-  for (const f of myFrags) {
-    if (!f.id) fragIssues.push("missing id: " + f.name);
-    if (!f.name) fragIssues.push("missing name: " + f.id);
-    if (!f.userId) fragIssues.push("missing userId: " + f.name);
-    if (!f.status) fragIssues.push("missing status: " + f.name);
-    if (!f.createdAt) fragIssues.push("missing createdAt: " + f.name);
-  }
-  check("All fragrances have required fields", fragIssues.length === 0, fragIssues.length ? fragIssues.join(", ") : "all clean");
-
-  const missingType = myFrags.filter((f) => !f.type);
-  check("All fragrances have type set", missingType.length === 0, missingType.length ? missingType.map((f) => f.name).join(", ") : "all have type");
-
-  // Orphaned compliments
-  const orphanedComps: string[] = [];
-  for (const c of compliments) {
-    if (c.primaryFragId && !fragIds.includes(c.primaryFragId)) {
-      orphanedComps.push("compliment " + c.id + " -> missing frag " + c.primaryFragId);
-    }
-  }
-  check("No orphaned compliments", orphanedComps.length === 0, orphanedComps.length ? orphanedComps.join(", ") : "all linked");
-
-  // Compliment integrity
-  const compIssues: string[] = [];
-  for (const c of compliments) {
-    if (!c.id) compIssues.push("missing id");
-    if (!c.primaryFrag) compIssues.push("missing frag name: " + c.id);
-    if (!c.relation) compIssues.push("missing relation: " + c.id);
-    if (!c.month || !c.year) compIssues.push("missing date: " + c.id);
-  }
-  check("All compliments have required fields", compIssues.length === 0, compIssues.length ? compIssues.join(", ") : "all clean");
-
-  // Env config
-  check("SA_EMAIL configured", !!process.env.NEXT_PUBLIC_SA_EMAIL);
-  check("SA_KEY configured", !!process.env.NEXT_PUBLIC_SA_KEY);
-  check("SPREADSHEET_ID configured", !!process.env.NEXT_PUBLIC_SPREADSHEET_ID);
-
-  // Duplicate detection
-  const fragKeys: Record<string, boolean> = {};
-  const dupes: string[] = [];
-  for (const f of myFrags) {
-    const key = (f.name || "").toLowerCase().trim() + "|" + (f.type || "");
-    if (fragKeys[key]) dupes.push(f.name + " (" + (f.type || "no type") + ")");
-    else fragKeys[key] = true;
-  }
-  check("No duplicate name+type combos", dupes.length === 0, dupes.length ? dupes.join(", ") : "none found");
-
-  return results;
-}
-
 function AuditTab() {
+  const { fragrances, compliments } = useData();
   const [results, setResults] = useState<AuditResult[] | null>(null);
 
   function run() {
-    setResults(runAudit());
+    const res: AuditResult[] = [];
+    function check(label: string, condition: boolean, detail?: string) {
+      res.push({ label, ok: condition, detail });
+    }
+
+    check("Supabase URL configured", !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+    check("Supabase anon key configured", !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    check("fragrances loaded", fragrances.length > 0, fragrances.length + " total");
+    check("compliments loaded", compliments.length >= 0, compliments.length + " total");
+
+    const fragIds = fragrances.map((f) => f.fragranceId ?? f.id);
+
+    const fragIssues: string[] = [];
+    for (const f of fragrances) {
+      if (!f.id) fragIssues.push("missing id: " + f.name);
+      if (!f.name) fragIssues.push("missing name: " + f.id);
+      if (!f.userId) fragIssues.push("missing userId: " + f.name);
+      if (!f.status) fragIssues.push("missing status: " + f.name);
+    }
+    check("All fragrances have required fields", fragIssues.length === 0, fragIssues.length ? fragIssues.join(", ") : "all clean");
+
+    const missingType = fragrances.filter((f) => !f.type);
+    check("All fragrances have type set", missingType.length === 0, missingType.length ? missingType.map((f) => f.name).join(", ") : "all have type");
+
+    const orphanedComps = compliments.filter((c) => c.primaryFragId && !fragIds.includes(c.primaryFragId));
+    check("No orphaned compliments", orphanedComps.length === 0, orphanedComps.length ? orphanedComps.map((c) => c.id).join(", ") : "all linked");
+
+    const compIssues: string[] = [];
+    for (const c of compliments) {
+      if (!c.id) compIssues.push("missing id");
+      if (!c.primaryFrag) compIssues.push("missing frag name: " + c.id);
+      if (!c.relation) compIssues.push("missing relation: " + c.id);
+      if (!c.month || !c.year) compIssues.push("missing date: " + c.id);
+    }
+    check("All compliments have required fields", compIssues.length === 0, compIssues.length ? compIssues.join(", ") : "all clean");
+
+    const fragKeys: Record<string, boolean> = {};
+    const dupes: string[] = [];
+    for (const f of fragrances) {
+      const key = (f.name || "").toLowerCase().trim() + "|" + (f.type || "");
+      if (fragKeys[key]) dupes.push(f.name + " (" + (f.type || "no type") + ")");
+      else fragKeys[key] = true;
+    }
+    check("No duplicate name+type combos", dupes.length === 0, dupes.length ? dupes.join(", ") : "none found");
+
+    setResults(res);
   }
 
   const pass = results?.filter((r) => r.ok).length ?? 0;
@@ -744,12 +711,39 @@ export default function AdminPage() {
     setLoading(true);
     setError(null);
     try {
-      const [apiLogs, activityLogs, users] = await Promise.all([
-        readSheet("api_log").catch(() => []),
-        readSheet("activityLog").catch(() => []),
-        readSheet("users").catch(() => []),
+      const [apiRes, actRes, profilesRes] = await Promise.all([
+        supabase.from("api_log").select("*").order("created_at", { ascending: false }),
+        supabase.from("activity_log").select("*").order("created_at", { ascending: false }),
+        supabase.from("user_profiles").select("id, name, email, created_at"),
       ]);
-      setData({ apiLogs: apiLogs as ApiLog[], activityLogs: activityLogs as ActivityLog[], users: users as AdminUser[] });
+      const mapApiLog = (r: Record<string, unknown>): ApiLog => ({
+        timestamp: (r.created_at as string) ?? "",
+        feature: (r.feature as string) ?? "",
+        userId: (r.user_id as string) ?? "",
+        status: (r.status as string) ?? "ok",
+        tokensIn: String(r.tokens_in ?? ""),
+        tokensOut: String(r.tokens_out ?? ""),
+        costUsd: String(r.cost_usd ?? ""),
+        latencyMs: String(r.latency_ms ?? ""),
+        error: r.status === "error" ? "true" : undefined,
+        errorMessage: (r.error_message as string) ?? undefined,
+      });
+      const mapActivityLog = (r: Record<string, unknown>): ActivityLog => ({
+        timestamp: (r.created_at as string) ?? "",
+        userId: (r.user_id as string) ?? "",
+        actionType: (r.action_type as string) ?? "",
+      });
+      const mapProfile = (r: Record<string, unknown>): AdminUser => ({
+        id: r.id as string,
+        userId: r.id as string,
+        name: r.name as string,
+        displayName: r.name as string,
+      });
+      setData({
+        apiLogs: (apiRes.data ?? []).map(mapApiLog),
+        activityLogs: (actRes.data ?? []).map(mapActivityLog),
+        users: (profilesRes.data ?? []).map(mapProfile),
+      });
       setLastSync("Just now");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load admin data");

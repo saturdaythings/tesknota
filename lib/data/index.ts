@@ -1,175 +1,143 @@
-import type { UserFragrance, UserCompliment, CommunityData, CommunityFrag } from "@/types";
-import type { UserId } from "@/lib/user-context";
-import {
-  FRAGRANCES, COMPLIMENTS, COMMUNITY_FRAGS,
-  setFragrances, setCompliments, setCommunityFrags,
-} from "@/lib/state";
-import { readSheet } from "@/lib/sheets";
-import { MONTHS } from "@/lib/frag-utils";
+import type { UserFragrance, UserCompliment, CommunityFrag, CommunityData } from "@/types";
+import { supabase } from "@/lib/supabase";
 
-export function myFragrances(userId: UserId): UserFragrance[] {
-  return FRAGRANCES.filter((f) => f.userId === userId);
-}
+// ── Row mappers ───────────────────────────────────────────────
 
-export function friendFragrances(userId: UserId): UserFragrance[] {
-  return FRAGRANCES.filter((f) => f.userId !== userId);
-}
-
-export function myCompliments(userId: UserId): UserCompliment[] {
-  return COMPLIMENTS.filter((c) => c.userId === userId);
-}
-
-export function friendCompliments(userId: UserId): UserCompliment[] {
-  return COMPLIMENTS.filter((c) => c.userId !== userId);
-}
-
-// ── Row parsers ──────────────────────────────────────────
-
-function resolveByFragId(fragId: string): { name: string; house: string } {
-  const cf = COMMUNITY_FRAGS.find((f) => f.fragranceId === fragId);
-  if (cf) return { name: cf.fragranceName ?? cf.name ?? "", house: cf.fragranceHouse ?? cf.house ?? "" };
-  const sf = FRAGRANCES.find((f) => f.fragranceId === fragId || f.id === fragId);
-  if (sf) return { name: sf.name, house: sf.house };
-  return { name: "", house: "" };
-}
-
-let _rowCounter = 0;
-
-function rowToFrag(row: Record<string, string>): UserFragrance {
-  const fid = row.fragranceId ?? "";
-  const { name, house } = resolveByFragId(fid);
-  const pm = row.purchaseMonth ?? "";
-  const py = row.purchaseYear ?? "";
-  const purchaseDate = pm && py ? `${pm} ${py}` : py || null;
-
+function dbRowToFrag(r: Record<string, unknown>): UserFragrance {
+  const pm = (r.purchase_month as string) ?? "";
+  const py = (r.purchase_year as string) ?? "";
   return {
-    id: `e${++_rowCounter}`,
-    fragranceId: fid,
-    userId: (row.userId as UserId) ?? "u1",
-    name,
-    house,
-    status: (row.status as UserFragrance["status"]) ?? "CURRENT",
-    sizes: row.bottleSize
-      ? (row.bottleSize.split(",").map((s) => s.trim()).filter(Boolean) as UserFragrance["sizes"])
-      : [],
-    type: (row.type as UserFragrance["type"]) || null,
-    personalRating: row.personalRating ? parseInt(row.personalRating) : null,
+    id: r.id as string,
+    fragranceId: (r.fragrance_id as string) ?? null,
+    userId: r.user_id as string,
+    name: r.name as string,
+    house: r.house as string,
+    status: (r.status as UserFragrance["status"]) ?? "CURRENT",
+    sizes: (r.sizes as UserFragrance["sizes"]) ?? [],
+    type: (r.type as UserFragrance["type"]) ?? null,
+    personalRating: (r.personal_rating as number) ?? null,
     statusRating: null,
-    personalLong: row.personalLongevity || null,
-    personalSill: row.personalSillage || null,
-    whereBought: row.boughtFrom || null,
-    purchaseDate,
+    whereBought: (r.where_bought as string) ?? null,
+    purchaseDate: pm && py ? `${pm} ${py}` : py || null,
     purchaseMonth: pm || null,
     purchaseYear: py || null,
-    purchasePrice: row.purchasePrice || null,
+    purchasePrice: (r.purchase_price as string) ?? null,
     isDupe: false,
     dupeFor: "",
-    personalNotes: (row.notes ?? "").replace(/^Purchased for \$[\d.]+\.?\s*/, "").trim(),
-    createdAt: row.addedAt ?? "",
+    personalNotes: (r.personal_notes as string) ?? "",
+    createdAt: (r.created_at as string) ?? "",
   };
 }
 
-function normalizeMonth(m: string): string {
-  const n = parseInt(m);
-  if (!isNaN(n) && n >= 1 && n <= 12) return MONTHS[n - 1];
-  return m;
-}
-
-function rowToComp(row: Record<string, string>): UserCompliment {
-  const pFid = row.primaryFragranceId ?? "";
-  const sFid = row.secondaryFragranceId || null;
-  const primary = resolveByFragId(pFid);
-  const secondary = sFid ? resolveByFragId(sFid) : null;
-
+function dbRowToComp(r: Record<string, unknown>): UserCompliment {
   return {
-    id: row.complimentId ?? `c${++_rowCounter}`,
-    userId: (row.userId as UserId) ?? "u1",
-    primaryFragId: pFid,
-    primaryFrag: primary.name,
-    secondaryFragId: sFid,
-    secondaryFrag: secondary ? secondary.name : null,
-    gender: (row.complimenterGender as UserCompliment["gender"]) || null,
-    relation: (row.relation as UserCompliment["relation"]) ?? "Other",
-    month: normalizeMonth(row.month ?? ""),
-    year: row.year ?? "",
-    location: row.locationName || null,
-    city: row.city || null,
-    state: row.state || null,
-    country: row.country || "US",
-    notes: row.notes || null,
-    createdAt: row.createdAt ?? "",
+    id: r.id as string,
+    userId: r.user_id as string,
+    primaryFragId: (r.primary_frag_id as string) ?? null,
+    primaryFrag: (r.primary_frag_name as string) ?? "",
+    secondaryFragId: (r.secondary_frag_id as string) ?? null,
+    secondaryFrag: (r.secondary_frag_name as string) ?? null,
+    gender: (r.gender as UserCompliment["gender"]) ?? null,
+    relation: (r.relation as UserCompliment["relation"]) ?? "Other",
+    month: (r.month as string) ?? "",
+    year: (r.year as string) ?? "",
+    location: (r.location as string) ?? null,
+    city: (r.city as string) ?? null,
+    state: (r.state as string) ?? null,
+    country: (r.country as string) ?? "US",
+    notes: (r.notes as string) ?? null,
+    createdAt: (r.created_at as string) ?? "",
   };
 }
 
-// ── loadAllData ──────────────────────────────────────────
+function dbRowToCommunityFrag(r: Record<string, unknown>): CommunityFrag {
+  return {
+    fragranceId: r.id as string,
+    name: r.name as string,
+    house: r.house as string,
+    fragranceName: r.name as string,
+    fragranceHouse: r.house as string,
+    fragranceType: (r.type as string) ?? "",
+    fragranceAccords: (r.accords as string) ?? "",
+    topNotes: (r.top_notes as string) ?? "",
+    middleNotes: (r.middle_notes as string) ?? "",
+    baseNotes: (r.base_notes as string) ?? "",
+    avgPrice: (r.avg_price as string) ?? null,
+    isDupe: r.is_dupe ? "true" : "false",
+    dupeFor: (r.dupe_for as string) ?? "",
+    communityRating: (r.community_rating as string) ?? "",
+    parfumoRating: (r.parfumo_rating as string) ?? "",
+    parfumoLongevity: (r.parfumo_longevity as string) ?? "",
+    parfumoSillage: (r.parfumo_sillage as string) ?? "",
+    communityLongevityLabel: (r.community_longevity_label as string) ?? "",
+    communitySillageLabel: (r.community_sillage_label as string) ?? "",
+    ratingVoteCount: (r.rating_vote_count as string) ?? "",
+    dataSource: (r.source as string) ?? "",
+    lastUpdated: (r.last_fetched_at as string) ?? "",
+  };
+}
 
-export async function loadAllData(): Promise<boolean> {
-  let ok = true;
+// ── loadAllData ───────────────────────────────────────────────
 
-  const [fragsRaw, compsRaw, communityRaw] = await Promise.all([
-    readSheet("userFragrances").catch((e) => {
-      console.error("[loadAllData] userFragrances error:", e);
-      ok = false;
-      return [] as Record<string, string>[];
-    }),
-    readSheet("userCompliments").catch((e) => {
-      console.error("[loadAllData] userCompliments error:", e);
-      ok = false;
-      return [] as Record<string, string>[];
-    }),
-    readSheet("fragranceDB").catch(() => [] as Record<string, string>[]),
+export interface AllData {
+  fragrances: UserFragrance[];
+  compliments: UserCompliment[];
+  communityFrags: CommunityFrag[];
+}
+
+export async function loadAllData(): Promise<{ data: AllData; ok: boolean }> {
+  const [fragsRes, compsRes, communityRes] = await Promise.all([
+    supabase.from("user_fragrances").select("*").order("created_at", { ascending: false }),
+    supabase.from("user_compliments").select("*").order("created_at", { ascending: false }),
+    supabase.from("fragrances").select("*"),
   ]);
 
-  // Community frags must be set before row parsers run (resolveByFragId reads them)
-  if (communityRaw.length) {
-    setCommunityFrags(
-      communityRaw.map((r) => ({
-        ...r,
-        fragranceName: r.fragranceName ?? r.name ?? "",
-        fragranceHouse: r.fragranceHouse ?? r.house ?? "",
-        name: r.fragranceName ?? r.name ?? "",
-        house: r.fragranceHouse ?? r.house ?? "",
-      })) as CommunityFrag[]
-    );
-  }
+  const ok = !fragsRes.error && !compsRes.error;
 
-  _rowCounter = 0;
+  if (fragsRes.error) console.error("[loadAllData] user_fragrances:", fragsRes.error.message);
+  if (compsRes.error) console.error("[loadAllData] user_compliments:", compsRes.error.message);
+  if (communityRes.error) console.error("[loadAllData] fragrances:", communityRes.error.message);
 
-  if (fragsRaw.length) {
-    const parsed = fragsRaw.map(rowToFrag).filter((f) => (f.name ?? "").trim());
-    const seen = new Set<string>();
-    setFragrances(
-      parsed.filter((f) => {
-        if (!f.id || seen.has(f.id)) return false;
-        seen.add(f.id);
-        return true;
-      })
-    );
-  }
-
-  if (compsRaw.length) {
-    const parsed = compsRaw.map(rowToComp);
-    const seen = new Set<string>();
-    setCompliments(
-      parsed.filter((c) => {
-        if (!c.id || seen.has(c.id)) return false;
-        seen.add(c.id);
-        return true;
-      })
-    );
-  }
-
-  return ok;
+  return {
+    data: {
+      fragrances: (fragsRes.data ?? []).map(dbRowToFrag),
+      compliments: (compsRes.data ?? []).map(dbRowToComp),
+      communityFrags: (communityRes.data ?? []).map(dbRowToCommunityFrag),
+    },
+    ok,
+  };
 }
 
-// ── Query helpers ────────────────────────────────────────
+// ── User-scoped filters ───────────────────────────────────────
+
+export function myFragrances(fragrances: UserFragrance[], userId: string): UserFragrance[] {
+  return fragrances.filter((f) => f.userId === userId);
+}
+
+export function friendFragrances(fragrances: UserFragrance[], userId: string): UserFragrance[] {
+  return fragrances.filter((f) => f.userId !== userId);
+}
+
+export function myCompliments(compliments: UserCompliment[], userId: string): UserCompliment[] {
+  return compliments.filter((c) => c.userId === userId);
+}
+
+export function friendCompliments(compliments: UserCompliment[], userId: string): UserCompliment[] {
+  return compliments.filter((c) => c.userId !== userId);
+}
+
+// ── Community data lookup ─────────────────────────────────────
+
+function norm(s: string): string {
+  return (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
 
 export function getCommunityData(
   name: string,
-  house: string
+  house: string,
+  communityFrags: CommunityFrag[]
 ): CommunityData | null {
-  const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const cf = COMMUNITY_FRAGS.find(
+  const cf = communityFrags.find(
     (f) => norm(f.fragranceName) === norm(name) && norm(f.fragranceHouse) === norm(house)
   );
   if (!cf) return null;
@@ -187,11 +155,20 @@ export function getCommunityData(
     communityLongevityLabel: cf.communityLongevityLabel ?? "",
     communitySillageLabel: cf.communitySillageLabel ?? "",
     ratingVoteCount: cf.ratingVoteCount ?? "",
-    dataSource: cf.dataSource ?? "fragranceDB",
+    dataSource: cf.dataSource ?? "",
     lastUpdated: cf.lastUpdated ?? "",
   };
 }
 
-export function resolveFragById(fragId: string): { name: string; house: string } {
-  return resolveByFragId(fragId);
+export function resolveFragById(
+  fragId: string | null,
+  communityFrags: CommunityFrag[],
+  fragrances: UserFragrance[]
+): { name: string; house: string } {
+  if (!fragId) return { name: "", house: "" };
+  const cf = communityFrags.find((f) => f.fragranceId === fragId);
+  if (cf) return { name: cf.fragranceName ?? "", house: cf.fragranceHouse ?? "" };
+  const uf = fragrances.find((f) => f.fragranceId === fragId || f.id === fragId);
+  if (uf) return { name: uf.name, house: uf.house };
+  return { name: "", house: "" };
 }

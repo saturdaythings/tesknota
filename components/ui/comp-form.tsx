@@ -79,7 +79,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
     if (editing) {
       const ef = fragrances.find((f) => f.fragranceId === editing.primaryFragId || f.id === editing.primaryFragId);
       setFragSearch(editing.primaryFrag);
-      setPrimaryFragId(editing.primaryFragId);
+      setPrimaryFragId(editing.primaryFragId ?? "");
       setPrimaryFragName(editing.primaryFrag);
       setRelation(editing.relation);
       setGender(editing.gender ?? "Female");

@@ -9,11 +9,10 @@ import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AccordCloud } from "@/components/ui/accord-cloud";
 import { statusColorClass } from "@/components/ui/frag-row";
-import { useUser, getFriend, USERS } from "@/lib/user-context";
+import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
-import type { UserId } from "@/lib/user-context";
 import {
   starsStr,
   parseRating,
@@ -275,7 +274,7 @@ function RecentFragrances({
   frags: UserFragrance[];
   compliments: UserCompliment[];
   communityFrags: CommunityFrag[];
-  userId: UserId;
+  userId: string;
   onFragClick: (frag: UserFragrance) => void;
 }) {
   const sorted = frags
@@ -338,7 +337,7 @@ function RecentRow({
   frag: UserFragrance;
   compliments: UserCompliment[];
   communityFrags: CommunityFrag[];
-  userId: UserId;
+  userId: string;
   onClick: (frag: UserFragrance) => void;
 }) {
   const compCount = getCompCount(f.fragranceId || f.id, compliments, userId);
@@ -392,10 +391,11 @@ function FriendActivity({
 }: {
   fragrances: UserFragrance[];
   compliments: UserCompliment[];
-  currentUserId: UserId;
+  currentUserId: string;
 }) {
   const router = useRouter();
-  const friends = USERS.filter((u) => u.id !== currentUserId);
+  const { profiles } = useUser();
+  const friends = profiles.filter((p) => p.id !== currentUserId);
   const sections: React.ReactNode[] = [];
 
   for (const friend of friends) {

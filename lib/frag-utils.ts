@@ -1,5 +1,4 @@
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
-import type { UserId } from "@/lib/user-context";
 
 export const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -39,7 +38,7 @@ export function getAccords(f: UserFragrance, communityFrags: CommunityFrag[]): s
 export function getCompCount(
   fragId: string,
   compliments: UserCompliment[],
-  userId?: UserId
+  userId?: string
 ): number {
   return compliments.filter(
     (c) =>

@@ -31,7 +31,7 @@ function getPrice(f: UserFragrance, communityFrags: CommunityFrag[]): string {
 }
 
 export default function WishlistPage() {
-  const { user } = useUser();
+  const { user, profiles } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded, removeFrag } = useData();
   const { toast } = useToast();
   const [filter, setFilter] = useState<WishFilter>("all");
@@ -66,7 +66,7 @@ export default function WishlistPage() {
     return a.name.localeCompare(b.name);
   });
 
-  const friend = user ? getFriend(user) : null;
+  const friend = user ? getFriend(user, profiles) : null;
   const FF = fragrances.filter((f) => f.userId === friend?.id && f.status === "CURRENT");
   const myNames = new Set(MF.map((f) => f.name.toLowerCase()));
   const friendSignals = FF.filter((f) => !myNames.has(f.name.toLowerCase())).slice(0, 4);

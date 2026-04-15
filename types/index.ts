@@ -1,4 +1,9 @@
-export type UserId = "u1" | "u2";
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
 
 export type FragranceStatus =
   | "CURRENT"
@@ -33,8 +38,8 @@ export type Relation =
 
 export interface UserFragrance {
   id: string;
-  fragranceId: string;
-  userId: UserId;
+  fragranceId: string | null;
+  userId: string;
   name: string;
   house: string;
   status: FragranceStatus;
@@ -42,8 +47,6 @@ export interface UserFragrance {
   type: FragranceType | null;
   personalRating: number | null;
   statusRating: null;
-  personalLong: string | null;
-  personalSill: string | null;
   whereBought: string | null;
   purchaseDate: string | null;
   purchaseMonth: string | null;
@@ -57,8 +60,8 @@ export interface UserFragrance {
 
 export interface UserCompliment {
   id: string;
-  userId: UserId;
-  primaryFragId: string;
+  userId: string;
+  primaryFragId: string | null;
   primaryFrag: string;
   secondaryFragId: string | null;
   secondaryFrag: string | null;
@@ -88,8 +91,6 @@ export interface CommunityFrag {
   avgPrice: string | null;
   isDupe: string;
   dupeFor: string;
-  addedBy: string;
-  addedAt: string;
   communityRating: string;
   parfumoRating: string;
   parfumoLongevity: string;

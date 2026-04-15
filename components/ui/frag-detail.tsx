@@ -7,7 +7,6 @@ import { STATUS_LABELS } from "@/types";
 import { statusColorClass } from "@/components/ui/frag-row";
 import { getCommunityData } from "@/lib/data";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
-import type { UserId } from "@/lib/user-context";
 
 function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
   if (!value) return null;
@@ -44,7 +43,7 @@ interface Props {
   frag: UserFragrance | null;
   communityFrags: CommunityFrag[];
   compliments: UserCompliment[];
-  userId: UserId;
+  userId: string;
   onEdit?: (frag: UserFragrance) => void;
   onDelete?: (frag: UserFragrance) => void;
   readOnly?: boolean;
@@ -65,7 +64,7 @@ export function FragDetail({
 
   if (!frag) return null;
 
-  const cd = getCommunityData(frag.name, frag.house);
+  const cd = getCommunityData(frag.name, frag.house, communityFrags);
   const accords = getAccords(frag, communityFrags);
   const compCount = getCompCount(frag.fragranceId || frag.id, compliments, userId);
   const starsDisplay = starsStr(parseRating(frag.personalRating));
@@ -168,8 +167,6 @@ export function FragDetail({
                 <span className="font-[var(--mono)] text-xs text-[var(--warm-text)] tracking-[1px]">{starsDisplay}</span>
               </div>
             ) : null}
-            <DetailRow label="Longevity" value={frag.personalLong} />
-            <DetailRow label="Sillage" value={frag.personalSill} />
             <DetailRow label="Type" value={frag.type} />
             <DetailRow label="Sizes" value={(frag.sizes ?? []).join(", ") || null} />
             <DetailRow label="Bought from" value={frag.whereBought} />

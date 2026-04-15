@@ -9,7 +9,6 @@ import {
 } from "react";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 import { loadAllData } from "@/lib/data";
-import { FRAGRANCES, COMPLIMENTS, COMMUNITY_FRAGS } from "@/lib/state";
 import {
   appendFrag,
   updateFrag,
@@ -46,12 +45,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const load = useCallback(async () => {
     setIsLoaded(false);
     setLoadError(false);
-    const ok = await loadAllData();
-    // loadAllData writes to the mutable state module arrays;
-    // capture them here to trigger React renders
-    setFrags([...FRAGRANCES]);
-    setComps([...COMPLIMENTS]);
-    setCF([...COMMUNITY_FRAGS]);
+    const { data, ok } = await loadAllData();
+    setFrags(data.fragrances);
+    setComps(data.compliments);
+    setCF(data.communityFrags);
     setIsLoaded(true);
     if (!ok) setLoadError(true);
   }, []);
@@ -60,32 +57,32 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const addFragCb = useCallback(async (frag: UserFragrance) => {
     await appendFrag(frag);
-    setFrags([...FRAGRANCES]);
+    setFrags((prev) => [frag, ...prev]);
   }, []);
 
   const editFragCb = useCallback(async (frag: UserFragrance) => {
     await updateFrag(frag);
-    setFrags([...FRAGRANCES]);
+    setFrags((prev) => prev.map((f) => (f.id === frag.id ? frag : f)));
   }, []);
 
   const addCompCb = useCallback(async (comp: UserCompliment) => {
     await appendComp(comp);
-    setComps([...COMPLIMENTS]);
+    setComps((prev) => [comp, ...prev]);
   }, []);
 
   const editCompCb = useCallback(async (comp: UserCompliment) => {
     await updateComp(comp);
-    setComps([...COMPLIMENTS]);
+    setComps((prev) => prev.map((c) => (c.id === comp.id ? comp : c)));
   }, []);
 
   const removeFragCb = useCallback(async (id: string) => {
     await deleteFrag(id);
-    setFrags([...FRAGRANCES]);
+    setFrags((prev) => prev.filter((f) => f.id !== id));
   }, []);
 
   const removeCompCb = useCallback(async (id: string) => {
     await deleteComp(id);
-    setComps([...COMPLIMENTS]);
+    setComps((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
   return (

@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
-import { COMMUNITY_FRAGS } from "@/lib/state";
 import { MONTHS } from "@/lib/frag-utils";
 import type { UserFragrance, UserCompliment, FragranceStatus, FragranceType, BottleSize, Relation, ComplimenterGender } from "@/types";
 
@@ -57,14 +56,6 @@ const STATUS_RATING_OPTIONS: SelectOption[] = [
   { v: "Don't Like", l: "Don't Like" }, { v: "WTF", l: "WTF" },
 ];
 
-const LONGEVITY_OPTIONS: SelectOption[] = [
-  "Very weak", "Weak", "Moderate", "Long lasting", "Eternal"
-].map((v) => ({ v, l: v }));
-
-const SILLAGE_OPTIONS: SelectOption[] = [
-  "Intimate", "Moderate", "Strong", "Enormous"
-].map((v) => ({ v, l: v }));
-
 const SIZE_OPTIONS = ["Sample", "Travel", "Full Bottle", "Decant"];
 
 const TYPE_OPTIONS: SelectOption[] = [
@@ -91,8 +82,6 @@ const FRAG_ADD_STEPS: FlowStep[] = [
   { id: "personalRating", type: "select", label: "Your personal rating?", options: RATING_OPTIONS, skipIf: isWishlist, optional: true },
   { id: "statusRating", type: "select", label: "How do you feel about it?", options: STATUS_RATING_OPTIONS, skipIf: isWishlist, optional: true },
   { id: "sizes", type: "multiselect", label: "Size owned", multiOptions: SIZE_OPTIONS, skipIf: isWishlist, optional: true },
-  { id: "personalLong", type: "select", label: "How long does it last on you?", options: LONGEVITY_OPTIONS, skipIf: isWishlist, optional: true },
-  { id: "personalSill", type: "select", label: "Sillage on you?", options: SILLAGE_OPTIONS, skipIf: isWishlist, optional: true },
   { id: "type", type: "select", label: "Type / concentration?", options: TYPE_OPTIONS, optional: true },
   { id: "personalNotes", type: "textarea", label: "Personal notes?", hint: "Your impressions, context, memories...", optional: true },
   { id: "confirm", type: "confirm", label: "Save fragrance?" },
@@ -151,7 +140,7 @@ function activeSteps(flow: FlowKey, answers: Record<string, unknown>): FlowStep[
 
 export function CmdPalette() {
   const { user } = useUser();
-  const { fragrances, compliments, addFrag, editFrag, addComp, editComp } = useData();
+  const { fragrances, compliments, communityFrags, addFrag, editFrag, addComp, editComp } = useData();
   const { toast } = useToast();
 
   const [pal, setPal] = useState<PalState>({
@@ -244,8 +233,6 @@ export function CmdPalette() {
           type: (a.type as FragranceType) || null,
           personalRating: a.personalRating ? parseInt(a.personalRating as string) : null,
           statusRating: null,
-          personalLong: (a.personalLong as string) || null,
-          personalSill: (a.personalSill as string) || null,
           whereBought: null,
           purchaseDate: null,
           purchaseMonth: null,
@@ -266,8 +253,6 @@ export function CmdPalette() {
           sizes: (a.sizes as BottleSize[]) ?? orig.sizes,
           type: (a.type as FragranceType) ?? orig.type,
           personalRating: a.personalRating ? parseInt(a.personalRating as string) : orig.personalRating,
-          personalLong: (a.personalLong as string) ?? orig.personalLong,
-          personalSill: (a.personalSill as string) ?? orig.personalSill,
           personalNotes: (a.personalNotes as string) ?? orig.personalNotes,
         };
         await editFrag(updated);
@@ -343,17 +328,17 @@ export function CmdPalette() {
     advanceStep({ ...pal.answers, [step.id]: val });
   }
 
-  // ── Search step: filter COMMUNITY_FRAGS ───────────────────────────────────
-  const fragResults = COMMUNITY_FRAGS.filter((f) => {
+  // ── Search step: filter community fragrances ──────────────────────────────
+  const fragResults = communityFrags.filter((f) => {
     if (!searchQuery) return false;
     const q = searchQuery.toLowerCase();
-    return f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q);
+    return f.fragranceName.toLowerCase().includes(q) || f.fragranceHouse.toLowerCase().includes(q);
   }).slice(0, 8);
 
-  function selectFragFromSearch(f: { fragranceId: string; name: string; house: string }) {
+  function selectFragFromSearch(f: { fragranceId: string; fragranceName: string; fragranceHouse: string }) {
     const step = getCurrentStep();
     if (!step) return;
-    const answers = { ...pal.answers, [step.id]: f.name, fragranceId: f.fragranceId, name: f.name, house: f.house };
+    const answers = { ...pal.answers, [step.id]: f.fragranceName, fragranceId: f.fragranceId, name: f.fragranceName, house: f.fragranceHouse };
     advanceStep(answers);
   }
 
@@ -482,8 +467,8 @@ export function CmdPalette() {
                     onClick={() => selectFragFromSearch(f)}
                     className="w-full text-left px-3 py-2.5 border-b border-[var(--b1)] hover:bg-[var(--off2)] cursor-pointer flex justify-between items-center bg-none border-x-0 border-t-0"
                   >
-                    <span className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</span>
-                    <span className="font-[var(--mono)] text-[10px] text-[var(--ink4)]">{f.house}</span>
+                    <span className="font-[var(--body)] text-sm text-[var(--ink)]">{f.fragranceName}</span>
+                    <span className="font-[var(--mono)] text-[10px] text-[var(--ink4)]">{f.fragranceHouse}</span>
                   </button>
                 ))}
                 {searchQuery && fragResults.length === 0 && (

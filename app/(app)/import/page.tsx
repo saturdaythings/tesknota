@@ -40,7 +40,7 @@ export default function ImportPage() {
           onClose={() => setFormOpen(false)}
           prefill={prefillFrag}
           status={formStatus}
-          userId={user?.id ?? "u1"}
+          userId={user?.id ?? ""}
         />
       )}
       <Topbar category="Manage" title="Import" />
@@ -109,7 +109,7 @@ function FragFormWithPrefill({
   onClose: () => void;
   prefill: CommunityFrag | null;
   status: FragranceStatus;
-  userId: "u1" | "u2";
+  userId: string;
 }) {
   const editing = prefill
     ? {
@@ -123,8 +123,6 @@ function FragFormWithPrefill({
         type: null,
         personalRating: null,
         statusRating: null,
-        personalLong: null,
-        personalSill: null,
         whereBought: null,
         purchaseDate: null,
         purchaseMonth: null,

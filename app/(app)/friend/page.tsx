@@ -11,7 +11,6 @@ import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS, getAccords, monthNum } from "@/lib/frag-utils";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
-import type { UserId } from "@/lib/user-context";
 
 type FriendTab = "collection" | "compliments" | "wishlist" | "incommon";
 
@@ -23,14 +22,15 @@ const FRIEND_TABS: { label: string; value: FriendTab }[] = [
 ];
 
 export default function FriendPage() {
-  const { user } = useUser();
+  const { user, profiles } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded } = useData();
   const [tab, setTab] = useState<FriendTab>("collection");
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
 
   if (!user) return null;
 
-  const friend = getFriend(user);
+  const friend = getFriend(user, profiles);
+  if (!friend) return null;
   const friendName = friend.name;
 
   const MF = fragrances.filter((f) => f.userId === user.id);
@@ -59,7 +59,7 @@ export default function FriendPage() {
         frag={detailFrag}
         communityFrags={communityFrags}
         compliments={compliments.filter((c) => c.userId === friend.id)}
-        userId={friend.id as UserId}
+        userId={friend.id}
         readOnly
       />
       <Topbar category="Social" title={`${friendName}'s Profile`} />
@@ -95,7 +95,7 @@ export default function FriendPage() {
                 frags={FFOwned}
                 compliments={FC}
                 communityFrags={communityFrags}
-                friendId={friend.id as UserId}
+                friendId={friend.id }
                 onFragClick={setDetailFrag}
               />
             )}
@@ -118,7 +118,7 @@ export default function FriendPage() {
                 compliments={compliments}
                 communityFrags={communityFrags}
                 userId={user.id}
-                friendId={friend.id as UserId}
+                friendId={friend.id }
                 friendName={friendName}
               />
             )}
@@ -139,7 +139,7 @@ function FriendCollectionTab({
   frags: UserFragrance[];
   compliments: UserCompliment[];
   communityFrags: CommunityFrag[];
-  friendId: UserId;
+  friendId: string;
   onFragClick: (frag: UserFragrance) => void;
 }) {
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
@@ -333,8 +333,8 @@ function InCommonTab({
   myFrags: UserFragrance[];
   compliments: UserCompliment[];
   communityFrags: CommunityFrag[];
-  userId: UserId;
-  friendId: UserId;
+  userId: string;
+  friendId: string;
   friendName: string;
 }) {
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));

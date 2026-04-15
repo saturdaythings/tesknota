@@ -3,7 +3,6 @@
 import { MONTHS, starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
 import { STATUS_LABELS, STATUS_CSS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } from "@/types";
-import type { UserId } from "@/lib/user-context";
 
 export const STATUS_COLOR: Record<string, string> = {
   "s-cur": "text-[var(--sage)]",
@@ -28,7 +27,7 @@ export function FragRow({
   frag: UserFragrance;
   communityFrags: CommunityFrag[];
   compliments: UserCompliment[];
-  userId: UserId;
+  userId: string;
   onClick?: (frag: UserFragrance) => void;
 }) {
   const compCount = getCompCount(frag.fragranceId || frag.id, compliments, userId);

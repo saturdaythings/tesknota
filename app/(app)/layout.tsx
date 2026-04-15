@@ -38,20 +38,22 @@ const NAV_MANAGE = {
 };
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoaded, signOut } = useUser();
+  const { user, profiles, isLoaded, signOut } = useUser();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoaded && !user) router.replace("/");
   }, [isLoaded, user, router]);
 
-  // Render nothing until localStorage has been read
   if (!isLoaded || !user) return null;
 
-  const friend = getFriend(user);
+  const friend = getFriend(user, profiles);
   const navSections = [
     ...NAV_SECTIONS_BASE,
-    { label: "Social", items: [{ href: "/friend", label: friend.name }] },
+    {
+      label: "Social",
+      items: [{ href: "/friend", label: friend?.name ?? "Friend" }],
+    },
     NAV_MANAGE,
   ];
 
@@ -62,8 +64,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Sidebar
             navSections={navSections}
             userName={user.name}
-            onSignOut={() => {
-              signOut();
+            onSignOut={async () => {
+              await signOut();
               router.push("/");
             }}
             onUserClick={() => router.push("/settings")}

@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { readSheet, appendRow } from "@/lib/sheets";
+import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
-import { PENDING_ENTRIES_HEADERS } from "@/lib/state";
 
 const AI_WORKER_URL = process.env.NEXT_PUBLIC_AI_WORKER_URL ?? "";
 
@@ -12,12 +11,12 @@ interface BotButton { label: string; action: () => void }
 
 interface PendingEntry {
   id: string;
-  userId: string;
+  user_id: string;
   type: string;
   status: string;
-  parsedJson: string;
-  missingFields: string;
-  createdAt: string;
+  parsed_json: Record<string, unknown> | null;
+  missing_fields: string[];
+  created_at: string;
 }
 
 export function BotDrawer() {
@@ -36,29 +35,22 @@ export function BotDrawer() {
     setMessages((prev) => [...prev, { role, text }]);
   }, []);
 
-  const showButtons = useCallback((btns: BotButton[]) => {
-    setButtons(btns);
-  }, []);
-
+  const showButtons = useCallback((btns: BotButton[]) => setButtons(btns), []);
   const clearButtons = useCallback(() => setButtons(null), []);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Load pending entries
   const loadPending = useCallback(async () => {
     if (!user) return;
-    try {
-      const rows = await readSheet("pendingEntries");
-      const filtered = (rows as unknown as PendingEntry[]).filter(
-        (e) => e.userId === user.id && e.status !== "complete" && e.status !== "discarded"
-      );
-      setPending(filtered);
-    } catch {
-      setPending([]);
-    }
+    const { data } = await supabase
+      .from("pending_entries")
+      .select("*")
+      .neq("status", "complete")
+      .neq("status", "discarded")
+      .order("created_at");
+    setPending((data as PendingEntry[]) ?? []);
   }, [user]);
 
   useEffect(() => { loadPending(); }, [loadPending]);
@@ -68,7 +60,11 @@ export function BotDrawer() {
     setOpen(true);
     setTimeout(() => inputRef.current?.focus(), 100);
     if (messages.length === 0 && pending.length > 0) {
-      addMsg("Hey — you have " + pending.length + " unfinished entr" + (pending.length === 1 ? "y" : "ies") + ". Want to go through them now?", "bot");
+      addMsg(
+        "Hey — you have " + pending.length + " unfinished entr" +
+        (pending.length === 1 ? "y" : "ies") + ". Want to go through them now?",
+        "bot"
+      );
       showButtons([
         { label: "Yes, let's do it", action: () => { clearButtons(); resolvePending(); } },
         { label: "Not right now", action: () => { clearButtons(); addMsg("No problem — I'm here whenever you're ready.", "bot"); } },
@@ -84,10 +80,15 @@ export function BotDrawer() {
 
   function resolvePending() {
     if (!pending.length) { addMsg("All caught up — no pending entries!", "bot"); return; }
-    const entry = pending.reduce((a, b) => (a.createdAt || "") < (b.createdAt || "") ? a : b);
-    const missing = entry.missingFields?.split(",").map((s) => s.trim()).filter(Boolean) || [];
+    const entry = pending.reduce((a, b) => (a.created_at || "") < (b.created_at || "") ? a : b);
+    const missing = entry.missing_fields ?? [];
     addMsg("Let me pull up your oldest entry...", "bot");
-    handleMessage("Resuming incomplete " + (entry.type || "entry") + ". Captured: " + (entry.parsedJson || "nothing yet") + ". Missing: " + (missing.join(", ") || "unknown") + ". Please ask for the first missing field.");
+    handleMessage(
+      "Resuming incomplete " + (entry.type || "entry") +
+      ". Captured: " + (entry.parsed_json ? JSON.stringify(entry.parsed_json) : "nothing yet") +
+      ". Missing: " + (missing.join(", ") || "unknown") +
+      ". Please ask for the first missing field."
+    );
   }
 
   async function handleMessage(text: string) {
@@ -114,10 +115,37 @@ export function BotDrawer() {
       });
       const data = await res.json();
       addMsg(data.reply || "...", "bot");
+      if (data.actions?.length) executeActions(data.actions);
     } catch (e: unknown) {
       addMsg("Error: " + (e instanceof Error ? e.message : "unknown"), "bot");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function executeActions(actions: Array<{ type: string; payload: Record<string, unknown> }>) {
+    for (const a of actions) {
+      if (a.type === "appendPendingEntry" && a.payload) {
+        const { error } = await supabase.from("pending_entries").insert({
+          user_id: user?.id ?? "",
+          type: a.payload.type ?? "unknown",
+          status: "pending",
+          raw_transcript: a.payload.rawTranscript ?? null,
+          parsed_json: a.payload.parsedJson ?? null,
+          missing_fields: a.payload.missingFields ?? [],
+        });
+        if (!error) {
+          await loadPending();
+          addMsg("Saved as draft — I'll remind you to finish it later.", "bot");
+        }
+      } else if (a.type === "completePendingEntry" && a.payload?.id) {
+        await supabase
+          .from("pending_entries")
+          .update({ status: "complete" })
+          .eq("id", a.payload.id);
+        await loadPending();
+        addMsg("Entry completed.", "bot");
+      }
     }
   }
 
@@ -130,7 +158,6 @@ export function BotDrawer() {
     handleMessage(text);
   }
 
-  // Keyboard: Escape closes
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape" && open) closeDrawer();
@@ -150,7 +177,6 @@ export function BotDrawer() {
 
   return (
     <>
-      {/* Pending banner (outside drawer, in main flow) */}
       {hasPending && !open && (
         <div
           onClick={openDrawer}
@@ -160,7 +186,6 @@ export function BotDrawer() {
         </div>
       )}
 
-      {/* Floating bot button */}
       <button
         onClick={openDrawer}
         aria-label="Open assistant"
@@ -177,28 +202,21 @@ export function BotDrawer() {
         )}
       </button>
 
-      {/* Overlay */}
       {open && (
-        <div
-          className="fixed inset-0 bg-[rgba(var(--near-black-ch),0.5)] z-[500]"
-          onClick={closeDrawer}
-        />
+        <div className="fixed inset-0 bg-[rgba(var(--near-black-ch),0.5)] z-[500]" onClick={closeDrawer} />
       )}
 
-      {/* Drawer */}
       <div
         className={`fixed bottom-0 left-0 right-0 h-[80vh] max-h-[600px] bg-[var(--off)] border-t border-[var(--b2)] z-[501] flex flex-col transition-transform duration-[280ms] ease-out ${open ? "translate-y-0" : "translate-y-full"}`}
         role="dialog"
         aria-modal="true"
         aria-label="AI assistant"
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--b2)] shrink-0">
           <div className="font-[var(--serif)] text-base italic text-[var(--ink)]">assistant</div>
           <button onClick={closeDrawer} className="text-xl text-[var(--ink3)] hover:text-[var(--ink)] bg-none border-none cursor-pointer px-2 py-1" aria-label="Close">×</button>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-2.5">
           {messages.map((m, i) => (
             <div
@@ -228,7 +246,6 @@ export function BotDrawer() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick chips (only when no messages) */}
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-2 px-5 pb-3">
             {QUICK_CHIPS.map((chip) => (
@@ -243,7 +260,6 @@ export function BotDrawer() {
           </div>
         )}
 
-        {/* Input */}
         <div className="px-5 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-2 border-t border-[var(--b2)] shrink-0 flex gap-2">
           <input
             ref={inputRef}

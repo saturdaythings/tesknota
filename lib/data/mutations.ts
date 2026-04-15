@@ -1,99 +1,83 @@
 import type { UserFragrance, UserCompliment } from "@/types";
-import {
-  FRAGRANCES, COMPLIMENTS,
-  setFragrances, setCompliments,
-  FRAG_HEADERS, COMP_HEADERS,
-} from "@/lib/state";
-import { appendRow, writeSheet } from "@/lib/sheets";
+import { supabase } from "@/lib/supabase";
 
-// ── Fragrance mutations ──────────────────────────────────
+// ── Row serialisers (TS → DB) ─────────────────────────────────
 
-export async function appendFrag(frag: UserFragrance): Promise<void> {
-  setFragrances([...FRAGRANCES, frag]);
-  await appendRow("userFragrances", fragToRow(frag), [...FRAG_HEADERS]);
-}
-
-export async function updateFrag(frag: UserFragrance): Promise<void> {
-  setFragrances(FRAGRANCES.map((f) => (f.id === frag.id ? frag : f)));
-  await writeSheet(
-    "userFragrances",
-    FRAGRANCES.map(fragToRow),
-    [...FRAG_HEADERS]
-  );
-}
-
-// ── Compliment mutations ─────────────────────────────────
-
-export async function appendComp(comp: UserCompliment): Promise<void> {
-  setCompliments([comp, ...COMPLIMENTS]);
-  await appendRow("userCompliments", compToRow(comp), [...COMP_HEADERS]);
-}
-
-export async function updateComp(comp: UserCompliment): Promise<void> {
-  setCompliments(COMPLIMENTS.map((c) => (c.id === comp.id ? comp : c)));
-  await writeSheet(
-    "userCompliments",
-    COMPLIMENTS.map(compToRow),
-    [...COMP_HEADERS]
-  );
-}
-
-// ── Delete mutations ─────────────────────────────────────
-
-export async function deleteFrag(id: string): Promise<void> {
-  setFragrances(FRAGRANCES.filter((f) => f.id !== id));
-  await writeSheet(
-    "userFragrances",
-    FRAGRANCES.map(fragToRow),
-    [...FRAG_HEADERS]
-  );
-}
-
-export async function deleteComp(id: string): Promise<void> {
-  setCompliments(COMPLIMENTS.filter((c) => c.id !== id));
-  await writeSheet(
-    "userCompliments",
-    COMPLIMENTS.map(compToRow),
-    [...COMP_HEADERS]
-  );
-}
-
-// ── Row serialisers ──────────────────────────────────────
-
-function fragToRow(f: UserFragrance): Record<string, string> {
+function fragToDb(f: UserFragrance): Record<string, unknown> {
   return {
-    userId: f.userId,
-    fragranceId: f.fragranceId,
+    user_id: f.userId,
+    fragrance_id: f.fragranceId ?? null,
+    name: f.name,
+    house: f.house,
     status: f.status,
-    bottleSize: f.sizes.join(", "),
-    type: f.type ?? "",
-    boughtFrom: f.whereBought ?? "",
-    purchaseMonth: f.purchaseMonth ?? "",
-    purchaseYear: f.purchaseYear ?? "",
-    purchasePrice: f.purchasePrice ?? "",
-    personalRating: f.personalRating != null ? String(f.personalRating) : "",
-    personalLongevity: f.personalLong ?? "",
-    personalSillage: f.personalSill ?? "",
-    notes: f.personalNotes ?? "",
-    addedAt: f.createdAt,
+    sizes: f.sizes,
+    type: f.type ?? null,
+    where_bought: f.whereBought ?? null,
+    purchase_month: f.purchaseMonth ?? null,
+    purchase_year: f.purchaseYear ?? null,
+    purchase_price: f.purchasePrice ?? null,
+    personal_rating: f.personalRating ?? null,
+    personal_notes: f.personalNotes ?? "",
+    created_at: f.createdAt || new Date().toISOString(),
   };
 }
 
-function compToRow(c: UserCompliment): Record<string, string> {
+function compToDb(c: UserCompliment): Record<string, unknown> {
   return {
-    complimentId: c.id,
-    userId: c.userId,
-    primaryFragranceId: c.primaryFragId,
-    secondaryFragranceId: c.secondaryFragId ?? "",
-    complimenterGender: c.gender ?? "",
+    user_id: c.userId,
+    primary_frag_id: c.primaryFragId ?? null,
+    primary_frag_name: c.primaryFrag,
+    secondary_frag_id: c.secondaryFragId ?? null,
+    secondary_frag_name: c.secondaryFrag ?? null,
+    gender: c.gender ?? null,
     relation: c.relation,
     month: c.month,
     year: c.year,
-    locationName: c.location ?? "",
-    city: c.city ?? "",
-    state: c.state ?? "",
+    location: c.location ?? null,
+    city: c.city ?? null,
+    state: c.state ?? null,
     country: c.country,
-    notes: c.notes ?? "",
-    createdAt: c.createdAt,
+    notes: c.notes ?? null,
+    created_at: c.createdAt || new Date().toISOString(),
   };
+}
+
+// ── Fragrance mutations ───────────────────────────────────────
+
+export async function appendFrag(frag: UserFragrance): Promise<void> {
+  const { error } = await supabase.from("user_fragrances").insert(fragToDb(frag));
+  if (error) throw new Error(error.message);
+}
+
+export async function updateFrag(frag: UserFragrance): Promise<void> {
+  const { error } = await supabase
+    .from("user_fragrances")
+    .update(fragToDb(frag))
+    .eq("id", frag.id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteFrag(id: string): Promise<void> {
+  const { error } = await supabase.from("user_fragrances").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+// ── Compliment mutations ──────────────────────────────────────
+
+export async function appendComp(comp: UserCompliment): Promise<void> {
+  const { error } = await supabase.from("user_compliments").insert(compToDb(comp));
+  if (error) throw new Error(error.message);
+}
+
+export async function updateComp(comp: UserCompliment): Promise<void> {
+  const { error } = await supabase
+    .from("user_compliments")
+    .update(compToDb(comp))
+    .eq("id", comp.id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteComp(id: string): Promise<void> {
+  const { error } = await supabase.from("user_compliments").delete().eq("id", id);
+  if (error) throw new Error(error.message);
 }

@@ -32,9 +32,6 @@ const TYPES: FragranceType[] = [
   "Other",
 ];
 
-const LONGEVITY_OPTS = ["Very weak", "Weak", "Moderate", "Long lasting", "Eternal"];
-const SILLAGE_OPTS = ["Intimate", "Moderate", "Strong", "Enormous"];
-
 const YEARS = Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) =>
   String(new Date().getFullYear() - i)
 );
@@ -68,8 +65,6 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const [sizes, setSizes] = useState<BottleSize[]>(["Full Bottle"]);
   const [type, setType] = useState<FragranceType | "">("");
   const [rating, setRating] = useState(0);
-  const [longevity, setLongevity] = useState("");
-  const [sillage, setSillage] = useState("");
   const [whereBought, setWhereBought] = useState("");
   const [purchaseMonth, setPurchaseMonth] = useState("");
   const [purchaseYear, setPurchaseYear] = useState("");
@@ -90,13 +85,11 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       setSearch(editing.name);
       setSelectedName(editing.name);
       setSelectedHouse(editing.house);
-      setSelectedFragId(editing.fragranceId);
+      setSelectedFragId(editing.fragranceId ?? "");
       setStatus(forceStatus ?? editing.status);
       setSizes(editing.sizes.length ? editing.sizes : ["Full Bottle"]);
       setType(editing.type ?? "");
       setRating(editing.personalRating ?? 0);
-      setLongevity(editing.personalLong ?? "");
-      setSillage(editing.personalSill ?? "");
       setWhereBought(editing.whereBought ?? "");
       setPurchaseMonth(editing.purchaseMonth ?? "");
       setPurchaseYear(editing.purchaseYear ?? "");
@@ -112,8 +105,6 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       setSizes(["Full Bottle"]);
       setType("");
       setRating(0);
-      setLongevity("");
-      setSillage("");
       setWhereBought("");
       setPurchaseMonth("");
       setPurchaseYear("");
@@ -186,8 +177,6 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       type: type || null,
       personalRating: rating || null,
       statusRating: null,
-      personalLong: longevity || null,
-      personalSill: sillage || null,
       whereBought: whereBought.trim() || null,
       purchaseDate: purchaseMonth && purchaseYear ? `${purchaseMonth} ${purchaseYear}` : purchaseYear || null,
       purchaseMonth: purchaseMonth || null,
@@ -216,7 +205,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
     }
   }
 
-  const cd = selectedName ? getCommunityData(selectedName, selectedHouse) : null;
+  const cd = selectedName ? getCommunityData(selectedName, selectedHouse, communityFrags) : null;
 
   const title = isEdit ? "Edit Fragrance" : "Add Fragrance";
   const subtitle = step === 1 ? "Step 1 of 2 — Search & identify" : "Step 2 of 2 — Details";
@@ -396,36 +385,6 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   {n <= rating ? "\u2605" : "\u2606"}
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* Longevity + Sillage */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
-                Longevity
-              </label>
-              <select
-                value={longevity}
-                onChange={(e) => setLongevity(e.target.value)}
-                className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
-              >
-                <option value="">Select...</option>
-                {LONGEVITY_OPTS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block font-[var(--mono)] text-[10px] text-[var(--ink3)] tracking-[0.12em] uppercase mb-2">
-                Sillage
-              </label>
-              <select
-                value={sillage}
-                onChange={(e) => setSillage(e.target.value)}
-                className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
-              >
-                <option value="">Select...</option>
-                {SILLAGE_OPTS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
             </div>
           </div>
 
