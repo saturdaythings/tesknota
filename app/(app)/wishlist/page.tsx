@@ -96,7 +96,7 @@ export default function WishlistPage() {
         editing={boughtFrag}
         forceStatus="CURRENT"
       />
-      <Topbar category="My Space" title="Wishlist" />
+      <Topbar title="Wishlist" />
       <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
@@ -153,7 +153,7 @@ export default function WishlistPage() {
                     onClick={() => { setEditingFrag(null); setFormOpen(true); }}
                     className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[7px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
                   >
-                    + Add
+                    + Add to Wishlist
                   </button>
                 </div>
               }

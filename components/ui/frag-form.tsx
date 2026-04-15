@@ -73,6 +73,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const [isDupe, setIsDupe] = useState(false);
   const [dupeFor, setDupeFor] = useState("");
 
+  const [moreOpen, setMoreOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -120,6 +121,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
     setDropOpen(false);
     setErr("");
     setSaving(false);
+    setMoreOpen(isEdit);
   }, [open, editing, forceStatus]);
 
   const matches = search.trim().length >= 2
@@ -213,14 +215,12 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const cd = selectedName ? getCommunityData(selectedName, selectedHouse, communityFrags) : null;
 
   const title = isEdit ? "Edit Fragrance" : "Add Fragrance";
-  const subtitle = step === 1 ? "Step 1 of 2 — Search & identify" : "Step 2 of 2 — Details";
 
   return (
     <Modal
       open={open}
       onClose={onClose}
       title={title}
-      subtitle={subtitle}
       footer={
         <div className="flex items-center justify-between w-full">
           <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">{err}</div>
@@ -238,7 +238,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               disabled={saving}
               className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {saving ? "Saving..." : step === 1 ? "Next" : isEdit ? "Update" : "Add"}
+              {saving ? "Saving..." : step === 1 ? "Next" : isEdit ? "Update" : "Save Fragrance"}
             </button>
           </div>
         </div>
@@ -277,14 +277,43 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               )}
             </div>
             {selectedName && (
-              <div className="mt-2 px-3 py-2 bg-[var(--b1)] border border-[var(--b2)]">
+              <div className="mt-2 px-3 py-3 bg-[var(--b1)] border border-[var(--b2)]">
                 <div className="font-[var(--body)] text-sm text-[var(--ink)]">{selectedName}</div>
                 {selectedHouse && (
                   <div className="font-[var(--mono)] text-xs text-[var(--ink3)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
                 )}
-                {cd?.avgPrice && (
-                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mt-[2px]">
-                    {cd.avgPrice.replace(/~/g, "")}
+                {(cd?.avgPrice || cd?.communityRating) && (
+                  <div className="font-[var(--mono)] text-xs text-[var(--ink3)] mt-[3px]">
+                    {[cd.avgPrice?.replace(/~/g, ""), cd.communityRating ? cd.communityRating + "/10" : ""].filter(Boolean).join(" · ")}
+                  </div>
+                )}
+                {cd && cd.accords.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {cd.accords.slice(0, 8).map((a) => (
+                      <span key={a} className="font-[var(--mono)] text-xs px-2 py-[3px] border border-[var(--b3)] text-[var(--ink3)]">{a}</span>
+                    ))}
+                  </div>
+                )}
+                {cd && (cd.topNotes.length > 0 || cd.middleNotes.length > 0 || cd.baseNotes.length > 0) && (
+                  <div className="mt-3 space-y-[6px]">
+                    {cd.topNotes.length > 0 && (
+                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                        <span className="tracking-[0.08em] uppercase mr-2">Top</span>
+                        {cd.topNotes.join(", ")}
+                      </div>
+                    )}
+                    {cd.middleNotes.length > 0 && (
+                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                        <span className="tracking-[0.08em] uppercase mr-2">Mid</span>
+                        {cd.middleNotes.join(", ")}
+                      </div>
+                    )}
+                    {cd.baseNotes.length > 0 && (
+                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                        <span className="tracking-[0.08em] uppercase mr-2">Base</span>
+                        {cd.baseNotes.join(", ")}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -296,15 +325,23 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Status
             </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as FragranceStatus)}
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
-            >
+            <div className="flex flex-wrap gap-2">
               {STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => setStatus(s.value)}
+                  className={
+                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
+                    (status === s.value
+                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
+                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
+                  }
+                >
+                  {s.label}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
         </div>
       )}
@@ -336,15 +373,23 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Status
             </label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as FragranceStatus)}
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
-            >
+            <div className="flex flex-wrap gap-2">
               {STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => setStatus(s.value)}
+                  className={
+                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
+                    (status === s.value
+                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
+                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
+                  }
+                >
+                  {s.label}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* Size */}
@@ -376,16 +421,23 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
               Concentration
             </label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value as FragranceType | "")}
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
-            >
-              <option value="">Select...</option>
+            <div className="flex flex-wrap gap-2">
               {TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setType(type === t ? "" : t)}
+                  className={
+                    "px-3 py-[5px] font-[var(--mono)] text-xs border transition-colors " +
+                    (type === t
+                      ? "border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]"
+                      : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--b4)]")
+                  }
+                >
+                  {t}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* Rating */}
@@ -409,96 +461,111 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             </div>
           </div>
 
-          {/* Where bought */}
-          <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-              Where Bought
-            </label>
-            <input
-              value={whereBought}
-              onChange={(e) => setWhereBought(e.target.value)}
-              placeholder="Sephora, Fragrantica, etc."
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
-            />
-          </div>
+          {/* More details toggle */}
+          {!moreOpen && (
+            <button
+              type="button"
+              onClick={() => setMoreOpen(true)}
+              className="font-[var(--mono)] text-xs text-[var(--blue)] hover:underline text-left"
+            >
+              + More Details
+            </button>
+          )}
 
-          {/* Purchase date + price */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-                Month
-              </label>
-              <select
-                value={purchaseMonth}
-                onChange={(e) => setPurchaseMonth(e.target.value)}
-                className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
-              >
-                <option value="">—</option>
-                {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-                Year
-              </label>
-              <select
-                value={purchaseYear}
-                onChange={(e) => setPurchaseYear(e.target.value)}
-                className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
-              >
-                <option value="">—</option>
-                {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-                Price
-              </label>
-              <input
-                value={purchasePrice}
-                onChange={(e) => setPurchasePrice(e.target.value)}
-                placeholder="$0"
-                className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
-              />
-            </div>
-          </div>
+          {moreOpen && (
+            <>
+              {/* Where bought */}
+              <div>
+                <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                  Where Bought
+                </label>
+                <input
+                  value={whereBought}
+                  onChange={(e) => setWhereBought(e.target.value)}
+                  placeholder="Sephora, Fragrantica, etc."
+                  className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                />
+              </div>
 
-          {/* Notes */}
-          <div>
-            <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-              Personal Notes
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              placeholder="Your impressions, context, memories..."
-              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)] resize-none"
-            />
-          </div>
+              {/* Purchase date + price */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                    Month
+                  </label>
+                  <select
+                    value={purchaseMonth}
+                    onChange={(e) => setPurchaseMonth(e.target.value)}
+                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
+                  >
+                    <option value="">—</option>
+                    {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                    Year
+                  </label>
+                  <select
+                    value={purchaseYear}
+                    onChange={(e) => setPurchaseYear(e.target.value)}
+                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] cursor-pointer"
+                  >
+                    <option value="">—</option>
+                    {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                    Price
+                  </label>
+                  <input
+                    value={purchasePrice}
+                    onChange={(e) => setPurchasePrice(e.target.value)}
+                    placeholder="$0"
+                    className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                  />
+                </div>
+              </div>
 
-          {/* Dupe */}
-          <div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isDupe}
-                onChange={(e) => setIsDupe(e.target.checked)}
-                className="accent-[var(--blue)]"
-              />
-              <span className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.05em] uppercase">
-                This is a dupe of another fragrance
-              </span>
-            </label>
-            {isDupe && (
-              <input
-                value={dupeFor}
-                onChange={(e) => setDupeFor(e.target.value)}
-                placeholder="Original fragrance name..."
-                className="mt-2 w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
-              />
-            )}
-          </div>
+              {/* Notes */}
+              <div>
+                <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+                  Personal Notes
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Your impressions, context, memories..."
+                  className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)] resize-none"
+                />
+              </div>
+
+              {/* Dupe */}
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isDupe}
+                    onChange={(e) => setIsDupe(e.target.checked)}
+                    className="accent-[var(--blue)]"
+                  />
+                  <span className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.05em] uppercase">
+                    This is a dupe of another fragrance
+                  </span>
+                </label>
+                {isDupe && (
+                  <input
+                    value={dupeFor}
+                    onChange={(e) => setDupeFor(e.target.value)}
+                    placeholder="Original fragrance name..."
+                    className="mt-2 w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                  />
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
     </Modal>

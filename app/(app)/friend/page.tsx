@@ -63,7 +63,7 @@ export default function FriendPage() {
         userId={friend.id}
         readOnly
       />
-      <Topbar category="Social" title={`${friendName}'s Profile`} />
+      <Topbar title={`${friendName}'s Profile`} />
       <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">

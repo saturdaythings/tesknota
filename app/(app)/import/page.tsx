@@ -600,7 +600,7 @@ export default function ImportPage() {
 
   return (
     <>
-      <Topbar category="Manage" title="Import" />
+      <Topbar title="Import" />
       <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         <div className="flex gap-0 border-b border-[var(--b2)] mb-6 max-w-[820px]">
           <button

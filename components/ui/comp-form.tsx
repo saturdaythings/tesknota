@@ -56,6 +56,10 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
   const [fragDropOpen, setFragDropOpen] = useState(false);
   const [primaryFragId, setPrimaryFragId] = useState("");
   const [primaryFragName, setPrimaryFragName] = useState("");
+  const [secSearch, setSecSearch] = useState("");
+  const [secDropOpen, setSecDropOpen] = useState(false);
+  const [secondaryFragId, setSecondaryFragId] = useState("");
+  const [secondaryFragName, setSecondaryFragName] = useState("");
   const [relation, setRelation] = useState<Relation>("Stranger");
   const [gender, setGender] = useState<ComplimenterGender>("Female");
   const [month, setMonth] = useState(curMonth);
@@ -82,6 +86,12 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       ).slice(0, 8)
     : eligibleFrags.slice(0, 8);
 
+  const secMatches = secSearch.trim().length >= 1
+    ? eligibleFrags.filter((f) =>
+        f.name.toLowerCase().includes(secSearch.toLowerCase())
+      ).slice(0, 8)
+    : eligibleFrags.slice(0, 8);
+
   useEffect(() => {
     if (!open) return;
     if (editing) {
@@ -89,6 +99,9 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       setFragSearch(editing.primaryFrag);
       setPrimaryFragId(editing.primaryFragId ?? "");
       setPrimaryFragName(editing.primaryFrag);
+      setSecSearch(editing.secondaryFrag ?? "");
+      setSecondaryFragId(editing.secondaryFragId ?? "");
+      setSecondaryFragName(editing.secondaryFrag ?? "");
       setRelation(editing.relation);
       setGender(editing.gender ?? "Female");
       setMonth(normalizeMonth(editing.month || curMonth));
@@ -103,6 +116,9 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       setFragSearch(pre ? pre.name : "");
       setPrimaryFragId(pre ? (pre.fragranceId || pre.id) : "");
       setPrimaryFragName(pre ? pre.name : "");
+      setSecSearch("");
+      setSecondaryFragId("");
+      setSecondaryFragName("");
       setRelation("Stranger");
       setGender("Female");
       setMonth(curMonth);
@@ -126,6 +142,13 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
     setFragDropOpen(false);
   }
 
+  function selectSecFrag(f: typeof eligibleFrags[0]) {
+    setSecSearch(f.name);
+    setSecondaryFragId(f.fragranceId || f.id);
+    setSecondaryFragName(f.name);
+    setSecDropOpen(false);
+  }
+
   async function save() {
     if (!user) return;
     if (!primaryFragId) { setErr("Select a fragrance."); return; }
@@ -139,8 +162,8 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       userId: user.id,
       primaryFragId,
       primaryFrag: primaryFragName,
-      secondaryFragId: editing?.secondaryFragId ?? null,
-      secondaryFrag: editing?.secondaryFrag ?? null,
+      secondaryFragId: secondaryFragId || null,
+      secondaryFrag: secondaryFragName || null,
       gender,
       relation,
       month,
@@ -188,7 +211,6 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
       open={open}
       onClose={onClose}
       title={isEdit ? "Edit Compliment" : "Log a Compliment"}
-      subtitle="Record who, where, and what you were wearing"
       footer={
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
@@ -266,6 +288,42 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
           </div>
         </div>
 
+        {/* Layering fragrance */}
+        <div>
+          <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
+            Layering Fragrance <span className="normal-case tracking-normal text-[var(--ink4)]">(optional)</span>
+          </label>
+          <div className="relative">
+            <input
+              value={secSearch}
+              onChange={(e) => {
+                setSecSearch(e.target.value);
+                setSecondaryFragId("");
+                setSecondaryFragName("");
+                setSecDropOpen(true);
+              }}
+              onFocus={() => setSecDropOpen(true)}
+              onBlur={() => setTimeout(() => setSecDropOpen(false), 150)}
+              placeholder="Search your collection..."
+              className="w-full px-3 py-[9px] border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+            />
+            {secDropOpen && secMatches.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-50 border border-[var(--b3)] border-t-0 bg-[var(--off)] shadow-sm max-h-[200px] overflow-y-auto">
+                {secMatches.map((f) => (
+                  <div
+                    key={f.id}
+                    onMouseDown={() => selectSecFrag(f)}
+                    className="px-3 py-[9px] cursor-pointer hover:bg-[var(--b1)] border-b border-[var(--b1)] last:border-0"
+                  >
+                    <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
+                    <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Relation */}
         <div>
           <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
@@ -293,7 +351,7 @@ export function CompForm({ open, onClose, editing, prefillFragId }: Props) {
         {/* Gender */}
         <div>
           <label className="block font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-2">
-            Complimenter
+            Gender
           </label>
           <div className="flex gap-2">
             {(["Female", "Male"] as ComplimenterGender[]).map((g) => (

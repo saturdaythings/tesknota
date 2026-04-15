@@ -79,7 +79,7 @@ export default function DashboardPage() {
         onClose={() => setFormOpen(false)}
         editing={editingFrag}
       />
-      <Topbar category="My Space" title="Dashboard" />
+      <Topbar title="Dashboard" />
       <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">

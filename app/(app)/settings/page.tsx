@@ -52,7 +52,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <Topbar category="Manage" title="Settings" />
+      <Topbar title="Settings" />
       <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px] max-w-[560px]">
 
         <SectionHeader title="Account" />

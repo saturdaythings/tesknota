@@ -62,10 +62,7 @@ export function Sidebar({
             tesknota
           </div>
           <div className="font-[var(--mono)] text-xs tracking-[0.18em] uppercase text-white/70 mt-1">
-            Fragrance Journal
-          </div>
-          <div className="font-[var(--script)] text-sm italic text-[rgba(var(--warm-ch),0.92)] leading-[1.45] mt-[10px] tracking-[0.01em]">
-            a scent is a memory waiting to be written
+            Fragrance Tracker
           </div>
         </div>
 

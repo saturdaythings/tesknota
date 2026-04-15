@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { useMobileNav } from "@/lib/mobile-nav-context";
 
 interface TopbarProps {
-  category?: string;
   title: string;
   search?: React.ReactNode;
   actions?: React.ReactNode;
@@ -12,7 +11,6 @@ interface TopbarProps {
 }
 
 export function Topbar({
-  category,
   title,
   search,
   actions,
@@ -40,12 +38,7 @@ export function Topbar({
       </button>
 
       <div className="flex-1 min-w-0">
-        {category && (
-          <div className="font-[var(--mono)] text-xs tracking-[0.2em] uppercase text-[var(--ink3)]">
-            {category}
-          </div>
-        )}
-        <div className="font-[var(--serif)] text-base font-normal text-[var(--ink)] mt-[1px] leading-[1.3] truncate">
+        <div className="font-[var(--serif)] text-base font-normal text-[var(--ink)] leading-[1.3] truncate">
           {title}
         </div>
       </div>
