@@ -145,9 +145,17 @@ export default function WishlistPage() {
             <SectionHeader
               title="Wishlist"
               right={
-                <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                  {filtered.length} {filtered.length === 1 ? "item" : "items"}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+                    {filtered.length} {filtered.length === 1 ? "item" : "items"}
+                  </span>
+                  <button
+                    onClick={() => { setEditingFrag(null); setFormOpen(true); }}
+                    className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[7px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+                  >
+                    + Add
+                  </button>
+                </div>
               }
             />
 

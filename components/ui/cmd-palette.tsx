@@ -381,19 +381,7 @@ export function CmdPalette() {
   const totalSteps = pal.flow ? activeSteps(pal.flow, pal.answers).length : 0;
   const stepNum = pal.step + 1;
 
-  if (!pal.open) {
-    return (
-      <button
-        onClick={openPal}
-        aria-label="Command palette (Cmd+K)"
-        title="Cmd+K"
-        className="fixed bottom-[26px] right-[26px] w-11 h-11 bg-[var(--blue)] text-white border-none cursor-pointer flex items-center justify-center z-[400] shadow-[0_4px_16px_rgba(var(--blue-ch),0.4)] hover:bg-[var(--blue2)] hover:scale-105 transition-all duration-150 rounded-full font-[var(--mono)] text-lg leading-none"
-        style={{ bottom: "calc(26px + env(safe-area-inset-bottom, 0px))", right: "calc(26px + env(safe-area-inset-right, 0px))" }}
-      >
-        +
-      </button>
-    );
-  }
+  if (!pal.open) return null;
 
   return (
     <>
