@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
+import { AccordCloud } from "@/components/ui/accord-cloud";
+import { statusColorClass } from "@/components/ui/frag-row";
 import { useUser, getFriend, USERS } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
-import { STATUS_LABELS, STATUS_CSS } from "@/types";
+import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 import type { UserId } from "@/lib/user-context";
 import {
@@ -236,21 +238,10 @@ function ScentSignature({
   const top = Object.entries(acCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
   if (!top.length) return null;
 
-  const sizeClass = (i: number) => (i === 0 ? "text-[15px]" : i <= 2 ? "text-[13px]" : "text-[11px]");
-
   return (
     <div>
       <SectionHeader title="Scent signature" right={<span className="font-[var(--mono)] text-xs text-[var(--ink3)]">Top accords in your collection</span>} />
-      <div className="flex flex-wrap gap-[6px]">
-        {top.map(([accord], i) => (
-          <span
-            key={accord}
-            className={`font-[var(--mono)] tracking-[0.08em] px-3 py-[5px] bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] cursor-default ${sizeClass(i)}`}
-          >
-            {accord}
-          </span>
-        ))}
-      </div>
+      <AccordCloud accords={top} />
     </div>
   );
 }
@@ -348,18 +339,7 @@ function RecentRow({
         {compCount > 0 ? <span className="text-[var(--blue)] underline underline-offset-2 cursor-pointer">{compCount}</span> : "\u2014"}
       </td>
       <td className="px-4 py-3">
-        <span
-          className={`font-[var(--mono)] text-[11px] tracking-[0.04em] ${
-            {
-              "s-cur": "text-[var(--sage)]",
-              "s-prv": "text-[var(--ink3)]",
-              "s-wnt": "text-[var(--s-want)]",
-              "s-no": "text-[var(--rose-tk)]",
-              "s-unk": "text-[var(--s-unknown)]",
-              "s-fin": "text-[var(--s-sold)]",
-            }[STATUS_CSS[f.status]] ?? "text-[var(--ink3)]"
-          }`}
-        >
+        <span className={`font-[var(--mono)] text-[11px] tracking-[0.04em] ${statusColorClass(f.status)}`}>
           {STATUS_LABELS[f.status] ?? f.status}
         </span>
       </td>
