@@ -412,18 +412,18 @@ export function CmdPalette() {
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--b2)]">
           {pal.flow ? (
             <div className="flex items-center gap-3">
-              <button onClick={goBack} className="font-[var(--mono)] text-[10px] tracking-[0.08em] text-[var(--ink3)] hover:text-[var(--ink)] bg-none border-none cursor-pointer p-0">
+              <button onClick={goBack} className="font-[var(--mono)] text-xs tracking-[0.08em] text-[var(--ink3)] hover:text-[var(--ink)] bg-none border-none cursor-pointer p-0">
                 ← Back
               </button>
-              <span className="font-[var(--mono)] text-[10px] text-[var(--ink4)] tracking-[0.08em]">
+              <span className="font-[var(--mono)] text-xs text-[var(--ink4)] tracking-[0.08em]">
                 {stepNum} / {totalSteps}
               </span>
             </div>
           ) : (
-            <div className="font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--ink3)]">Quick add</div>
+            <div className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)]">Quick add</div>
           )}
           <div className="flex items-center gap-3">
-            <kbd className="font-[var(--mono)] text-[10px] text-[var(--ink4)] bg-[var(--off2)] border border-[var(--b2)] px-1.5 py-0.5">⌘K</kbd>
+            <kbd className="font-[var(--mono)] text-xs text-[var(--ink4)] bg-[var(--off2)] border border-[var(--b2)] px-1.5 py-0.5">⌘K</kbd>
             <button onClick={closePal} className="text-lg text-[var(--ink3)] hover:text-[var(--ink)] bg-none border-none cursor-pointer px-1" aria-label="Close">×</button>
           </div>
         </div>
@@ -439,7 +439,7 @@ export function CmdPalette() {
               >
                 <div>
                   <div className="font-[var(--body)] text-sm text-[var(--ink)] group-hover:text-[var(--blue)]">{item.label}</div>
-                  <div className="font-[var(--mono)] text-[10px] text-[var(--ink4)] mt-0.5">{item.hint}</div>
+                  <div className="font-[var(--mono)] text-xs text-[var(--ink4)] mt-0.5">{item.hint}</div>
                 </div>
                 <span className="text-[var(--ink4)] group-hover:text-[var(--blue)] font-[var(--mono)] text-[12px]">→</span>
               </button>
@@ -470,7 +470,7 @@ export function CmdPalette() {
                     className="w-full text-left px-3 py-2.5 border-b border-[var(--b1)] hover:bg-[var(--off2)] cursor-pointer flex justify-between items-center bg-none border-x-0 border-t-0"
                   >
                     <span className="font-[var(--body)] text-sm text-[var(--ink)]">{f.fragranceName}</span>
-                    <span className="font-[var(--mono)] text-[10px] text-[var(--ink4)]">{f.fragranceHouse}</span>
+                    <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{f.fragranceHouse}</span>
                   </button>
                 ))}
                 {searchQuery && fragResults.length === 0 && (
@@ -498,7 +498,7 @@ export function CmdPalette() {
                     className="w-full text-left px-3 py-2.5 border-b border-[var(--b1)] hover:bg-[var(--off2)] cursor-pointer flex justify-between items-center bg-none border-x-0 border-t-0"
                   >
                     <span className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</span>
-                    <span className="font-[var(--mono)] text-[10px] text-[var(--ink4)]">{f.house}</span>
+                    <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{f.house}</span>
                   </button>
                 ))}
               </>
@@ -521,7 +521,7 @@ export function CmdPalette() {
                     className="w-full text-left px-3 py-2.5 border-b border-[var(--b1)] hover:bg-[var(--off2)] cursor-pointer flex justify-between items-center bg-none border-x-0 border-t-0"
                   >
                     <span className="font-[var(--body)] text-sm text-[var(--ink)]">{c.primaryFrag}</span>
-                    <span className="font-[var(--mono)] text-[10px] text-[var(--ink4)]">{MONTHS[parseInt(c.month) - 1]} {c.year}</span>
+                    <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{MONTHS[parseInt(c.month) - 1]} {c.year}</span>
                   </button>
                 ))}
               </>
@@ -559,7 +559,7 @@ export function CmdPalette() {
                     );
                   })}
                 </div>
-                <button onClick={submitMultiSelect} className="self-start px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-[10px] tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
+                <button onClick={submitMultiSelect} className="self-start px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
                   Continue
                 </button>
               </div>
@@ -576,7 +576,7 @@ export function CmdPalette() {
                   placeholder={step.hint}
                   className="w-full px-3 py-2.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] mb-3"
                 />
-                <button onClick={submitText} className="px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-[10px] tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
+                <button onClick={submitText} className="px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
                   Continue
                 </button>
               </>
@@ -593,7 +593,7 @@ export function CmdPalette() {
                   rows={4}
                   className="w-full px-3 py-2.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] resize-none mb-3"
                 />
-                <button onClick={submitText} className="px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-[10px] tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
+                <button onClick={submitText} className="px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
                   Continue
                 </button>
               </>
@@ -602,10 +602,10 @@ export function CmdPalette() {
             {/* Confirm step */}
             {step.type === "confirm" && (
               <div className="flex gap-3">
-                <button onClick={handleSave} className="px-6 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase hover:bg-[var(--blue2)] transition-colors">
+                <button onClick={handleSave} className="px-6 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.1em] uppercase hover:bg-[var(--blue2)] transition-colors">
                   Save
                 </button>
-                <button onClick={closePal} className="px-6 py-2.5 border border-[var(--b3)] font-[var(--mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--ink3)] hover:border-[var(--ink3)] transition-colors">
+                <button onClick={closePal} className="px-6 py-2.5 border border-[var(--b3)] font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)] hover:border-[var(--ink3)] transition-colors">
                   Cancel
                 </button>
               </div>
@@ -613,7 +613,7 @@ export function CmdPalette() {
 
             {/* Skip for optional steps */}
             {step.optional && step.type !== "confirm" && step.type !== "pick" && step.type !== "search" && (
-              <button onClick={skipStep} className="block mt-3 font-[var(--mono)] text-[10px] text-[var(--ink4)] hover:text-[var(--ink3)] bg-none border-none cursor-pointer p-0 tracking-[0.06em]">
+              <button onClick={skipStep} className="block mt-3 font-[var(--mono)] text-xs text-[var(--ink4)] hover:text-[var(--ink3)] bg-none border-none cursor-pointer p-0 tracking-[0.06em]">
                 Skip →
               </button>
             )}

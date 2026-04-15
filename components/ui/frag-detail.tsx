@@ -92,7 +92,6 @@ export function FragDetail({
     if (!user || !frag) return;
     setFlagging(true);
     try {
-      const cf = communityFrags.find((c) => c.fragranceId === frag.fragranceId);
       await submitCommunityFlag({
         userId: user.id,
         fragranceId: frag.fragranceId,
@@ -101,7 +100,6 @@ export function FragDetail({
         fieldFlagged: flagField,
         userNote: flagNote,
       });
-      void cf;
       toast("Flag submitted. Thanks!");
       setFlagOpen(false);
       setFlagNote("");
@@ -234,7 +232,7 @@ export function FragDetail({
               </div>
               <button
                 onClick={() => setFlagOpen((v) => !v)}
-                className="font-[var(--mono)] text-[10px] tracking-[0.08em] text-[var(--ink4)] hover:text-[var(--rose-tk)] transition-colors border-none bg-none cursor-pointer p-0"
+                className="font-[var(--mono)] text-xs tracking-[0.08em] text-[var(--ink4)] hover:text-[var(--rose-tk)] transition-colors border-none bg-none cursor-pointer p-0"
               >
                 {flagOpen ? "Cancel flag" : "Flag incorrect data"}
               </button>
@@ -248,7 +246,7 @@ export function FragDetail({
                     <button
                       key={f}
                       onClick={() => setFlagField(f)}
-                      className={`font-[var(--mono)] text-[10px] px-2 py-1 border transition-colors cursor-pointer ${flagField === f ? "bg-[var(--blue)] border-[var(--blue)] text-white" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
+                      className={`font-[var(--mono)] text-xs px-2 py-1 border transition-colors cursor-pointer ${flagField === f ? "bg-[var(--blue)] border-[var(--blue)] text-white" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
                     >
                       {f}
                     </button>
@@ -264,7 +262,7 @@ export function FragDetail({
                 <button
                   onClick={submitFlag}
                   disabled={flagging}
-                  className="self-start px-4 py-1.5 font-[var(--mono)] text-[10px] tracking-[0.08em] uppercase bg-[var(--blue)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  className="self-start px-4 py-1.5 font-[var(--mono)] text-xs tracking-[0.08em] uppercase bg-[var(--blue)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
                 >
                   {flagging ? "Submitting..." : "Submit flag"}
                 </button>

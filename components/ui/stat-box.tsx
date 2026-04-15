@@ -17,7 +17,7 @@ export function StatBox({ value, label, delta, className }: StatBoxProps) {
         {label}
       </div>
       {delta && (
-        <div className="font-[var(--mono)] text-xs text-[var(--s-want)] mt-[2px]">
+        <div className="font-[var(--mono)] text-xs text-[var(--s-cur)] mt-[2px]">
           {delta}
         </div>
       )}

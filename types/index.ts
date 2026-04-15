@@ -129,13 +129,3 @@ export const STATUS_LABELS: Record<FragranceStatus, string> = {
   WANT_TO_IDENTIFY: "Identify Later",
   FINISHED: "Finished",
 };
-
-export const STATUS_CSS: Record<FragranceStatus, string> = {
-  CURRENT: "s-cur",
-  PREVIOUSLY_OWNED: "s-prv",
-  WANT_TO_BUY: "s-wnt",
-  WANT_TO_SMELL: "s-wnt",
-  DONT_LIKE: "s-no",
-  WANT_TO_IDENTIFY: "s-unk",
-  FINISHED: "s-fin",
-};

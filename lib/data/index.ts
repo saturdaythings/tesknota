@@ -108,24 +108,6 @@ export async function loadAllData(): Promise<{ data: AllData; ok: boolean }> {
   };
 }
 
-// ── User-scoped filters ───────────────────────────────────────
-
-export function myFragrances(fragrances: UserFragrance[], userId: string): UserFragrance[] {
-  return fragrances.filter((f) => f.userId === userId);
-}
-
-export function friendFragrances(fragrances: UserFragrance[], userId: string): UserFragrance[] {
-  return fragrances.filter((f) => f.userId !== userId);
-}
-
-export function myCompliments(compliments: UserCompliment[], userId: string): UserCompliment[] {
-  return compliments.filter((c) => c.userId === userId);
-}
-
-export function friendCompliments(compliments: UserCompliment[], userId: string): UserCompliment[] {
-  return compliments.filter((c) => c.userId !== userId);
-}
-
 // ── Community data lookup ─────────────────────────────────────
 
 function norm(s: string): string {
@@ -160,15 +142,3 @@ export function getCommunityData(
   };
 }
 
-export function resolveFragById(
-  fragId: string | null,
-  communityFrags: CommunityFrag[],
-  fragrances: UserFragrance[]
-): { name: string; house: string } {
-  if (!fragId) return { name: "", house: "" };
-  const cf = communityFrags.find((f) => f.fragranceId === fragId);
-  if (cf) return { name: cf.fragranceName ?? "", house: cf.fragranceHouse ?? "" };
-  const uf = fragrances.find((f) => f.fragranceId === fragId || f.id === fragId);
-  if (uf) return { name: uf.name, house: uf.house };
-  return { name: "", house: "" };
-}

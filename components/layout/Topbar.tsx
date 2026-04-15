@@ -41,7 +41,7 @@ export function Topbar({
 
       <div className="flex-1 min-w-0">
         {category && (
-          <div className="font-[var(--mono)] text-[10px] tracking-[0.2em] uppercase text-[var(--ink3)]">
+          <div className="font-[var(--mono)] text-xs tracking-[0.2em] uppercase text-[var(--ink3)]">
             {category}
           </div>
         )}

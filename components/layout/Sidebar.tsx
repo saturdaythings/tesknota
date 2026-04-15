@@ -97,7 +97,7 @@ export function Sidebar({
                       {item.badge}
                     </span>
                     {item.count !== undefined && item.count > 0 && (
-                      <span className="font-[var(--mono)] text-[10px] text-[rgba(var(--warm-ch),0.8)]">
+                      <span className="font-[var(--mono)] text-xs text-[rgba(var(--warm-ch),0.8)]">
                         {item.count}
                       </span>
                     )}

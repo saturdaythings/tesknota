@@ -236,7 +236,7 @@ export function BotDrawer() {
                 <button
                   key={i}
                   onClick={b.action}
-                  className="bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] font-[var(--mono)] text-[10px] tracking-[0.06em] px-3.5 py-1.5 cursor-pointer rounded-full hover:bg-[var(--warm3)] hover:border-[var(--warm)] transition-all"
+                  className="bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] font-[var(--mono)] text-xs tracking-[0.06em] px-3.5 py-1.5 cursor-pointer rounded-full hover:bg-[var(--warm3)] hover:border-[var(--warm)] transition-all"
                 >
                   {b.label}
                 </button>
@@ -252,7 +252,7 @@ export function BotDrawer() {
               <button
                 key={chip}
                 onClick={() => { clearButtons(); addMsg(chip, "user"); handleMessage(chip); }}
-                className="bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] font-[var(--mono)] text-[10px] tracking-[0.06em] px-3.5 py-1.5 cursor-pointer rounded-full hover:bg-[var(--warm3)] hover:border-[var(--warm)] transition-all"
+                className="bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] font-[var(--mono)] text-xs tracking-[0.06em] px-3.5 py-1.5 cursor-pointer rounded-full hover:bg-[var(--warm3)] hover:border-[var(--warm)] transition-all"
               >
                 {chip}
               </button>
@@ -272,7 +272,7 @@ export function BotDrawer() {
           <button
             onClick={send}
             disabled={!input.trim() || loading}
-            className="px-4 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-[10px] tracking-[0.08em] uppercase disabled:opacity-40 hover:bg-[var(--blue2)] transition-colors"
+            className="px-4 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.08em] uppercase disabled:opacity-40 hover:bg-[var(--blue2)] transition-colors"
           >
             Send
           </button>
