@@ -1,300 +1,400 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Plus, X, FlaskConical, SearchX } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
-import { StatBox, StatsGrid } from "@/components/ui/stat-box";
-import { SectionHeader } from "@/components/ui/section-header";
-import { FilterChip } from "@/components/ui/filter-bar";
-import { FragRow } from "@/components/ui/frag-row";
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FragForm } from "@/components/ui/frag-form";
-import { FragDetail } from "@/components/ui/frag-detail";
-import { Pagination } from "@/components/ui/pagination";
-import { Dropdown } from "@/components/ui/dropdown";
-import { FilterPanel } from "@/components/ui/filter-panel";
+import { AddFragranceModal } from "@/components/collection/add-fragrance-modal";
+import { FragranceCard } from "@/components/collection/fragrance-card";
+import { FragranceDetailModal } from "@/components/collection/fragrance-detail-modal";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
-import { useFilterSync } from "@/lib/hooks/useFilterSync";
-import { avgRatingStr } from "@/lib/frag-utils";
 import type { UserFragrance, FragranceStatus } from "@/types";
 
-type StatusFilter = "all" | "wish" | FragranceStatus;
-type SortKey = "nameAZ" | "nameZA" | "houseAZ" | "ratingHL" | "ratingLH" | "added" | "comps";
+// ── Filter / sort constants ───────────────────────────────
 
-const WISHLIST_STATUSES = new Set<FragranceStatus>(["WANT_TO_BUY", "WANT_TO_SMELL", "WANT_TO_IDENTIFY"]);
+type StatusKey =
+  | "all"
+  | "collection"
+  | "wishlist"
+  | "previously_owned"
+  | "want_to_smell"
+  | "dont_like"
+  | "finished"
+  | "identify_later";
 
-const STATUS_FILTERS: { label: string; value: StatusFilter }[] = [
-  { label: "All", value: "all" },
-  { label: "Current", value: "CURRENT" },
-  { label: "Wishlist", value: "wish" },
-  { label: "Prev. Owned", value: "PREVIOUSLY_OWNED" },
-  { label: "Finished", value: "FINISHED" },
-  { label: "Don't Like", value: "DONT_LIKE" },
+type SortKey =
+  | "name_asc"
+  | "name_desc"
+  | "rating_desc"
+  | "rating_asc"
+  | "newest"
+  | "oldest"
+  | "compliments_desc";
+
+const WISHLIST_STATUSES = new Set<FragranceStatus>([
+  "WANT_TO_BUY",
+  "WANT_TO_SMELL",
+  "WANT_TO_IDENTIFY",
+]);
+
+const STATUS_OPTIONS = [
+  { value: "all", label: "All Statuses" },
+  { value: "collection", label: "Current Collection" },
+  { value: "wishlist", label: "Wishlist" },
+  { value: "previously_owned", label: "Previously Owned" },
+  { value: "want_to_smell", label: "Want to Smell" },
+  { value: "dont_like", label: "Don't Like" },
+  { value: "finished", label: "Finished" },
+  { value: "identify_later", label: "Identify Later" },
 ];
 
-export default function CollectionPage() {
-  const { user } = useUser();
-  const { fragrances, compliments, communityFrags, isLoaded, removeFrag } = useData();
-  const { toast } = useToast();
+const SORT_OPTIONS = [
+  { value: "name_asc", label: "Name A–Z" },
+  { value: "name_desc", label: "Name Z–A" },
+  { value: "rating_desc", label: "Highest Rated" },
+  { value: "rating_asc", label: "Lowest Rated" },
+  { value: "newest", label: "Recently Added" },
+  { value: "oldest", label: "Oldest First" },
+  { value: "compliments_desc", label: "Most Complimented" },
+];
 
-  // URL-synced filter state
-  const [filters, setFilters, clearAllFilters] = useFilterSync({
-    q: "",
-    status: "all" as StatusFilter,
-    sort: "nameAZ" as SortKey,
-    accord: "",
-    rating: null as number | null,
-    house: "",
+function applyStatus(frags: UserFragrance[], status: StatusKey): UserFragrance[] {
+  switch (status) {
+    case "collection":
+      return frags.filter((f) => f.status === "CURRENT");
+    case "wishlist":
+      return frags.filter((f) => WISHLIST_STATUSES.has(f.status));
+    case "previously_owned":
+      return frags.filter((f) => f.status === "PREVIOUSLY_OWNED");
+    case "want_to_smell":
+      return frags.filter((f) => f.status === "WANT_TO_SMELL");
+    case "dont_like":
+      return frags.filter((f) => f.status === "DONT_LIKE");
+    case "finished":
+      return frags.filter((f) => f.status === "FINISHED");
+    case "identify_later":
+      return frags.filter((f) => f.status === "WANT_TO_IDENTIFY");
+    default:
+      return frags;
+  }
+}
+
+function applySort(
+  frags: UserFragrance[],
+  sort: SortKey,
+  compMap: Record<string, number>,
+): UserFragrance[] {
+  return [...frags].sort((a, b) => {
+    switch (sort) {
+      case "name_desc":
+        return b.name.localeCompare(a.name);
+      case "rating_desc":
+        return (b.personalRating ?? 0) - (a.personalRating ?? 0);
+      case "rating_asc":
+        return (a.personalRating ?? 0) - (b.personalRating ?? 0);
+      case "newest":
+        return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
+      case "oldest":
+        return (a.createdAt ?? "").localeCompare(b.createdAt ?? "");
+      case "compliments_desc":
+        return (
+          (compMap[b.fragranceId ?? b.id] ?? 0) -
+          (compMap[a.fragranceId ?? a.id] ?? 0)
+        );
+      default:
+        return a.name.localeCompare(b.name);
+    }
   });
+}
 
-  // Local UI state (not in URL)
+// ── Card skeleton ─────────────────────────────────────────
+
+function CardSkeleton() {
+  return (
+    <div
+      style={{
+        background: "var(--color-surface)",
+        border: "1px solid var(--color-border)",
+        borderRadius: "var(--radius-lg)",
+        padding: "var(--space-5)",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--space-3)" }}>
+        <div style={{ flex: 1, marginRight: "var(--space-3)" }}>
+          <Skeleton className="h-5 w-4/5 mb-2" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+        <Skeleton className="h-6 w-20" />
+      </div>
+      <div style={{ display: "flex", gap: "var(--space-4)", marginBottom: "var(--space-3)" }}>
+        <Skeleton className="h-10 flex-1" />
+        <Skeleton className="h-10 flex-1" />
+        <Skeleton className="h-10 flex-1" />
+      </div>
+      <Skeleton className="h-4 w-2/3" />
+    </div>
+  );
+}
+
+// ── Inner page (uses useSearchParams, must be inside Suspense) ─
+
+function CollectionInner() {
+  const { user } = useUser();
+  const { fragrances, compliments, communityFrags, isLoaded, removeFrag } =
+    useData();
+  const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const status = (searchParams.get("status") as StatusKey) || "all";
+  const sort = (searchParams.get("sort") as SortKey) || "name_asc";
+
+  const [addOpen, setAddOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const setParam = useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value && value !== "all" && value !== "name_asc") {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+      router.push(`?${params.toString()}`);
+    },
+    [searchParams, router],
+  );
+
+  const clearFilters = useCallback(() => {
+    router.push(window.location.pathname);
+  }, [router]);
+
+  const filtersActive = status !== "all" || sort !== "name_asc";
 
   if (!user) return null;
 
   const MF = fragrances.filter((f) => f.userId === user.id);
   const MC = compliments.filter((c) => c.userId === user.id);
-  const current = MF.filter((f) => f.status === "CURRENT");
-
-  const normStr = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const getCf = useCallback((f: UserFragrance) =>
-    communityFrags.find(
-      (c) => (f.fragranceId && c.fragranceId === f.fragranceId) ||
-             (normStr(c.fragranceName) === normStr(f.name) && normStr(c.fragranceHouse) === normStr(f.house ?? ""))
-    ),
-    [communityFrags],
-  );
-
-  const allAccords = useMemo(
-    () => Array.from(new Set(MF.flatMap((f) => getCf(f)?.fragranceAccords ?? []))).sort(),
-    [MF, getCf],
-  );
-  const allHouses = useMemo(
-    () => Array.from(new Set(MF.map((f) => f.house).filter(Boolean) as string[])).sort(),
-    [MF],
-  );
 
   const compMap: Record<string, number> = {};
   MC.forEach((c) => {
-    if (c.primaryFragId) compMap[c.primaryFragId] = (compMap[c.primaryFragId] ?? 0) + 1;
-    if (c.secondaryFragId) compMap[c.secondaryFragId] = (compMap[c.secondaryFragId] ?? 0) + 1;
+    if (c.primaryFragId)
+      compMap[c.primaryFragId] = (compMap[c.primaryFragId] ?? 0) + 1;
+    if (c.secondaryFragId)
+      compMap[c.secondaryFragId] = (compMap[c.secondaryFragId] ?? 0) + 1;
   });
 
-  let filtered = MF;
-  if (filters.status === "wish") {
-    filtered = filtered.filter((f) => WISHLIST_STATUSES.has(f.status));
-  } else if (filters.status !== "all") {
-    filtered = filtered.filter((f) => f.status === filters.status);
-  }
-  if (filters.q.trim().length >= 2) {
-    const q = filters.q.toLowerCase();
-    filtered = filtered.filter(
-      (f) => f.name.toLowerCase().includes(q) || (f.house ?? "").toLowerCase().includes(q)
-    );
-  }
-  if (filters.accord) filtered = filtered.filter((f) => getCf(f)?.fragranceAccords?.includes(filters.accord) ?? false);
-  if (filters.rating !== null && filters.rating !== undefined) {
-    const minRating = filters.rating;
-    filtered = filtered.filter((f) => (f.personalRating ?? 0) >= minRating);
-  }
-  if (filters.house) filtered = filtered.filter((f) => f.house === filters.house);
-  filtered = filtered.slice().sort((a, b) => {
-    if (filters.sort === "nameZA") return b.name.localeCompare(a.name);
-    if (filters.sort === "houseAZ") return (a.house ?? "").localeCompare(b.house ?? "");
-    if (filters.sort === "ratingHL") return (b.personalRating ?? 0) - (a.personalRating ?? 0);
-    if (filters.sort === "ratingLH") return (a.personalRating ?? 0) - (b.personalRating ?? 0);
-    if (filters.sort === "added") return (b.createdAt ?? "") > (a.createdAt ?? "") ? 1 : -1;
-    if (filters.sort === "comps")
-      return (compMap[b.fragranceId || b.id] ?? 0) - (compMap[a.fragranceId || a.id] ?? 0);
-    return a.name.localeCompare(b.name);
-  });
+  const filtered = useMemo(
+    () => applySort(applyStatus(MF, status), sort, compMap),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fragrances, status, sort, compliments, user.id],
+  );
 
-  async function handleDeleteFrag(frag: UserFragrance) {
+  async function handleDelete(frag: UserFragrance) {
     await removeFrag(frag.id);
     setDetailFrag(null);
-    toast("Fragrance deleted.");
+    toast("Fragrance removed.");
+  }
+
+  function openAdd() {
+    setAddOpen(true);
   }
 
   return (
     <>
-      <FragDetail
+      <FragranceDetailModal
+        frag={detailFrag}
         open={!!detailFrag}
         onClose={() => setDetailFrag(null)}
-        frag={detailFrag}
         communityFrags={communityFrags}
         compliments={MC}
         userId={user.id}
-        onEdit={(frag) => { setEditingFrag(frag); setFormOpen(true); }}
-        onDelete={handleDeleteFrag}
+        onEdit={(frag) => {
+          setDetailFrag(null);
+          setEditingFrag(frag);
+          setFormOpen(true);
+        }}
+        onDelete={handleDelete}
+      />
+      <AddFragranceModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
       />
       <FragForm
         open={formOpen}
-        onClose={() => { setFormOpen(false); setDetailFrag(null); }}
+        onClose={() => {
+          setFormOpen(false);
+          setEditingFrag(null);
+        }}
         editing={editingFrag}
       />
+
       <Topbar title="My Collection" />
-      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
-        {!isLoaded && (
-          <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
-            Loading...
+
+      <main style={{ flex: 1, overflowY: "auto" }}>
+        <div
+          style={{
+            maxWidth: "1200px",
+            margin: "0 auto",
+            padding: "var(--space-8)",
+          }}
+          className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
+        >
+          {/* Page header */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "var(--space-6)",
+            }}
+          >
+            <h1 className="text-page-title">My Collection</h1>
+            <Button variant="primary" onClick={openAdd}>
+              <Plus size={15} aria-hidden="true" />
+              Add Fragrance
+            </Button>
           </div>
-        )}
 
-        {isLoaded && (
-          <>
-            <StatsGrid className="mb-6">
-              <StatBox value={MF.length} label="Total" />
-              <StatBox value={current.length} label="Current" />
-              <StatBox value={avgRatingStr(MF)} label="Avg Rating" />
-            </StatsGrid>
-
-            {/* Search + sort + filter toggle row */}
-            <div className="flex flex-wrap items-center gap-2 mb-3">
-              <input
-                type="text"
-                placeholder="Search name or house..."
-                value={filters.q}
-                onChange={(e) => { setFilters({ q: e.target.value }); setPage(1); }}
-                className="flex-1 min-w-[160px] max-w-[280px] px-3 py-[8px] border border-[var(--b3)] bg-[var(--off)] font-[var(--mono)] text-xs text-[var(--ink)] placeholder:text-[var(--ink3)] focus:outline-none focus:border-[var(--blue)]"
-              />
-              <Dropdown
-                value={filters.sort}
-                onChange={(value) => { setFilters({ sort: value as SortKey }); setPage(1); }}
-                options={[
-                  { label: "Name A–Z", value: "nameAZ" },
-                  { label: "Name Z–A", value: "nameZA" },
-                  { label: "House A–Z", value: "houseAZ" },
-                  { label: "Rating High–Low", value: "ratingHL" },
-                  { label: "Rating Low–High", value: "ratingLH" },
-                  { label: "Recently Added", value: "added" },
-                  { label: "Most Compliments", value: "comps" },
-                ]}
-              />
-              <button
-                onClick={() => setFiltersOpen((o) => !o)}
-                className={`font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[7px] border transition-colors ${filtersOpen ? "border-[var(--blue)] text-[var(--blue)]" : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"}`}
-              >
-                {filtersOpen ? "– FILTERS" : "+ FILTERS"}
-              </button>
-              {filters.accord && (
-                <span className="flex items-center gap-1 font-[var(--mono)] text-xs px-2 py-1 border border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]">
-                  {filters.accord} <button onClick={() => { setFilters({ accord: "" }); setPage(1); }} className="hover:opacity-70 leading-none">×</button>
-                </span>
-              )}
-              {filters.rating !== null && (
-                <span className="flex items-center gap-1 font-[var(--mono)] text-xs px-2 py-1 border border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]">
-                  {filters.rating}+ stars <button onClick={() => { setFilters({ rating: null }); setPage(1); }} className="hover:opacity-70 leading-none">×</button>
-                </span>
-              )}
-              {filters.house && (
-                <span className="flex items-center gap-1 font-[var(--mono)] text-xs px-2 py-1 border border-[var(--blue)] text-[var(--blue)] bg-[var(--blue-tint)]">
-                  {filters.house} <button onClick={() => { setFilters({ house: "" }); setPage(1); }} className="hover:opacity-70 leading-none">×</button>
-                </span>
-              )}
+          {/* Filter/sort toolbar */}
+          <div
+            style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-md)",
+              padding: "var(--space-3) var(--space-4)",
+              display: "flex",
+              gap: "var(--space-3)",
+              flexWrap: "wrap",
+              alignItems: "center",
+              marginBottom: "var(--space-6)",
+            }}
+          >
+            {/* Left: selects */}
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--space-3)",
+                flexWrap: "wrap",
+                flex: 1,
+              }}
+            >
+              <div style={{ width: "200px" }}>
+                <Select
+                  options={STATUS_OPTIONS}
+                  value={status}
+                  onChange={(v) => setParam("status", v)}
+                  placeholder="All Statuses"
+                />
+              </div>
+              <div style={{ width: "180px" }}>
+                <Select
+                  options={SORT_OPTIONS}
+                  value={sort}
+                  onChange={(v) => setParam("sort", v)}
+                  placeholder="Sort by"
+                />
+              </div>
             </div>
 
-            {/* Collapsible filter panel */}
-            {filtersOpen && (
-              <FilterPanel
-                filters={{
-                  accord: filters.accord,
-                  rating: filters.rating,
-                  house: filters.house,
-                  status: filters.status,
-                }}
-                allAccords={allAccords}
-                allHouses={allHouses}
-                statusOptions={STATUS_FILTERS}
-                onFilterChange={setFilters}
-                onPageReset={() => setPage(1)}
-              />
-            )}
+            {/* Right: count + clear */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--space-3)",
+                flexShrink: 0,
+              }}
+            >
+              {isLoaded && (
+                <span className="text-secondary">
+                  {filtered.length} fragrance{filtered.length !== 1 ? "s" : ""}
+                </span>
+              )}
+              {filtersActive && (
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  <X size={13} aria-hidden="true" />
+                  Clear filters
+                </Button>
+              )}
+            </div>
+          </div>
 
-            <SectionHeader
-              title="Fragrances"
-              right={
-                <div className="flex items-center gap-3">
-                  <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                    {filtered.length} {filtered.length === 1 ? "item" : "items"}
-                  </span>
-                  <button
-                    onClick={() => { setEditingFrag(null); setFormOpen(true); }}
-                    className="font-[var(--mono)] text-xs tracking-[0.08em] px-3 py-[7px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-                  >
-                    + Add to Collection
-                  </button>
-                </div>
+          {/* Content */}
+          {!isLoaded ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: "var(--space-4)",
+              }}
+              className="max-sm:grid-cols-1"
+            >
+              {Array.from({ length: 8 }).map((_, i) => (
+                <CardSkeleton key={i} />
+              ))}
+            </div>
+          ) : MF.length === 0 ? (
+            <EmptyState
+              icon={<FlaskConical size={48} />}
+              title="Your collection is empty"
+              description="Start tracking your fragrances."
+              action={
+                <Button variant="primary" onClick={openAdd}>
+                  Add Fragrance
+                </Button>
               }
             />
-
-            {filtered.length === 0 ? (
-              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4 flex items-center gap-3">
-                {MF.length === 0 ? "Your collection is empty." : (
-                  <>
-                    No matches.
-                    <button
-                      onClick={() => { clearAllFilters(); setPage(1); }}
-                      className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-                    >
-                      Clear filters
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : (() => {
-              const pageFrags = pageSize === 0 ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize);
-              return (
-                <>
-                  {/* Desktop table */}
-                  <div className="hidden md:block overflow-x-auto border border-[var(--b2)]">
-                    <table className="w-full min-w-[640px]">
-                      <thead>
-                        <tr className="border-b border-[var(--b2)]">
-                          {["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"].map((h) => (
-                            <th key={h} className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pageFrags.map((f) => (
-                          <FragRow key={f.id} frag={f} communityFrags={communityFrags} compliments={MC} userId={user.id} onClick={(frag) => setDetailFrag(frag)} />
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Mobile cards */}
-                  <div className="md:hidden flex flex-col border border-[var(--b2)]">
-                    {pageFrags.map((f) => {
-                      const comps = compMap[f.fragranceId || f.id] ?? 0;
-                      const cf = getCf(f);
-                      return (
-                        <div key={f.id} onClick={() => setDetailFrag(f)} className="px-4 py-3 border-b border-[var(--b1)] last:border-0 hover:bg-[var(--b1)] cursor-pointer">
-                          <div className="font-[var(--mono)] text-[10px] tracking-[0.08em] uppercase text-[var(--ink3)] mb-0.5">{f.house}</div>
-                          <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">{f.name}</div>
-                          <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                            <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</span>
-                            {f.personalRating ? <span className="font-[var(--mono)] text-xs text-[var(--warm-text)]">{"★".repeat(f.personalRating)}</span> : null}
-                            {comps > 0 ? <span className="font-[var(--mono)] text-xs text-[var(--blue)]">{comps} comp{comps !== 1 ? "s" : ""}</span> : null}
-                            {cf?.fragranceAccords?.[0] ? <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{cf.fragranceAccords.slice(0, 2).join(", ")}</span> : null}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <Pagination total={filtered.length} page={page} pageSize={pageSize} onPage={setPage} onPageSize={setPageSize} />
-                </>
-              );
-            })()}
-          </>
-        )}
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={<SearchX size={48} />}
+              title="No matches"
+              description="Try adjusting your filters."
+              action={
+                <Button variant="ghost" onClick={clearFilters}>
+                  Clear filters
+                </Button>
+              }
+            />
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                gap: "var(--space-4)",
+              }}
+              className="max-sm:grid-cols-1"
+            >
+              {filtered.map((frag) => (
+                <FragranceCard
+                  key={frag.id}
+                  frag={frag}
+                  compCount={compMap[frag.fragranceId ?? frag.id] ?? 0}
+                  onClick={() => setDetailFrag(frag)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
     </>
+  );
+}
+
+// Wrap in Suspense for useSearchParams
+export default function CollectionPage() {
+  return (
+    <Suspense>
+      <CollectionInner />
+    </Suspense>
   );
 }
