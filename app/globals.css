@@ -4,117 +4,225 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   TESKNOTA DESIGN TOKENS — mapped from css/tokens.css
+   All original variable names preserved.
+   shadcn semantic tokens override only where needed.
+   ============================================================ */
+
+:root {
+  /* --- Brand blues --- */
+  --blue: #2B4480;
+  --blue1: #6B9AF2;
+  --blue2: #3A5699;
+  --blue3: #1A2E5C;
+  --blue4: #EEF1F8;
+  --blue5: #D4DCEE;
+
+  /* --- Off-whites / surfaces --- */
+  --off: #F4F2ED;
+  --off2: #EAE7DF;
+  --off3: #DDD9CF;
+
+  /* --- Warm tones --- */
+  --warm: #C8B99A;
+  --warm2: #E6D9C4;
+  --warm3: #F2EBD9;
+  --warm-text: #786545;
+  --warm-hover: #b5a485;
+  --warm-layer: #9A7040;
+  --warm-tint: rgba(200, 185, 154, 0.18);
+
+  /* --- Accents --- */
+  --slate: #5A6E85;    /* original --muted; renamed to avoid shadcn conflict */
+  --rose-tk: #B87068;  /* original --rose; renamed to avoid shadcn conflict */
+  --sage: #5E8A6E;
+  --green: #4a7c59;
+
+  /* --- Ink / text --- */
+  --ink: #1A2030;
+  --ink2: #3D4A60;
+  --ink3: #556070;
+
+  /* --- Blue opacity layers --- */
+  --b1: rgba(43, 68, 128, 0.07);
+  --b2: rgba(43, 68, 128, 0.14);
+  --b3: rgba(43, 68, 128, 0.24);
+
+  /* --- Status colors --- */
+  --s-want: #7A6040;
+  --s-unknown: #9088C0;
+  --s-sold: #B08040;
+  --save-green: rgba(60, 180, 90, 0.85);
+  --save-green-border: rgba(60, 180, 90, 0.4);
+
+  /* --- Heatmap --- */
+  --hm-1: #D5D5D5;
+  --hm-2: #AAAAAA;
+  --hm-3: #777777;
+  --hm-4: #444444;
+
+  /* --- Admin panel (monochrome) --- */
+  --adm-bg: #FAFAFA;
+  --adm-bg2: #F0F0F0;
+  --adm-bg3: #E6E6E6;
+  --adm-fg: #0A0A0A;
+  --adm-fg2: #333333;
+  --adm-fg3: #666666;
+  --adm-fg4: #999999;
+  --adm-border: #D0D0D0;
+  --adm-border2: #E8E8E8;
+  --adm-red: #C0392B;
+  --adm-red-bg: #FDF2F1;
+  --adm-green: #1E8449;
+  --adm-green-bg: #F0FAF4;
+  --adm-blue: #2471A3;
+  --adm-blue-bg: #EBF5FB;
+
+  /* --- Fonts (referenced by next/font/google variables) --- */
+  --serif: var(--font-playfair), Georgia, serif;
+  --script: var(--font-cormorant), Georgia, serif;
+  --mono: var(--font-dm-mono), monospace;
+  --body: var(--font-jost), system-ui, sans-serif;
+
+  /* --- Layout --- */
+  --sw: 216px;
+  --th: 56px;
+
+  /* --- RGB channel tokens (for rgba() with variable alpha) --- */
+  --white-ch: 255, 255, 255;
+  --black-ch: 0, 0, 0;
+  --blue-ch: 43, 68, 128;
+  --blue1-ch: 107, 154, 242;
+  --blue-mid-ch: 74, 111, 165;
+  --blue3-ch: 26, 46, 92;
+  --ink-ch: 26, 32, 48;
+  --near-black-ch: 13, 12, 15;
+  --warm-ch: 200, 185, 154;
+  --warm2-ch: 230, 217, 196;
+  --rose-ch: 184, 112, 104;
+  --sage-ch: 94, 138, 110;
+  --off-ch: 244, 242, 237;
+  --hm-warm-ch: 201, 169, 110;
+
+  /* ============================================================
+     shadcn SEMANTIC TOKENS — mapped to tesknota colors
+     ============================================================ */
+  --background: #F4F2ED;         /* --off */
+  --foreground: #1A2030;         /* --ink */
+  --card: #F4F2ED;               /* --off */
+  --card-foreground: #1A2030;    /* --ink */
+  --popover: #ffffff;
+  --popover-foreground: #1A2030;
+  --primary: #2B4480;            /* --blue */
+  --primary-foreground: #ffffff;
+  --secondary: #F2EBD9;          /* --warm3 */
+  --secondary-foreground: #1A2030;
+  --muted: #EAE7DF;              /* --off2; shadcn surface muted */
+  --muted-foreground: #556070;   /* --ink3 */
+  --accent: #C8B99A;             /* --warm */
+  --accent-foreground: #1A2030;
+  --destructive: #B87068;        /* --rose-tk */
+  --border: #DDD9CF;             /* --off3 */
+  --input: #EAE7DF;              /* --off2 */
+  --ring: #6B9AF2;               /* --blue1 */
+  --radius: 0.5rem;
+
+  /* chart colors */
+  --chart-1: #2B4480;
+  --chart-2: #C8B99A;
+  --chart-3: #5E8A6E;
+  --chart-4: #B87068;
+  --chart-5: #9088C0;
+
+  /* sidebar — dark navy matching existing app */
+  --sidebar: #1A2E5C;               /* --blue3 */
+  --sidebar-foreground: #EEF1F8;    /* --blue4 */
+  --sidebar-primary: #6B9AF2;       /* --blue1 */
+  --sidebar-primary-foreground: #1A2E5C;
+  --sidebar-accent: #2B4480;        /* --blue */
+  --sidebar-accent-foreground: #EEF1F8;
+  --sidebar-border: rgba(43, 68, 128, 0.24); /* --b3 */
+  --sidebar-ring: #6B9AF2;
+}
+
+/* ============================================================
+   TAILWIND v4 THEME — expose tesknota tokens as utilities
+   ============================================================ */
 @theme inline {
+  /* shadcn semantic tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* tesknota brand colors as Tailwind utilities */
+  --color-blue: var(--blue);
+  --color-blue1: var(--blue1);
+  --color-blue2: var(--blue2);
+  --color-blue3: var(--blue3);
+  --color-blue4: var(--blue4);
+  --color-blue5: var(--blue5);
+  --color-off: var(--off);
+  --color-off2: var(--off2);
+  --color-off3: var(--off3);
+  --color-warm: var(--warm);
+  --color-warm2: var(--warm2);
+  --color-warm3: var(--warm3);
+  --color-warm-text: var(--warm-text);
+  --color-slate: var(--slate);
+  --color-rose-tk: var(--rose-tk);
+  --color-sage: var(--sage);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink2);
+  --color-ink3: var(--ink3);
+  --color-green: var(--green);
+  --color-s-want: var(--s-want);
+  --color-s-unknown: var(--s-unknown);
+  --color-s-sold: var(--s-sold);
+
+  /* fonts */
+  --font-sans: var(--body);
+  --font-serif: var(--serif);
+  --font-script: var(--script);
+  --font-mono: var(--mono);
+
+  /* radius */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-}
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* layout */
+  --width-sidebar: var(--sw);
+  --height-topbar: var(--th);
 }
 
 @layer base {
@@ -122,9 +230,6 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
+    @apply bg-background text-foreground font-sans;
   }
 }
