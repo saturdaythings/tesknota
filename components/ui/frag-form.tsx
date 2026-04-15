@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
@@ -217,33 +217,9 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const title = isEdit ? "Edit Fragrance" : "Add Fragrance";
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={title}
-      footer={
-        <div className="flex items-center justify-between w-full">
-          <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">{err}</div>
-          <div className="flex gap-2">
-            {step === 2 && !isEdit && (
-              <button
-                onClick={() => setStep(1)}
-                className="px-4 py-[7px] font-[var(--mono)] text-xs text-[var(--ink3)] border border-[var(--b3)] hover:border-[var(--b4)] transition-colors"
-              >
-                Back
-              </button>
-            )}
-            <button
-              onClick={save}
-              disabled={saving}
-              className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {saving ? "Saving..." : step === 1 ? "Next" : isEdit ? "Update" : "Save Fragrance"}
-            </button>
-          </div>
-        </div>
-      }
-    >
+    <Modal open={open} onClose={onClose}>
+      <ModalHeader title={title} onClose={onClose} />
+      <ModalBody>
       {step === 1 && (
         <div className="space-y-5">
           {/* Search */}
@@ -568,6 +544,29 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
           )}
         </div>
       )}
+      </ModalBody>
+      <ModalFooter>
+        <div className="flex items-center justify-between w-full">
+          <div className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">{err}</div>
+          <div className="flex gap-2">
+            {step === 2 && !isEdit && (
+              <button
+                onClick={() => setStep(1)}
+                className="px-4 py-[7px] font-[var(--mono)] text-xs text-[var(--ink3)] border border-[var(--b3)] hover:border-[var(--b4)] transition-colors"
+              >
+                Back
+              </button>
+            )}
+            <button
+              onClick={save}
+              disabled={saving}
+              className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {saving ? "Saving..." : step === 1 ? "Next" : isEdit ? "Update" : "Save Fragrance"}
+            </button>
+          </div>
+        </div>
+      </ModalFooter>
     </Modal>
   );
 }

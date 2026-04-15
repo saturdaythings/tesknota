@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
 import { StatusBadge } from "@/components/ui/frag-row";
 import { getCommunityData } from "@/lib/data";
@@ -119,61 +119,15 @@ export function FragDetail({
   }
 
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      title={frag.name}
-      subtitle={frag.house || undefined}
-      className="max-w-[600px]"
-      footer={
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
-            {!readOnly && onDelete && !confirmDelete && (
-              <button
-                onClick={handleDelete}
-                className="font-[var(--mono)] text-xs text-[var(--rose-tk)] border border-[var(--rose-tk)] px-3 py-[5px] hover:bg-[var(--rose-tk)] hover:text-white transition-colors"
-              >
-                Delete
-              </button>
-            )}
-            {!readOnly && onDelete && confirmDelete && (
-              <>
-                <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">Remove permanently?</span>
-                <button
-                  onClick={handleDelete}
-                  className="font-[var(--mono)] text-xs bg-[var(--rose-tk)] text-white px-3 py-[5px] hover:opacity-90"
-                >
-                  Confirm
-                </button>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] px-3 py-[5px] hover:border-[var(--b4)]"
-                >
-                  Cancel
-                </button>
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {!readOnly && onEdit && (
-              <button
-                onClick={() => { handleClose(); onEdit(frag!); }}
-                className="px-4 py-[7px] font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-              >
-                Edit
-              </button>
-            )}
-            <button
-              onClick={handleClose}
-              className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      }
-    >
+    <Modal open={open} onClose={handleClose} className="max-w-[600px]">
+      <ModalHeader title={frag.name} onClose={handleClose} />
+      <ModalBody>
       <div className="space-y-5">
+        {frag.house && (
+          <div className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink3)]">
+            {frag.house}
+          </div>
+        )}
         {/* Status + accords header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -303,6 +257,54 @@ export function FragDetail({
           </div>
         )}
       </div>
+      </ModalBody>
+      <ModalFooter>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            {!readOnly && onDelete && !confirmDelete && (
+              <button
+                onClick={handleDelete}
+                className="font-[var(--mono)] text-xs text-[var(--rose-tk)] border border-[var(--rose-tk)] px-3 py-[5px] hover:bg-[var(--rose-tk)] hover:text-white transition-colors"
+              >
+                Delete
+              </button>
+            )}
+            {!readOnly && onDelete && confirmDelete && (
+              <>
+                <span className="font-[var(--mono)] text-xs text-[var(--rose-tk)]">Remove permanently?</span>
+                <button
+                  onClick={handleDelete}
+                  className="font-[var(--mono)] text-xs bg-[var(--rose-tk)] text-white px-3 py-[5px] hover:opacity-90"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] px-3 py-[5px] hover:border-[var(--b4)]"
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {!readOnly && onEdit && (
+              <button
+                onClick={() => { handleClose(); onEdit(frag!); }}
+                className="px-4 py-[7px] font-[var(--mono)] text-xs border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
+              >
+                Edit
+              </button>
+            )}
+            <button
+              onClick={handleClose}
+              className="px-5 py-[7px] font-[var(--mono)] text-xs bg-[var(--blue)] text-white hover:opacity-90"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </ModalFooter>
     </Modal>
   );
 }
