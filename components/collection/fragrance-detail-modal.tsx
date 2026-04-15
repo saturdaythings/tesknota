@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, X } from "lucide-react";
-import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Divider } from "@/components/ui/divider";
 import { Badge } from "@/components/ui/badge";
+import { Divider } from "@/components/ui/divider";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CompForm } from "@/components/ui/comp-form";
 import { useData } from "@/lib/data-context";
-import { MONTHS, getCompCount, parseRating } from "@/lib/frag-utils";
+import { MONTHS } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } from "@/types";
+
+// ── Constants ─────────────────────────────────────────────
 
 const STATUS_OPTIONS = [
   { value: "CURRENT", label: "Current Collection" },
@@ -24,6 +25,14 @@ const STATUS_OPTIONS = [
   { value: "DONT_LIKE", label: "Don't Like" },
   { value: "FINISHED", label: "Finished" },
 ];
+
+const RATING_LABELS: Record<number, string> = {
+  5: "LOVE",
+  4: "REALLY LIKE",
+  3: "LIKE",
+  2: "OKAY",
+  1: "SKIP",
+};
 
 function statusVariant(status: FragranceStatus): React.ComponentProps<typeof Badge>["variant"] {
   switch (status) {
@@ -37,32 +46,42 @@ function statusVariant(status: FragranceStatus): React.ComponentProps<typeof Bad
   }
 }
 
-const normStr = (s: string) =>
-  (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+function concentrationBadge(type: string | null) {
+  if (!type) return null;
+  const short: Record<string, string> = {
+    "Extrait de Parfum": "EXTRAIT DE PARFUM",
+    "Eau de Parfum": "EAU DE PARFUM",
+    "Eau de Toilette": "EAU DE TOILETTE",
+    "Perfume Oil": "OIL",
+    "Cologne": "COLOGNE",
+    "Body Spray": "BODY SPRAY",
+    "Perfume Concentré": "CONCENTRÉ",
+    "Other": "OTHER",
+  };
+  return short[type] ?? type.toUpperCase();
+}
 
-// ── Star Rating ───────────────────────────────────────────
+// ── Star rating (20px for panel) ──────────────────────────
 
 function StarRating({
   value,
   onChange,
+  size = 20,
 }: {
   value: number | null;
   onChange: (v: number) => void;
+  size?: number;
 }) {
   const [hover, setHover] = useState<number | null>(null);
   const filled = hover ?? value ?? 0;
 
   return (
-    <div
-      role="group"
-      aria-label="Personal rating"
-      style={{ display: "flex", gap: "var(--space-1)" }}
-    >
+    <div role="group" aria-label="Personal rating" style={{ display: "flex", gap: "3px" }}>
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
-          aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
+          aria-label={`Rate ${star}`}
           onClick={() => onChange(star)}
           onMouseEnter={() => setHover(star)}
           onMouseLeave={() => setHover(null)}
@@ -71,14 +90,13 @@ function StarRating({
             border: "none",
             cursor: "pointer",
             padding: 0,
-            width: "22px",
-            height: "22px",
-            fontSize: "22px",
+            width: `${size}px`,
+            height: `${size}px`,
+            fontSize: `${size}px`,
             lineHeight: 1,
-            color: filled >= star ? "var(--color-accent)" : "var(--color-border-strong)",
-            transition: "color var(--transition-fast)",
+            color: filled >= star ? "var(--color-accent)" : "var(--color-cream-dark)",
+            transition: "color 120ms",
           }}
-          className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         >
           ★
         </button>
@@ -87,31 +105,51 @@ function StarRating({
   );
 }
 
-// ── Field row ─────────────────────────────────────────────
+// ── Accord tag ────────────────────────────────────────────
 
-function FieldRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null | undefined;
-}) {
+function AccordTag({ label }: { label: string }) {
   return (
-    <div>
-      <div className="text-label" style={{ marginBottom: "2px" }}>
-        {label}
-      </div>
-      <div
-        className={value ? "text-body" : "text-meta"}
-        style={{ color: value ? undefined : "var(--color-text-muted)" }}
-      >
-        {value || "—"}
-      </div>
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "2px 7px",
+        borderRadius: "100px",
+        background: "var(--color-sand-light)",
+        color: "var(--color-navy)",
+        fontFamily: "var(--font-sans)",
+        fontSize: "12px",
+        fontWeight: 400,
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+// ── Section label ─────────────────────────────────────────
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        fontFamily: "var(--font-sans)",
+        fontSize: "11px",
+        fontWeight: 500,
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        color: "var(--color-sand)",
+        marginBottom: "var(--space-2)",
+      }}
+    >
+      {children}
     </div>
   );
 }
 
 // ── Main component ────────────────────────────────────────
+
+const normStr = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
 interface Props {
   frag: UserFragrance | null;
@@ -142,7 +180,20 @@ export function FragranceDetailModal({
   const [notesValue, setNotesValue] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [compFormOpen, setCompFormOpen] = useState(false);
-  const [showAllNotes, setShowAllNotes] = useState(false);
+  const [statusDropOpen, setStatusDropOpen] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Mobile drag-to-dismiss
+  function onTouchStart(e: React.TouchEvent) {
+    setTouchStart(e.touches[0].clientY);
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStart === null) return;
+    const delta = e.changedTouches[0].clientY - touchStart;
+    if (delta > 80) handleClose();
+    setTouchStart(null);
+  }
 
   const cd = useMemo(() => {
     if (!frag) return null;
@@ -161,8 +212,7 @@ export function FragranceDetailModal({
       .filter((c) => c.primaryFragId === key)
       .sort(
         (a, b) =>
-          parseInt(b.year || "0") * 100 +
-          (parseInt(b.month || "0") || 0) -
+          parseInt(b.year || "0") * 100 + (parseInt(b.month || "0") || 0) -
           (parseInt(a.year || "0") * 100 + (parseInt(a.month || "0") || 0)),
       );
   }, [frag, compliments]);
@@ -173,13 +223,32 @@ export function FragranceDetailModal({
   const handleClose = useCallback(() => {
     setConfirmRemove(false);
     setEditingNotes(false);
-    setShowAllNotes(false);
+    setStatusDropOpen(false);
     onClose();
   }, [onClose]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, handleClose]);
+
+  // Prevent body scroll when open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
 
   async function handleStatusChange(status: string) {
     if (!frag) return;
     await editFrag({ ...frag, status: status as FragranceStatus });
+    setStatusDropOpen(false);
   }
 
   async function handleRatingChange(rating: number) {
@@ -200,42 +269,26 @@ export function FragranceDetailModal({
 
   if (!open) return null;
 
-  if (!frag) {
-    return (
-      <Modal open={open} onClose={handleClose}>
-        <ModalHeader title="Fragrance" onClose={handleClose} />
-        <ModalBody>
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-20" />
-            <Skeleton className="h-20" />
-          </div>
-        </ModalBody>
-      </Modal>
-    );
-  }
-
-  const accordsStr = cd?.fragranceAccords?.join(", ") || null;
-  const notesAll = [
-    cd?.topNotes?.length ? `Top: ${cd.topNotes.join(", ")}` : null,
-    cd?.middleNotes?.length ? `Middle: ${cd.middleNotes.join(", ")}` : null,
-    cd?.baseNotes?.length ? `Base: ${cd.baseNotes.join(", ")}` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  const notesDisplay = notesAll || accordsStr;
-
-  const dateAdded = frag.createdAt
+  const dateAdded = frag?.createdAt
     ? (() => {
         const d = new Date(frag.createdAt);
-        return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+        return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
       })()
     : null;
 
-  const purchaseDateStr = [frag.purchaseMonth, frag.purchaseYear]
-    .filter(Boolean)
-    .join(" ") || frag.purchaseDate || null;
+  const purchaseDateStr = frag
+    ? [frag.purchaseMonth, frag.purchaseYear].filter(Boolean).join(" ") || frag.purchaseDate || null
+    : null;
+
+  const accords = cd?.fragranceAccords ?? [];
+  const concLabel = concentrationBadge(frag?.type ?? null);
+
+  const sizeDisplay = frag?.sizes?.length
+    ? frag.sizes.join(", ")
+    : null;
+
+  const rating = frag?.personalRating ?? null;
+  const ratingLabel = rating ? RATING_LABELS[rating] : null;
 
   return (
     <>
@@ -243,340 +296,483 @@ export function FragranceDetailModal({
         open={compFormOpen}
         onClose={() => setCompFormOpen(false)}
         editing={null}
-        prefillFragId={frag.fragranceId ?? frag.id}
+        prefillFragId={frag?.fragranceId ?? frag?.id}
       />
 
-      <Modal open={open} onClose={handleClose} className="max-w-[600px]">
-        {/* Header */}
-        <ModalHeader
-          title={frag.name}
-          onClose={handleClose}
-        />
+      {/* Overlay */}
+      <div
+        onClick={handleClose}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(30, 45, 69, 0.4)",
+          zIndex: 200,
+        }}
+        aria-hidden="true"
+      />
 
-        {/* Sub-header with brand */}
+      {/* Panel */}
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={frag?.name ?? "Fragrance details"}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        style={{
+          position: "fixed",
+          zIndex: 201,
+          background: "var(--color-cream)",
+          display: "flex",
+          flexDirection: "column",
+          // Desktop: right panel
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: "380px",
+          boxShadow: "-4px 0 32px rgba(0,0,0,0.15)",
+          // Mobile overrides via class
+        }}
+        className="max-sm:w-full max-sm:top-auto max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:h-[90vh] max-sm:rounded-t-[12px]"
+      >
+        {/* Mobile drag handle */}
         <div
+          className="sm:hidden"
           style={{
-            padding: "var(--space-2) var(--space-6) 0",
+            display: "flex",
+            justifyContent: "center",
+            padding: "10px 0 4px",
+            flexShrink: 0,
           }}
         >
-          <span className="text-secondary">{frag.house}</span>
+          <div
+            style={{
+              width: "36px",
+              height: "4px",
+              borderRadius: "2px",
+              background: "var(--color-cream-dark)",
+            }}
+          />
         </div>
 
-        <ModalBody>
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
-
-            {/* Section: Status & Ownership */}
-            <section>
-              <p className="text-label" style={{ marginBottom: "var(--space-3)" }}>
-                Status &amp; Ownership
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-                <div>
-                  <div className="text-label" style={{ marginBottom: "var(--space-1)" }}>
-                    Status
-                  </div>
-                  <Select
-                    options={STATUS_OPTIONS}
-                    value={frag.status}
-                    onChange={handleStatusChange}
-                    className="max-w-[240px]"
-                  />
-                </div>
-
-                <div>
-                  <div className="text-label" style={{ marginBottom: "var(--space-2)" }}>
-                    My Rating
-                  </div>
-                  <StarRating
-                    value={frag.personalRating}
-                    onChange={handleRatingChange}
-                  />
-                </div>
-
-                <div
-                  className="grid gap-[var(--space-4)] grid-cols-2 max-sm:grid-cols-1"
-                >
-                  <FieldRow
-                    label="Size Owned"
-                    value={frag.sizes?.length > 0 ? frag.sizes.join(", ") : null}
-                  />
-                  <FieldRow label="Type" value={frag.type} />
-                </div>
-              </div>
-            </section>
-
-            <Divider />
-
-            {/* Section: Fragrance Profile */}
-            <section>
-              <p className="text-label" style={{ marginBottom: "var(--space-3)" }}>
-                Fragrance Profile
-              </p>
-              <div className="grid gap-[var(--space-4)] grid-cols-2 max-sm:grid-cols-1">
-                <FieldRow label="Fragrance Type" value={cd?.fragranceType} />
-                <div>
-                  <div className="text-label" style={{ marginBottom: "2px" }}>
-                    Notes &amp; Accords
-                  </div>
-                  {notesDisplay ? (
-                    <div>
-                      <div
-                        className="text-body"
-                        style={{
-                          overflow: "hidden",
-                          display: "-webkit-box",
-                          WebkitLineClamp: showAllNotes ? undefined : 3,
-                          WebkitBoxOrient: "vertical",
-                        } as React.CSSProperties}
-                      >
-                        {notesDisplay}
-                      </div>
-                      {notesDisplay.length > 120 && (
-                        <button
-                          onClick={() => setShowAllNotes((v) => !v)}
-                          className="text-meta"
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            cursor: "pointer",
-                            color: "var(--color-accent)",
-                            padding: 0,
-                            marginTop: "2px",
-                            fontSize: "var(--text-xs)",
-                          }}
-                        >
-                          {showAllNotes ? "Show less" : "Show more"}
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-meta" style={{ color: "var(--color-text-muted)" }}>
-                      —
-                    </span>
-                  )}
-                </div>
-                <FieldRow
-                  label="Longevity"
-                  value={cd?.communityLongevityLabel || cd?.parfumoLongevity}
-                />
-                <FieldRow
-                  label="Sillage"
-                  value={cd?.communitySillageLabel || cd?.parfumoSillage}
-                />
-                <FieldRow
-                  label="Avg Price"
-                  value={cd?.avgPrice}
-                />
-                <FieldRow
-                  label="Community Rating"
-                  value={
-                    cd?.communityRating
-                      ? parseFloat(cd.communityRating).toFixed(1)
-                      : null
-                  }
-                />
-              </div>
-            </section>
-
-            <Divider />
-
-            {/* Section: My Purchase */}
-            <section>
-              <p className="text-label" style={{ marginBottom: "var(--space-3)" }}>
-                My Purchase
-              </p>
-              <div className="grid gap-[var(--space-4)] grid-cols-2 max-sm:grid-cols-1">
-                <FieldRow label="Purchase Price" value={frag.purchasePrice} />
-                <FieldRow label="Where Bought" value={frag.whereBought} />
-                <FieldRow label="Date Added" value={dateAdded} />
-                {purchaseDateStr && (
-                  <FieldRow label="Purchase Date" value={purchaseDateStr} />
-                )}
-              </div>
-            </section>
-
-            <Divider />
-
-            {/* Section: Personal Notes */}
-            <section>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "var(--space-3)",
-                }}
-              >
-                <p className="text-label">Personal Notes</p>
-                {!editingNotes && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label="Edit notes"
-                    onClick={() => {
-                      setNotesValue(frag.personalNotes ?? "");
-                      setEditingNotes(true);
-                    }}
-                  >
-                    <Pencil size={13} aria-hidden="true" />
-                    Edit
-                  </Button>
-                )}
-              </div>
-
-              {editingNotes ? (
-                <div>
-                  <textarea
-                    value={notesValue}
-                    onChange={(e) => setNotesValue(e.target.value)}
-                    rows={4}
-                    style={{
-                      width: "100%",
-                      padding: "10px 12px",
-                      background: "var(--color-surface)",
-                      border: "1.5px solid var(--color-border)",
-                      borderRadius: "var(--radius-sm)",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "var(--text-base)",
-                      color: "var(--color-text-primary)",
-                      resize: "vertical",
-                      outline: "none",
-                    }}
-                    className="focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)]"
-                    autoFocus
-                  />
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "var(--space-2)",
-                      marginTop: "var(--space-2)",
-                    }}
-                  >
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={handleSaveNotes}
-                      disabled={savingNotes}
-                    >
-                      {savingNotes ? "Saving..." : "Save"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingNotes(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <p
-                  className={frag.personalNotes?.trim() ? "text-body" : "text-meta"}
-                  style={{ color: frag.personalNotes?.trim() ? undefined : "var(--color-text-muted)" }}
-                >
-                  {frag.personalNotes?.trim() || "No notes yet."}
-                </p>
-              )}
-            </section>
-
-            <Divider />
-
-            {/* Section: Compliments */}
-            <section>
-              <p
-                className="text-subheading"
-                style={{ marginBottom: "var(--space-3)" }}
-              >
-                {compCount} total compliment{compCount !== 1 ? "s" : ""}
-              </p>
-
-              {recentCompliments.length > 0 && (
-                <div
+        {/* Panel header */}
+        <div
+          style={{
+            padding: "var(--space-4) var(--space-5)",
+            borderBottom: "1px solid var(--color-cream-dark)",
+            flexShrink: 0,
+          }}
+        >
+          {!frag ? (
+            <Skeleton className="h-6 w-3/4" />
+          ) : (
+            <>
+              {/* Row 1: name + badge + close */}
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-2)", marginBottom: "4px" }}>
+                <h2
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "var(--space-3)",
-                    marginBottom: "var(--space-4)",
+                    fontFamily: "var(--font-serif)",
+                    fontSize: "24px",
+                    fontStyle: "italic",
+                    color: "var(--color-navy)",
+                    fontWeight: 400,
+                    lineHeight: 1.2,
+                    flex: 1,
+                    minWidth: 0,
                   }}
                 >
-                  {recentCompliments.map((c) => (
-                    <div
-                      key={c.id}
-                      style={{
-                        padding: "var(--space-3)",
-                        background: "var(--color-surface-raised)",
-                        borderRadius: "var(--radius-sm)",
-                      }}
-                    >
-                      <div
-                        className="text-secondary"
-                        style={{ marginBottom: "2px" }}
-                      >
-                        {[c.month, c.year].filter(Boolean).join(" ")}
-                        {c.relation && ` · ${c.relation}`}
-                        {c.location && ` · ${c.location}`}
-                      </div>
-                      {c.notes && (
-                        <p className="text-secondary">{c.notes}</p>
-                      )}
+                  {frag.name}
+                </h2>
+                {concLabel && (
+                  <span
+                    style={{
+                      border: "1px solid var(--color-sand)",
+                      color: "var(--color-sand)",
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "10px",
+                      fontWeight: 500,
+                      padding: "2px 6px",
+                      borderRadius: "2px",
+                      textTransform: "uppercase",
+                      flexShrink: 0,
+                      alignSelf: "flex-start",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {concLabel}
+                  </span>
+                )}
+                <button
+                  onClick={handleClose}
+                  aria-label="Close panel"
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--color-sand)",
+                    padding: "2px",
+                    flexShrink: 0,
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Row 2: house */}
+              <div
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--color-sand)",
+                  marginBottom: "8px",
+                }}
+              >
+                {frag.house}
+              </div>
+
+              {/* Row 3: status + change link */}
+              <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", position: "relative" }}>
+                <Badge variant={statusVariant(frag.status)}>
+                  {STATUS_LABELS[frag.status]}
+                </Badge>
+                <button
+                  onClick={() => setStatusDropOpen((v) => !v)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    color: "var(--color-sand)",
+                    padding: 0,
+                  }}
+                >
+                  CHANGE STATUS
+                </button>
+                {statusDropOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 4px)",
+                      left: 0,
+                      zIndex: 10,
+                      width: "200px",
+                    }}
+                  >
+                    <Select
+                      options={STATUS_OPTIONS}
+                      value={frag.status}
+                      onChange={handleStatusChange}
+                    />
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Scrollable body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-4) var(--space-5)" }}>
+          {!frag ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+              <Skeleton className="h-5 w-full" />
+              <Skeleton className="h-5 w-2/3" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+
+              {/* MY RATING */}
+              <section>
+                <SectionLabel>My Rating</SectionLabel>
+                <StarRating value={rating} onChange={handleRatingChange} size={20} />
+                {ratingLabel && (
+                  <div
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "13px",
+                      fontWeight: 400,
+                      color: "var(--color-sand)",
+                      marginTop: "4px",
+                    }}
+                  >
+                    {ratingLabel}
+                  </div>
+                )}
+              </section>
+
+              <Divider style={{ margin: 0 }} />
+
+              {/* SIZE + TYPE */}
+              <section>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
+                  <div>
+                    <SectionLabel>Size Owned</SectionLabel>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 600, color: "var(--color-navy)" }}>
+                      {sizeDisplay ?? "—"}
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <SectionLabel>Type</SectionLabel>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 600, color: "var(--color-navy)" }}>
+                      {frag.type ?? "—"}
+                    </div>
+                  </div>
                 </div>
+              </section>
+
+              <Divider style={{ margin: 0 }} />
+
+              {/* FRAGRANCE PROFILE */}
+              <section>
+                <SectionLabel>Fragrance Profile</SectionLabel>
+
+                {cd?.avgPrice && (
+                  <div style={{ marginBottom: "var(--space-3)" }}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                      Avg Price
+                    </div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "15px", fontWeight: 600, color: "var(--color-navy)" }}>
+                      {cd.avgPrice}
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {(cd?.topNotes?.length || cd?.middleNotes?.length || cd?.baseNotes?.length) ? (
+                  <div style={{ marginBottom: "var(--space-3)" }}>
+                    {[
+                      { label: "TOP", notes: cd?.topNotes },
+                      { label: "HEART", notes: cd?.middleNotes },
+                      { label: "BASE", notes: cd?.baseNotes },
+                    ].map(({ label, notes }) =>
+                      notes?.length ? (
+                        <div key={label} style={{ marginBottom: "var(--space-2)" }}>
+                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", color: "var(--color-sand)" }}>
+                            {label}
+                          </span>
+                          <span style={{ fontFamily: "var(--font-serif)", fontSize: "14px", fontStyle: "italic", color: "var(--color-navy)", marginLeft: "8px" }}>
+                            {notes.join(", ")}
+                          </span>
+                        </div>
+                      ) : null,
+                    )}
+                  </div>
+                ) : null}
+
+                {accords.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                    {accords.map((a) => <AccordTag key={a} label={a} />)}
+                  </div>
+                )}
+              </section>
+
+              <Divider style={{ margin: 0 }} />
+
+              {/* MY PURCHASE */}
+              <section>
+                <SectionLabel>My Purchase</SectionLabel>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
+                  <div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                      Purchase Price
+                    </div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>
+                      {frag.purchasePrice ?? "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                      Where Bought
+                    </div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>
+                      {frag.whereBought ? (
+                        frag.whereBought.startsWith("http") ? (
+                          <a href={frag.whereBought} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
+                            {frag.whereBought}
+                          </a>
+                        ) : (
+                          frag.whereBought
+                        )
+                      ) : "—"}
+                    </div>
+                  </div>
+                </div>
+                {dateAdded && (
+                  <div>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "11px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)" }}>
+                      Added
+                    </span>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-sand)", marginLeft: "8px" }}>
+                      {dateAdded}
+                    </span>
+                  </div>
+                )}
+              </section>
+
+              {/* DUPE INFO */}
+              {frag.isDupe && frag.dupeFor && (
+                <>
+                  <Divider style={{ margin: 0 }} />
+                  <section>
+                    <SectionLabel>Dupe Info</SectionLabel>
+                    <div style={{ fontFamily: "var(--font-serif)", fontSize: "15px", fontStyle: "italic", color: "var(--color-accent)" }}>
+                      Dupe for: {frag.dupeFor}
+                    </div>
+                  </section>
+                </>
               )}
 
-              <div style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    router.push(
-                      `/compliments?fragId=${encodeURIComponent(
-                        frag.fragranceId ?? frag.id,
-                      )}`,
-                    )
-                  }
-                >
-                  View All Compliments
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setCompFormOpen(true)}
-                >
-                  Log New Compliment
-                </Button>
-              </div>
-            </section>
-          </div>
-        </ModalBody>
+              <Divider style={{ margin: 0 }} />
 
-        <ModalFooter>
+              {/* PERSONAL NOTES */}
+              <section>
+                <SectionLabel>Personal Notes</SectionLabel>
+                {editingNotes ? (
+                  <div>
+                    <textarea
+                      value={notesValue}
+                      onChange={(e) => setNotesValue(e.target.value)}
+                      onBlur={handleSaveNotes}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSaveNotes(); } }}
+                      rows={4}
+                      autoFocus
+                      style={{
+                        width: "100%",
+                        padding: "8px 10px",
+                        background: "var(--color-cream)",
+                        border: "1.5px solid var(--color-accent)",
+                        borderRadius: "var(--radius-sm)",
+                        fontFamily: "var(--font-serif)",
+                        fontStyle: "italic",
+                        fontSize: "15px",
+                        color: "var(--color-sand)",
+                        resize: "vertical",
+                        outline: "none",
+                      }}
+                    />
+                    {savingNotes && (
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", marginTop: "4px" }}>
+                        Saving...
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => { setNotesValue(frag.personalNotes ?? ""); setEditingNotes(true); }}
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontStyle: "italic",
+                      fontSize: "15px",
+                      color: "var(--color-sand)",
+                      cursor: "text",
+                      minHeight: "32px",
+                    }}
+                  >
+                    {frag.personalNotes?.trim() || "No personal notes yet."}
+                  </div>
+                )}
+              </section>
+
+              <Divider style={{ margin: 0 }} />
+
+              {/* COMPLIMENTS */}
+              <section>
+                <SectionLabel>
+                  Compliments ({compCount} total)
+                </SectionLabel>
+
+                {compCount === 0 ? (
+                  <div style={{ fontFamily: "var(--font-sans)", fontStyle: "italic", fontSize: "14px", color: "var(--color-sand)" }}>
+                    None logged
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", marginBottom: "var(--space-3)" }}>
+                    {recentCompliments.map((c) => (
+                      <div
+                        key={c.id}
+                        style={{
+                          padding: "8px 10px",
+                          background: "var(--color-cream-dark)",
+                          borderRadius: "var(--radius-sm)",
+                        }}
+                      >
+                        <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)" }}>
+                          {[c.relation, c.gender, c.city ?? c.country].filter(Boolean).join(" · ")}
+                          {(c.month || c.year) && (
+                            <span style={{ color: "var(--color-sand)", marginLeft: "6px" }}>
+                              {[c.month, c.year].filter(Boolean).join(" ")}
+                            </span>
+                          )}
+                        </div>
+                        {c.notes && (
+                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", marginTop: "2px" }}>
+                            {c.notes}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap", marginTop: "var(--space-2)" }}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => router.push(`/compliments?fragId=${encodeURIComponent(frag.fragranceId ?? frag.id)}`)}
+                  >
+                    View All Compliments
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setCompFormOpen(true)}
+                  >
+                    Log New Compliment
+                  </Button>
+                </div>
+              </section>
+
+              {/* bottom padding so footer doesn't cover content */}
+              <div style={{ height: "var(--space-4)" }} />
+            </div>
+          )}
+        </div>
+
+        {/* Sticky footer */}
+        <div
+          style={{
+            padding: "var(--space-3) var(--space-5)",
+            borderTop: "1px solid var(--color-cream-dark)",
+            background: "var(--color-cream)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexShrink: 0,
+          }}
+        >
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => {
-              handleClose();
-              onEdit(frag);
-            }}
+            onClick={() => { handleClose(); if (frag) onEdit(frag); }}
           >
-            Edit Details
+            Edit
           </Button>
 
           {confirmRemove ? (
-            <>
-              <span
-                className="text-secondary"
-                style={{ fontSize: "var(--text-sm)" }}
-              >
+            <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-sand)" }}>
                 Are you sure?
               </span>
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => {
-                  onDelete(frag);
-                  handleClose();
-                }}
+                onClick={() => { if (frag) { onDelete(frag); handleClose(); } }}
               >
                 Yes, Remove
               </Button>
@@ -587,19 +783,18 @@ export function FragranceDetailModal({
               >
                 Cancel
               </Button>
-            </>
+            </div>
           ) : (
             <Button
               variant="danger"
               size="sm"
               onClick={() => setConfirmRemove(true)}
             >
-              <Trash2 size={14} aria-hidden="true" />
               Remove
             </Button>
           )}
-        </ModalFooter>
-      </Modal>
+        </div>
+      </div>
     </>
   );
 }
