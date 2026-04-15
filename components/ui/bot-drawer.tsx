@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
@@ -8,7 +7,6 @@ const AI_WORKER_URL = process.env.NEXT_PUBLIC_AI_WORKER_URL ?? "";
 
 interface BotMessage { role: "bot" | "user"; text: string }
 interface BotButton { label: string; action: () => void }
-
 interface PendingEntry {
   id: string;
   user_id: string;
@@ -34,7 +32,6 @@ export function BotDrawer() {
   const addMsg = useCallback((text: string, role: "bot" | "user") => {
     setMessages((prev) => [...prev, { role, text }]);
   }, []);
-
   const showButtons = useCallback((btns: BotButton[]) => setButtons(btns), []);
   const clearButtons = useCallback(() => setButtons(null), []);
 
@@ -61,8 +58,7 @@ export function BotDrawer() {
     setTimeout(() => inputRef.current?.focus(), 100);
     if (messages.length === 0 && pending.length > 0) {
       addMsg(
-        "Hey — you have " + pending.length + " unfinished entr" +
-        (pending.length === 1 ? "y" : "ies") + ". Want to go through them now?",
+        "Hey — you have " + pending.length + " unfinished entr" + (pending.length === 1 ? "y" : "ies") + ". Want to go through them now?",
         "bot"
       );
       showButtons([
@@ -84,10 +80,9 @@ export function BotDrawer() {
     const missing = entry.missing_fields ?? [];
     addMsg("Let me pull up your oldest entry...", "bot");
     handleMessage(
-      "Resuming incomplete " + (entry.type || "entry") +
-      ". Captured: " + (entry.parsed_json ? JSON.stringify(entry.parsed_json) : "nothing yet") +
-      ". Missing: " + (missing.join(", ") || "unknown") +
-      ". Please ask for the first missing field."
+      "Resuming incomplete " + (entry.type || "entry") + ". Captured: " +
+      (entry.parsed_json ? JSON.stringify(entry.parsed_json) : "nothing yet") +
+      ". Missing: " + (missing.join(", ") || "unknown") + ". Please ask for the first missing field."
     );
   }
 
@@ -96,22 +91,16 @@ export function BotDrawer() {
       addMsg("Bot coming soon — the AI worker hasn't been deployed yet.", "bot");
       return;
     }
-
     if (/https?:\/\/.*(tiktok|youtube|youtu\.be|instagram|vimeo)/i.test(text)) {
       addMsg("I can't watch videos — tell me the fragrance name and I'll look it up right now.", "bot");
       return;
     }
-
     setLoading(true);
     try {
       const res = await fetch(AI_WORKER_URL + "/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user?.id ?? "",
-          userName: user?.name ?? "there",
-          message: text,
-        }),
+        body: JSON.stringify({ userId: user?.id ?? "", userName: user?.name ?? "there", message: text }),
       });
       const data = await res.json();
       addMsg(data.reply || "...", "bot");
@@ -134,15 +123,9 @@ export function BotDrawer() {
           parsed_json: a.payload.parsedJson ?? null,
           missing_fields: a.payload.missingFields ?? [],
         });
-        if (!error) {
-          await loadPending();
-          addMsg("Saved as draft — I'll remind you to finish it later.", "bot");
-        }
+        if (!error) { await loadPending(); addMsg("Saved as draft — I'll remind you to finish it later.", "bot"); }
       } else if (a.type === "completePendingEntry" && a.payload?.id) {
-        await supabase
-          .from("pending_entries")
-          .update({ status: "complete" })
-          .eq("id", a.payload.id);
+        await supabase.from("pending_entries").update({ status: "complete" }).eq("id", a.payload.id);
         await loadPending();
         addMsg("Entry completed.", "bot");
       }
@@ -159,15 +142,12 @@ export function BotDrawer() {
   }
 
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && open) closeDrawer();
-    }
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape" && open) closeDrawer(); }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
   const hasPending = pending.length > 0;
-
   const QUICK_CHIPS = [
     "Add a fragrance",
     "Log a compliment",
@@ -180,63 +160,156 @@ export function BotDrawer() {
       {hasPending && !open && (
         <div
           onClick={openDrawer}
-          className="mx-4 mb-3 flex items-center justify-between cursor-pointer bg-[var(--warm3)] border border-[var(--warm)] px-4 py-2.5 font-[var(--mono)] text-xs text-[var(--ink2)] tracking-[0.04em]"
+          style={{
+            margin: "0 16px 12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            cursor: "pointer",
+            background: "var(--color-sand-light)",
+            border: "1px solid var(--color-cream-dark)",
+            padding: "10px 16px",
+            fontFamily: "var(--font-sans)",
+            fontSize: "12px",
+            color: "var(--color-navy)",
+            letterSpacing: "0.04em",
+          }}
         >
           <span>You have {pending.length} unfinished entr{pending.length === 1 ? "y" : "ies"} — tap to finish</span>
         </div>
       )}
 
+      {/* Trigger button — sits INSIDE the FAB stack via portal or is called externally */}
       <button
         onClick={openDrawer}
         aria-label="Open assistant"
-        className="fixed bottom-[26px] right-[84px] w-11 h-11 rounded-full bg-[var(--warm)] border-none cursor-pointer flex items-center justify-center z-[400] shadow-[0_4px_16px_rgba(var(--warm-ch),0.32)] hover:bg-[var(--warm2)] hover:scale-105 transition-all duration-150"
-        style={{ bottom: "calc(26px + env(safe-area-inset-bottom, 0px))", right: "calc(84px + env(safe-area-inset-right, 0px))" }}
+        style={{
+          position: "fixed",
+          bottom: "calc(26px + env(safe-area-inset-bottom, 0px))",
+          right: "calc(84px + env(safe-area-inset-right, 0px))",
+          width: "44px",
+          height: "44px",
+          borderRadius: "50%",
+          background: "var(--color-sand-light)",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 200,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+          transition: "opacity 150ms",
+          color: "var(--color-navy)",
+        }}
       >
         {loading ? (
-          <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[var(--blue3)] animate-spin"><path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2zm0 2a8 8 0 1 0 0 16A8 8 0 0 0 12 4zm0 2a6 6 0 0 1 0 12A6 6 0 0 1 12 6z" opacity=".3"/><path d="M12 4a8 8 0 0 1 8 8h-2a6 6 0 0 0-6-6V4z"/></svg>
+          <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "var(--color-navy)" }} className="animate-spin">
+            <path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2zm0 2a8 8 0 1 0 0 16A8 8 0 0 0 12 4zm0 2a6 6 0 0 1 0 12A6 6 0 0 1 12 6z" opacity=".3"/>
+            <path d="M12 4a8 8 0 0 1 8 8h-2a6 6 0 0 0-6-6V4z"/>
+          </svg>
         ) : (
-          <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[var(--blue3)]"><path d="M12 2C6.48 2 2 5.92 2 10.75c0 2.61 1.35 4.94 3.47 6.52L4 20l4.13-1.65A10.7 10.7 0 0 0 12 19.5c5.52 0 10-3.92 10-8.75C22 5.92 17.52 2 12 2z"/></svg>
+          <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "var(--color-navy)" }}>
+            <path d="M12 2C6.48 2 2 5.92 2 10.75c0 2.61 1.35 4.94 3.47 6.52L4 20l4.13-1.65A10.7 10.7 0 0 0 12 19.5c5.52 0 10-3.92 10-8.75C22 5.92 17.52 2 12 2z"/>
+          </svg>
         )}
         {hasPending && (
-          <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[var(--rose-tk)] rounded-full animate-pulse" />
+          <span style={{
+            position: "absolute",
+            top: "2px",
+            right: "2px",
+            width: "8px",
+            height: "8px",
+            background: "var(--color-destructive)",
+            borderRadius: "50%",
+          }} className="animate-pulse" />
         )}
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-[rgba(var(--near-black-ch),0.5)] z-[500]" onClick={closeDrawer} />
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(30,45,69,0.5)", zIndex: 500 }}
+          onClick={closeDrawer}
+        />
       )}
 
       <div
-        className={`fixed bottom-0 left-0 right-0 h-[80vh] max-h-[600px] bg-[var(--off)] border-t border-[var(--b2)] z-[501] flex flex-col transition-transform duration-[280ms] ease-out ${open ? "translate-y-0" : "translate-y-full"}`}
         role="dialog"
         aria-modal="true"
         aria-label="AI assistant"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "80vh",
+          maxHeight: "600px",
+          background: "var(--color-cream)",
+          borderTop: "1px solid var(--color-cream-dark)",
+          zIndex: 501,
+          display: "flex",
+          flexDirection: "column",
+          transform: open ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 280ms ease-out",
+        }}
       >
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--b2)] shrink-0">
-          <div className="font-[var(--serif)] text-base italic text-[var(--ink)]">assistant</div>
-          <button onClick={closeDrawer} className="text-xl text-[var(--ink3)] hover:text-[var(--ink)] bg-none border-none cursor-pointer px-2 py-1" aria-label="Close">×</button>
+        {/* Header */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "14px 20px",
+          borderBottom: "1px solid var(--color-cream-dark)",
+          flexShrink: 0,
+        }}>
+          <div style={{ fontFamily: "var(--font-serif)", fontSize: "16px", fontStyle: "italic", color: "var(--color-navy)" }}>
+            assistant
+          </div>
+          <button
+            onClick={closeDrawer}
+            style={{ fontSize: "20px", color: "var(--color-sand)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", lineHeight: 1 }}
+            aria-label="Close"
+          >
+            ×
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-2.5">
+        {/* Messages */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: "10px" }}>
           {messages.map((m, i) => (
             <div
               key={i}
-              className={`max-w-[85%] px-3.5 py-2.5 font-[var(--body)] text-[13px] leading-relaxed ${
-                m.role === "bot"
-                  ? "self-start bg-[var(--off2)] text-[var(--ink)] rounded-[2px_12px_12px_2px]"
-                  : "self-end bg-[var(--blue)] text-white rounded-[12px_2px_2px_12px]"
-              }`}
+              style={{
+                maxWidth: "85%",
+                padding: "10px 14px",
+                fontFamily: "var(--font-sans)",
+                fontSize: "13px",
+                lineHeight: 1.6,
+                alignSelf: m.role === "bot" ? "flex-start" : "flex-end",
+                background: m.role === "bot" ? "var(--color-cream-dark)" : "var(--color-navy)",
+                color: m.role === "bot" ? "var(--color-navy)" : "var(--color-cream)",
+                borderRadius: m.role === "bot" ? "2px 12px 12px 2px" : "12px 2px 2px 12px",
+              }}
             >
               {m.text}
             </div>
           ))}
           {buttons && (
-            <div className="flex flex-wrap gap-2 self-start">
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignSelf: "flex-start" }}>
               {buttons.map((b, i) => (
                 <button
                   key={i}
                   onClick={b.action}
-                  className="bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] font-[var(--mono)] text-xs tracking-[0.06em] px-3.5 py-1.5 cursor-pointer rounded-full hover:bg-[var(--warm3)] hover:border-[var(--warm)] transition-all"
+                  style={{
+                    background: "var(--color-cream-dark)",
+                    border: "1px solid var(--color-sand)",
+                    color: "var(--color-navy)",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "12px",
+                    padding: "6px 14px",
+                    cursor: "pointer",
+                    borderRadius: "100px",
+                    transition: "all 150ms",
+                  }}
                 >
                   {b.label}
                 </button>
@@ -246,13 +319,25 @@ export function BotDrawer() {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Quick chips */}
         {messages.length === 0 && (
-          <div className="flex flex-wrap gap-2 px-5 pb-3">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", padding: "0 20px 12px" }}>
             {QUICK_CHIPS.map((chip) => (
               <button
                 key={chip}
                 onClick={() => { clearButtons(); addMsg(chip, "user"); handleMessage(chip); }}
-                className="bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] font-[var(--mono)] text-xs tracking-[0.06em] px-3.5 py-1.5 cursor-pointer rounded-full hover:bg-[var(--warm3)] hover:border-[var(--warm)] transition-all"
+                style={{
+                  background: "var(--color-cream-dark)",
+                  border: "1px solid var(--color-cream-dark)",
+                  color: "var(--color-navy)",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "12px",
+                  letterSpacing: "0.04em",
+                  padding: "6px 14px",
+                  cursor: "pointer",
+                  borderRadius: "100px",
+                  transition: "all 150ms",
+                }}
               >
                 {chip}
               </button>
@@ -260,19 +345,50 @@ export function BotDrawer() {
           </div>
         )}
 
-        <div className="px-5 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-2 border-t border-[var(--b2)] shrink-0 flex gap-2">
+        {/* Input */}
+        <div style={{
+          padding: "8px 20px",
+          paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
+          borderTop: "1px solid var(--color-cream-dark)",
+          flexShrink: 0,
+          display: "flex",
+          gap: "8px",
+        }}>
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
             placeholder="Ask anything about your fragrances..."
-            className="flex-1 px-3 py-2.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)]"
+            style={{
+              flex: 1,
+              padding: "10px 12px",
+              border: "1px solid var(--color-cream-dark)",
+              background: "var(--color-cream)",
+              fontFamily: "var(--font-sans)",
+              fontSize: "14px",
+              color: "var(--color-navy)",
+              outline: "none",
+              borderRadius: "3px",
+            }}
           />
           <button
             onClick={send}
             disabled={!input.trim() || loading}
-            className="px-4 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.08em] uppercase disabled:opacity-40 hover:bg-[var(--blue2)] transition-colors"
+            style={{
+              padding: "10px 16px",
+              background: "var(--color-navy)",
+              color: "var(--color-cream)",
+              fontFamily: "var(--font-sans)",
+              fontSize: "12px",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              border: "none",
+              cursor: "pointer",
+              borderRadius: "3px",
+              opacity: (!input.trim() || loading) ? 0.4 : 1,
+              transition: "opacity 150ms",
+            }}
           >
             Send
           </button>
