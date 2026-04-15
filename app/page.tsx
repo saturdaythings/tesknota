@@ -1,78 +1,57 @@
-import { AppShell } from "@/components/layout/AppShell";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Topbar } from "@/components/layout/Topbar";
-import { StatsGrid, StatBox } from "@/components/ui/stat-box";
-import { SectionHeader } from "@/components/ui/section-header";
-import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
-import { Button } from "@/components/ui/button";
+"use client";
 
-const navSections = [
-  {
-    label: "My Space",
-    items: [
-      { href: "/dashboard", label: "Dashboard" },
-      { href: "/collection", label: "My Collection", count: 42 },
-      { href: "/wishlist", label: "Wishlist", count: 8 },
-    ],
-  },
-  {
-    label: "Experiences",
-    items: [
-      { href: "/compliments", label: "Compliments", count: 127 },
-      { href: "/analytics", label: "Analytics" },
-    ],
-  },
-  {
-    label: "Social",
-    items: [{ href: "/friend", label: "Sylvia" }],
-  },
-  {
-    label: "Manage",
-    items: [
-      { href: "/import", label: "Import" },
-      { href: "/settings", label: "Settings" },
-    ],
-  },
-];
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser, USERS } from "@/lib/user-context";
 
-export default function Home() {
+export default function IdentityScreen() {
+  const { user, selectUser } = useUser();
+  const router = useRouter();
+
+  // If user is already selected, go straight to dashboard
+  useEffect(() => {
+    if (user) router.replace("/dashboard");
+  }, [user, router]);
+
+  function handleSelect(u: (typeof USERS)[number]) {
+    selectUser(u);
+    router.push("/dashboard");
+  }
+
   return (
-    <AppShell
-      sidebar={
-        <Sidebar
-          navSections={navSections}
-          userName="Kiana"
-        />
-      }
-    >
-      <Topbar
-        category="My Space"
-        title="Dashboard"
-        actions={<Button variant="blue">Add Fragrance</Button>}
-      />
-      <main className="flex-1 overflow-y-auto p-[26px]">
-        <StatsGrid>
-          <StatBox value={42} label="In Collection" />
-          <StatBox value={8} label="Wishlist" />
-          <StatBox value={127} label="Compliments" delta="+12 this month" />
-          <StatBox value={3} label="Finished" />
-        </StatsGrid>
-
-        <SectionHeader
-          title="Top Performers"
-          right={
-            <FilterBar>
-              <FilterChip label="All Time" active />
-              <FilterChip label="This Year" />
-              <FilterChip label="6 Months" />
-            </FilterBar>
-          }
-        />
-
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase">
-          Phase 2 — Component library complete. Feature pages pending.
+    <div className="fixed inset-0 bg-[var(--blue3)] flex flex-col items-center justify-start pt-[30dvh] px-8">
+      {/* Wordmark */}
+      <div className="text-center mb-16">
+        <div className="font-[var(--script)] text-[64px] italic text-[var(--warm2)] tracking-[0.02em] leading-none">
+          tęsknota
         </div>
-      </main>
-    </AppShell>
+        <div className="font-[var(--mono)] text-[11px] tracking-[0.28em] uppercase text-white/70 mt-3">
+          Fragrance Tracker
+        </div>
+        <div className="h-5" />
+        <div className="font-[var(--script)] text-[15px] italic text-[rgba(var(--warm-ch),0.72)] leading-[1.5] tracking-[0.01em]">
+          [ tɛsk-ˈnɔ-ta ] &nbsp;·&nbsp; a deep longing for what is absent or
+          past
+        </div>
+      </div>
+
+      {/* Picker */}
+      <div className="flex flex-col items-center">
+        <div className="font-[var(--body)] text-sm text-white/70 mb-6 tracking-[0.04em] text-center">
+          Who are you?
+        </div>
+        <div className="flex gap-4 flex-col sm:flex-row w-full sm:w-auto">
+          {USERS.map((u) => (
+            <button
+              key={u.id}
+              onClick={() => handleSelect(u)}
+              className="min-w-[160px] min-h-[56px] bg-[rgba(var(--warm-ch),0.15)] border border-[rgba(var(--warm-ch),0.35)] text-[rgba(var(--warm2-ch),0.92)] font-[var(--script)] text-2xl italic px-11 cursor-pointer tracking-[0.04em] transition-all duration-[180ms] hover:bg-[rgba(var(--warm-ch),0.28)] sm:min-w-[160px] w-full sm:w-auto"
+            >
+              {u.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

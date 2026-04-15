@@ -16,9 +16,19 @@ Next.js rewrite of the vanilla JS tesknota app. Reference app: oliver-chase/tesk
 
 ```
 app/
-  layout.tsx          — root layout: fonts, metadata, body wrapper
+  layout.tsx          — root layout: fonts, metadata, UserProvider
   globals.css         — all design tokens + shadcn + Tailwind theme
-  page.tsx            — AppShell preview shell (identity screen — Phase 3)
+  page.tsx            — identity screen: Kiana / Sylvia selector
+  (app)/
+    layout.tsx        — AppShell layout for authenticated routes; redirects to / if no user
+    dashboard/page.tsx
+    collection/page.tsx
+    wishlist/page.tsx
+    compliments/page.tsx
+    analytics/page.tsx
+    friend/page.tsx   — dynamic title from getFriend(user)
+    import/page.tsx
+    settings/page.tsx
 
 components/
   layout/
@@ -35,6 +45,7 @@ components/
 
 lib/
   utils.ts            — shadcn cn() utility
+  user-context.tsx    — UserProvider, useUser, USERS, getFriend; localStorage persistence
   data/               — stub data functions (Phase 4), real calls (Phase 5+)
 
 types/
@@ -109,6 +120,6 @@ No session persistence beyond localStorage selection.
 |-------|--------|
 | 1 — Scaffold + tokens | Complete |
 | 2 — Component library | Complete |
-| 3 — Route shells | Pending |
+| 3 — Route shells | Complete |
 | 4 — TypeScript interfaces + data stubs | Pending |
 | 5+ — Feature port (page by page) | Pending |

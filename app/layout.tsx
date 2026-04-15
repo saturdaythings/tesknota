@@ -6,6 +6,7 @@ import {
   Jost,
 } from "next/font/google";
 import "./globals.css";
+import { UserProvider } from "@/lib/user-context";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -48,7 +49,9 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${cormorant.variable} ${dmMono.variable} ${jost.variable} h-full antialiased`}
     >
-      <body className="h-full overflow-hidden bg-[var(--off)] text-[var(--ink)]">{children}</body>
+      <body className="h-full overflow-hidden bg-[var(--off)] text-[var(--ink)]">
+        <UserProvider>{children}</UserProvider>
+      </body>
     </html>
   );
 }

@@ -13,7 +13,7 @@ New app: oliver-chase/tesknota-fragrance
 |-------|--------|--------|
 | 1 — Scaffold + tokens | Complete | — |
 | 2 — Component library | Complete | — |
-| 3 — Route shells | Pending | — |
+| 3 — Route shells | Complete | — |
 | 4 — TypeScript interfaces + data stubs | Pending | — |
 | 5a — Dashboard | Pending | — |
 | 5b — Collection | Pending | — |
@@ -63,6 +63,26 @@ New app: oliver-chase/tesknota-fragrance
 - Modal uses custom focus trap (not @base-ui/react/dialog) — avoids portal/hydration issues with static export.
 - `fieldClass`/`textareaClass` exported as strings (not components) — input elements vary too much per use case; let feature code compose them into `<input className={fieldClass} />`.
 - Sidebar uses Next.js `usePathname()` for active link state — works with App Router static export.
+
+---
+
+## Phase 3 — Route Shells (Complete)
+
+**What was done:**
+- `lib/user-context.tsx` — UserProvider (localStorage persistence, `isLoaded` flag to distinguish not-yet-hydrated from no-user), `useUser` hook, `USERS` constant, `getFriend` helper
+- `app/layout.tsx` — wrapped body in `<UserProvider>`
+- `app/page.tsx` — identity screen: dark navy full-bleed, tęsknota wordmark, Kiana/Sylvia buttons; redirects to `/dashboard` if user already stored
+- `app/(app)/layout.tsx` — route group layout: reads user from context, redirects to `/` if no user after hydration, wraps all authenticated routes in AppShell + Sidebar with correct nav sections (friend name is dynamic)
+- Route shells (all use AppShell via group layout + Topbar with correct category/title):
+  - `/dashboard`, `/collection`, `/wishlist`, `/compliments`, `/analytics`
+  - `/friend` — client component, title is `{friend.name}'s Profile`
+  - `/import`, `/settings`
+
+**Decisions:**
+- `isLoaded` flag on UserProvider prevents flash of redirect before localStorage is read on mount.
+- Route group `(app)/` shares the AppShell layout without affecting URL structure.
+- Page shells are server components except `/friend` (needs user context for dynamic title).
+- Friend name in sidebar nav is computed at layout render time from `getFriend(user)`.
 
 ---
 
