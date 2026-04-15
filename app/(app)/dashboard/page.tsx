@@ -160,6 +160,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
 // ── DQ Banner ────────────────────────────────────────────
 
 function DQBanner({ frags }: { frags: UserFragrance[] }) {
+  const router = useRouter();
   const [dismissed, setDismissed] = useState(false);
   if (dismissed || !frags.length) return null;
 
@@ -169,18 +170,21 @@ function DQBanner({ frags }: { frags: UserFragrance[] }) {
 
   if (!incomplete) return null;
 
-  const topField = missingRating >= missingNotes ? "rating" : "notes";
+  const topField = missingRating >= missingNotes ? "rating" : "personal notes";
 
   return (
     <div className="flex items-center justify-between bg-[var(--warm3)] border border-[var(--warm2)] px-4 py-[10px] mb-5 text-sm">
-      <span className="font-[var(--body)] text-[var(--warm-text)]">
-        {incomplete} {incomplete === 1 ? "fragrance is" : "fragrances are"} missing {topField} &mdash; add it to improve your insights.
-      </span>
+      <button
+        onClick={() => router.push("/collection")}
+        className="font-[var(--body)] text-[var(--warm-text)] text-left hover:underline"
+      >
+        {incomplete} {incomplete === 1 ? "fragrance is" : "fragrances are"} missing {topField} &mdash; add it to improve your insights &rarr;
+      </button>
       <button
         onClick={() => setDismissed(true)}
         className="font-[var(--mono)] text-xs text-[var(--ink3)] hover:text-[var(--ink)] ml-4 shrink-0"
       >
-        Dismiss
+        ×
       </button>
     </div>
   );

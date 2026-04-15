@@ -1,7 +1,18 @@
 "use client";
 
 import { MONTHS, starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
-import { STATUS_LABELS } from "@/types";
+import { STATUS_LABELS, type FragranceType } from "@/types";
+
+const TYPE_ABBR: Record<FragranceType, string> = {
+  "Extrait de Parfum":  "Extrait",
+  "Eau de Parfum":      "EDP",
+  "Eau de Toilette":    "EDT",
+  "Cologne":            "EDC",
+  "Perfume Concentré":  "Concentré",
+  "Body Spray":         "Spray",
+  "Perfume Oil":        "Oil",
+  "Other":              "",
+};
 import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } from "@/types";
 
 // Status badge: colored pill with per-status color token
@@ -61,12 +72,17 @@ export function FragRow({
         <div className="font-[var(--body)] text-sm text-[var(--ink)]">
           {frag.name}
           {frag.isDupe && (
-            <span className="ml-2 text-xs bg-[var(--ink3)] text-[var(--off)] px-[4px] py-[1px] align-middle tracking-[0.04em]">
-              DUPE
+            <span className="ml-2 font-[var(--mono)] text-[10px] tracking-[0.06em] text-[var(--ink3)] uppercase align-middle">
+              dupe
             </span>
           )}
         </div>
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{frag.house}</div>
+        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+          {frag.house}
+          {frag.type && TYPE_ABBR[frag.type] && (
+            <span className="ml-[6px] text-[var(--ink4)]">· {TYPE_ABBR[frag.type]}</span>
+          )}
+        </div>
       </td>
       <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">
         {(frag.sizes ?? []).join(", ") || "\u2014"}
