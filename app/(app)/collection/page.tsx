@@ -80,6 +80,7 @@ export default function CollectionPage() {
   const compMap: Record<string, number> = {};
   MC.forEach((c) => {
     if (c.primaryFragId) compMap[c.primaryFragId] = (compMap[c.primaryFragId] ?? 0) + 1;
+    if (c.secondaryFragId) compMap[c.secondaryFragId] = (compMap[c.secondaryFragId] ?? 0) + 1;
   });
 
   let filtered = MF;
