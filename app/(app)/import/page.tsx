@@ -362,7 +362,6 @@ async function runImport(
 
 interface UploadZoneProps {
   onFile: (file: File) => void;
-  onError: () => void;
 }
 
 function UploadZone({ onFile }: UploadZoneProps) {
@@ -375,60 +374,58 @@ function UploadZone({ onFile }: UploadZoneProps) {
   }
 
   return (
-    <div
-      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={(e) => {
-        e.preventDefault();
-        setDragging(false);
-        handleFiles(e.dataTransfer.files);
-      }}
+    <Card
+      padding="var(--space-8)"
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "var(--space-4)",
-        padding: "var(--space-8)",
         border: `2px dashed ${dragging ? "var(--color-accent)" : "var(--color-border)"}`,
-        borderRadius: "var(--radius-lg)",
         background: dragging ? "var(--color-accent-subtle)" : "var(--color-bg)",
+        boxShadow: "none",
         transition: "border-color var(--transition-base), background var(--transition-base)",
         cursor: "pointer",
-        textAlign: "center",
       }}
+      className="text-center"
       onClick={() => fileRef.current?.click()}
     >
-      <Upload
-        size={40}
-        aria-hidden="true"
-        style={{ color: "var(--color-text-muted)" }}
-      />
-      <div>
-        <div className="text-subheading" style={{ marginBottom: "var(--space-1)" }}>
-          Drop your file here
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "var(--space-4)",
+        }}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          handleFiles(e.dataTransfer.files);
+        }}
+      >
+        <Upload size={40} aria-hidden="true" style={{ color: "var(--color-text-muted)" }} />
+        <div>
+          <div className="text-subheading" style={{ marginBottom: "var(--space-1)" }}>
+            Drop your file here
+          </div>
+          <div className="text-secondary">or</div>
         </div>
-        <div className="text-secondary">or</div>
+        <Button
+          variant="secondary"
+          onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}
+        >
+          Browse Files
+        </Button>
+        <span className="text-meta" style={{ color: "var(--color-text-muted)" }}>
+          Supports .xlsx and .csv files
+        </span>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".xlsx,.csv"
+          style={{ display: "none" }}
+          onChange={(e) => handleFiles(e.target.files)}
+        />
       </div>
-      <Button
-        variant="secondary"
-        onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}
-      >
-        Browse Files
-      </Button>
-      <span
-        className="text-meta"
-        style={{ color: "var(--color-text-muted)" }}
-      >
-        Supports .xlsx and .csv files
-      </span>
-      <input
-        ref={fileRef}
-        type="file"
-        accept=".xlsx,.csv,.xls"
-        style={{ display: "none" }}
-        onChange={(e) => handleFiles(e.target.files)}
-      />
-    </div>
+    </Card>
   );
 }
 
@@ -572,7 +569,7 @@ function PreviewCard({ rows, totalRows, onBack, onImport }: PreviewCardProps) {
         </table>
       </div>
       <p className="text-secondary" style={{ marginBottom: "var(--space-4)" }}>
-        {validCount} of {totalRows} row{totalRows !== 1 ? "s" : ""} will be imported
+        {validCount} row{validCount !== 1 ? "s" : ""} will be imported
         {totalRows > 5 ? ` (showing first 5 of ${totalRows})` : ""}
       </p>
       <div style={{ display: "flex", gap: "var(--space-3)" }}>
@@ -824,7 +821,7 @@ export default function ImportPage() {
 
           {/* States */}
           {state === "idle" && (
-            <UploadZone onFile={handleFile} onError={() => setState("error")} />
+            <UploadZone onFile={handleFile} />
           )}
 
           {state === "mapping" && (
