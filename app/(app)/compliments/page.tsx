@@ -91,7 +91,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {/* Column 1: Fragrance — fixed width keeps visual gap to col 2 consistent at all viewports */}
-      <div style={{ flex: '0 1 220px', minWidth: 0 }}>
+      <div style={{ width: '220px', flexShrink: 0 }}>
         <FragranceCell
           name={fragName}
           house={fragHouse}
@@ -112,7 +112,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         )}
         {comp.notes && (
           <div
-            className="font-serif italic line-clamp-2"
+            className="font-serif italic"
             style={{ fontSize: 'var(--text-note)', color: 'var(--color-notes-text)', lineHeight: 1.6 }}
           >
             {comp.notes}
