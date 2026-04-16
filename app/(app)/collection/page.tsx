@@ -526,7 +526,7 @@ function CollectionInner() {
                   fontWeight: 500,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: filtersOpen ? "var(--color-navy)" : "var(--color-sand)",
+                  color: filtersOpen ? "var(--color-navy)" : "var(--color-navy)",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -709,7 +709,7 @@ function CollectionInner() {
                             fontFamily: "var(--font-sans)",
                             fontSize: "12px",
                             fontWeight: 500,
-                            color: "var(--color-sand)",
+                            color: "var(--color-navy)",
                             letterSpacing: "0.1em",
                             textTransform: "uppercase",
                             textAlign: "left",
@@ -826,7 +826,7 @@ function CollectionInner() {
 
                           {/* ADDED */}
                           <td style={{ padding: "0 16px", width: "100px" }}>
-                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 400, color: "var(--color-sand)" }}>
+                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 400, color: "var(--color-navy)" }}>
                               {added || "—"}
                             </span>
                           </td>

@@ -89,7 +89,7 @@ export default function DashboardPage() {
         {!isLoaded && (
           <div
             className="text-xs tracking-[0.12em] py-6"
-            style={{ fontFamily: "var(--font-sans)", color: "var(--color-sand)" }}
+            style={{ fontFamily: "var(--font-sans)", color: "var(--color-navy)" }}
           >
             Loading...
           </div>
@@ -179,7 +179,7 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
           fontFamily: "var(--font-sans)",
           fontWeight: 500,
           fontSize: "12px",
-          color: "var(--color-sand)",
+          color: "var(--color-navy)",
           textTransform: "uppercase",
           letterSpacing: "0.12em",
           marginBottom: "8px",
@@ -206,7 +206,7 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
             fontFamily: "var(--font-sans)",
             fontWeight: 400,
             fontSize: "13px",
-            color: "var(--color-sand)",
+            color: "var(--color-navy)",
           }}
         >
           {delta}
@@ -492,7 +492,7 @@ function ScentSignature({
             fontFamily: "var(--font-sans)",
             fontWeight: 500,
             fontSize: "12px",
-            color: "var(--color-sand)",
+            color: "var(--color-navy)",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
           }}
@@ -505,7 +505,7 @@ function ScentSignature({
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "13px",
-            color: "var(--color-sand)",
+            color: "var(--color-navy)",
             paddingTop: "8px",
           }}
         >
@@ -664,7 +664,7 @@ function ActivityCard({
           fontFamily: "var(--font-sans)",
           fontWeight: 500,
           fontSize: "12px",
-          color: "var(--color-sand)",
+          color: "var(--color-navy)",
           textTransform: "uppercase",
           letterSpacing: "0.12em",
           marginBottom: "8px",
@@ -688,7 +688,7 @@ function ActivityCard({
           fontFamily: "var(--font-sans)",
           fontWeight: 400,
           fontSize: "13px",
-          color: "var(--color-sand)",
+          color: "var(--color-navy)",
         }}
       >
         {sub}
@@ -746,7 +746,7 @@ function RecentPurchases({
             fontFamily: "var(--font-sans)",
             fontWeight: 500,
             fontSize: "12px",
-            color: "var(--color-sand)",
+            color: "var(--color-navy)",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
             textDecoration: "none",
@@ -762,7 +762,7 @@ function RecentPurchases({
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "13px",
-            color: "var(--color-sand)",
+            color: "var(--color-navy)",
             paddingTop: "8px",
           }}
         >
@@ -791,7 +791,7 @@ function RecentPurchases({
                         fontSize: "12px",
                         textTransform: "uppercase",
                         letterSpacing: "0.08em",
-                        color: "var(--color-sand)",
+                        color: "var(--color-navy)",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -861,7 +861,7 @@ function PurchaseRow({
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "12px",
-            color: "var(--color-sand)",
+            color: "var(--color-navy)",
             marginTop: "1px",
           }}
         >
@@ -873,7 +873,7 @@ function PurchaseRow({
           padding: "12px 16px",
           fontFamily: "var(--font-sans)",
           fontSize: "12px",
-          color: "var(--color-sand)",
+          color: "var(--color-navy)",
           whiteSpace: "nowrap",
         }}
       >
@@ -895,7 +895,7 @@ function PurchaseRow({
           padding: "12px 16px",
           fontFamily: "var(--font-sans)",
           fontSize: "12px",
-          color: "var(--color-sand)",
+          color: "var(--color-navy)",
           whiteSpace: "nowrap",
         }}
       >
@@ -906,7 +906,7 @@ function PurchaseRow({
           padding: "12px 16px",
           fontFamily: "var(--font-sans)",
           fontSize: "12px",
-          color: "var(--color-sand)",
+          color: "var(--color-navy)",
         }}
       >
         {accords}
@@ -916,7 +916,7 @@ function PurchaseRow({
           padding: "12px 16px",
           fontFamily: "var(--font-sans)",
           fontSize: "12px",
-          color: compCount > 0 ? "var(--color-navy)" : "var(--color-sand)",
+          color: compCount > 0 ? "var(--color-navy)" : "var(--color-cream-dark)",
           whiteSpace: "nowrap",
         }}
       >

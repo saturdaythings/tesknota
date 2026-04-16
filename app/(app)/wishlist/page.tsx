@@ -354,12 +354,12 @@ function WishlistMobileCard({
             {frag.name}
           </span>
           {concLabel && (
-            <span style={{ border: "1px solid var(--color-sand)", color: "var(--color-sand)", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", flexShrink: 0 }}>
+            <span style={{ border: "1px solid var(--color-navy)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", flexShrink: 0 }}>
               {concLabel}
             </span>
           )}
         </div>
-        <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
           {frag.house}
         </div>
         {cf?.avgPrice && (
@@ -643,7 +643,7 @@ function WishlistInner() {
 
           {/* Result count */}
           {isLoaded && (
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "var(--space-4)" }}>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-navy)", marginBottom: "var(--space-4)" }}>
               {filtered.length} Items
             </div>
           )}
@@ -655,7 +655,7 @@ function WishlistInner() {
                 <thead>
                   <tr style={{ background: "var(--color-cream-dark)", height: "40px" }}>
                     {["FRAGRANCE", "ADDED", "AVG PRICE", "ACCORDS", ""].map((h) => (
-                      <th key={h} style={{ padding: "0 16px", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, color: "var(--color-sand)", letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "left" }}>
+                      <th key={h} style={{ padding: "0 16px", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, color: "var(--color-navy)", letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "left" }}>
                         {h}
                       </th>
                     ))}
@@ -708,7 +708,7 @@ function WishlistInner() {
                             fontFamily: "var(--font-sans)",
                             fontSize: "12px",
                             fontWeight: 500,
-                            color: "var(--color-sand)",
+                            color: "var(--color-navy)",
                             letterSpacing: "0.1em",
                             textTransform: "uppercase",
                             textAlign: "left",

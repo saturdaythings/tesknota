@@ -198,7 +198,7 @@ function ChartEmpty({ icon, title, height }: {
         alignItems: "center",
         justifyContent: "center",
         gap: "8px",
-        color: "var(--color-sand)",
+        color: "var(--color-navy)",
       }}
     >
       {icon}
@@ -220,7 +220,7 @@ function RankedRow({ rank, name, sub, count, maxCount, unit }: {
   const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
   return (
     <div style={{ display: "flex", alignItems: "center", height: 44 }}>
-      <span style={{ width: 24, flexShrink: 0, fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", fontWeight: 500 }}>
+      <span style={{ width: 24, flexShrink: 0, fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)", fontWeight: 500 }}>
         {rank}
       </span>
       <div style={{ display: "flex", flexDirection: "column", width: 140, flexShrink: 0, minWidth: 0, overflow: "hidden" }}>
@@ -228,7 +228,7 @@ function RankedRow({ rank, name, sub, count, maxCount, unit }: {
           {name}
         </span>
         {sub && (
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {sub}
           </span>
         )}
@@ -236,7 +236,7 @@ function RankedRow({ rank, name, sub, count, maxCount, unit }: {
       <div style={{ flex: 1, height: 4, background: "var(--color-cream-dark)", borderRadius: "9999px", margin: "0 16px", overflow: "hidden" }}>
         <div style={{ height: "100%", width: `${pct}%`, background: "var(--color-accent)", borderRadius: "9999px" }} />
       </div>
-      <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>
+      <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)" }}>
         {count} {unit}
       </span>
     </div>
@@ -266,7 +266,7 @@ function ChartCard({ title, sub, children, wide }: {
           {title}
         </div>
         {sub && (
-          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)" }}>
             {sub}
           </div>
         )}
@@ -281,13 +281,13 @@ function ChartCard({ title, sub, children, wide }: {
 function StatCard({ label, value, delta }: { label: string; value: string | number; delta?: string }) {
   return (
     <div style={{ background: "#FFFFFF", border: "1px solid var(--color-cream-dark)", borderRadius: "6px", padding: "24px 24px 20px" }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "12px", color: "var(--color-sand)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "8px" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "12px", color: "var(--color-navy)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "8px" }}>
         {label}
       </div>
       <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "48px", lineHeight: 1, color: "var(--color-navy)", marginBottom: "8px" }}>
         {value}
       </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "13px", color: "var(--color-sand)", minHeight: "20px" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "13px", color: "var(--color-navy)", minHeight: "20px" }}>
         {delta ?? ""}
       </div>
     </div>
@@ -310,7 +310,7 @@ function TimePill({ label, active, onClick }: { label: string; active: boolean; 
         borderRadius: "2px",
         border: active ? "1px solid var(--color-navy)" : "1px solid var(--color-cream-dark)",
         background: active ? "var(--color-navy)" : "transparent",
-        color: active ? "var(--color-cream)" : "var(--color-sand)",
+        color: active ? "var(--color-cream)" : "var(--color-navy)",
         cursor: "pointer",
         transition: "all 120ms",
         whiteSpace: "nowrap",
@@ -512,7 +512,7 @@ export default function AnalyticsPage() {
                 borderRadius: "2px",
                 border: showFriend ? "1px solid var(--color-accent)" : "1px solid var(--color-cream-dark)",
                 background: showFriend ? "var(--color-accent)" : "transparent",
-                color: showFriend ? "var(--color-cream)" : "var(--color-sand)",
+                color: showFriend ? "var(--color-cream)" : "var(--color-navy)",
                 cursor: "pointer",
                 transition: "all 120ms",
                 marginLeft: "auto",
@@ -542,8 +542,8 @@ export default function AnalyticsPage() {
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={growthData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                   <CartesianGrid horizontal vertical={false} stroke="var(--color-cream-dark)" strokeDasharray="4 4" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--color-sand)" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "var(--color-sand)" }} axisLine={false} tickLine={false} width={28} />
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} width={28} />
                   <Tooltip content={<GrowthTooltip />} />
                   <Area type="monotone" dataKey="count" fill="rgba(45,74,107,0.08)" stroke="var(--color-accent)" strokeWidth={2} dot={{ r: 3, fill: "var(--color-accent)" }} />
                 </AreaChart>
@@ -561,8 +561,8 @@ export default function AnalyticsPage() {
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={complimentsMonthly} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                   <CartesianGrid horizontal vertical={false} stroke="var(--color-cream-dark)" strokeDasharray="4 4" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--color-sand)" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "var(--color-sand)" }} axisLine={false} tickLine={false} width={28} />
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} width={28} />
                   <Tooltip content={<BarsTooltip unit="compliments" />} />
                   <Bar dataKey="count" fill="var(--color-accent)" radius={[3, 3, 0, 0]} />
                 </BarChart>
@@ -608,8 +608,8 @@ export default function AnalyticsPage() {
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={ratingData} layout="vertical" margin={{ top: 0, right: 4, bottom: 0, left: 0 }}>
                   <CartesianGrid horizontal={false} vertical stroke="var(--color-cream-dark)" strokeDasharray="4 4" />
-                  <XAxis type="number" tick={{ fontSize: 11, fill: "var(--color-sand)" }} axisLine={false} tickLine={false} />
-                  <YAxis type="category" dataKey="star" tick={{ fontSize: 11, fill: "var(--color-sand)" }} axisLine={false} tickLine={false} width={36} />
+                  <XAxis type="number" tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="star" tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} width={36} />
                   <Tooltip content={<RatingTooltip />} />
                   <Bar dataKey="count" fill="var(--color-accent)" radius={[0, 3, 3, 0]} />
                 </BarChart>

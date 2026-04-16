@@ -48,7 +48,7 @@ export function FragranceRowEditorial({
           {secondary && (
             <span
               className="font-serif italic"
-              style={{ fontSize: '14px', color: 'rgba(30,45,69,0.7)' }}
+              style={{ fontSize: '14px', color: 'var(--color-navy-mid)' }}
             >
               + {secondary}
             </span>
@@ -59,7 +59,7 @@ export function FragranceRowEditorial({
         {house && (
           <div
             className="font-sans uppercase tracking-[0.1em] mb-1"
-            style={{ fontSize: '12px', color: 'var(--color-navy)' }}
+            style={{ fontSize: '12px', color: 'var(--color-navy)', letterSpacing: '0.06em' }}
           >
             {house}
           </div>
@@ -69,7 +69,7 @@ export function FragranceRowEditorial({
         {meta && (
           <div
             className="font-sans mb-1"
-            style={{ fontSize: '12px', color: 'rgba(30,45,69,0.65)' }}
+            style={{ fontSize: '12px', color: 'var(--color-navy-mid)', letterSpacing: '0.02em' }}
           >
             {meta}
           </div>
@@ -79,7 +79,7 @@ export function FragranceRowEditorial({
         {notes && (
           <div
             className="font-serif italic"
-            style={{ fontSize: '15px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}
+            style={{ fontSize: '15px', color: 'var(--color-navy-mid)', lineHeight: 1.6 }}
           >
             {notes}
           </div>
@@ -91,7 +91,7 @@ export function FragranceRowEditorial({
         {date && (
           <div
             className="font-sans flex-shrink-0 text-right"
-            style={{ fontSize: '14px', color: 'rgba(30,45,69,0.7)', minWidth: '72px' }}
+            style={{ fontSize: '14px', color: 'var(--color-navy-mid)', minWidth: '72px' }}
           >
             {date}
           </div>
