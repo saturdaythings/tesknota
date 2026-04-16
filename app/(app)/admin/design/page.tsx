@@ -148,9 +148,12 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
 // ── Token editor ───────────────────────────────────────────
 
 function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: () => void }) {
-  const [committedValue] = useState(() =>
-    getComputedStyle(document.documentElement).getPropertyValue(tokenName).trim()
-  );
+  const [committedValue] = useState(() => {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(tokenName).trim();
+    // Strip accidental "tokenName: " prefix if a prior corrupted publish baked it into the inline style
+    const colonPrefix = tokenName + ':';
+    return raw.startsWith(colonPrefix) ? raw.slice(colonPrefix.length).trim() : raw;
+  });
   const [draft, setDraft] = useState(committedValue);
   const [publishedValue, setPublishedValue] = useState(committedValue);
   const publishedRef = useRef(committedValue);

@@ -70,7 +70,7 @@ function patchToken(css, tokenName, newValue) {
     'm'
   );
   if (!pattern.test(css)) return null;
-  return css.replace(pattern, (_, prefix, _old, suffix) => `${prefix}${newValue}${suffix}`);
+  return css.replace(pattern, (_, prefix, _old, suffix) => `${prefix}${newValue.trim()}${suffix}`);
 }
 
 export async function onRequestOptions({ request, env }) {
