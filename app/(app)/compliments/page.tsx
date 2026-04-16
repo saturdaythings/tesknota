@@ -228,9 +228,29 @@ function ComplimentsInner() {
       <Topbar
         title="Compliments"
         actions={
-          <Button variant="secondary" size="sm" onClick={() => setAddFragOpen(true)}>
-            Find Fragrances
-          </Button>
+          <div
+            onClick={() => setAddFragOpen(true)}
+            className="relative flex items-center cursor-pointer"
+            style={{ width: '200px' }}
+          >
+            <Search
+              size={15}
+              className="absolute left-3 pointer-events-none"
+              style={{ color: 'rgba(30,45,69,0.8)' }}
+            />
+            <div
+              className="w-full h-9 pl-9 pr-3 flex items-center rounded-[2px] font-sans"
+              style={{
+                fontSize: '12px',
+                letterSpacing: '0.08em',
+                background: 'var(--color-cream)',
+                border: '1px solid rgba(30,45,69,0.8)',
+                color: 'rgba(30,45,69,0.8)',
+              }}
+            >
+              Find fragrances...
+            </div>
+          </div>
         }
         search={
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
