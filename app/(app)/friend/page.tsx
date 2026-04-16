@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
+import { FragSearch } from "@/components/ui/frag-search";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
@@ -75,7 +76,7 @@ export default function FriendPage() {
         userId={friend.id}
         readOnly
       />
-      <Topbar title={`${friendName}'s Profile`} />
+      <Topbar title={`${friendName}'s Profile`} actions={<FragSearch />} />
       <PageContent>
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">

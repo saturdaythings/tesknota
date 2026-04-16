@@ -23,6 +23,7 @@ import {
   MONTHS,
 } from "@/lib/frag-utils";
 import { Plus, MessageCircle, Upload, Flag } from "@/components/ui/Icons";
+import { FragSearch } from "@/components/ui/frag-search";
 
 const COLLECTION_STATUSES = new Set(["CURRENT", "PREVIOUSLY_OWNED", "FINISHED"]);
 const WISHLIST_STATUSES = new Set(["WANT_TO_BUY", "WANT_TO_SMELL", "WANT_TO_IDENTIFY"]);
@@ -82,7 +83,7 @@ export default function DashboardPage() {
         open={compFormOpen}
         onClose={() => setCompFormOpen(false)}
       />
-      <Topbar title="Dashboard" />
+      <Topbar title="Dashboard" actions={<FragSearch />} />
       <PageContent>
         {!isLoaded && (
           <div

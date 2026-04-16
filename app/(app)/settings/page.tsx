@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
+import { FragSearch } from "@/components/ui/frag-search";
 import { SectionHeader } from "@/components/ui/section-header";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
@@ -53,7 +54,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <Topbar title="Settings" />
+      <Topbar title="Settings" actions={<FragSearch />} />
       <PageContent maxWidth="560px">
 
         <SectionHeader title="Account" />

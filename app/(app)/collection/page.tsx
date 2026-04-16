@@ -22,6 +22,7 @@ import { useToast } from "@/components/ui/toast";
 import { getAccords, MONTHS, shortFragType } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, FragranceStatus } from "@/types";
+import { FragSearch } from "@/components/ui/frag-search";
 
 // ── Sort / filter constants ───────────────────────────────
 
@@ -421,12 +422,10 @@ function CollectionInner() {
         editing={editingFrag}
       />
 
-      {/* Topbar with global search */}
       <Topbar
         title="My Collection"
-        search={
-          <GlobalSearch value={search} onChange={setSearch} />
-        }
+        search={<GlobalSearch value={search} onChange={setSearch} />}
+        actions={<FragSearch />}
       />
 
       <PageContent>

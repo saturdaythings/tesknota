@@ -6,6 +6,7 @@ import { Upload, CheckCircle, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
+import { FragSearch } from "@/components/ui/frag-search";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -1048,7 +1049,7 @@ export default function ImportPage() {
 
   return (
     <>
-      <Topbar title="Import" />
+      <Topbar title="Import" actions={<FragSearch />} />
       <PageContent maxWidth="820px">
           {/* Tabs */}
           <div

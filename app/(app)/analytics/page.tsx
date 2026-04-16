@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
+import { FragSearch } from "@/components/ui/frag-search";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { addedThisMonth, avgRatingStr, parseRating, MONTHS } from "@/lib/frag-utils";
@@ -444,7 +445,7 @@ export default function AnalyticsPage() {
 
   return (
     <>
-      <Topbar title="Analytics" />
+      <Topbar title="Analytics" actions={<FragSearch />} />
       <PageContent>
 
         {/* Stat cards */}

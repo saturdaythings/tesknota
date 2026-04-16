@@ -6,6 +6,7 @@ import { Search, Plus, Heart, SearchX } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { Button } from "@/components/ui/button";
+import { FragSearch } from "@/components/ui/frag-search";
 import { Select } from "@/components/ui/select";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -572,7 +573,7 @@ function WishlistInner() {
 
       <Topbar
         title="Wishlist"
-        actions={<Button variant="primary" onClick={() => setAddOpen(true)}>ADD TO WISHLIST</Button>}
+        actions={<><FragSearch /><Button variant="primary" onClick={() => setAddOpen(true)}>ADD TO WISHLIST</Button></>}
       />
 
       <PageContent>

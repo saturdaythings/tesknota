@@ -9,6 +9,7 @@ import { TabPill } from '@/components/ui/tab-pill';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 import { Select } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
+import { FragSearch } from '@/components/ui/frag-search';
 
 // ── Token manifests ────────────────────────────────────────
 // Covers: Compliments page · Topbar · Sidebar · Login page.
@@ -532,7 +533,7 @@ export default function DesignSystemPage() {
 
   return (
     <>
-      <Topbar title="Design System" />
+      <Topbar title="Design System" actions={<FragSearch />} />
       <PageContent maxWidth="920px">
         <DesignModeContext.Provider value={mode}>
         <div className="flex items-center gap-4 mb-8">
