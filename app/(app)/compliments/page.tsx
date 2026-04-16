@@ -331,24 +331,18 @@ function ComplimentsInner() {
   }, [myComps, relationTab, sort, search]);
 
   useLayoutEffect(() => {
+    // Must be synchronous — rAF would defer past the paint causing a visible flash
     function measure() {
       if (!listRef.current) return;
       const cells = listRef.current.querySelectorAll<HTMLElement>('[data-col1]');
       if (!cells.length) return;
       cells.forEach((el) => { el.style.width = ''; });
-      const max = Math.max(...Array.from(cells).map((el) => el.offsetWidth));
-      if (max > 0) {
-        console.log('[compliments] col1Width measured:', max);
-        setCol1Width(max);
-      }
+      const max = Math.max(...Array.from(cells).map((el) => el.scrollWidth));
+      if (max > 0) setCol1Width(max);
     }
-    // rAF ensures the browser has laid out the rows before we measure
-    const id = requestAnimationFrame(measure);
+    measure();
     window.addEventListener('resize', measure);
-    return () => {
-      cancelAnimationFrame(id);
-      window.removeEventListener('resize', measure);
-    };
+    return () => window.removeEventListener('resize', measure);
   }, [displayed]);
 
   return (
