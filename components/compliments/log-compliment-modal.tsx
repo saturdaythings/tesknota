@@ -138,7 +138,7 @@ function FragSearch({
             letterSpacing: '0.08em',
             background: 'var(--color-cream)',
             border: error ? '1px solid var(--color-destructive)' : '1px solid rgba(30,45,69,0.8)',
-            color: 'rgba(30,45,69,0.8)',
+            color: value ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)',
           }}
         />
       </div>
@@ -163,7 +163,7 @@ function FragSearch({
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div className="font-serif italic" style={{ fontSize: '15px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+              <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
                 {f.name}
               </div>
               <div className="font-sans uppercase" style={{ fontSize: '12px', color: 'var(--color-navy)', letterSpacing: '0.1em' }}>
@@ -399,7 +399,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Work, friend's house, coffee shop, gym..."
               className={inputCls}
-              style={inputStyle}
+              style={{ ...inputStyle, color: location ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)' }}
             />
             <div className="grid grid-cols-2 gap-3">
               <input
@@ -407,14 +407,14 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="City"
                 className={inputCls}
-                style={inputStyle}
+                style={{ ...inputStyle, color: city ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)' }}
               />
               <input
                 value={state}
                 onChange={(e) => setState(e.target.value)}
                 placeholder="State / Country"
                 className={inputCls}
-                style={inputStyle}
+                style={{ ...inputStyle, color: state ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)' }}
               />
             </div>
           </div>
@@ -436,7 +436,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
                 minHeight: '72px',
                 background: 'var(--color-cream)',
                 border: '1px solid rgba(30,45,69,0.8)',
-                color: 'rgba(30,45,69,0.8)',
+                color: notes ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)',
               }}
             />
           </div>

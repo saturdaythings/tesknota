@@ -371,7 +371,8 @@ Used in: page topbar, modal fragrance search, any typeahead. Same spec everywher
 | Icon | `<Search size={15}>`, color `rgba(30,45,69,0.8)`, absolute left-3 vertically centered |
 | Border radius | 2px |
 | Font | 12px sans, weight 400, tracking `0.08em` |
-| Text color | `rgba(30,45,69,0.8)` |
+| Text color (empty) | `rgba(30,45,69,0.8)` |
+| Text color (filled) | `var(--color-navy)` — switches when user types or selects |
 | Placeholder color | `var(--color-navy-mid)` |
 | Border (rest) | `1px solid rgba(30,45,69,0.8)` |
 | Border (focus) | `1px solid var(--color-accent)` |
@@ -393,7 +394,7 @@ Appears below input at `calc(100% + 4px)`. Same dropdown shell as `<Select>`.
 | Row padding | `0 12px` |
 | Row divider | `1px solid rgba(30,45,69,0.1)` bottom |
 | Row hover bg | `rgba(232,224,208,0.3)` |
-| Result name | 15px serif italic navy, lh 1.2 |
+| Result name | 18px serif italic navy, lh 1.2 |
 | Result house | 12px sans uppercase tracking-0.1em navy |
 
 ---
