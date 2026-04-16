@@ -54,8 +54,8 @@ const STATUS_COLORS = [
 
 const TYPE_TOKENS = [
   { token: '--text-xxs',        label: 'XXS',         role: 'Sidebar tagline label',              font: 'sans',  italic: false },
-  { token: '--text-label',      label: 'Label',       role: 'Field labels, section headers, spec', font: 'sans',  italic: false },
-  { token: '--text-xs',         label: 'XS',          role: 'Meta, date, nav items, badges',       font: 'sans',  italic: false },
+  { token: '--text-label',      label: 'Label',       role: 'Design system annotations, code labels (11px)',  font: 'sans',  italic: false },
+  { token: '--text-xs',         label: 'XS',          role: 'Field labels, meta, date, nav items, badges',         font: 'sans',  italic: false },
   { token: '--text-sm',         label: 'SM',          role: 'Dropdowns, buttons, body small',      font: 'sans',  italic: false },
   { token: '--text-ui',         label: 'UI',          role: 'Sidebar username, empty state desc',  font: 'sans',  italic: false },
   { token: '--text-base',       label: 'Base',        role: 'Body copy',                           font: 'sans',  italic: false },
