@@ -219,7 +219,7 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
             right: 0,
             background: 'var(--color-cream)',
             border: '1px solid var(--color-meta-text)',
-            borderRadius: '3px',
+            borderRadius: 'var(--radius-md)',
             boxShadow: 'var(--shadow-md)',
             maxHeight: '280px',
             minWidth: '240px',
@@ -230,7 +230,7 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
               key={f.fragranceId}
               onMouseDown={() => { setQuery(''); setOpen(false); onSelect(f); }}
               className="flex flex-col justify-center cursor-pointer transition-colors"
-              style={{ height: '48px', padding: '0 12px', borderBottom: '1px solid var(--color-row-divider)' }}
+              style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', borderBottom: '1px solid var(--color-row-divider)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
@@ -245,7 +245,7 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
           {results.length === 0 && query.trim().length > 0 && (
             <div
               className="flex items-center font-sans italic"
-              style={{ height: '44px', padding: '0 12px', fontSize: 'var(--text-sm)', color: 'var(--color-meta-text)', borderBottom: '1px solid var(--color-row-divider)' }}
+              style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', fontSize: 'var(--text-sm)', color: 'var(--color-meta-text)', borderBottom: '1px solid var(--color-row-divider)' }}
             >
               No matches found
             </div>
@@ -254,7 +254,7 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
             <div
               onMouseDown={() => { setOpen(false); router.push('/import'); }}
               className="flex flex-col justify-center cursor-pointer transition-colors"
-              style={{ height: '48px', padding: '0 12px' }}
+              style={{ height: 'var(--space-12)', padding: '0 var(--space-3)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
@@ -360,7 +360,7 @@ function ComplimentsInner() {
                 paddingRight: '10px',
                 background: 'var(--color-white-subtle)',
                 border: '1px solid var(--color-white-dim)',
-                borderRadius: '3px',
+                borderRadius: 'var(--radius-md)',
                 fontFamily: 'var(--font-sans)',
                 fontSize: 'var(--text-sm)',
                 color: 'var(--color-cream)',
@@ -413,7 +413,7 @@ function ComplimentsInner() {
                   height: '80px',
                   borderBottom: '1px solid var(--color-row-divider)',
                   background: 'var(--color-row-hover)',
-                  borderRadius: '3px',
+                  borderRadius: 'var(--radius-md)',
                   marginBottom: 'var(--space-1)',
                 }}
               />

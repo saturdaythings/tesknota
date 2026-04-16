@@ -71,7 +71,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
       <aside
         className={cn(
           'flex flex-col flex-shrink-0 z-[300] h-dvh overflow-hidden',
-          'w-[220px]',
+          'w-[var(--sidebar-width)]',
           'fixed top-0 left-0 transition-transform duration-200',
           'md:relative md:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
