@@ -15,6 +15,7 @@ import { useData } from '@/lib/data-context';
 import type { UserCompliment, Relation, FragranceType } from '@/types';
 import { MessageCircle, Search } from '@/components/ui/Icons';
 import { Pagination } from '@/components/ui/pagination';
+import { PerPageControl } from '@/components/ui/per-page-control';
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -36,11 +37,6 @@ const SORT_OPTIONS = [
   { value: 'frag-az', label: 'Fragrance A–Z' },
 ];
 
-const PER_PAGE_OPTIONS = [
-  { value: '25', label: '25 per page' },
-  { value: '50', label: '50 per page' },
-  { value: 'all', label: 'All' },
-];
 
 // ── Helpers ────────────────────────────────────────────────
 
@@ -173,7 +169,7 @@ function ComplimentsInner() {
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
   const [search, setSearch] = useState('');
-  const [perPage, setPerPage] = useState('25');
+  const [perPage, setPerPage] = useState(25);
   const [page, setPage] = useState(1);
 
   if (!user) return null;
@@ -218,10 +214,10 @@ function ComplimentsInner() {
 
   useEffect(() => { setPage(1); }, [relationTab, sort, search, perPage]);
 
-  const pageSize = perPage === 'all' ? filtered.length : Number(perPage);
-  const totalPages = filtered.length === 0 ? 1 : perPage === 'all' ? 1 : Math.ceil(filtered.length / pageSize);
+  const pageSize = perPage === 0 ? filtered.length : perPage;
+  const totalPages = filtered.length === 0 ? 1 : perPage === 0 ? 1 : Math.ceil(filtered.length / pageSize);
   const paginated = useMemo(
-    () => perPage === 'all' ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize),
+    () => perPage === 0 ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize),
     [filtered, page, perPage, pageSize],
   );
 
@@ -261,12 +257,7 @@ function ComplimentsInner() {
             ))}
           </div>
           <div style={{ flexShrink: 0 }}>
-            <Select
-              options={PER_PAGE_OPTIONS}
-              value={perPage}
-              onChange={setPerPage}
-              size="auto"
-            />
+            <PerPageControl value={perPage} onChange={(v) => { setPerPage(v); setPage(1); }} />
           </div>
         </div>
 

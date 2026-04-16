@@ -97,6 +97,7 @@
   /* --- Font weight --- */
   --font-weight-normal: 400;
      --font-weight-medium: 500;
+     --font-weight-semibold: 600;
 
   /* --- Spacing (4px grid) --- */
   --space-half: 2px;

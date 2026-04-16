@@ -2,12 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@/components/ui/Icons';
-
-const PAGE_SIZES = [
-  { label: '25', value: 25 },
-  { label: '50', value: 50 },
-  { label: 'All', value: 0 },
-];
+import { PerPageControl } from '@/components/ui/per-page-control';
 
 interface PaginationProps {
   page: number;
@@ -26,61 +21,25 @@ export function Pagination({ page, onPage, totalPages: totalPagesProp, total, pa
   const totalPages = totalPagesProp ?? (resolvedPageSize === 0 ? 1 : Math.ceil(resolvedTotal / resolvedPageSize));
 
   if (resolvedTotal === 0 && totalPagesProp === undefined) return null;
-  if (totalPages <= 1 && !onPageSize) return null;
 
   const atFirst = page === 1;
   const atLast = page === totalPages;
+  const showNav = totalPages > 1;
+
+  if (!onPageSize && !showNav) return null;
 
   return (
     <div
       className="flex items-center justify-between flex-wrap"
       style={{ gap: 'var(--space-3)', paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-4)' }}
     >
-      {/* Per-page selector (legacy pages) */}
       {onPageSize ? (
-        <div className="flex items-center" style={{ gap: 'var(--space-2)' }}>
-          <span
-            className="font-sans uppercase"
-            style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-sm)', color: 'var(--color-meta-text)' }}
-          >
-            Show
-          </span>
-          {PAGE_SIZES.map((ps) => (
-            <button
-              key={ps.value}
-              onClick={() => { onPageSize(ps.value); onPage(1); }}
-              className="font-sans transition-colors"
-              style={{
-                height: 'var(--space-8)',
-                padding: '0 var(--space-2)',
-                border: '1px solid var(--color-sand-light)',
-                borderRadius: 'var(--radius-md)',
-                background: 'transparent',
-                fontSize: 'var(--text-xs)',
-                letterSpacing: 'var(--tracking-sm)',
-                cursor: 'pointer',
-                color: resolvedPageSize === ps.value ? 'var(--color-accent)' : 'var(--color-navy-mid)',
-                borderColor: resolvedPageSize === ps.value ? 'var(--color-accent)' : 'var(--color-sand-light)',
-              }}
-            >
-              {ps.label}
-            </button>
-          ))}
-          {resolvedPageSize > 0 && (
-            <span
-              className="font-sans"
-              style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', marginLeft: 'var(--space-2)' }}
-            >
-              {(page - 1) * resolvedPageSize + 1}–{Math.min(page * resolvedPageSize, resolvedTotal)} of {resolvedTotal}
-            </span>
-          )}
-        </div>
+        <PerPageControl value={resolvedPageSize} onChange={(v) => { onPageSize(v); onPage(1); }} />
       ) : (
         <div />
       )}
 
-      {/* Nav */}
-      {totalPages > 1 && (
+      {showNav && (
         <div className="flex items-center" style={{ gap: 'var(--space-2)' }}>
           <PagBtn onClick={() => onPage(1)} disabled={atFirst} title="First page">
             <ChevronsLeft size={13} />
