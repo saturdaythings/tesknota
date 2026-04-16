@@ -109,76 +109,52 @@ export function Select({
         </label>
       )}
 
-      {/* Grid wrapper: when size="auto" the hidden sizer forces width to the longest option */}
-      <div style={size === 'auto' ? { display: 'grid' } : undefined}>
-        {size === 'auto' && longestLabel && (
-          <span
-            aria-hidden="true"
-            style={{
-              gridArea: '1 / 1',
-              visibility: 'hidden',
-              pointerEvents: 'none',
-              height: 0,
-              overflow: 'hidden',
-              // Match trigger: px-3 (12px) left + chevron 16px + gap 8px + px-3 (12px) right
-              padding: '0 48px 0 12px',
-              fontSize: 'var(--text-sm)',
-              fontFamily: 'var(--font-sans)',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {longestLabel}
-          </span>
-        )}
-
-        <button
-          type="button"
-          id={id}
-          role="combobox"
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-controls={listId}
-          aria-labelledby={label ? `${id}-label` : undefined}
-          disabled={disabled}
-          onClick={() => {
-            if (!disabled) {
-              setOpen((o) => !o);
-              if (!open) setFocusedIndex(options.findIndex((o) => o.value === value));
-            }
-          }}
-          onKeyDown={handleKeyDown}
-          className={triggerBase}
+      <button
+        type="button"
+        id={id}
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listId}
+        aria-labelledby={label ? `${id}-label` : undefined}
+        disabled={disabled}
+        onClick={() => {
+          if (!disabled) {
+            setOpen((o) => !o);
+            if (!open) setFocusedIndex(options.findIndex((o) => o.value === value));
+          }
+        }}
+        onKeyDown={handleKeyDown}
+        className={cn(triggerBase, size === 'full' && 'w-full')}
+        style={{
+          fontSize: 'var(--text-sm)',
+          fontFamily: 'var(--font-sans)',
+          border: error
+            ? '1px solid var(--color-destructive)'
+            : open
+            ? '1px solid var(--color-accent)'
+            : '1px solid var(--color-meta-text)',
+        }}
+      >
+        <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)', whiteSpace: 'nowrap' }}>
+          {selectedOption?.label ?? placeholder}
+        </span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
           style={{
-            gridArea: size === 'auto' ? '1 / 1' : undefined,
-            fontSize: 'var(--text-sm)',
-            fontFamily: 'var(--font-sans)',
-            border: error
-              ? '1px solid var(--color-destructive)'
-              : open
-              ? '1px solid var(--color-accent)'
-              : '1px solid var(--color-meta-text)',
+            color: 'var(--color-meta-text)',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 150ms',
+            flexShrink: 0,
           }}
         >
-          <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)', whiteSpace: 'nowrap' }}>
-            {selectedOption?.label ?? placeholder}
-          </span>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-            style={{
-              color: 'var(--color-meta-text)',
-              transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 150ms',
-              flexShrink: 0,
-            }}
-          >
-            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
+          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
 
       {open && (
         <div
@@ -190,6 +166,7 @@ export function Select({
             top: 'calc(100% + 4px)',
             left: 0,
             minWidth: '100%',
+            width: 'max-content',
             zIndex: 50,
             background: 'var(--color-cream)',
             border: '1px solid var(--color-meta-text)',
