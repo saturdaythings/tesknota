@@ -97,7 +97,7 @@ export function Select({
 
   return (
     <div
-      className={cn('relative flex flex-col', size === 'full' && 'w-full', className)}
+      className={cn('relative flex flex-col', size === 'full' ? 'w-full' : 'w-fit', className)}
       ref={containerRef}
     >
       {label && (
@@ -110,7 +110,7 @@ export function Select({
       )}
 
       {/* Grid wrapper: when size="auto" the hidden sizer forces width to longest option */}
-      <div style={size === 'auto' ? { display: 'inline-grid' } : undefined}>
+      <div style={size === 'auto' ? { display: 'grid' } : undefined}>
         {size === 'auto' && (
           <span
             aria-hidden="true"
