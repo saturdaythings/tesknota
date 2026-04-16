@@ -194,7 +194,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
 function EmptyCompliments({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
-      <MessageCircle size={40} style={{ color: 'var(--color-sand)', marginBottom: '16px' }} />
+      <MessageCircle size={40} style={{ color: 'var(--color-navy)', marginBottom: '16px' }} />
       <div
         className="font-serif italic mb-2"
         style={{ fontSize: '22px', color: 'var(--color-navy)' }}
@@ -203,7 +203,7 @@ function EmptyCompliments({ onAdd }: { onAdd: () => void }) {
       </div>
       <div
         className="font-sans mb-6"
-        style={{ fontSize: '14px', color: 'var(--color-sand)', maxWidth: '280px' }}
+        style={{ fontSize: '14px', color: 'var(--color-navy)', maxWidth: '280px' }}
       >
         Start logging when someone notices your fragrance.
       </div>
@@ -338,7 +338,7 @@ function ComplimentsInner() {
             <EmptyCompliments onAdd={() => setLogOpen(true)} />
           ) : displayed.length === 0 ? (
             <div className="py-16 text-center">
-              <div className="font-sans" style={{ fontSize: '14px', color: 'var(--color-sand)' }}>
+              <div className="font-sans" style={{ fontSize: '14px', color: 'var(--color-navy)' }}>
                 No compliments match this filter.
               </div>
             </div>
