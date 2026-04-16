@@ -15,7 +15,7 @@ interface FragranceCellProps {
 export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
   return (
     <div className={className ?? ''}>
-      <div className="mb-1">
+      <div className="mb-1" style={{ whiteSpace: 'nowrap' }}>
         <span className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}
         </span>

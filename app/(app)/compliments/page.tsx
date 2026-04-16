@@ -102,7 +102,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       </div>
 
       {/* Col 2: elastic — large gap from col 1, takes all remaining space */}
-      <div style={{ flex: 1, minWidth: 0, textAlign: 'left', marginLeft: 'var(--space-12)' }}>
+      <div style={{ flex: 1, minWidth: 0, textAlign: 'left', marginLeft: 'var(--space-8)' }}>
         {meta && (
           <div
             className="font-sans uppercase mb-1"
@@ -124,7 +124,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       {/* Col 3: date — smaller gap from col 2, right-aligned, never wraps */}
       <div
         className="font-sans uppercase max-sm:text-left"
-        style={{ flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap', marginLeft: 'var(--space-6)', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
+        style={{ flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap', marginLeft: 'var(--space-8)', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
       >
         {date}
       </div>
