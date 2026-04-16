@@ -761,7 +761,7 @@ function WishlistInner() {
 
                           {/* ADDED */}
                           <td style={{ padding: "0 16px", width: "100px" }}>
-                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-sand)" }}>{added || "—"}</span>
+                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>{added || "—"}</span>
                           </td>
 
                           {/* AVG PRICE */}
