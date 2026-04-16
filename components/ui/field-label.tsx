@@ -22,9 +22,20 @@ export function OptionalTag() {
   return (
     <span
       className="normal-case font-normal"
-      style={{ letterSpacing: 0, color: 'var(--color-navy-mid)' }}
+      style={{ fontSize: '13px', letterSpacing: 0, color: 'var(--color-navy-mid)' }}
     >
       (optional)
+    </span>
+  );
+}
+
+export function RequiredMark() {
+  return (
+    <span
+      className="font-normal"
+      style={{ fontSize: '13px', letterSpacing: 0, color: 'var(--color-destructive)' }}
+    >
+      *
     </span>
   );
 }

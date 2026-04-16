@@ -5,7 +5,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/moda
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { TabPill } from '@/components/ui/tab-pill';
-import { FieldLabel, OptionalTag } from '@/components/ui/field-label';
+import { FieldLabel, OptionalTag, RequiredMark } from '@/components/ui/field-label';
 import { Search } from '@/components/ui/Icons';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
@@ -347,7 +347,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
         <div className="flex flex-col gap-5">
           {/* Fragrance */}
           <div>
-            <FieldLabel>Fragrance *</FieldLabel>
+            <FieldLabel>Fragrance <RequiredMark /></FieldLabel>
             <FragSearch
               value={primaryFrag}
               onSelect={(f) => { setPrimaryFrag(f); if (f) setFragError(''); }}
@@ -369,7 +369,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
 
           {/* Relation */}
           <div>
-            <FieldLabel>Relation *</FieldLabel>
+            <FieldLabel>Relation <RequiredMark /></FieldLabel>
             <ToggleGroup options={RELATIONS} value={relation} onChange={setRelation} />
           </div>
 
@@ -382,11 +382,11 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
           {/* Month + Year */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <FieldLabel>Month *</FieldLabel>
+              <FieldLabel>Month <RequiredMark /></FieldLabel>
               <Select options={MONTH_OPTIONS} value={month} onChange={setMonth} />
             </div>
             <div>
-              <FieldLabel>Year *</FieldLabel>
+              <FieldLabel>Year <RequiredMark /></FieldLabel>
               <Select options={YEAR_OPTIONS} value={year} onChange={setYear} />
             </div>
           </div>
