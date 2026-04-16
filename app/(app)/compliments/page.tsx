@@ -119,7 +119,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
   return (
     <div
       onClick={onEdit}
-      className="flex gap-4 items-start cursor-pointer transition-colors duration-100"
+      className="flex gap-6 items-start cursor-pointer transition-colors duration-100"
       style={{
         minHeight: '80px',
         padding: '16px 0',
@@ -128,8 +128,8 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Left: fragrance info */}
-      <div className="flex-1 min-w-0 pr-4">
+      {/* Column 1: Fragrance */}
+      <div className="flex-1 min-w-0">
         {/* Line 1: frag name + badge + layered */}
         <div className="flex flex-wrap items-center gap-2 mb-1">
           <span
@@ -156,14 +156,17 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {/* Line 2: house */}
         {fragHouse && (
           <div
-            className="font-sans uppercase tracking-[0.1em] mb-1"
+            className="font-sans uppercase tracking-[0.1em]"
             style={{ fontSize: '12px', color: 'var(--color-navy)' }}
           >
             {fragHouse}
           </div>
         )}
+      </div>
 
-        {/* Line 3: relation · gender · location */}
+      {/* Column 2: Meta + Notes */}
+      <div className="flex-1 min-w-0">
+        {/* Line 1: relation · gender · location */}
         {meta && (
           <div
             className="font-sans mb-1"
@@ -173,7 +176,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
           </div>
         )}
 
-        {/* Line 4: notes */}
+        {/* Line 2: notes */}
         {comp.notes && (
           <div
             className="font-serif italic"
@@ -184,7 +187,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         )}
       </div>
 
-      {/* Right: date */}
+      {/* Column 3: Date */}
       <div
         className="font-sans flex-shrink-0 text-right"
         style={{ fontSize: '14px', color: 'rgba(30,45,69,0.7)', minWidth: '72px' }}
