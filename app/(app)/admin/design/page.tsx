@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { TabPill } from '@/components/ui/tab-pill';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 import { Select } from '@/components/ui/select';
+import { supabase } from '@/lib/supabase';
 
 // ── Token manifests ────────────────────────────────────────
 // Covers: Compliments page · Topbar · Sidebar · Login page.
@@ -144,6 +145,133 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ── Token editor ───────────────────────────────────────────
+
+function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: () => void }) {
+  const [committedValue] = useState(() =>
+    getComputedStyle(document.documentElement).getPropertyValue(tokenName).trim()
+  );
+  const [draft, setDraft] = useState(committedValue);
+  const [publishedValue, setPublishedValue] = useState(committedValue);
+  const publishedRef = useRef(committedValue);
+  const committedRef = useRef(committedValue);
+  const [status, setStatus] = useState<'idle' | 'publishing' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [sha, setSha] = useState('');
+
+  // Apply draft as live preview
+  useEffect(() => {
+    document.documentElement.style.setProperty(tokenName, draft);
+  }, [draft, tokenName]);
+
+  // On unmount: keep published value if a commit landed, else revert to CSS file
+  useEffect(() => {
+    return () => {
+      if (publishedRef.current !== committedRef.current) {
+        document.documentElement.style.setProperty(tokenName, publishedRef.current);
+      } else {
+        document.documentElement.style.removeProperty(tokenName);
+      }
+    };
+  }, [tokenName]);
+
+  const isDirty = draft !== publishedValue;
+
+  async function publish() {
+    if (!isDirty || status === 'publishing') return;
+    setStatus('publishing');
+    setErrorMsg('');
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      setStatus('error');
+      setErrorMsg('No active session — sign in again');
+      return;
+    }
+
+    try {
+      const res = await fetch('/patch-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + session.access_token,
+        },
+        body: JSON.stringify({ tokenName, value: draft }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Failed (' + res.status + ')');
+      publishedRef.current = draft;
+      setPublishedValue(draft);
+      setStatus('success');
+      setSha(data.sha ?? '');
+    } catch (err) {
+      setStatus('error');
+      setErrorMsg(err instanceof Error ? err.message : 'Publish failed');
+      document.documentElement.style.setProperty(tokenName, publishedRef.current);
+      setDraft(publishedRef.current);
+    }
+  }
+
+  function reset() {
+    document.documentElement.style.setProperty(tokenName, publishedRef.current);
+    setDraft(publishedRef.current);
+    setStatus('idle');
+    setErrorMsg('');
+  }
+
+  return (
+    <div style={{ background: 'var(--color-navy)', borderRadius: '2px', padding: 'var(--space-4)', marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>
+      <div className="font-mono mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)', letterSpacing: '0.04em' }}>{tokenName}</div>
+      <div className="flex items-center gap-2">
+        <input
+          value={draft}
+          onChange={(e) => { setDraft(e.target.value); if (status !== 'idle') { setStatus('idle'); setErrorMsg(''); } }}
+          spellCheck={false}
+          onKeyDown={(e) => { if (e.key === 'Enter') publish(); if (e.key === 'Escape') onClose(); }}
+          className="font-mono flex-1 min-w-0"
+          style={{ background: 'var(--color-white-subtle)', border: '1px solid var(--color-white-dim)', color: 'var(--color-cream)', fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-3)', borderRadius: '2px', outline: 'none' }}
+        />
+        {isDirty && (
+          <button
+            onClick={reset}
+            className="font-sans flex-shrink-0"
+            style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
+          >
+            Reset
+          </button>
+        )}
+        <button
+          onClick={publish}
+          disabled={!isDirty || status === 'publishing'}
+          className="font-sans font-medium flex-shrink-0"
+          style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.08em', padding: 'var(--space-2) var(--space-4)', borderRadius: '2px', border: 'none', cursor: isDirty && status !== 'publishing' ? 'pointer' : 'default', opacity: status === 'publishing' ? 0.6 : 1, background: isDirty ? 'var(--color-cream)' : 'var(--color-white-subtle)', color: isDirty ? 'var(--color-navy)' : 'var(--color-sand-muted)' }}
+        >
+          {status === 'publishing' ? 'Publishing\u2026' : 'Publish'}
+        </button>
+      </div>
+      {status === 'success' && (
+        <div className="font-mono mt-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>
+          committed {sha.slice(0, 7)}
+        </div>
+      )}
+      {status === 'error' && (
+        <div className="font-sans mt-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>
+          {errorMsg}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ExpandableToken({ token, expanded, onToggle, children }: { token: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
+    <div>
+      <div onClick={onToggle} style={{ cursor: 'pointer' }}>{children}</div>
+      {expanded && <TokenEditPanel tokenName={token} onClose={onToggle} />}
+    </div>
+  );
+}
+
 // ── Layout helpers ─────────────────────────────────────────
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -204,6 +332,11 @@ export default function DesignSystemPage() {
     ...LAYOUT_TOKENS.map((t) => t.token),
   ];
   const computed = useComputedTokens(allTokens);
+  const [expandedToken, setExpandedToken] = useState<string | null>(null);
+
+  function toggle(token: string) {
+    setExpandedToken((prev) => (prev === token ? null : token));
+  }
 
   return (
     <>
@@ -213,20 +346,32 @@ export default function DesignSystemPage() {
 
           <Section title="Brand Colors">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
-              {BRAND_COLORS.map((c) => <ColorSwatch key={c.token} {...c} computed={computed[c.token] ?? ''} />)}
+              {BRAND_COLORS.map((c) => (
+                <ExpandableToken key={c.token} token={c.token} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
+                  <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
+                </ExpandableToken>
+              ))}
             </div>
           </Section>
 
           <Section title="Opacity Variants">
             <Note>Used on navy backgrounds — sidebar, login page, topbar search.</Note>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
-              {OPACITY_COLORS.map((c) => <ColorSwatch key={c.token} {...c} computed={computed[c.token] ?? ''} />)}
+              {OPACITY_COLORS.map((c) => (
+                <ExpandableToken key={c.token} token={c.token} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
+                  <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
+                </ExpandableToken>
+              ))}
             </div>
           </Section>
 
           <Section title="Row / List Tokens">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
-              {ROW_COLORS.map((c) => <ColorSwatch key={c.token} {...c} computed={computed[c.token] ?? ''} />)}
+              {ROW_COLORS.map((c) => (
+                <ExpandableToken key={c.token} token={c.token} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
+                  <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
+                </ExpandableToken>
+              ))}
             </div>
           </Section>
 
@@ -234,19 +379,21 @@ export default function DesignSystemPage() {
             <Note>Cormorant Garamond (serif, always italic) · Inter (sans, always upright). Never swap.</Note>
             <div style={{ marginTop: 'var(--space-4)' }}>
               {TYPE_TOKENS.map(({ token, label, role, font, italic }) => (
-                <div key={token} className="flex items-baseline gap-4 flex-wrap" style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-2) 0' }}>
-                  <span
-                    className={font === 'serif' ? 'font-serif italic' : 'font-sans'}
-                    style={{ fontSize: `var(${token})`, color: 'var(--color-navy)', lineHeight: 1.4, minWidth: '200px' }}
-                  >
-                    {font === 'serif' ? 'Tęsknota — longing' : 'MAISON MARGIELA · APR'}
-                  </span>
-                  <div className="flex items-baseline gap-2 flex-wrap">
-                    <code className="font-mono font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>{token}</code>
-                    <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{computed[token] ?? '…'}</span>
-                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{label} · {role}</span>
+                <ExpandableToken key={token} token={token} expanded={expandedToken === token} onToggle={() => toggle(token)}>
+                  <div className="flex items-baseline gap-4 flex-wrap" style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-2) 0' }}>
+                    <span
+                      className={font === 'serif' ? 'font-serif italic' : 'font-sans'}
+                      style={{ fontSize: `var(${token})`, color: 'var(--color-navy)', lineHeight: 1.4, minWidth: '200px' }}
+                    >
+                      {font === 'serif' ? 'Tęsknota — longing' : 'MAISON MARGIELA · APR'}
+                    </span>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <code className="font-mono font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>{token}</code>
+                      <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{computed[token] ?? '…'}</span>
+                      <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{label} · {role}</span>
+                    </div>
                   </div>
-                </div>
+                </ExpandableToken>
               ))}
             </div>
           </Section>
@@ -257,11 +404,13 @@ export default function DesignSystemPage() {
                 const val = computed[token] ?? '';
                 const px = parseInt(val) || 0;
                 return (
-                  <div key={token} className="flex items-center gap-4">
-                    <code className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '80px' }}>{token}</code>
-                    <span className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '40px' }}>{val}</span>
-                    <div className="rounded-[2px] flex-shrink-0" style={{ width: `${px}px`, height: 'var(--space-3)', background: 'var(--color-navy)', opacity: 0.3 }} />
-                  </div>
+                  <ExpandableToken key={token} token={token} expanded={expandedToken === token} onToggle={() => toggle(token)}>
+                    <div className="flex items-center gap-4">
+                      <code className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '80px' }}>{token}</code>
+                      <span className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '40px' }}>{val}</span>
+                      <div className="rounded-[2px] flex-shrink-0" style={{ width: `${px}px`, height: 'var(--space-3)', background: 'var(--color-navy)', opacity: 0.3 }} />
+                    </div>
+                  </ExpandableToken>
                 );
               })}
             </div>
@@ -270,11 +419,13 @@ export default function DesignSystemPage() {
           <Section title="Layout Tokens">
             <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
               {LAYOUT_TOKENS.map(({ token, label, usage }) => (
-                <div key={token} className="flex items-baseline gap-4 flex-wrap">
-                  <code className="font-mono font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '180px' }}>{token}</code>
-                  <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '60px' }}>{computed[token] ?? '…'}</span>
-                  <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{label} · {usage}</span>
-                </div>
+                <ExpandableToken key={token} token={token} expanded={expandedToken === token} onToggle={() => toggle(token)}>
+                  <div className="flex items-baseline gap-4 flex-wrap">
+                    <code className="font-mono font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '180px' }}>{token}</code>
+                    <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '60px' }}>{computed[token] ?? '…'}</span>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{label} · {usage}</span>
+                  </div>
+                </ExpandableToken>
               ))}
             </div>
           </Section>
