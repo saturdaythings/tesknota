@@ -233,7 +233,17 @@ function TokenEditPanel({ tokenName, defaultValue, onClose }: { tokenName: strin
 
   return (
     <div className="rounded-[2px]" style={{ background: 'var(--color-navy)', padding: 'var(--space-4)', marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>
-      <div className="font-mono mb-2 tracking-[0.04em]" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>{tokenName}</div>
+      <div className="flex items-center justify-between mb-2">
+        <div className="font-mono tracking-[0.04em]" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>{tokenName}</div>
+        <button
+          onClick={onClose}
+          className="font-sans bg-transparent border-0 cursor-pointer p-0 leading-none select-none"
+          style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)' }}
+          title="Close editor"
+        >
+          ×
+        </button>
+      </div>
       <div className="flex items-center gap-2">
         <input
           value={draft}
@@ -279,7 +289,26 @@ function TokenEditPanel({ tokenName, defaultValue, onClose }: { tokenName: strin
 function ExpandableToken({ token, defaultValue, expanded, onToggle, children }: { token: string; defaultValue: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
     <div>
-      <div onClick={onToggle} style={{ cursor: 'pointer' }}>{children}</div>
+      <div
+        onClick={onToggle}
+        className="flex items-center gap-2"
+        style={{ cursor: 'pointer' }}
+        title={expanded ? 'Click to close editor' : 'Click to edit token'}
+      >
+        <div className="flex-1 min-w-0">{children}</div>
+        <span
+          className="flex-shrink-0 select-none"
+          style={{
+            fontSize: 'var(--text-xs)',
+            color: expanded ? 'var(--color-navy)' : 'var(--color-meta-text)',
+            transform: expanded ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.15s, color 0.15s',
+            lineHeight: 1,
+          }}
+        >
+          ▾
+        </span>
+      </div>
       {expanded && <TokenEditPanel tokenName={token} defaultValue={defaultValue} onClose={onToggle} />}
     </div>
   );
