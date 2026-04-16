@@ -181,7 +181,7 @@ Container width: **160px**, flex-shrink 0, margin-left auto (right-aligns in fil
 | Trigger bg | `var(--color-cream)` |
 | Trigger border (rest) | `1px solid rgba(30,45,69,0.8)` |
 | Trigger border (open) | `1px solid var(--color-accent)` = `#2D4A6B` |
-| Trigger font | 15px Sans (use `text-[12px]` className override on compliments) |
+| Trigger font | 13px Sans |
 | Chevron color | `var(--color-sand)` |
 | Dropdown bg | `var(--color-cream)` |
 | Dropdown border | `1px solid rgba(30,45,69,0.8)` |
@@ -190,7 +190,7 @@ Container width: **160px**, flex-shrink 0, margin-left auto (right-aligns in fil
 | Dropdown top offset | `calc(100% + 4px)` |
 | Option height | 36px |
 | Option padding | `0 12px` |
-| Option font | 12px Sans navy |
+| Option font | 13px Sans navy |
 | Option selected bg | `var(--color-cream-dark)` |
 | Option hover bg | `rgba(232,224,208,0.3)` |
 
@@ -354,7 +354,7 @@ Used in: page topbar, modal fragrance search, any typeahead. Same spec everywher
                focus:border-[var(--color-accent)]
                placeholder:text-[var(--color-navy-mid)]"
     style={{
-      fontSize: '12px', fontWeight: 400, letterSpacing: '0.08em',
+      fontSize: '13px', fontWeight: 400, letterSpacing: '0.08em',
       background: 'var(--color-cream)',
       border: '1px solid rgba(30,45,69,0.8)',
       color: 'rgba(30,45,69,0.8)',
@@ -370,7 +370,7 @@ Used in: page topbar, modal fragrance search, any typeahead. Same spec everywher
 | Right padding | 12px (`pr-3`) |
 | Icon | `<Search size={15}>`, color `rgba(30,45,69,0.8)`, absolute left-3 vertically centered |
 | Border radius | 2px |
-| Font | 12px sans, weight 400, tracking `0.08em` |
+| Font | 13px sans, weight 400, tracking `0.08em` |
 | Text color (empty) | `rgba(30,45,69,0.8)` |
 | Text color (filled) | `var(--color-navy)` — switches when user types or selects |
 | Placeholder color | `var(--color-navy-mid)` |
@@ -487,7 +487,7 @@ All open-text form inputs use the same spec as the search input — same size, t
              focus:border-[var(--color-accent)]
              placeholder:text-[var(--color-navy-mid)]"
   style={{
-    fontSize: '12px', fontWeight: 400, letterSpacing: '0.08em',
+    fontSize: '13px', fontWeight: 400, letterSpacing: '0.08em',
     background: 'var(--color-cream)',
     border: '1px solid rgba(30,45,69,0.8)',
     color: 'rgba(30,45,69,0.8)',
@@ -507,7 +507,7 @@ Same spec as text input. Fixed height (no resize), max 160 characters for short 
              transition-[border-color] focus:border-[var(--color-accent)]
              placeholder:text-[var(--color-navy-mid)]"
   style={{
-    fontSize: '12px', fontWeight: 400, letterSpacing: '0.08em',
+    fontSize: '13px', fontWeight: 400, letterSpacing: '0.08em',
     minHeight: '72px',
     background: 'var(--color-cream)',
     border: '1px solid rgba(30,45,69,0.8)',

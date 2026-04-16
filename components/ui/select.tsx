@@ -23,7 +23,7 @@ interface SelectProps {
 const triggerBase =
   'flex items-center justify-between w-full h-9 px-3 ' +
   'bg-[var(--color-cream)] rounded-[3px] ' +
-  'font-sans text-[12px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
+  'font-sans text-[13px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 export function Select({
@@ -172,7 +172,7 @@ export function Select({
                   display: 'flex',
                   alignItems: 'center',
                   padding: '0 12px',
-                  fontSize: '12px',
+                  fontSize: '13px',
                   fontFamily: 'var(--font-sans)',
                   cursor: 'pointer',
                   color: 'var(--color-navy)',

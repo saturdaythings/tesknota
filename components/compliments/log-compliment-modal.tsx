@@ -133,7 +133,7 @@ function FragSearch({
           placeholder="Search your collection..."
           className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-navy-mid)]"
           style={{
-            fontSize: '12px',
+            fontSize: '13px',
             fontWeight: 400,
             letterSpacing: '0.08em',
             background: 'var(--color-cream)',
@@ -331,7 +331,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
     'w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 ' +
     'focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]';
   const inputStyle: React.CSSProperties = {
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: 400,
     letterSpacing: '0.08em',
     background: 'var(--color-cream)',
@@ -430,7 +430,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               maxLength={160}
               className="w-full p-3 rounded-[2px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-none placeholder:text-[var(--color-navy-mid)]"
               style={{
-                fontSize: '12px',
+                fontSize: '13px',
                 fontWeight: 400,
                 letterSpacing: '0.08em',
                 minHeight: '72px',
