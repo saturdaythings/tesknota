@@ -446,26 +446,8 @@ function CollectionInner() {
         <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "var(--space-6) var(--space-8)" }}
           className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
         >
-          {/* Page header row */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "var(--space-5)",
-            }}
-          >
-            <h1
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontSize: "26px",
-                fontStyle: "italic",
-                fontWeight: 400,
-                color: "var(--color-navy)",
-              }}
-            >
-              My Collection
-            </h1>
+          {/* Add button */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "var(--space-5)" }}>
             <button
               onClick={() => setAddOpen(true)}
               style={{
