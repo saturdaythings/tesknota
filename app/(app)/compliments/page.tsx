@@ -7,7 +7,7 @@ import { TabPill } from '@/components/ui/tab-pill';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
-import { Header } from '@/components/layout/Header';
+import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { TabPill } from '@/components/ui/tab-pill';
 import { FieldLabel, OptionalTag } from '@/components/ui/field-label';
+import { Search } from '@/components/ui/Icons';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
@@ -112,26 +113,35 @@ function FragSearch({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      <input
-        value={query}
-        readOnly={locked}
-        disabled={locked}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          if (value) onSelect(null);
-          setOpen(true);
-        }}
-        onFocus={() => !locked && setOpen(true)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
-        placeholder="Search your collection..."
-        className="w-full h-9 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-sand)]"
-        style={{
-          fontSize: '15px',
-          background: 'var(--color-cream)',
-          border: error ? '1px solid var(--color-destructive)' : '1px solid rgba(30,45,69,0.8)',
-          color: 'var(--color-navy)',
-        }}
-      />
+      <div className="relative">
+        <Search
+          size={15}
+          className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ color: 'rgba(30,45,69,0.8)' }}
+        />
+        <input
+          value={query}
+          readOnly={locked}
+          disabled={locked}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (value) onSelect(null);
+            setOpen(true);
+          }}
+          onFocus={() => !locked && setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder="Search your collection..."
+          className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-navy-mid)]"
+          style={{
+            fontSize: '12px',
+            fontWeight: 400,
+            letterSpacing: '0.08em',
+            background: 'var(--color-cream)',
+            border: error ? '1px solid var(--color-destructive)' : '1px solid rgba(30,45,69,0.8)',
+            color: 'rgba(30,45,69,0.8)',
+          }}
+        />
+      </div>
       {open && matches.length > 0 && (
         <div
           className="absolute left-0 right-0 z-50 overflow-y-auto"
@@ -319,7 +329,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
 
   const inputCls =
     'w-full h-9 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 ' +
-    'focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]';
+    'focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]';
   const inputStyle: React.CSSProperties = {
     fontSize: '15px',
     background: 'var(--color-cream)',
@@ -415,7 +425,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Context, reaction, moment..."
               rows={3}
-              className="w-full p-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y placeholder:text-[var(--color-sand)]"
+              className="w-full p-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y placeholder:text-[var(--color-navy-mid)]"
               style={{
                 fontSize: '15px',
                 minHeight: '80px',
