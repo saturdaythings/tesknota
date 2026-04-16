@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
-import type { UserFragrance, FragranceStatus, FragranceType, CommunityFrag } from "@/types";
+import type { UserFragrance, FragranceStatus, FragranceType, BottleSize, CommunityFrag } from "@/types";
 
 // ── Constants ─────────────────────────────────────────────
 
@@ -292,7 +292,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
         name: selected?.fragranceName ?? "Unidentified Fragrance",
         house: selected?.fragranceHouse ?? "",
         status,
-        sizes: sizeInput.trim() ? [sizeInput.trim()] : [],
+        sizes: sizeInput.trim() ? [sizeInput.trim() as BottleSize] : [],
         type: fragType || null,
         personalRating: rating || null,
         statusRating: null,
