@@ -65,12 +65,18 @@
      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
 
   /* --- Type scale --- */
-  --text-xs: 12px;
+  --text-xxs: 10px;
+     --text-xs: 12px;
      --text-sm: 13px;
+     --text-ui: 14px;
      --text-base: 15px;
+     --text-note: 16px;
      --text-md: 17px;
      --text-lg: 20px;
+     --text-empty-title: 22px;
+     --text-page-title: 24px;
      --text-xl: 26px;
+     --text-logo: 28px;
      --text-2xl: 36px;
      --text-hero: 56px;
 
@@ -89,6 +95,27 @@
   /* --- Layout --- */
   --sidebar-width: 220px;
      --header-height: 64px;
+     --topbar-px: 26px;
+     --topbar-px-mobile: 18px;
+
+  /* --- Opacity variants (on navy) --- */
+  --color-white-subtle: rgba(255, 255, 255, 0.08);
+     --color-white-dim: rgba(255, 255, 255, 0.15);
+     --color-white-mid: rgba(255, 255, 255, 0.40);
+     --color-cream-muted: rgba(245, 240, 232, 0.70);
+     --color-cream-faint: rgba(245, 240, 232, 0.50);
+     --color-sand-label: rgba(200, 184, 154, 0.60);
+     --color-sand-muted: rgba(200, 184, 154, 0.80);
+     --color-navy-backdrop: rgba(30, 45, 69, 0.50);
+
+  /* --- Row / list tokens --- */
+  --color-row-divider: rgba(30, 45, 69, 0.15);
+     --color-row-hover: rgba(232, 224, 208, 0.30);
+     --color-meta-text: rgba(30, 45, 69, 0.80);
+     --color-notes-text: rgba(30, 45, 69, 0.70);
+
+  /* --- Status --- */
+  --color-live: #22c55e;
 
   /* --- shadcn semantic tokens mapped to new brand --- */
   --background: var(--color-cream);

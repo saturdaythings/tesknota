@@ -85,10 +85,10 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       className="flex gap-6 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
       style={{
         minHeight: '80px',
-        padding: '16px 0',
-        borderBottom: '1px solid rgba(30,45,69,0.15)',
+        padding: 'var(--space-4) 0',
+        borderBottom: '1px solid var(--color-row-divider)',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {/* Column 1: Fragrance */}
@@ -101,21 +101,18 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
 
       {/* Column 2: Meta + Notes */}
       <div className="flex-1 min-w-0">
-        {/* Line 1: relation · gender · location */}
         {meta && (
           <div
             className="font-sans uppercase mb-1"
-            style={{ fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(30,45,69,0.8)' }}
+            style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-meta-text)' }}
           >
             {meta}
           </div>
         )}
-
-        {/* Line 2: notes */}
         {comp.notes && (
           <div
             className="font-serif italic line-clamp-2"
-            style={{ fontSize: '16px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}
+            style={{ fontSize: 'var(--text-note)', color: 'var(--color-notes-text)', lineHeight: 1.6 }}
           >
             {comp.notes}
           </div>
@@ -125,7 +122,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       {/* Column 3: Date */}
       <div
         className="font-sans uppercase flex-shrink-0 text-right"
-        style={{ fontSize: '12px', letterSpacing: '0.1em', color: 'var(--color-navy)', minWidth: '72px' }}
+        style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)', minWidth: '72px' }}
       >
         {date}
       </div>
@@ -136,16 +133,16 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
 function EmptyCompliments({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
-      <MessageCircle size={40} style={{ color: 'var(--color-navy)', marginBottom: '16px' }} />
+      <MessageCircle size={40} style={{ color: 'var(--color-navy)', marginBottom: 'var(--space-4)' }} />
       <div
         className="font-serif italic mb-2"
-        style={{ fontSize: '22px', color: 'var(--color-navy)' }}
+        style={{ fontSize: 'var(--text-empty-title)', color: 'var(--color-navy)' }}
       >
         No compliments yet
       </div>
       <div
         className="font-sans mb-6"
-        style={{ fontSize: '14px', color: 'var(--color-navy)', maxWidth: '280px' }}
+        style={{ fontSize: 'var(--text-ui)', color: 'var(--color-navy)', maxWidth: '280px' }}
       >
         Start logging when someone notices your fragrance.
       </div>
@@ -174,7 +171,6 @@ function ComplimentsInner() {
   const myComps = compliments.filter((c) => c.userId === user.id);
   const myFrags = fragrances.filter((f) => f.userId === user.id);
 
-  // Build lookup maps
   const fragById = new Map(myFrags.map((f) => [f.fragranceId || f.id, f]));
 
   function getFragInfo(comp: UserCompliment) {
@@ -186,7 +182,6 @@ function ComplimentsInner() {
     };
   }
 
-  // Tab counts
   const tabCounts = useMemo(() => {
     const map: Record<string, number> = { ALL: myComps.length };
     for (const c of myComps) {
@@ -195,7 +190,6 @@ function ComplimentsInner() {
     return map;
   }, [myComps]);
 
-  // Filtered + sorted
   const displayed = useMemo(() => {
     let result = relationTab === 'ALL' ? myComps : myComps.filter((c) => c.relation === relationTab);
     if (search.trim()) {
@@ -236,16 +230,16 @@ function ComplimentsInner() {
             <Search
               size={15}
               className="absolute left-3 pointer-events-none"
-              style={{ color: 'rgba(30,45,69,0.8)' }}
+              style={{ color: 'var(--color-meta-text)' }}
             />
             <div
               className="w-full h-9 pl-9 pr-3 flex items-center rounded-[2px] font-sans"
               style={{
-                fontSize: '12px',
+                fontSize: 'var(--text-xs)',
                 letterSpacing: '0.08em',
                 background: 'var(--color-cream)',
-                border: '1px solid rgba(30,45,69,0.8)',
-                color: 'rgba(30,45,69,0.8)',
+                border: '1px solid var(--color-meta-text)',
+                color: 'var(--color-meta-text)',
               }}
             >
               Find fragrances...
@@ -256,7 +250,7 @@ function ComplimentsInner() {
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Search
               size={14}
-              style={{ position: 'absolute', left: '10px', color: 'rgba(245,240,232,0.5)', pointerEvents: 'none' }}
+              style={{ position: 'absolute', left: '10px', color: 'var(--color-cream-faint)', pointerEvents: 'none' }}
             />
             <input
               type="search"
@@ -268,95 +262,91 @@ function ComplimentsInner() {
                 height: '34px',
                 paddingLeft: '30px',
                 paddingRight: '10px',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.15)',
+                background: 'var(--color-white-subtle)',
+                border: '1px solid var(--color-white-dim)',
                 borderRadius: '3px',
                 fontFamily: 'var(--font-sans)',
-                fontSize: '13px',
+                fontSize: 'var(--text-sm)',
                 color: 'var(--color-cream)',
                 outline: 'none',
               }}
-              className="placeholder:text-[rgba(245,240,232,0.5)] focus:border-[rgba(255,255,255,0.4)]"
+              className="placeholder:text-[var(--color-cream-faint)] focus:border-[var(--color-white-mid)]"
             />
           </div>
         }
       />
 
       <PageContent>
-          {/* Page header row */}
-          <div className="flex items-center justify-end mb-8">
-            <Button variant="primary" onClick={() => setLogOpen(true)}>
-              Log Compliment
-            </Button>
-          </div>
+        {/* Page header row */}
+        <div className="flex items-center justify-end mb-8">
+          <Button variant="primary" onClick={() => setLogOpen(true)}>
+            Log Compliment
+          </Button>
+        </div>
 
-          {/* Filter bar */}
-          <div className="flex items-start justify-between gap-4 flex-wrap mb-6 max-sm:flex-col">
-            {/* Tab pills */}
-            <div className="flex flex-wrap gap-2">
-              {RELATION_TABS.map((tab) => (
-                <TabPill
-                  key={tab.value}
-                  label={tab.label}
-                  count={tabCounts[tab.value] ?? 0}
-                  active={relationTab === tab.value}
-                  onClick={() => setRelationTab(tab.value)}
-                />
-              ))}
-            </div>
-
-            {/* Sort */}
-            <div className="max-sm:w-full max-sm:mt-3" style={{ width: '160px', flexShrink: 0, marginLeft: 'auto' }}>
-              <Select
-                options={SORT_OPTIONS}
-                value={sort}
-                onChange={setSort}
+        {/* Filter bar */}
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-6 max-sm:flex-col">
+          <div className="flex flex-wrap gap-2">
+            {RELATION_TABS.map((tab) => (
+              <TabPill
+                key={tab.value}
+                label={tab.label}
+                count={tabCounts[tab.value] ?? 0}
+                active={relationTab === tab.value}
+                onClick={() => setRelationTab(tab.value)}
               />
+            ))}
+          </div>
+          <div className="max-sm:w-full max-sm:mt-3" style={{ width: '160px', flexShrink: 0, marginLeft: 'auto' }}>
+            <Select
+              options={SORT_OPTIONS}
+              value={sort}
+              onChange={setSort}
+            />
+          </div>
+        </div>
+
+        {/* List */}
+        {!isLoaded ? (
+          <div>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: '80px',
+                  borderBottom: '1px solid var(--color-row-divider)',
+                  background: 'var(--color-row-hover)',
+                  borderRadius: '3px',
+                  marginBottom: 'var(--space-1)',
+                }}
+              />
+            ))}
+          </div>
+        ) : myComps.length === 0 ? (
+          <EmptyCompliments onAdd={() => setLogOpen(true)} />
+        ) : displayed.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="font-sans" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-navy)' }}>
+              No compliments match this filter.
             </div>
           </div>
-
-          {/* List */}
-          {!isLoaded ? (
-            /* Skeleton */
-            <div>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    height: '80px',
-                    borderBottom: '1px solid rgba(30,45,69,0.15)',
-                    background: 'rgba(232,224,208,0.3)',
-                    borderRadius: '3px',
-                    marginBottom: '2px',
-                  }}
+        ) : (
+          <div>
+            {displayed.map((comp) => {
+              const { name, house, type } = getFragInfo(comp);
+              return (
+                <ComplimentRow
+                  key={comp.id}
+                  comp={comp}
+                  fragName={name}
+                  fragHouse={house}
+                  fragType={type}
+                  onEdit={() => setEditingComp(comp)}
                 />
-              ))}
-            </div>
-          ) : myComps.length === 0 ? (
-            <EmptyCompliments onAdd={() => setLogOpen(true)} />
-          ) : displayed.length === 0 ? (
-            <div className="py-16 text-center">
-              <div className="font-sans" style={{ fontSize: '14px', color: 'var(--color-navy)' }}>
-                No compliments match this filter.
-              </div>
-            </div>
-          ) : (
-            <div>
-              {displayed.map((comp) => {
-                const { name, house, type } = getFragInfo(comp);
-                return (
-                  <ComplimentRow
-                    key={comp.id}
-                    comp={comp}
-                    fragName={name}
-                    fragHouse={house}
-                    fragType={type}
-                    onEdit={() => setEditingComp(comp)}
-                  />
-                );
-              })}
-            </div>
-          )}
+              );
+            })}
+          </div>
+        )}
       </PageContent>
     </>
   );
@@ -369,4 +359,3 @@ export default function ComplimentsPage() {
     </Suspense>
   );
 }
-// Last CI trigger: Wed Apr 15 23:08:45 EDT 2026

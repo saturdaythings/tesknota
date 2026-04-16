@@ -29,10 +29,10 @@ function CountBadge({ count, active }: { count: number; active: boolean }) {
     <span
       className="ml-auto font-sans tabular-nums"
       style={{
-        fontSize: '12px',
+        fontSize: 'var(--text-xs)',
         fontWeight: 400,
         letterSpacing: '0.08em',
-        color: active ? 'var(--color-cream)' : 'rgba(200,184,154,0.8)',
+        color: active ? 'var(--color-cream)' : 'var(--color-sand-muted)',
       }}
     >
       {count}
@@ -44,7 +44,7 @@ function LiveDot() {
   return (
     <span
       className="ml-1 inline-block w-2 h-2 rounded-full flex-shrink-0"
-      style={{ background: '#22c55e' }}
+      style={{ background: 'var(--color-live)' }}
       aria-label="New activity"
     />
   );
@@ -64,7 +64,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           'fixed inset-0 z-[299] md:hidden transition-opacity duration-200',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
         )}
-        style={{ background: 'rgba(30,45,69,0.5)' }}
+        style={{ background: 'var(--color-navy-backdrop)' }}
       />
 
       <aside
@@ -81,15 +81,15 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
         <div className="px-5 pt-8 pb-6 flex-shrink-0">
           <div
             className="font-serif italic leading-none mb-1"
-            style={{ fontSize: '28px', color: 'var(--color-cream)' }}
+            style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)' }}
           >
             t&#281;sknota
           </div>
           <div
             className="font-sans font-medium uppercase leading-none mb-3"
             style={{
-              fontSize: '10px',
-              color: 'rgba(245,240,232,0.7)',
+              fontSize: 'var(--text-xxs)',
+              color: 'var(--color-cream-muted)',
               letterSpacing: '0.22em',
             }}
           >
@@ -110,8 +110,8 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
               <div
                 className="px-5 mb-1 font-sans font-medium uppercase"
                 style={{
-                  fontSize: '12px',
-                  color: 'rgba(200,184,154,0.6)',
+                  fontSize: 'var(--text-xs)',
+                  color: 'var(--color-sand-label)',
                   letterSpacing: '0.08em',
                   lineHeight: 1,
                 }}
@@ -128,17 +128,17 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                     onClick={close}
                     className="flex items-center transition-colors duration-100"
                     style={{
-                      height: '40px',
-                      paddingLeft: '20px',
-                      paddingRight: '20px',
+                      height: 'var(--space-10)',
+                      paddingLeft: 'var(--space-5)',
+                      paddingRight: 'var(--space-5)',
                       borderLeft: isActive
                         ? '3px solid var(--color-cream)'
                         : '3px solid transparent',
-                      background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+                      background: isActive ? 'var(--color-white-subtle)' : 'transparent',
                       color: isActive
                         ? 'var(--color-cream)'
-                        : 'rgba(200,184,154,0.8)',
-                      fontSize: '12px',
+                        : 'var(--color-sand-muted)',
+                      fontSize: 'var(--text-xs)',
                       letterSpacing: '0.1em',
                       textTransform: 'uppercase',
                       fontFamily: 'var(--font-sans)',
@@ -157,18 +157,18 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
         {/* Bottom user section */}
         <div
           className="flex-shrink-0 px-5 py-5 border-t"
-          style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+          style={{ borderColor: 'var(--color-white-subtle)' }}
         >
           <div
             className="font-sans mb-1 truncate"
-            style={{ fontSize: '14px', color: 'var(--color-cream)' }}
+            style={{ fontSize: 'var(--text-ui)', color: 'var(--color-cream)' }}
           >
             {userName}
           </div>
           <button
             onClick={onSignOut}
             className="flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.08em] transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
-            style={{ fontSize: '12px', color: 'rgba(200,184,154,0.8)' }}
+            style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)' }}
           >
             <LogOut size={12} />
             Sign Out

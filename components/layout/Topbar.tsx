@@ -21,7 +21,7 @@ export function Topbar({
   return (
         <header
                 className={cn(
-                          "flex items-center gap-3 px-[18px] md:px-[26px] flex-shrink-0 z-[100]",
+                          "flex items-center gap-3 px-[var(--topbar-px-mobile)] md:px-[var(--topbar-px)] flex-shrink-0 z-[100]",
                           "h-[var(--header-height)] border-b border-[var(--color-sand-light)]",
                           className,
                         )}
@@ -42,14 +42,14 @@ export function Topbar({
               <div className="flex-1 min-w-0 flex flex-col justify-center gap-[2px]">
                       <div
                                   className="font-sans font-medium uppercase leading-none tracking-[0.12em]"
-                                  style={{ fontSize: "12px", color: "var(--color-navy-mid)" }}
+                                  style={{ fontSize: "var(--text-xs)", color: "var(--color-navy-mid)" }}
                                 >
                                 T&#280;SKNOTA
                       </div>
                       <div
                                   className="font-serif italic truncate leading-[1.2]"
                                   style={{
-                                                fontSize: "24px",
+                                                fontSize: "var(--text-page-title)",
                                                 fontWeight: 400,
                                                 color: "var(--color-navy)",
                                   }}
