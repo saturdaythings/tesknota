@@ -123,10 +123,10 @@ Search input in topbar (dark bg context):
 
 | Property | Value |
 |----------|-------|
-| Horizontal padding (desktop) | `var(--space-8)` = 32px |
-| Horizontal padding (mobile) | `var(--space-4)` = 16px |
-| Vertical padding (desktop) | `var(--space-6)` = 24px |
-| Vertical padding (mobile) | `var(--space-4)` = 16px |
+| Horizontal padding (≥768px) | `26px` — matches Topbar |
+| Horizontal padding (<768px) | `18px` — matches Topbar |
+| Vertical padding (≥768px) | `var(--space-6)` = 24px |
+| Vertical padding (<768px) | `var(--space-4)` = 16px |
 | Max content width | 1400px, centered |
 | Background | `var(--color-cream)` (from body default) |
 | Below action row | `mb-8` = 32px |

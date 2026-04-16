@@ -30,7 +30,7 @@ export function PageContent({ children, maxWidth = "1400px", className }: PageCo
     <main style={{ flex: 1, overflowY: "auto" }}>
       <div
         style={{ maxWidth, margin: "0 auto", padding: "var(--space-6) 26px" }}
-        className={cn("max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]", className)}
+        className={cn("max-md:px-[18px] max-md:py-[var(--space-4)]", className)}
       >
         {children}
       </div>
