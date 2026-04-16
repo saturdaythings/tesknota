@@ -84,7 +84,7 @@ function TabPill({
         padding: '6px 12px',
         borderRadius: '2px',
         background: active ? 'var(--color-navy)' : 'transparent',
-        color: active ? 'var(--color-cream)' : 'rgba(30,45,69,0.65)',
+        color: active ? 'var(--color-cream)' : 'var(--color-navy)',
         border: active ? '1px solid var(--color-navy)' : '1px solid rgba(30,45,69,0.65)',
       }}
     >
@@ -139,7 +139,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
             {fragName}
           </span>
           {fragType && (
-            <Badge variant="neutral" className="text-[11px] py-[2px]">
+            <Badge variant="neutral" className="text-[11px] py-[2px]" style={{ color: 'rgba(30,45,69,0.65)' }}>
               {fragType}
             </Badge>
           )}
