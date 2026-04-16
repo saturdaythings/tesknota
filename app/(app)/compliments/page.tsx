@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
+import React, { useState, useMemo, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
@@ -79,28 +79,35 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
   const meta = buildMeta(comp);
   const date = formatDate(comp);
 
+  const cellBase: React.CSSProperties = {
+    display: 'table-cell',
+    verticalAlign: 'top',
+    paddingTop: 'var(--space-4)',
+    paddingBottom: 'var(--space-4)',
+    borderBottom: '1px solid var(--color-row-divider)',
+    height: '80px',
+  };
+
   return (
     <div
       onClick={onEdit}
-      className="flex gap-6 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
-      style={{
-        minHeight: '80px',
-        padding: 'var(--space-4) 0',
-        borderBottom: '1px solid var(--color-row-divider)',
-      }}
+      className="cursor-pointer transition-colors duration-100"
+      style={{ display: 'table-row' }}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Column 1: Fragrance */}
-      <FragranceCell
-        name={fragName}
-        house={fragHouse}
-        type={fragType}
-        secondary={comp.secondaryFrag ?? undefined}
-      />
+      {/* Column 1: Fragrance — auto-width to widest entry across all rows */}
+      <div style={{ ...cellBase, paddingRight: 'var(--space-6)' }}>
+        <FragranceCell
+          name={fragName}
+          house={fragHouse}
+          type={fragType}
+          secondary={comp.secondaryFrag ?? undefined}
+        />
+      </div>
 
-      {/* Column 2: Meta + Notes */}
-      <div className="flex-1 min-w-0">
+      {/* Column 2: Meta + Notes — absorbs remaining width */}
+      <div style={{ ...cellBase, paddingRight: 'var(--space-6)', width: '100%' }}>
         {meta && (
           <div
             className="font-sans uppercase mb-1"
@@ -119,12 +126,14 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         )}
       </div>
 
-      {/* Column 3: Date */}
+      {/* Column 3: Date — auto-width, right-aligned */}
       <div
-        className="font-sans uppercase flex-shrink-0 text-right"
-        style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)', minWidth: '72px' }}
+        style={{ ...cellBase, whiteSpace: 'nowrap', textAlign: 'right' }}
+        className="font-sans uppercase"
       >
-        {date}
+        <span style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>
+          {date}
+        </span>
       </div>
     </div>
   );
@@ -423,7 +432,7 @@ function ComplimentsInner() {
             </div>
           </div>
         ) : (
-          <div>
+          <div style={{ display: 'table', width: '100%' }}>
             {displayed.map((comp) => {
               const { name, house, type } = getFragInfo(comp);
               return (
