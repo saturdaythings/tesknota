@@ -10,14 +10,14 @@
 
 :root {
   /* --- Brand palette --- */
-  --color-navy: #1E2D45;
-  --color-navy-mid: #3A5070;       /* readable mid-navy for text on light bg */
-  --color-cream: #F5F0E8;          /* sidebar header, login bg, accent surfaces */
-  --color-cream-dark: #EAE3D8;     /* cards, raised surfaces — distinct from cream */
-  --color-sand: #C8B89A;
-  --color-sand-light: #D9CEBC;     /* borders — clearly visible on white */
-  --color-accent: #2D4A6B;
-  --color-accent-light: #4A6E96;
+  --color-navy: #1e3a5f;           /* primary CTA, sidebar, active states */
+  --color-navy-mid: #1e3a5f;       /* readable mid-navy for text on light bg */
+  --color-cream: #f0ece5;          /* warm off-white page background */
+  --color-cream-dark: #ffffff;     /* white cards, raised surfaces */
+  --color-sand: #5a5a5a;           /* mid-gray for meta text (NOT tan) */
+  --color-sand-light: #d8d2c8;     /* borders — clearly visible on white */
+  --color-accent: #1e3a5f;         /* primary navy */
+  --color-accent-light: #4A6E96;   /* lighter navy for secondary states */
 
   /* --- Admin terminal tokens --- */
   --adm-bg: #0F1117;
@@ -36,11 +36,24 @@
   --adm-green-bg: rgba(82,176,82,0.08);
 
   /* --- Status badge colors --- */
-  --color-status-current: #1E2D45;
-  --color-status-want: #8B6F4E;
+  --color-status-current: #1e3a5f;
+  --color-status-want: #c4a96a;
   --color-status-finished: #6B7280;
   --color-status-sample: #4A6E96;
-  --color-status-dupe: #5C4A3A;
+  --color-status-dupe: #1e3a5f;
+
+  /* --- New design tokens --- */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #5a5a5a;
+  --color-text-label: #6b6b6b;
+  --color-text-muted: #999999;
+  --color-accent-gold: #c4a96a;
+  --color-tag-bg: #edeae4;
+  --color-tag-text: #3d3830;
+  --color-tag-border: #ccc8be;
+  --color-surface: #ffffff;
+  --color-bg: #f0ece5;
+  --color-border: #d8d2c8;
 
   /* --- Destructive --- */
   --color-destructive: #8B1A1A;
@@ -50,14 +63,9 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
 
   /* --- Token aliases (v1 names → v2 values) --- */
-  --color-surface: var(--color-cream);
-  --color-surface-raised: var(--color-cream-dark);
-  --color-text-primary: var(--color-navy);
-  --color-text-muted: var(--color-sand);
+  --color-surface-raised: #ffffff;
   --color-success: #2A7A4B;
-  --color-danger: var(--color-destructive);
-  --color-bg: #FFFFFF;
-  --color-accent-subtle: rgba(45, 74, 107, 0.1);
+  --color-accent-subtle: rgba(30, 58, 95, 0.1);
   --color-danger-subtle: rgba(139, 26, 26, 0.07);
   --radius-full: 9999px;
   --transition-base: 150ms ease;
@@ -91,42 +99,42 @@
   --header-height: 56px;
 
   /* --- shadcn semantic tokens mapped to new brand --- */
-  --background: #FFFFFF;
-  --foreground: #1E2D45;
-  --card: #FFFFFF;
-  --card-foreground: #1E2D45;
-  --popover: #FFFFFF;
-  --popover-foreground: #1E2D45;
-  --primary: #1E2D45;
-  --primary-foreground: #F5F0E8;
-  --secondary: #EAE3D8;
-  --secondary-foreground: #1E2D45;
-  --muted: #F3EEE6;
-  --muted-foreground: #3A5070;
-  --accent: #2D4A6B;
-  --accent-foreground: #F5F0E8;
+  --background: #ffffff;
+  --foreground: #1e3a5f;
+  --card: #ffffff;
+  --card-foreground: #1e3a5f;
+  --popover: #ffffff;
+  --popover-foreground: #1e3a5f;
+  --primary: #1e3a5f;
+  --primary-foreground: #f0ece5;
+  --secondary: #f0ece5;
+  --secondary-foreground: #1e3a5f;
+  --muted: #edeae4;
+  --muted-foreground: #6b6b6b;
+  --accent: #c4a96a;
+  --accent-foreground: #ffffff;
   --destructive: #8B1A1A;
-  --border: #D9CEBC;
-  --input: #D9CEBC;
-  --ring: #2D4A6B;
+  --border: #d8d2c8;
+  --input: #ffffff;
+  --ring: #1e3a5f;
   --radius: 0.1875rem; /* 3px */
 
   /* --- Chart colors --- */
-  --chart-1: #1E2D45;
-  --chart-2: #2D4A6B;
-  --chart-3: #4A6E96;
-  --chart-4: #C8B89A;
-  --chart-5: #8B6F4E;
+  --chart-1: #1e3a5f;
+  --chart-2: #4A6E96;
+  --chart-3: #6B8BAD;
+  --chart-4: #c4a96a;
+  --chart-5: #9d8468;
 
   /* --- Sidebar tokens --- */
-  --sidebar: #1E2D45;
-  --sidebar-foreground: #F5F0E8;
-  --sidebar-primary: #F5F0E8;
-  --sidebar-primary-foreground: #1E2D45;
+  --sidebar: #1e3a5f;
+  --sidebar-foreground: #f0ece5;
+  --sidebar-primary: #f0ece5;
+  --sidebar-primary-foreground: #1e3a5f;
   --sidebar-accent: rgba(255, 255, 255, 0.08);
-  --sidebar-accent-foreground: #F5F0E8;
+  --sidebar-accent-foreground: #f0ece5;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #4A6E96;
+  --sidebar-ring: #c4a96a;
 }
 
 /* ============================================================
@@ -175,6 +183,14 @@
   --color-accent-brand: var(--color-accent);
   --color-accent-light: var(--color-accent-light);
   --color-destructive-brand: var(--color-destructive);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-label: var(--color-text-label);
+  --color-text-muted: var(--color-text-muted);
+  --color-accent-gold: var(--color-accent-gold);
+  --color-tag-bg: var(--color-tag-bg);
+  --color-tag-text: var(--color-tag-text);
+  --color-tag-border: var(--color-tag-border);
 
   /* fonts */
   --font-sans: var(--font-sans);
@@ -195,8 +211,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    background-color: var(--color-cream);
-    color: var(--color-navy);
+    background-color: #f0ece5;
+    color: #1a1a1a;
     font-family: var(--font-sans);
     font-size: var(--text-base);
     line-height: 1.6;
@@ -204,14 +220,14 @@
 }
 
 /* Typography utility classes (v1 compat) */
-.text-body    { font-family: var(--font-sans); font-size: 15px; color: var(--color-navy); }
-.text-secondary { font-family: var(--font-sans); font-size: 13px; color: var(--color-sand); }
+.text-body    { font-family: var(--font-sans); font-size: 15px; color: #1a1a1a; }
+.text-secondary { font-family: var(--font-sans); font-size: 13px; color: #5a5a5a; }
 .text-label   { font-family: var(--font-sans); font-size: 11px; font-weight: 500;
-                letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-sand); }
+                letter-spacing: 0.1em; text-transform: uppercase; color: #6b6b6b; }
 .text-subheading { font-family: var(--font-serif); font-size: 20px; font-style: italic;
-                   font-weight: 400; color: var(--color-navy); }
-.text-meta    { font-family: var(--font-sans); font-size: 12px; color: var(--color-sand); }
-.text-page-title { font-family: var(--font-serif); font-size: 36px; font-style: italic; font-weight: 400; color: var(--color-navy); }
+                   font-weight: 400; color: #1a1a1a; }
+.text-meta    { font-family: var(--font-sans); font-size: 12px; color: #5a5a5a; }
+.text-page-title { font-family: var(--font-serif); font-size: 36px; font-style: italic; font-weight: 400; color: #1a1a1a; }
 
 /* Dashboard responsive grids */
 .dash-stat-grid {
