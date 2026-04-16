@@ -97,7 +97,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {/* Column 1: Fragrance — auto-width to widest entry, never wraps */}
-      <div style={{ ...cellBase, paddingRight: 'var(--space-6)', whiteSpace: 'nowrap' }}>
+      <div style={{ ...cellBase, whiteSpace: 'nowrap' }}>
         <FragranceCell
           name={fragName}
           house={fragHouse}
@@ -105,6 +105,9 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
           secondary={comp.secondaryFrag ?? undefined}
         />
       </div>
+
+      {/* Spacer — explicit fixed gap between col 1 and col 2, matches col 2→3 gap */}
+      <div style={{ display: 'table-cell', width: 'var(--space-6)', minWidth: 'var(--space-6)' }} />
 
       {/* Column 2: Meta + Notes — absorbs remaining width */}
       <div style={{ ...cellBase, paddingRight: 'var(--space-6)', width: '100%' }}>
