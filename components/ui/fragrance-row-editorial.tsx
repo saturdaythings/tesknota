@@ -1,8 +1,12 @@
 "use client";
 
+import { FragranceCell } from '@/components/ui/fragrance-cell';
+import type { FragranceType } from '@/types';
+
 interface FragranceRowEditorialProps {
   name: string;
   house?: string;
+  type?: FragranceType | null;
   secondary?: string;
   meta?: string;
   notes?: string;
@@ -15,6 +19,7 @@ interface FragranceRowEditorialProps {
 export function FragranceRowEditorial({
   name,
   house,
+  type,
   secondary,
   meta,
   notes,
@@ -26,72 +31,46 @@ export function FragranceRowEditorial({
   return (
     <div
       onClick={onClick}
-      className="flex gap-4 items-start cursor-pointer transition-colors duration-100"
+      className="flex gap-6 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
       style={{
         minHeight: '80px',
         padding: '16px 0',
-        borderBottom: '1px solid var(--color-cream-dark)',
+        borderBottom: '1px solid rgba(30,45,69,0.15)',
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Left: fragrance info */}
-      <div className="flex-1 min-w-0 pr-4">
-        {/* Line 1: frag name + secondary */}
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          <span
-            className="font-serif italic"
-            style={{ fontSize: '20px', color: 'var(--color-navy)', lineHeight: 1.2 }}
-          >
-            {name}
-          </span>
-          {secondary && (
-            <span
-              className="font-serif italic"
-              style={{ fontSize: '14px', color: 'var(--color-navy-mid)' }}
+      {/* Column 1: fragrance identity */}
+      <FragranceCell name={name} house={house} type={type} secondary={secondary} />
+
+      {/* Column 2: meta + notes */}
+      {(meta || notes) && (
+        <div className="flex-1 min-w-0">
+          {meta && (
+            <div
+              className="font-sans mb-1"
+              style={{ fontSize: '12px', color: 'rgba(30,45,69,0.8)' }}
             >
-              + {secondary}
-            </span>
+              {meta}
+            </div>
+          )}
+          {notes && (
+            <div
+              className="font-serif italic"
+              style={{ fontSize: '16px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}
+            >
+              {notes}
+            </div>
           )}
         </div>
+      )}
 
-        {/* Line 2: house */}
-        {house && (
-          <div
-            className="font-sans uppercase tracking-[0.1em] mb-1"
-            style={{ fontSize: '12px', color: 'var(--color-navy)', letterSpacing: '0.06em' }}
-          >
-            {house}
-          </div>
-        )}
-
-        {/* Line 3: meta (relation · gender · location) */}
-        {meta && (
-          <div
-            className="font-sans mb-1"
-            style={{ fontSize: '12px', color: 'var(--color-navy-mid)', letterSpacing: '0.02em' }}
-          >
-            {meta}
-          </div>
-        )}
-
-        {/* Line 4: notes */}
-        {notes && (
-          <div
-            className="font-serif italic"
-            style={{ fontSize: '15px', color: 'var(--color-navy-mid)', lineHeight: 1.6 }}
-          >
-            {notes}
-          </div>
-        )}
-      </div>
-
-      {/* Right: date + action */}
+      {/* Column 3: date + optional action */}
       <div className="flex items-start gap-3 flex-shrink-0">
         {date && (
           <div
             className="font-sans flex-shrink-0 text-right"
-            style={{ fontSize: '14px', color: 'var(--color-navy-mid)', minWidth: '72px' }}
+            style={{ fontSize: '12px', color: 'var(--color-navy)', minWidth: '72px' }}
           >
             {date}
           </div>
@@ -104,7 +83,7 @@ export function FragranceRowEditorial({
             }}
             className="font-sans text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-navy)] transition-colors whitespace-nowrap flex-shrink-0"
           >
-            {actionLabel ?? "Action"}
+            {actionLabel ?? 'Action'}
           </button>
         )}
       </div>

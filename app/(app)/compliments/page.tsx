@@ -3,7 +3,9 @@
 import { useState, useMemo, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { TabPill } from '@/components/ui/tab-pill';
+import { FragranceCell } from '@/components/ui/fragrance-cell';
+
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
 import { Header } from '@/components/layout/Header';
 import { useUser } from '@/lib/user-context';
@@ -62,48 +64,6 @@ function buildMeta(c: UserCompliment): string {
 
 // ── Sub-components ─────────────────────────────────────────
 
-function TabPill({
-  label,
-  count,
-  active,
-  onClick,
-}: {
-  label: string;
-  count: number;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 font-sans uppercase transition-colors duration-100 flex-shrink-0 cursor-pointer"
-      style={{
-        fontSize: '12px',
-        fontWeight: 400,
-        letterSpacing: '0.08em',
-        padding: '6px 12px',
-        borderRadius: '2px',
-        background: active ? 'var(--color-navy)' : 'transparent',
-        color: active ? 'var(--color-cream)' : 'var(--color-navy)',
-        border: active ? '1px solid var(--color-navy)' : '1px solid rgba(30,45,69,0.8)',
-      }}
-    >
-      {label}
-      {count > 0 && (
-        <span
-          className="font-sans"
-          style={{
-            fontSize: '11px',
-            opacity: 0.8,
-          }}
-        >
-          {count}
-        </span>
-      )}
-    </button>
-  );
-}
-
 interface ComplimentRowProps {
   comp: UserCompliment;
   fragName: string;
@@ -129,40 +89,12 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {/* Column 1: Fragrance */}
-      <div className="flex-1 min-w-0">
-        {/* Line 1: frag name + badge + layered */}
-        <div className="flex flex-wrap items-center gap-2 mb-1">
-          <span
-            className="font-serif italic"
-            style={{ fontSize: '20px', color: 'var(--color-navy)', lineHeight: 1.2 }}
-          >
-            {fragName}
-          </span>
-          {fragType && (
-            <Badge variant="neutral" className="text-[11px] py-[2px]" style={{ color: 'rgba(30,45,69,0.8)' }}>
-              {fragType}
-            </Badge>
-          )}
-          {comp.secondaryFrag && (
-            <span
-              className="font-serif italic"
-              style={{ fontSize: '15px', color: 'var(--color-navy)' }}
-            >
-              + {comp.secondaryFrag}
-            </span>
-          )}
-        </div>
-
-        {/* Line 2: house */}
-        {fragHouse && (
-          <div
-            className="font-sans uppercase tracking-[0.1em]"
-            style={{ fontSize: '12px', color: 'var(--color-navy)' }}
-          >
-            {fragHouse}
-          </div>
-        )}
-      </div>
+      <FragranceCell
+        name={fragName}
+        house={fragHouse}
+        type={fragType}
+        secondary={comp.secondaryFrag ?? undefined}
+      />
 
       {/* Column 2: Meta + Notes */}
       <div className="flex-1 min-w-0">
