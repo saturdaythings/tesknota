@@ -20,10 +20,10 @@ interface FragranceCellProps {
  */
 export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
   return (
-    <div className={`flex-none w-[220px] max-sm:w-full ${className ?? ''}`}>
-      <div className="flex items-center gap-2 mb-1 overflow-hidden">
+    <div className={`flex-none max-sm:w-full ${className ?? ''}`}>
+      <div className="flex items-center gap-2 mb-1">
         <span
-          className="font-serif italic truncate min-w-0"
+          className="font-serif italic"
           style={{ fontSize: '20px', color: 'var(--color-navy)', lineHeight: 1.2 }}
         >
           {name}
@@ -36,7 +36,7 @@ export function FragranceCell({ name, house, type, secondary, className }: Fragr
       </div>
       {secondary && (
         <div
-          className="font-serif italic truncate mb-1"
+          className="font-serif italic mb-1"
           style={{ fontSize: '14px', color: 'var(--color-navy)' }}
         >
           + {secondary}
