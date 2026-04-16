@@ -5,6 +5,7 @@ import * as XLSX from "xlsx";
 import { Upload, CheckCircle, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
+import { PageContent } from "@/components/layout/PageContent";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -1048,20 +1049,7 @@ export default function ImportPage() {
   return (
     <>
       <Topbar title="Import" />
-      <main style={{ flex: 1, overflowY: "auto" }}>
-        <div
-          style={{
-            maxWidth: 820,
-            margin: "0 auto",
-            padding: "var(--space-8)",
-          }}
-          className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
-        >
-          {/* Page header */}
-          <h1 className="text-page-title" style={{ marginBottom: "var(--space-6)" }}>
-            Add Fragrances
-          </h1>
-
+      <PageContent maxWidth="820px">
           {/* Tabs */}
           <div
             style={{
@@ -1153,8 +1141,7 @@ export default function ImportPage() {
               {state === "error" && <ErrorCard onReset={reset} />}
             </>
           )}
-        </div>
-      </main>
+      </PageContent>
     </>
   );
 }

@@ -570,29 +570,12 @@ function WishlistInner() {
         />
       )}
 
-      <Topbar title="Wishlist" />
+      <Topbar
+        title="Wishlist"
+        actions={<Button variant="primary" onClick={() => setAddOpen(true)}>ADD TO WISHLIST</Button>}
+      />
 
       <PageContent>
-          {/* Add button */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "var(--space-5)" }}>
-            <button
-              onClick={() => setAddOpen(true)}
-              style={{
-                background: "var(--color-navy)",
-                color: "var(--color-cream)",
-                fontFamily: "var(--font-sans)",
-                fontSize: "13px",
-                fontWeight: 500,
-                padding: "10px 20px",
-                borderRadius: "3px",
-                border: "none",
-                cursor: "pointer",
-                letterSpacing: "0.06em",
-              }}
-            >
-              ADD TO WISHLIST
-            </button>
-          </div>
 
           {/* Filter + sort bar */}
           <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", flexWrap: "wrap", marginBottom: "var(--space-4)" }}>

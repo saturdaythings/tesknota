@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Topbar } from "@/components/layout/Topbar";
+import { PageContent } from "@/components/layout/PageContent";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { addedThisMonth, avgRatingStr, parseRating, MONTHS } from "@/lib/frag-utils";
@@ -444,7 +445,7 @@ export default function AnalyticsPage() {
   return (
     <>
       <Topbar title="Analytics" />
-      <main className="flex-1 overflow-y-auto" style={{ background: "var(--color-cream)", padding: "32px 24px 40px" }}>
+      <PageContent>
 
         {/* Stat cards */}
         <div className="dash-stat-grid mb-6">
@@ -662,7 +663,7 @@ export default function AnalyticsPage() {
             )}
           </ChartCard>
         </div>
-      </main>
+      </PageContent>
     </>
   );
 }

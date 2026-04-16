@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
+import { PageContent } from "@/components/layout/PageContent";
 import { SectionHeader } from "@/components/ui/section-header";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
@@ -53,7 +54,7 @@ export default function SettingsPage() {
   return (
     <>
       <Topbar title="Settings" />
-      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px] max-w-[560px]">
+      <PageContent maxWidth="560px">
 
         <SectionHeader title="Account" />
         {user && (
@@ -124,7 +125,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-      </main>
+      </PageContent>
     </>
   );
 }

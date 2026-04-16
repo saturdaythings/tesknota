@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
+import { PageContent } from "@/components/layout/PageContent";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { SectionHeader } from "@/components/ui/section-header";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
@@ -75,7 +76,7 @@ export default function FriendPage() {
         readOnly
       />
       <Topbar title={`${friendName}'s Profile`} />
-      <main className="flex-1 overflow-y-auto px-4 py-5 md:p-[26px]">
+      <PageContent>
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
             Loading...
@@ -150,7 +151,7 @@ export default function FriendPage() {
             )}
           </>
         )}
-      </main>
+      </PageContent>
     </>
   );
 }
