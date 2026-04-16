@@ -158,13 +158,6 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           >
             {userName}
           </div>
-          <Link
-            href="/settings"
-            className="block font-sans mb-2 transition-opacity hover:opacity-100"
-            style={{ fontSize: '13px', color: 'var(--color-sand)', opacity: 0.8 }}
-          >
-            Settings
-          </Link>
           <button
             onClick={onSignOut}
             className="flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.12em] transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
