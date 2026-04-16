@@ -19,21 +19,22 @@
   --color-accent: #2D4A6B;
      --color-accent-light: #4A6E96;
 
-  /* --- Admin terminal tokens --- */
-  --adm-bg: #0F1117;
-     --adm-bg2: #181C24;
-     --adm-fg: #E2E2E2;
-     --adm-fg2: #B0B0B0;
-     --adm-fg3: #808080;
-     --adm-fg4: #525252;
+  /* --- Admin tokens (light mode) --- */
+  --adm-bg: #FAFAFA;
+     --adm-bg2: #F0F0F0;
+     --adm-bg3: #E4E4E4;
+     --adm-fg: #111111;
+     --adm-fg2: #444444;
+     --adm-fg3: #707070;
+     --adm-fg4: #999999;
      --adm-mono: ui-monospace, 'SF Mono', Consolas, monospace;
      --adm-serif: var(--font-serif);
-     --adm-border: rgba(255,255,255,0.1);
-     --adm-border2: rgba(255,255,255,0.05);
-     --adm-red: #E05252;
-     --adm-red-bg: rgba(224,82,82,0.08);
-     --adm-green: #52B052;
-     --adm-green-bg: rgba(82,176,82,0.08);
+     --adm-border: rgba(0,0,0,0.10);
+     --adm-border2: rgba(0,0,0,0.05);
+     --adm-red: #C03030;
+     --adm-red-bg: rgba(192,48,48,0.07);
+     --adm-green: #267326;
+     --adm-green-bg: rgba(38,115,38,0.07);
 
   /* --- Status badge colors --- */
   --color-status-current: #1E2D45;

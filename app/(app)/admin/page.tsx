@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
@@ -354,7 +353,7 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
     userEvents[uid].push(d.getTime());
   }
 
-  const heatLevels = ["bg-[var(--adm-bg2)]", "bg-[var(--adm-bg3)]", "bg-[#C8C8C8]", "bg-[#888]", "bg-[#444]", "bg-[var(--adm-fg)]"];
+  const heatLevels = ["bg-[var(--adm-bg2)]", "bg-[var(--adm-bg3)]", "bg-[#AAAAAA]", "bg-[#666666]", "bg-[#333333]", "bg-[var(--adm-fg)]"];
 
   return (
     <div>
@@ -994,7 +993,7 @@ export default function AdminPage() {
       <div className="border-b-2 border-[var(--adm-fg)] px-8 py-5 flex justify-between items-start shrink-0">
         <div>
           <div className="font-[var(--adm-mono)] text-[22px] font-bold tracking-[0.04em] text-[var(--adm-fg)] leading-none mb-1">
-            Admin
+            Admin Dashboard
           </div>
           {lastSync && (
             <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[0.06em]">
@@ -1010,12 +1009,6 @@ export default function AdminPage() {
           >
             Sync Now
           </button>
-          <Link
-            href="/dashboard"
-            className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-3 py-1.5 tracking-[0.1em] uppercase hover:bg-[var(--adm-fg)] hover:text-[var(--adm-bg)] transition-all"
-          >
-            Dashboard
-          </Link>
         </div>
       </div>
 

@@ -11,6 +11,7 @@ interface NavItem {
   label: string;
   count?: number;
   hasNewActivity?: boolean;
+  exact?: boolean;
 }
 
 interface NavSection {
@@ -119,8 +120,9 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                 {section.label}
               </div>
               {section.items.map((item) => {
-                const isActive =
-                  pathname === item.href || pathname.startsWith(item.href + '/');
+                const isActive = item.exact
+                  ? pathname === item.href
+                  : pathname === item.href || pathname.startsWith(item.href + '/');
                 return (
                   <Link
                     key={item.href}

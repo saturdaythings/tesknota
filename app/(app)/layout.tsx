@@ -78,7 +78,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     ...(user.isAdmin ? [{
       label: 'Admin',
       items: [
-        { href: '/admin', label: 'Admin' },
+        { href: '/admin', label: 'Admin Dashboard', exact: true },
         { href: '/admin/design', label: 'Design System' },
       ],
     }] : []),
