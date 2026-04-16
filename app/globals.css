@@ -10,13 +10,13 @@
 
 :root {
   /* --- Brand palette --- */
-  --color-navy: #1e3a5f;
-  --color-navy-mid: #1e3a5f;       /* readable mid-navy for text on light bg */
+  --color-navy: #1E2D45;
+  --color-navy-mid: #3A5070;       /* readable mid-navy for text on light bg */
   --color-cream: #F5F0E8;          /* sidebar header, login bg, accent surfaces */
   --color-cream-dark: #EAE3D8;     /* cards, raised surfaces — distinct from cream */
   --color-sand: #C8B89A;
   --color-sand-light: #D9CEBC;     /* borders — clearly visible on white */
-  --color-accent: #1e3a5f;
+  --color-accent: #2D4A6B;
   --color-accent-light: #4A6E96;
 
   /* --- Admin terminal tokens --- */
@@ -36,11 +36,11 @@
   --adm-green-bg: rgba(82,176,82,0.08);
 
   /* --- Status badge colors --- */
-  --color-status-current: #1e3a5f;
+  --color-status-current: #1E2D45;
   --color-status-want: #8B6F4E;
   --color-status-finished: #6B7280;
   --color-status-sample: #4A6E96;
-  --color-status-dupe: #1e3a5f;
+  --color-status-dupe: #5C4A3A;
 
   /* --- Destructive --- */
   --color-destructive: #8B1A1A;
@@ -92,37 +92,37 @@
 
   /* --- shadcn semantic tokens mapped to new brand --- */
   --background: #FFFFFF;
-  --foreground: #1e3a5f;
+  --foreground: #1E2D45;
   --card: #FFFFFF;
-  --card-foreground: #1e3a5f;
+  --card-foreground: #1E2D45;
   --popover: #FFFFFF;
-  --popover-foreground: #1e3a5f;
-  --primary: #1e3a5f;
+  --popover-foreground: #1E2D45;
+  --primary: #1E2D45;
   --primary-foreground: #F5F0E8;
   --secondary: #EAE3D8;
-  --secondary-foreground: #1e3a5f;
+  --secondary-foreground: #1E2D45;
   --muted: #F3EEE6;
   --muted-foreground: #3A5070;
-  --accent: #1e3a5f;
+  --accent: #2D4A6B;
   --accent-foreground: #F5F0E8;
   --destructive: #8B1A1A;
   --border: #D9CEBC;
   --input: #D9CEBC;
-  --ring: #1e3a5f;
+  --ring: #1E2D45;
   --radius: 0.1875rem; /* 3px */
 
   /* --- Chart colors --- */
-  --chart-1: #1e3a5f;
+  --chart-1: #1E2D45;
   --chart-2: #2D4A6B;
   --chart-3: #4A6E96;
   --chart-4: #C8B89A;
   --chart-5: #8B6F4E;
 
   /* --- Sidebar tokens --- */
-  --sidebar: #1e3a5f;
+  --sidebar: #1E2D45;
   --sidebar-foreground: #F5F0E8;
   --sidebar-primary: #F5F0E8;
-  --sidebar-primary-foreground: #1e3a5f;
+  --sidebar-primary-foreground: #1E2D45;
   --sidebar-accent: rgba(255, 255, 255, 0.08);
   --sidebar-accent-foreground: #F5F0E8;
   --sidebar-border: rgba(255, 255, 255, 0.08);

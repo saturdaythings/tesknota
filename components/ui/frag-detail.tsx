@@ -19,7 +19,7 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
   if (!value) return null;
   return (
     <div className="flex gap-3 py-[5px] border-b border-[var(--color-cream-dark)] last:border-0">
-      <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-sand)]">
+      <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)]">
         {label}
       </span>
       <span className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">{value}</span>
@@ -34,7 +34,7 @@ function NoteChips({ raw }: { raw: string[] }) {
       {raw.map((n) => (
         <span
           key={n}
-          className="font-[var(--font-sans)] text-xs px-2 py-[3px] border border-[var(--color-cream-dark)] text-[var(--color-sand)] bg-[var(--color-cream)]"
+          className="font-[var(--font-sans)] text-xs px-2 py-[3px] border border-[var(--color-cream-dark)] text-[var(--color-navy)] bg-[var(--color-cream)]"
         >
           {n}
         </span>
@@ -123,7 +123,7 @@ export function FragDetail({
       <ModalBody>
       <div className="space-y-5">
         {frag.house && (
-          <div className="font-[var(--font-sans)] text-xs tracking-[0.08em] uppercase text-[var(--color-sand)]">
+          <div className="font-[var(--font-sans)] text-xs tracking-[0.08em] uppercase text-[var(--color-navy)]">
             {frag.house}
           </div>
         )}
@@ -132,7 +132,7 @@ export function FragDetail({
           <div className="flex items-center gap-2">
             <StatusBadge status={frag.status} />
             {frag.isDupe && frag.dupeFor && (
-              <span className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
+              <span className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
                 Dupe for {frag.dupeFor}
               </span>
             )}
@@ -146,13 +146,13 @@ export function FragDetail({
 
         {/* Personal section */}
         <div>
-          <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-sand)] mb-2">
+          <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-navy)] mb-2">
             Personal
           </div>
           <div className="border border-[var(--color-cream-dark)] px-3 py-1">
             {frag.personalRating ? (
               <div className="flex gap-3 py-[5px] border-b border-[var(--color-cream-dark)]">
-                <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-sand)]">Rating</span>
+                <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)]">Rating</span>
                 <span className="font-[var(--font-sans)] text-xs text-[var(--color-accent)] tracking-[1px]">{starsDisplay}</span>
               </div>
             ) : null}
@@ -167,7 +167,7 @@ export function FragDetail({
         {/* Personal notes */}
         {frag.personalNotes && (
           <div>
-            <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-sand)] mb-2">
+            <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-navy)] mb-2">
               Notes
             </div>
             <p className="font-[var(--font-sans)] text-sm text-[var(--color-navy)] leading-relaxed whitespace-pre-wrap">
@@ -180,12 +180,12 @@ export function FragDetail({
         {(cd || accords.length > 0) && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-sand)]">
+              <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-navy)]">
                 Community
               </div>
               <button
                 onClick={() => setFlagOpen((v) => !v)}
-                className="font-[var(--font-sans)] text-xs tracking-[0.08em] text-[var(--color-sand)] hover:text-[var(--color-destructive)] transition-colors border-none bg-none cursor-pointer p-0"
+                className="font-[var(--font-sans)] text-xs tracking-[0.08em] text-[var(--color-navy)] hover:text-[var(--color-destructive)] transition-colors border-none bg-none cursor-pointer p-0"
               >
                 {flagOpen ? "Cancel flag" : "Flag incorrect data"}
               </button>
@@ -193,13 +193,13 @@ export function FragDetail({
 
             {flagOpen && (
               <div className="border border-[var(--color-cream-dark)] bg-[var(--color-cream-dark)] px-3 py-3 mb-3 flex flex-col gap-2">
-                <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] mb-1">Which field is incorrect?</div>
+                <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] mb-1">Which field is incorrect?</div>
                 <div className="flex flex-wrap gap-1.5 mb-1">
                   {FLAG_FIELDS.map((f) => (
                     <button
                       key={f}
                       onClick={() => setFlagField(f)}
-                      className={`font-[var(--font-sans)] text-xs px-2 py-1 border transition-colors cursor-pointer ${flagField === f ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white" : "border-[var(--color-cream-dark)] text-[var(--color-sand)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"}`}
+                      className={`font-[var(--font-sans)] text-xs px-2 py-1 border transition-colors cursor-pointer ${flagField === f ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white" : "border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"}`}
                     >
                       {f}
                     </button>
@@ -210,7 +210,7 @@ export function FragDetail({
                   onChange={(e) => setFlagNote(e.target.value)}
                   placeholder="What's wrong? (optional)"
                   rows={2}
-                  className="w-full px-2 py-1.5 border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] placeholder:text-[var(--color-sand)] focus:outline-none focus:border-[var(--color-accent)] resize-none"
+                  className="w-full px-2 py-1.5 border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] placeholder:text-[var(--color-cream-dark)] focus:outline-none focus:border-[var(--color-accent)] resize-none"
                 />
                 <button
                   onClick={submitFlag}
@@ -231,25 +231,25 @@ export function FragDetail({
             </div>
             {accords.length > 0 && (
               <div className="mt-3">
-                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-sand)] mb-1">Accords</div>
+                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)] mb-1">Accords</div>
                 <NoteChips raw={accords} />
               </div>
             )}
             {cd?.topNotes && cd.topNotes.length > 0 && (
               <div className="mt-3">
-                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-sand)] mb-1">Top Notes</div>
+                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)] mb-1">Top Notes</div>
                 <NoteChips raw={cd.topNotes} />
               </div>
             )}
             {cd?.middleNotes && cd.middleNotes.length > 0 && (
               <div className="mt-3">
-                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-sand)] mb-1">Middle Notes</div>
+                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)] mb-1">Middle Notes</div>
                 <NoteChips raw={cd.middleNotes} />
               </div>
             )}
             {cd?.baseNotes && cd.baseNotes.length > 0 && (
               <div className="mt-3">
-                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-sand)] mb-1">Base Notes</div>
+                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)] mb-1">Base Notes</div>
                 <NoteChips raw={cd.baseNotes} />
               </div>
             )}
@@ -279,7 +279,7 @@ export function FragDetail({
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
-                  className="font-[var(--font-sans)] text-xs border border-[var(--color-cream-dark)] text-[var(--color-sand)] px-3 py-[5px] hover:border-[var(--color-navy)]"
+                  className="font-[var(--font-sans)] text-xs border border-[var(--color-cream-dark)] text-[var(--color-navy)] px-3 py-[5px] hover:border-[var(--color-navy)]"
                 >
                   Cancel
                 </button>
@@ -290,7 +290,7 @@ export function FragDetail({
             {!readOnly && onEdit && (
               <button
                 onClick={() => { handleClose(); onEdit(frag!); }}
-                className="px-4 py-[7px] font-[var(--font-sans)] text-xs border border-[var(--color-cream-dark)] text-[var(--color-sand)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
+                className="px-4 py-[7px] font-[var(--font-sans)] text-xs border border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
               >
                 Edit
               </button>

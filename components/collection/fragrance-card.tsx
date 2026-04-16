@@ -79,10 +79,10 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         {concLabel && (
           <span
             style={{
-              border: "1px solid var(--color-sand)",
-              color: "var(--color-sand)",
+              border: "1px solid var(--color-navy)",
+              color: "var(--color-navy)",
               fontFamily: "var(--font-sans)",
-              fontSize: "12px",
+              fontSize: "11px",
               fontWeight: 500,
               padding: "2px 6px",
               borderRadius: "2px",
@@ -122,7 +122,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
           fontFamily: "var(--font-sans)",
           fontSize: "12px",
           fontWeight: 400,
-          color: "var(--color-sand)",
+          color: "var(--color-navy)",
           textTransform: "uppercase",
           letterSpacing: "0.08em",
           marginBottom: "10px",
@@ -153,7 +153,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         {addedDate && (
           <>
             <span style={{ color: "var(--color-cream-dark)", fontSize: "12px" }}>·</span>
-            <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-sand)" }}>
+            <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-navy)" }}>
               {addedDate}
             </span>
           </>
@@ -189,7 +189,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
                 padding: "2px 7px",
                 borderRadius: "100px",
                 background: "var(--color-sand-light)",
-                color: "var(--color-sand)",
+                color: "var(--color-navy)",
                 fontFamily: "var(--font-sans)",
                 fontSize: "12px",
               }}
@@ -205,7 +205,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         <Badge variant={statusVariant(frag.status)}>
           {STATUS_LABELS[frag.status]}
         </Badge>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: compCount > 0 ? "var(--color-navy)" : "var(--color-sand)" }}>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: compCount > 0 ? "var(--color-navy)" : "var(--color-cream-dark)" }}>
           {compCount > 0 ? compCount : "—"}
         </span>
       </div>

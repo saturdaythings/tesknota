@@ -12,7 +12,7 @@ export function AppShell({ children, sidebar, className }: AppShellProps) {
   return (
     <div
       className={cn('flex h-dvh overflow-hidden', className)}
-      style={{ background: '#FFFFFF', color: 'var(--color-navy)', fontFamily: 'var(--font-sans)' }}
+      style={{ background: 'var(--color-cream)', color: 'var(--color-navy)', fontFamily: 'var(--font-sans)' }}
     >
       {sidebar}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">

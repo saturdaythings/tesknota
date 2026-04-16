@@ -76,10 +76,10 @@ export function FragRow({
             </span>
           )}
         </div>
-        <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
+        <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
           {frag.house}
           {frag.type && TYPE_ABBR[frag.type] && (
-            <span className="ml-[6px]">· {TYPE_ABBR[frag.type]}</span>
+            <span className="ml-[6px] text-[11px]">· {TYPE_ABBR[frag.type]}</span>
           )}
         </div>
       </td>
@@ -89,11 +89,11 @@ export function FragRow({
       <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-accent)] tracking-[1px]">
         {starsStr(parseRating(frag.personalRating))}
       </td>
-      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
+      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
         {addedStr || "\u2014"}
       </td>
-      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-sand)]">{accords}</td>
-      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
+      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">{accords}</td>
+      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
         {compCount > 0 ? <span className="text-[var(--color-accent)]">{compCount}</span> : "\u2014"}
       </td>
       <td className="px-4 py-3">
@@ -103,7 +103,7 @@ export function FragRow({
         <td className="px-4 py-3">
           <button
             onClick={(e) => { e.stopPropagation(); onAction(frag, e); }}
-            className="font-[var(--font-sans)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--color-cream-dark)] text-[var(--color-sand)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors whitespace-nowrap"
+            className="font-[var(--font-sans)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors whitespace-nowrap"
           >
             {actionLabel ?? "Action"}
           </button>
