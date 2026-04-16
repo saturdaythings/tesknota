@@ -278,10 +278,10 @@ function ComplimentsInner() {
 
       <Header pageTitle="Compliments" />
 
-      <main className="flex-1 overflow-y-auto" style={{ background: 'var(--color-cream)' }}>
+      <main className="flex-1 overflow-y-auto" style={{ background: 'var(--color-cream)', padding: '32px 24px 40px' }}>
         <div
           className="mx-auto"
-          style={{ padding: '32px 24px 40px', maxWidth: '1000px' }}
+          style={{ maxWidth: '1000px' }}
         >
           {/* Page header row */}
           <div className="flex items-center justify-between mb-8">

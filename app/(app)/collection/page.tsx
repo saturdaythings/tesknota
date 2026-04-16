@@ -498,7 +498,7 @@ function CollectionInner() {
                     color: "var(--color-navy)",
                     outline: "none",
                   }}
-                  className="focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]"
+                  className="focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
                 />
               </div>
 
