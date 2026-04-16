@@ -54,22 +54,61 @@ The contrast between 20px serif italic and 12px sans uppercase is the visual cha
 
 ---
 
-## Page Layout
+## Topbar
+
+Component: `<Topbar>` from `components/layout/Topbar.tsx`
+
+Used on every page. Replaces `<Header>` which is deprecated.
 
 ```
-<main px-5 md:px-10 py-8 bg-cream flex-1 overflow-y-auto>
-  <div>
-    {/* Header row */}
-    <div flex items-center justify-end mb-8>
+<Topbar
+  title="Page Name"
+  search={<SearchInput />}   {/* optional */}
+  actions={<Button>...</Button>}  {/* optional */}
+/>
+```
+
+| Property | Value |
+|----------|-------|
+| Height | `var(--header-height)` = 56px |
+| Background | `var(--color-cream)` |
+| Border | `1px solid var(--color-sand-light)` bottom |
+| Horizontal padding | 18px mobile / 26px desktop |
+| Breadcrumb: app label | 10px sans upright uppercase tracking-0.12em, color `var(--color-navy-mid)` |
+| Breadcrumb: page title | 18px serif upright (not italic), color `var(--color-navy)`, lh 1.2 |
+| Search slot | right of title, flex-shrink-0 |
+| Actions slot | rightmost, gap-2 |
+| Mobile hamburger | rendered left of title, hidden md |
+
+Search input in topbar (dark bg context):
+- 34px height, 200px width
+- bg `rgba(255,255,255,0.08)`, border `rgba(255,255,255,0.15)`
+- 13px sans, color `var(--color-cream)`
+- border-radius 3px
+
+---
+
+## Page Layout
+
+```tsx
+<Topbar title="Page Name" />
+
+<main style={{ flex: 1, overflowY: 'auto' }}>
+  <div
+    style={{ maxWidth: '1400px', margin: '0 auto', padding: 'var(--space-6) var(--space-8)' }}
+    className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
+  >
+    {/* Action row */}
+    <div className="flex items-center justify-end mb-8">
       <Button variant="primary">Action Label</Button>
     </div>
 
     {/* Filter bar */}
-    <div flex items-start justify-between gap-4 flex-wrap mb-6>
-      <div flex flex-wrap gap-2>
+    <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+      <div className="flex flex-wrap gap-2">
         {/* TabPill components */}
       </div>
-      <div style="width:160px; flex-shrink:0; margin-left:auto">
+      <div style={{ width: '160px', flexShrink: 0, marginLeft: 'auto' }}>
         <Select ... />
       </div>
     </div>
@@ -84,11 +123,16 @@ The contrast between 20px serif italic and 12px sans uppercase is the visual cha
 
 | Property | Value |
 |----------|-------|
-| Horizontal padding | 20px mobile / 40px desktop (`px-5 md:px-10`) |
-| Vertical padding | 32px (`py-8`) |
-| Below header row | 32px (`mb-8`) |
-| Below filter bar | 24px (`mb-6`) |
-| Background | `var(--color-cream)` |
+| Horizontal padding (desktop) | `var(--space-8)` = 32px |
+| Horizontal padding (mobile) | `var(--space-4)` = 16px |
+| Vertical padding (desktop) | `var(--space-6)` = 24px |
+| Vertical padding (mobile) | `var(--space-4)` = 16px |
+| Max content width | 1400px, centered |
+| Background | `var(--color-cream)` (from body default) |
+| Below action row | `mb-8` = 32px |
+| Below filter bar | `mb-6` = 24px |
+
+**Button placement:** Primary action button sits in a right-aligned row inside `<main>`, above the filter bar. Do not place action buttons in the Topbar `actions` slot unless the page has no filter bar (e.g. Settings, Import).
 
 ---
 
@@ -296,6 +340,7 @@ Common Tailwind shorthand: `gap-2`=8px, `gap-4`=16px, `gap-6`=24px, `mb-1`=4px, 
 
 ## Do Not
 
+- Do not use `<Header>` — deprecated. Use `<Topbar>` on all pages
 - Do not use `<table>` for fragrance/compliment row lists
 - Do not change font sizes at breakpoints
 - Do not use `<select>` (native) anywhere visible to the user — always `<Select>` component
