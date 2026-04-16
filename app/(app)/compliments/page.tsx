@@ -7,7 +7,8 @@ import { TabPill } from '@/components/ui/tab-pill';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
-import { Topbar } from '@/components/layout/Topbar';
+import { Header } from '@/components/layout/Header';
+import { PageContent } from '@/components/layout/PageContent';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import type { UserCompliment, Relation, FragranceType } from '@/types';
@@ -213,10 +214,7 @@ function ComplimentsInner() {
 
       <Topbar title="Compliments" />
 
-      <main style={{ flex: 1, overflowY: 'auto' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'var(--space-6) var(--space-8)' }}
-          className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
-        >
+      <PageContent>
           {/* Page header row */}
           <div className="flex items-center justify-end mb-8">
             <Button variant="primary" onClick={() => setLogOpen(true)}>
@@ -245,7 +243,6 @@ function ComplimentsInner() {
                 options={SORT_OPTIONS}
                 value={sort}
                 onChange={setSort}
-                className="text-[12px]"
               />
             </div>
           </div>
@@ -292,8 +289,7 @@ function ComplimentsInner() {
               })}
             </div>
           )}
-        </div>
-      </main>
+      </PageContent>
     </>
   );
 }

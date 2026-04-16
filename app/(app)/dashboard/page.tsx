@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Topbar } from "@/components/layout/Topbar";
+import { PageContent } from "@/components/layout/PageContent";
 import { FragDetail } from "@/components/ui/frag-detail";
 import { FragForm } from "@/components/ui/frag-form";
 import { LogComplimentModal } from "@/components/compliments/log-compliment-modal";
@@ -82,10 +83,7 @@ export default function DashboardPage() {
         onClose={() => setCompFormOpen(false)}
       />
       <Topbar title="Dashboard" />
-      <main
-        className="flex-1 overflow-y-auto"
-        style={{ background: "var(--color-cream)", padding: "32px 24px 40px" }}
-      >
+      <PageContent>
         {!isLoaded && (
           <div
             className="text-xs tracking-[0.12em] py-6"
@@ -157,7 +155,7 @@ export default function DashboardPage() {
             />
           </>
         )}
-      </main>
+      </PageContent>
     </>
   );
 }

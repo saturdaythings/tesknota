@@ -23,7 +23,7 @@ interface SelectProps {
 const triggerBase =
   'flex items-center justify-between w-full h-9 px-3 ' +
   'bg-[var(--color-cream)] rounded-[3px] ' +
-  'font-sans text-[15px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
+  'font-sans text-[12px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 export function Select({
@@ -112,7 +112,7 @@ export function Select({
           }
         }}
         onKeyDown={handleKeyDown}
-        className={cn(triggerBase, className)}
+        className={triggerBase}
         style={{
           border: error ? '1px solid var(--color-destructive)' : open ? '1px solid var(--color-accent)' : '1px solid rgba(30,45,69,0.8)',
         }}

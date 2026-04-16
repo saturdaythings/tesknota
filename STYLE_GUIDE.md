@@ -341,6 +341,7 @@ Common Tailwind shorthand: `gap-2`=8px, `gap-4`=16px, `gap-6`=24px, `mb-1`=4px, 
 ## Do Not
 
 - Do not use `<Header>` — deprecated. Use `<Topbar>` on all pages
+- Do not write a raw `<main>` tag in pages — use `<PageContent>` from `components/layout/PageContent`
 - Do not use `<table>` for fragrance/compliment row lists
 - Do not change font sizes at breakpoints
 - Do not use `<select>` (native) anywhere visible to the user — always `<Select>` component
