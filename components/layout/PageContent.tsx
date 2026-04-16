@@ -29,8 +29,8 @@ export function PageContent({ children, maxWidth = "1400px", className }: PageCo
   return (
     <main style={{ flex: 1, overflowY: "auto" }}>
       <div
-        style={{ maxWidth, padding: "var(--space-6) var(--topbar-px)" }}
-        className={cn("max-md:px-[var(--topbar-px-mobile)] max-md:py-[var(--space-4)]", className)}
+        style={{ maxWidth }}
+        className={cn("px-[var(--topbar-px)] py-[var(--space-6)] max-md:px-[var(--topbar-px-mobile)] max-md:py-[var(--space-4)]", className)}
       >
         {children}
       </div>
