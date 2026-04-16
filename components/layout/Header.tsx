@@ -96,7 +96,7 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
                 fontSize: '12px',
                 width: '220px',
                 background: 'var(--color-cream)',
-                border: '1px solid #C8B89A',
+                border: '1px solid rgba(30,45,69,0.65)',
                 color: 'rgba(30,45,69,0.65)',
               }}
             />

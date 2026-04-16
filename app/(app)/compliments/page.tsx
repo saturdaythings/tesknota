@@ -85,7 +85,7 @@ function TabPill({
         borderRadius: '2px',
         background: active ? 'var(--color-navy)' : 'transparent',
         color: active ? 'var(--color-cream)' : 'rgba(30,45,69,0.65)',
-        border: active ? '1px solid var(--color-navy)' : '1px solid #C8B89A',
+        border: active ? '1px solid var(--color-navy)' : '1px solid rgba(30,45,69,0.65)',
       }}
     >
       {label}

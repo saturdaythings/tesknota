@@ -114,7 +114,7 @@ export function Select({
         onKeyDown={handleKeyDown}
         className={cn(triggerBase, className)}
         style={{
-          border: error ? '1px solid var(--color-destructive)' : open ? '1px solid var(--color-accent)' : '1px solid #C8B89A',
+          border: error ? '1px solid var(--color-destructive)' : open ? '1px solid var(--color-accent)' : '1px solid rgba(30,45,69,0.65)',
         }}
       >
         <span className={selectedOption ? 'text-[var(--color-navy)]' : 'text-[var(--color-sand)]'}>
@@ -149,7 +149,7 @@ export function Select({
             minWidth: '100%',
             zIndex: 50,
             background: 'var(--color-cream)',
-            border: '1px solid #C8B89A',
+            border: '1px solid rgba(30,45,69,0.65)',
             borderRadius: '3px',
             boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
             maxHeight: '280px',
@@ -175,7 +175,7 @@ export function Select({
                   fontSize: '12px',
                   fontFamily: 'var(--font-sans)',
                   cursor: 'pointer',
-                  color: isSelected ? 'var(--color-navy)' : 'var(--color-navy)',
+                  color: 'rgba(30,45,69,0.65)',
                   fontWeight: 400,
                   background: isSelected
                     ? 'var(--color-cream-dark)'
