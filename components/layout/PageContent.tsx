@@ -12,7 +12,7 @@ interface PageContentProps {
 /**
  * Canonical page content wrapper.
  *
- * Padding uses --page-margin (= --topbar-px) so left and right always match the topbar exactly.
+ * Padding uses --space-8 horizontal, --space-6 vertical. Mobile (max-sm): --space-4 both axes.
  * Centered at --page-content-max-width by default. Pass maxWidth to override for narrow pages.
  *
  * Do NOT write a <main> tag directly in pages — use this component.
@@ -26,8 +26,8 @@ export function PageContent({ children, maxWidth, className }: PageContentProps)
           margin: "0 auto",
         }}
         className={cn(
-          "px-[var(--page-margin)] py-[var(--space-6)]",
-          "max-md:px-[var(--topbar-px-mobile)] max-md:py-[var(--space-4)]",
+          "px-[var(--space-8)] py-[var(--space-6)]",
+          "max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]",
           className,
         )}
       >
