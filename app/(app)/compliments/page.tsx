@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect, Suspense } from 'react';
+import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
@@ -82,22 +82,17 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
   return (
     <div
       onClick={onEdit}
-      className="cursor-pointer transition-colors duration-100"
+      className="flex gap-6 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
       style={{
-        display: 'grid',
-        gridTemplateColumns: 'subgrid',
-        gridColumn: '1 / -1',
-        alignItems: 'start',
         minHeight: '80px',
-        paddingTop: 'var(--space-4)',
-        paddingBottom: 'var(--space-4)',
+        padding: 'var(--space-4) 0',
         borderBottom: '1px solid var(--color-row-divider)',
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Track 1: Fragrance — fixed to widest content, left edge never moves */}
-      <div style={{ whiteSpace: 'nowrap' }}>
+      {/* Col 1: fixed width — never shrinks or grows */}
+      <div className="w-[280px] shrink-0 max-sm:w-full">
         <FragranceCell
           name={fragName}
           house={fragHouse}
@@ -106,15 +101,12 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         />
       </div>
 
-      {/* Track 2: Spacer — shrinks proportionally before col 2 wraps */}
-      <div />
-
-      {/* Track 3: Notes/Meta — wraps only after both spacers are exhausted */}
-      <div>
+      {/* Col 2: elastic — takes all remaining space, wraps naturally */}
+      <div className="flex-1 min-w-0">
         {meta && (
           <div
             className="font-sans uppercase mb-1"
-            style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)', fontWeight: 400 }}
+            style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-meta-text)' }}
           >
             {meta}
           </div>
@@ -122,21 +114,19 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {comp.notes && (
           <div
             className="font-serif italic"
-            style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 1.6 }}
+            style={{ fontSize: 'var(--text-note)', color: 'var(--color-notes-text)', lineHeight: 1.6 }}
           >
             {comp.notes}
           </div>
         )}
       </div>
 
-      {/* Track 4: Spacer — always equal to track 2 */}
-      <div />
-
-      {/* Track 5: Date — fixed, right-aligned, right edge never moves */}
-      <div className="font-sans uppercase" style={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
-        <span style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>
-          {date}
-        </span>
+      {/* Col 3: fixed date — right-aligned, never moves */}
+      <div
+        className="w-[72px] shrink-0 text-right font-sans uppercase max-sm:w-auto max-sm:text-left"
+        style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
+      >
+        {date}
       </div>
     </div>
   );
@@ -435,7 +425,7 @@ function ComplimentsInner() {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr) minmax(min-content, max-content) minmax(0, 1fr) max-content', columnGap: 'calc(var(--space-6) / 2)', width: '100%' }}>
+          <div>
             {displayed.map((comp) => {
               const { name, house, type } = getFragInfo(comp);
               return (

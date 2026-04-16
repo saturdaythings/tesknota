@@ -34,15 +34,15 @@ export function FragranceCell({ name, house, type, secondary, className }: Fragr
             {shortFragType(type)}
           </Badge>
         )}
-        {secondary && (
-          <span
-            className="font-serif italic"
-            style={{ fontSize: '16px', color: 'var(--color-navy)' }}
-          >
-            + {secondary}
-          </span>
-        )}
       </div>
+      {secondary && (
+        <div
+          className="font-serif italic mb-1"
+          style={{ fontSize: '16px', color: 'var(--color-navy)' }}
+        >
+          + {secondary}
+        </div>
+      )}
       {house && (
         <div
           className="font-sans uppercase tracking-[0.1em]"
