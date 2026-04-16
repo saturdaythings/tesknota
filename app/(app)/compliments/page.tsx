@@ -130,7 +130,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         <div className="flex flex-wrap items-center gap-2 mb-1">
           <span
             className="font-serif italic"
-            style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}
+            style={{ fontSize: '20px', color: 'var(--color-navy)', lineHeight: 1.2 }}
           >
             {fragName}
           </span>
@@ -142,7 +142,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
           {comp.secondaryFrag && (
             <span
               className="font-serif italic"
-              style={{ fontSize: '14px', color: 'var(--color-sand)' }}
+              style={{ fontSize: '14px', color: 'rgba(30,45,69,0.7)' }}
             >
               + {comp.secondaryFrag}
             </span>
@@ -153,7 +153,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {fragHouse && (
           <div
             className="font-sans uppercase tracking-[0.1em] mb-1"
-            style={{ fontSize: '12px', color: 'var(--color-sand)' }}
+            style={{ fontSize: '12px', color: 'var(--color-navy)' }}
           >
             {fragHouse}
           </div>
@@ -163,7 +163,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {meta && (
           <div
             className="font-sans mb-1"
-            style={{ fontSize: '13px', color: 'var(--color-sand)' }}
+            style={{ fontSize: '12px', color: 'rgba(30,45,69,0.65)' }}
           >
             {meta}
           </div>
@@ -173,7 +173,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {comp.notes && (
           <div
             className="font-serif italic"
-            style={{ fontSize: '14px', color: 'rgba(200,184,154,0.8)', lineHeight: 1.4 }}
+            style={{ fontSize: '15px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}
           >
             {comp.notes}
           </div>
@@ -183,7 +183,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       {/* Right: date */}
       <div
         className="font-sans flex-shrink-0 text-right"
-        style={{ fontSize: '14px', color: 'var(--color-sand)', minWidth: '72px' }}
+        style={{ fontSize: '14px', color: 'rgba(30,45,69,0.7)', minWidth: '72px' }}
       >
         {date}
       </div>
@@ -308,7 +308,7 @@ function ComplimentsInner() {
             </div>
 
             {/* Sort */}
-            <div style={{ width: '220px', flexShrink: 0 }}>
+            <div style={{ width: '160px', flexShrink: 0 }}>
               <Select
                 options={SORT_OPTIONS}
                 value={sort}
