@@ -290,20 +290,6 @@ function ComplimentsInner() {
   const [col1Width, setCol1Width] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    function measure() {
-      if (!listRef.current) return;
-      const cells = listRef.current.querySelectorAll<HTMLElement>('[data-col1]');
-      if (!cells.length) return;
-      cells.forEach((el) => { el.style.width = ''; });
-      const max = Math.max(...Array.from(cells).map((el) => el.offsetWidth));
-      if (max > 0) setCol1Width(max);
-    }
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [displayed]);
-
   if (!user) return null;
 
   const myComps = compliments.filter((c) => c.userId === user.id);
@@ -343,6 +329,20 @@ function ComplimentsInner() {
     else if (sort === 'frag-az') result = [...result].sort((a, b) => (a.primaryFrag ?? '').localeCompare(b.primaryFrag ?? ''));
     return result;
   }, [myComps, relationTab, sort, search]);
+
+  useLayoutEffect(() => {
+    function measure() {
+      if (!listRef.current) return;
+      const cells = listRef.current.querySelectorAll<HTMLElement>('[data-col1]');
+      if (!cells.length) return;
+      cells.forEach((el) => { el.style.width = ''; });
+      const max = Math.max(...Array.from(cells).map((el) => el.offsetWidth));
+      if (max > 0) setCol1Width(max);
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [displayed]);
 
   return (
     <>
