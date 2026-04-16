@@ -83,7 +83,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, col1Width, onEdit 
   return (
     <div
       onClick={onEdit}
-      className="flex gap-6 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
+      className="flex gap-12 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
       style={{
         minHeight: '80px',
         padding: 'var(--space-4) 0',
@@ -337,11 +337,18 @@ function ComplimentsInner() {
       if (!cells.length) return;
       cells.forEach((el) => { el.style.width = ''; });
       const max = Math.max(...Array.from(cells).map((el) => el.offsetWidth));
-      if (max > 0) setCol1Width(max);
+      if (max > 0) {
+        console.log('[compliments] col1Width measured:', max);
+        setCol1Width(max);
+      }
     }
-    measure();
+    // rAF ensures the browser has laid out the rows before we measure
+    const id = requestAnimationFrame(measure);
     window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener('resize', measure);
+    };
   }, [displayed]);
 
   return (
