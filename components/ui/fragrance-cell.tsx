@@ -15,7 +15,7 @@ interface FragranceCellProps {
  * Canonical column 1 for any fragrance list row.
  * Use on Compliments, Collection, Wishlist, and any future list page.
  *
- * Line 1: [Name: serif italic 20px] [TypeBadge 11px?] [+ Secondary: serif italic 15px?]
+ * Line 1: [Name: serif italic 20px] [TypeBadge 11px?] [+ Secondary: serif italic 16px]
  * Line 2: [House: sans uppercase tracking-0.1em 12px?]
  */
 export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
@@ -36,7 +36,7 @@ export function FragranceCell({ name, house, type, secondary, className }: Fragr
         {secondary && (
           <span
             className="font-serif italic"
-            style={{ fontSize: '15px', color: 'var(--color-navy)' }}
+            style={{ fontSize: '16px', color: 'var(--color-navy)' }}
           >
             + {secondary}
           </span>

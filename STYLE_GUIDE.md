@@ -35,7 +35,7 @@ Never mix their roles. No bold on serif. No italic on sans.
 | Role | Font | Style | Size | Weight | Tracking | Color |
 |------|------|-------|------|--------|----------|-------|
 | Fragrance name | Serif | italic | 20px | 400 | — | navy |
-| Secondary name / layered | Serif | italic | 15px | 400 | — | navy |
+| Secondary name / layered | Serif | italic | 16px | 400 | — | navy |
 | Notes / quote | Serif | italic | 16px | 400 | — | rgba(30,45,69,0.7), lh 1.6 |
 | Page title | Serif | italic | 36px | 400 | — | navy |
 | Empty state headline | Serif | italic | 22px | 400 | — | navy |
