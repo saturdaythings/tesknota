@@ -147,10 +147,10 @@ export default function DesignSystemPage() {
             Component: <code className="font-mono">{'<FragranceCell>'}</code> from <code className="font-mono">components/ui/fragrance-cell.tsx</code>. Use on every list row — Collection, Wishlist, Compliments.
           </div>
           <div style={{ borderBottom: '1px solid rgba(30,45,69,0.15)', padding: '16px 0' }}>
-            <FragranceCell name="Replica — Coffee Breeze" house="Maison Margiela" type="EDP" secondary="Baccarat Rouge 540" />
+            <FragranceCell name="Replica — Coffee Breeze" house="Maison Margiela" type="Eau de Parfum" secondary="Baccarat Rouge 540" />
           </div>
           <div style={{ borderBottom: '1px solid rgba(30,45,69,0.15)', padding: '16px 0' }}>
-            <FragranceCell name="Oud Wood" house="Tom Ford" type="EDP" />
+            <FragranceCell name="Oud Wood" house="Tom Ford" type="Eau de Parfum" />
           </div>
         </Section>
 
@@ -334,7 +334,7 @@ export default function DesignSystemPage() {
           </div>
           <div style={{ borderBottom: '1px solid rgba(30,45,69,0.15)', padding: '16px 0' }}>
             <div className="flex gap-6 items-start">
-              <FragranceCell name="Replica — Coffee Breeze" house="Maison Margiela" type="EDP" />
+              <FragranceCell name="Replica — Coffee Breeze" house="Maison Margiela" type="Eau de Parfum" />
               <div className="flex-1 min-w-0">
                 <div className="font-sans mb-1" style={{ fontSize: '12px', color: 'rgba(30,45,69,0.8)' }}>STRANGER · FEMALE · COFFEE SHOP</div>
                 <div className="font-serif italic line-clamp-2" style={{ fontSize: '16px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}>stopped me to ask what I was wearing</div>
