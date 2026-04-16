@@ -371,7 +371,7 @@ function ComplimentsInner() {
         }
       />
 
-      <PageContent maxWidth="1400px">
+      <PageContent>
         {/* Page header row */}
         <div className="flex items-center justify-end mb-8">
           <Button variant="primary" onClick={() => setLogOpen(true)}>

@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Plus, X, FlaskConical, SearchX, SlidersHorizontal } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
+import { PageContent } from "@/components/layout/PageContent";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { MultiSelect } from "@/components/ui/multi-select";
@@ -428,10 +429,7 @@ function CollectionInner() {
         }
       />
 
-      <main style={{ flex: 1, overflowY: "auto" }}>
-        <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "var(--space-6) var(--space-8)" }}
-          className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
-        >
+      <PageContent>
           {/* Add button */}
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "var(--space-5)", position: "relative", zIndex: 10 }}>
             <Button variant="primary" onClick={() => setAddOpen(true)}>
@@ -907,8 +905,7 @@ function CollectionInner() {
               </div>
             </>
           )}
-        </div>
-      </main>
+      </PageContent>
     </>
   );
 }

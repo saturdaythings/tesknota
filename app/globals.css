@@ -100,6 +100,7 @@
      --topbar-px: 26px;
      --topbar-px-mobile: 18px;
      --page-margin: var(--topbar-px);
+     --page-content-max-width: 1400px;
 
   /* --- Opacity variants (on navy) --- */
   --color-white-subtle: rgba(255, 255, 255, 0.08);

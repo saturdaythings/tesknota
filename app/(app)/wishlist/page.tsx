@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Plus, Heart, SearchX } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
+import { PageContent } from "@/components/layout/PageContent";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -571,11 +572,7 @@ function WishlistInner() {
 
       <Topbar title="Wishlist" />
 
-      <main style={{ flex: 1, overflowY: "auto" }}>
-        <div
-          style={{ maxWidth: "1400px", margin: "0 auto", padding: "var(--space-6) var(--space-8)" }}
-          className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
-        >
+      <PageContent>
           {/* Add button */}
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "var(--space-5)" }}>
             <button
@@ -883,8 +880,7 @@ function WishlistInner() {
               )}
             </div>
           )}
-        </div>
-      </main>
+      </PageContent>
     </>
   );
 }
