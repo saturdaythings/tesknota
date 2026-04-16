@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
 
 interface FilterPanelProps {
@@ -29,6 +29,27 @@ export function FilterPanel({
   const [accordDDOpen, setAccordDDOpen] = useState(false);
   const [ratingDDOpen, setRatingDDOpen] = useState(false);
   const [houseDDOpen, setHouseDDOpen] = useState(false);
+  const accordRef = useRef<HTMLDivElement>(null);
+  const ratingRef = useRef<HTMLDivElement>(null);
+  const houseRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    if (!accordDDOpen && !ratingDDOpen && !houseDDOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (accordRef.current && !accordRef.current.contains(e.target as Node)) {
+        setAccordDDOpen(false);
+      }
+      if (ratingRef.current && !ratingRef.current.contains(e.target as Node)) {
+        setRatingDDOpen(false);
+      }
+      if (houseRef.current && !houseRef.current.contains(e.target as Node)) {
+        setHouseDDOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [accordDDOpen, ratingDDOpen, houseDDOpen]);
 
   const handleAccordChange = (accord: string) => {
     onFilterChange({ accord });
@@ -57,7 +78,7 @@ export function FilterPanel({
   return (
     <div className="flex flex-wrap items-start gap-2 mb-4 py-3 border border-[var(--b2)] px-3">
       {/* Accords dropdown */}
-      <div className="relative">
+      <div className="relative" ref={accordRef}>
         <button
           onClick={() => {
             setAccordDDOpen((o) => !o);
@@ -114,7 +135,7 @@ export function FilterPanel({
       </div>
 
       {/* Rating dropdown */}
-      <div className="relative">
+      <div className="relative" ref={ratingRef}>
         <button
           onClick={() => {
             setRatingDDOpen((o) => !o);
@@ -156,7 +177,7 @@ export function FilterPanel({
       </div>
 
       {/* Houses dropdown */}
-      <div className="relative">
+      <div className="relative" ref={houseRef}>
         <button
           onClick={() => {
             setHouseDDOpen((o) => !o);

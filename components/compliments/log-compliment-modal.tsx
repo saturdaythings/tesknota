@@ -81,8 +81,8 @@ function ToggleGroup<T extends string>({
               fontSize: '13px',
               borderRadius: '3px',
               border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-cream-dark)',
-              background: active ? 'var(--color-navy)' : 'transparent',
-              color: active ? 'var(--color-cream)' : 'var(--color-navy)',
+              background: active ? 'var(--color-navy)' : 'var(--color-cream)',
+              color: active ? 'white' : 'var(--color-navy)',
             }}
           >
             {opt.label}

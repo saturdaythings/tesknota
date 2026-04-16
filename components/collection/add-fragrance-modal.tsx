@@ -403,7 +403,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
                         borderBottom: "1px solid var(--color-border)",
                         transition: "background var(--transition-base)",
                       }}
-                      className="hover:bg-[var(--color-surface-raised)] last:border-b-0"
+                      className="hover:bg-[var(--color-surface-raised)] focus:bg-[var(--color-surface-raised)] focus:outline-none last:border-b-0"
                     >
                       <div
                         className="text-body"

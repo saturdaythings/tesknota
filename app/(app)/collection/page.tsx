@@ -447,24 +447,10 @@ function CollectionInner() {
           className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
         >
           {/* Add button */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "var(--space-5)" }}>
-            <button
-              onClick={() => setAddOpen(true)}
-              style={{
-                background: "var(--color-navy)",
-                color: "var(--color-cream)",
-                fontFamily: "var(--font-sans)",
-                fontSize: "13px",
-                fontWeight: 500,
-                padding: "10px 20px",
-                borderRadius: "3px",
-                border: "none",
-                cursor: "pointer",
-                letterSpacing: "0.06em",
-              }}
-            >
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "var(--space-5)", position: "relative", zIndex: 10 }}>
+            <Button variant="primary" onClick={() => setAddOpen(true)}>
               ADD TO COLLECTION
-            </button>
+            </Button>
           </div>
 
           {/* Sticky filter + sort bar */}

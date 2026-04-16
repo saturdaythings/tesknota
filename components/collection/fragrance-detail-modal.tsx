@@ -209,7 +209,7 @@ export function FragranceDetailModal({
     if (!frag) return [];
     const key = frag.fragranceId ?? frag.id;
     return compliments
-      .filter((c) => c.primaryFragId === key)
+      .filter((c) => c.primaryFragId === key || c.secondaryFragId === key)
       .sort(
         (a, b) =>
           parseInt(b.year || "0") * 100 + (parseInt(b.month || "0") || 0) -
@@ -306,7 +306,7 @@ export function FragranceDetailModal({
           position: "fixed",
           inset: 0,
           background: "rgba(30, 45, 69, 0.4)",
-          zIndex: 200,
+          zIndex: 250,
         }}
         aria-hidden="true"
       />
@@ -321,7 +321,7 @@ export function FragranceDetailModal({
         onTouchEnd={onTouchEnd}
         style={{
           position: "fixed",
-          zIndex: 201,
+          zIndex: 251,
           background: "var(--color-cream)",
           display: "flex",
           flexDirection: "column",
@@ -747,13 +747,15 @@ export function FragranceDetailModal({
         {/* Sticky footer */}
         <div
           style={{
-            padding: "var(--space-3) var(--space-5)",
+            padding: "var(--space-3) var(--space-5) var(--space-8)",
             borderTop: "1px solid var(--color-cream-dark)",
             background: "var(--color-cream)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexShrink: 0,
+            position: "relative",
+            zIndex: 10,
           }}
         >
           <Button

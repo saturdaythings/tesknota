@@ -212,8 +212,8 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const cd = selectedName ? getCommunityData(selectedName, selectedHouse, communityFrags) : null;
   const title = isEdit ? "Edit Fragrance" : "Add Fragrance";
 
-  const activeButtonClass = "border-[var(--color-accent)] text-[var(--color-accent)] bg-[var(--color-accent-subtle)]";
-  const inactiveButtonClass = "border-[var(--color-cream-dark)] text-[var(--color-sand)] hover:border-[var(--color-navy)]";
+  const activeButtonClass = "border-[var(--color-accent)] text-white bg-[var(--color-accent)]";
+  const inactiveButtonClass = "border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-navy)]";
   const inputClass = "w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]";
 
   return (
