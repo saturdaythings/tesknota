@@ -190,7 +190,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       {/* Column 3: Date */}
       <div
         className="font-sans flex-shrink-0 text-right"
-        style={{ fontSize: '14px', color: 'var(--color-navy)', minWidth: '72px' }}
+        style={{ fontSize: '12px', color: 'var(--color-navy)', minWidth: '72px' }}
       >
         {date}
       </div>
@@ -282,10 +282,7 @@ function ComplimentsInner() {
       <Header pageTitle="Compliments" />
 
       <main className="flex-1 overflow-y-auto px-5 md:px-10 py-8" style={{ background: 'var(--color-cream)' }}>
-        <div
-          className="mx-auto"
-          style={{ maxWidth: '1200px' }}
-        >
+        <div>
           {/* Page header row */}
           <div className="flex items-center justify-end mb-8">
             <Button variant="primary" onClick={() => setLogOpen(true)}>
