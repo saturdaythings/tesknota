@@ -220,22 +220,22 @@ function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: ()
   }
 
   return (
-    <div style={{ background: 'var(--color-navy)', borderRadius: '2px', padding: 'var(--space-4)', marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>
-      <div className="font-mono mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)', letterSpacing: '0.04em' }}>{tokenName}</div>
+    <div className="rounded-[2px]" style={{ background: 'var(--color-navy)', padding: 'var(--space-4)', marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>
+      <div className="font-mono mb-2 tracking-[0.04em]" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>{tokenName}</div>
       <div className="flex items-center gap-2">
         <input
           value={draft}
           onChange={(e) => { setDraft(e.target.value); if (status !== 'idle') { setStatus('idle'); setErrorMsg(''); } }}
           spellCheck={false}
           onKeyDown={(e) => { if (e.key === 'Enter') publish(); if (e.key === 'Escape') onClose(); }}
-          className="font-mono flex-1 min-w-0"
-          style={{ background: 'var(--color-white-subtle)', border: '1px solid var(--color-white-dim)', color: 'var(--color-cream)', fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-3)', borderRadius: '2px', outline: 'none' }}
+          className="font-mono flex-1 min-w-0 rounded-[2px] outline-none"
+          style={{ background: 'var(--color-white-subtle)', border: '1px solid var(--color-white-dim)', color: 'var(--color-cream)', fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-3)' }}
         />
         {isDirty && (
           <button
             onClick={reset}
-            className="font-sans flex-shrink-0"
-            style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '0' }}
+            className="font-sans flex-shrink-0 bg-transparent border-0 cursor-pointer p-0"
+            style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)' }}
           >
             Reset
           </button>
@@ -243,8 +243,8 @@ function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: ()
         <button
           onClick={publish}
           disabled={!isDirty || status === 'publishing'}
-          className="font-sans font-medium flex-shrink-0"
-          style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.08em', padding: 'var(--space-2) var(--space-4)', borderRadius: '2px', border: 'none', cursor: isDirty && status !== 'publishing' ? 'pointer' : 'default', opacity: status === 'publishing' ? 0.6 : 1, background: isDirty ? 'var(--color-cream)' : 'var(--color-white-subtle)', color: isDirty ? 'var(--color-navy)' : 'var(--color-sand-muted)' }}
+          className={'font-sans font-medium flex-shrink-0 rounded-[2px] border-0 tracking-[0.08em] disabled:opacity-50 ' + (isDirty ? 'cursor-pointer' : 'cursor-default')}
+          style={{ fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-4)', background: isDirty ? 'var(--color-cream)' : 'var(--color-white-subtle)', color: isDirty ? 'var(--color-navy)' : 'var(--color-sand-muted)' }}
         >
           {status === 'publishing' ? 'Publishing\u2026' : 'Publish'}
         </button>
