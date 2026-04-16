@@ -21,7 +21,7 @@ export function PageContent({ children, maxWidth, className }: PageContentProps)
   return (
     <main style={{ flex: 1, overflowY: "auto" }}>
       <div
-        style={maxWidth ? { maxWidth } : undefined}
+        style={maxWidth ? { maxWidth, margin: '0 auto' } : undefined}
         className={cn(
           "px-[var(--page-margin)] py-[var(--space-6)]",
           "max-md:px-[var(--topbar-px-mobile)] max-md:py-[var(--space-4)]",

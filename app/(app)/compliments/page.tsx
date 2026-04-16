@@ -371,7 +371,7 @@ function ComplimentsInner() {
         }
       />
 
-      <PageContent>
+      <PageContent maxWidth="1400px">
         {/* Page header row */}
         <div className="flex items-center justify-end mb-8">
           <Button variant="primary" onClick={() => setLogOpen(true)}>
@@ -427,7 +427,7 @@ function ComplimentsInner() {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr max-content', columnGap: 'var(--space-8)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr max-content', columnGap: 'var(--space-10)' }}>
             {displayed.map((comp) => {
               const { name, house, type } = getFragInfo(comp);
               return (
