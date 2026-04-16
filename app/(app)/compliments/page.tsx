@@ -91,13 +91,15 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Column 1: Fragrance */}
-      <FragranceCell
-        name={fragName}
-        house={fragHouse}
-        type={fragType}
-        secondary={comp.secondaryFrag ?? undefined}
-      />
+      {/* Column 1: Fragrance — fixed width keeps visual gap to col 2 consistent at all viewports */}
+      <div style={{ width: '220px', flexShrink: 0 }}>
+        <FragranceCell
+          name={fragName}
+          house={fragHouse}
+          type={fragType}
+          secondary={comp.secondaryFrag ?? undefined}
+        />
+      </div>
 
       {/* Column 2: Meta + Notes */}
       <div className="flex-1 min-w-0">
