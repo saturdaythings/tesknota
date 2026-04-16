@@ -147,7 +147,7 @@ function FragSearch({
           background: 'var(--color-cream)',
           border: error
             ? '1px solid var(--color-destructive)'
-            : '1px solid var(--color-cream-dark)',
+            : '1px solid #C8B89A',
           color: 'var(--color-navy)',
         }}
       />
@@ -157,7 +157,7 @@ function FragSearch({
           style={{
             top: 'calc(100% + 4px)',
             background: 'var(--color-cream)',
-            border: '1px solid var(--color-cream-dark)',
+            border: '1px solid #C8B89A',
             borderRadius: '3px',
             boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
             maxHeight: '220px',
@@ -171,7 +171,7 @@ function FragSearch({
               style={{
                 height: '52px',
                 padding: '0 12px',
-                borderBottom: '1px solid var(--color-cream-dark)',
+                borderBottom: '1px solid #C8B89A',
               }}
             >
               <div className="font-sans font-medium" style={{ fontSize: '13px', color: 'var(--color-navy)' }}>
