@@ -72,18 +72,17 @@ interface ComplimentRowProps {
   fragName: string;
   fragHouse: string;
   fragType: FragranceType | null;
-  col1Width: number | null;
   onEdit: () => void;
 }
 
-function ComplimentRow({ comp, fragName, fragHouse, fragType, col1Width, onEdit }: ComplimentRowProps) {
+function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: ComplimentRowProps) {
   const meta = buildMeta(comp);
   const date = formatDate(comp);
 
   return (
     <div
       onClick={onEdit}
-      className="flex gap-12 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
+      className="flex items-start cursor-pointer transition-colors duration-100 max-sm:flex-col"
       style={{
         minHeight: '80px',
         padding: 'var(--space-4) 0',
@@ -92,12 +91,8 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, col1Width, onEdit 
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Col 1: measured width — never shrinks or grows */}
-      <div
-        data-col1
-        className="shrink-0 max-sm:w-full"
-        style={col1Width ? { width: `${col1Width}px` } : undefined}
-      >
+      {/* Col 1: width set directly by useLayoutEffect DOM write */}
+      <div data-col1 className="shrink-0 max-sm:w-full">
         <FragranceCell
           name={fragName}
           house={fragHouse}
@@ -106,8 +101,8 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, col1Width, onEdit 
         />
       </div>
 
-      {/* Col 2: elastic — takes all remaining space, wraps naturally */}
-      <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+      {/* Col 2: elastic — large gap from col 1, takes all remaining space */}
+      <div style={{ flex: 1, minWidth: 0, textAlign: 'left', marginLeft: 'var(--space-12)' }}>
         {meta && (
           <div
             className="font-sans uppercase mb-1"
@@ -126,10 +121,10 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, col1Width, onEdit 
         )}
       </div>
 
-      {/* Col 3: date — right-aligned, never wraps */}
+      {/* Col 3: date — smaller gap from col 2, right-aligned, never wraps */}
       <div
         className="font-sans uppercase max-sm:text-left"
-        style={{ flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
+        style={{ flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap', marginLeft: 'var(--space-6)', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
       >
         {date}
       </div>
@@ -287,7 +282,6 @@ function ComplimentsInner() {
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
   const [search, setSearch] = useState('');
-  const [col1Width, setCol1Width] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   if (!user) return null;
@@ -331,14 +325,14 @@ function ComplimentsInner() {
   }, [myComps, relationTab, sort, search]);
 
   useLayoutEffect(() => {
-    // Must be synchronous — rAF would defer past the paint causing a visible flash
+    // Direct DOM write — no React state, no re-render, guaranteed before paint
     function measure() {
       if (!listRef.current) return;
       const cells = listRef.current.querySelectorAll<HTMLElement>('[data-col1]');
       if (!cells.length) return;
       cells.forEach((el) => { el.style.width = ''; });
       const max = Math.max(...Array.from(cells).map((el) => el.scrollWidth));
-      if (max > 0) setCol1Width(max);
+      if (max > 0) cells.forEach((el) => { el.style.width = `${max}px`; });
     }
     measure();
     window.addEventListener('resize', measure);
@@ -457,7 +451,6 @@ function ComplimentsInner() {
                   fragName={name}
                   fragHouse={house}
                   fragType={type}
-                  col1Width={col1Width}
                   onEdit={() => setEditingComp(comp)}
                 />
               );
