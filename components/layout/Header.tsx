@@ -93,7 +93,7 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
               }}
               className="h-9 pl-9 pr-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
               style={{
-                fontSize: '13px',
+                fontSize: '12px',
                 width: '220px',
                 background: 'var(--color-cream)',
                 border: '1px solid #C8B89A',

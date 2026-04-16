@@ -22,7 +22,7 @@ interface SelectProps {
 
 const triggerBase =
   'flex items-center justify-between w-full h-9 px-3 ' +
-  'bg-[var(--color-cream)] border border-[var(--color-cream-dark)] rounded-[3px] ' +
+  'bg-[var(--color-cream)] border border-[#C8B89A] rounded-[3px] ' +
   'font-sans text-[15px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'focus-visible:border-[var(--color-accent)] ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
@@ -151,7 +151,7 @@ export function Select({
             minWidth: '100%',
             zIndex: 50,
             background: 'var(--color-cream)',
-            border: '1px solid var(--color-cream-dark)',
+            border: '1px solid #C8B89A',
             borderRadius: '3px',
             boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
             maxHeight: '280px',

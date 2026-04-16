@@ -84,8 +84,8 @@ function TabPill({
         padding: '6px 12px',
         borderRadius: '2px',
         background: active ? 'var(--color-navy)' : 'transparent',
-        color: active ? 'var(--color-cream)' : 'var(--color-navy)',
-        border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-cream-dark)',
+        color: active ? 'var(--color-cream)' : 'rgba(30,45,69,0.65)',
+        border: active ? '1px solid var(--color-navy)' : '1px solid #C8B89A',
       }}
     >
       {label}
@@ -285,12 +285,6 @@ function ComplimentsInner() {
         >
           {/* Page header row */}
           <div className="flex items-center justify-between mb-8">
-            <h1
-              className="font-serif italic"
-              style={{ fontSize: '26px', color: 'var(--color-navy)' }}
-            >
-              Compliment Log
-            </h1>
             <Button variant="primary" onClick={() => setLogOpen(true)}>
               Log Compliment
             </Button>
