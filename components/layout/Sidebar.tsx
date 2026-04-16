@@ -78,7 +78,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
         style={{ background: 'var(--color-navy)' }}
       >
         {/* Logo area */}
-        <div className="px-5 pt-8 pb-4 flex-shrink-0">
+        <div className="px-5 pt-8 pb-6 flex-shrink-0">
           <div
             className="font-serif italic leading-none mb-1"
             style={{ fontSize: '28px', color: 'var(--color-cream)' }}
@@ -106,7 +106,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto pb-2">
           {navSections.map((section) => (
-            <div key={section.label} className="mt-4">
+            <div key={section.label} className="mt-6">
               <div
                 className="px-5 mb-1 font-sans font-medium uppercase"
                 style={{
@@ -158,15 +158,15 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           style={{ borderColor: 'rgba(255,255,255,0.08)' }}
         >
           <div
-            className="font-sans font-medium mb-1 truncate"
-            style={{ fontSize: '15px', color: 'var(--color-cream)' }}
+            className="font-sans mb-1 truncate"
+            style={{ fontSize: '14px', color: 'var(--color-cream)' }}
           >
             {userName}
           </div>
           <button
             onClick={onSignOut}
-            className="flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.12em] transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
-            style={{ fontSize: '11px', color: 'rgba(200,184,154,0.6)' }}
+            className="flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.1em] transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
+            style={{ fontSize: '11px', color: 'rgba(200,184,154,0.8)' }}
           >
             <LogOut size={12} />
             Sign Out
