@@ -22,9 +22,8 @@ interface SelectProps {
 
 const triggerBase =
   'flex items-center justify-between w-full h-9 px-3 ' +
-  'bg-[var(--color-cream)] border border-[#C8B89A] rounded-[3px] ' +
+  'bg-[var(--color-cream)] rounded-[3px] ' +
   'font-sans text-[15px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
-  'focus-visible:border-[var(--color-accent)] ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 export function Select({
@@ -113,11 +112,10 @@ export function Select({
           }
         }}
         onKeyDown={handleKeyDown}
-        className={cn(
-          triggerBase,
-          className,
-          error ? 'border-[var(--color-destructive)]' : open ? 'border-[var(--color-accent)]' : '',
-        )}
+        className={cn(triggerBase, className)}
+        style={{
+          border: error ? '1px solid var(--color-destructive)' : open ? '1px solid var(--color-accent)' : '1px solid #C8B89A',
+        }}
       >
         <span className={selectedOption ? 'text-[var(--color-navy)]' : 'text-[var(--color-sand)]'}>
           {selectedOption?.label ?? placeholder}
