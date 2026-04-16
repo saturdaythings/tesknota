@@ -88,7 +88,7 @@
 
   /* --- Layout --- */
   --sidebar-width: 220px;
-     --header-height: 56px;
+     --header-height: 64px;
 
   /* --- shadcn semantic tokens mapped to new brand --- */
   --background: var(--color-cream);
