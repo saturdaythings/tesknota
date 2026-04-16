@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { Button } from '@/components/ui/button';
@@ -166,6 +167,7 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
   const [activeAction, setActiveAction] = useState<'publish' | 'reset' | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [sha, setSha] = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Apply draft as live preview and notify parent of current display value
   useEffect(() => {
@@ -188,13 +190,10 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
   const isDirty = draft !== publishedValue;
   const isAtDefault = draft === defaultValue;
 
-  async function callWorker(value: string, message?: string) {
+  async function callWorker(value: string, message?: string): Promise<{ ok: boolean; sha?: string; error?: string }> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
-      setStatus('error');
-      setErrorMsg('No active session — sign in again');
-      setActiveAction(null);
-      return;
+      return { ok: false, error: 'No active session — sign in again' };
     }
     try {
       const body: Record<string, string> = { tokenName, value };
@@ -208,15 +207,12 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
       if (!res.ok) throw new Error(data.error ?? 'Failed (' + res.status + ')');
       publishedRef.current = value;
       setPublishedValue(value);
-      setStatus('success');
-      setSha(data.sha ?? '');
+      return { ok: true, sha: data.sha ?? '' };
     } catch (err) {
-      setStatus('error');
-      setErrorMsg(err instanceof Error ? err.message : 'Publish failed');
       document.documentElement.style.setProperty(tokenName, publishedRef.current);
       setDraft(publishedRef.current);
+      return { ok: false, error: err instanceof Error ? err.message : 'Publish failed' };
     }
-    setActiveAction(null);
   }
 
   async function publish() {
@@ -224,7 +220,10 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
     setStatus('publishing');
     setActiveAction('publish');
     setErrorMsg('');
-    await callWorker(draft);
+    const result = await callWorker(draft);
+    if (result.ok) { setStatus('success'); setSha(result.sha ?? ''); }
+    else { setStatus('error'); setErrorMsg(result.error ?? 'Publish failed'); }
+    setActiveAction(null);
   }
 
   async function resetToDefault() {
@@ -234,7 +233,10 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
     setErrorMsg('');
     document.documentElement.style.setProperty(tokenName, defaultValue);
     setDraft(defaultValue);
-    await callWorker(defaultValue, 'revert(design): restore ' + tokenName + ' to default');
+    const result = await callWorker(defaultValue, 'revert(design): restore ' + tokenName + ' to default');
+    if (result.ok) { setStatus('success'); setSha(result.sha ?? ''); }
+    else { setStatus('error'); setErrorMsg(result.error ?? 'Reset failed'); }
+    setActiveAction(null);
   }
 
   return (
@@ -269,6 +271,16 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
             {activeAction === 'reset' ? 'Restoring\u2026' : 'Reset'}
           </button>
         )}
+        {isDirty && (
+          <button
+            onClick={() => setPreviewOpen(true)}
+            disabled={status === 'publishing'}
+            className="font-sans flex-shrink-0 rounded-[2px] cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            style={{ fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-4)', background: 'transparent', border: '1px solid var(--color-white-dim)', color: 'var(--color-sand-muted)' }}
+          >
+            Preview
+          </button>
+        )}
         <button
           onClick={publish}
           disabled={!isDirty || status === 'publishing'}
@@ -288,7 +300,125 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
           {errorMsg}
         </div>
       )}
+      {previewOpen && (
+        <PreviewOverlay
+          tokenName={tokenName}
+          draft={draft}
+          onBack={() => setPreviewOpen(false)}
+          callWorker={callWorker}
+          onPublishSuccess={() => { setPreviewOpen(false); setStatus('success'); }}
+        />
+      )}
     </div>
+  );
+}
+
+// ── Preview overlay ────────────────────────────────────────
+
+const PREVIEW_ROUTES = [
+  { label: 'Dashboard', path: '/dashboard' },
+  { label: 'Compliments', path: '/compliments' },
+  { label: 'Collection', path: '/collection' },
+  { label: 'Login', path: '/' },
+];
+
+function PreviewOverlay({ tokenName, draft, onBack, callWorker, onPublishSuccess }: {
+  tokenName: string;
+  draft: string;
+  onBack: () => void;
+  callWorker: (value: string, message?: string) => Promise<{ ok: boolean; sha?: string; error?: string }>;
+  onPublishSuccess: () => void;
+}) {
+  const [route, setRoute] = useState('/dashboard');
+  const [status, setStatus] = useState<'idle' | 'publishing' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [sha, setSha] = useState('');
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  function injectToken() {
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: 'TOKEN_PREVIEW', token: tokenName, value: draft },
+      window.location.origin
+    );
+  }
+
+  async function handlePublish() {
+    if (status === 'publishing' || status === 'success') return;
+    setStatus('publishing');
+    setErrorMsg('');
+    const result = await callWorker(draft);
+    if (result.ok) {
+      setSha(result.sha ?? '');
+      setStatus('success');
+      onPublishSuccess();
+    } else {
+      setStatus('error');
+      setErrorMsg(result.error ?? 'Publish failed');
+    }
+  }
+
+  return createPortal(
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--color-navy)', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-4) var(--space-6)', borderBottom: '1px solid var(--color-white-subtle)', flexShrink: 0 }}>
+        <button
+          onClick={onBack}
+          className="font-sans flex-shrink-0"
+          style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, letterSpacing: '0.04em' }}
+        >
+          Back
+        </button>
+        <div className="flex gap-2 flex-1 justify-center">
+          {PREVIEW_ROUTES.map((r) => (
+            <button
+              key={r.path}
+              onClick={() => setRoute(r.path)}
+              className="font-sans uppercase flex-shrink-0 cursor-pointer"
+              style={{
+                fontSize: 'var(--text-xs)',
+                fontWeight: 400,
+                letterSpacing: '0.08em',
+                padding: 'var(--space-2) var(--space-4)',
+                borderRadius: '2px',
+                background: route === r.path ? 'var(--color-cream)' : 'transparent',
+                color: route === r.path ? 'var(--color-navy)' : 'var(--color-sand-muted)',
+                border: route === r.path ? '1px solid var(--color-cream)' : '1px solid var(--color-white-dim)',
+              }}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {status === 'error' && (
+            <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>{errorMsg}</span>
+          )}
+          {status === 'success' && (
+            <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>committed {sha.slice(0, 7)}</span>
+          )}
+          <button
+            onClick={handlePublish}
+            disabled={status === 'publishing' || status === 'success'}
+            className="font-sans font-medium rounded-[2px] border-0 tracking-[0.08em] cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            style={{ fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-4)', background: 'var(--color-cream)', color: 'var(--color-navy)' }}
+          >
+            {status === 'publishing' ? 'Publishing\u2026' : 'Publish'}
+          </button>
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-2) var(--space-6)', borderBottom: '1px solid var(--color-white-dim)', flexShrink: 0 }}>
+        <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>{tokenName}</span>
+        <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)' }}>{draft}</span>
+      </div>
+      <iframe
+        ref={iframeRef}
+        key={route}
+        src={route}
+        onLoad={injectToken}
+        style={{ flex: 1, border: 'none', display: 'block' }}
+        title="Token preview"
+      />
+    </div>,
+    document.body
   );
 }
 

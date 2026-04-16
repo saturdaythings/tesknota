@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Cormorant_Garamond, Inter } from 'next/font/google';
 import './globals.css';
 import { UserProvider } from '@/lib/user-context';
+import { TokenPreviewListener } from '@/components/ui/TokenPreviewListener';
 
 const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className="h-full overflow-hidden"
         style={{ background: 'var(--color-cream)', color: 'var(--color-navy)', fontFamily: 'var(--font-sans)' }}
       >
+        <TokenPreviewListener />
         <UserProvider>{children}</UserProvider>
       </body>
     </html>
