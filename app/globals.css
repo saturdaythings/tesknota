@@ -10,7 +10,7 @@
 
 :root {
      /* --- Brand palette --- */
-  --color-navy: #1E2D45;          /* darker navy (matches reference) */
+  --color-navy: #1e2d;          /* darker navy (matches reference) */
   --color-navy-mid: #3A5070;      /* readable mid-navy for text on light bg */
   --color-cream: #F5F0E8;         /* sidebar header, login bg, accent surfaces */
   --color-cream-dark: #EAE3D8;    /* cards, raised surfaces — distinct from cream */
