@@ -107,11 +107,11 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, col1Width, onEdit 
       </div>
 
       {/* Col 2: elastic — takes all remaining space, wraps naturally */}
-      <div className="flex-1 min-w-0">
+      <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
         {meta && (
           <div
             className="font-sans uppercase mb-1"
-            style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-meta-text)' }}
+            style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)', fontWeight: 400 }}
           >
             {meta}
           </div>
@@ -119,17 +119,17 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, col1Width, onEdit 
         {comp.notes && (
           <div
             className="font-serif italic"
-            style={{ fontSize: 'var(--text-note)', color: 'var(--color-notes-text)', lineHeight: 1.6 }}
+            style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 1.6 }}
           >
             {comp.notes}
           </div>
         )}
       </div>
 
-      {/* Col 3: fixed date — right-aligned, never moves */}
+      {/* Col 3: date — right-aligned, never wraps */}
       <div
-        className="w-[72px] shrink-0 text-right font-sans uppercase max-sm:w-auto max-sm:text-left"
-        style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
+        className="font-sans uppercase max-sm:text-left"
+        style={{ flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
       >
         {date}
       </div>

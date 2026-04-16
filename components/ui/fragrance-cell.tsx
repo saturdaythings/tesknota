@@ -12,42 +12,30 @@ interface FragranceCellProps {
   className?: string;
 }
 
-/**
- * Canonical column 1 for any fragrance list row.
- * Use on Compliments, Collection, Wishlist, and any future list page.
- *
- * Line 1: [Name: serif italic 20px] [TypeBadge 11px?] [+ Secondary: serif italic 16px]
- * Line 2: [House: sans uppercase tracking-0.1em 12px?]
- */
 export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
   return (
-    <div className={`flex-none max-sm:w-full ${className ?? ''}`}>
-      <div className="flex items-center gap-2 mb-1">
-        <span
-          className="font-serif italic"
-          style={{ fontSize: '20px', color: 'var(--color-navy)', lineHeight: 1.2 }}
-        >
+    <div className={className ?? ''}>
+      <div className="mb-1">
+        <span className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}
         </span>
         {type && shortFragType(type) && (
-          <Badge variant="neutral" className="flex-shrink-0 text-[11px] py-[2px]" style={{ color: 'rgba(30,45,69,0.8)' }}>
+          <Badge
+            variant="neutral"
+            className="inline-flex flex-shrink-0 ml-2 py-[2px]"
+            style={{ fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', verticalAlign: 'middle' }}
+          >
             {shortFragType(type)}
           </Badge>
         )}
       </div>
       {secondary && (
-        <div
-          className="font-serif italic mb-1"
-          style={{ fontSize: '16px', color: 'var(--color-navy)' }}
-        >
+        <div className="font-serif italic mb-1" style={{ fontSize: 'var(--text-note)', color: 'var(--color-navy)' }}>
           + {secondary}
         </div>
       )}
       {house && (
-        <div
-          className="font-sans uppercase tracking-[0.1em]"
-          style={{ fontSize: '12px', color: 'var(--color-navy)' }}
-        >
+        <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>
           {house}
         </div>
       )}
