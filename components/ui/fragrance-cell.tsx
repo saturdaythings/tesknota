@@ -20,7 +20,7 @@ interface FragranceCellProps {
  */
 export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
   return (
-    <div className={`flex-1 min-w-0 ${className ?? ''}`}>
+    <div className={`flex-none w-[220px] max-sm:w-full ${className ?? ''}`}>
       <div className="flex flex-wrap items-center gap-2 mb-1">
         <span
           className="font-serif italic"
