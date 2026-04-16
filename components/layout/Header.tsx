@@ -42,7 +42,7 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
           className="font-sans font-medium uppercase leading-none"
           style={{
             fontSize: '10px',
-            color: 'var(--color-sand)',
+            color: 'var(--color-navy)',
             letterSpacing: '0.12em',
           }}
         >
@@ -64,7 +64,8 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
           <button
             onClick={() => setSearchExpanded((v) => !v)}
             aria-label="Search"
-            className="md:hidden p-2 bg-transparent border-none cursor-pointer text-[var(--color-sand)] hover:text-[var(--color-navy)] transition-colors"
+            className="md:hidden p-2 bg-transparent border-none cursor-pointer transition-colors"
+            style={{ color: '#C8B89A' }}
           >
             <Search size={18} />
           </button>
@@ -80,7 +81,7 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
             <Search
               size={15}
               className="absolute left-3 pointer-events-none"
-              style={{ color: 'var(--color-sand)' }}
+              style={{ color: '#C8B89A' }}
             />
             <input
               type="search"
@@ -95,8 +96,8 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
                 fontSize: '13px',
                 width: '220px',
                 background: 'var(--color-cream)',
-                border: '1px solid var(--color-cream-dark)',
-                color: 'var(--color-navy)',
+                border: '1px solid #C8B89A',
+                color: 'rgba(30,45,69,0.65)',
               }}
             />
           </div>
