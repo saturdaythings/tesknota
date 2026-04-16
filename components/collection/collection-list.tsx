@@ -1,0 +1,137 @@
+"use client";
+
+import type { UserFragrance, CommunityFrag } from '@/types';
+import { FragranceCard } from '@/components/collection/fragrance-card';
+import { Pagination } from '@/components/ui/pagination';
+import { getAccords } from '@/lib/frag-utils';
+import { addedStr } from '@/lib/collection-utils';
+
+export interface CollectionRowContext {
+  compMap: Record<string, number>;
+  communityFrags: CommunityFrag[];
+  onRatingUpdate: (frag: UserFragrance, rating: number) => void;
+}
+
+export interface CollectionColumnDef {
+  id: string;
+  label: string;
+  /** CSS grid track: 'minmax(240px,1fr)', 'max-content', '200px', etc. */
+  width: string;
+  align?: 'left' | 'right';
+  render: (frag: UserFragrance, ctx: CollectionRowContext) => React.ReactNode;
+}
+
+interface CollectionListProps {
+  items: UserFragrance[];
+  columns: CollectionColumnDef[];
+  ctx: CollectionRowContext;
+  onOpen: (frag: UserFragrance) => void;
+  page: number;
+  totalPages: number;
+  onPage: (page: number) => void;
+}
+
+export function CollectionList({ items, columns, ctx, onOpen, page, totalPages, onPage }: CollectionListProps) {
+  const gridTemplateColumns = columns.map((c) => c.width).join(' ');
+
+  return (
+    <>
+      {/* Desktop grid table */}
+      <div className="hidden md:block">
+        {/* Header */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns,
+            columnGap: 'var(--space-6)',
+            background: 'var(--color-cream-dark)',
+            borderBottom: '1px solid var(--color-sand-light)',
+            height: '40px',
+            alignItems: 'center',
+          }}
+        >
+          {columns.map((col) => (
+            <div
+              key={col.id}
+              className="font-sans uppercase"
+              style={{
+                fontSize: 'var(--text-xs)',
+                fontWeight: 'var(--font-weight-medium)',
+                letterSpacing: 'var(--tracking-md)',
+                color: 'var(--color-navy)',
+                textAlign: col.align ?? 'left',
+                padding: '0 var(--space-4)',
+              }}
+            >
+              {col.label}
+            </div>
+          ))}
+        </div>
+
+        {/* Rows */}
+        <div style={{ display: 'grid', gridTemplateColumns, columnGap: 'var(--space-6)' }}>
+          {items.map((frag) => (
+            <CollectionRow
+              key={frag.id}
+              frag={frag}
+              columns={columns}
+              ctx={ctx}
+              onOpen={() => onOpen(frag)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile */}
+      <div className="md:hidden">
+        {items.map((frag) => (
+          <FragranceCard
+            key={frag.id}
+            frag={frag}
+            compCount={ctx.compMap[frag.fragranceId ?? frag.id] ?? 0}
+            accords={getAccords(frag, ctx.communityFrags)}
+            addedDate={addedStr(frag.createdAt) || null}
+            onClick={() => onOpen(frag)}
+          />
+        ))}
+      </div>
+
+      <Pagination page={page} totalPages={totalPages} onPage={onPage} />
+    </>
+  );
+}
+
+interface CollectionRowProps {
+  frag: UserFragrance;
+  columns: CollectionColumnDef[];
+  ctx: CollectionRowContext;
+  onOpen: () => void;
+}
+
+function CollectionRow({ frag, columns, ctx, onOpen }: CollectionRowProps) {
+  return (
+    <div
+      onClick={onOpen}
+      className="cursor-pointer transition-colors duration-100"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'subgrid',
+        gridColumn: '1 / -1',
+        alignItems: 'center',
+        minHeight: '64px',
+        borderBottom: '1px solid var(--color-sand-light)',
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
+      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+    >
+      {columns.map((col) => (
+        <div
+          key={col.id}
+          style={{ padding: '0 var(--space-4)', minWidth: 0, textAlign: col.align ?? 'left' }}
+        >
+          {col.render(frag, ctx)}
+        </div>
+      ))}
+    </div>
+  );
+}
