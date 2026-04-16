@@ -96,7 +96,8 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      <div style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+      {/* Track 1: Fragrance — fixed to widest content, left edge never moves */}
+      <div style={{ whiteSpace: 'nowrap' }}>
         <FragranceCell
           name={fragName}
           house={fragHouse}
@@ -105,6 +106,10 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         />
       </div>
 
+      {/* Track 2: Spacer — shrinks proportionally before col 2 wraps */}
+      <div />
+
+      {/* Track 3: Notes/Meta — wraps only after both spacers are exhausted */}
       <div>
         {meta && (
           <div
@@ -124,6 +129,10 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         )}
       </div>
 
+      {/* Track 4: Spacer — always equal to track 2 */}
+      <div />
+
+      {/* Track 5: Date — fixed, right-aligned, right edge never moves */}
       <div className="font-sans uppercase" style={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
         <span style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>
           {date}
@@ -426,7 +435,7 @@ function ComplimentsInner() {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', columnGap: 'var(--space-6)', width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr) minmax(min-content, max-content) minmax(0, 1fr) max-content', columnGap: 'calc(var(--space-6) / 2)', width: '100%' }}>
             {displayed.map((comp) => {
               const { name, house, type } = getFragInfo(comp);
               return (
