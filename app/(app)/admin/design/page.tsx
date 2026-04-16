@@ -147,7 +147,7 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
 
 // ── Token editor ───────────────────────────────────────────
 
-function TokenEditPanel({ tokenName, defaultValue, onClose }: { tokenName: string; defaultValue: string; onClose: () => void }) {
+function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { tokenName: string; defaultValue: string; onClose: () => void; onDraftChange?: (v: string) => void }) {
   const [committedValue] = useState(() => {
     const raw = getComputedStyle(document.documentElement).getPropertyValue(tokenName).trim();
     // Strip accidental "tokenName: " prefix if a prior corrupted publish baked it into the inline style
@@ -163,9 +163,10 @@ function TokenEditPanel({ tokenName, defaultValue, onClose }: { tokenName: strin
   const [errorMsg, setErrorMsg] = useState('');
   const [sha, setSha] = useState('');
 
-  // Apply draft as live preview
+  // Apply draft as live preview and notify parent of current display value
   useEffect(() => {
     document.documentElement.style.setProperty(tokenName, draft);
+    onDraftChange?.(draft);
   }, [draft, tokenName]);
 
   // On unmount: keep published value if a commit landed, else revert to CSS file
@@ -176,6 +177,7 @@ function TokenEditPanel({ tokenName, defaultValue, onClose }: { tokenName: strin
       } else {
         document.documentElement.style.removeProperty(tokenName);
       }
+      onDraftChange?.(publishedRef.current);
     };
   }, [tokenName]);
 
@@ -286,7 +288,7 @@ function TokenEditPanel({ tokenName, defaultValue, onClose }: { tokenName: strin
   );
 }
 
-function ExpandableToken({ token, defaultValue, expanded, onToggle, children }: { token: string; defaultValue: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
+function ExpandableToken({ token, defaultValue, expanded, onToggle, onDraftChange, children }: { token: string; defaultValue: string; expanded: boolean; onToggle: () => void; onDraftChange?: (v: string) => void; children: React.ReactNode }) {
   return (
     <div>
       <div
@@ -309,7 +311,7 @@ function ExpandableToken({ token, defaultValue, expanded, onToggle, children }: 
           ▾
         </span>
       </div>
-      {expanded && <TokenEditPanel tokenName={token} defaultValue={defaultValue} onClose={onToggle} />}
+      {expanded && <TokenEditPanel tokenName={token} defaultValue={defaultValue} onClose={onToggle} onDraftChange={onDraftChange} />}
     </div>
   );
 }
@@ -375,6 +377,15 @@ export default function DesignSystemPage() {
   ];
   const computed = useComputedTokens(allTokens);
   const [expandedToken, setExpandedToken] = useState<string | null>(null);
+  const [liveColorValues, setLiveColorValues] = useState<Record<string, string>>({});
+
+  function colorValue(token: string) {
+    return liveColorValues[token] ?? computed[token] ?? '';
+  }
+
+  function trackColor(token: string) {
+    return (v: string) => setLiveColorValues((prev) => ({ ...prev, [token]: v }));
+  }
 
   function toggle(token: string) {
     setExpandedToken((prev) => (prev === token ? null : token));
@@ -389,8 +400,8 @@ export default function DesignSystemPage() {
           <Section title="Brand Colors">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {BRAND_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
-                  <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
+                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)} onDraftChange={trackColor(c.token)}>
+                  <ColorSwatch {...c} computed={colorValue(c.token)} />
                 </ExpandableToken>
               ))}
             </div>
@@ -400,8 +411,8 @@ export default function DesignSystemPage() {
             <Note>Used on navy backgrounds — sidebar, login page, topbar search.</Note>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {OPACITY_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
-                  <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
+                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)} onDraftChange={trackColor(c.token)}>
+                  <ColorSwatch {...c} computed={colorValue(c.token)} />
                 </ExpandableToken>
               ))}
             </div>
@@ -410,8 +421,8 @@ export default function DesignSystemPage() {
           <Section title="Row / List Tokens">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {ROW_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
-                  <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
+                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)} onDraftChange={trackColor(c.token)}>
+                  <ColorSwatch {...c} computed={colorValue(c.token)} />
                 </ExpandableToken>
               ))}
             </div>
