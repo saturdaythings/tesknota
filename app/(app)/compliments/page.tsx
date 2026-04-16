@@ -258,7 +258,7 @@ function ComplimentsInner() {
                   style={{
                     height: '80px',
                     borderBottom: '1px solid rgba(30,45,69,0.15)',
-                    background: 'rgba(237,232,223,0.3)',
+                    background: 'rgba(232,224,208,0.3)',
                     borderRadius: '3px',
                     marginBottom: '2px',
                   }}

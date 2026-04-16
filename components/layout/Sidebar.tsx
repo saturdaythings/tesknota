@@ -24,11 +24,16 @@ interface SidebarProps {
   onSignOut?: () => void;
 }
 
-function CountBadge({ count }: { count: number }) {
+function CountBadge({ count, active }: { count: number; active: boolean }) {
   return (
     <span
-      className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full font-sans font-medium leading-none"
-      style={{ fontSize: '11px', background: 'var(--color-cream)', color: 'var(--color-navy)' }}
+      className="ml-auto font-sans tabular-nums"
+      style={{
+        fontSize: '12px',
+        fontWeight: 400,
+        letterSpacing: '0.08em',
+        color: active ? 'var(--color-cream)' : 'rgba(200,184,154,0.8)',
+      }}
     >
       {count}
     </span>
@@ -105,9 +110,9 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
               <div
                 className="px-5 mb-1 font-sans font-medium uppercase"
                 style={{
-                  fontSize: '10px',
+                  fontSize: '12px',
                   color: 'rgba(200,184,154,0.6)',
-                  letterSpacing: '0.15em',
+                  letterSpacing: '0.08em',
                   lineHeight: 1,
                 }}
               >
@@ -133,13 +138,13 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                       color: isActive
                         ? 'var(--color-cream)'
                         : 'rgba(200,184,154,0.8)',
-                      fontSize: '14px',
+                      fontSize: '12px',
                       fontFamily: 'var(--font-sans)',
                     }}
                   >
                     <span className="flex-1 truncate">{item.label}</span>
                     {item.hasNewActivity && <LiveDot />}
-                    {item.count !== undefined && <CountBadge count={item.count} />}
+                    {item.count !== undefined && <CountBadge count={item.count} active={isActive} />}
                   </Link>
                 );
               })}
