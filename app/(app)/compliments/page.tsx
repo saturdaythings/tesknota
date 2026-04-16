@@ -119,7 +119,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
   return (
     <div
       onClick={onEdit}
-      className="flex gap-6 items-start cursor-pointer transition-colors duration-100"
+      className="flex gap-6 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
       style={{
         minHeight: '80px',
         padding: '16px 0',
@@ -281,20 +281,20 @@ function ComplimentsInner() {
 
       <Header pageTitle="Compliments" />
 
-      <main className="flex-1 overflow-y-auto" style={{ background: 'var(--color-cream)', padding: '32px 24px 40px' }}>
+      <main className="flex-1 overflow-y-auto" style={{ background: 'var(--color-cream)', padding: '32px 16px 40px' }}>
         <div
           className="mx-auto"
           style={{ maxWidth: '1200px' }}
         >
           {/* Page header row */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-end mb-8">
             <Button variant="primary" onClick={() => setLogOpen(true)}>
               Log Compliment
             </Button>
           </div>
 
           {/* Filter bar */}
-          <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+          <div className="flex items-start justify-between gap-4 flex-wrap mb-6 max-sm:flex-col">
             {/* Tab pills */}
             <div className="flex flex-wrap gap-2">
               {RELATION_TABS.map((tab) => (
@@ -309,7 +309,7 @@ function ComplimentsInner() {
             </div>
 
             {/* Sort */}
-            <div style={{ width: '160px', flexShrink: 0, marginLeft: 'auto' }}>
+            <div className="max-sm:w-full max-sm:mt-3" style={{ width: '160px', flexShrink: 0, marginLeft: 'auto' }}>
               <Select
                 options={SORT_OPTIONS}
                 value={sort}
