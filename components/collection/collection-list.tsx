@@ -52,7 +52,7 @@ export function CollectionList({
       {/* Desktop: md:grid keeps display consistent — no inline display needed, no className conflict */}
       <div
         className="hidden md:grid"
-        style={{ gridTemplateColumns, columnGap: 'var(--space-6)' }}
+        style={{ gridTemplateColumns, columnGap: 'var(--space-10)' }}
       >
         {/* Header row */}
         <div

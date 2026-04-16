@@ -350,8 +350,11 @@ function CollectionSkeleton() {
         <div
           key={i}
           style={{
-            height: '64px',
-            borderBottom: '1px solid var(--color-sand-light)',
+            height: 'var(--space-16)',
+            borderBottom: '1px solid var(--color-row-divider)',
+            background: 'var(--color-row-hover)',
+            borderRadius: 'var(--radius-md)',
+            marginBottom: 'var(--space-1)',
             display: 'flex',
             alignItems: 'center',
             padding: '0 var(--space-4)',

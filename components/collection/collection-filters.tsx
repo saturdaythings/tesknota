@@ -62,18 +62,10 @@ export function CollectionFilters({
           </Button>
 
           {filtersActive && (
-            <button
-              onClick={onClearFilters}
-              className="flex items-center font-sans"
-              style={{
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-sm)',
-                color: 'var(--color-meta-text)', gap: 'var(--space-1)', padding: 0,
-              }}
-            >
+            <Button variant="ghost" size="sm" onClick={onClearFilters}>
               <X size={13} />
               Clear
-            </button>
+            </Button>
           )}
         </div>
 
