@@ -10,6 +10,7 @@ import { StarRating } from '@/components/ui/StarRating';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { FragSearch } from '@/components/ui/frag-search';
+import { SearchInput } from '@/components/ui/search-input';
 import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { FragranceDetailModal } from '@/components/collection/fragrance-detail-modal';
 import { CollectionFilters } from '@/components/collection/collection-filters';
@@ -283,12 +284,12 @@ function CollectionInner() {
       <Topbar title="My Collection" actions={<FragSearch />} />
 
       <PageContent>
-        <div className="flex items-center justify-end mb-8">
+        <div className="flex items-center justify-end gap-3 mb-8">
+          <SearchInput value={search} onChange={setSearch} placeholder="Search your collection..." className="w-[220px]" />
           <Button variant="primary" onClick={() => setAddOpen(true)}>Add to Collection</Button>
         </div>
 
         <CollectionFilters
-          search={search} onSearch={setSearch}
           sort={sort} onSort={setSort}
           filtersOpen={filtersOpen} onFiltersOpen={setFiltersOpen}
           accordFilter={accordFilter} onAccordFilter={setAccordFilter}

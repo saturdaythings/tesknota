@@ -3,14 +3,11 @@
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { SearchInput } from '@/components/ui/search-input';
 import { PerPageControl } from '@/components/ui/per-page-control';
 import { SlidersHorizontal, X } from '@/components/ui/Icons';
 import { SORT_OPTIONS, RATING_FILTER_OPTIONS, STATUS_FILTER_OPTIONS } from '@/lib/collection-utils';
 
 interface CollectionFiltersProps {
-  search: string;
-  onSearch: (v: string) => void;
   sort: string;
   onSort: (v: string) => void;
   filtersOpen: boolean;
@@ -31,11 +28,9 @@ interface CollectionFiltersProps {
   onPerPage: (v: number) => void;
 }
 
-// Status options without the "All" entry — empty array means all
 const STATUS_OPTIONS = STATUS_FILTER_OPTIONS.filter((o) => o.value !== 'all');
 
 export function CollectionFilters({
-  search, onSearch,
   sort, onSort,
   filtersOpen, onFiltersOpen,
   accordFilter, onAccordFilter,
@@ -48,50 +43,44 @@ export function CollectionFilters({
 }: CollectionFiltersProps) {
   return (
     <div style={{ marginBottom: 'var(--space-6)' }}>
-      {/* Row 1: search + sort + per-page + filters toggle */}
+      {/* Row 1: sort + filters left, per-page right */}
       <div
-        className="flex items-center flex-wrap max-sm:flex-col max-sm:items-stretch"
+        className="flex items-center justify-between flex-wrap"
         style={{ gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}
       >
-        <div style={{ width: '280px' }} className="max-sm:w-full">
-          <SearchInput value={search} onChange={onSearch} placeholder="Search your collection..." />
-        </div>
+        <div className="flex items-center" style={{ gap: 'var(--space-2)' }}>
+          <Select options={SORT_OPTIONS} value={sort} onChange={onSort} size="auto" />
 
-        <div style={{ width: '200px' }} className="max-sm:w-full">
-          <Select options={SORT_OPTIONS} value={sort} onChange={onSort} />
-        </div>
-
-        <div style={{ marginLeft: 'auto' }}>
-          <PerPageControl value={perPage} onChange={onPerPage} />
-        </div>
-
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => onFiltersOpen(!filtersOpen)}
-          style={{ borderColor: filtersOpen ? 'var(--color-navy)' : undefined }}
-        >
-          <SlidersHorizontal size={13} />
-          Filters
-        </Button>
-
-        {filtersActive && (
-          <button
-            onClick={onClearFilters}
-            className="flex items-center font-sans"
-            style={{
-              background: 'transparent', border: 'none', cursor: 'pointer',
-              fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-sm)',
-              color: 'var(--color-meta-text)', gap: 'var(--space-1)', padding: 0,
-            }}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onFiltersOpen(!filtersOpen)}
+            style={{ borderColor: filtersOpen ? 'var(--color-navy)' : undefined }}
           >
-            <X size={13} />
-            Clear
-          </button>
-        )}
+            <SlidersHorizontal size={13} />
+            Filters
+          </Button>
+
+          {filtersActive && (
+            <button
+              onClick={onClearFilters}
+              className="flex items-center font-sans"
+              style={{
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-sm)',
+                color: 'var(--color-meta-text)', gap: 'var(--space-1)', padding: 0,
+              }}
+            >
+              <X size={13} />
+              Clear
+            </button>
+          )}
+        </div>
+
+        <PerPageControl value={perPage} onChange={onPerPage} />
       </div>
 
-      {/* Row 2: expanded filters — all use the same MultiSelect pattern */}
+      {/* Row 2: expanded filters */}
       {filtersOpen && (
         <div
           className="flex flex-wrap"
