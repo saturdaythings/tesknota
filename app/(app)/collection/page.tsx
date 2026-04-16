@@ -102,16 +102,17 @@ function addedStr(createdAt: string | null): string {
 function concentrationLabel(type: string | null): string | null {
   if (!type) return null;
   const map: Record<string, string> = {
-    "Extrait de Parfum": "EXTRAIT DE PARFUM",
-    "Eau de Parfum": "EAU DE PARFUM",
-    "Eau de Toilette": "EAU DE TOILETTE",
-    "Perfume Oil": "OIL",
-    "Cologne": "COLOGNE",
-    "Body Spray": "BODY SPRAY",
-    "Perfume Concentré": "CONCENTRÉ",
-    "Other": "OTHER",
+    "Extrait de Parfum": "Extrait",
+    "Eau de Parfum":     "Parfum",
+    "Eau de Toilette":   "Toilette",
+    "Cologne":           "Cologne",
+    "Perfume Concentré": "Concentré",
+    "Body Spray":        "Spray",
+    "Perfume Oil":       "Oil",
+    "Other":             "",
   };
-  return map[type] ?? type.toUpperCase();
+  const short = map[type] ?? type;
+  return short || null;
 }
 
 function statusVariant(status: FragranceStatus): React.ComponentProps<typeof Badge>["variant"] {

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { FieldLabel, OptionalTag } from '@/components/ui/field-label';
 import { TabPill } from '@/components/ui/tab-pill';
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
+import { shortFragType } from '@/lib/frag-utils';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
@@ -305,9 +306,9 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                 >
                   {frag.fragranceHouse}
                 </div>
-                {frag.fragranceType && (
+                {frag.fragranceType && shortFragType(frag.fragranceType) && (
                   <span
-                    className="font-sans"
+                    className="font-sans uppercase"
                     style={{
                       fontSize: '11px',
                       letterSpacing: '0.06em',
@@ -317,7 +318,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                       padding: '2px 10px',
                     }}
                   >
-                    {frag.fragranceType}
+                    {shortFragType(frag.fragranceType)}
                   </span>
                 )}
               </div>

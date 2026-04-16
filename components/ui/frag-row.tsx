@@ -5,9 +5,9 @@ import { STATUS_LABELS, type FragranceType } from "@/types";
 
 const TYPE_ABBR: Record<FragranceType, string> = {
   "Extrait de Parfum":  "Extrait",
-  "Eau de Parfum":      "EDP",
-  "Eau de Toilette":    "EDT",
-  "Cologne":            "EDC",
+  "Eau de Parfum":      "Parfum",
+  "Eau de Toilette":    "Toilette",
+  "Cologne":            "Cologne",
   "Perfume Concentré":  "Concentré",
   "Body Spray":         "Spray",
   "Perfume Oil":        "Oil",

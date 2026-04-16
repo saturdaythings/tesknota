@@ -48,6 +48,22 @@ export function getCompCount(
   ).length;
 }
 
+export function shortFragType(type: string | null): string | null {
+  if (!type) return null;
+  const map: Record<string, string> = {
+    "Extrait de Parfum": "Extrait",
+    "Eau de Parfum":     "Parfum",
+    "Eau de Toilette":   "Toilette",
+    "Cologne":           "Cologne",
+    "Perfume Concentré": "Concentré",
+    "Body Spray":        "Spray",
+    "Perfume Oil":       "Oil",
+    "Other":             "",
+  };
+  const short = map[type] ?? type;
+  return short || null;
+}
+
 export function monthNum(m: string): number {
   const n = parseInt(m);
   return isNaN(n) ? MONTHS.indexOf(m) + 1 : n;

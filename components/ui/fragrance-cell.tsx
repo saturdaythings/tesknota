@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from '@/components/ui/badge';
+import { shortFragType } from '@/lib/frag-utils';
 import type { FragranceType } from '@/types';
 
 interface FragranceCellProps {
@@ -28,9 +29,9 @@ export function FragranceCell({ name, house, type, secondary, className }: Fragr
         >
           {name}
         </span>
-        {type && (
+        {type && shortFragType(type) && (
           <Badge variant="neutral" className="flex-shrink-0 text-[11px] py-[2px]" style={{ color: 'rgba(30,45,69,0.8)' }}>
-            {type}
+            {shortFragType(type)}
           </Badge>
         )}
         {secondary && (
