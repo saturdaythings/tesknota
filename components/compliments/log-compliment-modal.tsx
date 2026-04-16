@@ -174,7 +174,7 @@ function FragSearch({
                 borderBottom: '1px solid var(--color-cream-dark)',
               }}
             >
-              <div className="font-sans font-medium" style={{ fontSize: '14px', color: 'var(--color-navy)' }}>
+              <div className="font-sans font-medium" style={{ fontSize: '13px', color: 'var(--color-navy)' }}>
                 {f.name}
               </div>
               <div
