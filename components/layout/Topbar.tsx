@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useMobileNav } from "@/lib/mobile-nav-context";
 
 interface TopbarProps {
     title: string;
@@ -10,31 +9,7 @@ interface TopbarProps {
     className?: string;
 }
 
-function HamburgerButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label="Open menu"
-      className="md:hidden p-1 mr-1 text-[var(--color-sand)] hover:text-[var(--color-navy)] transition-colors"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--_ham-gap, 5px)',
-        '--_ham-gap': '5px',
-        '--_ham-w': '18px',
-        '--_ham-h': '1.5px',
-      } as React.CSSProperties}
-    >
-      <span style={{ display: 'block', width: 'var(--_ham-w)', height: 'var(--_ham-h)', background: 'currentColor' }} />
-      <span style={{ display: 'block', width: 'var(--_ham-w)', height: 'var(--_ham-h)', background: 'currentColor' }} />
-      <span style={{ display: 'block', width: 'var(--_ham-w)', height: 'var(--_ham-h)', background: 'currentColor' }} />
-    </button>
-  );
-}
-
 export function Topbar({ title, search, actions, className }: TopbarProps) {
-    const { toggle } = useMobileNav();
-
   return (
     <header
       className={cn(
@@ -44,9 +19,6 @@ export function Topbar({ title, search, actions, className }: TopbarProps) {
       )}
       style={{ background: "var(--color-cream)" }}
     >
-      <HamburgerButton onClick={toggle} />
-
-      {/* Breadcrumb title block */}
       <div
         className="flex-1 min-w-0 flex flex-col justify-center"
         style={{ gap: 'var(--space-half)' }}
