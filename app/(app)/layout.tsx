@@ -73,7 +73,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
       items: [
         { href: '/import', label: 'Import' },
         { href: '/settings', label: 'Settings' },
-        ...(user.isAdmin ? [{ href: '/admin', label: 'Admin' }] : []),
+        ...(user.isAdmin ? [{ href: '/admin', label: 'Admin' }, { href: '/admin/design', label: 'Design System' }] : []),
       ],
     },
   ];

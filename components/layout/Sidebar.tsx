@@ -138,8 +138,9 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                       color: isActive
                         ? 'var(--color-cream)'
                         : 'rgba(200,184,154,0.8)',
-                      fontSize: '13px',
-                      letterSpacing: '0.08em',
+                      fontSize: '12px',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
                       fontFamily: 'var(--font-sans)',
                     }}
                   >
