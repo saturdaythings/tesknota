@@ -15,6 +15,7 @@ import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import type { UserCompliment, Relation, FragranceType, CommunityFrag } from '@/types';
 import { MessageCircle, Search } from '@/components/ui/Icons';
+import { Pagination } from '@/components/ui/pagination';
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -34,6 +35,12 @@ const SORT_OPTIONS = [
   { value: 'date-desc', label: 'Date — Newest first' },
   { value: 'date-asc', label: 'Date — Oldest first' },
   { value: 'frag-az', label: 'Fragrance A–Z' },
+];
+
+const PER_PAGE_OPTIONS = [
+  { value: '25', label: '25 per page' },
+  { value: '50', label: '50 per page' },
+  { value: 'all', label: 'All' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────
@@ -284,6 +291,8 @@ function ComplimentsInner() {
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
   const [search, setSearch] = useState('');
+  const [perPage, setPerPage] = useState('25');
+  const [page, setPage] = useState(1);
 
   if (!user) return null;
 
@@ -309,7 +318,7 @@ function ComplimentsInner() {
     return map;
   }, [myComps]);
 
-  const displayed = useMemo(() => {
+  const filtered = useMemo(() => {
     let result = relationTab === 'ALL' ? myComps : myComps.filter((c) => c.relation === relationTab);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
@@ -324,6 +333,15 @@ function ComplimentsInner() {
     else if (sort === 'frag-az') result = [...result].sort((a, b) => (a.primaryFrag ?? '').localeCompare(b.primaryFrag ?? ''));
     return result;
   }, [myComps, relationTab, sort, search]);
+
+  useEffect(() => { setPage(1); }, [relationTab, sort, search, perPage]);
+
+  const pageSize = perPage === 'all' ? filtered.length : Number(perPage);
+  const totalPages = filtered.length === 0 ? 1 : perPage === 'all' ? 1 : Math.ceil(filtered.length / pageSize);
+  const paginated = useMemo(
+    () => perPage === 'all' ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize),
+    [filtered, page, perPage, pageSize],
+  );
 
 
   return (
@@ -380,8 +398,8 @@ function ComplimentsInner() {
           </Button>
         </div>
 
-        {/* Filter bar */}
-        <div className="flex items-start justify-between gap-4 flex-wrap mb-6 max-sm:flex-col">
+        {/* Filter bar — row 1: relation tabs + per-page */}
+        <div className="flex items-start justify-between gap-4 flex-wrap max-sm:flex-col" style={{ marginBottom: 'var(--space-3)' }}>
           <div className="flex flex-wrap gap-2">
             {RELATION_TABS.map((tab) => (
               <TabPill
@@ -389,18 +407,28 @@ function ComplimentsInner() {
                 label={tab.label}
                 count={tabCounts[tab.value] ?? 0}
                 active={relationTab === tab.value}
-                onClick={() => setRelationTab(tab.value)}
+                onClick={() => { setRelationTab(tab.value); }}
               />
             ))}
           </div>
-          <div className="max-sm:w-full max-sm:mt-3" style={{ flexShrink: 0, marginLeft: 'auto' }}>
+          <div style={{ flexShrink: 0 }}>
             <Select
-              options={SORT_OPTIONS}
-              value={sort}
-              onChange={setSort}
+              options={PER_PAGE_OPTIONS}
+              value={perPage}
+              onChange={setPerPage}
               size="auto"
             />
           </div>
+        </div>
+
+        {/* Filter bar — row 2: sort */}
+        <div style={{ marginBottom: 'var(--space-6)' }}>
+          <Select
+            options={SORT_OPTIONS}
+            value={sort}
+            onChange={setSort}
+            size="auto"
+          />
         </div>
 
         {/* List */}
@@ -421,28 +449,31 @@ function ComplimentsInner() {
           </div>
         ) : myComps.length === 0 ? (
           <EmptyCompliments onAdd={() => setLogOpen(true)} />
-        ) : displayed.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="py-16 text-center">
             <div className="font-sans" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-navy)' }}>
               No compliments match this filter.
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr max-content', columnGap: 'var(--space-10)' }}>
-            {displayed.map((comp) => {
-              const { name, house, type } = getFragInfo(comp);
-              return (
-                <ComplimentRow
-                  key={comp.id}
-                  comp={comp}
-                  fragName={name}
-                  fragHouse={house}
-                  fragType={type}
-                  onEdit={() => setEditingComp(comp)}
-                />
-              );
-            })}
-          </div>
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr max-content', columnGap: 'var(--space-10)' }}>
+              {paginated.map((comp) => {
+                const { name, house, type } = getFragInfo(comp);
+                return (
+                  <ComplimentRow
+                    key={comp.id}
+                    comp={comp}
+                    fragName={name}
+                    fragHouse={house}
+                    fragType={type}
+                    onEdit={() => setEditingComp(comp)}
+                  />
+                );
+              })}
+            </div>
+            <Pagination page={page} totalPages={totalPages} onPage={setPage} />
+          </>
         )}
       </PageContent>
     </>
