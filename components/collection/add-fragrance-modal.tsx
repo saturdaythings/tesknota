@@ -292,7 +292,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
         name: selected?.fragranceName ?? "Unidentified Fragrance",
         house: selected?.fragranceHouse ?? "",
         status,
-        sizes: [],
+        sizes: sizeInput.trim() ? [sizeInput.trim()] : [],
         type: fragType || null,
         personalRating: rating || null,
         statusRating: null,
@@ -516,34 +516,30 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
               <StarRating value={rating} onChange={setRating} />
 
               {/* Price with $ prefix */}
-              <div>
-                <label className="text-label" style={{ display: "block", marginBottom: "var(--space-1)" }}>
-                  Purchase Price
-                </label>
-                <div style={{ position: "relative" }}>
-                  <span
-                    style={{
-                      position: "absolute",
-                      left: 12,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: "var(--color-text-muted)",
-                      fontSize: "var(--text-base)",
-                      pointerEvents: "none",
-                      userSelect: "none",
-                    }}
-                  >
-                    $
-                  </span>
-                  <input
-                    type="text"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="0.00"
-                    style={{ paddingLeft: 24 }}
-                    className="w-full h-10 bg-[var(--color-surface)] border border-[1.5px] border-[var(--color-border)] rounded-[var(--radius-sm)] font-sans text-[length:var(--text-base)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none transition-[border-color,box-shadow] focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)]"
-                  />
-                </div>
+              <div style={{ position: "relative" }}>
+                <Input
+                  label="Purchase Price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  className="pl-6"
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    left: 12,
+                    bottom: 0,
+                    height: 40,
+                    display: "flex",
+                    alignItems: "center",
+                    color: "var(--color-navy-mid)",
+                    fontSize: "var(--text-base)",
+                    pointerEvents: "none",
+                    userSelect: "none",
+                  }}
+                >
+                  $
+                </span>
               </div>
 
               <Input
