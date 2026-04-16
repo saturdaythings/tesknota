@@ -1,20 +1,19 @@
 "use client";
 
-import { useState, useMemo, Suspense } from 'react';
-import { Search } from 'lucide-react';
+import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { TabPill } from '@/components/ui/tab-pill';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
-import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import type { UserCompliment, Relation, FragranceType } from '@/types';
-import { MessageCircle } from '@/components/ui/Icons';
+import { MessageCircle, Search } from '@/components/ui/Icons';
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -155,6 +154,121 @@ function EmptyCompliments({ onAdd }: { onAdd: () => void }) {
   );
 }
 
+// ── DB Fragrance Search (Topbar) ───────────────────────────
+
+function DbFragSearch() {
+  const { communityFrags } = useData();
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, []);
+
+  const results = query.trim().length === 0
+    ? []
+    : communityFrags
+        .filter(
+          (f) =>
+            f.fragranceName.toLowerCase().includes(query.toLowerCase()) ||
+            f.fragranceHouse.toLowerCase().includes(query.toLowerCase()),
+        )
+        .slice(0, 8);
+
+  const showDropdown = open && (results.length > 0 || query.trim().length > 0);
+
+  return (
+    <div ref={containerRef} className="relative" style={{ width: '200px' }}>
+      <div className="relative">
+        <Search
+          size={15}
+          className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ color: 'rgba(30,45,69,0.8)' }}
+        />
+        <input
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          placeholder="Find fragrances..."
+          className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
+          style={{
+            fontSize: '13px',
+            fontWeight: 400,
+            letterSpacing: '0.08em',
+            background: 'var(--color-cream)',
+            border: '1px solid rgba(30,45,69,0.8)',
+            color: query ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)',
+          }}
+        />
+      </div>
+      {showDropdown && (
+        <div
+          className="absolute left-0 right-0 z-[200] overflow-y-auto"
+          style={{
+            top: 'calc(100% + 4px)',
+            background: 'var(--color-cream)',
+            border: '1px solid rgba(30,45,69,0.8)',
+            borderRadius: '3px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+            maxHeight: '280px',
+            minWidth: '240px',
+          }}
+        >
+          {results.map((f) => (
+            <div
+              key={f.fragranceId}
+              onMouseDown={() => { setQuery(f.fragranceName); setOpen(false); }}
+              className="flex flex-col justify-center cursor-pointer transition-colors"
+              style={{ height: '48px', padding: '0 12px', borderBottom: '1px solid rgba(30,45,69,0.1)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+                {f.fragranceName}
+              </div>
+              <div className="font-sans uppercase" style={{ fontSize: '12px', color: 'var(--color-navy)', letterSpacing: '0.1em' }}>
+                {f.fragranceHouse}
+              </div>
+            </div>
+          ))}
+          {results.length === 0 && query.trim().length > 0 && (
+            <div
+              className="flex items-center font-sans italic"
+              style={{ height: '44px', padding: '0 12px', fontSize: '13px', color: 'rgba(30,45,69,0.5)', borderBottom: '1px solid rgba(30,45,69,0.1)' }}
+            >
+              No matches found
+            </div>
+          )}
+          <div style={{ borderTop: '1px solid rgba(30,45,69,0.15)' }}>
+            <div
+              onMouseDown={() => { setOpen(false); router.push('/import'); }}
+              className="flex flex-col justify-center cursor-pointer transition-colors"
+              style={{ height: '48px', padding: '0 12px' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+                Import new fragrance
+              </div>
+              <div className="font-sans uppercase" style={{ fontSize: '12px', color: 'var(--color-navy-mid)', letterSpacing: '0.1em' }}>
+                Add to database
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────
 
 function ComplimentsInner() {
@@ -163,7 +277,6 @@ function ComplimentsInner() {
 
   const [logOpen, setLogOpen] = useState(false);
   const [editingComp, setEditingComp] = useState<UserCompliment | null>(null);
-  const [addFragOpen, setAddFragOpen] = useState(false);
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
   const [search, setSearch] = useState('');
@@ -219,35 +332,9 @@ function ComplimentsInner() {
         onClose={() => setEditingComp(null)}
         editing={editingComp}
       />
-      <AddFragranceModal open={addFragOpen} onClose={() => setAddFragOpen(false)} />
-
       <Topbar
         title="Compliments"
-        actions={
-          <div
-            onClick={() => setAddFragOpen(true)}
-            className="relative flex items-center cursor-pointer"
-            style={{ width: '200px' }}
-          >
-            <Search
-              size={15}
-              className="absolute left-3 pointer-events-none"
-              style={{ color: 'var(--color-meta-text)' }}
-            />
-            <div
-              className="w-full h-9 pl-9 pr-3 flex items-center rounded-[2px] font-sans"
-              style={{
-                fontSize: 'var(--text-xs)',
-                letterSpacing: '0.08em',
-                background: 'var(--color-cream)',
-                border: '1px solid var(--color-meta-text)',
-                color: 'var(--color-meta-text)',
-              }}
-            >
-              Find fragrances...
-            </div>
-          </div>
-        }
+        actions={<DbFragSearch />}
         search={
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Search
