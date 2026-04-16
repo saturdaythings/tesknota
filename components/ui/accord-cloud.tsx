@@ -5,17 +5,15 @@ interface AccordCloudProps {
 export function AccordCloud({ accords }: AccordCloudProps) {
   if (!accords.length) return null;
   return (
-    <div className="flex flex-wrap gap-[6px]">
-      {accords.map(([accord], i) => (
-        <span
+    <div className="flex flex-col gap-2">
+      {accords.map(([accord, count]) => (
+        <div
           key={accord}
-          className={[
-            "font-[var(--mono)] tracking-[0.08em] px-3 py-[5px] bg-[var(--off2)] border border-[var(--b2)] text-[var(--ink2)] cursor-default",
-            i === 0 ? "text-[15px]" : i <= 2 ? "text-[13px]" : "text-xs",
-          ].join(" ")}
+          className="font-[var(--body)] text-sm text-[var(--ink)] flex justify-between items-center"
         >
-          {accord}
-        </span>
+          <span>{accord}</span>
+          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">({count})</span>
+        </div>
       ))}
     </div>
   );

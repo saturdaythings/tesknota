@@ -10,7 +10,7 @@
 
 :root {
      /* --- Brand palette --- */
-  --color-navy: #1A2E5C;          /* darker navy (matches reference) */
+  --color-navy: #1E2D45;          /* darker navy (matches reference) */
   --color-navy-mid: #3A5070;      /* readable mid-navy for text on light bg */
   --color-cream: #F5F0E8;         /* sidebar header, login bg, accent surfaces */
   --color-cream-dark: #EAE3D8;    /* cards, raised surfaces — distinct from cream */
@@ -36,7 +36,7 @@
      --adm-green-bg: rgba(82,176,82,0.08);
 
   /* --- Status badge colors --- */
-  --color-status-current: #1A2E5C;
+  --color-status-current: #1E2D45;
      --color-status-want: #8B6F4E;
      --color-status-finished: #6B7280;
      --color-status-sample: #4A6E96;
@@ -92,15 +92,15 @@
 
   /* --- shadcn semantic tokens mapped to new brand --- */
   --background: var(--color-cream);
-     --foreground: #1A2E5C;
+     --foreground: #1E2D45;
      --card: var(--color-cream-dark);
-     --card-foreground: #1A2E5C;
+     --card-foreground: #1E2D45;
      --popover: var(--color-cream-dark);
-     --popover-foreground: #1A2E5C;
-     --primary: #1A2E5C;
+     --popover-foreground: #1E2D45;
+     --primary: #1E2D45;
      --primary-foreground: #F5F0E8;
      --secondary: #EAE3D8;
-     --secondary-foreground: #1A2E5C;
+     --secondary-foreground: #1E2D45;
      --muted: #EAE3D8;
      --muted-foreground: #3A5070;
      --accent: #2D4A6B;
@@ -108,21 +108,21 @@
      --destructive: #8B1A1A;
      --border: #D9CEBC;
      --input: #D9CEBC;
-     --ring: #1A2E5C;
+     --ring: #1E2D45;
      --radius: 0.1875rem; /* 3px */
 
   /* --- Chart colors --- */
-  --chart-1: #1A2E5C;
+  --chart-1: #1E2D45;
      --chart-2: #2D4A6B;
      --chart-3: #4A6E96;
      --chart-4: #C8B89A;
      --chart-5: #8B6F4E;
 
   /* --- Sidebar tokens --- */
-  --sidebar: #1A2E5C;
+  --sidebar: #1E2D45;
      --sidebar-foreground: #F5F0E8;
      --sidebar-primary: #F5F0E8;
-     --sidebar-primary-foreground: #1A2E5C;
+     --sidebar-primary-foreground: #1E2D45;
      --sidebar-accent: rgba(255, 255, 255, 0.08);
      --sidebar-accent-foreground: #F5F0E8;
      --sidebar-border: rgba(255, 255, 255, 0.08);
