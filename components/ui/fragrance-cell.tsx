@@ -21,27 +21,27 @@ interface FragranceCellProps {
 export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
   return (
     <div className={`flex-none w-[220px] max-sm:w-full ${className ?? ''}`}>
-      <div className="flex flex-wrap items-center gap-2 mb-1">
+      <div className="flex items-center gap-2 mb-1 overflow-hidden">
         <span
-          className="font-serif italic"
+          className="font-serif italic truncate min-w-0"
           style={{ fontSize: '20px', color: 'var(--color-navy)', lineHeight: 1.2 }}
         >
           {name}
         </span>
         {type && (
-          <Badge variant="neutral" className="text-[11px] py-[2px]" style={{ color: 'rgba(30,45,69,0.8)' }}>
+          <Badge variant="neutral" className="flex-shrink-0 text-[11px] py-[2px]" style={{ color: 'rgba(30,45,69,0.8)' }}>
             {type}
           </Badge>
         )}
-        {secondary && (
-          <span
-            className="font-serif italic"
-            style={{ fontSize: '16px', color: 'var(--color-navy)' }}
-          >
-            + {secondary}
-          </span>
-        )}
       </div>
+      {secondary && (
+        <div
+          className="font-serif italic truncate mb-1"
+          style={{ fontSize: '14px', color: 'var(--color-navy)' }}
+        >
+          + {secondary}
+        </div>
+      )}
       {house && (
         <div
           className="font-sans uppercase tracking-[0.1em]"
