@@ -213,7 +213,7 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
       </div>
       {showDropdown && (
         <div
-          className="absolute left-0 right-0 z-[200] overflow-y-auto"
+          className="absolute right-0 z-[200] overflow-y-auto"
           style={{
             top: 'calc(100% + 4px)',
             background: 'var(--color-cream)',
