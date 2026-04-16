@@ -8,10 +8,11 @@ import { Topbar } from "@/components/layout/Topbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { FragForm } from "@/components/ui/frag-form";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { appendFrag, enrichFragranceCommunityData } from "@/lib/data/mutations";
-import type { FragranceStatus, FragranceType, BottleSize, UserFragrance } from "@/types";
+import type { FragranceStatus, FragranceType, BottleSize, UserFragrance, CommunityFrag } from "@/types";
 
 // ── Constants (preserved) ─────────────────────────────────
 
@@ -708,14 +709,281 @@ function ErrorCard({ onReset }: { onReset: () => void }) {
   );
 }
 
+// ── Search tab ────────────────────────────────────────────
+
+const INPUT_STYLE: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 460,
+  padding: "9px 12px",
+  border: "1px solid var(--color-sand-light)",
+  background: "#FFFFFF",
+  fontFamily: "var(--font-sans)",
+  fontSize: "14px",
+  color: "var(--color-navy)",
+  outline: "none",
+  borderRadius: 0,
+};
+
+function SearchTab({ userId }: { userId: string }) {
+  const { communityFrags } = useData();
+  const [search, setSearch] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const [formStatus, setFormStatus] = useState<FragranceStatus>("CURRENT");
+  const [prefillFrag, setPrefillFrag] = useState<CommunityFrag | null>(null);
+
+  const results = search.trim().length >= 2
+    ? communityFrags.filter(
+        (cf) =>
+          cf.fragranceName.toLowerCase().includes(search.toLowerCase()) ||
+          cf.fragranceHouse.toLowerCase().includes(search.toLowerCase())
+      ).slice(0, 20)
+    : [];
+
+  const editing = prefillFrag ? {
+    id: "", fragranceId: prefillFrag.fragranceId, userId,
+    name: prefillFrag.fragranceName, house: prefillFrag.fragranceHouse,
+    status: formStatus, sizes: ["Full Bottle" as const], type: null,
+    personalRating: null, statusRating: null, whereBought: null,
+    purchaseDate: null, purchaseMonth: null, purchaseYear: null,
+    purchasePrice: null, isDupe: false, dupeFor: "",
+    personalNotes: "", createdAt: "",
+  } : null;
+
+  return (
+    <>
+      {formOpen && editing && (
+        <FragForm open onClose={() => setFormOpen(false)} editing={editing} forceStatus={formStatus} />
+      )}
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search by name or house..."
+        style={INPUT_STYLE}
+        onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; }}
+        onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; }}
+      />
+      {search.trim().length >= 2 && results.length === 0 && (
+        <p className="text-secondary" style={{ marginTop: "var(--space-3)" }}>No matches.</p>
+      )}
+      {results.length > 0 && (
+        <div
+          style={{
+            border: "1px solid var(--color-sand-light)",
+            maxWidth: 460,
+            marginTop: "var(--space-4)",
+          }}
+        >
+          {results.map((cf) => (
+            <div
+              key={cf.fragranceId}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "12px 16px",
+                borderBottom: "1px solid rgba(217,206,188,0.5)",
+              }}
+              className="hover:bg-[var(--color-cream)]"
+            >
+              <div style={{ minWidth: 0, marginRight: 16, flex: 1 }}>
+                <div className="text-body" style={{ fontSize: 14 }}>{cf.fragranceName}</div>
+                <div className="text-secondary">
+                  {cf.fragranceHouse}
+                  {cf.avgPrice ? ` · ${cf.avgPrice.replace(/~/g, "")}` : ""}
+                  {cf.communityRating ? ` · ${cf.communityRating}/10` : ""}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                <button
+                  onClick={() => { setPrefillFrag(cf); setFormStatus("WANT_TO_BUY"); setFormOpen(true); }}
+                  style={{
+                    fontFamily: "var(--font-sans)", fontSize: 12, padding: "5px 12px",
+                    border: "1px solid var(--color-sand-light)", background: "transparent",
+                    color: "var(--color-navy-mid)", cursor: "pointer", borderRadius: 2,
+                    whiteSpace: "nowrap", transition: "border-color 120ms, color 120ms",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.color = "var(--color-accent)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; e.currentTarget.style.color = "var(--color-navy-mid)"; }}
+                >
+                  Wishlist
+                </button>
+                <button
+                  onClick={() => { setPrefillFrag(cf); setFormStatus("CURRENT"); setFormOpen(true); }}
+                  style={{
+                    fontFamily: "var(--font-sans)", fontSize: 12, padding: "5px 12px",
+                    border: "1px solid var(--color-accent)", background: "transparent",
+                    color: "var(--color-accent)", cursor: "pointer", borderRadius: 2,
+                    whiteSpace: "nowrap", transition: "background 120ms",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-accent-subtle)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                >
+                  Add to Collection
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── Link tab ───────────────────────────────────────────────
+
+function parseFragranceUrl(url: string): { name: string; house: string } | null {
+  try {
+    const parts = new URL(url).pathname.replace(/^\/+|\/+$/g, "").split("/");
+    const toWords = (slug: string) =>
+      slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    if (parts[0] === "perfume" && parts.length >= 3) {
+      return {
+        house: toWords(parts[1]),
+        name: toWords(parts[2].replace(/\.html$/, "").replace(/-\d+$/, "")),
+      };
+    }
+    if (parts[0] === "fragrance" && parts.length >= 3) {
+      return { house: toWords(parts[1]), name: toWords(parts[2]) };
+    }
+  } catch { /* not a valid URL */ }
+  return null;
+}
+
+function LinkTab({ userId }: { userId: string }) {
+  const { communityFrags } = useData();
+  const [url, setUrl] = useState("");
+  const [result, setResult] = useState<CommunityFrag | "not-found" | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [formStatus, setFormStatus] = useState<FragranceStatus>("CURRENT");
+  const [prefillFrag, setPrefillFrag] = useState<CommunityFrag | null>(null);
+
+  const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  function findCf(name: string, house: string) {
+    return (
+      communityFrags.find((cf) => norm(cf.fragranceName) === norm(name) && norm(cf.fragranceHouse) === norm(house)) ??
+      communityFrags.find((cf) => norm(cf.fragranceName) === norm(name))
+    );
+  }
+
+  function handleFetch() {
+    const parsed = parseFragranceUrl(url.trim());
+    if (!parsed) { setResult("not-found"); return; }
+    setResult(findCf(parsed.name, parsed.house) ?? "not-found");
+  }
+
+  const editing = prefillFrag ? {
+    id: "", fragranceId: prefillFrag.fragranceId, userId,
+    name: prefillFrag.fragranceName, house: prefillFrag.fragranceHouse,
+    status: formStatus, sizes: ["Full Bottle" as const], type: null,
+    personalRating: null, statusRating: null, whereBought: null,
+    purchaseDate: null, purchaseMonth: null, purchaseYear: null,
+    purchasePrice: null, isDupe: false, dupeFor: "",
+    personalNotes: "", createdAt: "",
+  } : null;
+
+  return (
+    <>
+      {formOpen && editing && (
+        <FragForm open onClose={() => setFormOpen(false)} editing={editing} forceStatus={formStatus} />
+      )}
+      <div style={{ display: "flex", gap: 8, maxWidth: 520, marginBottom: "var(--space-4)" }}>
+        <input
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleFetch()}
+          placeholder="https://www.fragrantica.com/perfume/..."
+          style={{ ...INPUT_STYLE, maxWidth: "none", flex: 1 }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; }}
+        />
+        <button
+          onClick={handleFetch}
+          style={{
+            fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 500,
+            padding: "9px 16px", border: "1px solid var(--color-sand-light)",
+            background: "transparent", color: "var(--color-navy-mid)", cursor: "pointer",
+            borderRadius: 2, whiteSpace: "nowrap", transition: "border-color 120ms, color 120ms",
+            letterSpacing: "0.06em",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.color = "var(--color-accent)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; e.currentTarget.style.color = "var(--color-navy-mid)"; }}
+        >
+          Fetch
+        </button>
+      </div>
+
+      {result === "not-found" && (
+        <p className="text-secondary" style={{ color: "var(--color-danger)", marginBottom: "var(--space-4)" }}>
+          Not found in database. Try Search Database tab.
+        </p>
+      )}
+      {result && result !== "not-found" && (
+        <div
+          style={{
+            border: "1px solid var(--color-sand-light)",
+            padding: "16px",
+            maxWidth: 460,
+            marginBottom: "var(--space-5)",
+          }}
+        >
+          <div className="text-secondary" style={{ marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>
+            {result.fragranceHouse}
+          </div>
+          <div className="text-body" style={{ marginBottom: 4 }}>{result.fragranceName}</div>
+          <div className="text-secondary" style={{ marginBottom: 12 }}>
+            {[result.communityRating ? result.communityRating + "/10" : "", result.avgPrice ? result.avgPrice.replace(/~/g, "") : ""].filter(Boolean).join(" · ")}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={() => { setPrefillFrag(result as CommunityFrag); setFormStatus("WANT_TO_BUY"); setFormOpen(true); }}
+              style={{
+                fontFamily: "var(--font-sans)", fontSize: 12, padding: "5px 12px",
+                border: "1px solid var(--color-sand-light)", background: "transparent",
+                color: "var(--color-navy-mid)", cursor: "pointer", borderRadius: 2,
+                transition: "border-color 120ms, color 120ms",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.color = "var(--color-accent)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; e.currentTarget.style.color = "var(--color-navy-mid)"; }}
+            >
+              Wishlist
+            </button>
+            <button
+              onClick={() => { setPrefillFrag(result as CommunityFrag); setFormStatus("CURRENT"); setFormOpen(true); }}
+              style={{
+                fontFamily: "var(--font-sans)", fontSize: 12, padding: "5px 12px",
+                border: "1px solid var(--color-accent)", background: "transparent",
+                color: "var(--color-accent)", cursor: "pointer", borderRadius: 2,
+                transition: "background 120ms",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-accent-subtle)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              Add to Collection
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────
 
+type ImportTabId = "search" | "link" | "file";
 type PageState = "idle" | "mapping" | "preview" | "importing" | "done" | "error";
+
+const TAB_ITEMS: { id: ImportTabId; label: string }[] = [
+  { id: "search", label: "Search Database" },
+  { id: "link", label: "Paste a Link" },
+  { id: "file", label: "Import File" },
+];
 
 export default function ImportPage() {
   const { user } = useUser();
   const { addFrag } = useData();
 
+  const [activeTab, setActiveTab] = useState<ImportTabId>("search");
   const [state, setState] = useState<PageState>("idle");
   const [headers, setHeaders] = useState<string[]>([]);
   const [rawRows, setRawRows] = useState<string[][]>([]);
@@ -783,78 +1051,108 @@ export default function ImportPage() {
       <main style={{ flex: 1, overflowY: "auto" }}>
         <div
           style={{
-            maxWidth: 800,
+            maxWidth: 820,
             margin: "0 auto",
             padding: "var(--space-8)",
           }}
           className="max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]"
         >
           {/* Page header */}
-          <h1 className="text-page-title" style={{ marginBottom: "var(--space-2)" }}>
-            Import Collection
+          <h1 className="text-page-title" style={{ marginBottom: "var(--space-6)" }}>
+            Add Fragrances
           </h1>
-          <p className="text-secondary" style={{ marginBottom: "var(--space-8)" }}>
-            Upload a spreadsheet to bulk-add fragrances.
-          </p>
 
-          {/* Template download link */}
-          {state === "idle" && (
-            <p className="text-secondary" style={{ marginBottom: "var(--space-6)" }}>
-              Need a template?{" "}
+          {/* Tabs */}
+          <div
+            style={{
+              display: "flex",
+              borderBottom: "1px solid var(--color-sand-light)",
+              marginBottom: "var(--space-6)",
+              overflowX: "auto",
+            }}
+          >
+            {TAB_ITEMS.map((t) => (
               <button
-                onClick={downloadXLSXTemplate}
+                key={t.id}
+                onClick={() => { setActiveTab(t.id); if (t.id !== "file") setState("idle"); }}
                 style={{
-                  background: "none",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  padding: "10px 18px",
+                  background: "transparent",
                   border: "none",
-                  padding: 0,
-                  color: "var(--color-accent)",
+                  borderBottom: activeTab === t.id ? "2px solid var(--color-accent)" : "2px solid transparent",
+                  color: activeTab === t.id ? "var(--color-accent)" : "var(--color-navy-mid)",
                   cursor: "pointer",
-                  textDecoration: "underline",
-                  fontSize: "inherit",
-                  fontFamily: "inherit",
+                  whiteSpace: "nowrap",
+                  marginBottom: -1,
+                  transition: "color 120ms, border-color 120ms",
                 }}
               >
-                Download .xlsx template
+                {t.label}
               </button>
-            </p>
+            ))}
+          </div>
+
+          {/* Search tab */}
+          {activeTab === "search" && (
+            <SearchTab userId={user?.id ?? ""} />
           )}
 
-          {/* States */}
-          {state === "idle" && (
-            <UploadZone onFile={handleFile} />
+          {/* Link tab */}
+          {activeTab === "link" && (
+            <LinkTab userId={user?.id ?? ""} />
           )}
 
-          {state === "mapping" && (
-            <MappingCard
-              headers={headers}
-              mapping={mapping}
-              onChange={handleMappingChange}
-              onPreview={handlePreview}
-            />
+          {/* File import tab */}
+          {activeTab === "file" && (
+            <>
+              {state === "idle" && (
+                <>
+                  <p className="text-secondary" style={{ marginBottom: "var(--space-6)" }}>
+                    Need a template?{" "}
+                    <button
+                      onClick={downloadXLSXTemplate}
+                      style={{
+                        background: "none", border: "none", padding: 0,
+                        color: "var(--color-accent)", cursor: "pointer",
+                        textDecoration: "underline", fontSize: "inherit", fontFamily: "inherit",
+                      }}
+                    >
+                      Download .xlsx template
+                    </button>
+                  </p>
+                  <UploadZone onFile={handleFile} />
+                </>
+              )}
+              {state === "mapping" && (
+                <MappingCard
+                  headers={headers}
+                  mapping={mapping}
+                  onChange={handleMappingChange}
+                  onPreview={handlePreview}
+                />
+              )}
+              {state === "preview" && (
+                <PreviewCard
+                  rows={rows}
+                  totalRows={rows.length}
+                  onBack={() => setState("mapping")}
+                  onImport={handleImport}
+                />
+              )}
+              {state === "importing" && (
+                <ProgressCard done={progress} total={rows.filter((r) => !r.rowError && r.name).length} />
+              )}
+              {state === "done" && (
+                <DoneCard added={addedCount} errors={importErrors} onReset={reset} />
+              )}
+              {state === "error" && <ErrorCard onReset={reset} />}
+            </>
           )}
-
-          {state === "preview" && (
-            <PreviewCard
-              rows={rows}
-              totalRows={rows.length}
-              onBack={() => setState("mapping")}
-              onImport={handleImport}
-            />
-          )}
-
-          {state === "importing" && (
-            <ProgressCard done={progress} total={rows.filter((r) => !r.rowError && r.name).length} />
-          )}
-
-          {state === "done" && (
-            <DoneCard
-              added={addedCount}
-              errors={importErrors}
-              onReset={reset}
-            />
-          )}
-
-          {state === "error" && <ErrorCard onReset={reset} />}
         </div>
       </main>
     </>
