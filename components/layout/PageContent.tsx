@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 interface PageContentProps {
   children: React.ReactNode;
-  /** Override max-width for narrow-form pages (e.g. Settings). Default: 1400px */
+  /** Constrain inner content width for narrow-form pages (e.g. Settings). Optional. */
   maxWidth?: string;
   className?: string;
 }
@@ -12,25 +12,21 @@ interface PageContentProps {
 /**
  * Canonical page content wrapper.
  *
- * Enforces the design baseline for every page:
- *   - main: flex-1, overflow-y-auto
- *   - inner container: maxWidth 1400px (or override), centered, padding tokens
- *   - mobile: padding shrinks to var(--space-4) both axes
- *
- * Usage:
- *   <Topbar title="My Page" />
- *   <PageContent>
- *     ...page content...
- *   </PageContent>
+ * Padding uses --page-margin (= --topbar-px) so left and right always match the topbar exactly.
+ * No centering, no hardcoded widths. Pass maxWidth only for narrow-form admin pages.
  *
  * Do NOT write a <main> tag directly in pages — use this component.
  */
-export function PageContent({ children, maxWidth = "1400px", className }: PageContentProps) {
+export function PageContent({ children, maxWidth, className }: PageContentProps) {
   return (
     <main style={{ flex: 1, overflowY: "auto" }}>
       <div
-        style={{ maxWidth }}
-        className={cn("px-[var(--topbar-px)] py-[var(--space-6)] max-md:px-[var(--topbar-px-mobile)] max-md:py-[var(--space-4)]", className)}
+        style={maxWidth ? { maxWidth } : undefined}
+        className={cn(
+          "px-[var(--page-margin)] py-[var(--space-6)]",
+          "max-md:px-[var(--topbar-px-mobile)] max-md:py-[var(--space-4)]",
+          className,
+        )}
       >
         {children}
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useRef, useEffect, useCallback, SelectHTMLAttributes } from 'react';
+import { useId, useState, useRef, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
 interface SelectOption {
@@ -18,12 +18,17 @@ interface SelectProps {
   disabled?: boolean;
   className?: string;
   id?: string;
+  /**
+   * "full"  — fills its container (default, use in forms)
+   * "auto"  — sizes to the longest option label; never wraps regardless of option text length
+   */
+  size?: 'full' | 'auto';
 }
 
 const triggerBase =
   'flex items-center justify-between w-full h-9 px-3 ' +
   'bg-[var(--color-cream)] rounded-[3px] ' +
-  'font-sans text-[13px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
+  'font-sans text-[var(--text-sm)] outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 export function Select({
@@ -36,6 +41,7 @@ export function Select({
   disabled,
   className,
   id: idProp,
+  size = 'full',
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -45,6 +51,11 @@ export function Select({
   const listId = `${id}-list`;
 
   const selectedOption = options.find((o) => o.value === value);
+
+  // For size="auto": the longest label is rendered in a hidden sizer that forces the trigger width.
+  const longestLabel = size === 'auto'
+    ? options.reduce((longest, opt) => opt.label.length > longest.length ? opt.label : longest, placeholder)
+    : null;
 
   const close = useCallback(() => {
     setOpen(false);
@@ -90,52 +101,87 @@ export function Select({
   };
 
   return (
-    <div className={cn('relative flex flex-col w-full', className)} ref={containerRef}>
+    <div
+      className={cn('relative flex flex-col', size === 'full' && 'w-full', className)}
+      ref={containerRef}
+    >
       {label && (
-        <label id={`${id}-label`} className="mb-1 text-[13px] font-medium font-sans text-[var(--color-navy)]">
+        <label
+          id={`${id}-label`}
+          className="mb-1 font-sans font-medium text-[var(--text-sm)] text-[var(--color-navy)]"
+        >
           {label}
         </label>
       )}
-      <button
-        type="button"
-        id={id}
-        role="combobox"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listId}
-        aria-labelledby={label ? `${id}-label` : undefined}
-        disabled={disabled}
-        onClick={() => {
-          if (!disabled) {
-            setOpen((o) => !o);
-            if (!open) setFocusedIndex(options.findIndex((o) => o.value === value));
-          }
-        }}
-        onKeyDown={handleKeyDown}
-        className={triggerBase}
-        style={{
-          border: error ? '1px solid var(--color-destructive)' : open ? '1px solid var(--color-accent)' : '1px solid rgba(30,45,69,0.8)',
-        }}
-      >
-        <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)' }}>
-          {selectedOption?.label ?? placeholder}
-        </span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          aria-hidden="true"
+
+      {/* Grid wrapper: when size="auto" the hidden sizer forces width to the longest option */}
+      <div style={size === 'auto' ? { display: 'grid' } : undefined}>
+        {size === 'auto' && longestLabel && (
+          <span
+            aria-hidden="true"
+            style={{
+              gridArea: '1 / 1',
+              visibility: 'hidden',
+              pointerEvents: 'none',
+              height: 0,
+              overflow: 'hidden',
+              // Match trigger: px-3 (12px) left + chevron 16px + gap 8px + px-3 (12px) right
+              padding: '0 48px 0 12px',
+              fontSize: 'var(--text-sm)',
+              fontFamily: 'var(--font-sans)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {longestLabel}
+          </span>
+        )}
+
+        <button
+          type="button"
+          id={id}
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={listId}
+          aria-labelledby={label ? `${id}-label` : undefined}
+          disabled={disabled}
+          onClick={() => {
+            if (!disabled) {
+              setOpen((o) => !o);
+              if (!open) setFocusedIndex(options.findIndex((o) => o.value === value));
+            }
+          }}
+          onKeyDown={handleKeyDown}
+          className={triggerBase}
           style={{
-            color: 'rgba(30,45,69,0.8)',
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 150ms',
-            flexShrink: 0,
+            gridArea: size === 'auto' ? '1 / 1' : undefined,
+            border: error
+              ? '1px solid var(--color-destructive)'
+              : open
+              ? '1px solid var(--color-accent)'
+              : '1px solid var(--color-meta-text)',
           }}
         >
-          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
+          <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)', whiteSpace: 'nowrap' }}>
+            {selectedOption?.label ?? placeholder}
+          </span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            style={{
+              color: 'var(--color-meta-text)',
+              transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 150ms',
+              flexShrink: 0,
+            }}
+          >
+            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </div>
 
       {open && (
         <div
@@ -149,12 +195,12 @@ export function Select({
             minWidth: '100%',
             zIndex: 50,
             background: 'var(--color-cream)',
-            border: '1px solid rgba(30,45,69,0.8)',
+            border: '1px solid var(--color-meta-text)',
             borderRadius: '3px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+            boxShadow: 'var(--shadow-md)',
             maxHeight: '280px',
             overflowY: 'auto',
-            padding: '4px 0',
+            padding: 'var(--space-1) 0',
           }}
         >
           {options.map((option, i) => {
@@ -171,16 +217,17 @@ export function Select({
                   height: '36px',
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '0 12px',
-                  fontSize: '13px',
+                  padding: '0 var(--space-3)',
+                  fontSize: 'var(--text-sm)',
                   fontFamily: 'var(--font-sans)',
                   cursor: 'pointer',
                   color: 'var(--color-navy)',
                   fontWeight: 400,
+                  whiteSpace: 'nowrap',
                   background: isSelected
                     ? 'var(--color-cream-dark)'
                     : isFocused
-                    ? 'rgba(232,224,208,0.3)'
+                    ? 'var(--color-row-hover)'
                     : 'transparent',
                 }}
               >
@@ -192,7 +239,7 @@ export function Select({
       )}
 
       {error && (
-        <p role="alert" className="mt-1 text-[13px] text-[var(--color-destructive)]">
+        <p role="alert" className="mt-1 text-[var(--text-sm)] text-[var(--color-destructive)]">
           {error}
         </p>
       )}

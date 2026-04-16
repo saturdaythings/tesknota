@@ -297,11 +297,12 @@ function ComplimentsInner() {
               />
             ))}
           </div>
-          <div className="max-sm:w-full max-sm:mt-3" style={{ width: '160px', flexShrink: 0, marginLeft: 'auto' }}>
+          <div className="max-sm:w-full max-sm:mt-3" style={{ flexShrink: 0, marginLeft: 'auto' }}>
             <Select
               options={SORT_OPTIONS}
               value={sort}
               onChange={setSort}
+              size="auto"
             />
           </div>
         </div>
