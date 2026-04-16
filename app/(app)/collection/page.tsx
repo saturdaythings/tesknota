@@ -106,26 +106,9 @@ const COLUMNS: CollectionColumnDef[] = [
     render: (frag, ctx) => {
       const accords = getAccords(frag, ctx.communityFrags);
       return (
-        <div className="flex flex-wrap" style={{ gap: '3px' }}>
-          {accords.map((a) => (
-            <span
-              key={a}
-              className="font-sans"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '2px 7px',
-                borderRadius: '100px',
-                background: 'var(--color-sand-light)',
-                color: 'var(--color-navy)',
-                fontSize: 'var(--text-xs)',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {a}
-            </span>
-          ))}
-        </div>
+        <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', lineHeight: 'var(--leading-relaxed)' }}>
+          {accords.length ? accords.join(', ') : '—'}
+        </span>
       );
     },
   },
@@ -171,7 +154,7 @@ function CollectionInner() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [accordFilter, setAccordFilter] = useState<string[]>([]);
   const [ratingFilter, setRatingFilter] = useState('any');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [houseFilter, setHouseFilter] = useState<string[]>([]);
   const [addOpen, setAddOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
@@ -226,7 +209,7 @@ function CollectionInner() {
       const q = search.trim().toLowerCase();
       list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
     }
-    if (statusFilter !== 'all') list = list.filter((f) => f.status === statusFilter);
+    if (statusFilter.length > 0) list = list.filter((f) => statusFilter.includes(f.status));
     if (ratingFilter !== 'any') {
       list = list.filter((f) => {
         const r = f.personalRating ?? 0;
@@ -250,7 +233,7 @@ function CollectionInner() {
     sort !== 'name_asc' ||
     accordFilter.length > 0 ||
     ratingFilter !== 'any' ||
-    statusFilter !== 'all' ||
+    statusFilter.length > 0 ||
     houseFilter.length > 0;
 
   useEffect(() => { setPage(1); }, [search, sort, statusFilter, ratingFilter, accordFilter, houseFilter, perPage]);
@@ -265,7 +248,7 @@ function CollectionInner() {
     setSearch('');
     setAccordFilter([]);
     setRatingFilter('any');
-    setStatusFilter('all');
+    setStatusFilter([]);
     setHouseFilter([]);
     router.push(window.location.pathname);
   }

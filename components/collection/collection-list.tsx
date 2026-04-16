@@ -74,7 +74,7 @@ export function CollectionList({
                 className="font-sans uppercase flex items-center"
                 style={{
                   padding: '0 var(--space-4)',
-                  fontSize: 'var(--text-xs)',
+                  fontSize: 'var(--text-xxs)',
                   fontWeight: 'var(--font-weight-medium)',
                   letterSpacing: 'var(--tracking-md)',
                   color: 'var(--color-navy)',

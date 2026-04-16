@@ -19,8 +19,8 @@ interface CollectionFiltersProps {
   onAccordFilter: (v: string[]) => void;
   ratingFilter: string;
   onRatingFilter: (v: string) => void;
-  statusFilter: string;
-  onStatusFilter: (v: string) => void;
+  statusFilter: string[];
+  onStatusFilter: (v: string[]) => void;
   houseFilter: string[];
   onHouseFilter: (v: string[]) => void;
   accordOptions: { value: string; label: string }[];
@@ -30,6 +30,9 @@ interface CollectionFiltersProps {
   perPage: number;
   onPerPage: (v: number) => void;
 }
+
+// Status options without the "All" entry — empty array means all
+const STATUS_OPTIONS = STATUS_FILTER_OPTIONS.filter((o) => o.value !== 'all');
 
 export function CollectionFilters({
   search, onSearch,
@@ -77,14 +80,9 @@ export function CollectionFilters({
             onClick={onClearFilters}
             className="flex items-center font-sans"
             style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 'var(--text-xs)',
-              letterSpacing: 'var(--tracking-sm)',
-              color: 'var(--color-meta-text)',
-              gap: 'var(--space-1)',
-              padding: 0,
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-sm)',
+              color: 'var(--color-meta-text)', gap: 'var(--space-1)', padding: 0,
             }}
           >
             <X size={13} />
@@ -93,15 +91,11 @@ export function CollectionFilters({
         )}
       </div>
 
-      {/* Row 2: expanded filters */}
+      {/* Row 2: expanded filters — all use the same MultiSelect pattern */}
       {filtersOpen && (
         <div
           className="flex flex-wrap"
-          style={{
-            gap: 'var(--space-2)',
-            paddingTop: 'var(--space-3)',
-            borderTop: '1px solid var(--color-sand-light)',
-          }}
+          style={{ gap: 'var(--space-2)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--color-sand-light)' }}
         >
           <div style={{ width: '160px' }}>
             <MultiSelect options={accordOptions} value={accordFilter} onChange={onAccordFilter} placeholder="Accords" />
@@ -110,7 +104,7 @@ export function CollectionFilters({
             <Select options={RATING_FILTER_OPTIONS} value={ratingFilter} onChange={onRatingFilter} placeholder="Rating" />
           </div>
           <div style={{ width: '180px' }}>
-            <Select options={STATUS_FILTER_OPTIONS} value={statusFilter} onChange={onStatusFilter} placeholder="Status" />
+            <MultiSelect options={STATUS_OPTIONS} value={statusFilter} onChange={onStatusFilter} placeholder="Status" />
           </div>
           <div style={{ width: '160px' }}>
             <MultiSelect options={houseOptions} value={houseFilter} onChange={onHouseFilter} placeholder="Houses" />
