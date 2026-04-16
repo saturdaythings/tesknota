@@ -21,7 +21,7 @@ export function Topbar({
   return (
         <header
                 className={cn(
-                          "flex items-center gap-3 pl-[var(--topbar-px-mobile)] pr-[var(--topbar-px-mobile)] md:pl-0 md:pr-[var(--page-margin)] flex-shrink-0 z-[100]",
+                          "flex items-center gap-3 pl-[var(--topbar-px-mobile)] pr-[var(--topbar-px-mobile)] md:pl-[var(--topbar-px)] md:pr-[var(--page-margin)] flex-shrink-0 z-[100]",
                           "h-[var(--header-height)] border-b border-[var(--color-sand-light)]",
                           className,
                         )}
