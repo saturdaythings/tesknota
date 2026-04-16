@@ -87,8 +87,8 @@ export interface AllData {
 
 export async function loadAllData(userId: string): Promise<{ data: AllData; ok: boolean }> {
   const [fragsRes, compsRes, communityRes] = await Promise.all([
-    supabase.from("user_fragrances").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-    supabase.from("user_compliments").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+    supabase.from("user_fragrances").select("*").order("created_at", { ascending: false }),
+    supabase.from("user_compliments").select("*").order("created_at", { ascending: false }),
     supabase.from("fragrances").select("*"),
   ]);
 
