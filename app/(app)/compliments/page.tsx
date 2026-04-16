@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, useLayoutEffect, Suspense } from 'react';
+import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
@@ -82,8 +82,12 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
   return (
     <div
       onClick={onEdit}
-      className="flex items-start cursor-pointer transition-colors duration-100 max-sm:flex-col"
+      className="cursor-pointer transition-colors duration-100"
       style={{
+        display: 'grid',
+        gridTemplateColumns: 'subgrid',
+        gridColumn: '1 / -1',
+        alignItems: 'start',
         minHeight: '80px',
         padding: 'var(--space-4) 0',
         borderBottom: '1px solid var(--color-row-divider)',
@@ -91,8 +95,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Col 1: width set directly by useLayoutEffect DOM write */}
-      <div data-col1 className="shrink-0 max-sm:w-full">
+      <div>
         <FragranceCell
           name={fragName}
           house={fragHouse}
@@ -101,8 +104,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         />
       </div>
 
-      {/* Col 2: elastic — large gap from col 1, takes all remaining space */}
-      <div style={{ flex: 1, minWidth: 0, textAlign: 'left', marginLeft: 'var(--space-8)' }}>
+      <div style={{ minWidth: 0, textAlign: 'left' }}>
         {meta && (
           <div
             className="font-sans uppercase mb-1"
@@ -121,10 +123,9 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         )}
       </div>
 
-      {/* Col 3: date — smaller gap from col 2, right-aligned, never wraps */}
       <div
-        className="font-sans uppercase max-sm:text-left"
-        style={{ flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap', marginLeft: 'var(--space-8)', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
+        className="font-sans uppercase"
+        style={{ textAlign: 'right', whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
       >
         {date}
       </div>
@@ -282,7 +283,6 @@ function ComplimentsInner() {
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
   const [search, setSearch] = useState('');
-  const listRef = useRef<HTMLDivElement>(null);
 
   if (!user) return null;
 
@@ -324,20 +324,6 @@ function ComplimentsInner() {
     return result;
   }, [myComps, relationTab, sort, search]);
 
-  useLayoutEffect(() => {
-    // Direct DOM write — no React state, no re-render, guaranteed before paint
-    function measure() {
-      if (!listRef.current) return;
-      const cells = listRef.current.querySelectorAll<HTMLElement>('[data-col1]');
-      if (!cells.length) return;
-      cells.forEach((el) => { el.style.width = ''; });
-      const max = Math.max(...Array.from(cells).map((el) => el.scrollWidth));
-      if (max > 0) cells.forEach((el) => { el.style.width = `${max}px`; });
-    }
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [displayed]);
 
   return (
     <>
@@ -441,7 +427,7 @@ function ComplimentsInner() {
             </div>
           </div>
         ) : (
-          <div ref={listRef}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr max-content', columnGap: 'var(--space-8)' }}>
             {displayed.map((comp) => {
               const { name, house, type } = getFragInfo(comp);
               return (

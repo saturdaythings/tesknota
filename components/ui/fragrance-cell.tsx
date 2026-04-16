@@ -15,15 +15,15 @@ interface FragranceCellProps {
 export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
   return (
     <div className={className ?? ''}>
-      <div className="mb-1" style={{ whiteSpace: 'nowrap' }}>
+      <div className="flex items-center gap-2 mb-1">
         <span className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}
         </span>
         {type && shortFragType(type) && (
           <Badge
             variant="neutral"
-            className="inline-flex flex-shrink-0 ml-2 py-[2px]"
-            style={{ fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', verticalAlign: 'middle' }}
+            className="flex-shrink-0 py-[2px]"
+            style={{ fontSize: 'var(--text-label)', color: 'var(--color-meta-text)' }}
           >
             {shortFragType(type)}
           </Badge>
