@@ -3,6 +3,9 @@
 import type { UserCompliment, FragranceType } from '@/types';
 import { Pagination } from '@/components/ui/pagination';
 
+/* component-internal: compliment row min-height */
+const ROW_MIN_HEIGHT = '80px';
+
 export interface FragInfo {
   name: string;
   house: string;
@@ -67,7 +70,7 @@ function ComplimentRow({ comp, frag, columns, onEdit }: ComplimentRowProps) {
         gridTemplateColumns: 'subgrid',
         gridColumn: '1 / -1',
         alignItems: 'start',
-        minHeight: '80px',
+        minHeight: ROW_MIN_HEIGHT,
         padding: 'var(--space-4) 0',
         borderBottom: '1px solid var(--color-row-divider)',
       }}

@@ -162,6 +162,9 @@ function ComplimentsInner() {
   );
 }
 
+/* component-internal: compliment row min-height */
+const SKELETON_ROW_HEIGHT = '80px';
+
 function ComplimentsSkeleton() {
   return (
     <div>
@@ -169,7 +172,7 @@ function ComplimentsSkeleton() {
         <div
           key={i}
           style={{
-            height: '80px',
+            height: SKELETON_ROW_HEIGHT,
             borderBottom: '1px solid var(--color-row-divider)',
             background: 'var(--color-row-hover)',
             borderRadius: 'var(--radius-md)',
