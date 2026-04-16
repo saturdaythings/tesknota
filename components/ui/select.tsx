@@ -21,8 +21,8 @@ interface SelectProps {
 }
 
 const triggerBase =
-  'flex items-center justify-between w-full h-10 px-3 ' +
-  'bg-[var(--color-cream)] border border-[#C8B89A] rounded-[3px] ' +
+  'flex items-center justify-between w-full h-9 px-3 ' +
+  'bg-[var(--color-cream)] border border-[var(--color-cream-dark)] rounded-[3px] ' +
   'font-sans text-[15px] outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'focus-visible:border-[var(--color-accent)] ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
@@ -115,6 +115,7 @@ export function Select({
         onKeyDown={handleKeyDown}
         className={cn(
           triggerBase,
+          className,
           error ? 'border-[var(--color-destructive)]' : open ? 'border-[var(--color-accent)]' : '',
         )}
       >
@@ -150,7 +151,7 @@ export function Select({
             minWidth: '100%',
             zIndex: 50,
             background: 'var(--color-cream)',
-            border: '1px solid #C8B89A',
+            border: '1px solid var(--color-cream-dark)',
             borderRadius: '3px',
             boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
             maxHeight: '280px',
@@ -169,19 +170,19 @@ export function Select({
                 onClick={() => { onChange(option.value); close(); }}
                 onMouseEnter={() => setFocusedIndex(i)}
                 style={{
-                  height: '40px',
+                  height: '36px',
                   display: 'flex',
                   alignItems: 'center',
                   padding: '0 12px',
-                  fontSize: '15px',
+                  fontSize: '12px',
                   fontFamily: 'var(--font-sans)',
                   cursor: 'pointer',
-                  color: isSelected ? 'var(--color-accent)' : 'var(--color-navy)',
-                  fontWeight: isSelected ? 500 : 400,
+                  color: isSelected ? 'var(--color-navy)' : 'var(--color-navy)',
+                  fontWeight: 400,
                   background: isSelected
-                    ? 'var(--color-sand-light)'
-                    : isFocused
                     ? 'var(--color-cream-dark)'
+                    : isFocused
+                    ? 'rgba(232,224,208,0.3)'
                     : 'transparent',
                 }}
               >

@@ -76,27 +76,30 @@ function TabPill({
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.1em] transition-colors duration-100 flex-shrink-0 cursor-pointer"
+      className="inline-flex items-center gap-1.5 font-sans uppercase transition-colors duration-100 flex-shrink-0 cursor-pointer"
       style={{
         fontSize: '12px',
-        height: '36px',
-        padding: '0 16px',
+        fontWeight: 400,
+        letterSpacing: '0.08em',
+        padding: '6px 12px',
         borderRadius: '2px',
         background: active ? 'var(--color-navy)' : 'transparent',
         color: active ? 'var(--color-cream)' : 'var(--color-navy)',
-        border: active ? '1px solid var(--color-navy)' : '1px solid #AEA392',
+        border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-cream-dark)',
       }}
     >
       {label}
-      <span
-        className="font-sans font-medium"
-        style={{
-          fontSize: '11px',
-          opacity: 0.7,
-        }}
-      >
-        {count}
-      </span>
+      {count > 0 && (
+        <span
+          className="font-sans"
+          style={{
+            fontSize: '11px',
+            opacity: 0.8,
+          }}
+        >
+          {count}
+        </span>
+      )}
     </button>
   );
 }
@@ -282,6 +285,12 @@ function ComplimentsInner() {
         >
           {/* Page header row */}
           <div className="flex items-center justify-between mb-8">
+            <h1
+              className="font-serif italic"
+              style={{ fontSize: '26px', color: 'var(--color-navy)' }}
+            >
+              Compliment Log
+            </h1>
             <Button variant="primary" onClick={() => setLogOpen(true)}>
               Log Compliment
             </Button>
@@ -308,6 +317,7 @@ function ComplimentsInner() {
                 options={SORT_OPTIONS}
                 value={sort}
                 onChange={setSort}
+                className="text-[12px]"
               />
             </div>
           </div>
