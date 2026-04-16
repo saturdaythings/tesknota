@@ -139,8 +139,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                         ? 'var(--color-cream)'
                         : 'var(--color-sand-muted)',
                       fontSize: 'var(--text-xs)',
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
                       fontFamily: 'var(--font-sans)',
                     }}
                   >
