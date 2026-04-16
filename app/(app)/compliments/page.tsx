@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, Suspense } from 'react';
+import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { TabPill } from '@/components/ui/tab-pill';
@@ -164,6 +165,7 @@ function ComplimentsInner() {
   const [editingComp, setEditingComp] = useState<UserCompliment | null>(null);
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
+  const [search, setSearch] = useState('');
 
   if (!user) return null;
 
@@ -194,11 +196,19 @@ function ComplimentsInner() {
   // Filtered + sorted
   const displayed = useMemo(() => {
     let result = relationTab === 'ALL' ? myComps : myComps.filter((c) => c.relation === relationTab);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter((c) =>
+        (c.primaryFrag ?? '').toLowerCase().includes(q) ||
+        (c.secondaryFrag ?? '').toLowerCase().includes(q) ||
+        (c.notes ?? '').toLowerCase().includes(q),
+      );
+    }
     if (sort === 'date-desc') result = [...result].sort((a, b) => compSortNum(b) - compSortNum(a));
     else if (sort === 'date-asc') result = [...result].sort((a, b) => compSortNum(a) - compSortNum(b));
     else if (sort === 'frag-az') result = [...result].sort((a, b) => (a.primaryFrag ?? '').localeCompare(b.primaryFrag ?? ''));
     return result;
-  }, [myComps, relationTab, sort]);
+  }, [myComps, relationTab, sort, search]);
 
   return (
     <>
@@ -212,7 +222,37 @@ function ComplimentsInner() {
         editing={editingComp}
       />
 
-      <Topbar title="Compliments" />
+      <Topbar
+        title="Compliments"
+        search={
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Search
+              size={14}
+              style={{ position: 'absolute', left: '10px', color: 'rgba(245,240,232,0.5)', pointerEvents: 'none' }}
+            />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search..."
+              style={{
+                width: '200px',
+                height: '34px',
+                paddingLeft: '30px',
+                paddingRight: '10px',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '3px',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '13px',
+                color: 'var(--color-cream)',
+                outline: 'none',
+              }}
+              className="placeholder:text-[rgba(245,240,232,0.5)] focus:border-[rgba(255,255,255,0.4)]"
+            />
+          </div>
+        }
+      />
 
       <PageContent>
           {/* Page header row */}
