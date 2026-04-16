@@ -36,14 +36,14 @@ export function CollectionList({ items, columns, ctx, onOpen, page, totalPages, 
 
   return (
     <>
-      {/* Desktop grid table */}
-      <div className="hidden md:block">
-        {/* Header */}
+      {/* Desktop: single grid so header and data columns align via subgrid */}
+      <div className="hidden md:block" style={{ display: 'grid', gridTemplateColumns, columnGap: 'var(--space-6)' }}>
+        {/* Header row */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns,
-            columnGap: 'var(--space-6)',
+            gridTemplateColumns: 'subgrid',
+            gridColumn: '1 / -1',
             background: 'var(--color-cream-dark)',
             borderBottom: '1px solid var(--color-sand-light)',
             height: '40px',
@@ -55,12 +55,12 @@ export function CollectionList({ items, columns, ctx, onOpen, page, totalPages, 
               key={col.id}
               className="font-sans uppercase"
               style={{
+                padding: '0 var(--space-4)',
                 fontSize: 'var(--text-xs)',
                 fontWeight: 'var(--font-weight-medium)',
                 letterSpacing: 'var(--tracking-md)',
                 color: 'var(--color-navy)',
                 textAlign: col.align ?? 'left',
-                padding: '0 var(--space-4)',
               }}
             >
               {col.label}
@@ -68,18 +68,16 @@ export function CollectionList({ items, columns, ctx, onOpen, page, totalPages, 
           ))}
         </div>
 
-        {/* Rows */}
-        <div style={{ display: 'grid', gridTemplateColumns, columnGap: 'var(--space-6)' }}>
-          {items.map((frag) => (
-            <CollectionRow
-              key={frag.id}
-              frag={frag}
-              columns={columns}
-              ctx={ctx}
-              onOpen={() => onOpen(frag)}
-            />
-          ))}
-        </div>
+        {/* Data rows */}
+        {items.map((frag) => (
+          <CollectionRow
+            key={frag.id}
+            frag={frag}
+            columns={columns}
+            ctx={ctx}
+            onOpen={() => onOpen(frag)}
+          />
+        ))}
       </div>
 
       {/* Mobile */}

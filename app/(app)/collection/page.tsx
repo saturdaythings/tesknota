@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { FragranceCell } from '@/components/ui/fragrance-cell';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StarRating } from '@/components/ui/StarRating';
@@ -18,7 +19,7 @@ import { FragForm } from '@/components/ui/frag-form';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
-import { getAccords, shortFragType, MONTHS } from '@/lib/frag-utils';
+import { getAccords } from '@/lib/frag-utils';
 import { STATUS_LABELS } from '@/types';
 import { applySort, addedStr, statusVariant, type SortKey } from '@/lib/collection-utils';
 import { FlaskConical } from '@/components/ui/Icons';
@@ -30,59 +31,27 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'fragrance',
     label: 'Fragrance',
     width: 'minmax(240px,1fr)',
-    render: (frag) => {
-      const concLabel = shortFragType(frag.type ?? null);
-      return (
-        <div style={{ padding: 'var(--space-2) 0' }}>
-          <div className="flex items-center flex-wrap" style={{ gap: 'var(--space-2)' }}>
-            <span
-              className="font-serif italic"
-              style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-normal)', color: 'var(--color-navy)' }}
-            >
-              {frag.name}
-            </span>
-            {concLabel && (
-              <span
-                className="font-sans uppercase"
-                style={{
-                  border: '1px solid var(--color-meta-text)',
-                  color: 'var(--color-meta-text)',
-                  fontSize: 'var(--text-xs)',
-                  fontWeight: 'var(--font-weight-medium)',
-                  padding: '2px 6px',
-                  borderRadius: '2px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {concLabel}
-              </span>
-            )}
-            {frag.isDupe && (
-              <span
-                className="font-sans uppercase"
-                style={{
-                  background: 'var(--color-sand-light)',
-                  color: 'var(--color-navy)',
-                  fontSize: 'var(--text-xs)',
-                  fontWeight: 'var(--font-weight-medium)',
-                  padding: '2px 6px',
-                  borderRadius: '2px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Dupe
-              </span>
-            )}
-          </div>
-          <div
-            className="font-sans uppercase"
-            style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-sm)', color: 'var(--color-meta-text)', marginTop: 'var(--space-half)' }}
+    render: (frag) => (
+      <div className="flex items-start gap-2">
+        <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} />
+        {frag.isDupe && (
+          <span
+            className="font-sans uppercase flex-shrink-0"
+            style={{
+              background: 'var(--color-sand-light)',
+              color: 'var(--color-navy)',
+              fontSize: 'var(--text-xs)',
+              fontWeight: 'var(--font-weight-medium)',
+              padding: '2px 6px',
+              borderRadius: '2px',
+              marginTop: '3px',
+            }}
           >
-            {frag.house}
-          </div>
-        </div>
-      );
-    },
+            Dupe
+          </span>
+        )}
+      </div>
+    ),
   },
   {
     id: 'size',
@@ -124,11 +93,9 @@ const COLUMNS: CollectionColumnDef[] = [
     width: '200px',
     render: (frag, ctx) => {
       const accords = getAccords(frag, ctx.communityFrags);
-      const visible = accords.slice(0, 4);
-      const extra = accords.length > 4 ? accords.length - 4 : 0;
       return (
         <div className="flex flex-wrap" style={{ gap: '3px' }}>
-          {visible.map((a) => (
+          {accords.map((a) => (
             <span
               key={a}
               className="font-sans"
@@ -146,22 +113,6 @@ const COLUMNS: CollectionColumnDef[] = [
               {a}
             </span>
           ))}
-          {extra > 0 && (
-            <span
-              className="font-sans"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '2px 7px',
-                borderRadius: '100px',
-                background: 'var(--color-sand-light)',
-                color: 'var(--color-meta-text)',
-                fontSize: 'var(--text-xs)',
-              }}
-            >
-              +{extra}
-            </span>
-          )}
         </div>
       );
     },
