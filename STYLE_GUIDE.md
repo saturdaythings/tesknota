@@ -332,9 +332,223 @@ Common Tailwind shorthand: `gap-2`=8px, `gap-4`=16px, `gap-6`=24px, `mb-1`=4px, 
 |---------|-------|
 | Buttons, dropdowns, cards | 3px |
 | Filter pills | 2px |
+| Search inputs, text inputs in modals | 2px |
 | Badges | 2px |
 | Tag pills | 9999px (full round) |
+| Modal panel | 6px (no bottom radius on mobile bottom sheet) |
 | Row hover | no radius |
+
+---
+
+## Search Input
+
+Used in: page topbar, modal fragrance search, any typeahead. Same spec everywhere.
+
+```
+<div className="relative">
+  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ color: 'rgba(30,45,69,0.8)' }} />
+  <input
+    className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none
+               transition-[border-color] duration-150
+               focus:border-[var(--color-accent)]
+               placeholder:text-[var(--color-navy-mid)]"
+    style={{
+      fontSize: '12px', fontWeight: 400, letterSpacing: '0.08em',
+      background: 'var(--color-cream)',
+      border: '1px solid rgba(30,45,69,0.8)',
+      color: 'rgba(30,45,69,0.8)',
+    }}
+  />
+</div>
+```
+
+| Property | Value |
+|----------|-------|
+| Height | 36px (`h-9`) |
+| Left padding | 36px (`pl-9`) — reserved for icon |
+| Right padding | 12px (`pr-3`) |
+| Icon | `<Search size={15}>`, color `rgba(30,45,69,0.8)`, absolute left-3 vertically centered |
+| Border radius | 2px |
+| Font | 12px sans, weight 400, tracking `0.08em` |
+| Text color | `rgba(30,45,69,0.8)` |
+| Placeholder color | `var(--color-navy-mid)` |
+| Border (rest) | `1px solid rgba(30,45,69,0.8)` |
+| Border (focus) | `1px solid var(--color-accent)` |
+| Border (error) | `1px solid var(--color-destructive)` |
+| Background | `var(--color-cream)` |
+
+### Search autocomplete dropdown
+
+Appears below input at `calc(100% + 4px)`. Same dropdown shell as `<Select>`.
+
+| Property | Value |
+|----------|-------|
+| Background | `var(--color-cream)` |
+| Border | `1px solid rgba(30,45,69,0.8)` |
+| Border radius | 3px |
+| Shadow | `0 4px 16px rgba(0,0,0,0.12)` |
+| Max height | 220px, overflow-y auto |
+| Row height | 48px |
+| Row padding | `0 12px` |
+| Row divider | `1px solid rgba(30,45,69,0.1)` bottom |
+| Row hover bg | `rgba(232,224,208,0.3)` |
+| Result name | 15px serif italic navy, lh 1.2 |
+| Result house | 12px sans uppercase tracking-0.1em navy |
+
+---
+
+## Modal / Add Popup
+
+Components: `Modal`, `ModalHeader`, `ModalBody`, `ModalFooter` from `components/ui/modal.tsx`
+
+Use for all add, edit, log, and confirm flows — "Log Compliment", "Add to Collection", "Add to Wishlist", etc.
+
+### Shell
+
+```tsx
+<Modal open={open} onClose={onClose}>
+  <ModalHeader title="Log a Compliment" onClose={onClose} />
+  <ModalBody>
+    ...form fields...
+  </ModalBody>
+  <ModalFooter>
+    ...action buttons...
+  </ModalFooter>
+</Modal>
+```
+
+| Property | Value |
+|----------|-------|
+| Desktop size | 90vw, max-w 560px, max-h 90dvh, centered |
+| Mobile | Full-width bottom sheet, max-h 90dvh, no bottom radius |
+| Background | `var(--color-cream)` |
+| Border radius | 6px (0px bottom on mobile) |
+| Shadow | `0 8px 32px rgba(0,0,0,0.2)` |
+| Backdrop | `rgba(30,45,69,0.6)` |
+| Header padding | `px-8 py-6` |
+| Body padding | `px-8 py-6` |
+| Footer padding | `px-8 py-4` |
+| Header title | 22px serif italic navy |
+| Header close button | `<Button variant="icon">` with X icon |
+| Header/footer dividers | `1px solid var(--color-cream-dark)` |
+
+### Form layout
+
+```
+<ModalBody>
+  <div className="flex flex-col gap-5">   {/* 20px between every field group */}
+    <div>
+      <FieldLabel>Label <RequiredMark /></FieldLabel>
+      <Input ... />
+    </div>
+    <div>
+      <FieldLabel>Label <OptionalTag /></FieldLabel>
+      <Input ... />
+    </div>
+    {/* 2-column grid for paired fields */}
+    <div className="grid grid-cols-2 gap-4">
+      ...
+    </div>
+  </div>
+</ModalBody>
+```
+
+| Property | Value |
+|----------|-------|
+| Field gap | 20px (`gap-5`) between every field group |
+| Paired fields | `grid grid-cols-2 gap-4` (16px between) |
+| Sub-fields under one label | `flex flex-col gap-2` (8px between) |
+
+### Field label
+
+Component: `<FieldLabel>` from `components/ui/field-label.tsx`
+
+```tsx
+<FieldLabel>Label text <RequiredMark /></FieldLabel>
+<FieldLabel>Label text <OptionalTag /></FieldLabel>
+```
+
+| Element | Size | Weight | Style | Color |
+|---------|------|--------|-------|-------|
+| FieldLabel | 11px | 500 | sans uppercase tracking-0.1em | navy |
+| OptionalTag "(optional)" | 13px | 400 | normal-case | `rgba(30,45,69,0.7)` |
+| RequiredMark "*" | 13px | 400 | normal-case | `var(--color-destructive)` |
+
+### Text inputs
+
+All open-text form inputs use the same spec as the search input — same size, tracking, color, radius.
+
+```tsx
+<input
+  className="w-full h-9 px-3 rounded-[2px] font-sans outline-none
+             transition-[border-color] duration-150
+             focus:border-[var(--color-accent)]
+             placeholder:text-[var(--color-navy-mid)]"
+  style={{
+    fontSize: '12px', fontWeight: 400, letterSpacing: '0.08em',
+    background: 'var(--color-cream)',
+    border: '1px solid rgba(30,45,69,0.8)',
+    color: 'rgba(30,45,69,0.8)',
+  }}
+/>
+```
+
+### Textarea
+
+Same spec as text input. Fixed height (no resize), max 160 characters for short capture fields.
+
+```tsx
+<textarea
+  rows={3}
+  maxLength={160}
+  className="w-full p-3 rounded-[2px] font-sans outline-none resize-none
+             transition-[border-color] focus:border-[var(--color-accent)]
+             placeholder:text-[var(--color-navy-mid)]"
+  style={{
+    fontSize: '12px', fontWeight: 400, letterSpacing: '0.08em',
+    minHeight: '72px',
+    background: 'var(--color-cream)',
+    border: '1px solid rgba(30,45,69,0.8)',
+    color: 'rgba(30,45,69,0.8)',
+  }}
+/>
+```
+
+Notes displayed in list rows: `line-clamp-2` (max 2 visible lines in the row).
+
+### Select dropdowns in modals
+
+Use `<Select>` component. Same component as the page-level sort dropdown. Width fills its grid column.
+
+### Toggle groups (option pickers)
+
+Use `<TabPill>` components in a `flex flex-wrap gap-2` wrapper. Same pill spec as page filter pills.
+
+```tsx
+<div className="flex flex-wrap gap-2">
+  {options.map((opt) => (
+    <TabPill key={opt.value} label={opt.label} active={value === opt.value} onClick={() => onChange(opt.value)} />
+  ))}
+</div>
+```
+
+### Footer buttons
+
+```tsx
+<ModalFooter>
+  <div className="flex items-center gap-3 flex-1">
+    {/* destructive actions (delete) go left */}
+  </div>
+  <div className="flex items-center gap-3">
+    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+    <Button variant="primary" onClick={save}>Log / Save</Button>
+  </div>
+</ModalFooter>
+```
+
+Primary CTA label: "Log [Thing]" for new entries, "Save Changes" for edits.
+Cancel always secondary. Delete always destructive, left-aligned with a confirm step.
 
 ---
 
