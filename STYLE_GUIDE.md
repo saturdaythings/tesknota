@@ -75,7 +75,7 @@ Used on every page. Replaces `<Header>` which is deprecated.
 | Border | `1px solid var(--color-sand-light)` bottom |
 | Horizontal padding | 18px mobile / 26px desktop |
 | Breadcrumb: app label | 10px sans upright uppercase tracking-0.12em, color `var(--color-navy-mid)` |
-| Breadcrumb: page title | 18px serif upright (not italic), color `var(--color-navy)`, lh 1.2 |
+| Breadcrumb: page title | 20px serif italic, color `var(--color-navy)`, lh 1.2 |
 | Search slot | right of title, flex-shrink-0 |
 | Actions slot | rightmost, gap-2 |
 | Mobile hamburger | rendered left of title, hidden md |

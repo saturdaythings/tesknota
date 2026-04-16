@@ -47,10 +47,9 @@ export function Topbar({
                                 T&#280;SKNOTA
                       </div>
                       <div
-                                  className="font-serif truncate leading-[1.2]"
+                                  className="font-serif italic truncate leading-[1.2]"
                                   style={{
-                                                fontSize: "18px",
-                                                fontStyle: "normal",
+                                                fontSize: "20px",
                                                 fontWeight: 400,
                                                 color: "var(--color-navy)",
                                   }}
