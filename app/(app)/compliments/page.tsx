@@ -13,7 +13,7 @@ import { MessageCircle } from '@/components/ui/Icons';
 
 // ── Constants ──────────────────────────────────────────────
 
-const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
 const RELATION_TABS: { label: string; value: Relation | 'ALL' }[] = [
   { label: 'All', value: 'ALL' },
@@ -85,7 +85,7 @@ function TabPill({
         borderRadius: '2px',
         background: active ? 'var(--color-navy)' : 'transparent',
         color: active ? 'var(--color-cream)' : 'var(--color-navy)',
-        border: active ? '1px solid var(--color-navy)' : '1px solid rgba(30,45,69,0.65)',
+        border: active ? '1px solid var(--color-navy)' : '1px solid rgba(30,45,69,0.8)',
       }}
     >
       {label}
@@ -139,7 +139,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
             {fragName}
           </span>
           {fragType && (
-            <Badge variant="neutral" className="text-[11px] py-[2px]" style={{ color: 'rgba(30,45,69,0.65)' }}>
+            <Badge variant="neutral" className="text-[11px] py-[2px]" style={{ color: 'rgba(30,45,69,0.8)' }}>
               {fragType}
             </Badge>
           )}
@@ -170,7 +170,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {meta && (
           <div
             className="font-sans mb-1"
-            style={{ fontSize: '12px', color: 'rgba(30,45,69,0.65)' }}
+            style={{ fontSize: '12px', color: 'rgba(30,45,69,0.8)' }}
           >
             {meta}
           </div>
