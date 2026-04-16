@@ -3,7 +3,6 @@
 import { useState, useMemo, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -20,10 +19,15 @@ import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
 import { getAccords } from '@/lib/frag-utils';
-import { STATUS_LABELS } from '@/types';
-import { applySort, addedStr, statusVariant, type SortKey } from '@/lib/collection-utils';
+import { applySort, addedStr, type SortKey } from '@/lib/collection-utils';
 import { FlaskConical } from '@/components/ui/Icons';
-import type { UserFragrance } from '@/types';
+import { STATUS_LABELS, type UserFragrance } from '@/types';
+
+const cellStyle = {
+  fontSize: 'var(--text-xs)',
+  letterSpacing: 'var(--tracking-md)',
+  color: 'var(--color-navy)',
+} as const;
 
 // Column definitions — add an entry here to add a column to the table
 const COLUMNS: CollectionColumnDef[] = [
@@ -31,6 +35,8 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'fragrance',
     label: 'Fragrance',
     width: 'minmax(240px,1fr)',
+    sortKeyAsc: 'name_asc',
+    sortKeyDesc: 'name_desc',
     render: (frag) => (
       <div className="flex items-start gap-2">
         <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} />
@@ -57,8 +63,10 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'size',
     label: 'Size',
     width: 'max-content',
+    sortKeyAsc: 'size_asc',
+    sortKeyDesc: 'size_desc',
     render: (frag) => (
-      <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>
+      <span className="font-sans uppercase" style={cellStyle}>
         {frag.sizes?.length ? frag.sizes[0] : '—'}
       </span>
     ),
@@ -67,6 +75,8 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'rating',
     label: 'Rating',
     width: 'max-content',
+    sortKeyAsc: 'rating_asc',
+    sortKeyDesc: 'rating_desc',
     render: (frag, ctx) => (
       <div onClick={(e) => e.stopPropagation()}>
         <StarRating
@@ -81,8 +91,10 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'added',
     label: 'Added',
     width: 'max-content',
+    sortKeyAsc: 'oldest',
+    sortKeyDesc: 'newest',
     render: (frag) => (
-      <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)', whiteSpace: 'nowrap' }}>
+      <span className="font-sans uppercase" style={{ ...cellStyle, whiteSpace: 'nowrap' }}>
         {addedStr(frag.createdAt) || '—'}
       </span>
     ),
@@ -121,13 +133,12 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'compliments',
     label: 'Compliments',
     width: 'max-content',
+    sortKeyAsc: 'compliments_asc',
+    sortKeyDesc: 'compliments_desc',
     render: (frag, ctx) => {
       const count = ctx.compMap[frag.fragranceId ?? frag.id] ?? 0;
       return (
-        <span
-          className="font-sans"
-          style={{ fontSize: 'var(--text-sm)', color: count > 0 ? 'var(--color-navy)' : 'var(--color-meta-text)' }}
-        >
+        <span className="font-sans uppercase" style={{ ...cellStyle, color: count > 0 ? 'var(--color-navy)' : 'var(--color-meta-text)' }}>
           {count > 0 ? count : '—'}
         </span>
       );
@@ -137,10 +148,12 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'status',
     label: 'Status',
     width: 'max-content',
+    sortKeyAsc: 'status_asc',
+    sortKeyDesc: 'status_desc',
     render: (frag) => (
-      <Badge variant={statusVariant(frag.status)}>
+      <span className="font-sans uppercase" style={cellStyle}>
         {STATUS_LABELS[frag.status]}
-      </Badge>
+      </span>
     ),
   },
 ];
@@ -335,6 +348,8 @@ function CollectionInner() {
             columns={COLUMNS}
             ctx={rowCtx}
             onOpen={setDetailFrag}
+            sort={sort}
+            onSort={setSort}
             page={page}
             totalPages={totalPages}
             onPage={setPage}

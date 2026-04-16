@@ -1,15 +1,14 @@
 import type { UserFragrance, FragranceStatus } from '@/types';
-import type { BadgeVariant } from '@/components/ui/badge';
 import { MONTHS } from '@/lib/frag-utils';
+import { STATUS_LABELS } from '@/types';
 
 export type SortKey =
-  | 'name_asc'
-  | 'name_desc'
-  | 'newest'
-  | 'oldest'
-  | 'rating_desc'
-  | 'rating_asc'
-  | 'compliments_desc';
+  | 'name_asc' | 'name_desc'
+  | 'newest' | 'oldest'
+  | 'rating_desc' | 'rating_asc'
+  | 'compliments_desc' | 'compliments_asc'
+  | 'size_asc' | 'size_desc'
+  | 'status_asc' | 'status_desc';
 
 export const SORT_OPTIONS = [
   { value: 'name_asc', label: 'Name A–Z' },
@@ -41,6 +40,11 @@ export const STATUS_FILTER_OPTIONS = [
   { value: 'FINISHED', label: 'Finished' },
 ];
 
+function sizeNum(frag: UserFragrance): number {
+  const n = parseInt(frag.sizes?.[0] ?? '');
+  return isNaN(n) ? 0 : n;
+}
+
 export function applySort(
   frags: UserFragrance[],
   sort: SortKey,
@@ -55,6 +59,12 @@ export function applySort(
       case 'oldest': return (a.createdAt ?? '').localeCompare(b.createdAt ?? '');
       case 'compliments_desc':
         return (compMap[b.fragranceId ?? b.id] ?? 0) - (compMap[a.fragranceId ?? a.id] ?? 0);
+      case 'compliments_asc':
+        return (compMap[a.fragranceId ?? a.id] ?? 0) - (compMap[b.fragranceId ?? b.id] ?? 0);
+      case 'size_asc': return sizeNum(a) - sizeNum(b);
+      case 'size_desc': return sizeNum(b) - sizeNum(a);
+      case 'status_asc': return (STATUS_LABELS[a.status] ?? '').localeCompare(STATUS_LABELS[b.status] ?? '');
+      case 'status_desc': return (STATUS_LABELS[b.status] ?? '').localeCompare(STATUS_LABELS[a.status] ?? '');
       default: return a.name.localeCompare(b.name);
     }
   });
@@ -64,16 +74,4 @@ export function addedStr(createdAt: string | null): string {
   if (!createdAt) return '';
   const d = new Date(createdAt);
   return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-export function statusVariant(status: FragranceStatus): BadgeVariant {
-  switch (status) {
-    case 'CURRENT': return 'collection';
-    case 'WANT_TO_BUY': case 'WANT_TO_SMELL': return 'wishlist';
-    case 'WANT_TO_IDENTIFY': return 'identify_later';
-    case 'PREVIOUSLY_OWNED': return 'previously_owned';
-    case 'DONT_LIKE': return 'dont_like';
-    case 'FINISHED': return 'finished';
-    default: return 'neutral';
-  }
 }

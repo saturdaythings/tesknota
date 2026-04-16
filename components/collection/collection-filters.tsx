@@ -51,7 +51,7 @@ export function CollectionFilters({
         style={{ gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}
       >
         <div style={{ width: '280px' }} className="max-sm:w-full">
-          <SearchInput value={search} onChange={onSearch} placeholder="Search fragrances..." />
+          <SearchInput value={search} onChange={onSearch} placeholder="Search your collection..." />
         </div>
 
         <div style={{ width: '200px' }} className="max-sm:w-full">
@@ -69,7 +69,7 @@ export function CollectionFilters({
           style={{ borderColor: filtersOpen ? 'var(--color-navy)' : undefined }}
         >
           <SlidersHorizontal size={13} />
-          {filtersOpen ? '- Filters' : '+ Filters'}
+          Filters
         </Button>
 
         {filtersActive && (
