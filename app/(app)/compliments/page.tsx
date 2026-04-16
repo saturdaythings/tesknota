@@ -146,7 +146,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
           {comp.secondaryFrag && (
             <span
               className="font-serif italic"
-              style={{ fontSize: '14px', color: 'var(--color-navy)' }}
+              style={{ fontSize: '15px', color: 'var(--color-navy)' }}
             >
               + {comp.secondaryFrag}
             </span>
@@ -180,7 +180,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {comp.notes && (
           <div
             className="font-serif italic"
-            style={{ fontSize: '15px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}
+            style={{ fontSize: '16px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}
           >
             {comp.notes}
           </div>
