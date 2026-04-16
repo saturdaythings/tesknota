@@ -20,6 +20,7 @@ interface BadgeProps {
   variant?: BadgeVariant;
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
@@ -40,10 +41,10 @@ const variantStyles: Record<BadgeVariant, React.CSSProperties> = {
 };
 
 /** Status badge - 13px Inter 500, all-caps, tracking 0.1em */
-export function Badge({ variant = 'neutral', children, className }: BadgeProps) {
+export function Badge({ variant = 'neutral', children, className, style }: BadgeProps) {
   return (
     <span
-      style={variantStyles[variant]}
+      style={{ ...variantStyles[variant], ...style }}
       className={cn(
         'inline-flex items-center px-2 py-[3px] rounded-[2px]',
         'text-[13px] font-medium font-sans uppercase tracking-[0.1em] leading-none',
