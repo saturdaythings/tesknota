@@ -214,7 +214,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
   const activeButtonClass = "border-[var(--color-accent)] text-white bg-[var(--color-accent)]";
   const inactiveButtonClass = "border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-navy)]";
-  const inputClass = "w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]";
+  const inputClass = "w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy)]";
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -224,7 +224,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
         <div className="space-y-5">
           {/* Search */}
           <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
               Fragrance Name
             </label>
             <div className="relative">
@@ -246,7 +246,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                       className="px-3 py-[9px] cursor-pointer hover:bg-[var(--color-cream-dark)] border-b border-[var(--color-cream-dark)] last:border-0"
                     >
                       <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{cf.fragranceName}</div>
-                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">{cf.fragranceHouse}</div>
+                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">{cf.fragranceHouse}</div>
                     </div>
                   ))}
                 </div>
@@ -256,36 +256,36 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               <div className="mt-2 px-3 py-3 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
                 <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
                 {selectedHouse && (
-                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
                 )}
                 {(cd?.avgPrice || cd?.communityRating) && (
-                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] mt-[3px]">
+                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] mt-[3px]">
                     {[cd.avgPrice?.replace(/~/g, ""), cd.communityRating ? cd.communityRating + "/10" : ""].filter(Boolean).join(" · ")}
                   </div>
                 )}
                 {cd && cd.accords.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {cd.accords.slice(0, 8).map((a) => (
-                      <span key={a} className="font-[var(--font-sans)] text-xs px-2 py-[3px] border border-[var(--color-cream-dark)] text-[var(--color-sand)]">{a}</span>
+                      <span key={a} className="font-[var(--font-sans)] text-xs px-2 py-[3px] border border-[var(--color-cream-dark)] text-[var(--color-navy)]">{a}</span>
                     ))}
                   </div>
                 )}
                 {cd && (cd.topNotes.length > 0 || cd.middleNotes.length > 0 || cd.baseNotes.length > 0) && (
                   <div className="mt-3 space-y-[6px]">
                     {cd.topNotes.length > 0 && (
-                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
+                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
                         <span className="tracking-[0.08em] uppercase mr-2">Top</span>
                         {cd.topNotes.join(", ")}
                       </div>
                     )}
                     {cd.middleNotes.length > 0 && (
-                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
+                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
                         <span className="tracking-[0.08em] uppercase mr-2">Mid</span>
                         {cd.middleNotes.join(", ")}
                       </div>
                     )}
                     {cd.baseNotes.length > 0 && (
-                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)]">
+                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
                         <span className="tracking-[0.08em] uppercase mr-2">Base</span>
                         {cd.baseNotes.join(", ")}
                       </div>
@@ -298,7 +298,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Status */}
           <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
               Status
             </label>
             <div className="flex flex-wrap gap-2">
@@ -324,7 +324,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <div className="px-3 py-2 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
               <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
               {selectedHouse && (
-                <div className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
               )}
               {!isEdit && (
                 <button
@@ -339,7 +339,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Status */}
           <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
               Status
             </label>
             <div className="flex flex-wrap gap-2">
@@ -358,7 +358,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Size */}
           <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
               Size
             </label>
             <div className="flex flex-wrap gap-2">
@@ -377,7 +377,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Type */}
           <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
               Concentration
             </label>
             <div className="flex flex-wrap gap-2">
@@ -396,7 +396,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
           {/* Rating */}
           <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
               Personal Rating
             </label>
             <div className="flex gap-1">
@@ -429,7 +429,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             <>
               {/* Where bought */}
               <div>
-                <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+                <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
                   Where Bought
                 </label>
                 <input
@@ -443,7 +443,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               {/* Purchase date + price */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
                     Month
                   </label>
                   <select
@@ -456,7 +456,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
                     Year
                   </label>
                   <select
@@ -469,7 +469,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
                     Price
                   </label>
                   <input
@@ -483,7 +483,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
 
               {/* Notes */}
               <div>
-                <label className="block font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.1em] uppercase mb-2">
+                <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
                   Personal Notes
                 </label>
                 <textarea
@@ -491,7 +491,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder="Your impressions, context, memories..."
-                  className="w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)] resize-none"
+                  className="w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy)] resize-none"
                 />
               </div>
 
@@ -504,7 +504,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                     onChange={(e) => setIsDupe(e.target.checked)}
                     className="accent-[var(--color-accent)]"
                   />
-                  <span className="font-[var(--font-sans)] text-xs text-[var(--color-sand)] tracking-[0.05em] uppercase">
+                  <span className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.05em] uppercase">
                     This is a dupe of another fragrance
                   </span>
                 </label>
@@ -529,7 +529,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
             {step === 2 && !isEdit && (
               <button
                 onClick={() => setStep(1)}
-                className="px-4 py-[7px] font-[var(--font-sans)] text-xs text-[var(--color-sand)] border border-[var(--color-cream-dark)] hover:border-[var(--color-navy)] transition-colors"
+                className="px-4 py-[7px] font-[var(--font-sans)] text-xs text-[var(--color-navy)] border border-[var(--color-cream-dark)] hover:border-[var(--color-navy)] transition-colors"
               >
                 Back
               </button>

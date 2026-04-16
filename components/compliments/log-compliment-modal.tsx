@@ -49,7 +49,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="mb-1 font-sans font-medium uppercase"
-      style={{ fontSize: '11px', color: 'var(--color-sand)', letterSpacing: '0.12em' }}
+      style={{ fontSize: '11px', color: 'var(--color-navy)', letterSpacing: '0.12em' }}
     >
       {children}
     </div>
