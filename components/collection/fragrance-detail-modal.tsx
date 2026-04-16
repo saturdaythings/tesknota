@@ -8,7 +8,7 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Divider } from "@/components/ui/divider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CompForm } from "@/components/ui/comp-form";
+import { LogComplimentModal } from "@/components/compliments/log-compliment-modal";
 import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
@@ -292,7 +292,7 @@ export function FragranceDetailModal({
 
   return (
     <>
-      <CompForm
+      <LogComplimentModal
         open={compFormOpen}
         onClose={() => setCompFormOpen(false)}
         editing={null}

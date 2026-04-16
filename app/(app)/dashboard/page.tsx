@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Topbar } from "@/components/layout/Topbar";
 import { FragDetail } from "@/components/ui/frag-detail";
 import { FragForm } from "@/components/ui/frag-form";
-import { CompForm } from "@/components/ui/comp-form";
+import { LogComplimentModal } from "@/components/compliments/log-compliment-modal";
 import { StatusBadge } from "@/components/ui/frag-row";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
@@ -77,7 +77,7 @@ export default function DashboardPage() {
         onClose={() => setFragFormOpen(false)}
         editing={editingFrag}
       />
-      <CompForm
+      <LogComplimentModal
         open={compFormOpen}
         onClose={() => setCompFormOpen(false)}
       />
