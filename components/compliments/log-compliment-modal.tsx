@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
@@ -27,10 +28,15 @@ const GENDERS: { value: ComplimenterGender; label: string }[] = [
 
 const ELIGIBLE_STATUSES = new Set(['CURRENT', 'PREVIOUSLY_OWNED', 'FINISHED']);
 
-const YEARS = Array.from(
+const MONTH_OPTIONS = MONTHS.map((m, i) => ({
+  value: String(i + 1).padStart(2, '0'),
+  label: m,
+}));
+
+const YEAR_OPTIONS = Array.from(
   { length: new Date().getFullYear() - 2019 },
   (_, i) => String(new Date().getFullYear() - i),
-);
+).map((y) => ({ value: y, label: y }));
 
 function genId(): string {
   return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -49,10 +55,21 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="mb-1 font-sans font-medium uppercase"
-      style={{ fontSize: '11px', color: 'var(--color-navy)', letterSpacing: '0.12em' }}
+      style={{ fontSize: '11px', color: 'var(--color-navy)', letterSpacing: '0.1em' }}
     >
       {children}
     </div>
+  );
+}
+
+function OptionalTag() {
+  return (
+    <span
+      className="normal-case font-normal"
+      style={{ letterSpacing: 0, color: 'var(--color-sand)' }}
+    >
+      (optional)
+    </span>
   );
 }
 
@@ -74,15 +91,16 @@ function ToggleGroup<T extends string>({
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className="font-sans font-medium transition-colors duration-100 cursor-pointer"
+            className="font-sans transition-colors duration-100 cursor-pointer"
             style={{
-              height: '40px',
+              height: '36px',
               padding: '0 14px',
               fontSize: '13px',
-              borderRadius: '3px',
-              border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-cream-dark)',
-              background: active ? 'var(--color-navy)' : 'var(--color-cream)',
-              color: active ? 'white' : 'var(--color-navy)',
+              letterSpacing: '0.04em',
+              borderRadius: '2px',
+              border: active ? '1px solid var(--color-navy)' : '1px solid rgba(30,45,69,0.8)',
+              background: active ? 'var(--color-navy)' : 'transparent',
+              color: active ? 'var(--color-cream)' : 'var(--color-navy)',
             }}
           >
             {opt.label}
@@ -147,7 +165,7 @@ function FragSearch({
           background: 'var(--color-cream)',
           border: error
             ? '1px solid var(--color-destructive)'
-            : '1px solid #C8B89A',
+            : '1px solid rgba(30,45,69,0.8)',
           color: 'var(--color-navy)',
         }}
       />
@@ -157,7 +175,7 @@ function FragSearch({
           style={{
             top: 'calc(100% + 4px)',
             background: 'var(--color-cream)',
-            border: '1px solid #C8B89A',
+            border: '1px solid rgba(30,45,69,0.8)',
             borderRadius: '3px',
             boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
             maxHeight: '220px',
@@ -167,19 +185,24 @@ function FragSearch({
             <div
               key={f.id}
               onMouseDown={() => { onSelect(f); setOpen(false); }}
-              className="flex flex-col justify-center cursor-pointer hover:bg-[var(--color-sand-light)] transition-colors"
+              className="flex flex-col justify-center cursor-pointer transition-colors"
               style={{
-                height: '52px',
+                height: '48px',
                 padding: '0 12px',
-                borderBottom: '1px solid #C8B89A',
+                borderBottom: '1px solid rgba(30,45,69,0.1)',
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div className="font-sans font-medium" style={{ fontSize: '13px', color: 'var(--color-navy)' }}>
+              <div
+                className="font-serif italic"
+                style={{ fontSize: '15px', color: 'var(--color-navy)', lineHeight: 1.2 }}
+              >
                 {f.name}
               </div>
               <div
                 className="font-sans uppercase"
-                style={{ fontSize: '11px', color: 'var(--color-sand)', letterSpacing: '0.08em' }}
+                style={{ fontSize: '11px', color: 'var(--color-navy)', letterSpacing: '0.1em', opacity: 0.6 }}
               >
                 {f.house}
               </div>
@@ -226,7 +249,6 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
     ? fragrances.filter((f) => f.userId === user.id && ELIGIBLE_STATUSES.has(f.status))
     : [];
 
-  // Form state
   const [primaryFrag, setPrimaryFrag] = useState<UserFragrance | null>(null);
   const [secondaryFrag, setSecondaryFrag] = useState<UserFragrance | null>(null);
   const [relation, setRelation] = useState<Relation | ''>('');
@@ -344,16 +366,16 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
-    height: '40px',
+    height: '36px',
     padding: '0 12px',
     fontSize: '15px',
     fontFamily: 'var(--font-sans)',
     background: 'var(--color-cream)',
-    border: '1px solid var(--color-cream-dark)',
+    border: '1px solid rgba(30,45,69,0.8)',
     borderRadius: '3px',
     color: 'var(--color-navy)',
     outline: 'none',
-    cursor: 'pointer',
+    cursor: 'text',
   };
 
   return (
@@ -375,15 +397,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
 
           {/* Layering fragrance */}
           <div>
-            <FieldLabel>
-              Layering Fragrance{' '}
-              <span
-                className="normal-case font-normal"
-                style={{ letterSpacing: 0, color: 'var(--color-sand)', opacity: 0.7 }}
-              >
-                (optional)
-              </span>
-            </FieldLabel>
+            <FieldLabel>Layering Fragrance <OptionalTag /></FieldLabel>
             <FragSearch
               value={secondaryFrag}
               onSelect={setSecondaryFrag}
@@ -400,15 +414,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
 
           {/* Gender */}
           <div>
-            <FieldLabel>
-              Gender{' '}
-              <span
-                className="normal-case font-normal"
-                style={{ letterSpacing: 0, color: 'var(--color-sand)', opacity: 0.7 }}
-              >
-                (optional)
-              </span>
-            </FieldLabel>
+            <FieldLabel>Gender <OptionalTag /></FieldLabel>
             <ToggleGroup options={GENDERS} value={gender} onChange={setGender} />
           </div>
 
@@ -416,80 +422,42 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
           <div className="grid grid-cols-2 gap-4">
             <div>
               <FieldLabel>Month *</FieldLabel>
-              <select
-                value={month}
-                onChange={(e) => setMonth(e.target.value)}
-                style={inputStyle}
-              >
-                {MONTHS.map((m, i) => (
-                  <option key={m} value={String(i + 1).padStart(2, '0')}>
-                    {m}
-                  </option>
-                ))}
-              </select>
+              <Select options={MONTH_OPTIONS} value={month} onChange={setMonth} />
             </div>
             <div>
               <FieldLabel>Year *</FieldLabel>
-              <select
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                style={inputStyle}
-              >
-                {YEARS.map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+              <Select options={YEAR_OPTIONS} value={year} onChange={setYear} />
             </div>
           </div>
 
           {/* Location */}
           <div className="flex flex-col gap-2">
-            <FieldLabel>
-              Location{' '}
-              <span
-                className="normal-case font-normal"
-                style={{ letterSpacing: 0, color: 'var(--color-sand)', opacity: 0.7 }}
-              >
-                (optional)
-              </span>
-            </FieldLabel>
+            <FieldLabel>Location <OptionalTag /></FieldLabel>
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Bluegrass Lounge, coffee shop, gym..."
-              style={{
-                ...inputStyle,
-                cursor: 'text',
-                fontFamily: 'var(--font-sans)',
-              }}
+              style={inputStyle}
             />
             <div className="grid grid-cols-2 gap-3">
               <input
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="City"
-                style={{ ...inputStyle, cursor: 'text', fontFamily: 'var(--font-sans)' }}
+                style={inputStyle}
               />
               <input
                 value={state}
                 onChange={(e) => setState(e.target.value)}
                 placeholder="State / Country"
-                style={{ ...inputStyle, cursor: 'text', fontFamily: 'var(--font-sans)' }}
+                style={inputStyle}
               />
             </div>
           </div>
 
           {/* Notes */}
           <div>
-            <FieldLabel>
-              Notes{' '}
-              <span
-                className="normal-case font-normal"
-                style={{ letterSpacing: 0, color: 'var(--color-sand)', opacity: 0.7 }}
-              >
-                (optional)
-              </span>
-            </FieldLabel>
+            <FieldLabel>Notes <OptionalTag /></FieldLabel>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -500,7 +468,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
                 fontSize: '15px',
                 minHeight: '80px',
                 background: 'var(--color-cream)',
-                border: '1px solid var(--color-cream-dark)',
+                border: '1px solid rgba(30,45,69,0.8)',
                 color: 'var(--color-navy)',
               }}
             />
