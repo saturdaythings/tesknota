@@ -81,7 +81,7 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
             <Search
               size={15}
               className="absolute left-3 pointer-events-none"
-              style={{ color: '#C8B89A' }}
+              style={{ color: 'rgba(30,45,69,0.8)' }}
             />
             <input
               type="search"
@@ -91,9 +91,11 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
                 setQuery(e.target.value);
                 onSearch?.(e.target.value);
               }}
-              className="h-9 pl-9 pr-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
+              className="h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
               style={{
                 fontSize: '12px',
+                fontWeight: 400,
+                letterSpacing: '0.08em',
                 width: '220px',
                 background: 'var(--color-cream)',
                 border: '1px solid rgba(30,45,69,0.8)',
