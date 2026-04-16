@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
+import { TabPill } from '@/components/ui/tab-pill';
+import { FieldLabel, OptionalTag } from '@/components/ui/field-label';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
@@ -34,7 +36,7 @@ const MONTH_OPTIONS = MONTHS.map((m, i) => ({
 }));
 
 const YEAR_OPTIONS = Array.from(
-  { length: new Date().getFullYear() - 2019 },
+  { length: new Date().getFullYear() - 2009 },
   (_, i) => String(new Date().getFullYear() - i),
 ).map((y) => ({ value: y, label: y }));
 
@@ -49,29 +51,7 @@ function normalizeMonth(m: string): string {
   return idx >= 0 ? String(idx + 1).padStart(2, '0') : String(new Date().getMonth() + 1).padStart(2, '0');
 }
 
-// ── Inline components ──────────────────────────────────────
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className="mb-1 font-sans font-medium uppercase"
-      style={{ fontSize: '11px', color: 'var(--color-navy)', letterSpacing: '0.1em' }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function OptionalTag() {
-  return (
-    <span
-      className="normal-case font-normal"
-      style={{ letterSpacing: 0, color: 'var(--color-sand)' }}
-    >
-      (optional)
-    </span>
-  );
-}
+// ── Sub-components ─────────────────────────────────────────
 
 function ToggleGroup<T extends string>({
   options,
@@ -84,29 +64,14 @@ function ToggleGroup<T extends string>({
 }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {options.map((opt) => {
-        const active = value === opt.value;
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onChange(opt.value)}
-            className="font-sans transition-colors duration-100 cursor-pointer"
-            style={{
-              height: '36px',
-              padding: '0 14px',
-              fontSize: '13px',
-              letterSpacing: '0.04em',
-              borderRadius: '2px',
-              border: active ? '1px solid var(--color-navy)' : '1px solid rgba(30,45,69,0.8)',
-              background: active ? 'var(--color-navy)' : 'transparent',
-              color: active ? 'var(--color-cream)' : 'var(--color-navy)',
-            }}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
+      {options.map((opt) => (
+        <TabPill
+          key={opt.value}
+          label={opt.label}
+          active={value === opt.value}
+          onClick={() => onChange(opt.value)}
+        />
+      ))}
     </div>
   );
 }
@@ -159,16 +124,12 @@ function FragSearch({
         onFocus={() => !locked && setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         placeholder="Search your collection..."
-        className="w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-navy-mid)]"
+        className="w-full h-9 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-sand)]"
         style={{
-          fontSize: '12px',
-          fontWeight: 400,
-          letterSpacing: '0.08em',
+          fontSize: '15px',
           background: 'var(--color-cream)',
-          border: error
-            ? '1px solid var(--color-destructive)'
-            : '1px solid rgba(30,45,69,0.8)',
-          color: 'rgba(30,45,69,0.8)',
+          border: error ? '1px solid var(--color-destructive)' : '1px solid rgba(30,45,69,0.8)',
+          color: 'var(--color-navy)',
         }}
       />
       {open && matches.length > 0 && (
@@ -188,24 +149,14 @@ function FragSearch({
               key={f.id}
               onMouseDown={() => { onSelect(f); setOpen(false); }}
               className="flex flex-col justify-center cursor-pointer transition-colors"
-              style={{
-                height: '48px',
-                padding: '0 12px',
-                borderBottom: '1px solid rgba(30,45,69,0.1)',
-              }}
+              style={{ height: '48px', padding: '0 12px', borderBottom: '1px solid rgba(30,45,69,0.1)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div
-                className="font-serif italic"
-                style={{ fontSize: '15px', color: 'var(--color-navy)', lineHeight: 1.2 }}
-              >
+              <div className="font-serif italic" style={{ fontSize: '15px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
                 {f.name}
               </div>
-              <div
-                className="font-sans uppercase"
-                style={{ fontSize: '11px', color: 'var(--color-navy)', letterSpacing: '0.1em', opacity: 0.6 }}
-              >
+              <div className="font-sans uppercase" style={{ fontSize: '11px', color: 'var(--color-navy)', letterSpacing: '0.1em', opacity: 0.6 }}>
                 {f.house}
               </div>
             </div>
@@ -259,7 +210,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
   const [year, setYear] = useState(String(now.getFullYear()));
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
-  const [state, setState] = useState('US');
+  const [state, setState] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [fragError, setFragError] = useState('');
@@ -290,7 +241,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
       setYear(editing.year || String(now.getFullYear()));
       setLocation(editing.location ?? '');
       setCity(editing.city ?? '');
-      setState(editing.state ?? editing.country ?? 'US');
+      setState(editing.state ?? editing.country ?? '');
       setNotes(editing.notes ?? '');
     } else {
       const pre = prefillFragId
@@ -304,7 +255,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
       setYear(String(now.getFullYear()));
       setLocation('');
       setCity('');
-      setState('US');
+      setState('');
       setNotes('');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -366,20 +317,14 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
     }
   }
 
+  const inputCls =
+    'w-full h-9 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 ' +
+    'focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]';
   const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: '36px',
-    padding: '0 12px',
-    fontSize: '12px',
-    fontWeight: 400,
-    letterSpacing: '0.08em',
-    fontFamily: 'var(--font-sans)',
+    fontSize: '15px',
     background: 'var(--color-cream)',
     border: '1px solid rgba(30,45,69,0.8)',
-    borderRadius: '2px',
-    color: 'rgba(30,45,69,0.8)',
-    outline: 'none',
-    cursor: 'text',
+    color: 'var(--color-navy)',
   };
 
   return (
@@ -441,7 +386,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Bluegrass Lounge, coffee shop, gym..."
-              className="placeholder:text-[var(--color-navy-mid)]"
+              className={inputCls}
               style={inputStyle}
             />
             <div className="grid grid-cols-2 gap-3">
@@ -449,14 +394,14 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="City"
-                className="placeholder:text-[var(--color-navy-mid)]"
+                className={inputCls}
                 style={inputStyle}
               />
               <input
                 value={state}
                 onChange={(e) => setState(e.target.value)}
                 placeholder="State / Country"
-                className="placeholder:text-[var(--color-navy-mid)]"
+                className={inputCls}
                 style={inputStyle}
               />
             </div>
@@ -470,15 +415,13 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Context, reaction, moment..."
               rows={3}
-              className="w-full p-3 rounded-[2px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y placeholder:text-[var(--color-navy-mid)]"
+              className="w-full p-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y placeholder:text-[var(--color-sand)]"
               style={{
-                fontSize: '12px',
-                fontWeight: 400,
-                letterSpacing: '0.08em',
+                fontSize: '15px',
                 minHeight: '80px',
                 background: 'var(--color-cream)',
                 border: '1px solid rgba(30,45,69,0.8)',
-                color: 'rgba(30,45,69,0.8)',
+                color: 'var(--color-navy)',
               }}
             />
           </div>
@@ -492,7 +435,6 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
       </ModalBody>
 
       <ModalFooter>
-        {/* Left: delete (edit mode only) */}
         <div className="flex items-center gap-3 flex-1">
           {isEdit && !confirmDelete && (
             <Button variant="destructive" onClick={handleDelete}>
@@ -501,33 +443,20 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
           )}
           {isEdit && confirmDelete && (
             <div className="flex items-center gap-3">
-              <span
-                className="font-sans"
-                style={{ fontSize: '13px', color: 'var(--color-destructive)' }}
-              >
+              <span className="font-sans" style={{ fontSize: '13px', color: 'var(--color-destructive)' }}>
                 Are you sure? This cannot be undone.
               </span>
-              <Button variant="destructive" onClick={handleDelete}>
-                Delete
-              </Button>
-              <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
-                Cancel
-              </Button>
+              <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+              <Button variant="ghost" onClick={() => setConfirmDelete(false)}>Cancel</Button>
             </div>
           )}
         </div>
-
-        {/* Right: cancel + save */}
         <div className="flex items-center gap-3">
           <Button variant="secondary" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
           <Button variant="primary" onClick={save} disabled={saving || confirmDelete}>
-            {saving ? (
-              <><Spinner /> {isEdit ? 'Saving...' : 'Logging...'}</>
-            ) : (
-              isEdit ? 'Save Changes' : 'Log Compliment'
-            )}
+            {saving ? <><Spinner /> {isEdit ? 'Saving...' : 'Logging...'}</> : isEdit ? 'Save Changes' : 'Log Compliment'}
           </Button>
         </div>
       </ModalFooter>
