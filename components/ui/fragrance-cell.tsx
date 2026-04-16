@@ -19,6 +19,11 @@ export function FragranceCell({ name, house, type, secondary, className }: Fragr
         <span className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}
         </span>
+        {secondary && (
+          <span className="font-serif italic flex-shrink-0" style={{ fontSize: 'var(--text-note)', color: 'var(--color-navy)' }}>
+            + {secondary}
+          </span>
+        )}
         {type && shortFragType(type) && (
           <Badge
             variant="neutral"
@@ -29,11 +34,6 @@ export function FragranceCell({ name, house, type, secondary, className }: Fragr
           </Badge>
         )}
       </div>
-      {secondary && (
-        <div className="font-serif italic mb-1" style={{ fontSize: 'var(--text-note)', color: 'var(--color-navy)' }}>
-          + {secondary}
-        </div>
-      )}
       {house && (
         <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>
           {house}
