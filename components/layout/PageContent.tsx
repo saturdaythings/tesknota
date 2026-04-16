@@ -26,8 +26,8 @@ export function PageContent({ children, maxWidth, className }: PageContentProps)
           margin: "0 auto",
         }}
         className={cn(
-          "px-[var(--space-8)] py-[var(--space-6)]",
-          "max-sm:px-[var(--space-4)] max-sm:py-[var(--space-4)]",
+          "px-[var(--page-margin)] py-[var(--space-6)]",
+          "max-sm:px-[var(--topbar-px-mobile)] max-sm:py-[var(--space-4)]",
           className,
         )}
       >
