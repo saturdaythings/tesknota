@@ -60,7 +60,7 @@ const LAYOUT_TOKENS = [
   { token: '--header-height',    label: 'Header Height',    usage: 'Topbar height' },
   { token: '--topbar-px',        label: 'Topbar PX',        usage: 'Topbar horizontal padding (desktop)' },
   { token: '--topbar-px-mobile', label: 'Topbar PX Mobile', usage: 'Topbar horizontal padding (mobile)' },
-  { token: '--page-margin',      label: 'Page Margin',      usage: 'PageContent horizontal padding — alias of --topbar-px' },
+  { token: '--page-margin',      label: 'Page Margin',      usage: 'PageContent horizontal padding (left + right); right edge of Topbar actions' },
 ];
 
 // ── Dynamic token reader ───────────────────────────────────
