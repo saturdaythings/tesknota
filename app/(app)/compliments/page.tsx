@@ -253,7 +253,7 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
           {results.length === 0 && query.trim().length > 0 && (
             <div
               className="flex items-center font-sans italic"
-              style={{ height: '44px', padding: '0 12px', fontSize: 'var(--text-sm)', color: 'var(--color-navy-backdrop)', borderBottom: '1px solid var(--color-row-divider)' }}
+              style={{ height: '44px', padding: '0 12px', fontSize: 'var(--text-sm)', color: 'var(--color-meta-text)', borderBottom: '1px solid var(--color-row-divider)' }}
             >
               No matches found
             </div>

@@ -214,7 +214,6 @@ export default function DesignSystemPage() {
               <Swatch color="var(--color-meta-text)"    label="Meta Text"    token="--color-meta-text · rgba(30,45,69,0.80)" />
               <Swatch color="var(--color-notes-text)"   label="Notes Text"   token="--color-notes-text · rgba(30,45,69,0.70)" />
               <Swatch color="var(--color-row-hover)"    label="Row Hover"    token="--color-row-hover · rgba(232,224,208,0.30)" />
-              <Swatch color="var(--color-navy-backdrop)" label="Navy Backdrop" token="--color-navy-backdrop · rgba(30,45,69,0.50)" />
             </div>
             <Note>
               Never hardcode hex or rgba values. Use <code className="font-mono">var(--color-*)</code> tokens only. All opacity variants have named tokens — never write raw rgba() inline.
@@ -252,10 +251,7 @@ export default function DesignSystemPage() {
               <span className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>Maison Margiela</span>
             </TypeSpec>
             <TypeSpec spec="Sans uppercase · var(--text-xs) · 400 · 0.1em · navy">
-              <span className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>STRANGER · FEMALE · COFFEE SHOP</span>
-            </TypeSpec>
-            <TypeSpec spec="Sans · var(--text-xs) · 400 · navy">
-              <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>APR 2025</span>
+              <span className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>STRANGER · FEMALE · APR 2025</span>
             </TypeSpec>
             <TypeSpec spec="Sans · var(--text-base) · 400 · navy">
               <span className="font-sans" style={{ fontSize: 'var(--text-base)', color: 'var(--color-navy)' }}>Body copy text</span>
