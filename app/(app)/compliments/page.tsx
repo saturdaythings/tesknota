@@ -79,25 +79,24 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
   const meta = buildMeta(comp);
   const date = formatDate(comp);
 
-  const cellBase: React.CSSProperties = {
-    display: 'table-cell',
-    verticalAlign: 'top',
-    paddingTop: 'var(--space-4)',
-    paddingBottom: 'var(--space-4)',
-    borderBottom: '1px solid var(--color-row-divider)',
-    height: '80px',
-  };
-
   return (
     <div
       onClick={onEdit}
       className="cursor-pointer transition-colors duration-100"
-      style={{ display: 'table-row' }}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'subgrid',
+        gridColumn: '1 / -1',
+        alignItems: 'start',
+        minHeight: '80px',
+        paddingTop: 'var(--space-4)',
+        paddingBottom: 'var(--space-4)',
+        borderBottom: '1px solid var(--color-row-divider)',
+      }}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Column 1: Fragrance — auto-width to widest entry, never wraps */}
-      <div style={{ ...cellBase, whiteSpace: 'nowrap' }}>
+      <div style={{ whiteSpace: 'nowrap' }}>
         <FragranceCell
           name={fragName}
           house={fragHouse}
@@ -106,11 +105,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         />
       </div>
 
-      {/* Spacer — explicit fixed gap between col 1 and col 2, matches col 2→3 gap */}
-      <div style={{ display: 'table-cell', width: 'var(--space-6)', minWidth: 'var(--space-6)' }} />
-
-      {/* Column 2: Meta + Notes — absorbs remaining width */}
-      <div style={{ ...cellBase, paddingRight: 'var(--space-6)', width: '100%' }}>
+      <div>
         {meta && (
           <div
             className="font-sans uppercase mb-1"
@@ -129,11 +124,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         )}
       </div>
 
-      {/* Column 3: Date — auto-width, right-aligned */}
-      <div
-        style={{ ...cellBase, whiteSpace: 'nowrap', textAlign: 'right' }}
-        className="font-sans uppercase"
-      >
+      <div className="font-sans uppercase" style={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
         <span style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>
           {date}
         </span>
@@ -435,7 +426,7 @@ function ComplimentsInner() {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'table', width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr auto', columnGap: 'var(--space-6)', width: '100%' }}>
             {displayed.map((comp) => {
               const { name, house, type } = getFragInfo(comp);
               return (
