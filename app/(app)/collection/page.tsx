@@ -18,6 +18,7 @@ import { FragranceDetailModal } from "@/components/collection/fragrance-detail-m
 import { Pagination } from "@/components/ui/pagination";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
+import { FragSearch } from "@/components/ui/frag-search";
 import { useToast } from "@/components/ui/toast";
 import { getAccords, MONTHS, shortFragType } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
@@ -372,7 +373,7 @@ function CollectionInner() {
         editing={editingFrag}
       />
 
-      <Topbar title="My Collection" />
+      <Topbar title="My Collection" actions={<FragSearch />} />
 
       <PageContent>
           {/* Add button */}

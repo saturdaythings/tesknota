@@ -571,7 +571,7 @@ function WishlistInner() {
         />
       )}
 
-      <Topbar title="Wishlist" />
+      <Topbar title="Wishlist" actions={<FragSearch />} />
 
       <PageContent>
 

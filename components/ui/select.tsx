@@ -26,7 +26,7 @@ interface SelectProps {
 }
 
 const triggerBase =
-  'flex items-center gap-2 h-9 px-3 ' +
+  'flex items-center justify-between w-full h-9 px-3 ' +
   'bg-[var(--color-cream)] rounded-[3px] ' +
   'font-sans outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
@@ -109,52 +109,75 @@ export function Select({
         </label>
       )}
 
-      <button
-        type="button"
-        id={id}
-        role="combobox"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-controls={listId}
-        aria-labelledby={label ? `${id}-label` : undefined}
-        disabled={disabled}
-        onClick={() => {
-          if (!disabled) {
-            setOpen((o) => !o);
-            if (!open) setFocusedIndex(options.findIndex((o) => o.value === value));
-          }
-        }}
-        onKeyDown={handleKeyDown}
-        className={cn(triggerBase, size === 'full' && 'w-full')}
-        style={{
-          fontSize: 'var(--text-sm)',
-          fontFamily: 'var(--font-sans)',
-          border: error
-            ? '1px solid var(--color-destructive)'
-            : open
-            ? '1px solid var(--color-accent)'
-            : '1px solid var(--color-meta-text)',
-        }}
-      >
-        <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)', whiteSpace: 'nowrap' }}>
-          {selectedOption?.label ?? placeholder}
-        </span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          aria-hidden="true"
+      {/* Grid wrapper: when size="auto" the hidden sizer forces width to longest option */}
+      <div style={size === 'auto' ? { display: 'grid' } : undefined}>
+        {size === 'auto' && (
+          <span
+            aria-hidden="true"
+            style={{
+              gridArea: '1 / 1',
+              visibility: 'hidden',
+              pointerEvents: 'none',
+              height: 0,
+              overflow: 'hidden',
+              padding: '0 48px 0 12px',
+              fontSize: 'var(--text-sm)',
+              fontFamily: 'var(--font-sans)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {options.reduce((longest, opt) => opt.label.length > longest.length ? opt.label : longest, placeholder)}
+          </span>
+        )}
+
+        <button
+          type="button"
+          id={id}
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={listId}
+          aria-labelledby={label ? `${id}-label` : undefined}
+          disabled={disabled}
+          onClick={() => {
+            if (!disabled) {
+              setOpen((o) => !o);
+              if (!open) setFocusedIndex(options.findIndex((o) => o.value === value));
+            }
+          }}
+          onKeyDown={handleKeyDown}
+          className={cn(triggerBase, size === 'full' && 'w-full')}
           style={{
-            color: 'var(--color-meta-text)',
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 150ms',
-            flexShrink: 0,
+            gridArea: size === 'auto' ? '1 / 1' : undefined,
+            fontSize: 'var(--text-sm)',
+            fontFamily: 'var(--font-sans)',
+            border: error
+              ? '1px solid var(--color-destructive)'
+              : open
+              ? '1px solid var(--color-accent)'
+              : '1px solid var(--color-meta-text)',
           }}
         >
-          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
+          <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)', whiteSpace: 'nowrap' }}>
+            {selectedOption?.label ?? placeholder}
+          </span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            style={{
+              color: 'var(--color-meta-text)',
+              transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 150ms',
+              flexShrink: 0,
+            }}
+          >
+            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </div>
 
       {open && (
         <div
@@ -196,7 +219,7 @@ export function Select({
                   fontFamily: 'var(--font-sans)',
                   cursor: 'pointer',
                   color: 'var(--color-navy)',
-                  fontWeight: 400,
+                  fontWeight: 'var(--font-weight-normal)',
                   whiteSpace: 'nowrap',
                   background: isSelected
                     ? 'var(--color-cream-dark)'

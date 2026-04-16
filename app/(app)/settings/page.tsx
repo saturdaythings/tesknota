@@ -54,7 +54,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <Topbar title="Settings" />
+      <Topbar title="Settings" actions={<FragSearch />} />
       <PageContent maxWidth="560px">
 
         <SectionHeader title="Account" />

@@ -233,7 +233,7 @@ function ComplimentsInner() {
         onClose={() => setEditingComp(null)}
         editing={editingComp}
       />
-      <Topbar title="Compliments" />
+      <Topbar title="Compliments" actions={<FragSearch />} />
 
       <PageContent>
         {/* Page header row */}

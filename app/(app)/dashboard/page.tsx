@@ -83,7 +83,7 @@ export default function DashboardPage() {
         open={compFormOpen}
         onClose={() => setCompFormOpen(false)}
       />
-      <Topbar title="Dashboard" />
+      <Topbar title="Dashboard" actions={<FragSearch />} />
       <PageContent>
         {!isLoaded && (
           <div
