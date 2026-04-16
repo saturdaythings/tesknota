@@ -190,7 +190,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       {/* Column 3: Date */}
       <div
         className="font-sans flex-shrink-0 text-right"
-        style={{ fontSize: '14px', color: 'rgba(30,45,69,0.7)', minWidth: '72px' }}
+        style={{ fontSize: '14px', color: 'var(--color-navy)', minWidth: '72px' }}
       >
         {date}
       </div>

@@ -117,7 +117,7 @@ export function Select({
           border: error ? '1px solid var(--color-destructive)' : open ? '1px solid var(--color-accent)' : '1px solid rgba(30,45,69,0.65)',
         }}
       >
-        <span className={selectedOption ? 'text-[var(--color-navy)]' : 'text-[var(--color-sand)]'}>
+        <span style={{ color: selectedOption ? 'rgba(30,45,69,0.65)' : 'var(--color-sand)' }}>
           {selectedOption?.label ?? placeholder}
         </span>
         <svg
