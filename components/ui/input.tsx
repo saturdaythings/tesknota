@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 const inputBase =
   'w-full font-sans font-normal text-[15px] text-[var(--color-navy)] ' +
   'bg-[var(--color-cream)] border border-[var(--color-cream-dark)] rounded-[3px] ' +
-  'placeholder:text-[var(--color-sand)] outline-none transition-[border-color] duration-150 ' +
+  'placeholder:text-[var(--color-navy-mid)] outline-none transition-[border-color] duration-150 ' +
   'focus:border-[var(--color-accent)] ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 

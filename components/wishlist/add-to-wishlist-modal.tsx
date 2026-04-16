@@ -168,7 +168,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                     color: "var(--color-navy)",
                     outline: "none",
                   }}
-                  className="focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]"
+                  className="focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
                 />
                 {selected && (
                   <span
@@ -223,7 +223,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                       <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 500, color: "var(--color-navy)" }}>
                         {f.fragranceName}
                       </div>
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>
                         {f.fragranceHouse}
                       </div>
                     </div>

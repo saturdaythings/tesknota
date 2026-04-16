@@ -73,7 +73,7 @@ export function MultiSelect({
           fontSize: "15px",
           outline: "none",
           cursor: "pointer",
-          color: value.length > 0 ? "var(--color-navy)" : "var(--color-sand)",
+          color: value.length > 0 ? "var(--color-navy)" : "var(--color-navy-mid)",
           borderColor: open ? "var(--color-accent)" : "var(--color-cream-dark)",
           transition: "border-color 150ms",
         }}
@@ -88,7 +88,7 @@ export function MultiSelect({
           fill="none"
           aria-hidden="true"
           style={{
-            color: "var(--color-sand)",
+            color: "rgba(30,45,69,0.8)",
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 150ms",
             flexShrink: 0,
@@ -149,14 +149,14 @@ export function MultiSelect({
                   style={{
                     width: "14px",
                     height: "14px",
-                    border: "1px solid var(--color-sand)",
+                    border: "1px solid rgba(30,45,69,0.8)",
                     borderRadius: "2px",
                     flexShrink: 0,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     background: checked ? "var(--color-navy)" : "transparent",
-                    borderColor: checked ? "var(--color-navy)" : "var(--color-sand)",
+                    borderColor: checked ? "var(--color-navy)" : "rgba(30,45,69,0.8)",
                   }}
                 >
                   {checked && (

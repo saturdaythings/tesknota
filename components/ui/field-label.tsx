@@ -22,7 +22,7 @@ export function OptionalTag() {
   return (
     <span
       className="normal-case font-normal"
-      style={{ letterSpacing: 0, color: 'var(--color-sand)' }}
+      style={{ letterSpacing: 0, color: 'rgba(30,45,69,0.7)' }}
     >
       (optional)
     </span>

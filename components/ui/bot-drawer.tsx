@@ -266,7 +266,7 @@ export function BotDrawer() {
           </div>
           <button
             onClick={closeDrawer}
-            style={{ fontSize: "20px", color: "var(--color-sand)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", lineHeight: 1 }}
+            style={{ fontSize: "20px", color: "rgba(30,45,69,0.8)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", lineHeight: 1 }}
             aria-label="Close"
           >
             ×
@@ -301,7 +301,7 @@ export function BotDrawer() {
                   onClick={b.action}
                   style={{
                     background: "var(--color-cream-dark)",
-                    border: "1px solid var(--color-sand)",
+                    border: "1px solid rgba(30,45,69,0.8)",
                     color: "var(--color-navy)",
                     fontFamily: "var(--font-sans)",
                     fontSize: "12px",

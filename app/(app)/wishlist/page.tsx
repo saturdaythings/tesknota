@@ -109,7 +109,7 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
         gap: "6px",
       }}
     >
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--color-sand)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)" }}>
         {house}
       </div>
       <div
@@ -128,12 +128,12 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
       >
         {name}
       </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-sand)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(30,45,69,0.8)" }}>
         {ratingNum ? `${ratingNum.toFixed(1)} ★` : ""}
         {ratingNum && priceRange ? " · " : ""}
         {priceRange ?? ""}
       </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontStyle: "italic", color: "var(--color-sand)", flex: 1 }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontStyle: "italic", color: "rgba(30,45,69,0.8)", flex: 1 }}>
         {matchNote}
       </div>
       {onWishlist ? (
@@ -187,7 +187,7 @@ function DiscoverRow({ title, children }: { title: string; children: React.React
           fontWeight: 500,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
-          color: "var(--color-sand)",
+          color: "rgba(30,45,69,0.8)",
           marginBottom: "var(--space-3)",
         }}
       >
@@ -241,7 +241,7 @@ function RowActions({
   if (confirm) {
     return (
       <div style={{ display: "flex", gap: "4px", alignItems: "center" }} onClick={(e) => e.stopPropagation()}>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>Remove?</span>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>Remove?</span>
         <button
           onClick={() => onRemove(frag)}
           style={{
@@ -265,7 +265,7 @@ function RowActions({
             cursor: "pointer",
             fontFamily: "var(--font-sans)",
             fontSize: "12px",
-            color: "var(--color-sand)",
+            color: "rgba(30,45,69,0.8)",
             padding: "4px 6px",
           }}
         >
@@ -614,7 +614,7 @@ function WishlistInner() {
           {/* Filter + sort bar */}
           <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", flexWrap: "wrap", marginBottom: "var(--space-4)" }}>
             <div style={{ position: "relative", display: "flex", alignItems: "center", width: "280px" }} className="max-sm:w-full">
-              <Search size={14} style={{ position: "absolute", left: "10px", color: "var(--color-sand)", pointerEvents: "none" }} />
+              <Search size={14} style={{ position: "absolute", left: "10px", color: "rgba(30,45,69,0.8)", pointerEvents: "none" }} />
               <input
                 type="search"
                 value={search}
@@ -633,7 +633,7 @@ function WishlistInner() {
                   color: "var(--color-navy)",
                   outline: "none",
                 }}
-                className="focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]"
+                className="focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
               />
             </div>
             <div style={{ width: "200px" }} className="max-sm:flex-1">
@@ -749,12 +749,12 @@ function WishlistInner() {
                                 {frag.name}
                               </span>
                               {concLabel && (
-                                <span style={{ border: "1px solid var(--color-sand)", color: "var(--color-sand)", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                                <span style={{ border: "1px solid rgba(30,45,69,0.8)", color: "rgba(30,45,69,0.8)", fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, padding: "2px 6px", borderRadius: "2px", textTransform: "uppercase", whiteSpace: "nowrap" }}>
                                   {concLabel}
                                 </span>
                               )}
                             </div>
-                            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: "2px" }}>
+                            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: "2px" }}>
                               {frag.house}
                             </div>
                           </td>
@@ -780,7 +780,7 @@ function WishlistInner() {
                                 </span>
                               ))}
                               {extra > 0 && (
-                                <span style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "var(--color-sand)", fontFamily: "var(--font-sans)", fontSize: "12px" }}>
+                                <span style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "rgba(30,45,69,0.8)", fontFamily: "var(--font-sans)", fontSize: "12px" }}>
                                   +{extra} more
                                 </span>
                               )}

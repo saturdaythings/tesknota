@@ -117,7 +117,7 @@ export function Select({
           border: error ? '1px solid var(--color-destructive)' : open ? '1px solid var(--color-accent)' : '1px solid rgba(30,45,69,0.8)',
         }}
       >
-        <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-sand)' }}>
+        <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)' }}>
           {selectedOption?.label ?? placeholder}
         </span>
         <svg
@@ -127,7 +127,7 @@ export function Select({
           fill="none"
           aria-hidden="true"
           style={{
-            color: 'var(--color-sand)',
+            color: 'rgba(30,45,69,0.8)',
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 150ms',
             flexShrink: 0,

@@ -124,7 +124,7 @@ function FragSearch({
         onFocus={() => !locked && setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         placeholder="Search your collection..."
-        className="w-full h-9 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-sand)]"
+        className="w-full h-9 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-navy-mid)]"
         style={{
           fontSize: '15px',
           background: 'var(--color-cream)',
@@ -319,7 +319,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
 
   const inputCls =
     'w-full h-9 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 ' +
-    'focus:border-[var(--color-accent)] placeholder:text-[var(--color-sand)]';
+    'focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]';
   const inputStyle: React.CSSProperties = {
     fontSize: '15px',
     background: 'var(--color-cream)',
@@ -415,7 +415,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Context, reaction, moment..."
               rows={3}
-              className="w-full p-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y placeholder:text-[var(--color-sand)]"
+              className="w-full p-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y placeholder:text-[var(--color-navy-mid)]"
               style={{
                 fontSize: '15px',
                 minHeight: '80px',

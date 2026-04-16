@@ -213,7 +213,7 @@ function GlobalSearch({
         style={{
           position: "absolute",
           left: "10px",
-          color: "var(--color-sand)",
+          color: "rgba(30,45,69,0.8)",
           pointerEvents: "none",
         }}
       />
@@ -478,7 +478,7 @@ function CollectionInner() {
               >
                 <Search
                   size={14}
-                  style={{ position: "absolute", left: "10px", color: "var(--color-sand)", pointerEvents: "none" }}
+                  style={{ position: "absolute", left: "10px", color: "rgba(30,45,69,0.8)", pointerEvents: "none" }}
                 />
                 <input
                   type="search"
@@ -549,7 +549,7 @@ function CollectionInner() {
                     cursor: "pointer",
                     fontFamily: "var(--font-sans)",
                     fontSize: "12px",
-                    color: "var(--color-sand)",
+                    color: "rgba(30,45,69,0.8)",
                     display: "flex",
                     alignItems: "center",
                     gap: "4px",
@@ -619,7 +619,7 @@ function CollectionInner() {
                 fontWeight: 500,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
-                color: "var(--color-sand)",
+                color: "rgba(30,45,69,0.8)",
                 marginBottom: "var(--space-4)",
               }}
             >
@@ -642,7 +642,7 @@ function CollectionInner() {
                           fontFamily: "var(--font-sans)",
                           fontSize: "12px",
                           fontWeight: 500,
-                          color: "var(--color-sand)",
+                          color: "rgba(30,45,69,0.8)",
                           letterSpacing: "0.1em",
                           textTransform: "uppercase",
                           textAlign: "left",
@@ -762,8 +762,8 @@ function CollectionInner() {
                               {concLabel && (
                                 <span
                                   style={{
-                                    border: "1px solid var(--color-sand)",
-                                    color: "var(--color-sand)",
+                                    border: "1px solid rgba(30,45,69,0.8)",
+                                    color: "rgba(30,45,69,0.8)",
                                     fontFamily: "var(--font-sans)",
                                     fontSize: "12px",
                                     fontWeight: 500,
@@ -799,7 +799,7 @@ function CollectionInner() {
                                 fontFamily: "var(--font-sans)",
                                 fontSize: "12px",
                                 fontWeight: 400,
-                                color: "var(--color-sand)",
+                                color: "rgba(30,45,69,0.8)",
                                 textTransform: "uppercase",
                                 letterSpacing: "0.08em",
                                 marginTop: "2px",
@@ -861,7 +861,7 @@ function CollectionInner() {
                                     padding: "2px 7px",
                                     borderRadius: "100px",
                                     background: "var(--color-sand-light)",
-                                    color: "var(--color-sand)",
+                                    color: "rgba(30,45,69,0.8)",
                                     fontFamily: "var(--font-sans)",
                                     fontSize: "12px",
                                   }}
@@ -874,7 +874,7 @@ function CollectionInner() {
 
                           {/* COMPLIMENTS */}
                           <td style={{ padding: "0 16px", width: "110px" }}>
-                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 400, color: compCount > 0 ? "var(--color-navy)" : "var(--color-sand)" }}>
+                            <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 400, color: compCount > 0 ? "var(--color-navy)" : "rgba(30,45,69,0.7)" }}>
                               {compCount > 0 ? compCount : "—"}
                             </span>
                           </td>

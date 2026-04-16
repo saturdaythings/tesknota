@@ -157,8 +157,8 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
               </h2>
               {concLabel && (
                 <span style={{
-                  border: "1px solid var(--color-sand)",
-                  color: "var(--color-sand)",
+                  border: "1px solid rgba(30,45,69,0.8)",
+                  color: "rgba(30,45,69,0.8)",
                   fontFamily: "var(--font-sans)",
                   fontSize: "12px",
                   fontWeight: 500,
@@ -175,12 +175,12 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
               <button
                 onClick={handleClose}
                 aria-label="Close"
-                style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--color-sand)", padding: "2px", flexShrink: 0, alignSelf: "flex-start" }}
+                style={{ background: "transparent", border: "none", cursor: "pointer", color: "rgba(30,45,69,0.8)", padding: "2px", flexShrink: 0, alignSelf: "flex-start" }}
               >
                 <X size={18} />
               </button>
             </div>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "8px" }}>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "8px" }}>
               {frag.house}
             </div>
             <Badge variant={statusVariant(frag.status)}>
@@ -217,7 +217,7 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
                     ].map(({ label, notes }) =>
                       notes?.length ? (
                         <div key={label} style={{ marginBottom: "var(--space-2)" }}>
-                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", color: "var(--color-sand)" }}>
+                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", color: "rgba(30,45,69,0.8)" }}>
                             {label}
                           </span>
                           <span style={{ fontFamily: "var(--font-serif)", fontSize: "14px", fontStyle: "italic", color: "var(--color-navy)", marginLeft: "8px" }}>
@@ -268,13 +268,13 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" }}>
                       {cd.communityRating && (
                         <div>
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>Rating</div>
+                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "2px" }}>Rating</div>
                           <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 600, color: "var(--color-navy)" }}>{parseFloat(cd.communityRating).toFixed(1)} ★</div>
                         </div>
                       )}
                       {cd.communityLongevityLabel && (
                         <div>
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>Longevity</div>
+                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "2px" }}>Longevity</div>
                           <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>{cd.communityLongevityLabel}</div>
                         </div>
                       )}
@@ -300,7 +300,7 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
 
             {confirmRemove ? (
               <>
-                <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-sand)", alignSelf: "center" }}>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(30,45,69,0.8)", alignSelf: "center" }}>
                   Remove?
                 </span>
                 <Button

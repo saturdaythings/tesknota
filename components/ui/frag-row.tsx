@@ -17,7 +17,7 @@ import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } fr
 
 const STATUS_STYLE: Record<string, { color: string }> = {
   CURRENT:          { color: "var(--color-navy)" },
-  PREVIOUSLY_OWNED: { color: "var(--color-sand)" },
+  PREVIOUSLY_OWNED: { color: "rgba(30,45,69,0.7)" },
   WANT_TO_BUY:      { color: "#8B6F4E" },
   WANT_TO_SMELL:    { color: "#8B6F4E" },
   DONT_LIKE:        { color: "var(--color-destructive)" },
@@ -26,7 +26,7 @@ const STATUS_STYLE: Record<string, { color: string }> = {
 };
 
 export function StatusBadge({ status }: { status: FragranceStatus }) {
-  const style = STATUS_STYLE[status] ?? { color: "var(--color-sand)" };
+  const style = STATUS_STYLE[status] ?? { color: "rgba(30,45,69,0.7)" };
   return (
     <span
       className="font-[var(--font-sans)] text-xs tracking-[0.04em] px-2 py-[2px] whitespace-nowrap border"
@@ -71,7 +71,7 @@ export function FragRow({
         <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">
           {frag.name}
           {frag.isDupe && (
-            <span className="ml-2 font-[var(--font-sans)] text-[12px] tracking-[0.06em] text-[var(--color-sand)] uppercase align-middle">
+            <span className="ml-2 font-[var(--font-sans)] text-[12px] tracking-[0.06em] text-[rgba(30,45,69,0.7)] uppercase align-middle">
               dupe
             </span>
           )}

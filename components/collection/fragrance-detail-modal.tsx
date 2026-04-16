@@ -386,8 +386,8 @@ export function FragranceDetailModal({
                 {concLabel && (
                   <span
                     style={{
-                      border: "1px solid var(--color-sand)",
-                      color: "var(--color-sand)",
+                      border: "1px solid rgba(30,45,69,0.8)",
+                      color: "rgba(30,45,69,0.8)",
                       fontFamily: "var(--font-sans)",
                       fontSize: "12px",
                       fontWeight: 500,
@@ -409,7 +409,7 @@ export function FragranceDetailModal({
                     background: "transparent",
                     border: "none",
                     cursor: "pointer",
-                    color: "var(--color-sand)",
+                    color: "rgba(30,45,69,0.8)",
                     padding: "2px",
                     flexShrink: 0,
                     alignSelf: "flex-start",
@@ -427,7 +427,7 @@ export function FragranceDetailModal({
                   fontWeight: 500,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: "var(--color-sand)",
+                  color: "rgba(30,45,69,0.8)",
                   marginBottom: "8px",
                 }}
               >
@@ -448,7 +448,7 @@ export function FragranceDetailModal({
                     fontFamily: "var(--font-sans)",
                     fontSize: "12px",
                     fontWeight: 500,
-                    color: "var(--color-sand)",
+                    color: "rgba(30,45,69,0.8)",
                     padding: 0,
                   }}
                 >
@@ -497,7 +497,7 @@ export function FragranceDetailModal({
                       fontFamily: "var(--font-sans)",
                       fontSize: "13px",
                       fontWeight: 400,
-                      color: "var(--color-sand)",
+                      color: "rgba(30,45,69,0.8)",
                       marginTop: "4px",
                     }}
                   >
@@ -534,7 +534,7 @@ export function FragranceDetailModal({
 
                 {cd?.avgPrice && (
                   <div style={{ marginBottom: "var(--space-3)" }}>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "2px" }}>
                       Avg Price
                     </div>
                     <div style={{ fontFamily: "var(--font-sans)", fontSize: "15px", fontWeight: 600, color: "var(--color-navy)" }}>
@@ -553,7 +553,7 @@ export function FragranceDetailModal({
                     ].map(({ label, notes }) =>
                       notes?.length ? (
                         <div key={label} style={{ marginBottom: "var(--space-2)" }}>
-                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", color: "var(--color-sand)" }}>
+                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", color: "rgba(30,45,69,0.8)" }}>
                             {label}
                           </span>
                           <span style={{ fontFamily: "var(--font-serif)", fontSize: "14px", fontStyle: "italic", color: "var(--color-navy)", marginLeft: "8px" }}>
@@ -579,7 +579,7 @@ export function FragranceDetailModal({
                 <SectionLabel>My Purchase</SectionLabel>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
                   <div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "2px" }}>
                       Purchase Price
                     </div>
                     <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>
@@ -587,7 +587,7 @@ export function FragranceDetailModal({
                     </div>
                   </div>
                   <div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)", marginBottom: "2px" }}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "2px" }}>
                       Where Bought
                     </div>
                     <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>
@@ -605,10 +605,10 @@ export function FragranceDetailModal({
                 </div>
                 {dateAdded && (
                   <div>
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--color-sand)" }}>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)" }}>
                       Added
                     </span>
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-sand)", marginLeft: "8px" }}>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "rgba(30,45,69,0.8)", marginLeft: "8px" }}>
                       {dateAdded}
                     </span>
                   </div>
@@ -651,13 +651,13 @@ export function FragranceDetailModal({
                         fontFamily: "var(--font-serif)",
                         fontStyle: "italic",
                         fontSize: "15px",
-                        color: "var(--color-sand)",
+                        color: "rgba(30,45,69,0.8)",
                         resize: "vertical",
                         outline: "none",
                       }}
                     />
                     {savingNotes && (
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", marginTop: "4px" }}>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)", marginTop: "4px" }}>
                         Saving...
                       </div>
                     )}
@@ -669,7 +669,7 @@ export function FragranceDetailModal({
                       fontFamily: "var(--font-serif)",
                       fontStyle: "italic",
                       fontSize: "15px",
-                      color: "var(--color-sand)",
+                      color: "rgba(30,45,69,0.8)",
                       cursor: "text",
                       minHeight: "32px",
                     }}
@@ -688,7 +688,7 @@ export function FragranceDetailModal({
                 </SectionLabel>
 
                 {compCount === 0 ? (
-                  <div style={{ fontFamily: "var(--font-sans)", fontStyle: "italic", fontSize: "14px", color: "var(--color-sand)" }}>
+                  <div style={{ fontFamily: "var(--font-sans)", fontStyle: "italic", fontSize: "14px", color: "rgba(30,45,69,0.8)" }}>
                     None logged
                   </div>
                 ) : (
@@ -705,13 +705,13 @@ export function FragranceDetailModal({
                         <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)" }}>
                           {[c.relation, c.gender, c.city ?? c.country].filter(Boolean).join(" · ")}
                           {(c.month || c.year) && (
-                            <span style={{ color: "var(--color-sand)", marginLeft: "6px" }}>
+                            <span style={{ color: "rgba(30,45,69,0.8)", marginLeft: "6px" }}>
                               {[c.month, c.year].filter(Boolean).join(" ")}
                             </span>
                           )}
                         </div>
                         {c.notes && (
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)", marginTop: "2px" }}>
+                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)", marginTop: "2px" }}>
                             {c.notes}
                           </div>
                         )}
@@ -768,7 +768,7 @@ export function FragranceDetailModal({
 
           {confirmRemove ? (
             <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-sand)" }}>
+              <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(30,45,69,0.8)" }}>
                 Are you sure?
               </span>
               <Button

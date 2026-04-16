@@ -55,7 +55,7 @@ const STATUS_LABELS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   CURRENT: "var(--color-navy)",
   WANT_TO_BUY: "var(--color-accent-light)",
-  PREVIOUSLY_OWNED: "var(--color-sand)",
+  PREVIOUSLY_OWNED: "rgba(30,45,69,0.8)",
   WANT_TO_SMELL: "#6B8FAA",
   DONT_LIKE: "var(--color-destructive)",
   FINISHED: "#6B7280",
@@ -395,7 +395,7 @@ export default function AnalyticsPage() {
         status,
         name: STATUS_LABELS[status] ?? status,
         value,
-        color: STATUS_COLORS[status] ?? "var(--color-sand)",
+        color: STATUS_COLORS[status] ?? "rgba(30,45,69,0.8)",
       }));
   }, [activeFrags]);
 
@@ -590,7 +590,7 @@ export default function AnalyticsPage() {
                   {statusData.map((d) => (
                     <div key={d.status} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color, flexShrink: 0 }} />
-                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>{d.name}</span>
+                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>{d.name}</span>
                     </div>
                   ))}
                 </div>

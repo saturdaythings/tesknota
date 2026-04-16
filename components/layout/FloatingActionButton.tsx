@@ -114,7 +114,7 @@ export function FloatingActionButton({
             >
               <span
                 className="font-sans font-medium uppercase"
-                style={{ fontSize: '11px', color: 'var(--color-sand)', letterSpacing: '0.12em' }}
+                style={{ fontSize: '11px', color: 'rgba(30,45,69,0.8)', letterSpacing: '0.12em' }}
               >
                 Actions
               </span>
@@ -133,7 +133,7 @@ export function FloatingActionButton({
                 <Search
                   size={14}
                   className="absolute left-3 pointer-events-none"
-                  style={{ color: 'var(--color-sand)' }}
+                  style={{ color: 'rgba(30,45,69,0.8)' }}
                 />
                 <input
                   autoFocus
@@ -161,7 +161,7 @@ export function FloatingActionButton({
                   )}
                   <div
                     className="px-6 pt-4 pb-1 font-sans font-medium uppercase"
-                    style={{ fontSize: '11px', color: 'var(--color-sand)', letterSpacing: '0.12em' }}
+                    style={{ fontSize: '11px', color: 'rgba(30,45,69,0.8)', letterSpacing: '0.12em' }}
                   >
                     {section.label}
                   </div>
@@ -188,7 +188,7 @@ export function FloatingActionButton({
               {filteredSections.length === 0 && (
                 <div
                   className="px-6 py-8 text-center font-sans"
-                  style={{ fontSize: '14px', color: 'var(--color-sand)' }}
+                  style={{ fontSize: '14px', color: 'rgba(30,45,69,0.8)' }}
                 >
                   No actions match &ldquo;{search}&rdquo;
                 </div>

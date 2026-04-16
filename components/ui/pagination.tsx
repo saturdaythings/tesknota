@@ -59,7 +59,7 @@ export function Pagination({ total, page, pageSize, onPage, onPageSize }: Props)
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "12px",
-            color: "var(--color-sand)",
+            color: "rgba(30,45,69,0.8)",
             letterSpacing: "0.06em",
             textTransform: "uppercase",
             marginRight: "2px",
@@ -92,7 +92,7 @@ export function Pagination({ total, page, pageSize, onPage, onPageSize }: Props)
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: "12px",
-            color: "var(--color-sand)",
+            color: "rgba(30,45,69,0.8)",
             marginLeft: "8px",
           }}
         >

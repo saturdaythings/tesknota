@@ -948,7 +948,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
         style={{
           fontFamily: "var(--font-sans)",
           fontSize: "13px",
-          color: "var(--color-sand)",
+          color: "rgba(30,45,69,0.8)",
           letterSpacing: "0.06em",
           marginBottom: "24px",
         }}
@@ -992,7 +992,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
             <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)", marginBottom: "2px" }}>
               Add your first fragrance
             </div>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>
               Search by name or import from a spreadsheet
             </div>
           </div>
@@ -1030,7 +1030,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
             <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)", marginBottom: "2px" }}>
               Log your first compliment
             </div>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-sand)" }}>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>
               Record who complimented you, when, and what you were wearing
             </div>
           </div>
