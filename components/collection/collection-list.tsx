@@ -49,9 +49,11 @@ export function CollectionList({
 
   return (
     <>
-      {/* Desktop: single grid so header and rows share column sizing */}
-      <div className="hidden md:block" style={{ display: 'grid', gridTemplateColumns, columnGap: 'var(--space-6)' }}>
-
+      {/* Desktop: md:grid keeps display consistent — no inline display needed, no className conflict */}
+      <div
+        className="hidden md:grid"
+        style={{ gridTemplateColumns, columnGap: 'var(--space-6)' }}
+      >
         {/* Header row */}
         <div
           style={{
@@ -59,8 +61,8 @@ export function CollectionList({
             gridTemplateColumns: 'subgrid',
             gridColumn: '1 / -1',
             background: 'var(--color-cream-dark)',
-            borderBottom: '1px solid var(--color-sand-light)',
-            height: '40px',
+            borderBottom: '1px solid var(--color-row-divider)',
+            height: 'var(--space-10)',
             alignItems: 'center',
           }}
         >
@@ -164,8 +166,8 @@ function CollectionRow({ frag, columns, ctx, onOpen }: CollectionRowProps) {
         gridTemplateColumns: 'subgrid',
         gridColumn: '1 / -1',
         alignItems: 'center',
-        minHeight: '64px',
-        borderBottom: '1px solid var(--color-sand-light)',
+        minHeight: 'var(--space-16)',
+        borderBottom: '1px solid var(--color-row-divider)',
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}

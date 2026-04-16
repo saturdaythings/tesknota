@@ -84,7 +84,7 @@ export function CollectionFilters({
       {filtersOpen && (
         <div
           className="flex flex-wrap"
-          style={{ gap: 'var(--space-2)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--color-sand-light)' }}
+          style={{ gap: 'var(--space-2)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--color-row-divider)' }}
         >
           <div style={{ width: '160px' }}>
             <MultiSelect options={accordOptions} value={accordFilter} onChange={onAccordFilter} placeholder="Accords" />

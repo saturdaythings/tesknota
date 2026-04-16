@@ -231,7 +231,6 @@ function CollectionInner() {
 
   const filtersActive =
     search.trim() !== '' ||
-    sort !== 'name_asc' ||
     accordFilter.length > 0 ||
     ratingFilter !== 'any' ||
     statusFilter.length > 0 ||
