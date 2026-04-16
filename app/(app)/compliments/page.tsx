@@ -108,7 +108,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {meta && (
           <div
             className="font-sans uppercase mb-1"
-            style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)', fontWeight: 400 }}
+            style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy)', fontWeight: 'var(--font-weight-normal)' }}
           >
             {meta}
           </div>
@@ -116,7 +116,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {comp.notes && (
           <div
             className="font-serif italic"
-            style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 1.6 }}
+            style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 'var(--leading-relaxed)' }}
           >
             {comp.notes}
           </div>
@@ -125,7 +125,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
 
       <div
         className="font-sans uppercase"
-        style={{ textAlign: 'right', whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}
+        style={{ textAlign: 'right', whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy)' }}
       >
         {date}
       </div>
@@ -203,8 +203,8 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
           className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-navy)] placeholder:text-[var(--color-navy-mid)]"
           style={{
             fontSize: 'var(--text-sm)',
-            fontWeight: 400,
-            letterSpacing: '0.08em',
+            fontWeight: 'var(--font-weight-normal)',
+            letterSpacing: 'var(--tracking-sm)',
             background: 'var(--color-cream)',
             border: '1px solid var(--color-meta-text)',
             color: query ? 'var(--color-navy)' : 'var(--color-meta-text)',
@@ -234,10 +234,10 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+              <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 'var(--leading-tight)' }}>
                 {f.fragranceName}
               </div>
-              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', letterSpacing: '0.1em' }}>
+              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', letterSpacing: 'var(--tracking-md)' }}>
                 {f.fragranceHouse}
               </div>
             </div>
@@ -258,10 +258,10 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+              <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 'var(--leading-tight)' }}>
                 Import new fragrance
               </div>
-              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: '0.1em' }}>
+              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-md)' }}>
                 Add to database
               </div>
             </div>

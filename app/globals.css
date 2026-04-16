@@ -82,8 +82,25 @@
      --text-2xl: 36px;
      --text-hero: 56px;
 
+  /* --- Tracking (letter-spacing) --- */
+  --tracking-xs: 0.04em;
+     --tracking-sm: 0.08em;
+     --tracking-md: 0.10em;
+     --tracking-lg: 0.12em;
+     --tracking-xl: 0.22em;
+
+  /* --- Leading (line-height) --- */
+  --leading-none: 1;
+     --leading-tight: 1.2;
+     --leading-relaxed: 1.6;
+
+  /* --- Font weight --- */
+  --font-weight-normal: 400;
+     --font-weight-medium: 500;
+
   /* --- Spacing (4px grid) --- */
-  --space-1: 4px;
+  --space-half: 2px;
+     --space-1: 4px;
      --space-2: 8px;
      --space-3: 12px;
      --space-4: 16px;

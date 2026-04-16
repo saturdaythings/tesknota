@@ -31,8 +31,8 @@ function CountBadge({ count, active }: { count: number; active: boolean }) {
       className="ml-auto font-sans tabular-nums"
       style={{
         fontSize: 'var(--text-xs)',
-        fontWeight: 400,
-        letterSpacing: '0.08em',
+        fontWeight: 'var(--font-weight-normal)',
+        letterSpacing: 'var(--tracking-sm)',
         color: active ? 'var(--color-cream)' : 'var(--color-sand-muted)',
       }}
     >
@@ -91,7 +91,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
             style={{
               fontSize: 'var(--text-xxs)',
               color: 'var(--color-cream-muted)',
-              letterSpacing: '0.22em',
+              letterSpacing: 'var(--tracking-xl)',
             }}
           >
             Fragrance Tracker
@@ -113,8 +113,8 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                 style={{
                   fontSize: 'var(--text-xs)',
                   color: 'var(--color-sand-label)',
-                  letterSpacing: '0.08em',
-                  lineHeight: 1,
+                  letterSpacing: 'var(--tracking-sm)',
+                  lineHeight: 'var(--leading-none)',
                 }}
               >
                 {section.label}
@@ -141,7 +141,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                         ? 'var(--color-cream)'
                         : 'var(--color-sand-muted)',
                       fontSize: 'var(--text-xs)',
-                      letterSpacing: '0.04em',
+                      letterSpacing: 'var(--tracking-xs)',
                       fontFamily: 'var(--font-sans)',
                     }}
                   >
@@ -168,8 +168,12 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           </div>
           <button
             onClick={onSignOut}
-            className="flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.08em] transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
-            style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)' }}
+            className="flex items-center gap-1.5 font-sans font-medium uppercase transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
+            style={{
+              fontSize: 'var(--text-xs)',
+              color: 'var(--color-sand-muted)',
+              letterSpacing: 'var(--tracking-sm)',
+            }}
           >
             <LogOut size={12} />
             Sign Out
