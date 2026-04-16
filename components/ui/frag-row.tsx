@@ -1,18 +1,7 @@
 "use client";
 
-import { MONTHS, starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
-import { STATUS_LABELS, type FragranceType } from "@/types";
-
-const TYPE_ABBR: Record<FragranceType, string> = {
-  "Extrait de Parfum":  "Extrait",
-  "Eau de Parfum":      "Parfum",
-  "Eau de Toilette":    "Toilette",
-  "Cologne":            "Cologne",
-  "Perfume Concentré":  "Concentré",
-  "Body Spray":         "Spray",
-  "Perfume Oil":        "Oil",
-  "Other":              "",
-};
+import { MONTHS, starsStr, parseRating, getAccords, getCompCount, shortFragType } from "@/lib/frag-utils";
+import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } from "@/types";
 
 const STATUS_STYLE: Record<string, { color: string }> = {
@@ -78,8 +67,8 @@ export function FragRow({
         </div>
         <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
           {frag.house}
-          {frag.type && TYPE_ABBR[frag.type] && (
-            <span className="ml-[6px] text-[11px]">· {TYPE_ABBR[frag.type]}</span>
+          {frag.type && shortFragType(frag.type) && (
+            <span className="ml-[6px] text-[11px]">· {shortFragType(frag.type)}</span>
           )}
         </div>
       </td>

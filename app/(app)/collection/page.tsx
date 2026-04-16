@@ -18,7 +18,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
-import { getAccords, MONTHS } from "@/lib/frag-utils";
+import { getAccords, MONTHS, shortFragType } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, FragranceStatus } from "@/types";
 
@@ -99,21 +99,6 @@ function addedStr(createdAt: string | null): string {
   return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-function concentrationLabel(type: string | null): string | null {
-  if (!type) return null;
-  const map: Record<string, string> = {
-    "Extrait de Parfum": "Extrait",
-    "Eau de Parfum":     "Parfum",
-    "Eau de Toilette":   "Toilette",
-    "Cologne":           "Cologne",
-    "Perfume Concentré": "Concentré",
-    "Body Spray":        "Spray",
-    "Perfume Oil":       "Oil",
-    "Other":             "",
-  };
-  const short = map[type] ?? type;
-  return short || null;
-}
 
 function statusVariant(status: FragranceStatus): React.ComponentProps<typeof Badge>["variant"] {
   switch (status) {
@@ -728,7 +713,7 @@ function CollectionInner() {
                       const accords = getAccords(frag, communityFrags);
                       const visibleAccords = accords.slice(0, 4);
                       const extraAccords = accords.length > 4 ? accords.length - 4 : 0;
-                      const concLabel = concentrationLabel(frag.type ?? null);
+                      const concLabel = shortFragType(frag.type ?? null);
                       const added = addedStr(frag.createdAt);
                       const compCount = compMap[frag.fragranceId ?? frag.id] ?? 0;
                       const isEven = i % 2 === 0;

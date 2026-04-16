@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { shortFragType } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, FragranceStatus } from "@/types";
 
@@ -16,21 +17,6 @@ function statusVariant(status: FragranceStatus): React.ComponentProps<typeof Bad
   }
 }
 
-function concentrationLabel(type: string | null): string | null {
-  if (!type) return null;
-  const map: Record<string, string> = {
-    "Extrait de Parfum": "Extrait",
-    "Eau de Parfum":     "Parfum",
-    "Eau de Toilette":   "Toilette",
-    "Cologne":           "Cologne",
-    "Perfume Concentré": "Concentré",
-    "Body Spray":        "Spray",
-    "Perfume Oil":       "Oil",
-    "Other":             "",
-  };
-  const short = map[type] ?? type;
-  return short || null;
-}
 
 interface FragranceCardProps {
   frag: UserFragrance;
@@ -41,7 +27,7 @@ interface FragranceCardProps {
 }
 
 export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: FragranceCardProps) {
-  const concLabel = concentrationLabel(frag.type ?? null);
+  const concLabel = shortFragType(frag.type ?? null);
   const ratingFilled = frag.personalRating ?? 0;
   const sizeDisplay = frag.sizes?.length ? frag.sizes.join(", ") : "—";
   const visibleAccords = accords.slice(0, 4);

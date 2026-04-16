@@ -16,7 +16,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
-import { getAccords, MONTHS } from "@/lib/frag-utils";
+import { getAccords, MONTHS, shortFragType } from "@/lib/frag-utils";
 import type { UserFragrance, CommunityFrag, FragranceStatus } from "@/types";
 
 // ── Constants ─────────────────────────────────────────────
@@ -66,21 +66,6 @@ function getCF(frag: UserFragrance, communityFrags: CommunityFrag[]): CommunityF
   );
 }
 
-function concentrationLabel(type: string | null): string | null {
-  if (!type) return null;
-  const map: Record<string, string> = {
-    "Extrait de Parfum": "Extrait",
-    "Eau de Parfum":     "Parfum",
-    "Eau de Toilette":   "Toilette",
-    "Cologne":           "Cologne",
-    "Perfume Concentré": "Concentré",
-    "Body Spray":        "Spray",
-    "Perfume Oil":       "Oil",
-    "Other":             "",
-  };
-  const short = map[type] ?? type;
-  return short || null;
-}
 
 // ── Discover card ─────────────────────────────────────────
 
@@ -337,7 +322,7 @@ function WishlistMobileCard({
   onRemove: (f: UserFragrance) => void;
 }) {
   const accords = cf?.fragranceAccords?.slice(0, 4) ?? [];
-  const concLabel = concentrationLabel(frag.type ?? null);
+  const concLabel = shortFragType(frag.type ?? null);
 
   return (
     <div
@@ -727,7 +712,7 @@ function WishlistInner() {
                       const cf = cfMap.get(frag.id) ?? null;
                       const accords = cf?.fragranceAccords?.slice(0, 4) ?? [];
                       const extra = (cf?.fragranceAccords?.length ?? 0) > 4 ? (cf!.fragranceAccords.length - 4) : 0;
-                      const concLabel = concentrationLabel(frag.type ?? null);
+                      const concLabel = shortFragType(frag.type ?? null);
                       const added = addedStr(frag.createdAt);
                       const isEven = i % 2 === 0;
 
