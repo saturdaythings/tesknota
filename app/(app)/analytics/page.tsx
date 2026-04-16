@@ -445,7 +445,7 @@ export default function AnalyticsPage() {
 
   return (
     <>
-      <Topbar title="Analytics" actions={<FragSearch />} />
+      <Topbar title="Analytics" />
       <PageContent>
 
         {/* Stat cards */}

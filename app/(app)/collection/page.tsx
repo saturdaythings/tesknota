@@ -22,7 +22,6 @@ import { useToast } from "@/components/ui/toast";
 import { getAccords, MONTHS, shortFragType } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, FragranceStatus } from "@/types";
-import { FragSearch } from "@/components/ui/frag-search";
 
 // ── Sort / filter constants ───────────────────────────────
 
@@ -179,55 +178,6 @@ function InteractiveStarRow({
   );
 }
 
-// ── Global search input (header) ──────────────────────────
-
-function GlobalSearch({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div
-      style={{
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Search
-        size={14}
-        style={{
-          position: "absolute",
-          left: "10px",
-          color: "rgba(30,45,69,0.8)",
-          pointerEvents: "none",
-        }}
-      />
-      <input
-        type="search"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Search..."
-        style={{
-          width: "200px",
-          height: "34px",
-          paddingLeft: "30px",
-          paddingRight: "10px",
-          background: "rgba(255,255,255,0.08)",
-          border: "1px solid rgba(255,255,255,0.15)",
-          borderRadius: "3px",
-          fontFamily: "var(--font-sans)",
-          fontSize: "13px",
-          color: "var(--color-cream)",
-          outline: "none",
-        }}
-        className="placeholder:text-[rgba(245,240,232,0.5)] focus:border-[rgba(255,255,255,0.4)]"
-      />
-    </div>
-  );
-}
 
 // ── Table row skeleton ────────────────────────────────────
 
@@ -422,11 +372,7 @@ function CollectionInner() {
         editing={editingFrag}
       />
 
-      <Topbar
-        title="My Collection"
-        search={<GlobalSearch value={search} onChange={setSearch} />}
-        actions={<FragSearch />}
-      />
+      <Topbar title="My Collection" />
 
       <PageContent>
           {/* Add button */}

@@ -26,7 +26,7 @@ interface SelectProps {
 }
 
 const triggerBase =
-  'flex items-center justify-between w-full h-9 px-3 ' +
+  'flex items-center gap-2 h-9 px-3 ' +
   'bg-[var(--color-cream)] rounded-[3px] ' +
   'font-sans outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
@@ -51,11 +51,6 @@ export function Select({
   const listId = `${id}-list`;
 
   const selectedOption = options.find((o) => o.value === value);
-
-  // For size="auto": the longest label is rendered in a hidden sizer that forces the trigger width.
-  const longestLabel = size === 'auto'
-    ? options.reduce((longest, opt) => opt.label.length > longest.length ? opt.label : longest, placeholder)
-    : null;
 
   const close = useCallback(() => {
     setOpen(false);

@@ -571,10 +571,7 @@ function WishlistInner() {
         />
       )}
 
-      <Topbar
-        title="Wishlist"
-        actions={<><FragSearch /><Button variant="primary" onClick={() => setAddOpen(true)}>ADD TO WISHLIST</Button></>}
-      />
+      <Topbar title="Wishlist" />
 
       <PageContent>
 

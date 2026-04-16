@@ -76,7 +76,7 @@ export default function FriendPage() {
         userId={friend.id}
         readOnly
       />
-      <Topbar title={`${friendName}'s Profile`} actions={<FragSearch />} />
+      <Topbar title={`${friendName}'s Profile`} />
       <PageContent>
         {!isLoaded && (
           <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">

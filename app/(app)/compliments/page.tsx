@@ -237,38 +237,7 @@ function ComplimentsInner() {
         onClose={() => setEditingComp(null)}
         editing={editingComp}
       />
-      <Topbar
-        title="Compliments"
-        actions={<FragSearch />}
-        search={
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Search
-              size={14}
-              style={{ position: 'absolute', left: '10px', color: 'var(--color-cream-faint)', pointerEvents: 'none' }}
-            />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search..."
-              style={{
-                width: '200px',
-                height: '34px',
-                paddingLeft: '30px',
-                paddingRight: '10px',
-                background: 'var(--color-white-subtle)',
-                border: '1px solid var(--color-white-dim)',
-                borderRadius: 'var(--radius-md)',
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--color-cream)',
-                outline: 'none',
-              }}
-              className="placeholder:text-[var(--color-cream-faint)] focus:border-[var(--color-white-mid)]"
-            />
-          </div>
-        }
-      />
+      <Topbar title="Compliments" />
 
       <PageContent>
         {/* Page header row */}

@@ -533,7 +533,7 @@ export default function DesignSystemPage() {
 
   return (
     <>
-      <Topbar title="Design System" actions={<FragSearch />} />
+      <Topbar title="Design System" />
       <PageContent maxWidth="920px">
         <DesignModeContext.Provider value={mode}>
         <div className="flex items-center gap-4 mb-8">

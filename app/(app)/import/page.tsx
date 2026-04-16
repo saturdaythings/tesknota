@@ -1049,7 +1049,7 @@ export default function ImportPage() {
 
   return (
     <>
-      <Topbar title="Import" actions={<FragSearch />} />
+      <Topbar title="Import" />
       <PageContent maxWidth="820px">
           {/* Tabs */}
           <div
