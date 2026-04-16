@@ -119,10 +119,11 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Invalid JSON body' }, 400, appOrigin);
   }
 
-  const { tokenName, value } = body;
+  const { tokenName, value, message } = body;
 
   if (!tokenName || typeof tokenName !== 'string') return json({ error: 'Missing tokenName' }, 400, appOrigin);
   if (!value || typeof value !== 'string') return json({ error: 'Missing value' }, 400, appOrigin);
+  if (message !== undefined && (typeof message !== 'string' || message.includes('\n'))) return json({ error: 'Invalid message' }, 400, appOrigin);
   if (!/^--[\w-]+$/.test(tokenName)) return json({ error: 'tokenName must be a CSS custom property (e.g. --color-navy)' }, 400, appOrigin);
   if (value.includes('\n') || value.includes(';')) return json({ error: 'value must not contain newlines or semicolons' }, 400, appOrigin);
 
@@ -158,7 +159,7 @@ export async function onRequestPost({ request, env }) {
     method: 'PUT',
     headers: { ...ghHeaders, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      message: `fix(design): set ${tokenName} to ${value}`,
+      message: message ?? `fix(design): set ${tokenName} to ${value}`,
       content: encodeBase64(patchedCss),
       sha: fileSha,
       branch: BRANCH,

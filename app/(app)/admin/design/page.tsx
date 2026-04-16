@@ -147,7 +147,7 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
 
 // ── Token editor ───────────────────────────────────────────
 
-function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: () => void }) {
+function TokenEditPanel({ tokenName, defaultValue, onClose }: { tokenName: string; defaultValue: string; onClose: () => void }) {
   const [committedValue] = useState(() => {
     const raw = getComputedStyle(document.documentElement).getPropertyValue(tokenName).trim();
     // Strip accidental "tokenName: " prefix if a prior corrupted publish baked it into the inline style
@@ -159,6 +159,7 @@ function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: ()
   const publishedRef = useRef(committedValue);
   const committedRef = useRef(committedValue);
   const [status, setStatus] = useState<'idle' | 'publishing' | 'success' | 'error'>('idle');
+  const [activeAction, setActiveAction] = useState<'publish' | 'reset' | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [sha, setSha] = useState('');
 
@@ -179,32 +180,28 @@ function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: ()
   }, [tokenName]);
 
   const isDirty = draft !== publishedValue;
+  const isAtDefault = draft === defaultValue;
 
-  async function publish() {
-    if (!isDirty || status === 'publishing') return;
-    setStatus('publishing');
-    setErrorMsg('');
-
+  async function callWorker(value: string, message?: string) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
       setStatus('error');
       setErrorMsg('No active session — sign in again');
+      setActiveAction(null);
       return;
     }
-
     try {
+      const body: Record<string, string> = { tokenName, value };
+      if (message) body.message = message;
       const res = await fetch('/patch-token', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + session.access_token,
-        },
-        body: JSON.stringify({ tokenName, value: draft }),
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed (' + res.status + ')');
-      publishedRef.current = draft;
-      setPublishedValue(draft);
+      publishedRef.current = value;
+      setPublishedValue(value);
       setStatus('success');
       setSha(data.sha ?? '');
     } catch (err) {
@@ -213,13 +210,25 @@ function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: ()
       document.documentElement.style.setProperty(tokenName, publishedRef.current);
       setDraft(publishedRef.current);
     }
+    setActiveAction(null);
   }
 
-  function reset() {
-    document.documentElement.style.setProperty(tokenName, publishedRef.current);
-    setDraft(publishedRef.current);
-    setStatus('idle');
+  async function publish() {
+    if (!isDirty || status === 'publishing') return;
+    setStatus('publishing');
+    setActiveAction('publish');
     setErrorMsg('');
+    await callWorker(draft);
+  }
+
+  async function resetToDefault() {
+    if (isAtDefault || status === 'publishing') return;
+    setStatus('publishing');
+    setActiveAction('reset');
+    setErrorMsg('');
+    document.documentElement.style.setProperty(tokenName, defaultValue);
+    setDraft(defaultValue);
+    await callWorker(defaultValue, 'revert(design): restore ' + tokenName + ' to default');
   }
 
   return (
@@ -234,13 +243,14 @@ function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: ()
           className="font-mono flex-1 min-w-0 rounded-[2px] outline-none"
           style={{ background: 'var(--color-white-subtle)', border: '1px solid var(--color-white-dim)', color: 'var(--color-cream)', fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-3)' }}
         />
-        {isDirty && (
+        {!isAtDefault && (
           <button
-            onClick={reset}
-            className="font-sans flex-shrink-0 bg-transparent border-0 cursor-pointer p-0"
+            onClick={resetToDefault}
+            disabled={status === 'publishing'}
+            className="font-sans flex-shrink-0 bg-transparent border-0 cursor-pointer p-0 disabled:opacity-50 disabled:cursor-default"
             style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)' }}
           >
-            Reset
+            {activeAction === 'reset' ? 'Restoring\u2026' : 'Reset'}
           </button>
         )}
         <button
@@ -249,7 +259,7 @@ function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: ()
           className={'font-sans font-medium flex-shrink-0 rounded-[2px] border-0 tracking-[0.08em] disabled:opacity-50 ' + (isDirty ? 'cursor-pointer' : 'cursor-default')}
           style={{ fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-4)', background: isDirty ? 'var(--color-cream)' : 'var(--color-white-subtle)', color: isDirty ? 'var(--color-navy)' : 'var(--color-sand-muted)' }}
         >
-          {status === 'publishing' ? 'Publishing\u2026' : 'Publish'}
+          {activeAction === 'publish' ? 'Publishing\u2026' : 'Publish'}
         </button>
       </div>
       {status === 'success' && (
@@ -266,11 +276,11 @@ function TokenEditPanel({ tokenName, onClose }: { tokenName: string; onClose: ()
   );
 }
 
-function ExpandableToken({ token, expanded, onToggle, children }: { token: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
+function ExpandableToken({ token, defaultValue, expanded, onToggle, children }: { token: string; defaultValue: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
     <div>
       <div onClick={onToggle} style={{ cursor: 'pointer' }}>{children}</div>
-      {expanded && <TokenEditPanel tokenName={token} onClose={onToggle} />}
+      {expanded && <TokenEditPanel tokenName={token} defaultValue={defaultValue} onClose={onToggle} />}
     </div>
   );
 }
@@ -350,7 +360,7 @@ export default function DesignSystemPage() {
           <Section title="Brand Colors">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {BRAND_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
+                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
                   <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
                 </ExpandableToken>
               ))}
@@ -361,7 +371,7 @@ export default function DesignSystemPage() {
             <Note>Used on navy backgrounds — sidebar, login page, topbar search.</Note>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {OPACITY_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
+                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
                   <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
                 </ExpandableToken>
               ))}
@@ -371,7 +381,7 @@ export default function DesignSystemPage() {
           <Section title="Row / List Tokens">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {ROW_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
+                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)}>
                   <ColorSwatch {...c} computed={computed[c.token] ?? ''} />
                 </ExpandableToken>
               ))}
@@ -382,7 +392,7 @@ export default function DesignSystemPage() {
             <Note>Cormorant Garamond (serif, always italic) · Inter (sans, always upright). Never swap.</Note>
             <div style={{ marginTop: 'var(--space-4)' }}>
               {TYPE_TOKENS.map(({ token, label, role, font, italic }) => (
-                <ExpandableToken key={token} token={token} expanded={expandedToken === token} onToggle={() => toggle(token)}>
+                <ExpandableToken key={token} token={token} defaultValue={computed[token] ?? ''} expanded={expandedToken === token} onToggle={() => toggle(token)}>
                   <div className="flex items-baseline gap-4 flex-wrap" style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-2) 0' }}>
                     <span
                       className={font === 'serif' ? 'font-serif italic' : 'font-sans'}
@@ -407,7 +417,7 @@ export default function DesignSystemPage() {
                 const val = computed[token] ?? '';
                 const px = parseInt(val) || 0;
                 return (
-                  <ExpandableToken key={token} token={token} expanded={expandedToken === token} onToggle={() => toggle(token)}>
+                  <ExpandableToken key={token} token={token} defaultValue={computed[token] ?? ''} expanded={expandedToken === token} onToggle={() => toggle(token)}>
                     <div className="flex items-center gap-4">
                       <code className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '80px' }}>{token}</code>
                       <span className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '40px' }}>{val}</span>
@@ -422,7 +432,7 @@ export default function DesignSystemPage() {
           <Section title="Layout Tokens">
             <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
               {LAYOUT_TOKENS.map(({ token, label, usage }) => (
-                <ExpandableToken key={token} token={token} expanded={expandedToken === token} onToggle={() => toggle(token)}>
+                <ExpandableToken key={token} token={token} defaultValue={computed[token] ?? ''} expanded={expandedToken === token} onToggle={() => toggle(token)}>
                   <div className="flex items-baseline gap-4 flex-wrap">
                     <code className="font-mono font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '180px' }}>{token}</code>
                     <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '60px' }}>{computed[token] ?? '…'}</span>
