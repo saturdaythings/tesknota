@@ -91,7 +91,7 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
                 setQuery(e.target.value);
                 onSearch?.(e.target.value);
               }}
-              className="h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
+              className="h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
               style={{
                 fontSize: '12px',
                 fontWeight: 400,
