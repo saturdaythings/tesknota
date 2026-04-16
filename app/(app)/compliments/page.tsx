@@ -113,7 +113,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {/* Line 2: notes */}
         {comp.notes && (
           <div
-            className="font-serif italic"
+            className="font-serif italic line-clamp-2"
             style={{ fontSize: '16px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}
           >
             {comp.notes}

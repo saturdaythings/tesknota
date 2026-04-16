@@ -328,13 +328,15 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
   }
 
   const inputCls =
-    'w-full h-9 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 ' +
+    'w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 ' +
     'focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]';
   const inputStyle: React.CSSProperties = {
-    fontSize: '15px',
+    fontSize: '12px',
+    fontWeight: 400,
+    letterSpacing: '0.08em',
     background: 'var(--color-cream)',
     border: '1px solid rgba(30,45,69,0.8)',
-    color: 'var(--color-navy)',
+    color: 'rgba(30,45,69,0.8)',
   };
 
   return (
@@ -395,7 +397,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Bluegrass Lounge, coffee shop, gym..."
+              placeholder="Work, friend's house, coffee shop, gym..."
               className={inputCls}
               style={inputStyle}
             />
@@ -425,13 +427,16 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Context, reaction, moment..."
               rows={3}
-              className="w-full p-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y placeholder:text-[var(--color-navy-mid)]"
+              maxLength={160}
+              className="w-full p-3 rounded-[2px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-none placeholder:text-[var(--color-navy-mid)]"
               style={{
-                fontSize: '15px',
-                minHeight: '80px',
+                fontSize: '12px',
+                fontWeight: 400,
+                letterSpacing: '0.08em',
+                minHeight: '72px',
                 background: 'var(--color-cream)',
                 border: '1px solid rgba(30,45,69,0.8)',
-                color: 'var(--color-navy)',
+                color: 'rgba(30,45,69,0.8)',
               }}
             />
           </div>
