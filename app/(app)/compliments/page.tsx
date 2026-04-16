@@ -104,8 +104,8 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
         {/* Line 1: relation · gender · location */}
         {meta && (
           <div
-            className="font-sans mb-1"
-            style={{ fontSize: '12px', color: 'rgba(30,45,69,0.8)' }}
+            className="font-sans uppercase mb-1"
+            style={{ fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(30,45,69,0.8)' }}
           >
             {meta}
           </div>
@@ -124,8 +124,8 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
 
       {/* Column 3: Date */}
       <div
-        className="font-sans flex-shrink-0 text-right"
-        style={{ fontSize: '12px', color: 'var(--color-navy)', minWidth: '72px' }}
+        className="font-sans uppercase flex-shrink-0 text-right"
+        style={{ fontSize: '12px', letterSpacing: '0.1em', color: 'var(--color-navy)', minWidth: '72px' }}
       >
         {date}
       </div>
