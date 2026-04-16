@@ -8,6 +8,7 @@ import { TabPill } from '@/components/ui/tab-pill';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
+import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { useUser } from '@/lib/user-context';
@@ -163,6 +164,7 @@ function ComplimentsInner() {
 
   const [logOpen, setLogOpen] = useState(false);
   const [editingComp, setEditingComp] = useState<UserCompliment | null>(null);
+  const [addFragOpen, setAddFragOpen] = useState(false);
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
   const [search, setSearch] = useState('');
@@ -221,9 +223,15 @@ function ComplimentsInner() {
         onClose={() => setEditingComp(null)}
         editing={editingComp}
       />
+      <AddFragranceModal open={addFragOpen} onClose={() => setAddFragOpen(false)} />
 
       <Topbar
         title="Compliments"
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => setAddFragOpen(true)}>
+            Find Fragrances
+          </Button>
+        }
         search={
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Search

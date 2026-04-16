@@ -42,14 +42,14 @@ export function Topbar({
               <div className="flex-1 min-w-0 flex flex-col justify-center gap-[2px]">
                       <div
                                   className="font-sans font-medium uppercase leading-none tracking-[0.12em]"
-                                  style={{ fontSize: "10px", color: "var(--color-navy-mid)" }}
+                                  style={{ fontSize: "12px", color: "var(--color-navy-mid)" }}
                                 >
                                 T&#280;SKNOTA
                       </div>
                       <div
                                   className="font-serif italic truncate leading-[1.2]"
                                   style={{
-                                                fontSize: "20px",
+                                                fontSize: "24px",
                                                 fontWeight: 400,
                                                 color: "var(--color-navy)",
                                   }}
