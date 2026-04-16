@@ -281,7 +281,7 @@ function ComplimentsInner() {
 
       <Header pageTitle="Compliments" />
 
-      <main className="flex-1 overflow-y-auto" style={{ background: 'var(--color-cream)', padding: '32px 16px 40px' }}>
+      <main className="flex-1 overflow-y-auto px-5 md:px-10 py-8" style={{ background: 'var(--color-cream)' }}>
         <div
           className="mx-auto"
           style={{ maxWidth: '1200px' }}
