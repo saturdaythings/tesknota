@@ -165,8 +165,8 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           </div>
           <button
             onClick={onSignOut}
-            className="flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.1em] transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
-            style={{ fontSize: '11px', color: 'rgba(200,184,154,0.8)' }}
+            className="flex items-center gap-1.5 font-sans font-medium uppercase tracking-[0.08em] transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
+            style={{ fontSize: '12px', color: 'rgba(200,184,154,0.8)' }}
           >
             <LogOut size={12} />
             Sign Out
