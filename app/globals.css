@@ -66,6 +66,7 @@
 
   /* --- Type scale --- */
   --text-xxs: 10px;
+     --text-label: 11px;
      --text-xs: 12px;
      --text-sm: 13px;
      --text-ui: 14px;
