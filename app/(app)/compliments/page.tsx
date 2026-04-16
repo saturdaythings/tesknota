@@ -8,11 +8,12 @@ import { TabPill } from '@/components/ui/tab-pill';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
+import { FragranceProfileModal } from '@/components/collection/fragrance-profile-modal';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
-import type { UserCompliment, Relation, FragranceType } from '@/types';
+import type { UserCompliment, Relation, FragranceType, CommunityFrag } from '@/types';
 import { MessageCircle, Search } from '@/components/ui/Icons';
 
 // ── Constants ──────────────────────────────────────────────
@@ -154,7 +155,7 @@ function EmptyCompliments({ onAdd }: { onAdd: () => void }) {
 
 // ── DB Fragrance Search (Topbar) ───────────────────────────
 
-function DbFragSearch() {
+function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
   const { communityFrags } = useData();
   const router = useRouter();
   const [query, setQuery] = useState('');
@@ -223,7 +224,7 @@ function DbFragSearch() {
           {results.map((f) => (
             <div
               key={f.fragranceId}
-              onMouseDown={() => { setQuery(f.fragranceName); setOpen(false); }}
+              onMouseDown={() => { setQuery(''); setOpen(false); onSelect(f); }}
               className="flex flex-col justify-center cursor-pointer transition-colors"
               style={{ height: '48px', padding: '0 12px', borderBottom: '1px solid rgba(30,45,69,0.1)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
@@ -275,6 +276,7 @@ function ComplimentsInner() {
 
   const [logOpen, setLogOpen] = useState(false);
   const [editingComp, setEditingComp] = useState<UserCompliment | null>(null);
+  const [profileFrag, setProfileFrag] = useState<CommunityFrag | null>(null);
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
   const [search, setSearch] = useState('');
@@ -330,9 +332,11 @@ function ComplimentsInner() {
         onClose={() => setEditingComp(null)}
         editing={editingComp}
       />
+      <FragranceProfileModal frag={profileFrag} onClose={() => setProfileFrag(null)} />
+
       <Topbar
         title="Compliments"
-        actions={<DbFragSearch />}
+        actions={<DbFragSearch onSelect={setProfileFrag} />}
         search={
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Search
