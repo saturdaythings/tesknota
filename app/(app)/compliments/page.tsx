@@ -123,7 +123,7 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       style={{
         minHeight: '80px',
         padding: '16px 0',
-        borderBottom: '1px solid var(--color-cream-dark)',
+        borderBottom: '1px solid rgba(30,45,69,0.15)',
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -325,7 +325,7 @@ function ComplimentsInner() {
                   key={i}
                   style={{
                     height: '80px',
-                    borderBottom: '1px solid var(--color-cream-dark)',
+                    borderBottom: '1px solid rgba(30,45,69,0.15)',
                     background: 'rgba(237,232,223,0.3)',
                     borderRadius: '3px',
                     marginBottom: '2px',
