@@ -96,8 +96,8 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Column 1: Fragrance — auto-width to widest entry across all rows */}
-      <div style={{ ...cellBase, paddingRight: 'var(--space-6)' }}>
+      {/* Column 1: Fragrance — auto-width to widest entry, never wraps */}
+      <div style={{ ...cellBase, paddingRight: 'var(--space-6)', whiteSpace: 'nowrap' }}>
         <FragranceCell
           name={fragName}
           house={fragHouse}
