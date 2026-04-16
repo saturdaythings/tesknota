@@ -28,7 +28,7 @@ interface SelectProps {
 const triggerBase =
   'flex items-center justify-between w-full h-9 px-3 ' +
   'bg-[var(--color-cream)] rounded-[3px] ' +
-  'font-sans text-[var(--text-sm)] outline-none transition-[border-color] duration-150 cursor-pointer ' +
+  'font-sans outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 export function Select({
@@ -155,6 +155,8 @@ export function Select({
           className={triggerBase}
           style={{
             gridArea: size === 'auto' ? '1 / 1' : undefined,
+            fontSize: 'var(--text-sm)',
+            fontFamily: 'var(--font-sans)',
             border: error
               ? '1px solid var(--color-destructive)'
               : open
