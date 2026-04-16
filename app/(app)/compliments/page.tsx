@@ -426,7 +426,7 @@ function ComplimentsInner() {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(max-content, 1fr) 1fr auto', columnGap: 'var(--space-6)', width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr) auto', columnGap: 'var(--space-6)', width: '100%' }}>
             {displayed.map((comp) => {
               const { name, house, type } = getFragInfo(comp);
               return (
