@@ -96,7 +96,9 @@ export async function onRequestPost({ request, env }) {
     return json({ error: 'Forbidden' }, 403, appOrigin);
   }
 
-  const { SUPABASE_URL, SUPABASE_ANON_KEY, GITHUB_TOKEN } = env;
+  const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_ANON_KEY = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { GITHUB_TOKEN } = env;
 
   if (!GITHUB_TOKEN) return json({ error: 'Server misconfiguration: GITHUB_TOKEN not set' }, 500, appOrigin);
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return json({ error: 'Server misconfiguration: Supabase env vars not set' }, 500, appOrigin);
