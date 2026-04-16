@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, Suspense } from 'react';
+import { useState, useMemo, useRef, useEffect, useLayoutEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
@@ -72,10 +72,11 @@ interface ComplimentRowProps {
   fragName: string;
   fragHouse: string;
   fragType: FragranceType | null;
+  col1Width: number | null;
   onEdit: () => void;
 }
 
-function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: ComplimentRowProps) {
+function ComplimentRow({ comp, fragName, fragHouse, fragType, col1Width, onEdit }: ComplimentRowProps) {
   const meta = buildMeta(comp);
   const date = formatDate(comp);
 
@@ -91,8 +92,12 @@ function ComplimentRow({ comp, fragName, fragHouse, fragType, onEdit }: Complime
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      {/* Col 1: fixed width — never shrinks or grows */}
-      <div className="w-[280px] shrink-0 max-sm:w-full">
+      {/* Col 1: measured width — never shrinks or grows */}
+      <div
+        data-col1
+        className="shrink-0 max-sm:w-full"
+        style={col1Width ? { width: `${col1Width}px` } : undefined}
+      >
         <FragranceCell
           name={fragName}
           house={fragHouse}
@@ -282,6 +287,22 @@ function ComplimentsInner() {
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sort, setSort] = useState('date-desc');
   const [search, setSearch] = useState('');
+  const [col1Width, setCol1Width] = useState<number | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    function measure() {
+      if (!listRef.current) return;
+      const cells = listRef.current.querySelectorAll<HTMLElement>('[data-col1]');
+      if (!cells.length) return;
+      cells.forEach((el) => { el.style.width = ''; });
+      const max = Math.max(...Array.from(cells).map((el) => el.offsetWidth));
+      if (max > 0) setCol1Width(max);
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [displayed]);
 
   if (!user) return null;
 
@@ -425,7 +446,7 @@ function ComplimentsInner() {
             </div>
           </div>
         ) : (
-          <div>
+          <div ref={listRef}>
             {displayed.map((comp) => {
               const { name, house, type } = getFragInfo(comp);
               return (
@@ -435,6 +456,7 @@ function ComplimentsInner() {
                   fragName={name}
                   fragHouse={house}
                   fragType={type}
+                  col1Width={col1Width}
                   onEdit={() => setEditingComp(comp)}
                 />
               );
