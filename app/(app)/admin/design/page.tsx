@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { Button } from '@/components/ui/button';
@@ -62,6 +62,10 @@ const LAYOUT_TOKENS = [
   { token: '--topbar-px-mobile', label: 'Topbar PX Mobile', usage: 'Topbar horizontal padding (mobile)' },
   { token: '--page-margin',      label: 'Page Margin',      usage: 'PageContent horizontal padding (left + right); right edge of Topbar actions' },
 ];
+
+// ── Mode context ──────────────────────────────────────────
+
+const DesignModeContext = createContext<'reference' | 'edit'>('reference');
 
 // ── Dynamic token reader ───────────────────────────────────
 
@@ -289,6 +293,10 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
 }
 
 function ExpandableToken({ token, defaultValue, expanded, onToggle, onDraftChange, children }: { token: string; defaultValue: string; expanded: boolean; onToggle: () => void; onDraftChange?: (v: string) => void; children: React.ReactNode }) {
+  const mode = useContext(DesignModeContext);
+  if (mode === 'reference') {
+    return <div>{children}</div>;
+  }
   return (
     <div>
       <div
@@ -376,6 +384,7 @@ export default function DesignSystemPage() {
     ...LAYOUT_TOKENS.map((t) => t.token),
   ];
   const computed = useComputedTokens(allTokens);
+  const [mode, setMode] = useState<'reference' | 'edit'>('reference');
   const [expandedToken, setExpandedToken] = useState<string | null>(null);
   const [liveColorValues, setLiveColorValues] = useState<Record<string, string>>({});
 
@@ -395,6 +404,18 @@ export default function DesignSystemPage() {
     <>
       <Topbar title="Design System" />
       <PageContent maxWidth="920px">
+        <DesignModeContext.Provider value={mode}>
+        <div className="flex items-center gap-4 mb-8">
+          <div className="flex gap-2">
+            <TabPill label="Reference" active={mode === 'reference'} onClick={() => { setMode('reference'); setExpandedToken(null); }} />
+            <TabPill label="Edit" active={mode === 'edit'} onClick={() => setMode('edit')} />
+          </div>
+          {mode === 'edit' && (
+            <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: '0.04em' }}>
+              Changes publish directly to the live site.
+            </span>
+          )}
+        </div>
         <HardcodeChecker>
 
           <Section title="Brand Colors">
@@ -648,6 +669,7 @@ export default function DesignSystemPage() {
           </Section>
 
         </HardcodeChecker>
+        </DesignModeContext.Provider>
       </PageContent>
     </>
   );
