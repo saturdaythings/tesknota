@@ -159,14 +159,16 @@ function FragSearch({
         onFocus={() => !locked && setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         placeholder="Search your collection..."
-        className="w-full h-10 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-navy-mid)]"
         style={{
-          fontSize: '15px',
+          fontSize: '12px',
+          fontWeight: 400,
+          letterSpacing: '0.08em',
           background: 'var(--color-cream)',
           border: error
             ? '1px solid var(--color-destructive)'
             : '1px solid rgba(30,45,69,0.8)',
-          color: 'var(--color-navy)',
+          color: 'rgba(30,45,69,0.8)',
         }}
       />
       {open && matches.length > 0 && (
@@ -368,12 +370,14 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
     width: '100%',
     height: '36px',
     padding: '0 12px',
-    fontSize: '15px',
+    fontSize: '12px',
+    fontWeight: 400,
+    letterSpacing: '0.08em',
     fontFamily: 'var(--font-sans)',
     background: 'var(--color-cream)',
     border: '1px solid rgba(30,45,69,0.8)',
-    borderRadius: '3px',
-    color: 'var(--color-navy)',
+    borderRadius: '2px',
+    color: 'rgba(30,45,69,0.8)',
     outline: 'none',
     cursor: 'text',
   };
@@ -437,6 +441,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Bluegrass Lounge, coffee shop, gym..."
+              className="placeholder:text-[var(--color-navy-mid)]"
               style={inputStyle}
             />
             <div className="grid grid-cols-2 gap-3">
@@ -444,12 +449,14 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="City"
+                className="placeholder:text-[var(--color-navy-mid)]"
                 style={inputStyle}
               />
               <input
                 value={state}
                 onChange={(e) => setState(e.target.value)}
                 placeholder="State / Country"
+                className="placeholder:text-[var(--color-navy-mid)]"
                 style={inputStyle}
               />
             </div>
@@ -463,13 +470,15 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Context, reaction, moment..."
               rows={3}
-              className="w-full p-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y"
+              className="w-full p-3 rounded-[2px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-y placeholder:text-[var(--color-navy-mid)]"
               style={{
-                fontSize: '15px',
+                fontSize: '12px',
+                fontWeight: 400,
+                letterSpacing: '0.08em',
                 minHeight: '80px',
                 background: 'var(--color-cream)',
                 border: '1px solid rgba(30,45,69,0.8)',
-                color: 'var(--color-navy)',
+                color: 'rgba(30,45,69,0.8)',
               }}
             />
           </div>
