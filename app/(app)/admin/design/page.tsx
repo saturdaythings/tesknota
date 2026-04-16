@@ -205,20 +205,19 @@ export default function DesignSystemPage() {
             <div className="grid grid-cols-2 gap-x-8 md:grid-cols-3">
               <Swatch color="var(--color-navy)"         label="Navy"         token="--color-navy" />
               <Swatch color="var(--color-navy-mid)"     label="Navy Mid"     token="--color-navy-mid" />
-              <Swatch color="var(--color-accent)"       label="Accent"       token="--color-accent" />
               <Swatch color="var(--color-cream)"        label="Cream"        token="--color-cream" />
               <Swatch color="var(--color-cream-dark)"   label="Cream Dark"   token="--color-cream-dark" />
               <Swatch color="var(--color-sand)"         label="Sand"         token="--color-sand" />
               <Swatch color="var(--color-sand-light)"   label="Sand Light"   token="--color-sand-light" />
               <Swatch color="var(--color-destructive)"  label="Destructive"  token="--color-destructive" />
-              <Swatch color="var(--color-row-divider)"  label="Row Divider"  token="--color-row-divider" />
-              <Swatch color="var(--color-meta-text)"    label="Meta Text"    token="--color-meta-text" />
-              <Swatch color="var(--color-notes-text)"   label="Notes Text"   token="--color-notes-text" />
-              <Swatch color="var(--color-row-hover)"    label="Row Hover"    token="--color-row-hover" />
+              <Swatch color="var(--color-row-divider)"  label="Row Divider"  token="--color-row-divider · rgba(30,45,69,0.15)" />
+              <Swatch color="var(--color-meta-text)"    label="Meta Text"    token="--color-meta-text · rgba(30,45,69,0.80)" />
+              <Swatch color="var(--color-notes-text)"   label="Notes Text"   token="--color-notes-text · rgba(30,45,69,0.70)" />
+              <Swatch color="var(--color-row-hover)"    label="Row Hover"    token="--color-row-hover · rgba(232,224,208,0.30)" />
+              <Swatch color="var(--color-navy-backdrop)" label="Navy Backdrop" token="--color-navy-backdrop · rgba(30,45,69,0.50)" />
             </div>
             <Note>
-              Never hardcode hex or rgba. Use <code className="font-mono">var(--color-*)</code> tokens only.
-              Opacity variants are tokens: <code className="font-mono">--color-meta-text</code>, <code className="font-mono">--color-notes-text</code>, <code className="font-mono">--color-row-divider</code>, etc.
+              Never hardcode hex or rgba values. Use <code className="font-mono">var(--color-*)</code> tokens only. All opacity variants have named tokens — never write raw rgba() inline.
             </Note>
           </Section>
 
@@ -236,8 +235,8 @@ export default function DesignSystemPage() {
             <TypeSpec spec="Serif italic · var(--text-note) · 400 · navy">
               <span className="font-serif italic" style={{ fontSize: 'var(--text-note)', color: 'var(--color-navy)' }}>+ Layering Name</span>
             </TypeSpec>
-            <TypeSpec spec="Serif italic · var(--text-note) · 400 · --color-notes-text · lh 1.6">
-              <span className="font-serif italic" style={{ fontSize: 'var(--text-note)', color: 'var(--color-notes-text)', lineHeight: 1.6 }}>worn to a dinner, first comment within 20 minutes</span>
+            <TypeSpec spec="Serif italic · var(--text-note) · 400 · --color-meta-text · lh 1.6">
+              <span className="font-serif italic" style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 1.6 }}>worn to a dinner, first comment within 20 minutes</span>
             </TypeSpec>
             <TypeSpec spec="Serif italic · var(--text-empty-title) · 400 · navy">
               <span className="font-serif italic" style={{ fontSize: 'var(--text-empty-title)', color: 'var(--color-navy)' }}>Log a Compliment</span>
@@ -252,8 +251,8 @@ export default function DesignSystemPage() {
             <TypeSpec spec="Sans uppercase · var(--text-xs) · 400 · 0.1em · navy">
               <span className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>Maison Margiela</span>
             </TypeSpec>
-            <TypeSpec spec="Sans · var(--text-xs) · 400 · --color-meta-text">
-              <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>STRANGER · FEMALE · COFFEE SHOP</span>
+            <TypeSpec spec="Sans uppercase · var(--text-xs) · 400 · 0.1em · navy">
+              <span className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>STRANGER · FEMALE · COFFEE SHOP</span>
             </TypeSpec>
             <TypeSpec spec="Sans · var(--text-xs) · 400 · navy">
               <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>APR 2025</span>
@@ -478,38 +477,83 @@ export default function DesignSystemPage() {
           {/* Topbar preview */}
           <Section title="Page Header (Topbar)">
             <Note>
-              Component: <code className="font-mono">{'<Topbar title="..." />'}</code> from <code className="font-mono">components/layout/Topbar.tsx</code>. Required on every page — pairs with <code className="font-mono">{'<PageContent>'}</code>.
+              Component: <code className="font-mono">{'<Topbar title="..." />'}</code> from <code className="font-mono">components/layout/Topbar.tsx</code>. Required on every page — pairs with <code className="font-mono">{'<PageContent>'}</code>. Supports optional <code className="font-mono">search</code> and <code className="font-mono">actions</code> slots (right side).
             </Note>
-            <div className="rounded-[3px] overflow-hidden" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
-              <div
-                className="flex items-center gap-3"
-                style={{ height: 'var(--header-height)', paddingLeft: 'var(--topbar-px)', paddingRight: 'var(--topbar-px)' }}
-              >
+            {/* Title only */}
+            <div className="mb-2 font-sans" style={{ fontSize: 'var(--text-label)', color: 'var(--color-navy-mid)', letterSpacing: '0.04em' }}>Title only</div>
+            <div className="rounded-[3px] overflow-hidden mb-4" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
+              <div className="flex items-center gap-3" style={{ height: 'var(--header-height)', paddingLeft: 'var(--topbar-px)', paddingRight: 'var(--topbar-px)' }}>
+                <div className="flex-1">
+                  <div className="font-sans font-medium uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.12em', color: 'var(--color-navy-mid)' }}>TĘSKNOTA</div>
+                  <div className="font-serif italic" style={{ fontSize: 'var(--text-page-title)', color: 'var(--color-navy)', lineHeight: 1.2 }}>Dashboard</div>
+                </div>
+              </div>
+            </div>
+            {/* With search */}
+            <div className="mb-2 font-sans" style={{ fontSize: 'var(--text-label)', color: 'var(--color-navy-mid)', letterSpacing: '0.04em' }}>With search input (actions slot)</div>
+            <div className="rounded-[3px] overflow-hidden mb-4" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
+              <div className="flex items-center gap-3" style={{ height: 'var(--header-height)', paddingLeft: 'var(--topbar-px)', paddingRight: 'var(--topbar-px)' }}>
                 <div className="flex-1">
                   <div className="font-sans font-medium uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.12em', color: 'var(--color-navy-mid)' }}>TĘSKNOTA</div>
                   <div className="font-serif italic" style={{ fontSize: 'var(--text-page-title)', color: 'var(--color-navy)', lineHeight: 1.2 }}>Compliments</div>
                 </div>
+                {/* Search slot */}
+                <div className="relative flex-shrink-0" style={{ width: '200px' }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--color-meta-text)' }}>
+                    <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                  </svg>
+                  <div
+                    className="w-full h-9 pl-9 pr-3 flex items-center rounded-[2px] font-sans"
+                    style={{ fontSize: 'var(--text-sm)', letterSpacing: '0.08em', border: '1px solid var(--color-meta-text)', color: 'var(--color-meta-text)', background: 'var(--color-cream)' }}
+                  >
+                    Find fragrances...
+                  </div>
+                </div>
               </div>
             </div>
-            <Note>Height: var(--header-height) · bg cream · border-bottom 1px --color-sand-light · padding var(--topbar-px-mobile) mobile / var(--topbar-px) desktop. App label: var(--text-xs) sans uppercase 0.12em --color-navy-mid. Page title: var(--text-page-title) serif italic navy.</Note>
+            <Note>Height: var(--header-height) · cream bg · border-bottom --color-sand-light · px var(--topbar-px-mobile) mobile / var(--topbar-px) desktop. App label: var(--text-xs) sans uppercase 0.12em navy-mid. Title: var(--text-page-title) serif italic navy. Search/actions slot: right side, flex-shrink-0.</Note>
+          </Section>
+
+          {/* Page-by-page layout reference */}
+          <Section title="Page-by-Page Layout Reference">
+            <Note>Every page = <code className="font-mono">Topbar</code> + <code className="font-mono">PageContent</code>. Margin matches topbar exactly via <code className="font-mono">--page-margin</code> / <code className="font-mono">--topbar-px-mobile</code> tokens.</Note>
+
+            {[
+              { page: 'Dashboard',     topbar: 'Title only',                    content: 'Stats cards, recent activity' },
+              { page: 'My Collection', topbar: 'Title + search input (filter)',  content: 'Table rows: FragranceCell · accords · rating · date added' },
+              { page: 'Wishlist',      topbar: 'Title + search input (filter)',  content: 'Table rows: FragranceCell · price · accords' },
+              { page: 'Compliments',   topbar: 'Title + DB search (Find fragrances...)', content: 'Table rows: FragranceCell · meta+notes · date. Filter pills + sort select above list.' },
+              { page: 'Analytics',     topbar: 'Title only',                    content: 'Charts and stat blocks' },
+              { page: 'Friend',        topbar: 'Title only',                    content: "Friend's collection rows" },
+              { page: 'Import',        topbar: 'Title only',                    content: 'Upload + match UI' },
+              { page: 'Settings',      topbar: 'Title only',                    content: 'Form fields, maxWidth 560px' },
+            ].map((row) => (
+              <div key={row.page} className="flex items-start gap-4 py-3" style={{ borderBottom: '1px solid var(--color-row-divider)' }}>
+                <div className="font-serif italic flex-shrink-0" style={{ fontSize: 'var(--text-base)', color: 'var(--color-navy)', width: '120px' }}>{row.page}</div>
+                <div className="flex-1">
+                  <div className="font-sans mb-1" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>{row.topbar}</div>
+                  <div className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-meta-text)' }}>{row.content}</div>
+                </div>
+              </div>
+            ))}
           </Section>
 
           {/* Row list */}
           <Section title="Row List Pattern">
             <Note>
-              No <code className="font-mono">{'<table>'}</code>. Flexbox rows with border-bottom. Three columns: FragranceCell (col 1), meta+notes (col 2), date (col 3).
+              Three columns: <code className="font-mono">FragranceCell</code> (col 1, auto-width), meta+notes (col 2, flex-1), date (col 3, auto-width right-aligned).
             </Note>
             <div style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-4) 0' }}>
               <div className="flex gap-6 items-start">
                 <FragranceCell name="Replica — Coffee Breeze" house="Maison Margiela" type="Eau de Parfum" />
                 <div className="flex-1 min-w-0">
-                  <div className="font-sans mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>STRANGER · FEMALE · COFFEE SHOP</div>
-                  <div className="font-serif italic line-clamp-2" style={{ fontSize: 'var(--text-note)', color: 'var(--color-notes-text)', lineHeight: 1.6 }}>stopped me to ask what I was wearing</div>
+                  <div className="font-sans uppercase mb-1" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)', fontWeight: 400 }}>STRANGER · FEMALE · COFFEE SHOP</div>
+                  <div className="font-serif italic line-clamp-2" style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 1.6 }}>worn to a dinner, first comment within 20 minutes</div>
                 </div>
-                <div className="font-sans flex-shrink-0 text-right" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '72px' }}>APR 2025</div>
+                <div className="font-sans uppercase flex-shrink-0 text-right" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)', fontWeight: 400, minWidth: '72px' }}>APR 2025</div>
               </div>
             </div>
-            <Note>Row: min-h 80px · var(--space-4) padding · gap-6 · --color-row-divider border · --color-row-hover on hover. Notes: line-clamp-2 in list view.</Note>
+            <Note>Row: min-h 80px · var(--space-4) padding y · gap-6 · --color-row-divider border · --color-row-hover bg on hover. Meta (col 2 top): sans uppercase 0.1em navy 400. Notes (col 2 body): serif italic --color-meta-text lh 1.6. Date (col 3): sans uppercase 0.1em navy 400 — matches meta exactly.</Note>
           </Section>
 
         </HardcodeChecker>

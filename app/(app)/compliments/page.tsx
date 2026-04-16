@@ -199,21 +199,21 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
         <Search
           size={15}
           className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-          style={{ color: 'rgba(30,45,69,0.8)' }}
+          style={{ color: 'var(--color-meta-text)' }}
         />
         <input
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder="Find fragrances..."
-          className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
+          className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-navy)] placeholder:text-[var(--color-navy-mid)]"
           style={{
-            fontSize: '13px',
+            fontSize: 'var(--text-sm)',
             fontWeight: 400,
             letterSpacing: '0.08em',
             background: 'var(--color-cream)',
-            border: '1px solid rgba(30,45,69,0.8)',
-            color: query ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)',
+            border: '1px solid var(--color-meta-text)',
+            color: query ? 'var(--color-navy)' : 'var(--color-meta-text)',
           }}
         />
       </div>
@@ -223,9 +223,9 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
           style={{
             top: 'calc(100% + 4px)',
             background: 'var(--color-cream)',
-            border: '1px solid rgba(30,45,69,0.8)',
+            border: '1px solid var(--color-meta-text)',
             borderRadius: '3px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+            boxShadow: 'var(--shadow-md)',
             maxHeight: '280px',
             minWidth: '240px',
           }}
@@ -235,14 +235,14 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
               key={f.fragranceId}
               onMouseDown={() => { setQuery(''); setOpen(false); onSelect(f); }}
               className="flex flex-col justify-center cursor-pointer transition-colors"
-              style={{ height: '48px', padding: '0 12px', borderBottom: '1px solid rgba(30,45,69,0.1)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+              style={{ height: '48px', padding: '0 12px', borderBottom: '1px solid var(--color-row-divider)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+              <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
                 {f.fragranceName}
               </div>
-              <div className="font-sans uppercase" style={{ fontSize: '12px', color: 'var(--color-navy)', letterSpacing: '0.1em' }}>
+              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', letterSpacing: '0.1em' }}>
                 {f.fragranceHouse}
               </div>
             </div>
@@ -250,23 +250,23 @@ function DbFragSearch({ onSelect }: { onSelect: (f: CommunityFrag) => void }) {
           {results.length === 0 && query.trim().length > 0 && (
             <div
               className="flex items-center font-sans italic"
-              style={{ height: '44px', padding: '0 12px', fontSize: '13px', color: 'rgba(30,45,69,0.5)', borderBottom: '1px solid rgba(30,45,69,0.1)' }}
+              style={{ height: '44px', padding: '0 12px', fontSize: 'var(--text-sm)', color: 'var(--color-navy-backdrop)', borderBottom: '1px solid var(--color-row-divider)' }}
             >
               No matches found
             </div>
           )}
-          <div style={{ borderTop: '1px solid rgba(30,45,69,0.15)' }}>
+          <div style={{ borderTop: '1px solid var(--color-row-divider)' }}>
             <div
               onMouseDown={() => { setOpen(false); router.push('/import'); }}
               className="flex flex-col justify-center cursor-pointer transition-colors"
               style={{ height: '48px', padding: '0 12px' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+              <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
                 Import new fragrance
               </div>
-              <div className="font-sans uppercase" style={{ fontSize: '12px', color: 'var(--color-navy-mid)', letterSpacing: '0.1em' }}>
+              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: '0.1em' }}>
                 Add to database
               </div>
             </div>
