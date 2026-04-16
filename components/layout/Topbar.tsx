@@ -36,7 +36,7 @@ export function Topbar({
                       <span className="block w-[18px] h-[1.5px] bg-current" />
                       <span className="block w-[18px] h-[1.5px] bg-current" />
                       <span className="block w-[18px] h-[1.5px] bg-current" />
-              </button>button>
+              </button>
         
           {/* Breadcrumb title block */}
               <div className="flex-1 min-w-0 flex flex-col justify-center gap-[2px]">
@@ -45,7 +45,7 @@ export function Topbar({
                                   style={{ fontSize: "10px", color: "var(--color-sand)" }}
                                 >
                                 T&#280;SKNOTA
-                      </div>div>
+                      </div>
                       <div
                                   className="font-serif truncate leading-[1.2]"
                                   style={{
@@ -56,18 +56,18 @@ export function Topbar({
                                   }}
                                 >
                         {title}
-                      </div>div>
-              </div>div>
+                      </div>
+              </div>
         
           {/* Search */}
           {search && (
                         <div className="flex-shrink-0">
                           {search}
-                        </div>div>
+                        </div>
               )}
         
           {/* Actions */}
-          {actions && <div className="flex items-center gap-2">{actions}</div>div>}
-        </header>header>
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
+        </header>
       );
-}</header>
+}
