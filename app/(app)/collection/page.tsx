@@ -11,8 +11,6 @@ import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { FragSearch } from '@/components/ui/frag-search';
 import { PageFilterBar } from '@/components/ui/page-filter-bar';
-import { Select } from '@/components/ui/select';
-import { MultiSelect } from '@/components/ui/multi-select';
 import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { FragranceDetailModal } from '@/components/collection/fragrance-detail-modal';
 import { CollectionList, type CollectionColumnDef, type CollectionRowContext } from '@/components/collection/collection-list';
@@ -25,6 +23,11 @@ import {
   SORT_FIELD_OPTIONS, RATING_FILTER_OPTIONS, STATUS_FILTER_OPTIONS,
   type SortField, type SortDir,
 } from '@/lib/collection-utils';
+
+const STATUS_OPTIONS = [
+  { value: 'any', label: 'Any status' },
+  ...STATUS_FILTER_OPTIONS.filter((o) => o.value !== 'all'),
+];
 import { FlaskConical } from '@/components/ui/Icons';
 import { STATUS_LABELS, type UserFragrance } from '@/types';
 
@@ -34,7 +37,6 @@ const cellStyle = {
   color: 'var(--color-navy)',
 } as const;
 
-const STATUS_OPTIONS = STATUS_FILTER_OPTIONS.filter((o) => o.value !== 'all');
 
 // Column definitions — add an entry here to add a column to the table
 const COLUMNS: CollectionColumnDef[] = [
@@ -149,11 +151,10 @@ function CollectionInner() {
   const filterParam = searchParams.get('filter');
 
   const [search, setSearch] = useState('');
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [accordFilter, setAccordFilter] = useState<string[]>([]);
+  const [accordFilter, setAccordFilter] = useState('any');
   const [ratingFilter, setRatingFilter] = useState('any');
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
-  const [houseFilter, setHouseFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState('any');
+  const [houseFilter, setHouseFilter] = useState('any');
   const [addOpen, setAddOpen] = useState(false);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [page, setPage] = useState(1);
@@ -217,7 +218,7 @@ function CollectionInner() {
       const q = search.trim().toLowerCase();
       list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
     }
-    if (statusFilter.length > 0) list = list.filter((f) => statusFilter.includes(f.status));
+    if (statusFilter !== 'any') list = list.filter((f) => f.status === statusFilter);
     if (ratingFilter !== 'any') {
       list = list.filter((f) => {
         const r = f.personalRating ?? 0;
@@ -229,20 +230,20 @@ function CollectionInner() {
         return true;
       });
     }
-    if (accordFilter.length > 0) {
-      list = list.filter((f) => accordFilter.some((a) => getAccords(f, communityFrags).includes(a)));
+    if (accordFilter !== 'any') {
+      list = list.filter((f) => getAccords(f, communityFrags).includes(accordFilter));
     }
-    if (houseFilter.length > 0) list = list.filter((f) => houseFilter.includes(f.house));
+    if (houseFilter !== 'any') list = list.filter((f) => f.house === houseFilter);
     return applySort(list, sortField, sortDir, compMap);
   }, [myFrags, search, filterParam, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, compMap, communityFrags]);
 
   const filtersActive =
-    accordFilter.length > 0 ||
+    accordFilter !== 'any' ||
     ratingFilter !== 'any' ||
-    statusFilter.length > 0 ||
-    houseFilter.length > 0;
+    statusFilter !== 'any' ||
+    houseFilter !== 'any';
 
-  useEffect(() => { setPage(1); }, [search, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, perPage]);
+  useEffect(() => { setPage(1); }, [search, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pageSize = perPage === 0 ? filtered.length : perPage;
   const totalPages = filtered.length === 0 ? 1 : perPage === 0 ? 1 : Math.ceil(filtered.length / pageSize);
@@ -251,10 +252,10 @@ function CollectionInner() {
   if (!user) return null;
 
   function clearFilters() {
-    setAccordFilter([]);
+    setAccordFilter('any');
     setRatingFilter('any');
-    setStatusFilter([]);
-    setHouseFilter([]);
+    setStatusFilter('any');
+    setHouseFilter('any');
   }
 
   async function handleDelete(frag: UserFragrance) {
@@ -268,23 +269,6 @@ function CollectionInner() {
   }
 
   const rowCtx: CollectionRowContext = { compMap, communityFrags, onRatingUpdate: handleRatingUpdate };
-
-  const filterPanel = (
-    <>
-      <div style={{ width: '160px' }}>
-        <MultiSelect options={accordOptions} value={accordFilter} onChange={setAccordFilter} placeholder="Accords" />
-      </div>
-      <div style={{ width: '160px' }}>
-        <Select options={RATING_FILTER_OPTIONS} value={ratingFilter} onChange={setRatingFilter} placeholder="Rating" />
-      </div>
-      <div style={{ width: '180px' }}>
-        <MultiSelect options={STATUS_OPTIONS} value={statusFilter} onChange={setStatusFilter} placeholder="Status" />
-      </div>
-      <div style={{ width: '160px' }}>
-        <MultiSelect options={houseOptions} value={houseFilter} onChange={setHouseFilter} placeholder="Houses" />
-      </div>
-    </>
-  );
 
   return (
     <>
@@ -302,20 +286,24 @@ function CollectionInner() {
 
       <PageContent>
         <PageFilterBar
-          search={search}
+          searchValue={search}
           onSearch={setSearch}
           searchPlaceholder="Search your collection..."
-          action={<Button variant="primary" onClick={() => setAddOpen(true)}>Add to Collection</Button>}
+          addLabel="Add to Collection"
+          onAdd={() => setAddOpen(true)}
+          sortFields={SORT_FIELD_OPTIONS}
           sortField={sortField}
-          sortDir={sortDir}
-          sortOptions={SORT_FIELD_OPTIONS}
           onSortField={(v) => handleSortField(v as SortField)}
-          onToggleSortDir={handleToggleSortDir}
-          filtersOpen={filtersOpen}
-          onFiltersOpen={setFiltersOpen}
+          sortDir={sortDir}
+          onSortDir={handleToggleSortDir}
+          filters={[
+            { value: accordFilter, onChange: setAccordFilter, options: [{ value: 'any', label: 'Any accord' }, ...accordOptions] },
+            { value: ratingFilter, onChange: setRatingFilter, options: RATING_FILTER_OPTIONS },
+            { value: statusFilter, onChange: setStatusFilter, options: STATUS_OPTIONS },
+            { value: houseFilter, onChange: setHouseFilter, options: [{ value: 'any', label: 'Any house' }, ...houseOptions] },
+          ]}
           filtersActive={filtersActive}
           onClearFilters={clearFilters}
-          filterPanel={filterPanel}
           perPage={perPage}
           onPerPage={(v) => { setPerPage(v); setPage(1); }}
           count={isLoaded ? filtered.length : undefined}

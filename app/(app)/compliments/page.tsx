@@ -129,20 +129,6 @@ function ComplimentsInner() {
     return { name: f?.name ?? comp.primaryFrag ?? '-', house: f?.house ?? '', type: f?.type ?? null };
   }
 
-  const pills = (
-    <div className="flex flex-wrap" style={{ gap: 'var(--space-2)' }}>
-      {RELATION_TABS.map((tab) => (
-        <TabPill
-          key={tab.value}
-          label={tab.label}
-          count={tabCounts[tab.value] ?? 0}
-          active={relationTab === tab.value}
-          onClick={() => setRelationTab(tab.value)}
-        />
-      ))}
-    </div>
-  );
-
   return (
     <>
       <LogComplimentModal open={logOpen} onClose={() => setLogOpen(false)} />
@@ -151,22 +137,35 @@ function ComplimentsInner() {
 
       <PageContent>
         <PageFilterBar
-          search={search}
+          searchValue={search}
           onSearch={setSearch}
           searchPlaceholder="Search your compliments..."
-          action={<Button variant="primary" onClick={() => setLogOpen(true)}>Log Compliment</Button>}
+          addLabel="Log Compliment"
+          onAdd={() => setLogOpen(true)}
+          sortFields={SORT_FIELD_OPTIONS}
           sortField={sortField}
-          sortDir={sortDir}
-          sortOptions={SORT_FIELD_OPTIONS}
           onSortField={setSortField}
-          onToggleSortDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-          pills={pills}
+          sortDir={sortDir}
+          onSortDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+          filtersActive={false}
           perPage={perPage}
           onPerPage={(v) => { setPerPage(v); setPage(1); }}
           count={isLoaded ? filtered.length : undefined}
           countLabel="Compliment"
           isLoaded={isLoaded}
         />
+
+        <div className="flex flex-wrap" style={{ gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+          {RELATION_TABS.map((tab) => (
+            <TabPill
+              key={tab.value}
+              label={tab.label}
+              count={tabCounts[tab.value] ?? 0}
+              active={relationTab === tab.value}
+              onClick={() => setRelationTab(tab.value)}
+            />
+          ))}
+        </div>
 
         {!isLoaded ? (
           <ComplimentsSkeleton />

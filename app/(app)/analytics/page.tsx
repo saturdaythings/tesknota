@@ -6,7 +6,7 @@ import { PageContent } from "@/components/layout/PageContent";
 import { FragSearch } from "@/components/ui/frag-search";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
-import { addedThisMonth, avgRatingStr, parseRating, MONTHS, getAccords } from "@/lib/frag-utils";
+import { avgRatingStr, parseRating, MONTHS, getAccords } from "@/lib/frag-utils";
 import { Select } from "@/components/ui/select";
 import { TabPill } from "@/components/ui/tab-pill";
 import { Button } from "@/components/ui/button";
@@ -103,9 +103,9 @@ function buildGrowthData(frags: UserFragrance[]) {
 function buildMonthlyBars(items: UserCompliment[], baseFrags: UserFragrance[]) {
   const byMonth: Record<string, { count: number; fragNames: string[] }> = {};
   items.forEach((c) => {
-    const d = new Date(c.createdAt);
-    if (isNaN(d.getTime())) return;
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const mo = parseInt(c.month);
+    if (!c.year || isNaN(mo)) return;
+    const key = `${c.year}-${String(mo).padStart(2, "0")}`;
     if (!byMonth[key]) byMonth[key] = { count: 0, fragNames: [] };
     byMonth[key].count++;
     if (c.primaryFragId) {
@@ -125,12 +125,14 @@ function buildMonthlyBars(items: UserCompliment[], baseFrags: UserFragrance[]) {
 
 function buildMonthOptions(frags: UserFragrance[], comps: UserCompliment[]): { value: string; label: string }[] {
   const s = new Set<string>();
-  const add = (dt: string) => {
-    const d = new Date(dt);
+  frags.forEach((f) => {
+    const d = new Date(f.createdAt);
     if (!isNaN(d.getTime())) s.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-  };
-  frags.forEach((f) => add(f.createdAt));
-  comps.forEach((c) => add(c.createdAt));
+  });
+  comps.forEach((c) => {
+    const mo = parseInt(c.month);
+    if (c.year && !isNaN(mo)) s.add(`${c.year}-${String(mo).padStart(2, "0")}`);
+  });
   const now = new Date();
   s.add(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
   return Array.from(s)
@@ -155,8 +157,8 @@ function fragsSeason(frags: UserFragrance[], season: Season) {
 function compsSeason(comps: UserCompliment[], season: Season) {
   const ms = SEASON_MONTHS[season];
   return comps.filter((c) => {
-    const d = new Date(c.createdAt);
-    return !isNaN(d.getTime()) && ms.includes(d.getMonth() + 1);
+    const mo = parseInt(c.month);
+    return !isNaN(mo) && ms.includes(mo);
   });
 }
 
@@ -518,7 +520,7 @@ export default function AnalyticsPage() {
   const baseFrags = showFriend ? FF : MF;
   const baseComps = showFriend ? FC : MC;
 
-  function filterByTime<T extends { createdAt: string }>(items: T[]): T[] {
+  function filterFragsByTime(items: UserFragrance[]): UserFragrance[] {
     if (period === "all") return items;
     if (period === "year") return items.filter((i) => new Date(i.createdAt).getFullYear() === curYear);
     if (period === "season") {
@@ -535,11 +537,31 @@ export default function AnalyticsPage() {
     return items;
   }
 
-  const activeFrags = filterByTime(baseFrags);
-  const activeComps = filterByTime(baseComps);
+  function filterCompsByTime(items: UserCompliment[]): UserCompliment[] {
+    if (period === "all") return items;
+    if (period === "year") return items.filter((c) => c.year === String(curYear));
+    if (period === "season") {
+      const ms = SEASON_MONTHS[season];
+      return items.filter((c) => {
+        const mo = parseInt(c.month);
+        return !isNaN(mo) && ms.includes(mo);
+      });
+    }
+    if (period === "month") {
+      const [y, m] = selectedMonth.split("-").map(Number);
+      return items.filter((c) => c.year === String(y) && parseInt(c.month) === m);
+    }
+    return items;
+  }
+
+  const activeFrags = filterFragsByTime(baseFrags);
+  const activeComps = filterCompsByTime(baseComps);
 
   const totalComps = activeComps.length;
-  const compDelta = addedThisMonth(activeComps, now.getMonth() + 1, now.getFullYear());
+  const compDelta = activeComps.filter((c) => {
+    const mo = parseInt(c.month);
+    return !isNaN(mo) && mo === now.getMonth() + 1 && c.year === String(now.getFullYear());
+  }).length;
   const inCollection = activeFrags.length;
   const ratedCount = activeFrags.filter((f) => f.personalRating).length;
   const strangerCount = activeComps.filter((c) => c.relation === "Stranger").length;

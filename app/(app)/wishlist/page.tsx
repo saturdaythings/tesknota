@@ -38,6 +38,20 @@ const SORT_FIELD_OPTIONS = [
   { value: "priority", label: "Priority" },
 ];
 
+const PRIORITY_FILTER_OPTIONS = [
+  { value: "any", label: "Any priority" },
+  { value: "HIGH", label: "High" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "LOW", label: "Low" },
+];
+
+const WISHLIST_STATUS_OPTIONS = [
+  { value: "any", label: "Any status" },
+  { value: "WANT_TO_BUY", label: "Want to Buy" },
+  { value: "WANT_TO_SMELL", label: "Want to Smell" },
+  { value: "WANT_TO_IDENTIFY", label: "Identify Later" },
+];
+
 const PRIORITY_ORDER: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
 
 const cellStyle = {
@@ -377,6 +391,8 @@ function WishlistInner() {
   const sortDir = (lastUnderscore > -1 ? rawSort!.slice(lastUnderscore + 1) : "asc") as "asc" | "desc";
 
   const [search, setSearch] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("any");
+  const [wishlistStatusFilter, setWishlistStatusFilter] = useState("any");
   const [addOpen, setAddOpen] = useState(false);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [moveFormFrag, setMoveFormFrag] = useState<UserFragrance | null>(null);
@@ -415,12 +431,21 @@ function WishlistInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fragrances, communityFrags, user.id]);
 
+  const filtersActive = priorityFilter !== "any" || wishlistStatusFilter !== "any";
+
+  function clearFilters() {
+    setPriorityFilter("any");
+    setWishlistStatusFilter("any");
+  }
+
   const filtered = useMemo(() => {
     let list = wishlist;
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
     }
+    if (priorityFilter !== "any") list = list.filter((f) => f.wishlistPriority === priorityFilter);
+    if (wishlistStatusFilter !== "any") list = list.filter((f) => f.status === wishlistStatusFilter);
     return [...list].sort((a, b) => {
       let cmp = 0;
       switch (sortField) {
@@ -433,7 +458,7 @@ function WishlistInner() {
       return sortDir === "desc" ? -cmp : cmp;
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fragrances, search, sortField, sortDir, cfMap]);
+  }, [fragrances, search, sortField, sortDir, cfMap, priorityFilter, wishlistStatusFilter]);
 
   const topAccords = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -482,7 +507,7 @@ function WishlistInner() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [communityFrags, ownedKeys]);
 
-  useEffect(() => { setPage(1); }, [search, sortField, sortDir]);
+  useEffect(() => { setPage(1); }, [search, sortField, sortDir, priorityFilter, wishlistStatusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const paginated = useMemo(
     () => pageSize === 0 ? filtered : filtered.slice((page - 1) * pageSize, page * pageSize),
@@ -561,19 +586,26 @@ function WishlistInner() {
 
       <PageContent>
         <PageFilterBar
-          search={search}
+          searchValue={search}
           onSearch={setSearch}
           searchPlaceholder="Search your wishlist..."
-          action={<Button variant="primary" onClick={() => setAddOpen(true)}>Add to Wishlist</Button>}
+          addLabel="Add to Wishlist"
+          onAdd={() => setAddOpen(true)}
+          sortFields={SORT_FIELD_OPTIONS}
           sortField={sortField}
-          sortDir={sortDir}
-          sortOptions={SORT_FIELD_OPTIONS}
           onSortField={handleSortField}
-          onToggleSortDir={handleToggleSortDir}
+          sortDir={sortDir}
+          onSortDir={handleToggleSortDir}
+          filters={[
+            { value: priorityFilter, onChange: setPriorityFilter, options: PRIORITY_FILTER_OPTIONS },
+            { value: wishlistStatusFilter, onChange: setWishlistStatusFilter, options: WISHLIST_STATUS_OPTIONS },
+          ]}
+          filtersActive={filtersActive}
+          onClearFilters={clearFilters}
           perPage={pageSize}
           onPerPage={(v) => { setPageSize(v); setPage(1); }}
           count={isLoaded ? filtered.length : undefined}
-          countLabel="Fragrance"
+          countLabel="Item"
           isLoaded={isLoaded}
         />
 

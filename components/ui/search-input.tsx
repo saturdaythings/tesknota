@@ -48,7 +48,7 @@ export function SearchInput({ value, onChange, placeholder = "Search...", classN
             color: "var(--color-meta-text)", padding: 0,
           }}
         >
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <svg style={{ width: "var(--text-sm)", height: "var(--text-sm)" }} viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M10.5 3.5L3.5 10.5M3.5 3.5l7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
