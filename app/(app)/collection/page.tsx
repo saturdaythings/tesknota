@@ -207,7 +207,11 @@ function CollectionInner() {
   const filtered = useMemo(() => {
     let list = myFrags;
     if (filterParam === 'missing') {
-      list = list.filter((f) => !f.personalRating || !f.house || !f.type);
+      list = list.filter(
+        (f) =>
+          (f.status === 'CURRENT' || f.status === 'PREVIOUSLY_OWNED' || f.status === 'FINISHED') &&
+          (!f.personalRating || !f.house || !f.type)
+      );
     }
     if (search.trim()) {
       const q = search.trim().toLowerCase();

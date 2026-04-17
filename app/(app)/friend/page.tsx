@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { FragSearch } from "@/components/ui/frag-search";
@@ -14,6 +14,7 @@ import { AccordCloud } from "@/components/ui/accord-cloud";
 import { Pagination } from "@/components/ui/pagination";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
+import { loadAllData } from "@/lib/data";
 import { MONTHS, getAccords, monthNum } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
@@ -84,16 +85,27 @@ export default function FriendPage() {
   const { fragrances, compliments, communityFrags, isLoaded } = useData();
   const [tab, setTab] = useState<FriendTab>("collection");
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
+  const [friendFragrances, setFriendFragrances] = useState<UserFragrance[]>([]);
+  const [friendCompliments, setFriendCompliments] = useState<UserCompliment[]>([]);
+
+  const friend = user ? getFriend(user, profiles) : null;
+
+  useEffect(() => {
+    if (!friend) return;
+    loadAllData(friend.id).then(({ data }) => {
+      setFriendFragrances(data.fragrances);
+      setFriendCompliments(data.compliments);
+    });
+  }, [friend?.id]);
 
   if (!user) return null;
-
-  const friend = getFriend(user, profiles);
   if (!friend) return null;
+
   const friendName = friend.name;
 
   const MF = fragrances.filter((f) => f.userId === user.id);
-  const FF = fragrances.filter((f) => f.userId === friend.id);
-  const FC = compliments.filter((c) => c.userId === friend.id);
+  const FF = friendFragrances;
+  const FC = friendCompliments;
 
   const FFOwned = FF.filter(
     (f) => f.status === "CURRENT" || f.status === "PREVIOUSLY_OWNED" || f.status === "FINISHED"
@@ -126,7 +138,7 @@ export default function FriendPage() {
         onClose={() => setDetailFrag(null)}
         frag={detailFrag}
         communityFrags={communityFrags}
-        compliments={compliments.filter((c) => c.userId === friend.id)}
+        compliments={FC}
         userId={friend.id}
         readOnly
       />
@@ -181,7 +193,7 @@ export default function FriendPage() {
               <InCommonTab
                 frags={inCommon}
                 myFrags={MF}
-                compliments={compliments}
+                compliments={[...compliments, ...friendCompliments]}
                 communityFrags={communityFrags}
                 userId={user.id}
                 friendId={friend.id}
