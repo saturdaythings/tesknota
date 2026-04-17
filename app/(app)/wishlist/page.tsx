@@ -352,7 +352,14 @@ function WishlistMobileCard({
         onClick={onClick}
         style={{ display: "block", width: "100%", textAlign: "left", padding: 0, minHeight: 0, height: "auto" }}
       >
-        <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
+        <div style={{ marginBottom: "2px" }}>
+          <span style={{ display: "block", fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", fontWeight: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {frag.name}
+          </span>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", fontWeight: 400 }}>
+            {frag.house}
+          </span>
+        </div>
         {frag.wishlistPriority && (
           <div style={{ marginTop: "var(--space-2)" }}>
             <PriorityBadge priority={frag.wishlistPriority} />
