@@ -6,6 +6,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/moda
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { TabPill } from "@/components/ui/tab-pill";
 import { FieldLabel } from "@/components/ui/field-label";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
@@ -123,10 +124,10 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
         wishlistPriority: priority,
       };
       await addFrag(frag);
-      toast("Added to wishlist");
+      toast("Added to wishlist", "success");
       onClose();
     } catch {
-      toast("Failed to save. Check your connection.");
+      toast("Failed to save. Check your connection.", "error");
     } finally {
       setSaving(false);
     }
@@ -217,38 +218,15 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
           {/* Priority */}
           <div>
             <FieldLabel>Priority</FieldLabel>
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-              {PRIORITY_KEYS.map((key) => {
-                const { label, subtitle } = WISHLIST_PRIORITY_LABELS[key];
-                const active = priority === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setPriority(active ? null : key)}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      padding: "var(--space-3) var(--space-4)",
-                      borderRadius: "var(--radius-md)",
-                      border: active ? "1.5px solid var(--color-navy)" : "1px solid var(--color-cream-dark)",
-                      background: active ? "var(--color-cream-dark)" : "transparent",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      width: "100%",
-                      transition: "border-color 120ms, background 120ms",
-                    }}
-                  >
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", fontWeight: "var(--font-weight-medium)", color: "var(--color-navy)" }}>
-                      {label}
-                    </span>
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", marginTop: "2px" }}>
-                      {subtitle}
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="flex flex-wrap gap-2">
+              {PRIORITY_KEYS.map((key) => (
+                <TabPill
+                  key={key}
+                  label={WISHLIST_PRIORITY_LABELS[key].label}
+                  active={priority === key}
+                  onClick={() => setPriority(priority === key ? null : key)}
+                />
+              ))}
             </div>
           </div>
 

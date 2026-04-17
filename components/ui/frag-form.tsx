@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
+import { TabPill } from "@/components/ui/tab-pill";
+import { FieldLabel } from "@/components/ui/field-label";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
@@ -75,7 +80,6 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
 
   const isEdit = !!(editing && editing.id);
 
@@ -214,329 +218,261 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
   const cd = selectedName ? getCommunityData(selectedName, selectedHouse, communityFrags) : null;
   const title = isEdit ? "Edit Fragrance" : "Add Fragrance";
 
-  const activeButtonClass = "border-[var(--color-accent)] text-white bg-[var(--color-accent)]";
-  const inactiveButtonClass = "border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-navy)]";
-  const inputClass = "w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy)]";
-
   return (
     <Modal open={open} onClose={onClose}>
       <ModalHeader title={title} onClose={onClose} />
       <ModalBody>
-      {step === 1 && (
-        <div className="space-y-5">
-          {/* Search */}
-          <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-              Fragrance Name
-            </label>
-            <div className="relative">
-              <input
-                ref={searchRef}
-                value={search}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onFocus={() => search.trim().length >= 2 && setDropOpen(true)}
-                onBlur={() => setTimeout(() => setDropOpen(false), 150)}
-                placeholder="Search by name or house..."
-                className={inputClass}
-              />
-              {dropOpen && matches.length > 0 && (
-                <div className="absolute top-full left-0 right-0 z-50 border border-[var(--color-cream-dark)] border-t-0 bg-[var(--color-cream)] shadow-sm max-h-[220px] overflow-y-auto">
-                  {matches.map((cf) => (
-                    <div
-                      key={cf.fragranceId}
-                      onMouseDown={() => selectMatch(cf)}
-                      className="px-3 py-[9px] cursor-pointer hover:bg-[var(--color-cream-dark)] border-b border-[var(--color-cream-dark)] last:border-0"
-                    >
-                      <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{cf.fragranceName}</div>
-                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">{cf.fragranceHouse}</div>
+        {step === 1 && (
+          <div className="flex flex-col gap-5">
+            <div>
+              <FieldLabel>Fragrance Name</FieldLabel>
+              <div className="relative">
+                <Input
+                  value={search}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => search.trim().length >= 2 && setDropOpen(true)}
+                  onBlur={() => setTimeout(() => setDropOpen(false), 150)}
+                  placeholder="Search by name or house..."
+                />
+                {dropOpen && matches.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 z-50 border border-[var(--color-cream-dark)] border-t-0 bg-[var(--color-cream)] shadow-sm max-h-[220px] overflow-y-auto">
+                    {matches.map((cf) => (
+                      <div
+                        key={cf.fragranceId}
+                        onMouseDown={() => selectMatch(cf)}
+                        className="px-3 py-[9px] cursor-pointer hover:bg-[var(--color-cream-dark)] border-b border-[var(--color-cream-dark)] last:border-0"
+                      >
+                        <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{cf.fragranceName}</div>
+                        <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">{cf.fragranceHouse}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {selectedName && (
+                <div className="mt-2 px-3 py-3 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
+                  <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
+                  {selectedHouse && (
+                    <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                  )}
+                  {(cd?.avgPrice || cd?.communityRating) && (
+                    <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] mt-[3px]">
+                      {[cd.avgPrice?.replace(/~/g, ""), cd.communityRating ? cd.communityRating + "/10" : ""].filter(Boolean).join(" · ")}
                     </div>
-                  ))}
+                  )}
+                  {cd && cd.accords.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {cd.accords.slice(0, 8).map((a) => (
+                        <span key={a} className="font-[var(--font-sans)] text-xs px-2 py-[3px] border border-[var(--color-cream-dark)] text-[var(--color-navy)]">{a}</span>
+                      ))}
+                    </div>
+                  )}
+                  {cd && (cd.topNotes.length > 0 || cd.middleNotes.length > 0 || cd.baseNotes.length > 0) && (
+                    <div className="mt-3 space-y-[6px]">
+                      {cd.topNotes.length > 0 && (
+                        <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
+                          <span className="tracking-[0.08em] uppercase mr-2">Top</span>
+                          {cd.topNotes.join(", ")}
+                        </div>
+                      )}
+                      {cd.middleNotes.length > 0 && (
+                        <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
+                          <span className="tracking-[0.08em] uppercase mr-2">Mid</span>
+                          {cd.middleNotes.join(", ")}
+                        </div>
+                      )}
+                      {cd.baseNotes.length > 0 && (
+                        <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
+                          <span className="tracking-[0.08em] uppercase mr-2">Base</span>
+                          {cd.baseNotes.join(", ")}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
+
+            <div>
+              <FieldLabel>Status</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {STATUSES.map((s) => (
+                  <TabPill
+                    key={s.value}
+                    label={s.label}
+                    active={status === s.value}
+                    onClick={() => setStatus(s.value)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="flex flex-col gap-5">
             {selectedName && (
-              <div className="mt-2 px-3 py-3 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
+              <div className="px-3 py-2 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
                 <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
                 {selectedHouse && (
                   <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
                 )}
-                {(cd?.avgPrice || cd?.communityRating) && (
-                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] mt-[3px]">
-                    {[cd.avgPrice?.replace(/~/g, ""), cd.communityRating ? cd.communityRating + "/10" : ""].filter(Boolean).join(" · ")}
-                  </div>
-                )}
-                {cd && cd.accords.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {cd.accords.slice(0, 8).map((a) => (
-                      <span key={a} className="font-[var(--font-sans)] text-xs px-2 py-[3px] border border-[var(--color-cream-dark)] text-[var(--color-navy)]">{a}</span>
-                    ))}
-                  </div>
-                )}
-                {cd && (cd.topNotes.length > 0 || cd.middleNotes.length > 0 || cd.baseNotes.length > 0) && (
-                  <div className="mt-3 space-y-[6px]">
-                    {cd.topNotes.length > 0 && (
-                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-                        <span className="tracking-[0.08em] uppercase mr-2">Top</span>
-                        {cd.topNotes.join(", ")}
-                      </div>
-                    )}
-                    {cd.middleNotes.length > 0 && (
-                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-                        <span className="tracking-[0.08em] uppercase mr-2">Mid</span>
-                        {cd.middleNotes.join(", ")}
-                      </div>
-                    )}
-                    {cd.baseNotes.length > 0 && (
-                      <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-                        <span className="tracking-[0.08em] uppercase mr-2">Base</span>
-                        {cd.baseNotes.join(", ")}
-                      </div>
-                    )}
-                  </div>
+                {!isEdit && (
+                  <Button variant="ghost" onClick={() => setStep(1)}>
+                    Change
+                  </Button>
                 )}
               </div>
             )}
-          </div>
 
-          {/* Status */}
-          <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-              Status
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {STATUSES.map((s) => (
-                <button
-                  key={s.value}
-                  type="button"
-                  onClick={() => setStatus(s.value)}
-                  className={"px-3 py-[5px] font-[var(--font-sans)] text-xs border transition-colors " + (status === s.value ? activeButtonClass : inactiveButtonClass)}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="space-y-5">
-          {/* Selected frag header */}
-          {selectedName && (
-            <div className="px-3 py-2 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
-              <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
-              {selectedHouse && (
-                <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
-              )}
-              {!isEdit && (
-                <button
-                  onClick={() => setStep(1)}
-                  className="font-[var(--font-sans)] text-xs text-[var(--color-accent)] mt-1 hover:underline bg-transparent border-none cursor-pointer p-0"
-                >
-                  Change
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Status */}
-          <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-              Status
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {STATUSES.map((s) => (
-                <button
-                  key={s.value}
-                  type="button"
-                  onClick={() => setStatus(s.value)}
-                  className={"px-3 py-[5px] font-[var(--font-sans)] text-xs border transition-colors " + (status === s.value ? activeButtonClass : inactiveButtonClass)}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Size */}
-          <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-              Size
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {SIZES.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => toggleSize(s)}
-                  className={"px-3 py-[5px] font-[var(--font-sans)] text-xs border transition-colors " + (sizes.includes(s) ? activeButtonClass : inactiveButtonClass)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Type */}
-          <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-              Concentration
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {TYPES.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setType(type === t ? "" : t)}
-                  className={"px-3 py-[5px] font-[var(--font-sans)] text-xs border transition-colors " + (type === t ? activeButtonClass : inactiveButtonClass)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Rating */}
-          <div>
-            <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-              Personal Rating
-            </label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => setRating(rating === n ? 0 : n)}
-                  className="text-[22px] leading-none bg-transparent border-none cursor-pointer p-0 transition-opacity hover:opacity-80"
-                  style={{ color: n <= rating ? "var(--color-accent)" : "var(--color-cream-dark)" }}
-                  aria-label={`${n} star${n > 1 ? "s" : ""}`}
-                >
-                  {n <= rating ? "\u2605" : "\u2606"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {!moreOpen && (
-            <button
-              type="button"
-              onClick={() => setMoreOpen(true)}
-              className="font-[var(--font-sans)] text-xs text-[var(--color-accent)] hover:underline text-left"
-            >
-              + More Details
-            </button>
-          )}
-
-          {moreOpen && (
-            <>
-              {/* Where bought */}
-              <div>
-                <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-                  Where Bought
-                </label>
-                <input
-                  value={whereBought}
-                  onChange={(e) => setWhereBought(e.target.value)}
-                  placeholder="Sephora, Fragrantica, etc."
-                  className={inputClass}
-                />
+            <div>
+              <FieldLabel>Status</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {STATUSES.map((s) => (
+                  <TabPill
+                    key={s.value}
+                    label={s.label}
+                    active={status === s.value}
+                    onClick={() => setStatus(s.value)}
+                  />
+                ))}
               </div>
+            </div>
 
-              {/* Purchase date + price */}
-              <div className="grid grid-cols-3 gap-4">
+            <div>
+              <FieldLabel>Size</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {SIZES.map((s) => (
+                  <TabPill
+                    key={s}
+                    label={s}
+                    active={sizes.includes(s)}
+                    onClick={() => toggleSize(s)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <FieldLabel>Concentration</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {TYPES.map((t) => (
+                  <TabPill
+                    key={t}
+                    label={t}
+                    active={type === t}
+                    onClick={() => setType(type === t ? "" : t)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <FieldLabel>Personal Rating</FieldLabel>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <TabPill
+                    key={n}
+                    label={n <= rating ? "\u2605" : "\u2606"}
+                    active={n <= rating}
+                    onClick={() => setRating(rating === n ? 0 : n)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {!moreOpen && (
+              <Button variant="ghost" onClick={() => setMoreOpen(true)}>
+                + More Details
+              </Button>
+            )}
+
+            {moreOpen && (
+              <>
                 <div>
-                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-                    Month
-                  </label>
-                  <Select
-                    options={[{ value: "", label: "—" }, ...MONTHS.map((m) => ({ value: m, label: m }))]}
-                    value={purchaseMonth}
-                    onChange={setPurchaseMonth}
+                  <FieldLabel>Where Bought</FieldLabel>
+                  <Input
+                    value={whereBought}
+                    onChange={(e) => setWhereBought(e.target.value)}
+                    placeholder="Sephora, Fragrantica, etc."
                   />
                 </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <FieldLabel>Month</FieldLabel>
+                    <Select
+                      options={[{ value: "", label: "—" }, ...MONTHS.map((m) => ({ value: m, label: m }))]}
+                      value={purchaseMonth}
+                      onChange={setPurchaseMonth}
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Year</FieldLabel>
+                    <Select
+                      options={[{ value: "", label: "—" }, ...YEARS.map((y) => ({ value: y, label: y }))]}
+                      value={purchaseYear}
+                      onChange={setPurchaseYear}
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Price</FieldLabel>
+                    <Input
+                      value={purchasePrice}
+                      onChange={(e) => setPurchasePrice(e.target.value)}
+                      placeholder="$0"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-                    Year
-                  </label>
-                  <Select
-                    options={[{ value: "", label: "—" }, ...YEARS.map((y) => ({ value: y, label: y }))]}
-                    value={purchaseYear}
-                    onChange={setPurchaseYear}
+                  <FieldLabel>Personal Notes</FieldLabel>
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={3}
+                    placeholder="Your impressions, context, memories..."
                   />
                 </div>
+
                 <div>
-                  <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-                    Price
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isDupe}
+                      onChange={(e) => setIsDupe(e.target.checked)}
+                      className="accent-[var(--color-accent)]"
+                    />
+                    <span className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.05em] uppercase">
+                      This is a dupe of another fragrance
+                    </span>
                   </label>
-                  <input
-                    value={purchasePrice}
-                    onChange={(e) => setPurchasePrice(e.target.value)}
-                    placeholder="$0"
-                    className={inputClass}
-                  />
+                  {isDupe && (
+                    <Input
+                      value={dupeFor}
+                      onChange={(e) => setDupeFor(e.target.value)}
+                      placeholder="Original fragrance name..."
+                      className="mt-2"
+                    />
+                  )}
                 </div>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
-                  Personal Notes
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                  placeholder="Your impressions, context, memories..."
-                  className="w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy)] resize-none"
-                />
-              </div>
-
-              {/* Dupe */}
-              <div>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isDupe}
-                    onChange={(e) => setIsDupe(e.target.checked)}
-                    className="accent-[var(--color-accent)]"
-                  />
-                  <span className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.05em] uppercase">
-                    This is a dupe of another fragrance
-                  </span>
-                </label>
-                {isDupe && (
-                  <input
-                    value={dupeFor}
-                    onChange={(e) => setDupeFor(e.target.value)}
-                    placeholder="Original fragrance name..."
-                    className={"mt-2 " + inputClass}
-                  />
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+              </>
+            )}
+          </div>
+        )}
       </ModalBody>
       <ModalFooter>
         <div className="flex items-center justify-between w-full">
           <div className="font-[var(--font-sans)] text-xs text-[var(--color-destructive)]">{err}</div>
           <div className="flex gap-2">
             {step === 2 && !isEdit && (
-              <button
-                onClick={() => setStep(1)}
-                className="px-4 py-[7px] font-[var(--font-sans)] text-xs text-[var(--color-navy)] border border-[var(--color-cream-dark)] hover:border-[var(--color-navy)] transition-colors"
-              >
+              <Button variant="secondary" onClick={() => setStep(1)}>
                 Back
-              </button>
+              </Button>
             )}
-            <button
-              onClick={save}
-              disabled={saving}
-              className="px-5 py-[7px] font-[var(--font-sans)] text-xs bg-[var(--color-accent)] text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
+            <Button variant="primary" onClick={save} disabled={saving}>
               {saving ? "Saving..." : step === 1 ? "Next" : isEdit ? "Update" : "Save Fragrance"}
-            </button>
+            </Button>
           </div>
         </div>
       </ModalFooter>

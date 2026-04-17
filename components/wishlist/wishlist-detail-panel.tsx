@@ -310,7 +310,7 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
                   Remove?
                 </span>
                 <Button
-                  variant="danger"
+                  variant="destructive"
                   size="sm"
                   onClick={() => { if (frag) { onRemove(frag); handleClose(); } }}
                 >

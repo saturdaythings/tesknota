@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select } from '@/components/ui/select';
 import { TabPill } from '@/components/ui/tab-pill';
 import { FieldLabel, OptionalTag, RequiredMark } from '@/components/ui/field-label';
@@ -327,18 +329,6 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
     }
   }
 
-  const inputCls =
-    'w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 ' +
-    'focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]';
-  const inputStyle: React.CSSProperties = {
-    fontSize: 'var(--text-sm)',
-    fontWeight: 400,
-    letterSpacing: 'var(--tracking-sm)',
-    background: 'var(--color-cream)',
-    border: '1px solid var(--color-meta-text)',
-    color: 'var(--color-meta-text)',
-  };
-
   return (
     <Modal open={open} onClose={onClose}>
       <ModalHeader title={isEdit ? 'Edit Compliment' : 'Log a Compliment'} onClose={onClose} />
@@ -394,27 +384,21 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
           {/* Location */}
           <div className="flex flex-col gap-2">
             <FieldLabel>Location <OptionalTag /></FieldLabel>
-            <input
+            <Input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Work, friend's house, coffee shop, gym..."
-              className={inputCls}
-              style={{ ...inputStyle, color: location ? 'var(--color-navy)' : 'var(--color-meta-text)' }}
             />
             <div className="grid grid-cols-2 gap-3">
-              <input
+              <Input
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="City"
-                className={inputCls}
-                style={{ ...inputStyle, color: city ? 'var(--color-navy)' : 'var(--color-meta-text)' }}
               />
-              <input
+              <Input
                 value={state}
                 onChange={(e) => setState(e.target.value)}
                 placeholder="State / Country"
-                className={inputCls}
-                style={{ ...inputStyle, color: state ? 'var(--color-navy)' : 'var(--color-meta-text)' }}
               />
             </div>
           </div>
@@ -422,22 +406,12 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
           {/* Notes */}
           <div>
             <FieldLabel>Notes <OptionalTag /></FieldLabel>
-            <textarea
+            <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Context, reaction, moment..."
               rows={3}
               maxLength={160}
-              className="w-full p-3 rounded-[2px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-none placeholder:text-[var(--color-navy-mid)]"
-              style={{
-                fontSize: 'var(--text-sm)',
-                fontWeight: 400,
-                letterSpacing: 'var(--tracking-sm)',
-                minHeight: '72px',
-                background: 'var(--color-cream)',
-                border: '1px solid var(--color-meta-text)',
-                color: notes ? 'var(--color-navy)' : 'var(--color-meta-text)',
-              }}
             />
           </div>
 

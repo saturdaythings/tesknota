@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { TabPill } from "@/components/ui/tab-pill";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -115,38 +116,20 @@ function StarRating({
   value: number;
   onChange: (v: number) => void;
 }) {
-  const [hover, setHover] = useState(0);
   return (
     <div>
       <div className="text-label" style={{ marginBottom: "var(--space-1)" }}>
         My Rating
       </div>
       <div style={{ display: "flex", gap: "var(--space-1)" }}>
-        {[1, 2, 3, 4, 5].map((n) => {
-          const filled = n <= (hover || value);
-          return (
-            <button
-              key={n}
-              type="button"
-              aria-label={`${n} star${n !== 1 ? "s" : ""}`}
-              onClick={() => onChange(value === n ? 0 : n)}
-              onMouseEnter={() => setHover(n)}
-              onMouseLeave={() => setHover(0)}
-              style={{
-                fontSize: 22,
-                lineHeight: 1,
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                color: filled ? "var(--color-accent)" : "var(--color-border)",
-                transition: "color var(--transition-base)",
-              }}
-            >
-              {filled ? "\u2605" : "\u2606"}
-            </button>
-          );
-        })}
+        {[1, 2, 3, 4, 5].map((n) => (
+          <TabPill
+            key={n}
+            label={n <= value ? "\u2605" : "\u2606"}
+            active={n <= value}
+            onClick={() => onChange(value === n ? 0 : n)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -576,6 +559,11 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
           </Button>
         )}
         <div style={{ flex: 1 }} />
+        {step > 1 && (
+          <Button variant="secondary" onClick={onClose} disabled={saving}>
+            Cancel
+          </Button>
+        )}
         {step < 3 ? (
           <Button
             variant="primary"
