@@ -102,6 +102,7 @@ export function PageFilterBar({
           {filters?.map((f, i) => (
             <Select key={i} options={f.options} value={f.value} onChange={f.onChange} size="auto" />
           ))}
+          {filterPanel}
           {filtersActive && onClearFilters && (
             <Button variant="ghost" size="sm" style={{ height: "36px" }} onClick={onClearFilters}>
               Clear
