@@ -229,6 +229,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
       dupeFor: '',
       personalNotes: '',
       createdAt: new Date().toISOString(),
+      wishlistPriority: null,
     };
     addFrag(wishFrag).then(() => {
       toast(frag.fragranceName + ' added to wishlist', 'success');
@@ -260,6 +261,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
         dupeFor: '',
         personalNotes: notes.trim(),
         createdAt: new Date().toISOString(),
+        wishlistPriority: null,
       };
       await addFrag(newFrag);
       toast(frag.fragranceName + ' added to your collection', 'success');

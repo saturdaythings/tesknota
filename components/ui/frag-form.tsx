@@ -190,6 +190,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
       dupeFor: isDupe ? dupeFor.trim() : "",
       personalNotes: notes.trim(),
       createdAt: editing?.createdAt ?? now,
+      wishlistPriority: null,
     };
 
     try {

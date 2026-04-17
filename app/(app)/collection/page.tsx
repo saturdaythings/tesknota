@@ -19,7 +19,7 @@ import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
 import { getAccords } from '@/lib/frag-utils';
-import { applySort, addedStr, type SortKey } from '@/lib/collection-utils';
+import { applySort, addedStr, parseSortKey, type SortField, type SortDir } from '@/lib/collection-utils';
 import { FlaskConical } from '@/components/ui/Icons';
 import { STATUS_LABELS, type UserFragrance } from '@/types';
 
@@ -83,7 +83,7 @@ const COLUMNS: CollectionColumnDef[] = [
   },
   {
     id: 'added',
-    label: 'Added',
+    label: 'Date Added',
     width: 'max-content',
     render: (frag) => (
       <span className="font-sans uppercase" style={{ ...cellStyle, whiteSpace: 'nowrap' }}>
@@ -137,7 +137,8 @@ function CollectionInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const sort = (searchParams.get('sort') as SortKey) || 'name_asc';
+  const rawSort = searchParams.get('sort');
+  const { field: sortField, dir: sortDir } = parseSortKey(rawSort);
 
   const [search, setSearch] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -150,16 +151,20 @@ function CollectionInner() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(25);
 
-  const setSort = useCallback(
-    (value: string) => {
+  const pushSort = useCallback(
+    (field: SortField, dir: SortDir) => {
+      const key = `${field}_${dir}`;
       const params = new URLSearchParams(searchParams.toString());
-      if (value && value !== 'name_asc') params.set('sort', value);
+      if (key !== 'fragrance_asc') params.set('sort', key);
       else params.delete('sort');
       const qs = params.toString();
       router.replace(pathname + (qs ? '?' + qs : ''), { scroll: false });
     },
     [searchParams, router, pathname],
   );
+
+  const handleSortField = useCallback((v: SortField) => pushSort(v, sortDir), [pushSort, sortDir]);
+  const handleToggleSortDir = useCallback(() => pushSort(sortField, sortDir === 'asc' ? 'desc' : 'asc'), [pushSort, sortField, sortDir]);
 
   const myFrags = useMemo(
     () => (user ? fragrances.filter((f) => f.userId === user.id) : []),
@@ -213,8 +218,8 @@ function CollectionInner() {
       list = list.filter((f) => accordFilter.some((a) => getAccords(f, communityFrags).includes(a)));
     }
     if (houseFilter.length > 0) list = list.filter((f) => houseFilter.includes(f.house));
-    return applySort(list, sort, compMap);
-  }, [myFrags, search, sort, statusFilter, ratingFilter, accordFilter, houseFilter, compMap, communityFrags]);
+    return applySort(list, sortField, sortDir, compMap);
+  }, [myFrags, search, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, compMap, communityFrags]);
 
   const filtersActive =
     search.trim() !== '' ||
@@ -223,7 +228,7 @@ function CollectionInner() {
     statusFilter.length > 0 ||
     houseFilter.length > 0;
 
-  useEffect(() => { setPage(1); }, [search, sort, statusFilter, ratingFilter, accordFilter, houseFilter, perPage]);
+  useEffect(() => { setPage(1); }, [search, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, perPage]);
 
   const pageSize = perPage === 0 ? filtered.length : perPage;
   const totalPages = filtered.length === 0 ? 1 : perPage === 0 ? 1 : Math.ceil(filtered.length / pageSize);
@@ -273,7 +278,8 @@ function CollectionInner() {
         </div>
 
         <CollectionFilters
-          sort={sort} onSort={setSort}
+          sortField={sortField} sortDir={sortDir}
+          onSortField={handleSortField} onToggleSortDir={handleToggleSortDir}
           filtersOpen={filtersOpen} onFiltersOpen={setFiltersOpen}
           accordFilter={accordFilter} onAccordFilter={setAccordFilter}
           ratingFilter={ratingFilter} onRatingFilter={setRatingFilter}

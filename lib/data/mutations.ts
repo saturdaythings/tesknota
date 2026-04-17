@@ -62,6 +62,7 @@ function fragToDb(f: UserFragrance, resolvedFragId: string | null): Record<strin
     is_dupe: f.isDupe ?? false,
     dupe_for: f.dupeFor ?? "",
     created_at: f.createdAt || new Date().toISOString(),
+    wishlist_priority: f.wishlistPriority ?? null,
   };
 }
 

@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Divider } from "@/components/ui/divider";
+import { WISHLIST_PRIORITY_LABELS } from "@/types";
 import type { UserFragrance, CommunityFrag, FragranceStatus } from "@/types";
 
 const STATUS_LABELS: Record<FragranceStatus, string> = {
@@ -183,6 +184,21 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
         <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-4) var(--space-5)" }}>
           {frag && (
             <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+
+              {/* Priority */}
+              {frag.wishlistPriority && (
+                <section>
+                  <SectionLabel>Priority</SectionLabel>
+                  <div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", fontWeight: "var(--font-weight-medium)", color: "var(--color-navy)" }}>
+                      {WISHLIST_PRIORITY_LABELS[frag.wishlistPriority].label}
+                    </div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "rgba(30,45,69,0.8)", marginTop: "2px" }}>
+                      {WISHLIST_PRIORITY_LABELS[frag.wishlistPriority].subtitle}
+                    </div>
+                  </div>
+                </section>
+              )}
 
               {/* Avg price */}
               {cd?.avgPrice && (

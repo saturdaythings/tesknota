@@ -12,6 +12,14 @@ export const RELATION_TABS: { label: string; value: Relation | 'ALL' }[] = [
   { label: 'Other', value: 'Other' },
 ];
 
+/** Field options for compliment sort — match column headers: Date, Fragrance, Details. */
+export const SORT_FIELD_OPTIONS = [
+  { value: 'date', label: 'Date' },
+  { value: 'fragrance', label: 'Fragrance' },
+  { value: 'details', label: 'Details' },
+];
+
+/** @deprecated Use SORT_FIELD_OPTIONS + SortControl instead. */
 export const SORT_OPTIONS = [
   { value: 'date-desc', label: 'Date — Newest first' },
   { value: 'date-asc', label: 'Date — Oldest first' },

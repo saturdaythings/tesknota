@@ -10,6 +10,7 @@ import { FieldLabel } from "@/components/ui/field-label";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
+import { WISHLIST_PRIORITY_LABELS, type WishlistPriority } from "@/types";
 import type { UserFragrance, FragranceType, CommunityFrag } from "@/types";
 
 const TYPE_OPTIONS = [
@@ -23,6 +24,8 @@ const TYPE_OPTIONS = [
   { value: "Body Spray", label: "Body Spray" },
   { value: "Other", label: "Other" },
 ];
+
+const PRIORITY_KEYS: WishlistPriority[] = ["HIGH", "MEDIUM", "LOW"];
 
 function genId(): string {
   return "w" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -45,27 +48,26 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
   const [selected, setSelected] = useState<CommunityFrag | null>(null);
   const [house, setHouse] = useState("");
   const [fragType, setFragType] = useState<FragranceType | "">("");
+  const [priority, setPriority] = useState<WishlistPriority | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Reset on open
   useEffect(() => {
     if (!open) return;
     setQuery(prefill?.name ?? "");
     setDebouncedQuery(prefill?.name ?? "");
     setHouse(prefill?.house ?? "");
     setFragType((prefill?.type as FragranceType | "") ?? "");
+    setPriority(null);
     setSelected(null);
     setResults([]);
     setSaving(false);
   }, [open, prefill]);
 
-  // Debounce
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), 280);
     return () => clearTimeout(t);
   }, [query]);
 
-  // Search community frags
   useEffect(() => {
     const q = debouncedQuery.trim().toLowerCase();
     if (!q || q.length < 2) { setResults([]); return; }
@@ -118,6 +120,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
         dupeFor: "",
         personalNotes: "",
         createdAt: new Date().toISOString(),
+        wishlistPriority: priority,
       };
       await addFrag(frag);
       toast("Added to wishlist");
@@ -210,16 +213,54 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                       }}
                       className="hover:bg-[var(--color-cream-dark)] last:border-0"
                     >
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 500, color: "var(--color-navy)" }}>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-ui)", fontWeight: "var(--font-weight-medium)", color: "var(--color-navy)" }}>
                         {f.fragranceName}
                       </div>
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "rgba(30,45,69,0.8)" }}>
                         {f.fragranceHouse}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Priority */}
+          <div>
+            <FieldLabel>Priority</FieldLabel>
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+              {PRIORITY_KEYS.map((key) => {
+                const { label, subtitle } = WISHLIST_PRIORITY_LABELS[key];
+                const active = priority === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setPriority(active ? null : key)}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      padding: "var(--space-3) var(--space-4)",
+                      borderRadius: "var(--radius-md)",
+                      border: active ? "1.5px solid var(--color-navy)" : "1px solid var(--color-cream-dark)",
+                      background: active ? "var(--color-cream-dark)" : "transparent",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      width: "100%",
+                      transition: "border-color 120ms, background 120ms",
+                    }}
+                  >
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", fontWeight: "var(--font-weight-medium)", color: "var(--color-navy)" }}>
+                      {label}
+                    </span>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "rgba(30,45,69,0.8)", marginTop: "2px" }}>
+                      {subtitle}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

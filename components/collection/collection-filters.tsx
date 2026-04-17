@@ -1,15 +1,19 @@
 "use client";
 
 import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { PerPageControl } from '@/components/ui/per-page-control';
+import { SortControl } from '@/components/ui/sort-control';
 import { SlidersHorizontal, X } from '@/components/ui/Icons';
-import { SORT_OPTIONS, RATING_FILTER_OPTIONS, STATUS_FILTER_OPTIONS } from '@/lib/collection-utils';
+import { SORT_FIELD_OPTIONS, RATING_FILTER_OPTIONS, STATUS_FILTER_OPTIONS } from '@/lib/collection-utils';
+import { Select } from '@/components/ui/select';
+import type { SortField, SortDir } from '@/lib/collection-utils';
 
 interface CollectionFiltersProps {
-  sort: string;
-  onSort: (v: string) => void;
+  sortField: SortField;
+  sortDir: SortDir;
+  onSortField: (v: SortField) => void;
+  onToggleSortDir: () => void;
   filtersOpen: boolean;
   onFiltersOpen: (v: boolean) => void;
   accordFilter: string[];
@@ -31,7 +35,7 @@ interface CollectionFiltersProps {
 const STATUS_OPTIONS = STATUS_FILTER_OPTIONS.filter((o) => o.value !== 'all');
 
 export function CollectionFilters({
-  sort, onSort,
+  sortField, sortDir, onSortField, onToggleSortDir,
   filtersOpen, onFiltersOpen,
   accordFilter, onAccordFilter,
   ratingFilter, onRatingFilter,
@@ -49,7 +53,13 @@ export function CollectionFilters({
         style={{ gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}
       >
         <div className="flex items-center" style={{ gap: 'var(--space-2)' }}>
-          <Select options={SORT_OPTIONS} value={sort} onChange={onSort} size="auto" />
+          <SortControl
+            field={sortField}
+            direction={sortDir}
+            options={SORT_FIELD_OPTIONS}
+            onField={(v) => onSortField(v as SortField)}
+            onToggleDirection={onToggleSortDir}
+          />
 
           <Button
             variant="secondary"

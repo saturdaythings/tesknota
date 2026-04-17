@@ -307,6 +307,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
         createdAt: dateAdded
           ? new Date(dateAdded).toISOString()
           : new Date().toISOString(),
+        wishlistPriority: null,
       };
       await addFrag(frag);
       toast("Fragrance added to your collection", "success");

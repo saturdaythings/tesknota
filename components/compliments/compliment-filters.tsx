@@ -1,23 +1,27 @@
 "use client";
 
 import { TabPill } from '@/components/ui/tab-pill';
-import { Select } from '@/components/ui/select';
 import { PerPageControl } from '@/components/ui/per-page-control';
-import { RELATION_TABS, SORT_OPTIONS } from '@/lib/compliment-utils';
+import { SortControl } from '@/components/ui/sort-control';
+import { RELATION_TABS, SORT_FIELD_OPTIONS } from '@/lib/compliment-utils';
 import type { Relation } from '@/types';
 
 interface ComplimentFiltersProps {
   relationTab: Relation | 'ALL';
   onRelationTab: (v: Relation | 'ALL') => void;
   tabCounts: Record<string, number>;
-  sort: string;
-  onSort: (v: string) => void;
+  sortField: string;
+  sortDir: 'asc' | 'desc';
+  onSortField: (v: string) => void;
+  onToggleSortDir: () => void;
   perPage: number;
   onPerPage: (v: number) => void;
 }
 
 export function ComplimentFilters({
-  relationTab, onRelationTab, tabCounts, sort, onSort, perPage, onPerPage,
+  relationTab, onRelationTab, tabCounts,
+  sortField, sortDir, onSortField, onToggleSortDir,
+  perPage, onPerPage,
 }: ComplimentFiltersProps) {
   return (
     <div style={{ marginBottom: 'var(--space-6)' }}>
@@ -40,7 +44,13 @@ export function ComplimentFilters({
           <PerPageControl value={perPage} onChange={onPerPage} />
         </div>
       </div>
-      <Select options={SORT_OPTIONS} value={sort} onChange={onSort} size="auto" />
+      <SortControl
+        field={sortField}
+        direction={sortDir}
+        options={SORT_FIELD_OPTIONS}
+        onField={onSortField}
+        onToggleDirection={onToggleSortDir}
+      />
     </div>
   );
 }

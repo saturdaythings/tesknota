@@ -242,6 +242,7 @@ export function CmdPalette() {
           dupeFor: "",
           personalNotes: (a.personalNotes as string) || "",
           createdAt: new Date().toISOString(),
+          wishlistPriority: null,
         };
         await addFrag(frag);
         toast((a.name as string) + " added");

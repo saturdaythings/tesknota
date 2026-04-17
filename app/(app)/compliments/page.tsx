@@ -75,7 +75,8 @@ function ComplimentsInner() {
   const [logOpen, setLogOpen] = useState(false);
   const [editingComp, setEditingComp] = useState<UserCompliment | null>(null);
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
-  const [sort, setSort] = useState('date-desc');
+  const [sortField, setSortField] = useState('date');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [perPage, setPerPage] = useState(25);
   const [page, setPage] = useState(1);
 
@@ -98,13 +99,16 @@ function ComplimentsInner() {
 
   const filtered = useMemo(() => {
     const base = relationTab === 'ALL' ? myComps : myComps.filter((c) => c.relation === relationTab);
-    if (sort === 'date-desc') return [...base].sort((a, b) => compSortNum(b) - compSortNum(a));
-    if (sort === 'date-asc') return [...base].sort((a, b) => compSortNum(a) - compSortNum(b));
-    if (sort === 'frag-az') return [...base].sort((a, b) => (a.primaryFrag ?? '').localeCompare(b.primaryFrag ?? ''));
-    return base;
-  }, [myComps, relationTab, sort]);
+    const sorted = [...base].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'date') cmp = compSortNum(a) - compSortNum(b);
+      else if (sortField === 'fragrance') cmp = (a.primaryFrag ?? '').localeCompare(b.primaryFrag ?? '');
+      return sortDir === 'desc' ? -cmp : cmp;
+    });
+    return sorted;
+  }, [myComps, relationTab, sortField, sortDir]);
 
-  useEffect(() => { setPage(1); }, [relationTab, sort, perPage]);
+  useEffect(() => { setPage(1); }, [relationTab, sortField, sortDir, perPage]);
 
   if (!user) return null;
 
@@ -132,8 +136,10 @@ function ComplimentsInner() {
           relationTab={relationTab}
           onRelationTab={setRelationTab}
           tabCounts={tabCounts}
-          sort={sort}
-          onSort={setSort}
+          sortField={sortField}
+          sortDir={sortDir}
+          onSortField={setSortField}
+          onToggleSortDir={() => setSortDir((d) => d === 'asc' ? 'desc' : 'asc')}
           perPage={perPage}
           onPerPage={(v) => { setPerPage(v); setPage(1); }}
         />

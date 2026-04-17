@@ -336,6 +336,7 @@ async function runImport(
       dupeFor: "",
       personalNotes: row.personalNotes,
       createdAt: new Date().toISOString(),
+      wishlistPriority: null,
     };
     try {
       const { id, fragranceId } = await appendFrag(frag);
@@ -748,7 +749,7 @@ function SearchTab({ userId }: { userId: string }) {
     personalRating: null, statusRating: null, whereBought: null,
     purchaseDate: null, purchaseMonth: null, purchaseYear: null,
     purchasePrice: null, isDupe: false, dupeFor: "",
-    personalNotes: "", createdAt: "",
+    personalNotes: "", createdAt: "", wishlistPriority: null,
   } : null;
 
   return (
@@ -881,7 +882,7 @@ function LinkTab({ userId }: { userId: string }) {
     personalRating: null, statusRating: null, whereBought: null,
     purchaseDate: null, purchaseMonth: null, purchaseYear: null,
     purchasePrice: null, isDupe: false, dupeFor: "",
-    personalNotes: "", createdAt: "",
+    personalNotes: "", createdAt: "", wishlistPriority: null,
   } : null;
 
   return (

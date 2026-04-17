@@ -26,6 +26,7 @@ function dbRowToFrag(r: Record<string, unknown>): UserFragrance {
     dupeFor: (r.dupe_for as string) ?? "",
     personalNotes: (r.personal_notes as string) ?? "",
     createdAt: (r.created_at as string) ?? "",
+    wishlistPriority: (r.wishlist_priority as UserFragrance["wishlistPriority"]) ?? null,
   };
 }
 

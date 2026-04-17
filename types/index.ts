@@ -37,6 +37,14 @@ export type Relation =
   | "Significant Other"
   | "Other";
 
+export type WishlistPriority = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export const WISHLIST_PRIORITY_LABELS: Record<WishlistPriority, { label: string; subtitle: string }> = {
+  HIGH: { label: 'High', subtitle: 'Obsessed and I need to own this' },
+  MEDIUM: { label: 'Medium', subtitle: 'This is so good' },
+  LOW: { label: 'Low', subtitle: "I don't want to forget about this" },
+};
+
 export interface UserFragrance {
   id: string;
   fragranceId: string | null;
@@ -57,6 +65,7 @@ export interface UserFragrance {
   dupeFor: string;
   personalNotes: string;
   createdAt: string;
+  wishlistPriority: WishlistPriority | null;
 }
 
 export interface UserCompliment {
