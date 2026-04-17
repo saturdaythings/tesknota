@@ -27,6 +27,20 @@ export function StatusBadge({ status }: { status: FragranceStatus }) {
   );
 }
 
+/* component-internal: grid column widths for 7-col row + optional action col */
+const GRID_BASE = "minmax(200px,1fr) 100px 80px 100px minmax(100px,1fr) 60px 130px";
+const GRID_WITH_ACTION = GRID_BASE + " 120px";
+
+const cellStyle: React.CSSProperties = {
+  padding: "0 var(--space-4)",
+  display: "flex",
+  alignItems: "center",
+  minWidth: 0,
+  fontFamily: "var(--font-sans)",
+  fontSize: "var(--text-xs)",
+  color: "var(--color-navy)",
+};
+
 export function FragRow({
   frag,
   communityFrags,
@@ -53,44 +67,54 @@ export function FragRow({
       : "");
 
   return (
-    <tr
-      className="border-b border-[var(--color-cream-dark)] last:border-0 hover:bg-[var(--color-cream-dark)] cursor-pointer"
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: onAction ? GRID_WITH_ACTION : GRID_BASE,
+        minHeight: "var(--size-row-min)",
+        borderBottom: "1px solid var(--color-row-divider)",
+        cursor: "pointer",
+      }}
+      className="hover:bg-[var(--color-row-hover)] transition-colors duration-100"
       onClick={() => onClick?.(frag)}
     >
-      <td className="px-4 py-3">
-        <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
-        {frag.isDupe && (
-          <span className="font-[var(--font-sans)] uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-notes-text)' }}>
-            dupe
-          </span>
-        )}
-      </td>
-      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
+      <div style={cellStyle}>
+        <div>
+          <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
+          {frag.isDupe && (
+            <span
+              className="font-[var(--font-sans)] uppercase"
+              style={{ fontSize: "var(--text-xs)", letterSpacing: "var(--tracking-md)", color: "var(--color-notes-text)" }}
+            >
+              dupe
+            </span>
+          )}
+        </div>
+      </div>
+      <div style={cellStyle}>
         {(frag.sizes ?? []).join(", ") || "\u2014"}
-      </td>
-      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-accent)] tracking-[1px]">
+      </div>
+      <div style={{ ...cellStyle, color: "var(--color-accent)", letterSpacing: "1px" }}>
         {starsStr(parseRating(frag.personalRating))}
-      </td>
-      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-        {addedStr || "\u2014"}
-      </td>
-      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">{accords}</td>
-      <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-        {compCount > 0 ? <span className="text-[var(--color-accent)]">{compCount}</span> : "\u2014"}
-      </td>
-      <td className="px-4 py-3">
+      </div>
+      <div style={cellStyle}>{addedStr || "\u2014"}</div>
+      <div style={cellStyle}>{accords}</div>
+      <div style={cellStyle}>
+        {compCount > 0 ? <span style={{ color: "var(--color-accent)" }}>{compCount}</span> : "\u2014"}
+      </div>
+      <div style={{ ...cellStyle, justifyContent: "flex-start" }}>
         <StatusBadge status={frag.status} />
-      </td>
+      </div>
       {onAction && (
-        <td className="px-4 py-3">
+        <div style={cellStyle}>
           <button
             onClick={(e) => { e.stopPropagation(); onAction(frag, e); }}
             className="font-[var(--font-sans)] text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors whitespace-nowrap"
           >
             {actionLabel ?? "Action"}
           </button>
-        </td>
+        </div>
       )}
-    </tr>
+    </div>
   );
 }
