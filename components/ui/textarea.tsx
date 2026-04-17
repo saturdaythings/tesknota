@@ -10,7 +10,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 }
 
 const textareaBase =
-  "w-full min-h-24 px-3 py-[10px] bg-[var(--color-surface)] border border-[1.5px] border-[var(--color-border)] rounded-[var(--radius-sm)] font-sans text-[length:var(--text-base)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none resize-y transition-[border-color,box-shadow] focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] disabled:bg-[var(--color-surface-raised)] disabled:opacity-60 disabled:cursor-not-allowed";
+  "w-full min-h-24 px-3 py-[10px] bg-[var(--color-surface)] border border-[1.5px] border-[var(--color-border)] rounded-[var(--radius-sm)] font-sans text-[length:var(--text-base)] text-[var(--color-text-primary)] placeholder:text-[var(--color-navy-mid)] outline-none resize-y transition-[border-color,box-shadow] focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] disabled:bg-[var(--color-surface-raised)] disabled:opacity-60 disabled:cursor-not-allowed";
 
 const textareaError =
   "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:shadow-[0_0_0_3px_var(--color-danger-subtle)]";

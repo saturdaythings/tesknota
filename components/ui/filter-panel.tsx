@@ -100,7 +100,7 @@ export function FilterPanel({
                 value={accordSearch}
                 onChange={(e) => setAccordSearch(e.target.value)}
                 placeholder="Search accords..."
-                className="w-full px-2 py-1 text-xs font-[var(--mono)] border border-[var(--b3)] bg-[var(--off)] text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--ink4)]"
+                className="w-full px-2 py-1 text-xs font-[var(--mono)] border border-[var(--b3)] bg-[var(--off)] text-[var(--ink)] focus:outline-none focus:border-[var(--blue)] placeholder:text-[var(--color-navy-mid)]"
               />
             </div>
             <div className="overflow-y-auto max-h-[220px]">

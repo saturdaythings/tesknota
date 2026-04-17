@@ -117,6 +117,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search..."
+              className="placeholder:text-[var(--color-navy-mid)]"
               style={{
                 width: "100%",
                 height: "28px",

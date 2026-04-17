@@ -115,7 +115,7 @@ export default function LoginPage() {
             placeholder="Password"
             autoFocus
             required
-            className="w-full h-10 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150"
+            className="w-full h-10 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 placeholder:text-[var(--color-cream)]"
             style={{
               fontSize: '15px',
               background: 'rgba(255,255,255,0.12)',
