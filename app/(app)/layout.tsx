@@ -52,6 +52,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
   const [addCompOpen, setAddCompOpen] = useState(false);
   const [addWishOpen, setAddWishOpen] = useState(false);
   const [openFlagCount, setOpenFlagCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const friend = getFriend(user, profiles);
 
   const refreshFlagCount = useCallback(async () => {
@@ -63,7 +64,17 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     setOpenFlagCount(count ?? 0);
   }, [user.isAdmin]);
 
+  const refreshPendingCount = useCallback(async () => {
+    if (!user.isAdmin) return;
+    const { count } = await supabase
+      .from("pending_entries")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending");
+    setPendingCount(count ?? 0);
+  }, [user.isAdmin]);
+
   useEffect(() => { refreshFlagCount(); }, [refreshFlagCount]);
+  useEffect(() => { refreshPendingCount(); }, [refreshPendingCount]);
 
   const collectionCount = fragrances.filter((f) => f.status === 'CURRENT').length;
   const wishlistCount = fragrances.filter((f) => f.status === 'WANT_TO_BUY' || f.status === 'WANT_TO_SMELL').length;
@@ -101,7 +112,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     ...(user.isAdmin ? [{
       label: 'Admin',
       items: [
-        { href: '/admin', label: 'Admin Dashboard', exact: true, hasNewActivity: openFlagCount > 0 },
+        { href: '/admin', label: 'Admin Dashboard', exact: true, hasNewActivity: openFlagCount > 0, pendingDot: pendingCount > 0 },
         { href: '/admin/design', label: 'Design System' },
       ],
     }] : []),

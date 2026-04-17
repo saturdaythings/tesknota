@@ -7,6 +7,7 @@ import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { Button } from "@/components/ui/button";
 import { TabPill } from "@/components/ui/tab-pill";
+import Link from "next/link";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,6 +45,16 @@ interface DQFrag {
   house: string;
   missingAccords: boolean;
   missingNotes: boolean;
+}
+
+interface PendingEntry {
+  id: string;
+  fragranceName: string;
+  house: string | null;
+  concentration: string | null;
+  requestedBy: string;
+  createdAt: string;
+  status: string;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -853,9 +864,62 @@ function DataQualityTab({ frags }: { frags: DQFrag[] }) {
   );
 }
 
+// ── Pending Entries tab ───────────────────────────────────────────────────────
+
+function PendingEntriesTab({
+  entries,
+  users,
+  onDismiss,
+}: {
+  entries: PendingEntry[];
+  users: AdminUser[];
+  onDismiss: (id: string) => void;
+}) {
+  const pending = entries.filter((e) => e.status === "pending");
+
+  return (
+    <div>
+      <BigNumGrid items={[
+        { val: String(pending.length), label: "Pending requests", valClass: pending.length > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
+        { val: String(entries.filter((e) => e.status === "dismissed").length), label: "Dismissed" },
+        { val: String(entries.length), label: "Total" },
+      ]} />
+
+      {pending.length === 0 ? (
+        <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-green)] py-3">No pending requests.</div>
+      ) : (
+        <div className="flex flex-col">
+          {pending.map((e) => (
+            <div key={e.id} className="flex items-start gap-3 px-3 py-3 border-b border-[var(--adm-border2)] hover:bg-[var(--adm-bg2)]">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="font-[var(--adm-mono)] text-xs text-[var(--adm-fg)] font-medium">{e.fragranceName}</span>
+                  {e.house && <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)]">{e.house}</span>}
+                  {e.concentration && (
+                    <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-1.5 py-0.5">{e.concentration}</span>
+                  )}
+                </div>
+                <div className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)]">
+                  {userName(e.requestedBy, users)} &middot; {new Date(e.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link href={`/import?name=${encodeURIComponent(e.fragranceName)}`}>
+                  <Button variant="secondary" size="sm">Import from Fragrantica</Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={() => onDismiss(e.id)}>Dismiss</Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Admin page ───────────────────────────────────────────────────────────────
 
-const TABS = ["Spend", "Usage", "Errors", "Audit", "Flags", "Users", "Data Quality"] as const;
+const TABS = ["Spend", "Usage", "Errors", "Audit", "Flags", "Users", "Data Quality", "Pending"] as const;
 type TabId = typeof TABS[number];
 
 interface AdminData {
@@ -864,13 +928,14 @@ interface AdminData {
   users: AdminUser[];
   flags: CommunityFlag[];
   dqFrags: DQFrag[];
+  pendingEntries: PendingEntry[];
 }
 
 export default function AdminPage() {
   const { user, isLoaded } = useUser();
   const router = useRouter();
   const [tab, setTab] = useState<TabId>("Spend");
-  const [data, setData] = useState<AdminData>({ apiLogs: [], activityLogs: [], users: [], flags: [], dqFrags: [] });
+  const [data, setData] = useState<AdminData>({ apiLogs: [], activityLogs: [], users: [], flags: [], dqFrags: [], pendingEntries: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(null);
@@ -883,12 +948,13 @@ export default function AdminPage() {
     setLoading(true);
     setError(null);
     try {
-      const [apiRes, actRes, profilesRes, flagsRes, fragsRes] = await Promise.all([
+      const [apiRes, actRes, profilesRes, flagsRes, fragsRes, pendingRes] = await Promise.all([
         supabase.from("api_log").select("*").order("created_at", { ascending: false }),
         supabase.from("activity_log").select("*").order("created_at", { ascending: false }),
         supabase.from("user_profiles").select("id, name, email, created_at, is_admin"),
         supabase.from("community_flags").select("*").order("created_at", { ascending: false }),
         supabase.from("fragrances").select("id, name, house, accords, top_notes"),
+        supabase.from("pending_entries").select("*").order("created_at", { ascending: false }),
       ]);
       const mapApiLog = (r: Record<string, unknown>): ApiLog => ({
         timestamp: (r.created_at as string) ?? "",
@@ -932,6 +998,15 @@ export default function AdminPage() {
         resolved: (r.resolved as boolean) ?? false,
         createdAt: r.created_at as string,
       });
+      const mapPendingEntry = (r: Record<string, unknown>): PendingEntry => ({
+        id: r.id as string,
+        fragranceName: r.fragrance_name as string,
+        house: (r.house as string) ?? null,
+        concentration: (r.concentration as string) ?? null,
+        requestedBy: r.requested_by as string,
+        createdAt: r.created_at as string,
+        status: (r.status as string) ?? "pending",
+      });
       const allDQFrags = (fragsRes.data ?? []).map(mapDQFrag);
       setData({
         apiLogs: (apiRes.data ?? []).map(mapApiLog),
@@ -939,6 +1014,7 @@ export default function AdminPage() {
         users: (profilesRes.data ?? []).map(mapProfile),
         flags: (flagsRes.data ?? []).map(mapFlag),
         dqFrags: allDQFrags.filter((f) => f.missingAccords || f.missingNotes),
+        pendingEntries: (pendingRes.data ?? []).map(mapPendingEntry),
       });
       setLastSync("Just now");
     } catch (e: unknown) {
@@ -963,6 +1039,14 @@ export default function AdminPage() {
     setData((prev) => ({
       ...prev,
       users: prev.users.map((u) => u.id === id ? { ...u, isAdmin: !current } : u),
+    }));
+  }
+
+  async function dismissPendingEntry(id: string) {
+    await supabase.from("pending_entries").update({ status: "dismissed" }).eq("id", id);
+    setData((prev) => ({
+      ...prev,
+      pendingEntries: prev.pendingEntries.map((e) => e.id === id ? { ...e, status: "dismissed" } : e),
     }));
   }
 
@@ -1030,6 +1114,7 @@ export default function AdminPage() {
               {tab === "Flags" && <FlagsTab flags={data.flags} users={data.users} onResolve={resolveFlag} />}
               {tab === "Users" && <UsersTab users={data.users} currentUserId={user.id} onToggleAdmin={toggleAdmin} />}
               {tab === "Data Quality" && <DataQualityTab frags={data.dqFrags} />}
+              {tab === "Pending" && <PendingEntriesTab entries={data.pendingEntries} users={data.users} onDismiss={dismissPendingEntry} />}
             </>
           )}
         </div>
