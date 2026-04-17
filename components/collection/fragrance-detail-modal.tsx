@@ -1,233 +1,123 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Divider } from "@/components/ui/divider";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TabPill } from "@/components/ui/tab-pill";
+import { FieldLabel, OptionalTag, RequiredMark } from "@/components/ui/field-label";
 import { LogComplimentModal } from "@/components/compliments/log-compliment-modal";
 import { useData } from "@/lib/data-context";
+import { useToast } from "@/components/ui/toast";
 import { MONTHS } from "@/lib/frag-utils";
-import { STATUS_LABELS } from "@/types";
-import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } from "@/types";
+import type { UserFragrance, FragranceStatus, FragranceType, BottleSize, UserCompliment } from "@/types";
 
-// ── Constants ─────────────────────────────────────────────
+// ── Constants ──────────────────────────────────────────────
 
-const STATUS_OPTIONS = [
-  { value: "CURRENT", label: "Current Collection" },
+const STATUSES: { value: FragranceStatus; label: string }[] = [
+  { value: "CURRENT", label: "Current" },
+  { value: "PREVIOUSLY_OWNED", label: "Previously Owned" },
+  { value: "FINISHED", label: "Finished" },
   { value: "WANT_TO_BUY", label: "Want to Buy" },
   { value: "WANT_TO_SMELL", label: "Want to Smell" },
-  { value: "WANT_TO_IDENTIFY", label: "Identify Later" },
-  { value: "PREVIOUSLY_OWNED", label: "Previously Owned" },
   { value: "DONT_LIKE", label: "Don't Like" },
-  { value: "FINISHED", label: "Finished" },
+  { value: "WANT_TO_IDENTIFY", label: "Identify Later" },
 ];
 
-const RATING_LABELS: Record<number, string> = {
-  5: "LOVE",
-  4: "REALLY LIKE",
-  3: "LIKE",
-  2: "OKAY",
-  1: "SKIP",
-};
+const SIZES: BottleSize[] = ["Sample", "Travel", "Full Bottle", "Decant"];
 
-function statusVariant(status: FragranceStatus): React.ComponentProps<typeof Badge>["variant"] {
-  switch (status) {
-    case "CURRENT": return "collection";
-    case "WANT_TO_BUY": case "WANT_TO_SMELL": return "wishlist";
-    case "WANT_TO_IDENTIFY": return "identify_later";
-    case "PREVIOUSLY_OWNED": return "previously_owned";
-    case "DONT_LIKE": return "dont_like";
-    case "FINISHED": return "finished";
-    default: return "neutral";
-  }
-}
+const TYPES: FragranceType[] = [
+  "Extrait de Parfum",
+  "Eau de Parfum",
+  "Eau de Toilette",
+  "Cologne",
+  "Perfume Concentré",
+  "Body Spray",
+  "Perfume Oil",
+  "Other",
+];
 
-function concentrationBadge(type: string | null) {
-  if (!type) return null;
-  const short: Record<string, string> = {
-    "Extrait de Parfum": "EXTRAIT DE PARFUM",
-    "Eau de Parfum": "EAU DE PARFUM",
-    "Eau de Toilette": "EAU DE TOILETTE",
-    "Perfume Oil": "OIL",
-    "Cologne": "COLOGNE",
-    "Body Spray": "BODY SPRAY",
-    "Perfume Concentré": "CONCENTRÉ",
-    "Other": "OTHER",
-  };
-  return short[type] ?? type.toUpperCase();
-}
+const MONTH_OPTIONS = [
+  { value: "", label: "—" },
+  ...MONTHS.map((m) => ({ value: m, label: m })),
+];
 
-// ── Star rating (20px for panel) ──────────────────────────
+const YEAR_OPTIONS = [
+  { value: "", label: "—" },
+  ...Array.from(
+    { length: new Date().getFullYear() - 1989 },
+    (_, i) => String(new Date().getFullYear() - i),
+  ).map((y) => ({ value: y, label: y })),
+];
 
-function StarRating({
-  value,
-  onChange,
-  size = 20,
-}: {
-  value: number | null;
-  onChange: (v: number) => void;
-  size?: number;
-}) {
-  const [hover, setHover] = useState<number | null>(null);
-  const filled = hover ?? value ?? 0;
+// ── Spinner ────────────────────────────────────────────────
 
+function Spinner() {
   return (
-    <div role="group" aria-label="Personal rating" style={{ display: "flex", gap: "3px" }}>
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          aria-label={`Rate ${star}`}
-          onClick={() => onChange(star)}
-          onMouseEnter={() => setHover(star)}
-          onMouseLeave={() => setHover(null)}
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            padding: 0,
-            width: `${size}px`,
-            height: `${size}px`,
-            fontSize: `${size}px`,
-            lineHeight: 1,
-            color: filled >= star ? "var(--color-accent)" : "var(--color-cream-dark)",
-            transition: "color 120ms",
-          }}
-        >
-          ★
-        </button>
-      ))}
-    </div>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="animate-spin" aria-hidden="true">
+      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.25" />
+      <path d="M7 1.5a5.5 5.5 0 015.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
   );
 }
 
-// ── Accord tag ────────────────────────────────────────────
-
-function AccordTag({ label }: { label: string }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "2px 7px",
-        borderRadius: "100px",
-        background: "var(--color-sand-light)",
-        color: "var(--color-navy)",
-        fontFamily: "var(--font-sans)",
-        fontSize: "12px",
-        fontWeight: 400,
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-// ── Section label ─────────────────────────────────────────
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        fontFamily: "var(--font-sans)",
-        fontSize: "12px",
-        fontWeight: 500,
-        letterSpacing: "0.1em",
-        textTransform: "uppercase",
-        color: "var(--color-navy)",
-        marginBottom: "var(--space-2)",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-// ── Main component ────────────────────────────────────────
-
-const normStr = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+// ── Main component ─────────────────────────────────────────
 
 interface Props {
   frag: UserFragrance | null;
   open: boolean;
   onClose: () => void;
-  communityFrags: CommunityFrag[];
   compliments: UserCompliment[];
   userId: string;
-  onEdit: (frag: UserFragrance) => void;
   onDelete: (frag: UserFragrance) => void;
 }
 
-export function FragranceDetailModal({
-  frag,
-  open,
-  onClose,
-  communityFrags,
-  compliments,
-  userId,
-  onEdit,
-  onDelete,
-}: Props) {
+export function FragranceDetailModal({ frag, open, onClose, compliments, onDelete }: Props) {
   const { editFrag } = useData();
-  const router = useRouter();
+  const { toast } = useToast();
 
-  const [confirmRemove, setConfirmRemove] = useState(false);
-  const [editingNotes, setEditingNotes] = useState(false);
-  const [notesValue, setNotesValue] = useState("");
-  const [savingNotes, setSavingNotes] = useState(false);
+  const [status, setStatus] = useState<FragranceStatus>("CURRENT");
+  const [rating, setRating] = useState(0);
+  const [sizes, setSizes] = useState<BottleSize[]>([]);
+  const [type, setType] = useState<FragranceType | "">("");
+  const [purchaseMonth, setPurchaseMonth] = useState("");
+  const [purchaseYear, setPurchaseYear] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState("");
+  const [whereBought, setWhereBought] = useState("");
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [compFormOpen, setCompFormOpen] = useState(false);
-  const [statusDropOpen, setStatusDropOpen] = useState(false);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const [err, setErr] = useState("");
 
-  // Mobile drag-to-dismiss
-  function onTouchStart(e: React.TouchEvent) {
-    setTouchStart(e.touches[0].clientY);
-  }
-  function onTouchEnd(e: React.TouchEvent) {
-    if (touchStart === null) return;
-    const delta = e.changedTouches[0].clientY - touchStart;
-    if (delta > 80) handleClose();
-    setTouchStart(null);
-  }
-
-  const cd = useMemo(() => {
-    if (!frag) return null;
-    return communityFrags.find(
-      (c) =>
-        (frag.fragranceId && c.fragranceId === frag.fragranceId) ||
-        (normStr(c.fragranceName) === normStr(frag.name) &&
-          normStr(c.fragranceHouse) === normStr(frag.house ?? "")),
-    ) ?? null;
-  }, [frag, communityFrags]);
-
-  const fragCompliments = useMemo(() => {
-    if (!frag) return [];
-    const key = frag.fragranceId ?? frag.id;
-    return compliments
-      .filter((c) => c.primaryFragId === key || c.secondaryFragId === key)
-      .sort(
-        (a, b) =>
-          parseInt(b.year || "0") * 100 + (parseInt(b.month || "0") || 0) -
-          (parseInt(a.year || "0") * 100 + (parseInt(a.month || "0") || 0)),
-      );
-  }, [frag, compliments]);
-
-  const compCount = fragCompliments.length;
-  const recentCompliments = fragCompliments.slice(0, 3);
+  const fragCompliments = frag
+    ? compliments.filter((c) => {
+        const key = frag.fragranceId ?? frag.id;
+        return c.primaryFragId === key || c.secondaryFragId === key;
+      })
+    : [];
 
   const handleClose = useCallback(() => {
-    setConfirmRemove(false);
-    setEditingNotes(false);
-    setStatusDropOpen(false);
+    setConfirmDelete(false);
     onClose();
   }, [onClose]);
 
-  // Close on Escape
+  useEffect(() => {
+    if (!open || !frag) return;
+    setStatus(frag.status);
+    setRating(frag.personalRating ?? 0);
+    setSizes(frag.sizes.length ? frag.sizes : []);
+    setType(frag.type ?? "");
+    setPurchaseMonth(frag.purchaseMonth ?? "");
+    setPurchaseYear(frag.purchaseYear ?? "");
+    setPurchasePrice(frag.purchasePrice ?? "");
+    setWhereBought(frag.whereBought ?? "");
+    setNotes(frag.personalNotes ?? "");
+    setErr("");
+    setSaving(false);
+    setConfirmDelete(false);
+  }, [open, frag]);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
@@ -235,67 +125,62 @@ export function FragranceDetailModal({
     return () => document.removeEventListener("keydown", handler);
   }, [open, handleClose]);
 
-  // Prevent body scroll when open
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  async function handleStatusChange(status: string) {
-    if (!frag) return;
-    await editFrag({ ...frag, status: status as FragranceStatus });
-    setStatusDropOpen(false);
+  function toggleSize(s: BottleSize) {
+    setSizes((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   }
 
-  async function handleRatingChange(rating: number) {
+  async function save() {
     if (!frag) return;
-    await editFrag({ ...frag, personalRating: rating });
-  }
-
-  async function handleSaveNotes() {
-    if (!frag) return;
-    setSavingNotes(true);
+    setSaving(true);
+    setErr("");
     try {
-      await editFrag({ ...frag, personalNotes: notesValue });
-      setEditingNotes(false);
+      await editFrag({
+        ...frag,
+        status,
+        personalRating: rating || null,
+        sizes,
+        type: type || null,
+        purchaseMonth: purchaseMonth || null,
+        purchaseYear: purchaseYear || null,
+        purchaseDate: purchaseMonth && purchaseYear ? `${purchaseMonth} ${purchaseYear}` : purchaseYear || null,
+        purchasePrice: purchasePrice.trim() || null,
+        whereBought: whereBought.trim() || null,
+        personalNotes: notes.trim(),
+      });
+      toast("Fragrance updated.", "success");
+      handleClose();
+    } catch (e) {
+      console.error(e);
+      setErr("Save failed. Check your connection.");
     } finally {
-      setSavingNotes(false);
+      setSaving(false);
     }
   }
 
   if (!open) return null;
 
-  const dateAdded = frag?.createdAt
-    ? (() => {
-        const d = new Date(frag.createdAt);
-        return `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-      })()
-    : null;
-
-  const purchaseDateStr = frag
-    ? [frag.purchaseMonth, frag.purchaseYear].filter(Boolean).join(" ") || frag.purchaseDate || null
-    : null;
-
-  const accords = cd?.fragranceAccords ?? [];
-  const concLabel = concentrationBadge(frag?.type ?? null);
-
-  const sizeDisplay = frag?.sizes?.length
-    ? frag.sizes.join(", ")
-    : null;
-
-  const rating = frag?.personalRating ?? null;
-  const ratingLabel = rating ? RATING_LABELS[rating] : null;
+  const inputCls =
+    "w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 " +
+    "focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]";
+  const inputStyle: React.CSSProperties = {
+    fontSize: "13px",
+    fontWeight: 400,
+    letterSpacing: "0.08em",
+    background: "var(--color-cream)",
+    border: "1px solid rgba(30,45,69,0.8)",
+    color: "rgba(30,45,69,0.8)",
+  };
 
   return (
     <>
       <LogComplimentModal
         open={compFormOpen}
         onClose={() => setCompFormOpen(false)}
-        editing={null}
         prefillFragId={frag?.fragranceId ?? frag?.id}
       />
 
@@ -313,49 +198,32 @@ export function FragranceDetailModal({
 
       {/* Panel */}
       <div
-        ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label={frag?.name ?? "Fragrance details"}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
+        aria-label={frag?.name ?? "Edit fragrance"}
         style={{
           position: "fixed",
           zIndex: 251,
           background: "var(--color-cream)",
           display: "flex",
           flexDirection: "column",
-          // Desktop: right panel
           top: 0,
           right: 0,
           bottom: 0,
-          width: "380px",
+          width: "400px",
           boxShadow: "-4px 0 32px rgba(0,0,0,0.15)",
-          // Mobile overrides via class
         }}
         className="max-sm:w-full max-sm:top-auto max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:h-[90vh] max-sm:rounded-t-[12px]"
       >
         {/* Mobile drag handle */}
         <div
           className="sm:hidden"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: "10px 0 4px",
-            flexShrink: 0,
-          }}
+          style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", flexShrink: 0 }}
         >
-          <div
-            style={{
-              width: "36px",
-              height: "4px",
-              borderRadius: "2px",
-              background: "var(--color-cream-dark)",
-            }}
-          />
+          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "var(--color-cream-dark)" }} />
         </div>
 
-        {/* Panel header */}
+        {/* Header */}
         <div
           style={{
             padding: "var(--space-4) var(--space-5)",
@@ -363,63 +231,21 @@ export function FragranceDetailModal({
             flexShrink: 0,
           }}
         >
-          {!frag ? (
-            <Skeleton className="h-6 w-3/4" />
-          ) : (
-            <>
-              {/* Row 1: name + badge + close */}
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-2)", marginBottom: "4px" }}>
-                <h2
-                  style={{
-                    fontFamily: "var(--font-serif)",
-                    fontSize: "24px",
-                    fontStyle: "italic",
-                    color: "var(--color-navy)",
-                    fontWeight: 400,
-                    lineHeight: 1.2,
-                    flex: 1,
-                    minWidth: 0,
-                  }}
-                >
-                  {frag.name}
-                </h2>
-                {concLabel && (
-                  <span
-                    style={{
-                      border: "1px solid rgba(30,45,69,0.8)",
-                      color: "rgba(30,45,69,0.8)",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      padding: "2px 6px",
-                      borderRadius: "2px",
-                      textTransform: "uppercase",
-                      flexShrink: 0,
-                      alignSelf: "flex-start",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {concLabel}
-                  </span>
-                )}
-                <button
-                  onClick={handleClose}
-                  aria-label="Close panel"
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "rgba(30,45,69,0.8)",
-                    padding: "2px",
-                    flexShrink: 0,
-                    alignSelf: "flex-start",
-                  }}
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Row 2: house */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "var(--space-2)" }}>
+            <div style={{ minWidth: 0 }}>
+              <h2
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: "22px",
+                  fontStyle: "italic",
+                  color: "var(--color-navy)",
+                  fontWeight: 400,
+                  lineHeight: 1.2,
+                  marginBottom: "2px",
+                }}
+              >
+                {frag?.name}
+              </h2>
               <div
                 style={{
                   fontFamily: "var(--font-sans)",
@@ -428,320 +254,161 @@ export function FragranceDetailModal({
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   color: "rgba(30,45,69,0.8)",
-                  marginBottom: "8px",
                 }}
               >
-                {frag.house}
+                {frag?.house}
               </div>
-
-              {/* Row 3: status + change link */}
-              <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", position: "relative" }}>
-                <Badge variant={statusVariant(frag.status)}>
-                  {STATUS_LABELS[frag.status]}
-                </Badge>
-                <button
-                  onClick={() => setStatusDropOpen((v) => !v)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "12px",
-                    fontWeight: 500,
-                    color: "rgba(30,45,69,0.8)",
-                    padding: 0,
-                  }}
-                >
-                  CHANGE STATUS
-                </button>
-                {statusDropOpen && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 4px)",
-                      left: 0,
-                      zIndex: 10,
-                      width: "200px",
-                    }}
-                  >
-                    <Select
-                      options={STATUS_OPTIONS}
-                      value={frag.status}
-                      onChange={handleStatusChange}
-                    />
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+            </div>
+            <button
+              onClick={handleClose}
+              aria-label="Close panel"
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "rgba(30,45,69,0.8)",
+                padding: "2px",
+                flexShrink: 0,
+              }}
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable body */}
         <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-4) var(--space-5)" }}>
-          {!frag ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-              <Skeleton className="h-5 w-full" />
-              <Skeleton className="h-5 w-2/3" />
-              <Skeleton className="h-20 w-full" />
+          <div className="flex flex-col gap-5">
+
+            {/* Status */}
+            <div>
+              <FieldLabel>Status <RequiredMark /></FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {STATUSES.map((s) => (
+                  <TabPill key={s.value} label={s.label} active={status === s.value} onClick={() => setStatus(s.value)} />
+                ))}
+              </div>
             </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
 
-              {/* MY RATING */}
-              <section>
-                <SectionLabel>My Rating</SectionLabel>
-                <StarRating value={rating} onChange={handleRatingChange} size={20} />
-                {ratingLabel && (
-                  <div
+            {/* Rating */}
+            <div>
+              <FieldLabel>Personal Rating <OptionalTag /></FieldLabel>
+              <div style={{ display: "flex", gap: "4px" }}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setRating(rating === n ? 0 : n)}
                     style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "13px",
-                      fontWeight: 400,
-                      color: "rgba(30,45,69,0.8)",
-                      marginTop: "4px",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      fontSize: "22px",
+                      lineHeight: 1,
+                      color: n <= rating ? "var(--color-accent)" : "var(--color-cream-dark)",
+                      transition: "color 120ms",
                     }}
+                    aria-label={`${n} star${n !== 1 ? "s" : ""}`}
                   >
-                    {ratingLabel}
-                  </div>
-                )}
-              </section>
-
-              <Divider style={{ margin: 0 }} />
-
-              {/* SIZE + TYPE */}
-              <section>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-4)" }}>
-                  <div>
-                    <SectionLabel>Size Owned</SectionLabel>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 600, color: "var(--color-navy)" }}>
-                      {sizeDisplay ?? "—"}
-                    </div>
-                  </div>
-                  <div>
-                    <SectionLabel>Type</SectionLabel>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 600, color: "var(--color-navy)" }}>
-                      {frag.type ?? "—"}
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <Divider style={{ margin: 0 }} />
-
-              {/* FRAGRANCE PROFILE */}
-              <section>
-                <SectionLabel>Fragrance Profile</SectionLabel>
-
-                {cd?.avgPrice && (
-                  <div style={{ marginBottom: "var(--space-3)" }}>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "2px" }}>
-                      Avg Price
-                    </div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "15px", fontWeight: 600, color: "var(--color-navy)" }}>
-                      {cd.avgPrice}
-                    </div>
-                  </div>
-                )}
-
-                {/* Notes */}
-                {(cd?.topNotes?.length || cd?.middleNotes?.length || cd?.baseNotes?.length) ? (
-                  <div style={{ marginBottom: "var(--space-3)" }}>
-                    {[
-                      { label: "TOP", notes: cd?.topNotes },
-                      { label: "HEART", notes: cd?.middleNotes },
-                      { label: "BASE", notes: cd?.baseNotes },
-                    ].map(({ label, notes }) =>
-                      notes?.length ? (
-                        <div key={label} style={{ marginBottom: "var(--space-2)" }}>
-                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", color: "rgba(30,45,69,0.8)" }}>
-                            {label}
-                          </span>
-                          <span style={{ fontFamily: "var(--font-serif)", fontSize: "14px", fontStyle: "italic", color: "var(--color-navy)", marginLeft: "8px" }}>
-                            {notes.join(", ")}
-                          </span>
-                        </div>
-                      ) : null,
-                    )}
-                  </div>
-                ) : null}
-
-                {accords.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                    {accords.map((a) => <AccordTag key={a} label={a} />)}
-                  </div>
-                )}
-              </section>
-
-              <Divider style={{ margin: 0 }} />
-
-              {/* MY PURCHASE */}
-              <section>
-                <SectionLabel>My Purchase</SectionLabel>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
-                  <div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "2px" }}>
-                      Purchase Price
-                    </div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>
-                      {frag.purchasePrice ?? "—"}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "2px" }}>
-                      Where Bought
-                    </div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)" }}>
-                      {frag.whereBought ? (
-                        frag.whereBought.startsWith("http") ? (
-                          <a href={frag.whereBought} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
-                            {frag.whereBought}
-                          </a>
-                        ) : (
-                          frag.whereBought
-                        )
-                      ) : "—"}
-                    </div>
-                  </div>
-                </div>
-                {dateAdded && (
-                  <div>
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)" }}>
-                      Added
-                    </span>
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "rgba(30,45,69,0.8)", marginLeft: "8px" }}>
-                      {dateAdded}
-                    </span>
-                  </div>
-                )}
-              </section>
-
-              {/* DUPE INFO */}
-              {frag.isDupe && frag.dupeFor && (
-                <>
-                  <Divider style={{ margin: 0 }} />
-                  <section>
-                    <SectionLabel>Dupe Info</SectionLabel>
-                    <div style={{ fontFamily: "var(--font-serif)", fontSize: "15px", fontStyle: "italic", color: "var(--color-accent)" }}>
-                      Dupe for: {frag.dupeFor}
-                    </div>
-                  </section>
-                </>
-              )}
-
-              <Divider style={{ margin: 0 }} />
-
-              {/* PERSONAL NOTES */}
-              <section>
-                <SectionLabel>Personal Notes</SectionLabel>
-                {editingNotes ? (
-                  <div>
-                    <textarea
-                      value={notesValue}
-                      onChange={(e) => setNotesValue(e.target.value)}
-                      onBlur={handleSaveNotes}
-                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSaveNotes(); } }}
-                      rows={4}
-                      autoFocus
-                      style={{
-                        width: "100%",
-                        padding: "8px 10px",
-                        background: "var(--color-cream)",
-                        border: "1.5px solid var(--color-accent)",
-                        borderRadius: "var(--radius-sm)",
-                        fontFamily: "var(--font-serif)",
-                        fontStyle: "italic",
-                        fontSize: "15px",
-                        color: "rgba(30,45,69,0.8)",
-                        resize: "vertical",
-                        outline: "none",
-                      }}
-                    />
-                    {savingNotes && (
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)", marginTop: "4px" }}>
-                        Saving...
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => { setNotesValue(frag.personalNotes ?? ""); setEditingNotes(true); }}
-                    style={{
-                      fontFamily: "var(--font-serif)",
-                      fontStyle: "italic",
-                      fontSize: "15px",
-                      color: "rgba(30,45,69,0.8)",
-                      cursor: "text",
-                      minHeight: "32px",
-                    }}
-                  >
-                    {frag.personalNotes?.trim() || "No personal notes yet."}
-                  </div>
-                )}
-              </section>
-
-              <Divider style={{ margin: 0 }} />
-
-              {/* COMPLIMENTS */}
-              <section>
-                <SectionLabel>
-                  Compliments ({compCount} total)
-                </SectionLabel>
-
-                {compCount === 0 ? (
-                  <div style={{ fontFamily: "var(--font-sans)", fontStyle: "italic", fontSize: "14px", color: "rgba(30,45,69,0.8)" }}>
-                    None logged
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", marginBottom: "var(--space-3)" }}>
-                    {recentCompliments.map((c) => (
-                      <div
-                        key={c.id}
-                        style={{
-                          padding: "8px 10px",
-                          background: "var(--color-cream-dark)",
-                          borderRadius: "var(--radius-sm)",
-                        }}
-                      >
-                        <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)" }}>
-                          {[c.relation, c.gender, c.city ?? c.country].filter(Boolean).join(" · ")}
-                          {(c.month || c.year) && (
-                            <span style={{ color: "rgba(30,45,69,0.8)", marginLeft: "6px" }}>
-                              {[c.month, c.year].filter(Boolean).join(" ")}
-                            </span>
-                          )}
-                        </div>
-                        {c.notes && (
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)", marginTop: "2px" }}>
-                            {c.notes}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap", marginTop: "var(--space-2)" }}>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => router.push(`/compliments?fragId=${encodeURIComponent(frag.fragranceId ?? frag.id)}`)}
-                  >
-                    View All Compliments
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => setCompFormOpen(true)}
-                  >
-                    Log New Compliment
-                  </Button>
-                </div>
-              </section>
-
-              {/* bottom padding so footer doesn't cover content */}
-              <div style={{ height: "var(--space-4)" }} />
+                    {n <= rating ? "\u2605" : "\u2606"}
+                  </button>
+                ))}
+              </div>
             </div>
-          )}
+
+            {/* Size */}
+            <div>
+              <FieldLabel>Size <OptionalTag /></FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {SIZES.map((s) => (
+                  <TabPill key={s} label={s} active={sizes.includes(s)} onClick={() => toggleSize(s)} />
+                ))}
+              </div>
+            </div>
+
+            {/* Concentration */}
+            <div>
+              <FieldLabel>Concentration <OptionalTag /></FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {TYPES.map((t) => (
+                  <TabPill key={t} label={t} active={type === t} onClick={() => setType(type === t ? "" : t)} />
+                ))}
+              </div>
+            </div>
+
+            {/* Purchase Month + Year */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <FieldLabel>Purchase Month <OptionalTag /></FieldLabel>
+                <Select options={MONTH_OPTIONS} value={purchaseMonth} onChange={setPurchaseMonth} />
+              </div>
+              <div>
+                <FieldLabel>Purchase Year <OptionalTag /></FieldLabel>
+                <Select options={YEAR_OPTIONS} value={purchaseYear} onChange={setPurchaseYear} />
+              </div>
+            </div>
+
+            {/* Purchase Price + Where Bought */}
+            <div className="flex flex-col gap-2">
+              <FieldLabel>Purchase Details <OptionalTag /></FieldLabel>
+              <input
+                value={purchasePrice}
+                onChange={(e) => setPurchasePrice(e.target.value)}
+                placeholder="Price (e.g. $120)"
+                className={inputCls}
+                style={{ ...inputStyle, color: purchasePrice ? "var(--color-navy)" : "rgba(30,45,69,0.8)" }}
+              />
+              <input
+                value={whereBought}
+                onChange={(e) => setWhereBought(e.target.value)}
+                placeholder="Where bought (Sephora, online, etc.)"
+                className={inputCls}
+                style={{ ...inputStyle, color: whereBought ? "var(--color-navy)" : "rgba(30,45,69,0.8)" }}
+              />
+            </div>
+
+            {/* Personal Notes */}
+            <div>
+              <FieldLabel>Personal Notes <OptionalTag /></FieldLabel>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Your impressions, context, memories..."
+                rows={3}
+                className="w-full p-3 rounded-[2px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-none placeholder:text-[var(--color-navy-mid)]"
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 400,
+                  letterSpacing: "0.08em",
+                  minHeight: "72px",
+                  background: "var(--color-cream)",
+                  border: "1px solid rgba(30,45,69,0.8)",
+                  color: notes ? "var(--color-navy)" : "rgba(30,45,69,0.8)",
+                }}
+              />
+            </div>
+
+            {/* Compliments */}
+            <div>
+              <FieldLabel>Compliments</FieldLabel>
+              <p
+                className="font-sans"
+                style={{ fontSize: "13px", color: "rgba(30,45,69,0.8)", marginBottom: "var(--space-2)" }}
+              >
+                {fragCompliments.length > 0 ? `${fragCompliments.length} logged` : "None logged yet"}
+              </p>
+              <Button variant="secondary" size="sm" onClick={() => setCompFormOpen(true)}>
+                Log Compliment
+              </Button>
+            </div>
+
+            {err && (
+              <p className="font-sans" style={{ fontSize: "13px", color: "var(--color-destructive)" }}>
+                {err}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Sticky footer */}
@@ -754,47 +421,35 @@ export function FragranceDetailModal({
             justifyContent: "space-between",
             alignItems: "center",
             flexShrink: 0,
-            position: "relative",
-            zIndex: 10,
           }}
         >
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => { handleClose(); if (frag) onEdit(frag); }}
-          >
-            Edit
-          </Button>
-
-          {confirmRemove ? (
-            <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "rgba(30,45,69,0.8)" }}>
-                Are you sure?
-              </span>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => { if (frag) { onDelete(frag); handleClose(); } }}
-              >
-                Yes, Remove
+          <div className="flex items-center gap-3">
+            {!confirmDelete ? (
+              <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(true)}>
+                Remove
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setConfirmRemove(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => setConfirmRemove(true)}
-            >
-              Remove
+            ) : (
+              <>
+                <span className="font-sans" style={{ fontSize: "13px", color: "var(--color-destructive)" }}>
+                  Are you sure? This cannot be undone.
+                </span>
+                <Button variant="destructive" size="sm" onClick={() => frag && onDelete(frag)}>
+                  Yes, Remove
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
+                  Cancel
+                </Button>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" onClick={handleClose} disabled={saving}>
+              Cancel
             </Button>
-          )}
+            <Button variant="primary" onClick={save} disabled={saving || confirmDelete}>
+              {saving ? <><Spinner /> Saving...</> : "Save Changes"}
+            </Button>
+          </div>
         </div>
       </div>
     </>

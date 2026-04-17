@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +15,6 @@ import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { FragranceDetailModal } from '@/components/collection/fragrance-detail-modal';
 import { CollectionFilters } from '@/components/collection/collection-filters';
 import { CollectionList, type CollectionColumnDef, type CollectionRowContext } from '@/components/collection/collection-list';
-import { FragForm } from '@/components/ui/frag-form';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
@@ -36,8 +35,6 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'fragrance',
     label: 'Fragrance',
     width: 'minmax(240px,1fr)',
-    sortKeyAsc: 'name_asc',
-    sortKeyDesc: 'name_desc',
     render: (frag) => (
       <div className="flex items-start gap-2">
         <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} />
@@ -64,8 +61,6 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'size',
     label: 'Size',
     width: 'max-content',
-    sortKeyAsc: 'size_asc',
-    sortKeyDesc: 'size_desc',
     render: (frag) => (
       <span className="font-sans uppercase" style={cellStyle}>
         {frag.sizes?.length ? frag.sizes[0] : '—'}
@@ -76,8 +71,6 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'rating',
     label: 'Rating',
     width: 'max-content',
-    sortKeyAsc: 'rating_asc',
-    sortKeyDesc: 'rating_desc',
     render: (frag, ctx) => (
       <div onClick={(e) => e.stopPropagation()}>
         <StarRating
@@ -92,8 +85,6 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'added',
     label: 'Added',
     width: 'max-content',
-    sortKeyAsc: 'oldest',
-    sortKeyDesc: 'newest',
     render: (frag) => (
       <span className="font-sans uppercase" style={{ ...cellStyle, whiteSpace: 'nowrap' }}>
         {addedStr(frag.createdAt) || '—'}
@@ -117,8 +108,6 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'compliments',
     label: 'Compliments',
     width: 'max-content',
-    sortKeyAsc: 'compliments_asc',
-    sortKeyDesc: 'compliments_desc',
     render: (frag, ctx) => {
       const count = ctx.compMap[frag.fragranceId ?? frag.id] ?? 0;
       return (
@@ -132,8 +121,6 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'status',
     label: 'Status',
     width: 'max-content',
-    sortKeyAsc: 'status_asc',
-    sortKeyDesc: 'status_desc',
     render: (frag) => (
       <span className="font-sans uppercase" style={cellStyle}>
         {STATUS_LABELS[frag.status]}
@@ -147,6 +134,7 @@ function CollectionInner() {
   const { fragrances, compliments, communityFrags, isLoaded, removeFrag, editFrag } = useData();
   const { toast } = useToast();
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const sort = (searchParams.get('sort') as SortKey) || 'name_asc';
@@ -158,8 +146,6 @@ function CollectionInner() {
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [houseFilter, setHouseFilter] = useState<string[]>([]);
   const [addOpen, setAddOpen] = useState(false);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingFrag, setEditingFrag] = useState<UserFragrance | null>(null);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(25);
@@ -169,9 +155,10 @@ function CollectionInner() {
       const params = new URLSearchParams(searchParams.toString());
       if (value && value !== 'name_asc') params.set('sort', value);
       else params.delete('sort');
-      router.push(`?${params.toString()}`);
+      const qs = params.toString();
+      router.replace(pathname + (qs ? '?' + qs : ''), { scroll: false });
     },
-    [searchParams, router],
+    [searchParams, router, pathname],
   );
 
   const myFrags = useMemo(
@@ -271,14 +258,11 @@ function CollectionInner() {
         frag={detailFrag}
         open={!!detailFrag}
         onClose={() => setDetailFrag(null)}
-        communityFrags={communityFrags}
         compliments={myComps}
         userId={user.id}
-        onEdit={(frag) => { setDetailFrag(null); setEditingFrag(frag); setFormOpen(true); }}
         onDelete={handleDelete}
       />
       <AddFragranceModal open={addOpen} onClose={() => setAddOpen(false)} />
-      <FragForm open={formOpen} onClose={() => { setFormOpen(false); setEditingFrag(null); }} editing={editingFrag} />
 
       <Topbar title="My Collection" actions={<FragSearch />} />
 
@@ -331,8 +315,6 @@ function CollectionInner() {
             columns={COLUMNS}
             ctx={rowCtx}
             onOpen={setDetailFrag}
-            sort={sort}
-            onSort={setSort}
             page={page}
             totalPages={totalPages}
             onPage={setPage}

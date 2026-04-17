@@ -4,7 +4,7 @@ import type { UserFragrance, CommunityFrag } from '@/types';
 import { FragranceCard } from '@/components/collection/fragrance-card';
 import { Pagination } from '@/components/ui/pagination';
 import { getAccords } from '@/lib/frag-utils';
-import { addedStr, type SortKey } from '@/lib/collection-utils';
+import { addedStr } from '@/lib/collection-utils';
 
 export interface CollectionRowContext {
   compMap: Record<string, number>;
@@ -15,12 +15,8 @@ export interface CollectionRowContext {
 export interface CollectionColumnDef {
   id: string;
   label: string;
-  /** CSS grid track: 'minmax(240px,1fr)', 'max-content', '200px', etc. */
   width: string;
   align?: 'left' | 'right';
-  /** Sort keys for this column. When absent, header is not clickable. */
-  sortKeyAsc?: SortKey;
-  sortKeyDesc?: SortKey;
   render: (frag: UserFragrance, ctx: CollectionRowContext) => React.ReactNode;
 }
 
@@ -29,27 +25,16 @@ interface CollectionListProps {
   columns: CollectionColumnDef[];
   ctx: CollectionRowContext;
   onOpen: (frag: UserFragrance) => void;
-  sort: string;
-  onSort: (key: string) => void;
   page: number;
   totalPages: number;
   onPage: (page: number) => void;
 }
 
-export function CollectionList({
-  items, columns, ctx, onOpen, sort, onSort, page, totalPages, onPage,
-}: CollectionListProps) {
+export function CollectionList({ items, columns, ctx, onOpen, page, totalPages, onPage }: CollectionListProps) {
   const gridTemplateColumns = columns.map((c) => c.width).join(' ');
-
-  function handleHeaderClick(col: CollectionColumnDef) {
-    if (!col.sortKeyAsc || !col.sortKeyDesc) return;
-    if (sort === col.sortKeyAsc) onSort(col.sortKeyDesc);
-    else onSort(col.sortKeyAsc);
-  }
 
   return (
     <>
-      {/* Desktop: md:grid keeps display consistent — no inline display needed, no className conflict */}
       <div
         className="hidden md:grid"
         style={{ gridTemplateColumns, columnGap: 'var(--space-10)' }}
@@ -66,36 +51,22 @@ export function CollectionList({
             alignItems: 'center',
           }}
         >
-          {columns.map((col) => {
-            const isActive = sort === col.sortKeyAsc || sort === col.sortKeyDesc;
-            const sortable = !!(col.sortKeyAsc && col.sortKeyDesc);
-            return (
-              <div
-                key={col.id}
-                onClick={sortable ? () => handleHeaderClick(col) : undefined}
-                className="font-sans uppercase flex items-center"
-                style={{
-                  padding: '0 var(--space-4)',
-                  fontSize: 'var(--text-xxs)',
-                  fontWeight: 'var(--font-weight-medium)',
-                  letterSpacing: 'var(--tracking-md)',
-                  color: 'var(--color-navy)',
-                  textAlign: col.align ?? 'left',
-                  gap: 'var(--space-1)',
-                  cursor: sortable ? 'pointer' : 'default',
-                  userSelect: 'none',
-                }}
-              >
-                {col.label}
-                {sortable && (
-                  <SortArrow
-                    active={isActive}
-                    direction={sort === col.sortKeyDesc ? 'desc' : 'asc'}
-                  />
-                )}
-              </div>
-            );
-          })}
+          {columns.map((col) => (
+            <div
+              key={col.id}
+              className="font-sans uppercase"
+              style={{
+                padding: '0 var(--space-4)',
+                fontSize: 'var(--text-xxs)',
+                fontWeight: 'var(--font-weight-medium)',
+                letterSpacing: 'var(--tracking-md)',
+                color: 'var(--color-navy)',
+                textAlign: col.align ?? 'left',
+              }}
+            >
+              {col.label}
+            </div>
+          ))}
         </div>
 
         {/* Data rows */}
@@ -126,26 +97,6 @@ export function CollectionList({
 
       <Pagination page={page} totalPages={totalPages} onPage={onPage} />
     </>
-  );
-}
-
-function SortArrow({ active, direction }: { active: boolean; direction: 'asc' | 'desc' }) {
-  if (!active) {
-    return (
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"
-        style={{ color: 'var(--color-navy)', opacity: 0.3, flexShrink: 0 }}>
-        <path d="M5 1v8M2 4L5 1l3 3M2 6l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"
-      style={{ color: 'var(--color-navy)', flexShrink: 0 }}>
-      {direction === 'asc'
-        ? <path d="M5 8V2M2 5L5 2l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-        : <path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      }
-    </svg>
   );
 }
 
