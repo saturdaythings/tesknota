@@ -3,12 +3,14 @@
 import { forwardRef, ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'danger' | 'icon';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'danger' | 'icon' | 'tab-action';
 type ButtonSize = 'md' | 'sm';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  active?: boolean;
+  selected?: boolean;
 }
 
 const base =
@@ -18,52 +20,51 @@ const base =
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] ' +
-    'bg-[var(--color-navy)] text-[var(--color-cream)] hover:bg-[var(--color-accent)]',
+    'h-8 px-[var(--space-3)] bg-transparent border border-[var(--color-navy)] rounded-[var(--radius-md)] ' +
+    'text-[length:var(--text-sm)] text-[var(--color-navy)] leading-none ' +
+    'hover:bg-[var(--color-cream-dark)] active:bg-[var(--color-row-hover)]',
   secondary:
-    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-transparent ' +
-    'border border-[var(--color-navy)] text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]',
+    'h-8 px-[var(--space-3)] bg-transparent border border-[var(--color-row-divider)] rounded-[var(--radius-md)] ' +
+    'text-[length:var(--text-sm)] text-[var(--color-navy)] leading-none ' +
+    'hover:border-[var(--color-navy)]',
   ghost:
-    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-transparent ' +
-    'text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]',
+    'h-8 px-[var(--space-2)] bg-transparent border-none rounded-[var(--radius-md)] ' +
+    'text-[length:var(--text-sm)] text-[var(--color-meta-text)] leading-none ' +
+    'hover:text-[var(--color-navy)]',
   destructive:
-    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] ' +
-    'bg-[var(--color-destructive)] text-[var(--color-cream)] hover:opacity-85',
+    'h-8 px-[var(--space-3)] bg-transparent border border-[var(--color-destructive)] rounded-[var(--radius-md)] ' +
+    'text-[length:var(--text-sm)] text-[var(--color-destructive)] leading-none ' +
+    'hover:bg-[var(--color-destructive)] hover:text-[var(--color-cream)]',
   danger:
-    'px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] ' +
-    'bg-[var(--color-destructive)] text-[var(--color-cream)] hover:opacity-85',
-  icon: 'rounded-[3px] bg-transparent text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]',
-};
-
-const sizes: Record<ButtonSize, Record<ButtonVariant, string>> = {
-  md: {
-    primary: 'min-h-10',
-    secondary: 'min-h-10',
-    ghost: 'min-h-10',
-    destructive: 'min-h-10',
-    danger: 'min-h-10',
-    icon: 'w-10 h-10',
-  },
-  sm: {
-    primary: 'min-h-8',
-    secondary: 'min-h-8',
-    ghost: 'min-h-8',
-    destructive: 'min-h-8',
-    danger: 'min-h-8',
-    icon: 'w-8 h-8',
-  },
+    'h-8 px-[var(--space-3)] bg-transparent border border-[var(--color-destructive)] rounded-[var(--radius-md)] ' +
+    'text-[length:var(--text-sm)] text-[var(--color-destructive)] leading-none ' +
+    'hover:bg-[var(--color-destructive)] hover:text-[var(--color-cream)]',
+  icon:
+    'w-7 h-7 bg-transparent border-none rounded-[var(--radius-md)] ' +
+    'hover:bg-[var(--color-cream-dark)]',
+  'tab-action':
+    'h-8 px-[var(--space-3)] bg-transparent border border-[var(--color-row-divider)] rounded-[var(--radius-md)] ' +
+    'text-[length:var(--text-sm)] text-[var(--color-navy)] leading-none',
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', className, children, ...props }, ref) => (
-    <button
-      ref={ref}
-      className={cn(base, variants[variant], sizes[size][variant], className)}
-      {...props}
-    >
-      {children}
-    </button>
-  ),
+  ({ variant = 'primary', size: _size, active, selected, className, children, ...props }, ref) => {
+    const isActive = active || selected;
+    const tabActionActive =
+      variant === 'tab-action' && isActive
+        ? 'border-[var(--color-navy)] bg-[var(--color-cream-dark)]'
+        : '';
+
+    return (
+      <button
+        ref={ref}
+        className={cn(base, variants[variant], tabActionActive, className)}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  },
 );
 
 Button.displayName = 'Button';
