@@ -1,4 +1,7 @@
-import type { UserFragrance, UserCompliment } from "@/types";
+import type {
+  UserFragrance, UserCompliment,
+  Profile, DiscountCode, Follow, FollowStatus, PendingTaskStatus,
+} from "@/types";
 import { supabase } from "@/lib/supabase";
 
 // ── Community fragrance dedup ─────────────────────────────────
@@ -172,6 +175,113 @@ export async function enrichFragranceCommunityData(
   if (fields.communitySillageLabel) patch.community_sillage_label = fields.communitySillageLabel;
   if (Object.keys(patch).length === 0) return;
   await supabase.from("fragrances").update(patch).eq("id", fragranceId);
+}
+
+// ── Profile mutations ─────────────────────────────────────────
+
+function profileToDb(p: Profile): Record<string, unknown> {
+  return {
+    id: p.id,
+    first_name: p.firstName ?? null,
+    last_name: p.lastName ?? null,
+    username: p.username ?? null,
+    email: p.email ?? null,
+    city: p.city ?? null,
+    state: p.state ?? null,
+    country: p.country ?? null,
+    instagram_handle: p.instagramHandle ?? null,
+    tiktok_handle: p.tiktokHandle ?? null,
+    youtube_handle: p.youtubeHandle ?? null,
+    show_collection: p.showCollection,
+    show_followers: p.showFollowers,
+    show_following: p.showFollowing,
+    show_social_handles: p.showSocialHandles,
+    show_discount_codes: p.showDiscountCodes,
+  };
+}
+
+export async function upsertProfile(profile: Profile): Promise<void> {
+  const { error } = await supabase.from("profiles").upsert(profileToDb(profile));
+  if (error) throw new Error(error.message);
+}
+
+// ── Discount code mutations ───────────────────────────────────
+
+export async function addDiscountCode(code: DiscountCode): Promise<{ id: string }> {
+  const { data, error } = await supabase
+    .from("discount_codes")
+    .insert({ user_id: code.userId, place: code.place, code: code.code, notes: code.notes })
+    .select("id")
+    .single();
+  if (error) throw new Error(error.message);
+  return { id: data.id };
+}
+
+export async function updateDiscountCode(code: DiscountCode): Promise<void> {
+  const { error } = await supabase
+    .from("discount_codes")
+    .update({ place: code.place, code: code.code, notes: code.notes })
+    .eq("id", code.id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteDiscountCode(id: string): Promise<void> {
+  const { error } = await supabase.from("discount_codes").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+// ── Follow mutations ──────────────────────────────────────────
+
+export async function sendFollowRequest(
+  followerId: string,
+  followingId: string,
+  message?: string
+): Promise<{ id: string }> {
+  const { data, error } = await supabase
+    .from("follows")
+    .insert({ follower_id: followerId, following_id: followingId, request_message: message ?? null })
+    .select("id")
+    .single();
+  if (error) throw new Error(error.message);
+  return { id: data.id };
+}
+
+export async function updateFollowStatus(id: string, status: FollowStatus): Promise<void> {
+  const { error } = await supabase.from("follows").update({ status }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function setFollowStarred(id: string, starred: boolean): Promise<void> {
+  const { error } = await supabase.from("follows").update({ starred }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteFollow(id: string): Promise<void> {
+  const { error } = await supabase.from("follows").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+// ── Notification mutations ────────────────────────────────────
+
+export async function markNotificationRead(id: string): Promise<void> {
+  const { error } = await supabase.from("notifications").update({ read: true }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function markAllNotificationsRead(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from("notifications")
+    .update({ read: true })
+    .eq("user_id", userId)
+    .eq("read", false);
+  if (error) throw new Error(error.message);
+}
+
+// ── Pending task mutations ────────────────────────────────────
+
+export async function updatePendingTaskStatus(id: string, status: PendingTaskStatus): Promise<void> {
+  const { error } = await supabase.from("pending_tasks").update({ status }).eq("id", id);
+  if (error) throw new Error(error.message);
 }
 
 // ── Community flagging ────────────────────────────────────────

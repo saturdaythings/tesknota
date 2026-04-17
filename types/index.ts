@@ -130,6 +130,84 @@ export interface CommunityData {
   lastUpdated: string;
 }
 
+// ── Social / profile types ────────────────────────────────────
+
+export type FollowStatus = 'pending' | 'accepted' | 'declined' | 'archived';
+
+export type NotificationType =
+  | 'follow_request'
+  | 'follow_accepted'
+  | 'pending_task'
+  | 'pending_entry'
+  | 'community_flag';
+
+export type PendingTaskType = 'fill_compliment' | 'fill_rating' | 'voice_add' | 'receipt_add';
+
+export type PendingTaskStatus = 'open' | 'completed' | 'dismissed';
+
+export interface Profile {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  username: string | null;
+  email: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  instagramHandle: string | null;
+  tiktokHandle: string | null;
+  youtubeHandle: string | null;
+  showCollection: boolean;
+  showFollowers: boolean;
+  showFollowing: boolean;
+  showSocialHandles: boolean;
+  showDiscountCodes: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DiscountCode {
+  id: string;
+  userId: string;
+  place: string | null;
+  code: string | null;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface Follow {
+  id: string;
+  followerId: string;
+  followingId: string;
+  status: FollowStatus;
+  starred: boolean;
+  requestMessage: string | null;
+  createdAt: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string | null;
+  body: string | null;
+  read: boolean;
+  actionUrl: string | null;
+  createdAt: string;
+}
+
+export interface PendingTask {
+  id: string;
+  userId: string;
+  type: PendingTaskType;
+  referenceId: string | null;
+  referenceTable: string | null;
+  prompt: string | null;
+  status: PendingTaskStatus;
+  createdAt: string;
+  dueAt: string | null;
+}
+
 export const STATUS_LABELS: Record<FragranceStatus, string> = {
   CURRENT: "Current",
   PREVIOUSLY_OWNED: "Prev. Owned",

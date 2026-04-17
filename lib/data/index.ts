@@ -1,7 +1,84 @@
-import type { UserFragrance, UserCompliment, CommunityFrag, CommunityData } from "@/types";
+import type {
+  UserFragrance, UserCompliment, CommunityFrag, CommunityData,
+  Profile, DiscountCode, Follow, Notification, PendingTask,
+  FollowStatus, NotificationType, PendingTaskType, PendingTaskStatus,
+} from "@/types";
 import { supabase } from "@/lib/supabase";
 
 // ── Row mappers ───────────────────────────────────────────────
+
+function dbRowToProfile(r: Record<string, unknown>): Profile {
+  return {
+    id: r.id as string,
+    firstName: (r.first_name as string) ?? null,
+    lastName: (r.last_name as string) ?? null,
+    username: (r.username as string) ?? null,
+    email: (r.email as string) ?? null,
+    city: (r.city as string) ?? null,
+    state: (r.state as string) ?? null,
+    country: (r.country as string) ?? null,
+    instagramHandle: (r.instagram_handle as string) ?? null,
+    tiktokHandle: (r.tiktok_handle as string) ?? null,
+    youtubeHandle: (r.youtube_handle as string) ?? null,
+    showCollection: (r.show_collection as boolean) ?? true,
+    showFollowers: (r.show_followers as boolean) ?? true,
+    showFollowing: (r.show_following as boolean) ?? true,
+    showSocialHandles: (r.show_social_handles as boolean) ?? true,
+    showDiscountCodes: (r.show_discount_codes as boolean) ?? true,
+    createdAt: (r.created_at as string) ?? "",
+    updatedAt: (r.updated_at as string) ?? "",
+  };
+}
+
+function dbRowToDiscountCode(r: Record<string, unknown>): DiscountCode {
+  return {
+    id: r.id as string,
+    userId: r.user_id as string,
+    place: (r.place as string) ?? null,
+    code: (r.code as string) ?? null,
+    notes: (r.notes as string) ?? null,
+    createdAt: (r.created_at as string) ?? "",
+  };
+}
+
+function dbRowToFollow(r: Record<string, unknown>): Follow {
+  return {
+    id: r.id as string,
+    followerId: r.follower_id as string,
+    followingId: r.following_id as string,
+    status: (r.status as FollowStatus) ?? "pending",
+    starred: (r.starred as boolean) ?? false,
+    requestMessage: (r.request_message as string) ?? null,
+    createdAt: (r.created_at as string) ?? "",
+  };
+}
+
+function dbRowToNotification(r: Record<string, unknown>): Notification {
+  return {
+    id: r.id as string,
+    userId: r.user_id as string,
+    type: r.type as NotificationType,
+    title: (r.title as string) ?? null,
+    body: (r.body as string) ?? null,
+    read: (r.read as boolean) ?? false,
+    actionUrl: (r.action_url as string) ?? null,
+    createdAt: (r.created_at as string) ?? "",
+  };
+}
+
+function dbRowToPendingTask(r: Record<string, unknown>): PendingTask {
+  return {
+    id: r.id as string,
+    userId: r.user_id as string,
+    type: r.type as PendingTaskType,
+    referenceId: (r.reference_id as string) ?? null,
+    referenceTable: (r.reference_table as string) ?? null,
+    prompt: (r.prompt as string) ?? null,
+    status: (r.status as PendingTaskStatus) ?? "open",
+    createdAt: (r.created_at as string) ?? "",
+    dueAt: (r.due_at as string) ?? null,
+  };
+}
 
 function dbRowToFrag(r: Record<string, unknown>): UserFragrance {
   const pm = (r.purchase_month as string) ?? "";
@@ -114,6 +191,64 @@ export async function loadAllData(userId: string): Promise<{ data: AllData; ok: 
 function norm(s: string): string {
   return (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
+
+// ── Profile queries ───────────────────────────────────────────
+
+export async function fetchProfile(userId: string): Promise<Profile | null> {
+  const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  return data ? dbRowToProfile(data as Record<string, unknown>) : null;
+}
+
+export async function fetchProfileByUsername(username: string): Promise<Profile | null> {
+  const { data } = await supabase.from("profiles").select("*").eq("username", username).maybeSingle();
+  return data ? dbRowToProfile(data as Record<string, unknown>) : null;
+}
+
+// ── Follows queries ───────────────────────────────────────────
+
+export async function fetchFollows(userId: string): Promise<Follow[]> {
+  const { data } = await supabase
+    .from("follows")
+    .select("*")
+    .or(`follower_id.eq.${userId},following_id.eq.${userId}`)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r) => dbRowToFollow(r as Record<string, unknown>));
+}
+
+// ── Notification queries ──────────────────────────────────────
+
+export async function fetchNotifications(userId: string): Promise<Notification[]> {
+  const { data } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r) => dbRowToNotification(r as Record<string, unknown>));
+}
+
+// ── Discount code queries ─────────────────────────────────────
+
+export async function fetchDiscountCodes(userId: string): Promise<DiscountCode[]> {
+  const { data } = await supabase
+    .from("discount_codes")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r) => dbRowToDiscountCode(r as Record<string, unknown>));
+}
+
+// ── Pending task queries ──────────────────────────────────────
+
+export async function fetchPendingTasks(userId: string): Promise<PendingTask[]> {
+  const { data } = await supabase
+    .from("pending_tasks")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r) => dbRowToPendingTask(r as Record<string, unknown>));
+}
+
+// ── Community data lookup ─────────────────────────────────────
 
 export function getCommunityData(
   name: string,
