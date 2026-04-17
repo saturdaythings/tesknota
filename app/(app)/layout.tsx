@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { AppShell } from '@/components/layout/AppShell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { FloatingActionButton } from '@/components/layout/FloatingActionButton';
 import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
+import { FragranceDetailModal } from '@/components/collection/fragrance-detail-modal';
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
 import { AddToWishlistModal } from '@/components/wishlist/add-to-wishlist-modal';
 import { useUser, getFriend } from '@/lib/user-context';
@@ -14,6 +16,9 @@ import { ToastProvider } from '@/components/ui/toast';
 import { MobileNavProvider } from '@/lib/mobile-nav-context';
 import { BotDrawer } from '@/components/ui/bot-drawer';
 import { CmdPalette } from '@/components/ui/cmd-palette';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import type { UserFragrance, UserCompliment } from '@/types';
 
 function DataErrorBanner() {
   const { loadError, reload } = useData();
@@ -46,7 +51,19 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
   const [addFragOpen, setAddFragOpen] = useState(false);
   const [addCompOpen, setAddCompOpen] = useState(false);
   const [addWishOpen, setAddWishOpen] = useState(false);
+  const [openFlagCount, setOpenFlagCount] = useState(0);
   const friend = getFriend(user, profiles);
+
+  const refreshFlagCount = useCallback(async () => {
+    if (!user.isAdmin) return;
+    const { count } = await supabase
+      .from("community_flags")
+      .select("id", { count: "exact", head: true })
+      .eq("resolved", false);
+    setOpenFlagCount(count ?? 0);
+  }, [user.isAdmin]);
+
+  useEffect(() => { refreshFlagCount(); }, [refreshFlagCount]);
 
   const collectionCount = fragrances.filter((f) => f.status === 'CURRENT').length;
   const wishlistCount = fragrances.filter((f) => f.status === 'WANT_TO_BUY' || f.status === 'WANT_TO_SMELL').length;
@@ -84,7 +101,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     ...(user.isAdmin ? [{
       label: 'Admin',
       items: [
-        { href: '/admin', label: 'Admin Dashboard', exact: true },
+        { href: '/admin', label: 'Admin Dashboard', exact: true, hasNewActivity: openFlagCount > 0 },
         { href: '/admin/design', label: 'Design System' },
       ],
     }] : []),
