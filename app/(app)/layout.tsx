@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { FloatingActionButton } from '@/components/layout/FloatingActionButton';
+import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
+import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
+import { AddToWishlistModal } from '@/components/wishlist/add-to-wishlist-modal';
 import { useUser, getFriend } from '@/lib/user-context';
 import { DataProvider, useData } from '@/lib/data-context';
 import { ToastProvider } from '@/components/ui/toast';
@@ -40,6 +43,9 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
 }) {
   const router = useRouter();
   const { fragrances, compliments } = useData();
+  const [addFragOpen, setAddFragOpen] = useState(false);
+  const [addCompOpen, setAddCompOpen] = useState(false);
+  const [addWishOpen, setAddWishOpen] = useState(false);
   const friend = getFriend(user, profiles);
 
   const collectionCount = fragrances.filter((f) => f.status === 'CURRENT').length;
@@ -84,6 +90,12 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     }] : []),
   ];
 
+  function handleFabAction(action: string) {
+    if (action === 'add-fragrance') setAddFragOpen(true);
+    else if (action === 'log-compliment') setAddCompOpen(true);
+    else if (action === 'add-wishlist') setAddWishOpen(true);
+  }
+
   return (
     <AppShell
       sidebar={
@@ -97,13 +109,16 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
         />
       }
     >
+      <AddFragranceModal open={addFragOpen} onClose={() => setAddFragOpen(false)} />
+      <LogComplimentModal open={addCompOpen} onClose={() => setAddCompOpen(false)} />
+      <AddToWishlistModal open={addWishOpen} onClose={() => setAddWishOpen(false)} />
       <ToastProvider>
         <DataErrorBanner />
         {children}
         <BotDrawer />
         <CmdPalette />
       </ToastProvider>
-      <FloatingActionButton />
+      <FloatingActionButton onAction={handleFabAction} />
     </AppShell>
   );
 }

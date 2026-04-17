@@ -112,6 +112,9 @@
      --space-12: 48px;
      --space-16: 64px;
 
+  /* --- Component size constants --- */
+  --size-row-min: 80px;
+
   /* --- Layout --- */
   --sidebar-width: 220px;
      --header-height: 64px;
