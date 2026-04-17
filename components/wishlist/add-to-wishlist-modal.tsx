@@ -6,6 +6,7 @@ import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/moda
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { FieldLabel } from "@/components/ui/field-label";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -136,18 +137,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
 
           {/* Fragrance Name with typeahead */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontFamily: "var(--font-sans)",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: "var(--color-navy)",
-                marginBottom: "4px",
-              }}
-            >
-              Fragrance Name
-            </label>
+            <FieldLabel>Fragrance Name</FieldLabel>
             <div style={{ position: "relative" }}>
               <div style={{ position: "relative" }}>
                 <input
@@ -198,7 +188,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                     background: "var(--color-cream)",
                     border: "1px solid var(--color-cream-dark)",
                     borderRadius: "3px",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                    boxShadow: "var(--shadow-md)",
                     maxHeight: "220px",
                     overflowY: "auto",
                   }}
@@ -244,18 +234,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
 
           {/* House */}
           <div>
-            <label
-              style={{
-                display: "block",
-                fontFamily: "var(--font-sans)",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: "var(--color-navy)",
-                marginBottom: "4px",
-              }}
-            >
-              House
-            </label>
+            <FieldLabel>House</FieldLabel>
             <Input
               value={house}
               onChange={(e) => setHouse(e.target.value)}

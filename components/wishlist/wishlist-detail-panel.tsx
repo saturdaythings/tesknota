@@ -139,7 +139,7 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
           right: 0,
           bottom: 0,
           width: "360px",
-          boxShadow: "-4px 0 32px rgba(0,0,0,0.15)",
+          boxShadow: "var(--shadow-md)",
         }}
         className="max-sm:w-full max-sm:top-auto max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:h-[85vh] max-sm:rounded-t-[12px]"
       >
@@ -156,29 +156,19 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
                 {frag.name}
               </h2>
               {concLabel && (
-                <span style={{
-                  border: "1px solid rgba(30,45,69,0.8)",
-                  color: "rgba(30,45,69,0.8)",
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  padding: "2px 6px",
-                  borderRadius: "2px",
-                  textTransform: "uppercase",
-                  flexShrink: 0,
-                  alignSelf: "flex-start",
-                  marginTop: "2px",
-                }}>
+                <Badge variant="neutral" style={{ flexShrink: 0, alignSelf: "flex-start", marginTop: "2px" }}>
                   {concLabel}
-                </span>
+                </Badge>
               )}
-              <button
+              <Button
+                variant="icon"
+                size="sm"
                 onClick={handleClose}
                 aria-label="Close"
-                style={{ background: "transparent", border: "none", cursor: "pointer", color: "rgba(30,45,69,0.8)", padding: "2px", flexShrink: 0, alignSelf: "flex-start" }}
+                style={{ flexShrink: 0, alignSelf: "flex-start" }}
               >
                 <X size={18} />
-              </button>
+              </Button>
             </div>
             <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(30,45,69,0.8)", marginBottom: "8px" }}>
               {frag.house}
