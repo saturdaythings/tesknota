@@ -47,10 +47,20 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
   signOut: () => Promise<void>;
 }) {
   const router = useRouter();
-  const { fragrances, compliments } = useData();
+  const { fragrances, compliments, removeFrag } = useData();
   const [addFragOpen, setAddFragOpen] = useState(false);
   const [addCompOpen, setAddCompOpen] = useState(false);
   const [addWishOpen, setAddWishOpen] = useState(false);
+
+  // FAB edit-action state
+  const [fragPickerOpen, setFragPickerOpen] = useState(false);
+  const [fragPickerQuery, setFragPickerQuery] = useState('');
+  const [editFragTarget, setEditFragTarget] = useState<UserFragrance | null>(null);
+  const [fragDetailOpen, setFragDetailOpen] = useState(false);
+  const [compPickerOpen, setCompPickerOpen] = useState(false);
+  const [compPickerQuery, setCompPickerQuery] = useState('');
+  const [editCompTarget, setEditCompTarget] = useState<UserCompliment | null>(null);
+  const [editCompOpen, setEditCompOpen] = useState(false);
   const [openFlagCount, setOpenFlagCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const friend = getFriend(user, profiles);
@@ -122,7 +132,25 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     if (action === 'add-fragrance') setAddFragOpen(true);
     else if (action === 'log-compliment') setAddCompOpen(true);
     else if (action === 'add-wishlist') setAddWishOpen(true);
+    else if (action === 'edit-fragrance' || action === 'change-status' || action === 'remove-fragrance') {
+      setFragPickerQuery('');
+      setFragPickerOpen(true);
+    } else if (action === 'edit-compliment' || action === 'delete-compliment') {
+      setCompPickerQuery('');
+      setCompPickerOpen(true);
+    }
   }
+
+  const myFrags = fragrances.filter((f) => f.userId === user.id);
+  const myComps = compliments.filter((c) => c.userId === user.id);
+
+  const fragPickerResults = myFrags
+    .filter((f) => !fragPickerQuery || f.name.toLowerCase().includes(fragPickerQuery.toLowerCase()) || f.house.toLowerCase().includes(fragPickerQuery.toLowerCase()))
+    .slice(0, 10);
+
+  const compPickerResults = myComps
+    .filter((c) => !compPickerQuery || (c.primaryFrag ?? '').toLowerCase().includes(compPickerQuery.toLowerCase()))
+    .slice(0, 10);
 
   return (
     <AppShell
@@ -139,8 +167,113 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     >
       <ToastProvider>
         <AddFragranceModal open={addFragOpen} onClose={() => setAddFragOpen(false)} />
-        <LogComplimentModal open={addCompOpen} onClose={() => setAddCompOpen(false)} />
+        <LogComplimentModal
+          open={addCompOpen || editCompOpen}
+          onClose={() => { setAddCompOpen(false); setEditCompOpen(false); setEditCompTarget(null); }}
+          editing={editCompTarget}
+        />
         <AddToWishlistModal open={addWishOpen} onClose={() => setAddWishOpen(false)} />
+        <FragranceDetailModal
+          open={fragDetailOpen}
+          frag={editFragTarget}
+          onClose={() => { setFragDetailOpen(false); setEditFragTarget(null); }}
+          compliments={myComps}
+          userId={user.id}
+          onDelete={(f) => { removeFrag(f.id); setFragDetailOpen(false); setEditFragTarget(null); }}
+        />
+
+        {/* Fragrance picker for FAB edit/change-status/remove actions */}
+        {fragPickerOpen && (
+          <div
+            className="fixed inset-0 z-[600]"
+            style={{ background: 'var(--color-navy-backdrop)' }}
+            onClick={() => setFragPickerOpen(false)}
+          >
+            <div
+              className="fixed left-1/2 top-[15vh] -translate-x-1/2 w-full max-w-[480px] bg-[var(--color-cream)] border border-[var(--color-sand-light)] z-[601]"
+              style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.16)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--color-cream-dark)' }}>
+                <div className="font-sans uppercase mb-3" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}>
+                  Select a fragrance
+                </div>
+                <Input
+                  value={fragPickerQuery}
+                  onChange={(e) => setFragPickerQuery(e.target.value)}
+                  placeholder="Search by name or house..."
+                  autoFocus
+                />
+              </div>
+              <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                {fragPickerResults.map((f) => (
+                  <Button
+                    key={f.id}
+                    variant="ghost"
+                    className="w-full justify-between px-5 py-3 h-auto min-h-0 rounded-none"
+                    style={{ borderBottom: '1px solid var(--color-row-divider)' }}
+                    onClick={() => { setEditFragTarget(f); setFragDetailOpen(true); setFragPickerOpen(false); }}
+                  >
+                    <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>{f.name}</span>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{f.house}</span>
+                  </Button>
+                ))}
+                {fragPickerResults.length === 0 && (
+                  <div className="px-5 py-4 font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-meta-text)' }}>
+                    No fragrances found
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Compliment picker for FAB edit-compliment/delete-compliment actions */}
+        {compPickerOpen && (
+          <div
+            className="fixed inset-0 z-[600]"
+            style={{ background: 'var(--color-navy-backdrop)' }}
+            onClick={() => setCompPickerOpen(false)}
+          >
+            <div
+              className="fixed left-1/2 top-[15vh] -translate-x-1/2 w-full max-w-[480px] bg-[var(--color-cream)] border border-[var(--color-sand-light)] z-[601]"
+              style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.16)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--color-cream-dark)' }}>
+                <div className="font-sans uppercase mb-3" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}>
+                  Select a compliment
+                </div>
+                <Input
+                  value={compPickerQuery}
+                  onChange={(e) => setCompPickerQuery(e.target.value)}
+                  placeholder="Search by fragrance name..."
+                  autoFocus
+                />
+              </div>
+              <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                {compPickerResults.map((c) => (
+                  <Button
+                    key={c.id}
+                    variant="ghost"
+                    className="w-full justify-between px-5 py-3 h-auto min-h-0 rounded-none"
+                    style={{ borderBottom: '1px solid var(--color-row-divider)' }}
+                    onClick={() => { setEditCompTarget(c); setEditCompOpen(true); setCompPickerOpen(false); }}
+                  >
+                    <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>{c.primaryFrag}</span>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{c.month && c.year ? `${c.month}/${c.year}` : ''}</span>
+                  </Button>
+                ))}
+                {compPickerResults.length === 0 && (
+                  <div className="px-5 py-4 font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-meta-text)' }}>
+                    No compliments found
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <DataErrorBanner />
         {children}
         <BotDrawer />
