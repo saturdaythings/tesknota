@@ -6,10 +6,11 @@ import { PageContent } from "@/components/layout/PageContent";
 import { FragSearch } from "@/components/ui/frag-search";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
-import { avgRatingStr, parseRating, MONTHS } from "@/lib/frag-utils";
+import { addedThisMonth, avgRatingStr, parseRating, MONTHS, getAccords } from "@/lib/frag-utils";
 import { Select } from "@/components/ui/select";
 import { TabPill } from "@/components/ui/tab-pill";
 import { Button } from "@/components/ui/button";
+import { CompareView } from "@/components/analytics/comparative-view";
 import {
   AreaChart,
   Area,
@@ -24,8 +25,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { TrendingUp, MessageCircle, PieChart as PieIcon, Star, Award } from "lucide-react";
-import type { UserFragrance, UserCompliment } from "@/types";
+import { TrendingUp, MessageCircle, PieChart as PieIcon, Star, Award, Leaf, Sun, Wind, Snowflake } from "lucide-react";
+import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -66,56 +67,70 @@ const STATUS_COLORS: Record<string, string> = {
   WANT_TO_IDENTIFY: "var(--color-status-want)",
 };
 
-// ── Helpers ────────────────────────────────────────────────
+const SEASON_META: Record<Season, { label: string; icon: React.ReactNode }> = {
+  spring: { label: "Spring", icon: <Leaf size={18} /> },
+  summer: { label: "Summer", icon: <Sun size={18} /> },
+  fall: { label: "Autumn", icon: <Wind size={18} /> },
+  winter: { label: "Winter", icon: <Snowflake size={18} /> },
+};
+
+const ALL_SEASONS: Season[] = ["spring", "summer", "fall", "winter"];
+
+// ── Data builders ─────────────────────────────────────────
 
 function buildGrowthData(frags: UserFragrance[]) {
   const sorted = [...frags].sort((a, b) => (a.createdAt ?? "").localeCompare(b.createdAt ?? ""));
-  const counts: Record<string, number> = {};
+  const byMonth: Record<string, { count: number; names: string[] }> = {};
   sorted.forEach((f) => {
     const d = new Date(f.createdAt);
     if (isNaN(d.getTime())) return;
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    counts[key] = (counts[key] ?? 0) + 1;
+    if (!byMonth[key]) byMonth[key] = { count: 0, names: [] };
+    byMonth[key].count++;
+    byMonth[key].names.push(f.name);
   });
   let cum = 0;
-  return Object.entries(counts)
+  return Object.entries(byMonth)
     .sort()
-    .map(([key, n]) => {
-      cum += n;
+    .map(([key, { count, names }]) => {
+      cum += count;
       const [yr, mo] = key.split("-");
       const label = MONTHS[parseInt(mo) - 1];
-      return { label, fullLabel: `${label} ${yr}`, count: cum };
+      return { label, fullLabel: `${label} ${yr}`, count: cum, fragsAdded: names };
     });
 }
 
-function buildMonthlyBars(items: UserCompliment[]) {
-  const counts: Record<string, number> = {};
+function buildMonthlyBars(items: UserCompliment[], baseFrags: UserFragrance[]) {
+  const byMonth: Record<string, { count: number; fragNames: string[] }> = {};
   items.forEach((c) => {
-    const mo = parseInt(c.month);
-    if (!c.year || isNaN(mo)) return;
-    const key = `${c.year}-${String(mo).padStart(2, "0")}`;
-    counts[key] = (counts[key] ?? 0) + 1;
+    const d = new Date(c.createdAt);
+    if (isNaN(d.getTime())) return;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (!byMonth[key]) byMonth[key] = { count: 0, fragNames: [] };
+    byMonth[key].count++;
+    if (c.primaryFragId) {
+      const frag = baseFrags.find((f) => f.id === c.primaryFragId || f.fragranceId === c.primaryFragId);
+      const name = frag?.name ?? (c as any).primaryFrag ?? "";
+      if (name && !byMonth[key].fragNames.includes(name)) byMonth[key].fragNames.push(name);
+    }
   });
-  return Object.entries(counts)
+  return Object.entries(byMonth)
     .sort()
-    .map(([key, count]) => {
+    .map(([key, { count, fragNames }]) => {
       const [yr, mo] = key.split("-");
       const label = MONTHS[parseInt(mo) - 1];
-      return { label, fullLabel: `${label} ${yr}`, count };
+      return { label, fullLabel: `${label} ${yr}`, count, fragNames };
     });
 }
 
 function buildMonthOptions(frags: UserFragrance[], comps: UserCompliment[]): { value: string; label: string }[] {
   const s = new Set<string>();
-  frags.forEach((f) => {
-    const d = new Date(f.createdAt);
+  const add = (dt: string) => {
+    const d = new Date(dt);
     if (!isNaN(d.getTime())) s.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-  });
-  comps.forEach((c) => {
-    const mo = parseInt(c.month);
-    if (!c.year || isNaN(mo)) return;
-    s.add(`${c.year}-${String(mo).padStart(2, "0")}`);
-  });
+  };
+  frags.forEach((f) => add(f.createdAt));
+  comps.forEach((c) => add(c.createdAt));
   const now = new Date();
   s.add(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`);
   return Array.from(s)
@@ -127,105 +142,234 @@ function buildMonthOptions(frags: UserFragrance[], comps: UserCompliment[]): { v
     });
 }
 
+// ── Seasonal builders ─────────────────────────────────────
+
+function fragsSeason(frags: UserFragrance[], season: Season) {
+  const ms = SEASON_MONTHS[season];
+  return frags.filter((f) => {
+    const d = new Date(f.createdAt);
+    return !isNaN(d.getTime()) && ms.includes(d.getMonth() + 1);
+  });
+}
+
+function compsSeason(comps: UserCompliment[], season: Season) {
+  const ms = SEASON_MONTHS[season];
+  return comps.filter((c) => {
+    const d = new Date(c.createdAt);
+    return !isNaN(d.getTime()) && ms.includes(d.getMonth() + 1);
+  });
+}
+
+function buildSeasonalCompliments(comps: UserCompliment[], frags: UserFragrance[]) {
+  return ALL_SEASONS.map((season) => {
+    const sc = compsSeason(comps, season);
+    const counts: Record<string, { name: string; count: number }> = {};
+    sc.forEach((c) => {
+      if (!c.primaryFragId) return;
+      if (!counts[c.primaryFragId]) {
+        const frag = frags.find((f) => f.id === c.primaryFragId || f.fragranceId === c.primaryFragId);
+        counts[c.primaryFragId] = { name: frag?.name ?? (c as any).primaryFrag ?? "", count: 0 };
+      }
+      counts[c.primaryFragId].count++;
+    });
+    const topFrag = Object.values(counts).sort((a, b) => b.count - a.count)[0];
+    return { season, count: sc.length, topFrag: topFrag?.name ?? null };
+  });
+}
+
+function buildSeasonalAcquisitions(frags: UserFragrance[]) {
+  return ALL_SEASONS.map((season) => {
+    const sf = fragsSeason(frags, season);
+    const topFrag = sf.length > 0 ? sf[sf.length - 1].name : null;
+    return { season, count: sf.length, topFrag };
+  });
+}
+
+function buildSeasonalAccords(frags: UserFragrance[], communityFrags: CommunityFrag[]) {
+  return ALL_SEASONS.map((season) => {
+    const sf = fragsSeason(frags, season);
+    const counts: Record<string, number> = {};
+    sf.forEach((f) => {
+      getAccords(f, communityFrags).forEach((a) => {
+        counts[a] = (counts[a] ?? 0) + 1;
+      });
+    });
+    const topAccords = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    return { season, topAccords };
+  });
+}
+
 // ── Tooltip style ─────────────────────────────────────────
 
 const tooltipStyle: React.CSSProperties = {
   background: "var(--color-cream)",
-  border: "1px solid var(--color-cream-dark)",
-  borderRadius: "var(--radius-md)",
+  border: "1px solid var(--color-row-divider)",
+  borderRadius: "var(--radius-lg)",
   boxShadow: "var(--shadow-md)",
   fontFamily: "var(--font-sans)",
   fontSize: "var(--text-xs)",
-  padding: "6px 10px",
   color: "var(--color-navy)",
+  padding: "var(--space-3)",
+  maxHeight: 240,
+  overflowY: "auto" as const,
+  minWidth: 160,
 };
+
+function TooltipHeader({ label }: { label: string }) {
+  return (
+    <div style={{
+      fontFamily: "var(--font-sans)",
+      fontSize: "var(--text-label)",
+      letterSpacing: "var(--tracking-wide)",
+      textTransform: "uppercase" as const,
+      color: "var(--color-meta-text)",
+      marginBottom: "var(--space-2)",
+      paddingBottom: "var(--space-1)",
+      borderBottom: "1px solid var(--color-row-divider)",
+    }}>
+      {label}
+    </div>
+  );
+}
+
+function TooltipFragLine({ name }: { name: string }) {
+  return (
+    <div style={{
+      fontFamily: "var(--font-serif)",
+      fontStyle: "italic",
+      fontSize: "var(--text-note)",
+      color: "var(--color-navy)",
+      lineHeight: 1.3,
+    }}>
+      {name}
+    </div>
+  );
+}
 
 function GrowthTooltip({ active, payload }: {
   active?: boolean;
-  payload?: Array<{ payload: { fullLabel: string }; value: number }>;
+  payload?: Array<{ payload: { fullLabel: string; fragsAdded: string[] }; value: number }>;
 }) {
   if (!active || !payload?.length) return null;
-  return <div style={tooltipStyle}>{payload[0].payload.fullLabel}: {payload[0].value} fragrances</div>;
+  const d = payload[0].payload;
+  return (
+    <div style={tooltipStyle}>
+      <TooltipHeader label={`${d.fullLabel} — ${d.fragsAdded.length} added`} />
+      {d.fragsAdded.map((n) => <TooltipFragLine key={n} name={n} />)}
+    </div>
+  );
 }
 
-function BarsTooltip({ active, payload, unit }: {
+function CompsTooltip({ active, payload }: {
   active?: boolean;
-  payload?: Array<{ payload: { fullLabel: string }; value: number }>;
-  unit?: string;
+  payload?: Array<{ payload: { fullLabel: string; count: number; fragNames: string[] } }>;
 }) {
   if (!active || !payload?.length) return null;
-  return <div style={tooltipStyle}>{payload[0].payload.fullLabel}: {payload[0].value} {unit ?? ""}</div>;
+  const d = payload[0].payload;
+  return (
+    <div style={tooltipStyle}>
+      <TooltipHeader label={`${d.fullLabel} — ${d.count} compliments`} />
+      {d.fragNames.map((n) => <TooltipFragLine key={n} name={n} />)}
+    </div>
+  );
 }
 
 function StatusTooltip({ active, payload }: {
   active?: boolean;
-  payload?: Array<{ payload: { name: string; value: number } }>;
+  payload?: Array<{ payload: { name: string; value: number; fragrances: string[] } }>;
 }) {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
-  return <div style={tooltipStyle}>{d.name}: {d.value}</div>;
+  return (
+    <div style={tooltipStyle}>
+      <TooltipHeader label={`${d.name} — ${d.value}`} />
+      {d.fragrances.slice(0, 12).map((n) => <TooltipFragLine key={n} name={n} />)}
+      {d.fragrances.length > 12 && (
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", marginTop: "var(--space-1)" }}>
+          +{d.fragrances.length - 12} more
+        </div>
+      )}
+    </div>
+  );
 }
 
 function RatingTooltip({ active, payload }: {
   active?: boolean;
-  payload?: Array<{ payload: { star: string }; value: number }>;
+  payload?: Array<{ payload: { star: string; count: number; fragrances: string[] } }>;
 }) {
   if (!active || !payload?.length) return null;
-  return <div style={tooltipStyle}>{payload[0].payload.star}: {payload[0].value} fragrances</div>;
-}
-
-// ── Skeleton ──────────────────────────────────────────────
-
-function ChartSkeleton({ height }: { height: number }) {
+  const d = payload[0].payload;
   return (
-    <div
-      style={{
-        height,
-        background: "var(--color-cream-dark)",
-        borderRadius: "3px",
-        opacity: 0.5,
-      }}
-    />
+    <div style={tooltipStyle}>
+      <TooltipHeader label={`${d.star} — ${d.count} fragrances`} />
+      {d.fragrances.map((n) => <TooltipFragLine key={n} name={n} />)}
+    </div>
   );
 }
 
-// ── Empty state ───────────────────────────────────────────
+// ── Hover tooltip for non-Recharts elements ───────────────
 
-function ChartEmpty({ icon, title, height }: {
-  icon: React.ReactNode;
-  title: string;
-  height: number;
+function HoverTooltip({ children, lines, header }: {
+  children: React.ReactNode;
+  lines: string[];
+  header?: string;
 }) {
+  const [show, setShow] = useState(false);
+  if (!lines.length) return <>{children}</>;
   return (
     <div
-      style={{
-        height,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "8px",
-        color: "var(--color-navy)",
-      }}
+      style={{ position: "relative" }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
     >
+      {children}
+      {show && (
+        <div style={{
+          ...tooltipStyle,
+          position: "absolute",
+          top: "50%",
+          left: "calc(100% + var(--space-2))",
+          transform: "translateY(-50%)",
+          zIndex: 50,
+          pointerEvents: "none",
+        }}>
+          {header && <TooltipHeader label={header} />}
+          {lines.map((n) => <TooltipFragLine key={n} name={n} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Skeleton / Empty ──────────────────────────────────────
+
+function ChartSkeleton({ height }: { height: number }) {
+  return <div style={{ height, background: "var(--color-cream-dark)", borderRadius: "3px", opacity: 0.5 }} />;
+}
+
+function ChartEmpty({ icon, title, height }: { icon: React.ReactNode; title: string; height: number }) {
+  return (
+    <div style={{ height, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--space-2)", color: "var(--color-navy)" }}>
       {icon}
-      <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px" }}>{title}</span>
+      <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)" }}>{title}</span>
     </div>
   );
 }
 
 // ── Ranked row ────────────────────────────────────────────
 
-function RankedRow({ rank, name, sub, count, maxCount, unit }: {
+function RankedRow({ rank, name, sub, count, maxCount, unit, tooltipLines, tooltipHeader }: {
   rank: number;
   name: string;
   sub?: string;
   count: number;
   maxCount: number;
   unit: string;
+  tooltipLines?: string[];
+  tooltipHeader?: string;
 }) {
   const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
-  return (
+  const row = (
     <div style={{ display: "flex", alignItems: "center", height: 44 }}>
       <span style={{ width: 24, flexShrink: 0, fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)", fontWeight: 500 }}>
         {rank}
@@ -240,7 +384,7 @@ function RankedRow({ rank, name, sub, count, maxCount, unit }: {
           </span>
         )}
       </div>
-      <div style={{ flex: 1, height: 4, background: "var(--color-cream-dark)", borderRadius: "var(--radius-full)", margin: "0 16px", overflow: "hidden" }}>
+      <div style={{ flex: 1, height: 4, background: "var(--color-cream-dark)", borderRadius: "var(--radius-full)", margin: "0 var(--space-4)", overflow: "hidden" }}>
         <div style={{ height: "100%", width: `${pct}%`, background: "var(--color-accent)", borderRadius: "var(--radius-full)" }} />
       </div>
       <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>
@@ -248,9 +392,14 @@ function RankedRow({ rank, name, sub, count, maxCount, unit }: {
       </span>
     </div>
   );
+
+  if (tooltipLines?.length) {
+    return <HoverTooltip lines={tooltipLines} header={tooltipHeader}>{row}</HoverTooltip>;
+  }
+  return row;
 }
 
-// ── Chart card wrapper ────────────────────────────────────
+// ── Chart card ────────────────────────────────────────────
 
 function ChartCard({ title, sub, children, wide }: {
   title: string;
@@ -259,21 +408,19 @@ function ChartCard({ title, sub, children, wide }: {
   wide?: boolean;
 }) {
   return (
-    <div
-      style={{
-        background: "var(--color-cream)",
-        border: "1px solid var(--color-cream-dark)",
-        borderRadius: "var(--radius-lg)",
-        padding: "var(--space-6)",
-        gridColumn: wide ? "1 / -1" : undefined,
-      }}
-    >
-      <div style={{ marginBottom: "16px" }}>
-        <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "18px", color: "var(--color-navy)", marginBottom: "2px" }}>
+    <div style={{
+      background: "var(--color-cream)",
+      border: "1px solid var(--color-cream-dark)",
+      borderRadius: "var(--radius-lg)",
+      padding: "var(--space-6)",
+      gridColumn: wide ? "1 / -1" : undefined,
+    }}>
+      <div style={{ marginBottom: "var(--space-4)" }}>
+        <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-lg)", color: "var(--color-navy)", marginBottom: "var(--space-half)" }}>
           {title}
         </div>
         {sub && (
-          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
             {sub}
           </div>
         )}
@@ -288,14 +435,56 @@ function ChartCard({ title, sub, children, wide }: {
 function StatCard({ label, value, delta }: { label: string; value: string | number; delta?: string }) {
   return (
     <div style={{ background: "var(--color-cream)", border: "1px solid var(--color-cream-dark)", borderRadius: "var(--radius-lg)", padding: "var(--space-6) var(--space-6) var(--space-5)" }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "var(--text-xs)", color: "var(--color-navy)", textTransform: "uppercase", letterSpacing: "var(--tracking-lg)", marginBottom: "8px" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "var(--text-xs)", color: "var(--color-navy)", textTransform: "uppercase", letterSpacing: "var(--tracking-lg)", marginBottom: "var(--space-2)" }}>
         {label}
       </div>
-      <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "var(--text-hero)", lineHeight: 1, color: "var(--color-navy)", marginBottom: "8px" }}>
+      <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "var(--text-hero)", lineHeight: 1, color: "var(--color-navy)", marginBottom: "var(--space-2)" }}>
         {value}
       </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "var(--text-sm)", color: "var(--color-navy)", minHeight: "20px" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "var(--text-sm)", color: "var(--color-meta-text)", minHeight: "var(--space-5)" }}>
         {delta ?? ""}
+      </div>
+    </div>
+  );
+}
+
+// ── Season card ───────────────────────────────────────────
+
+function SeasonCard({ season, children }: { season: Season; children: React.ReactNode }) {
+  const { label, icon } = SEASON_META[season];
+  return (
+    <div style={{
+      background: "var(--color-cream)",
+      border: "1px solid var(--color-cream-dark)",
+      borderRadius: "var(--radius-lg)",
+      padding: "var(--space-6)",
+      display: "flex",
+      flexDirection: "column",
+      gap: "var(--space-3)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", color: "var(--color-meta-text)" }}>
+        {icon}
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)" }}>
+          {label}
+        </span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function SeasonSection({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginTop: "var(--space-8)" }}>
+      <div style={{ marginBottom: "var(--space-4)" }}>
+        <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-lg)", color: "var(--color-navy)" }}>
+          {title}
+        </div>
+        {sub && <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{sub}</div>}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--space-4)" }}
+        className="max-sm:grid-cols-2">
+        {children}
       </div>
     </div>
   );
@@ -305,7 +494,7 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
 
 export default function AnalyticsPage() {
   const { user, profiles } = useUser();
-  const { fragrances, compliments, isLoaded } = useData();
+  const { fragrances, compliments, communityFrags, isLoaded } = useData();
 
   const [period, setPeriod] = useState<TimePeriod>("all");
   const [season, setSeason] = useState<Season>("winter");
@@ -321,7 +510,6 @@ export default function AnalyticsPage() {
   const curYear = new Date().getFullYear();
   const now = new Date();
 
-  // Base data sets
   const MF = fragrances.filter((f) => f.userId === user.id);
   const MC = compliments.filter((c) => c.userId === user.id);
   const FF = friend ? fragrances.filter((f) => f.userId === friend.id) : [];
@@ -330,12 +518,9 @@ export default function AnalyticsPage() {
   const baseFrags = showFriend ? FF : MF;
   const baseComps = showFriend ? FC : MC;
 
-  // Filter fragrances by time — uses createdAt (when added to collection)
-  function filterFragsByTime(items: UserFragrance[]): UserFragrance[] {
+  function filterByTime<T extends { createdAt: string }>(items: T[]): T[] {
     if (period === "all") return items;
-    if (period === "year") {
-      return items.filter((i) => new Date(i.createdAt).getFullYear() === curYear);
-    }
+    if (period === "year") return items.filter((i) => new Date(i.createdAt).getFullYear() === curYear);
     if (period === "season") {
       const ms = SEASON_MONTHS[season];
       return items.filter((i) => ms.includes(new Date(i.createdAt).getMonth() + 1));
@@ -350,62 +535,45 @@ export default function AnalyticsPage() {
     return items;
   }
 
-  // Filter compliments by time — uses month/year fields (when the compliment happened)
-  function filterCompsByTime(items: UserCompliment[]): UserCompliment[] {
-    if (period === "all") return items;
-    if (period === "year") {
-      return items.filter((c) => c.year === String(curYear));
-    }
-    if (period === "season") {
-      const ms = SEASON_MONTHS[season];
-      return items.filter((c) => ms.includes(parseInt(c.month)));
-    }
-    if (period === "month") {
-      const [y, m] = selectedMonth.split("-").map(Number);
-      return items.filter((c) => c.year === String(y) && parseInt(c.month) === m);
-    }
-    return items;
-  }
+  const activeFrags = filterByTime(baseFrags);
+  const activeComps = filterByTime(baseComps);
 
-  const activeFrags = filterFragsByTime(baseFrags);
-  const activeComps = filterCompsByTime(baseComps);
-
-  // Stat card data
   const totalComps = activeComps.length;
-  const compDelta = activeComps.filter((c) => {
-    const mo = parseInt(c.month);
-    return !isNaN(mo) && mo === now.getMonth() + 1 && c.year === String(now.getFullYear());
-  }).length;
+  const compDelta = addedThisMonth(activeComps, now.getMonth() + 1, now.getFullYear());
   const inCollection = activeFrags.length;
   const ratedCount = activeFrags.filter((f) => f.personalRating).length;
   const strangerCount = activeComps.filter((c) => c.relation === "Stranger").length;
   const strangerPct = totalComps > 0 ? Math.round((strangerCount / totalComps) * 100) : 0;
   const avgRat = avgRatingStr(activeFrags);
 
-  // Chart data
   const growthData = useMemo(() => buildGrowthData(activeFrags), [activeFrags]);
-  const complimentsMonthly = useMemo(() => buildMonthlyBars(activeComps), [activeComps]);
+  const complimentsMonthly = useMemo(() => buildMonthlyBars(activeComps, baseFrags), [activeComps, baseFrags]);
 
   const statusData = useMemo(() => {
-    const counts: Record<string, number> = {};
-    activeFrags.forEach((f) => { counts[f.status] = (counts[f.status] ?? 0) + 1; });
+    const counts: Record<string, { value: number; fragrances: string[] }> = {};
+    activeFrags.forEach((f) => {
+      if (!counts[f.status]) counts[f.status] = { value: 0, fragrances: [] };
+      counts[f.status].value++;
+      counts[f.status].fragrances.push(f.name);
+    });
     return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .map(([status, value]) => ({
+      .sort((a, b) => b[1].value - a[1].value)
+      .map(([status, { value, fragrances }]) => ({
         status,
         name: STATUS_LABELS[status] ?? status,
         value,
+        fragrances,
         color: STATUS_COLORS[status] ?? "var(--color-meta-text)",
       }));
   }, [activeFrags]);
 
   const ratingData = useMemo(() => {
-    const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const byRating: Record<number, string[]> = { 1: [], 2: [], 3: [], 4: [], 5: [] };
     activeFrags.forEach((f) => {
       const r = parseRating(f.personalRating);
-      if (r >= 1 && r <= 5) counts[r]++;
+      if (r >= 1 && r <= 5) byRating[r].push(f.name);
     });
-    return [5, 4, 3, 2, 1].map((s) => ({ star: `★ ${s}`, count: counts[s] ?? 0 }));
+    return [5, 4, 3, 2, 1].map((s) => ({ star: `★ ${s}`, count: byRating[s].length, fragrances: byRating[s] }));
   }, [activeFrags]);
   const hasRatings = ratingData.some((d) => d.count > 0);
 
@@ -416,7 +584,7 @@ export default function AnalyticsPage() {
       if (!counts[c.primaryFragId]) {
         const frag = baseFrags.find((f) => f.id === c.primaryFragId || f.fragranceId === c.primaryFragId);
         counts[c.primaryFragId] = {
-          name: frag?.name ?? c.primaryFrag ?? c.primaryFragId,
+          name: frag?.name ?? (c as any).primaryFrag ?? c.primaryFragId,
           house: frag?.house ?? "",
           count: 0,
         };
@@ -427,19 +595,30 @@ export default function AnalyticsPage() {
   }, [activeComps, baseFrags]);
 
   const locationData = useMemo(() => {
-    const counts: Record<string, number> = {};
+    const byLoc: Record<string, { count: number; fragNames: string[] }> = {};
     activeComps.forEach((c) => {
-      const loc = c.city ?? c.country ?? c.location ?? null;
+      const loc = c.city ?? c.country ?? (c as any).location ?? null;
       if (!loc) return;
-      counts[loc] = (counts[loc] ?? 0) + 1;
+      if (!byLoc[loc]) byLoc[loc] = { count: 0, fragNames: [] };
+      byLoc[loc].count++;
+      if (c.primaryFragId) {
+        const frag = baseFrags.find((f) => f.id === c.primaryFragId || f.fragranceId === c.primaryFragId);
+        const name = frag?.name ?? (c as any).primaryFrag ?? "";
+        if (name && !byLoc[loc].fragNames.includes(name)) byLoc[loc].fragNames.push(name);
+      }
     });
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
+    return Object.entries(byLoc)
+      .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 8)
-      .map(([name, count]) => ({ name, count }));
-  }, [activeComps]);
+      .map(([name, { count, fragNames }]) => ({ name, count, fragNames }));
+  }, [activeComps, baseFrags]);
 
   const monthOptions = useMemo(() => buildMonthOptions(MF, MC), [MF.length, MC.length]);
+
+  // Seasonal data — always uses full MF/MC, not time-filtered
+  const seasonalCompliments = useMemo(() => buildSeasonalCompliments(MC, MF), [MC, MF]);
+  const seasonalAcquisitions = useMemo(() => buildSeasonalAcquisitions(MF), [MF]);
+  const seasonalAccords = useMemo(() => buildSeasonalAccords(MF, communityFrags), [MF, communityFrags]);
 
   return (
     <>
@@ -448,83 +627,61 @@ export default function AnalyticsPage() {
 
         {/* Stat cards */}
         <div className="dash-stat-grid mb-6">
-          <StatCard
-            label="Total Compliments"
-            value={totalComps}
-            delta={compDelta > 0 ? `+${compDelta} this month` : undefined}
-          />
-          <StatCard
-            label="In Collection"
-            value={inCollection}
-            delta={ratedCount > 0 ? `${ratedCount} rated` : undefined}
-          />
-          <StatCard
-            label="From Strangers"
-            value={totalComps > 0 ? `${strangerPct}%` : "—"}
-            delta={totalComps > 0 ? `${strangerCount} of ${totalComps}` : undefined}
-          />
-          <StatCard
-            label="Avg Rating"
-            value={avgRat}
-            delta={ratedCount > 0 ? `${ratedCount} rated` : undefined}
-          />
+          <StatCard label="Total Compliments" value={totalComps} delta={compDelta > 0 ? `+${compDelta} this month` : undefined} />
+          <StatCard label="In Collection" value={inCollection} delta={ratedCount > 0 ? `${ratedCount} rated` : undefined} />
+          <StatCard label="From Strangers" value={totalComps > 0 ? `${strangerPct}%` : "—"} delta={totalComps > 0 ? `${strangerCount} of ${totalComps}` : undefined} />
+          <StatCard label="Avg Rating" value={avgRat} delta={ratedCount > 0 ? `${ratedCount} rated` : undefined} />
         </div>
 
-        {/* Time + friend filter row */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", marginBottom: "32px" }}>
-          {/* Time pills */}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+        {/* Filter row */}
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap", marginBottom: "var(--space-8)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap" }}>
             <TabPill label="All Time" active={period === "all"} onClick={() => setPeriod("all")} />
             <TabPill label="Year" active={period === "year"} onClick={() => setPeriod("year")} />
             <TabPill label="Season" active={period === "season"} onClick={() => setPeriod("season")} />
             {period === "season" && (
-              <div className="max-sm:w-full" style={{ width: "130px", marginLeft: "4px" }}>
-                <Select
-                  options={SEASON_OPTIONS}
-                  value={season}
-                  onChange={(v) => setSeason(v as Season)}
-                />
+              <div className="max-sm:w-full" style={{ width: "130px", marginLeft: "var(--space-1)" }}>
+                <Select options={SEASON_OPTIONS} value={season} onChange={(v) => setSeason(v as Season)} />
               </div>
             )}
             <TabPill label="Month" active={period === "month"} onClick={() => setPeriod("month")} />
             {period === "month" && monthOptions.length > 0 && (
-              <div className="max-sm:w-full" style={{ width: "140px", marginLeft: "4px" }}>
-                <Select
-                  options={monthOptions}
-                  value={selectedMonth}
-                  onChange={setSelectedMonth}
-                />
+              <div className="max-sm:w-full" style={{ width: "140px", marginLeft: "var(--space-1)" }}>
+                <Select options={monthOptions} value={selectedMonth} onChange={setSelectedMonth} />
               </div>
             )}
           </div>
-
-          {/* Friend toggle */}
           {friend && (
             <Button
               variant="secondary"
               onClick={() => setShowFriend((v) => !v)}
               className="ml-auto"
-              style={showFriend ? {
-                border: "1px solid var(--color-accent)",
-                background: "var(--color-accent)",
-                color: "var(--color-cream)",
-              } : undefined}
+              style={showFriend ? { border: "1px solid var(--color-accent)", background: "var(--color-accent)", color: "var(--color-cream)" } : undefined}
             >
-              {friend.name}
+              {showFriend ? `Comparing with ${friend.name}` : `Compare with ${friend.name}`}
             </Button>
           )}
         </div>
 
+        {/* Comparative view */}
+        {showFriend && friend && (
+          <div style={{ marginBottom: "var(--space-8)" }}>
+            <CompareView
+              myFrags={MF}
+              myComps={MC}
+              friendFrags={FF}
+              friendComps={FC}
+              myName={user.name ?? "Me"}
+              friendName={friend.name ?? "Friend"}
+            />
+          </div>
+        )}
+
         {/* Charts grid */}
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "20px",
-          }}
+          style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "var(--space-5)" }}
           className="max-md:grid-cols-1"
         >
-          {/* Collection Growth — full width */}
           <ChartCard title="Collection Growth" sub="Cumulative fragrances over time" wide>
             {!isLoaded ? (
               <ChartSkeleton height={240} />
@@ -543,7 +700,6 @@ export default function AnalyticsPage() {
             )}
           </ChartCard>
 
-          {/* Compliments Over Time */}
           <ChartCard title="Compliments Over Time" sub="Monthly compliment frequency">
             {!isLoaded ? (
               <ChartSkeleton height={200} />
@@ -555,14 +711,13 @@ export default function AnalyticsPage() {
                   <CartesianGrid horizontal vertical={false} stroke="var(--color-cream-dark)" strokeDasharray="4 4" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} width={28} />
-                  <Tooltip content={<BarsTooltip unit="compliments" />} />
+                  <Tooltip content={<CompsTooltip />} />
                   <Bar dataKey="count" fill="var(--color-accent)" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </ChartCard>
 
-          {/* Status Breakdown */}
           <ChartCard title="Status Breakdown" sub="Your collection by current status">
             {!isLoaded ? (
               <ChartSkeleton height={200} />
@@ -578,10 +733,10 @@ export default function AnalyticsPage() {
                     <Tooltip content={<StatusTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "10px" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
                   {statusData.map((d) => (
-                    <div key={d.status} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color, flexShrink: 0 }} />
+                    <div key={d.status} style={{ display: "flex", alignItems: "center", gap: "var(--space-1)" }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "var(--radius-full)", background: d.color, flexShrink: 0 }} />
                       <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{d.name}</span>
                     </div>
                   ))}
@@ -590,7 +745,6 @@ export default function AnalyticsPage() {
             )}
           </ChartCard>
 
-          {/* Rating Distribution */}
           <ChartCard title="Rating Distribution" sub="How you've rated your fragrances">
             {!isLoaded ? (
               <ChartSkeleton height={180} />
@@ -609,14 +763,13 @@ export default function AnalyticsPage() {
             )}
           </ChartCard>
 
-          {/* Most Complimented */}
           <ChartCard title="Most Complimented" sub="Fragrances that get the most attention">
             {!isLoaded ? (
               <ChartSkeleton height={220} />
             ) : topComplimented.length === 0 ? (
               <ChartEmpty icon={<Award size={24} />} title="Log compliments to see rankings" height={220} />
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
                 {topComplimented.map((item, i) => (
                   <RankedRow
                     key={i}
@@ -626,20 +779,21 @@ export default function AnalyticsPage() {
                     count={item.count}
                     maxCount={topComplimented[0].count}
                     unit="compliments"
+                    tooltipHeader={item.name}
+                    tooltipLines={item.house ? [item.house] : []}
                   />
                 ))}
               </div>
             )}
           </ChartCard>
 
-          {/* Where You Received Compliments — full width */}
           <ChartCard title="Where You Received Compliments" sub="Top locations and contexts" wide>
             {!isLoaded ? (
               <ChartSkeleton height={200} />
             ) : locationData.length === 0 ? (
               <ChartEmpty icon={<Award size={24} />} title="Log compliments with locations to see breakdown" height={200} />
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
                 {locationData.map((item, i) => (
                   <RankedRow
                     key={i}
@@ -648,12 +802,90 @@ export default function AnalyticsPage() {
                     count={item.count}
                     maxCount={locationData[0].count}
                     unit="compliments"
+                    tooltipHeader={item.name}
+                    tooltipLines={item.fragNames}
                   />
                 ))}
               </div>
             )}
           </ChartCard>
         </div>
+
+        {/* Seasonal sections */}
+        {isLoaded && (
+          <>
+            <SeasonSection title="Seasonal Compliments" sub="When you receive the most compliments by season">
+              {ALL_SEASONS.map((s) => {
+                const d = seasonalCompliments.find((x) => x.season === s)!;
+                return (
+                  <SeasonCard key={s} season={s}>
+                    <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-hero)", color: "var(--color-navy)", lineHeight: 1 }}>
+                      {d.count}
+                    </div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)" }}>
+                      COMPLIMENTS
+                    </div>
+                    {d.topFrag && (
+                      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", borderTop: "1px solid var(--color-row-divider)", paddingTop: "var(--space-2)" }}>
+                        {d.topFrag}
+                      </div>
+                    )}
+                  </SeasonCard>
+                );
+              })}
+            </SeasonSection>
+
+            <SeasonSection title="Seasonal Acquisitions" sub="When you add the most fragrances to your collection">
+              {ALL_SEASONS.map((s) => {
+                const d = seasonalAcquisitions.find((x) => x.season === s)!;
+                return (
+                  <SeasonCard key={s} season={s}>
+                    <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-hero)", color: "var(--color-navy)", lineHeight: 1 }}>
+                      {d.count}
+                    </div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)" }}>
+                      FRAGRANCES ACQUIRED
+                    </div>
+                    {d.topFrag && (
+                      <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", borderTop: "1px solid var(--color-row-divider)", paddingTop: "var(--space-2)" }}>
+                        {d.topFrag}
+                      </div>
+                    )}
+                  </SeasonCard>
+                );
+              })}
+            </SeasonSection>
+
+            <SeasonSection title="Seasonal Accords" sub="Top accords in fragrances you add each season">
+              {ALL_SEASONS.map((s) => {
+                const d = seasonalAccords.find((x) => x.season === s)!;
+                return (
+                  <SeasonCard key={s} season={s}>
+                    {d.topAccords.length === 0 ? (
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>No data</div>
+                    ) : (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)" }}>
+                        {d.topAccords.map(([accord]) => (
+                          <span key={accord} style={{
+                            fontFamily: "var(--font-serif)",
+                            fontStyle: "italic",
+                            fontSize: "var(--text-xs)",
+                            color: "var(--color-navy)",
+                            background: "var(--color-row-hover)",
+                            borderRadius: "var(--radius-full)",
+                            padding: "var(--space-half) var(--space-2)",
+                          }}>
+                            {accord}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </SeasonCard>
+                );
+              })}
+            </SeasonSection>
+          </>
+        )}
       </PageContent>
     </>
   );

@@ -17,15 +17,17 @@ import { useData } from "@/lib/data-context";
 import { loadAllData } from "@/lib/data";
 import { MONTHS, getAccords, monthNum } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
+import { CompareView } from "@/components/analytics/comparative-view";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 
-type FriendTab = "collection" | "compliments" | "wishlist" | "incommon";
+type FriendTab = "collection" | "compliments" | "wishlist" | "incommon" | "analytics";
 
 const FRIEND_TABS: { label: string; value: FriendTab }[] = [
   { label: "Collection", value: "collection" },
   { label: "Compliments", value: "compliments" },
   { label: "Wishlist", value: "wishlist" },
   { label: "In Common", value: "incommon" },
+  { label: "Analytics", value: "analytics" },
 ];
 
 const PER_PAGE = 25;
@@ -197,6 +199,16 @@ export default function FriendPage() {
                 communityFrags={communityFrags}
                 userId={user.id}
                 friendId={friend.id}
+                friendName={friendName}
+              />
+            )}
+            {tab === "analytics" && (
+              <CompareView
+                myFrags={MF}
+                myComps={compliments.filter((c) => c.userId === user.id)}
+                friendFrags={FF}
+                friendComps={FC}
+                myName={user.name ?? "Me"}
                 friendName={friendName}
               />
             )}
