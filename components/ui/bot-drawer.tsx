@@ -170,7 +170,7 @@ export function BotDrawer() {
             border: "1px solid var(--color-cream-dark)",
             padding: "10px 16px",
             fontFamily: "var(--font-sans)",
-            fontSize: "12px",
+            fontSize: "var(--text-xs)",
             color: "var(--color-navy)",
             letterSpacing: "0.04em",
           }}

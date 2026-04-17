@@ -77,7 +77,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
       onClick={onClick}
       className="inline-flex items-center gap-1.5 font-sans uppercase transition-colors duration-100 flex-shrink-0 cursor-pointer"
       style={{
-        fontSize: '12px',
+        fontSize: 'var(--text-xs)',
         fontWeight: 400,
         letterSpacing: '0.08em',
         padding: '6px 12px',
@@ -89,7 +89,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
     >
       {label}
       {count != null && count > 0 && (
-        <span className="font-sans" style={{ fontSize: '11px', opacity: 0.8 }}>
+        <span className="font-sans" style={{ fontSize: 'var(--text-label)', opacity: 0.8 }}>
           {count}
         </span>
       )}

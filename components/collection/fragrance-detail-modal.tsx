@@ -249,7 +249,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               <div
                 style={{
                   fontFamily: "var(--font-sans)",
-                  fontSize: "12px",
+                  fontSize: "var(--text-xs)",
                   fontWeight: 500,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
