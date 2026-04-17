@@ -3,16 +3,17 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
+import { TabPill } from '@/components/ui/tab-pill';
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
-import { ComplimentFilters } from '@/components/compliments/compliment-filters';
 import { ComplimentsList, type ComplimentColumnDef, type FragInfo } from '@/components/compliments/compliments-list';
 import { EmptyCompliments } from '@/components/compliments/empty-compliments';
 import { FragSearch } from '@/components/ui/frag-search';
+import { PageFilterBar } from '@/components/ui/page-filter-bar';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
-import { compSortNum, formatDate, buildMeta } from '@/lib/compliment-utils';
+import { compSortNum, formatDate, buildMeta, RELATION_TABS, SORT_FIELD_OPTIONS } from '@/lib/compliment-utils';
 import type { UserCompliment, Relation } from '@/types';
 
 // Column definitions — add an entry here to add a column to the table
@@ -74,6 +75,7 @@ function ComplimentsInner() {
 
   const [logOpen, setLogOpen] = useState(false);
   const [editingComp, setEditingComp] = useState<UserCompliment | null>(null);
+  const [search, setSearch] = useState('');
   const [relationTab, setRelationTab] = useState<Relation | 'ALL'>('ALL');
   const [sortField, setSortField] = useState('date');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -98,17 +100,23 @@ function ComplimentsInner() {
   }, [myComps]);
 
   const filtered = useMemo(() => {
-    const base = relationTab === 'ALL' ? myComps : myComps.filter((c) => c.relation === relationTab);
-    const sorted = [...base].sort((a, b) => {
+    let base = relationTab === 'ALL' ? myComps : myComps.filter((c) => c.relation === relationTab);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      base = base.filter((c) =>
+        (c.primaryFrag ?? '').toLowerCase().includes(q) ||
+        (c.notes ?? '').toLowerCase().includes(q),
+      );
+    }
+    return [...base].sort((a, b) => {
       let cmp = 0;
       if (sortField === 'date') cmp = compSortNum(a) - compSortNum(b);
       else if (sortField === 'fragrance') cmp = (a.primaryFrag ?? '').localeCompare(b.primaryFrag ?? '');
       return sortDir === 'desc' ? -cmp : cmp;
     });
-    return sorted;
-  }, [myComps, relationTab, sortField, sortDir]);
+  }, [myComps, relationTab, sortField, sortDir, search]);
 
-  useEffect(() => { setPage(1); }, [relationTab, sortField, sortDir, perPage]);
+  useEffect(() => { setPage(1); }, [relationTab, sortField, sortDir, perPage, search]);
 
   if (!user) return null;
 
@@ -121,6 +129,20 @@ function ComplimentsInner() {
     return { name: f?.name ?? comp.primaryFrag ?? '-', house: f?.house ?? '', type: f?.type ?? null };
   }
 
+  const pills = (
+    <div className="flex flex-wrap" style={{ gap: 'var(--space-2)' }}>
+      {RELATION_TABS.map((tab) => (
+        <TabPill
+          key={tab.value}
+          label={tab.label}
+          count={tabCounts[tab.value] ?? 0}
+          active={relationTab === tab.value}
+          onClick={() => setRelationTab(tab.value)}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <>
       <LogComplimentModal open={logOpen} onClose={() => setLogOpen(false)} />
@@ -128,20 +150,22 @@ function ComplimentsInner() {
       <Topbar title="Compliments" actions={<FragSearch />} />
 
       <PageContent>
-        <div className="flex items-center justify-end mb-8">
-          <Button variant="primary" onClick={() => setLogOpen(true)}>Log Compliment</Button>
-        </div>
-
-        <ComplimentFilters
-          relationTab={relationTab}
-          onRelationTab={setRelationTab}
-          tabCounts={tabCounts}
+        <PageFilterBar
+          search={search}
+          onSearch={setSearch}
+          searchPlaceholder="Search your compliments..."
+          action={<Button variant="primary" onClick={() => setLogOpen(true)}>Log Compliment</Button>}
           sortField={sortField}
           sortDir={sortDir}
+          sortOptions={SORT_FIELD_OPTIONS}
           onSortField={setSortField}
-          onToggleSortDir={() => setSortDir((d) => d === 'asc' ? 'desc' : 'asc')}
+          onToggleSortDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
+          pills={pills}
           perPage={perPage}
           onPerPage={(v) => { setPerPage(v); setPage(1); }}
+          count={isLoaded ? filtered.length : undefined}
+          countLabel="Compliment"
+          isLoaded={isLoaded}
         />
 
         {!isLoaded ? (

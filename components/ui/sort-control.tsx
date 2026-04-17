@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronUp, ChevronDown } from "lucide-react";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
@@ -17,10 +16,24 @@ interface SortControlProps {
   onToggleDirection: () => void;
 }
 
-/**
- * Sort field picker + direction toggle. Field select shrinks to label width;
- * arrow button defaults to desc (down), toggles to asc (up) on click.
- */
+function SortArrowAsc() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M4 7L8 3L12 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SortArrowDesc() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <line x1="2" y1="4" x2="14" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M4 9L8 13L12 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function SortControl({ field, direction, options, onField, onToggleDirection }: SortControlProps) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-1)" }}>
@@ -30,8 +43,9 @@ export function SortControl({ field, direction, options, onField, onToggleDirect
         size="sm"
         onClick={onToggleDirection}
         aria-label={direction === "asc" ? "Sort ascending" : "Sort descending"}
+        style={{ width: "36px", height: "36px" }}
       >
-        {direction === "asc" ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+        {direction === "asc" ? <SortArrowAsc /> : <SortArrowDesc />}
       </Button>
     </div>
   );

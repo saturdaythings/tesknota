@@ -21,7 +21,7 @@ export function SearchInput({ value, onChange, placeholder = "Search...", classN
       </svg>
 
       <input
-        type="search"
+        type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

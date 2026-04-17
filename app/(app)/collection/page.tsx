@@ -10,16 +10,21 @@ import { StarRating } from '@/components/ui/StarRating';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
 import { FragSearch } from '@/components/ui/frag-search';
-import { SearchInput } from '@/components/ui/search-input';
+import { PageFilterBar } from '@/components/ui/page-filter-bar';
+import { Select } from '@/components/ui/select';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { FragranceDetailModal } from '@/components/collection/fragrance-detail-modal';
-import { CollectionFilters } from '@/components/collection/collection-filters';
 import { CollectionList, type CollectionColumnDef, type CollectionRowContext } from '@/components/collection/collection-list';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
 import { getAccords } from '@/lib/frag-utils';
-import { applySort, addedStr, parseSortKey, type SortField, type SortDir } from '@/lib/collection-utils';
+import {
+  applySort, addedStr, parseSortKey,
+  SORT_FIELD_OPTIONS, RATING_FILTER_OPTIONS, STATUS_FILTER_OPTIONS,
+  type SortField, type SortDir,
+} from '@/lib/collection-utils';
 import { FlaskConical } from '@/components/ui/Icons';
 import { STATUS_LABELS, type UserFragrance } from '@/types';
 
@@ -28,6 +33,8 @@ const cellStyle = {
   letterSpacing: 'var(--tracking-md)',
   color: 'var(--color-navy)',
 } as const;
+
+const STATUS_OPTIONS = STATUS_FILTER_OPTIONS.filter((o) => o.value !== 'all');
 
 // Column definitions — add an entry here to add a column to the table
 const COLUMNS: CollectionColumnDef[] = [
@@ -222,7 +229,6 @@ function CollectionInner() {
   }, [myFrags, search, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, compMap, communityFrags]);
 
   const filtersActive =
-    search.trim() !== '' ||
     accordFilter.length > 0 ||
     ratingFilter !== 'any' ||
     statusFilter.length > 0 ||
@@ -237,12 +243,10 @@ function CollectionInner() {
   if (!user) return null;
 
   function clearFilters() {
-    setSearch('');
     setAccordFilter([]);
     setRatingFilter('any');
     setStatusFilter([]);
     setHouseFilter([]);
-    router.push(window.location.pathname);
   }
 
   async function handleDelete(frag: UserFragrance) {
@@ -256,6 +260,23 @@ function CollectionInner() {
   }
 
   const rowCtx: CollectionRowContext = { compMap, communityFrags, onRatingUpdate: handleRatingUpdate };
+
+  const filterPanel = (
+    <>
+      <div style={{ width: '160px' }}>
+        <MultiSelect options={accordOptions} value={accordFilter} onChange={setAccordFilter} placeholder="Accords" />
+      </div>
+      <div style={{ width: '160px' }}>
+        <Select options={RATING_FILTER_OPTIONS} value={ratingFilter} onChange={setRatingFilter} placeholder="Rating" />
+      </div>
+      <div style={{ width: '180px' }}>
+        <MultiSelect options={STATUS_OPTIONS} value={statusFilter} onChange={setStatusFilter} placeholder="Status" />
+      </div>
+      <div style={{ width: '160px' }}>
+        <MultiSelect options={houseOptions} value={houseFilter} onChange={setHouseFilter} placeholder="Houses" />
+      </div>
+    </>
+  );
 
   return (
     <>
@@ -272,32 +293,27 @@ function CollectionInner() {
       <Topbar title="My Collection" actions={<FragSearch />} />
 
       <PageContent>
-        <div className="flex items-center justify-end gap-3 mb-8">
-          <SearchInput value={search} onChange={setSearch} placeholder="Search your collection..." className="w-[220px]" />
-          <Button variant="primary" onClick={() => setAddOpen(true)}>Add to Collection</Button>
-        </div>
-
-        <CollectionFilters
-          sortField={sortField} sortDir={sortDir}
-          onSortField={handleSortField} onToggleSortDir={handleToggleSortDir}
-          filtersOpen={filtersOpen} onFiltersOpen={setFiltersOpen}
-          accordFilter={accordFilter} onAccordFilter={setAccordFilter}
-          ratingFilter={ratingFilter} onRatingFilter={setRatingFilter}
-          statusFilter={statusFilter} onStatusFilter={setStatusFilter}
-          houseFilter={houseFilter} onHouseFilter={setHouseFilter}
-          accordOptions={accordOptions} houseOptions={houseOptions}
-          filtersActive={filtersActive} onClearFilters={clearFilters}
-          perPage={perPage} onPerPage={(v) => { setPerPage(v); setPage(1); }}
+        <PageFilterBar
+          search={search}
+          onSearch={setSearch}
+          searchPlaceholder="Search your collection..."
+          action={<Button variant="primary" onClick={() => setAddOpen(true)}>Add to Collection</Button>}
+          sortField={sortField}
+          sortDir={sortDir}
+          sortOptions={SORT_FIELD_OPTIONS}
+          onSortField={(v) => handleSortField(v as SortField)}
+          onToggleSortDir={handleToggleSortDir}
+          filtersOpen={filtersOpen}
+          onFiltersOpen={setFiltersOpen}
+          filtersActive={filtersActive}
+          onClearFilters={clearFilters}
+          filterPanel={filterPanel}
+          perPage={perPage}
+          onPerPage={(v) => { setPerPage(v); setPage(1); }}
+          count={isLoaded ? filtered.length : undefined}
+          countLabel="Fragrance"
+          isLoaded={isLoaded}
         />
-
-        {isLoaded && (
-          <div
-            className="font-sans uppercase"
-            style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--font-weight-medium)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-meta-text)', marginBottom: 'var(--space-4)' }}
-          >
-            {filtered.length} {filtered.length === 1 ? 'Fragrance' : 'Fragrances'}
-          </div>
-        )}
 
         {!isLoaded ? (
           <CollectionSkeleton />

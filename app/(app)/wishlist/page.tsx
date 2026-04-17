@@ -7,12 +7,11 @@ import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { Button } from "@/components/ui/button";
 import { FragSearch } from "@/components/ui/frag-search";
-import { SearchInput } from "@/components/ui/search-input";
+import { PageFilterBar } from "@/components/ui/page-filter-bar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FragranceCell } from "@/components/ui/fragrance-cell";
-import { SortControl } from "@/components/ui/sort-control";
 import { FragForm } from "@/components/ui/frag-form";
 import { AddToWishlistModal } from "@/components/wishlist/add-to-wishlist-modal";
 import { WishlistDetailPanel } from "@/components/wishlist/wishlist-detail-panel";
@@ -520,29 +519,22 @@ function WishlistInner() {
       <Topbar title="Wishlist" actions={<FragSearch />} />
 
       <PageContent>
-
-        {/* Filter + sort bar */}
-        <div style={{ marginBottom: "var(--space-6)" }}>
-          <div className="flex items-start justify-between gap-4 flex-wrap max-sm:flex-col" style={{ marginBottom: "var(--space-3)" }}>
-            <div style={{ width: "280px" }} className="max-sm:w-full">
-              <SearchInput value={search} onChange={setSearch} placeholder="Search wishlist..." />
-            </div>
-            <SortControl
-              field={sortField}
-              direction={sortDir}
-              options={SORT_FIELD_OPTIONS}
-              onField={handleSortField}
-              onToggleDirection={handleToggleSortDir}
-            />
-          </div>
-        </div>
-
-        {/* Result count */}
-        {isLoaded && (
-          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)", letterSpacing: "var(--tracking-md)", textTransform: "uppercase", color: "var(--color-navy)", marginBottom: "var(--space-4)" }}>
-            {filtered.length} Items
-          </div>
-        )}
+        <PageFilterBar
+          search={search}
+          onSearch={setSearch}
+          searchPlaceholder="Search your wishlist..."
+          action={<Button variant="primary" onClick={() => setAddOpen(true)}><Plus size={15} />Add to Wishlist</Button>}
+          sortField={sortField}
+          sortDir={sortDir}
+          sortOptions={SORT_FIELD_OPTIONS}
+          onSortField={handleSortField}
+          onToggleSortDir={handleToggleSortDir}
+          perPage={pageSize}
+          onPerPage={(v) => { setPageSize(v); setPage(1); }}
+          count={isLoaded ? filtered.length : undefined}
+          countLabel="Item"
+          isLoaded={isLoaded}
+        />
 
         {/* Content */}
         {!isLoaded ? (
@@ -693,7 +685,6 @@ function WishlistInner() {
               page={page}
               pageSize={pageSize}
               onPage={setPage}
-              onPageSize={setPageSize}
             />
 
             {/* Mobile cards */}
