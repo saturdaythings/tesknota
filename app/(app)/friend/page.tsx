@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { FragSearch } from "@/components/ui/frag-search";
+import { FragranceCell } from "@/components/ui/fragrance-cell";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
-import { SectionHeader } from "@/components/ui/section-header";
-import { FilterBar, FilterChip } from "@/components/ui/filter-bar";
+import { TabPill } from "@/components/ui/tab-pill";
 import { FragDetail } from "@/components/ui/frag-detail";
 import { AccordCloud } from "@/components/ui/accord-cloud";
 import { Pagination } from "@/components/ui/pagination";
@@ -24,6 +24,58 @@ const FRIEND_TABS: { label: string; value: FriendTab }[] = [
   { label: "Wishlist", value: "wishlist" },
   { label: "In Common", value: "incommon" },
 ];
+
+const PER_PAGE = 25;
+
+/* component-internal: skeleton row height */
+const SKELETON_ROW_HEIGHT = 'var(--size-row-min)';
+
+const cellStyle = {
+  fontSize: 'var(--text-xs)',
+  letterSpacing: 'var(--tracking-md)',
+  color: 'var(--color-navy)',
+} as const;
+
+const metaStyle = {
+  fontSize: 'var(--text-xs)',
+  letterSpacing: 'var(--tracking-md)',
+  color: 'var(--color-meta-text)',
+} as const;
+
+const headerCellStyle = {
+  padding: '0 var(--space-4)',
+  fontSize: 'var(--text-xxs)',
+  fontWeight: 'var(--font-weight-medium)',
+  letterSpacing: 'var(--tracking-md)',
+  color: 'var(--color-navy)',
+} as const;
+
+const countLabel = {
+  fontSize: 'var(--text-xs)',
+  fontWeight: 'var(--font-weight-medium)',
+  letterSpacing: 'var(--tracking-md)',
+  color: 'var(--color-meta-text)',
+  marginBottom: 'var(--space-4)',
+} as const;
+
+const headerRowStyle = {
+  display: 'grid',
+  gridTemplateColumns: 'subgrid',
+  gridColumn: '1 / -1',
+  background: 'var(--color-cream-dark)',
+  borderBottom: '1px solid var(--color-row-divider)',
+  height: 'var(--space-10)',
+  alignItems: 'center',
+} as const;
+
+const dataRowStyle = {
+  display: 'grid',
+  gridTemplateColumns: 'subgrid',
+  gridColumn: '1 / -1',
+  alignItems: 'center',
+  minHeight: 'var(--space-16)',
+  borderBottom: '1px solid var(--color-row-divider)',
+} as const;
 
 export default function FriendPage() {
   const { user, profiles } = useUser();
@@ -78,13 +130,9 @@ export default function FriendPage() {
       />
       <Topbar title={`${friendName}'s Profile`} actions={<FragSearch />} />
       <PageContent>
-        {!isLoaded && (
-          <div className="text-[var(--ink3)] font-[var(--mono)] text-xs tracking-[0.12em] py-6">
-            Loading...
-          </div>
-        )}
-
-        {isLoaded && (
+        {!isLoaded ? (
+          <FriendSkeleton />
+        ) : (
           <>
             <StatsGrid className="mb-6">
               <StatBox value={FFOwned.length} label="Collection" />
@@ -94,50 +142,38 @@ export default function FriendPage() {
             </StatsGrid>
 
             {friendAccordCounts.length > 0 && (
-              <div className="mb-6">
-                <SectionHeader
-                  title="Scent signature"
-                  right={
-                    <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                      {friendName}'s accords
-                    </span>
-                  }
-                />
+              <div style={{ marginBottom: 'var(--space-6)' }}>
+                <div className="font-sans uppercase" style={countLabel}>
+                  Scent Signature — {friendName}'s Accords
+                </div>
                 <AccordCloud accords={friendAccordCounts} />
               </div>
             )}
 
-            <FilterBar className="mb-6">
+            <div className="flex flex-wrap gap-2" style={{ marginBottom: 'var(--space-6)' }}>
               {FRIEND_TABS.map((t) => (
-                <FilterChip
+                <TabPill
                   key={t.value}
                   label={t.label}
                   active={tab === t.value}
                   onClick={() => setTab(t.value)}
                 />
               ))}
-            </FilterBar>
+            </div>
 
             {tab === "collection" && (
               <FriendCollectionTab
                 frags={FFOwned}
                 compliments={FC}
                 communityFrags={communityFrags}
-                friendId={friend.id }
                 onFragClick={setDetailFrag}
               />
             )}
             {tab === "compliments" && (
-              <FriendComplimentsTab
-                compliments={FC}
-                frags={FF}
-              />
+              <FriendComplimentsTab compliments={FC} frags={FF} />
             )}
             {tab === "wishlist" && (
-              <FriendWishlistTab
-                frags={FFWish}
-                communityFrags={communityFrags}
-              />
+              <FriendWishlistTab frags={FFWish} communityFrags={communityFrags} />
             )}
             {tab === "incommon" && (
               <InCommonTab
@@ -146,7 +182,7 @@ export default function FriendPage() {
                 compliments={compliments}
                 communityFrags={communityFrags}
                 userId={user.id}
-                friendId={friend.id }
+                friendId={friend.id}
                 friendName={friendName}
               />
             )}
@@ -166,66 +202,110 @@ function FriendCollectionTab({
   frags: UserFragrance[];
   compliments: UserCompliment[];
   communityFrags: CommunityFrag[];
-  friendId: string;
   onFragClick: (frag: UserFragrance) => void;
 }) {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(24);
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
-  const pageFrags = pageSize === 0 ? sorted : sorted.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+  const pageFrags = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const gridCols = 'minmax(200px,1fr) max-content max-content 180px max-content';
+
+  if (sorted.length === 0) {
+    return (
+      <div className="font-sans uppercase" style={{ ...metaStyle, padding: 'var(--space-8) 0' }}>
+        No fragrances.
+      </div>
+    );
+  }
+
   return (
     <>
-      <SectionHeader
-        title="Collection"
-        right={
-          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-            {sorted.length} {sorted.length === 1 ? "fragrance" : "fragrances"}
-          </span>
-        }
-      />
-      {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No fragrances.</div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
-            {pageFrags.map((f) => {
-              const comps = compliments.filter((c) => c.primaryFragId === (f.fragranceId || f.id)).length;
-              const accords = getAccords(f, communityFrags).slice(0, 3).join(", ");
-              return (
-                <div
-                  key={f.id}
-                  onClick={() => onFragClick(f)}
-                  className="border border-[var(--b2)] px-4 py-3 hover:bg-[var(--b1)] cursor-pointer"
-                >
-                  <div className="font-[var(--mono)] text-xs tracking-[0.08em] uppercase text-[var(--ink3)] mb-0.5 truncate">{f.house}</div>
-                  <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-2 leading-snug">{f.name}</div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                    <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-                      {STATUS_LABELS[f.status as keyof typeof STATUS_LABELS] ?? f.status}
-                    </span>
-                    {f.personalRating ? (
-                      <span className="font-[var(--mono)] text-xs text-[var(--warm-text)]">{"★".repeat(f.personalRating)}</span>
-                    ) : null}
-                    {comps > 0 ? (
-                      <span className="font-[var(--mono)] text-xs text-[var(--blue)]">{comps} comp{comps !== 1 ? "s" : ""}</span>
-                    ) : null}
-                    {accords ? (
-                      <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{accords}</span>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <Pagination
-            total={sorted.length}
-            page={page}
-            pageSize={pageSize}
-            onPage={setPage}
-            onPageSize={setPageSize}
-          />
-        </>
-      )}
+      <div className="font-sans uppercase" style={countLabel}>
+        {sorted.length} {sorted.length === 1 ? 'fragrance' : 'fragrances'}
+      </div>
+
+      <div className="hidden md:grid" style={{ gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
+        <div style={headerRowStyle}>
+          {['Fragrance', 'Rating', 'Status', 'Accords', 'Compliments'].map((label) => (
+            <div key={label} className="font-sans uppercase" style={headerCellStyle}>{label}</div>
+          ))}
+        </div>
+        {pageFrags.map((f) => {
+          const comps = compliments.filter((c) => c.primaryFragId === (f.fragranceId || f.id)).length;
+          const accords = getAccords(f, communityFrags).slice(0, 4).join(', ') || '—';
+          return (
+            <div
+              key={f.id}
+              onClick={() => onFragClick(f)}
+              className="cursor-pointer transition-colors duration-100"
+              style={dataRowStyle}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+              </div>
+              <div style={{ padding: '0 var(--space-4)' }}>
+                <span className="font-sans uppercase" style={cellStyle}>
+                  {f.personalRating ? '★'.repeat(f.personalRating) : '—'}
+                </span>
+              </div>
+              <div style={{ padding: '0 var(--space-4)' }}>
+                <span className="font-sans uppercase" style={cellStyle}>
+                  {STATUS_LABELS[f.status as keyof typeof STATUS_LABELS] ?? f.status}
+                </span>
+              </div>
+              <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
+                <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', lineHeight: 'var(--leading-relaxed)' }}>
+                  {accords}
+                </span>
+              </div>
+              <div style={{ padding: '0 var(--space-4)' }}>
+                <span className="font-sans uppercase" style={{ ...cellStyle, color: comps > 0 ? 'var(--color-navy)' : 'var(--color-meta-text)' }}>
+                  {comps > 0 ? comps : '—'}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="md:hidden">
+        {pageFrags.map((f) => {
+          const comps = compliments.filter((c) => c.primaryFragId === (f.fragranceId || f.id)).length;
+          const accords = getAccords(f, communityFrags).slice(0, 3).join(', ');
+          return (
+            <div
+              key={f.id}
+              onClick={() => onFragClick(f)}
+              className="cursor-pointer"
+              style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--color-row-divider)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                {f.personalRating ? (
+                  <span className="font-sans uppercase" style={metaStyle}>{'★'.repeat(f.personalRating)}</span>
+                ) : null}
+                <span className="font-sans uppercase" style={metaStyle}>
+                  {STATUS_LABELS[f.status as keyof typeof STATUS_LABELS] ?? f.status}
+                </span>
+                {comps > 0 ? (
+                  <span className="font-sans uppercase" style={{ ...metaStyle, color: 'var(--color-accent)' }}>
+                    {comps} comp{comps !== 1 ? 's' : ''}
+                  </span>
+                ) : null}
+                {accords ? (
+                  <span className="font-sans" style={metaStyle}>{accords}</span>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </>
   );
 }
@@ -237,67 +317,63 @@ function FriendComplimentsTab({
   compliments: UserCompliment[];
   frags: UserFragrance[];
 }) {
+  const [page, setPage] = useState(1);
   const sorted = compliments.slice().sort(
     (a, b) =>
       parseInt(b.year) * 100 + monthNum(b.month) - (parseInt(a.year) * 100 + monthNum(a.month))
   );
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+  const pageItems = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const gridCols = 'minmax(180px,1fr) max-content max-content max-content';
+
+  if (sorted.length === 0) {
+    return (
+      <div className="font-sans uppercase" style={{ ...metaStyle, padding: 'var(--space-8) 0' }}>
+        No compliments.
+      </div>
+    );
+  }
+
   return (
     <>
-      <SectionHeader
-        title="Compliments"
-        right={
-          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-            {sorted.length} {sorted.length === 1 ? "item" : "items"}
-          </span>
-        }
-      />
-      {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No compliments.</div>
-      ) : (
-        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-          <table className="w-full min-w-[480px]">
-            <thead>
-              <tr className="border-b border-[var(--b2)]">
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Fragrance</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Relation</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">When</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Location</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((c) => {
-                const frag = frags.find((f) => (f.fragranceId || f.id) === c.primaryFragId);
-                const fragName = frag?.name ?? c.primaryFrag ?? "\u2014";
-                const fragHouse = frag?.house ?? "";
-                const mn = monthNum(c.month);
-                const mLabel = mn >= 1 && mn <= 12 ? MONTHS[mn - 1] : c.month;
-                const when = c.year ? `${mLabel} ${c.year}` : mLabel;
-                const location = [c.city, c.country].filter(Boolean).join(", ") || "\u2014";
-                return (
-                  <tr
-                    key={c.id}
-                    className="border-b border-[var(--b1)] last:border-0"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{fragName}</div>
-                      {fragHouse && (
-                        <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{fragHouse}</div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">
-                      {c.relation}
-                    </td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{when}</td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
-                      {location}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="font-sans uppercase" style={countLabel}>
+        {sorted.length} {sorted.length === 1 ? 'compliment' : 'compliments'}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
+        <div style={headerRowStyle}>
+          {['Fragrance', 'Relation', 'When', 'Location'].map((label) => (
+            <div key={label} className="font-sans uppercase" style={headerCellStyle}>{label}</div>
+          ))}
         </div>
-      )}
+        {pageItems.map((c) => {
+          const frag = frags.find((f) => (f.fragranceId || f.id) === c.primaryFragId);
+          const fragName = frag?.name ?? c.primaryFrag ?? '\u2014';
+          const fragHouse = frag?.house ?? '';
+          const mn = monthNum(c.month);
+          const mLabel = mn >= 1 && mn <= 12 ? MONTHS[mn - 1] : c.month;
+          const when = c.year ? `${mLabel} ${c.year}` : mLabel;
+          const location = [c.city, c.country].filter(Boolean).join(', ') || '\u2014';
+          return (
+            <div key={c.id} style={dataRowStyle}>
+              <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
+                <FragranceCell name={fragName} house={fragHouse || undefined} />
+              </div>
+              <div style={{ padding: '0 var(--space-4)' }}>
+                <span className="font-sans uppercase" style={cellStyle}>{c.relation}</span>
+              </div>
+              <div style={{ padding: '0 var(--space-4)' }}>
+                <span className="font-sans uppercase" style={cellStyle}>{when}</span>
+              </div>
+              <div style={{ padding: '0 var(--space-4)' }}>
+                <span className="font-sans uppercase" style={cellStyle}>{location}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </>
   );
 }
@@ -309,55 +385,58 @@ function FriendWishlistTab({
   frags: UserFragrance[];
   communityFrags: CommunityFrag[];
 }) {
+  const [page, setPage] = useState(1);
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+  const pageFrags = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const gridCols = 'minmax(200px,1fr) max-content 180px';
+
+  if (sorted.length === 0) {
+    return (
+      <div className="font-sans uppercase" style={{ ...metaStyle, padding: 'var(--space-8) 0' }}>
+        No wishlist items.
+      </div>
+    );
+  }
+
   return (
     <>
-      <SectionHeader
-        title="Wishlist"
-        right={
-          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-            {sorted.length} {sorted.length === 1 ? "item" : "items"}
-          </span>
-        }
-      />
-      {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">No wishlist items.</div>
-      ) : (
-        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-          <table className="w-full min-w-[420px]">
-            <thead>
-              <tr className="border-b border-[var(--b2)]">
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Fragrance</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Avg Price</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Accords</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((f) => {
-                const accords = getAccords(f, communityFrags).slice(0, 3).join(", ") || "\u2014";
-                const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
-                const cf = communityFrags.find(
-                  (c) => norm(c.fragranceName) === norm(f.name) && norm(c.fragranceHouse) === norm(f.house)
-                );
-                const price = (cf?.avgPrice ?? "").replace(/~/g, "") || "\u2014";
-                return (
-                  <tr
-                    key={f.id}
-                    className="border-b border-[var(--b1)] last:border-0"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
-                    </td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink2)]">{price}</td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="font-sans uppercase" style={countLabel}>
+        {sorted.length} {sorted.length === 1 ? 'item' : 'items'}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
+        <div style={headerRowStyle}>
+          {['Fragrance', 'Avg Price', 'Accords'].map((label) => (
+            <div key={label} className="font-sans uppercase" style={headerCellStyle}>{label}</div>
+          ))}
         </div>
-      )}
+        {pageFrags.map((f) => {
+          const accords = getAccords(f, communityFrags).slice(0, 3).join(', ') || '\u2014';
+          const norm = (s: string) => (s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const cf = communityFrags.find(
+            (c) => norm(c.fragranceName) === norm(f.name) && norm(c.fragranceHouse) === norm(f.house)
+          );
+          const price = (cf?.avgPrice ?? '').replace(/~/g, '') || '\u2014';
+          return (
+            <div key={f.id} style={dataRowStyle}>
+              <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+              </div>
+              <div style={{ padding: '0 var(--space-4)' }}>
+                <span className="font-sans uppercase" style={cellStyle}>{price}</span>
+              </div>
+              <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
+                <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', lineHeight: 'var(--leading-relaxed)' }}>
+                  {accords}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </>
   );
 }
@@ -379,68 +458,85 @@ function InCommonTab({
   friendId: string;
   friendName: string;
 }) {
+  const [page, setPage] = useState(1);
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+  const pageFrags = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const gridCols = 'minmax(200px,1fr) 180px max-content';
+
+  if (sorted.length === 0) {
+    return (
+      <div className="font-sans uppercase" style={{ ...metaStyle, padding: 'var(--space-8) 0' }}>
+        No fragrances in common yet.
+      </div>
+    );
+  }
+
   return (
     <>
-      <SectionHeader
-        title="In Common"
-        right={
-          <span className="font-[var(--mono)] text-xs text-[var(--ink3)]">
-            Both own {sorted.length} {sorted.length === 1 ? "fragrance" : "fragrances"}
-          </span>
-        }
-      />
-      {sorted.length === 0 ? (
-        <div className="font-[var(--mono)] text-xs text-[var(--ink3)] py-4">
-          No fragrances in common yet.
+      <div className="font-sans uppercase" style={countLabel}>
+        Both own {sorted.length} {sorted.length === 1 ? 'fragrance' : 'fragrances'}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
+        <div style={headerRowStyle}>
+          {['Fragrance', 'Accords', 'Compliments'].map((label) => (
+            <div key={label} className="font-sans uppercase" style={headerCellStyle}>{label}</div>
+          ))}
         </div>
-      ) : (
-        <div className="overflow-x-auto border border-[var(--b2)] mb-6">
-          <table className="w-full min-w-[420px]">
-            <thead>
-              <tr className="border-b border-[var(--b2)]">
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Fragrance</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Accords</th>
-                <th className="px-4 py-2 text-left font-[var(--mono)] text-xs tracking-[0.06em] uppercase font-normal text-[var(--ink3)]">Compliments</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((f) => {
-                const myFrag = myFrags.find((mf) => mf.name.toLowerCase() === f.name.toLowerCase());
-                const accords = getAccords(f, communityFrags).slice(0, 3).join(", ") || "\u2014";
-                const myComps = compliments.filter(
-                  (c) => c.userId === userId && c.primaryFragId === (myFrag?.fragranceId || myFrag?.id)
-                ).length;
-                const friendComps = compliments.filter(
-                  (c) => c.userId === friendId && c.primaryFragId === (f.fragranceId || f.id)
-                ).length;
-                return (
-                  <tr
-                    key={f.id}
-                    className="border-b border-[var(--b1)] last:border-0"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</div>
-                      <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">{f.house}</div>
-                    </td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">{accords}</td>
-                    <td className="px-4 py-3 font-[var(--mono)] text-xs text-[var(--ink3)]">
-                      {myComps > 0 ? (
-                        <span>You: <span className="text-[var(--blue)]">{myComps}</span></span>
-                      ) : null}
-                      {myComps > 0 && friendComps > 0 ? " · " : null}
-                      {friendComps > 0 ? (
-                        <span>{friendName}: <span className="text-[var(--blue)]">{friendComps}</span></span>
-                      ) : null}
-                      {myComps === 0 && friendComps === 0 ? "\u2014" : null}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+        {pageFrags.map((f) => {
+          const myFrag = myFrags.find((mf) => mf.name.toLowerCase() === f.name.toLowerCase());
+          const accords = getAccords(f, communityFrags).slice(0, 3).join(', ') || '\u2014';
+          const myComps = compliments.filter(
+            (c) => c.userId === userId && c.primaryFragId === (myFrag?.fragranceId || myFrag?.id)
+          ).length;
+          const friendComps = compliments.filter(
+            (c) => c.userId === friendId && c.primaryFragId === (f.fragranceId || f.id)
+          ).length;
+          const compParts: string[] = [];
+          if (myComps > 0) compParts.push(`You: ${myComps}`);
+          if (friendComps > 0) compParts.push(`${friendName}: ${friendComps}`);
+          const compDisplay = compParts.join(' · ') || '\u2014';
+          return (
+            <div key={f.id} style={dataRowStyle}>
+              <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+              </div>
+              <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
+                <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', lineHeight: 'var(--leading-relaxed)' }}>
+                  {accords}
+                </span>
+              </div>
+              <div style={{ padding: '0 var(--space-4)' }}>
+                <span className="font-sans uppercase" style={{ ...cellStyle, color: (myComps > 0 || friendComps > 0) ? 'var(--color-accent)' : 'var(--color-meta-text)' }}>
+                  {compDisplay}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Pagination page={page} totalPages={totalPages} onPage={setPage} />
     </>
+  );
+}
+
+function FriendSkeleton() {
+  return (
+    <div>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            height: SKELETON_ROW_HEIGHT,
+            borderBottom: '1px solid var(--color-row-divider)',
+            background: 'var(--color-row-hover)',
+            borderRadius: 'var(--radius-md)',
+            marginBottom: 'var(--space-1)',
+          }}
+        />
+      ))}
+    </div>
   );
 }
