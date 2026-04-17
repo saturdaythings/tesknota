@@ -11,9 +11,10 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 const textareaBase =
   'w-full min-h-[80px] font-sans font-normal text-[length:var(--text-sm)] text-[var(--color-navy)] ' +
-  'bg-[var(--color-cream-dark)] border border-[var(--color-row-divider)] rounded-[var(--radius-sm)] ' +
+  '[letter-spacing:var(--tracking-sm)] ' +
+  'bg-[var(--color-cream)] border border-[var(--color-meta-text)] rounded-[var(--radius-sm)] ' +
   'placeholder:text-[var(--color-navy-mid)] outline-none resize-y transition-[border-color] duration-150 ' +
-  'focus:border-[var(--color-navy)] ' +
+  'focus:border-[var(--color-accent)] ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 export function Textarea({

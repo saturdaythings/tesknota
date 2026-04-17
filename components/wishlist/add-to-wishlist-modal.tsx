@@ -313,13 +313,12 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                 onBlur={() => setTimeout(() => setResults([]), 150)}
                 placeholder="Search your collection..."
                 autoFocus
-                className="w-full h-10 pl-9 pr-9 font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
+                className="w-full h-9 pl-9 pr-9 font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)]"
                 style={{
                   fontSize: "var(--text-sm)",
-                  letterSpacing: "var(--tracking-xs)",
                   background: "var(--color-cream)",
                   border: "1px solid var(--color-meta-text)",
-                  borderRadius: "var(--radius-md)",
+                  borderRadius: "var(--radius-sm)",
                   color: "var(--color-navy)",
                 }}
               />

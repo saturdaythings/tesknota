@@ -141,11 +141,11 @@ export function FloatingActionButton({
                   placeholder="Search actions..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full h-9 pl-9 pr-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)]"
+                  className="w-full h-9 pl-9 pr-3 rounded-[var(--radius-sm)] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)]"
                   style={{
-                    fontSize: 'var(--text-ui)',
+                    fontSize: 'var(--text-sm)',
                     background: 'var(--color-cream)',
-                    border: '1px solid var(--color-cream-dark)',
+                    border: '1px solid var(--color-meta-text)',
                     color: 'var(--color-navy)',
                   }}
                 />

@@ -27,8 +27,8 @@ export function SearchInput({ value, onChange, placeholder = "Search...", classN
         placeholder={placeholder}
         style={{ paddingLeft: "32px", paddingRight: value ? "32px" : "10px" }}
         className={cn(
-          "w-full h-9 bg-[var(--color-cream)] border border-[var(--color-meta-text)] rounded-[3px]",
-          "font-sans text-[length:var(--text-sm)] text-[var(--color-navy)]",
+          "w-full h-9 bg-[var(--color-cream)] border border-[var(--color-meta-text)] rounded-[var(--radius-sm)]",
+          "font-sans text-[length:var(--text-sm)] text-[var(--color-navy)] [letter-spacing:var(--tracking-sm)]",
           "placeholder:text-[var(--color-navy-mid)] outline-none transition-[border-color] duration-150",
           "focus:border-[var(--color-accent)]",
         )}

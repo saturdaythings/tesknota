@@ -29,7 +29,8 @@ interface SelectProps {
 
 const triggerBase =
   'flex items-center justify-between w-full h-9 px-3 ' +
-  'bg-[var(--color-cream-dark)] rounded-[3px] ' +
+  'bg-[var(--color-cream)] rounded-[var(--radius-sm)] ' +
+  '[letter-spacing:var(--tracking-sm)] ' +
   'font-sans outline-none transition-[border-color] duration-150 cursor-pointer ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
@@ -157,8 +158,8 @@ export function Select({
             border: error
               ? '1px solid var(--color-destructive)'
               : open
-              ? '1px solid var(--color-navy)'
-              : '1px solid var(--color-row-divider)',
+              ? '1px solid var(--color-accent)'
+              : '1px solid var(--color-meta-text)',
           }}
         >
           <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)', whiteSpace: 'nowrap' }}>
@@ -197,8 +198,8 @@ export function Select({
             width: 'max-content',
             zIndex: 50,
             background: 'var(--color-cream)',
-            border: '1px solid var(--color-row-divider)',
-            borderRadius: '3px',
+            border: '1px solid var(--color-meta-text)',
+            borderRadius: 'var(--radius-sm)',
             boxShadow: 'var(--shadow-md)',
             maxHeight: '280px',
             overflowY: 'auto',

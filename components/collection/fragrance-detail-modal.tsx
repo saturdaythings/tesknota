@@ -168,12 +168,12 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
     "w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 " +
     "focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]";
   const inputStyle: React.CSSProperties = {
-    fontSize: "13px",
+    fontSize: "var(--text-sm)",
     fontWeight: 400,
-    letterSpacing: "0.08em",
+    letterSpacing: "var(--tracking-sm)",
     background: "var(--color-cream)",
-    border: "1px solid rgba(30,45,69,0.8)",
-    color: "rgba(30,45,69,0.8)",
+    border: "1px solid var(--color-meta-text)",
+    color: "var(--color-meta-text)",
   };
 
   return (
@@ -357,14 +357,14 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
                 onChange={(e) => setPurchasePrice(e.target.value)}
                 placeholder="Price (e.g. $120)"
                 className={inputCls}
-                style={{ ...inputStyle, color: purchasePrice ? "var(--color-navy)" : "rgba(30,45,69,0.8)" }}
+                style={{ ...inputStyle, color: purchasePrice ? "var(--color-navy)" : "var(--color-meta-text)" }}
               />
               <input
                 value={whereBought}
                 onChange={(e) => setWhereBought(e.target.value)}
                 placeholder="Where bought (Sephora, online, etc.)"
                 className={inputCls}
-                style={{ ...inputStyle, color: whereBought ? "var(--color-navy)" : "rgba(30,45,69,0.8)" }}
+                style={{ ...inputStyle, color: whereBought ? "var(--color-navy)" : "var(--color-meta-text)" }}
               />
             </div>
 
@@ -376,15 +376,14 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Your impressions, context, memories..."
                 rows={3}
-                className="w-full p-3 rounded-[2px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-none placeholder:text-[var(--color-navy-mid)]"
+                className="w-full p-[var(--space-3)] rounded-[var(--radius-sm)] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] resize-none placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)]"
                 style={{
-                  fontSize: "13px",
+                  fontSize: "var(--text-sm)",
                   fontWeight: 400,
-                  letterSpacing: "0.08em",
-                  minHeight: "72px",
+                  minHeight: "var(--size-row-min)",
                   background: "var(--color-cream)",
-                  border: "1px solid rgba(30,45,69,0.8)",
-                  color: notes ? "var(--color-navy)" : "rgba(30,45,69,0.8)",
+                  border: "1px solid var(--color-meta-text)",
+                  color: notes ? "var(--color-navy)" : "var(--color-meta-text)",
                 }}
               />
             </div>

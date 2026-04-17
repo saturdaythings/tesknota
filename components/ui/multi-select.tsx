@@ -117,18 +117,15 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search..."
-              className="placeholder:text-[var(--color-navy-mid)]"
+              className="w-full h-9 placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)] outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
               style={{
-                width: "100%",
-                height: "28px",
-                padding: "0 8px",
-                background: "var(--color-cream-dark)",
-                border: "none",
-                borderRadius: "2px",
+                padding: "0 var(--space-2)",
+                background: "var(--color-cream)",
+                border: "1px solid var(--color-meta-text)",
+                borderRadius: "var(--radius-sm)",
                 fontFamily: "var(--font-sans)",
                 fontSize: "var(--text-sm)",
                 color: "var(--color-navy)",
-                outline: "none",
               }}
             />
           </div>

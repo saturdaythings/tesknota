@@ -360,17 +360,15 @@ export function BotDrawer() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
             placeholder="Ask anything about your fragrances..."
-            className="placeholder:text-[var(--color-navy-mid)]"
+            className="flex-1 h-9 placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)] outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
             style={{
-              flex: 1,
-              padding: "10px 12px",
-              border: "1px solid var(--color-cream-dark)",
+              padding: "0 var(--space-3)",
+              border: "1px solid var(--color-meta-text)",
               background: "var(--color-cream)",
               fontFamily: "var(--font-sans)",
-              fontSize: "var(--text-ui)",
+              fontSize: "var(--text-sm)",
               color: "var(--color-navy)",
-              outline: "none",
-              borderRadius: "var(--radius-md)",
+              borderRadius: "var(--radius-sm)",
             }}
           />
           <button

@@ -5,9 +5,10 @@ import { cn } from '@/lib/utils';
 
 const inputBase =
   'w-full font-sans font-normal text-[length:var(--text-sm)] text-[var(--color-navy)] ' +
-  'bg-[var(--color-cream-dark)] border border-[var(--color-row-divider)] rounded-[3px] ' +
+  '[letter-spacing:var(--tracking-sm)] ' +
+  'bg-[var(--color-cream)] border border-[var(--color-meta-text)] rounded-[var(--radius-sm)] ' +
   'placeholder:text-[var(--color-navy-mid)] outline-none transition-[border-color] duration-150 ' +
-  'focus:border-[var(--color-navy)] ' +
+  'focus:border-[var(--color-accent)] ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
