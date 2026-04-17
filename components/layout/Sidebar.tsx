@@ -11,6 +11,7 @@ interface NavItem {
   label: string;
   count?: number;
   hasNewActivity?: boolean;
+  pendingDot?: boolean;
   exact?: boolean;
 }
 
@@ -47,6 +48,24 @@ function LiveDot() {
       className="ml-1 inline-block w-2 h-2 rounded-full flex-shrink-0"
       style={{ background: 'var(--color-live)' }}
       aria-label="New activity"
+    />
+  );
+}
+
+function PendingDot() {
+  return (
+    <span
+      style={{
+        position: 'absolute',
+        top: '-2px',
+        right: '-5px',
+        width: '8px',
+        height: '8px',
+        borderRadius: 'var(--radius-full)',
+        background: 'var(--color-accent)',
+        flexShrink: 0,
+      }}
+      aria-label="Pending entries"
     />
   );
 }
@@ -147,7 +166,10 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                         fontFamily: 'var(--font-sans)',
                       }}
                     >
-                      <span className="flex-1 truncate">{item.label}</span>
+                      <span className="flex-1 truncate" style={{ position: 'relative' }}>
+                        {item.label}
+                        {item.pendingDot && <PendingDot />}
+                      </span>
                       {item.hasNewActivity && <LiveDot />}
                       {item.count !== undefined && <CountBadge count={item.count} active={isActive} />}
                     </Link>

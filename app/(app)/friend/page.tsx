@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { FragSearch } from "@/components/ui/frag-search";
@@ -12,12 +12,21 @@ import { FlaskConical, MessageCircle, Star, Users } from "lucide-react";
 import { FragDetail } from "@/components/ui/frag-detail";
 import { AccordCloud } from "@/components/ui/accord-cloud";
 import { Pagination } from "@/components/ui/pagination";
+import { PageFilterBar } from "@/components/ui/page-filter-bar";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { loadAllData } from "@/lib/data";
 import { MONTHS, getAccords, monthNum } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import { CompareView } from "@/components/analytics/comparative-view";
+import {
+  applySort,
+  SORT_FIELD_OPTIONS,
+  RATING_FILTER_OPTIONS,
+  STATUS_FILTER_OPTIONS,
+  type SortField,
+  type SortDir,
+} from "@/lib/collection-utils";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 
 type FriendTab = "collection" | "compliments" | "wishlist" | "incommon" | "analytics";
@@ -30,7 +39,29 @@ const FRIEND_TABS: { label: string; value: FriendTab }[] = [
   { label: "Analytics", value: "analytics" },
 ];
 
-const PER_PAGE = 25;
+const COLLECTION_STATUS_OPTIONS = [
+  { value: "any", label: "Any status" },
+  ...STATUS_FILTER_OPTIONS.filter((o) => o.value !== "all"),
+];
+
+const WISHLIST_PRIORITY_OPTIONS = [
+  { value: "any", label: "Any priority" },
+  { value: "HIGH", label: "High" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "LOW", label: "Low" },
+];
+
+const WISHLIST_STATUS_OPTIONS = [
+  { value: "any", label: "Any status" },
+  { value: "WANT_TO_BUY", label: "Want to Buy" },
+  { value: "WANT_TO_SMELL", label: "Want to Smell" },
+  { value: "WANT_TO_IDENTIFY", label: "Identify Later" },
+];
+
+const COMP_SORT_OPTIONS = [
+  { value: "date", label: "Date" },
+  { value: "fragrance", label: "Fragrance" },
+];
 
 /* component-internal: skeleton row height */
 const SKELETON_ROW_HEIGHT = 'var(--size-row-min)';
@@ -231,20 +262,92 @@ function FriendCollectionTab({
   onFragClick: (frag: UserFragrance) => void;
 }) {
   const [page, setPage] = useState(1);
-  const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
-  const pageFrags = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const [perPage, setPerPage] = useState(25);
+  const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState<SortField>("fragrance");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [accordFilter, setAccordFilter] = useState("any");
+  const [ratingFilter, setRatingFilter] = useState("any");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+
+  const compMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    compliments.forEach((c) => {
+      if (c.primaryFragId) map[c.primaryFragId] = (map[c.primaryFragId] ?? 0) + 1;
+    });
+    return map;
+  }, [compliments]);
+
+  const accordOptions = useMemo(() => {
+    const s = new Set<string>();
+    frags.forEach((f) => getAccords(f, communityFrags).forEach((a) => s.add(a)));
+    return [{ value: "any", label: "Any accord" }, ...Array.from(s).sort().map((a) => ({ value: a, label: a }))];
+  }, [frags, communityFrags]);
+
+  const filtered = useMemo(() => {
+    let list = frags;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
+    }
+    if (accordFilter !== "any") {
+      list = list.filter((f) => getAccords(f, communityFrags).includes(accordFilter));
+    }
+    if (ratingFilter !== "any") {
+      list = list.filter((f) => {
+        const r = f.personalRating ?? 0;
+        if (ratingFilter === "5") return r === 5;
+        if (ratingFilter === "4plus") return r >= 4;
+        if (ratingFilter === "3plus") return r >= 3;
+        if (ratingFilter === "1to2") return r >= 1 && r <= 2;
+        if (ratingFilter === "unrated") return !r;
+        return true;
+      });
+    }
+    if (statusFilter.length > 0) {
+      list = list.filter((f) => statusFilter.includes(f.status));
+    }
+    return applySort(list, sortField, sortDir, compMap);
+  }, [frags, search, accordFilter, ratingFilter, statusFilter, sortField, sortDir, compMap, communityFrags]);
+
+  const filtersActive = accordFilter !== "any" || ratingFilter !== "any" || statusFilter.length > 0;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const pageFrags = filtered.slice((page - 1) * perPage, page * perPage);
   const gridCols = 'minmax(200px,1fr) max-content max-content 180px max-content';
 
-  if (sorted.length === 0) {
+  function clearFilters() {
+    setAccordFilter("any");
+    setRatingFilter("any");
+    setStatusFilter([]);
+  }
+
+  if (frags.length === 0) {
     return <EmptyState icon={<FlaskConical size={48} />} title="No fragrances" />;
   }
 
   return (
     <>
-      <div className="font-sans uppercase" style={countLabel}>
-        {sorted.length} {sorted.length === 1 ? 'fragrance' : 'fragrances'}
-      </div>
+      <PageFilterBar
+        searchValue={search}
+        onSearch={(v) => { setSearch(v); setPage(1); }}
+        searchPlaceholder="Search collection..."
+        sortFields={SORT_FIELD_OPTIONS}
+        sortField={sortField}
+        onSortField={(v) => { setSortField(v as SortField); setPage(1); }}
+        sortDir={sortDir}
+        onSortDir={() => { setSortDir((d) => d === "asc" ? "desc" : "asc"); setPage(1); }}
+        filters={[
+          { value: accordFilter, onChange: (v) => { setAccordFilter(v); setPage(1); }, options: accordOptions },
+          { value: ratingFilter, onChange: (v) => { setRatingFilter(v); setPage(1); }, options: RATING_FILTER_OPTIONS },
+        ]}
+        filtersActive={filtersActive}
+        onClearFilters={clearFilters}
+        perPage={perPage}
+        onPerPage={(v) => { setPerPage(v); setPage(1); }}
+        count={filtered.length}
+        countLabel="Fragrance"
+        isLoaded
+      />
 
       <div className="hidden md:grid" style={{ gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
         <div style={headerRowStyle}>
@@ -340,23 +443,63 @@ function FriendComplimentsTab({
   frags: UserFragrance[];
 }) {
   const [page, setPage] = useState(1);
-  const sorted = compliments.slice().sort(
-    (a, b) =>
-      parseInt(b.year) * 100 + monthNum(b.month) - (parseInt(a.year) * 100 + monthNum(a.month))
-  );
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
-  const pageItems = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const [perPage, setPerPage] = useState(25);
+  const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState("date");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const filtered = useMemo(() => {
+    let list = compliments;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((c) => {
+        const frag = frags.find((f) => (f.fragranceId || f.id) === c.primaryFragId);
+        const name = frag?.name ?? c.primaryFrag ?? "";
+        return name.toLowerCase().includes(q) || (c.notes ?? "").toLowerCase().includes(q);
+      });
+    }
+    return list.slice().sort((a, b) => {
+      if (sortField === "date") {
+        const aVal = parseInt(a.year) * 100 + monthNum(a.month);
+        const bVal = parseInt(b.year) * 100 + monthNum(b.month);
+        return sortDir === "desc" ? bVal - aVal : aVal - bVal;
+      }
+      // fragrance
+      const aFrag = frags.find((f) => (f.fragranceId || f.id) === a.primaryFragId);
+      const bFrag = frags.find((f) => (f.fragranceId || f.id) === b.primaryFragId);
+      const aName = aFrag?.name ?? a.primaryFrag ?? "";
+      const bName = bFrag?.name ?? b.primaryFrag ?? "";
+      const cmp = aName.localeCompare(bName);
+      return sortDir === "desc" ? -cmp : cmp;
+    });
+  }, [compliments, frags, search, sortField, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const pageItems = filtered.slice((page - 1) * perPage, page * perPage);
   const gridCols = 'minmax(180px,1fr) max-content max-content max-content';
 
-  if (sorted.length === 0) {
+  if (compliments.length === 0) {
     return <EmptyState icon={<MessageCircle size={48} />} title="No compliments yet" />;
   }
 
   return (
     <>
-      <div className="font-sans uppercase" style={countLabel}>
-        {sorted.length} {sorted.length === 1 ? 'compliment' : 'compliments'}
-      </div>
+      <PageFilterBar
+        searchValue={search}
+        onSearch={(v) => { setSearch(v); setPage(1); }}
+        searchPlaceholder="Search compliments..."
+        sortFields={COMP_SORT_OPTIONS}
+        sortField={sortField}
+        onSortField={(v) => { setSortField(v); setPage(1); }}
+        sortDir={sortDir}
+        onSortDir={() => { setSortDir((d) => d === "asc" ? "desc" : "asc"); setPage(1); }}
+        filtersActive={false}
+        perPage={perPage}
+        onPerPage={(v) => { setPerPage(v); setPage(1); }}
+        count={filtered.length}
+        countLabel="Compliment"
+        isLoaded
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
         <div style={headerRowStyle}>
@@ -404,20 +547,85 @@ function FriendWishlistTab({
   communityFrags: CommunityFrag[];
 }) {
   const [page, setPage] = useState(1);
-  const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
-  const pageFrags = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const [perPage, setPerPage] = useState(25);
+  const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState("fragrance");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [priorityFilter, setPriorityFilter] = useState("any");
+  const [wishlistStatusFilter, setWishlistStatusFilter] = useState("any");
+
+  const PRIORITY_ORDER: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+
+  const filtered = useMemo(() => {
+    let list = frags;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
+    }
+    if (priorityFilter !== "any") {
+      list = list.filter((f) => (f as UserFragrance & { priority?: string }).priority === priorityFilter);
+    }
+    if (wishlistStatusFilter !== "any") {
+      list = list.filter((f) => f.status === wishlistStatusFilter);
+    }
+    return list.slice().sort((a, b) => {
+      let cmp = 0;
+      if (sortField === "fragrance") {
+        cmp = a.name.localeCompare(b.name);
+      } else if (sortField === "date_added") {
+        cmp = (a.createdAt ?? "").localeCompare(b.createdAt ?? "");
+      } else if (sortField === "priority") {
+        const ap = PRIORITY_ORDER[(a as UserFragrance & { priority?: string }).priority ?? ""] ?? 0;
+        const bp = PRIORITY_ORDER[(b as UserFragrance & { priority?: string }).priority ?? ""] ?? 0;
+        cmp = ap - bp;
+      }
+      return sortDir === "desc" ? -cmp : cmp;
+    });
+  }, [frags, search, priorityFilter, wishlistStatusFilter, sortField, sortDir]);
+
+  const filtersActive = priorityFilter !== "any" || wishlistStatusFilter !== "any";
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const pageFrags = filtered.slice((page - 1) * perPage, page * perPage);
   const gridCols = 'minmax(200px,1fr) max-content 180px';
 
-  if (sorted.length === 0) {
+  const WISHLIST_SORT_OPTIONS = [
+    { value: "fragrance", label: "Fragrance" },
+    { value: "date_added", label: "Date Added" },
+    { value: "priority", label: "Priority" },
+  ];
+
+  function clearFilters() {
+    setPriorityFilter("any");
+    setWishlistStatusFilter("any");
+  }
+
+  if (frags.length === 0) {
     return <EmptyState icon={<Star size={48} />} title="No wishlist items" />;
   }
 
   return (
     <>
-      <div className="font-sans uppercase" style={countLabel}>
-        {sorted.length} {sorted.length === 1 ? 'item' : 'items'}
-      </div>
+      <PageFilterBar
+        searchValue={search}
+        onSearch={(v) => { setSearch(v); setPage(1); }}
+        searchPlaceholder="Search wishlist..."
+        sortFields={WISHLIST_SORT_OPTIONS}
+        sortField={sortField}
+        onSortField={(v) => { setSortField(v); setPage(1); }}
+        sortDir={sortDir}
+        onSortDir={() => { setSortDir((d) => d === "asc" ? "desc" : "asc"); setPage(1); }}
+        filters={[
+          { value: priorityFilter, onChange: (v) => { setPriorityFilter(v); setPage(1); }, options: WISHLIST_PRIORITY_OPTIONS },
+          { value: wishlistStatusFilter, onChange: (v) => { setWishlistStatusFilter(v); setPage(1); }, options: WISHLIST_STATUS_OPTIONS },
+        ]}
+        filtersActive={filtersActive}
+        onClearFilters={clearFilters}
+        perPage={perPage}
+        onPerPage={(v) => { setPerPage(v); setPage(1); }}
+        count={filtered.length}
+        countLabel="Item"
+        isLoaded
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
         <div style={headerRowStyle}>
@@ -474,8 +682,8 @@ function InCommonTab({
 }) {
   const [page, setPage] = useState(1);
   const sorted = frags.slice().sort((a, b) => a.name.localeCompare(b.name));
-  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
-  const pageFrags = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / 25));
+  const pageFrags = sorted.slice((page - 1) * 25, page * 25);
   const gridCols = 'minmax(200px,1fr) 180px max-content';
 
   if (sorted.length === 0) {

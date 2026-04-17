@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import * as XLSX from "xlsx";
 import { QRCodeSVG } from "qrcode.react";
 import { Topbar } from "@/components/layout/Topbar";
@@ -376,13 +377,13 @@ function ResultCard({ cf, userId, onAdded }: { cf: CommunityFrag; userId: string
   );
 }
 
-function PasteLinkTab({ userId }: { userId: string }) {
+function PasteLinkTab({ userId, prefillName }: { userId: string; prefillName?: string }) {
   const { communityFrags, addFrag } = useData();
   const { toast } = useToast();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CommunityFrag | "not-found" | null>(null);
-  const [queueInput, setQueueInput] = useState("");
+  const [queueInput, setQueueInput] = useState(prefillName ?? "");
   const [queue, setQueue] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
 
@@ -749,8 +750,10 @@ const TABS: { id: ImportTab; label: string; sublabel: string }[] = [
   { id: "csv", label: "CSV", sublabel: ".CSV · .XLSX · .XLS" },
 ];
 
-export default function ImportPage() {
+function ImportPageInner() {
   const { user } = useUser();
+  const searchParams = useSearchParams();
+  const prefillName = searchParams.get("name") ?? undefined;
   const [activeTab, setActiveTab] = useState<ImportTab>("link");
 
   return (
@@ -791,10 +794,18 @@ export default function ImportPage() {
           })}
         </div>
 
-        {activeTab === "link" && <PasteLinkTab userId={user?.id ?? ""} />}
+        {activeTab === "link" && <PasteLinkTab userId={user?.id ?? ""} prefillName={prefillName} />}
         {activeTab === "scan" && <ScanTab userId={user?.id ?? ""} />}
         {activeTab === "csv" && <CsvTab userId={user?.id ?? ""} />}
       </PageContent>
     </>
+  );
+}
+
+export default function ImportPage() {
+  return (
+    <Suspense>
+      <ImportPageInner />
+    </Suspense>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Check } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { SearchInput } from "@/components/ui/search-input";
 import { Input } from "@/components/ui/input";
@@ -165,6 +166,12 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
   const [sizeInput, setSizeInput] = useState("");
   const [fragType, setFragType] = useState<FragranceType | "">("");
 
+  // Quick-add request
+  const [showRequest, setShowRequest] = useState(false);
+  const [reqHouse, setReqHouse] = useState("");
+  const [reqConc, setReqConc] = useState("");
+  const [reqSaving, setReqSaving] = useState(false);
+
   // Step 3
   const [rating, setRating] = useState(0);
   const [price, setPrice] = useState("");
@@ -254,6 +261,23 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
     } else {
       setStep((s) => s - 1);
     }
+  }
+
+  async function submitRequest() {
+    if (!user || !query.trim()) return;
+    setReqSaving(true);
+    await supabase.from("pending_entries").insert({
+      fragrance_name: query.trim(),
+      house: reqHouse.trim() || null,
+      concentration: reqConc.trim() || null,
+      requested_by: user.id,
+      status: "pending",
+    });
+    setReqSaving(false);
+    setShowRequest(false);
+    setReqHouse("");
+    setReqConc("");
+    toast("Fragrance requested for admin review.", "success");
   }
 
   const handleQueryChange = useCallback((val: string) => {
@@ -409,15 +433,29 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
                   marginTop: "var(--space-3)",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "var(--space-2)",
+                  gap: "var(--space-3)",
                 }}
               >
                 <span className="text-secondary">
-                  Not finding it? Save to identify later.
+                  Not in our database yet.
                 </span>
-                <Button variant="ghost" size="sm" onClick={handleIdentifyLater}>
-                  Save to Identify Later
-                </Button>
+                <div style={{ display: "flex", gap: "var(--space-2)", flexWrap: "wrap" }}>
+                  <Button variant="ghost" size="sm" onClick={handleIdentifyLater}>
+                    Save to Identify Later
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setShowRequest((v) => !v)}>
+                    Request Fragrance
+                  </Button>
+                </div>
+                {showRequest && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", padding: "var(--space-3)", background: "var(--color-cream-dark)", borderRadius: "var(--radius-md)" }}>
+                    <Input value={reqHouse} onChange={(e) => setReqHouse(e.target.value)} placeholder="House / Brand" />
+                    <Input value={reqConc} onChange={(e) => setReqConc(e.target.value)} placeholder="Concentration (EDP, EDT...)" />
+                    <Button variant="primary" size="sm" onClick={submitRequest} disabled={reqSaving || !query.trim()}>
+                      {reqSaving ? "Submitting..." : "Submit Request"}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
