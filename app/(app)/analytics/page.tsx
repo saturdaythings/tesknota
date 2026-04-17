@@ -480,7 +480,7 @@ export default function AnalyticsPage() {
             <TimePill label="Year" active={period === "year"} onClick={() => setPeriod("year")} />
             <TimePill label="Season" active={period === "season"} onClick={() => setPeriod("season")} />
             {period === "season" && (
-              <div style={{ width: "130px", marginLeft: "4px" }}>
+              <div className="max-sm:w-full" style={{ width: "130px", marginLeft: "4px" }}>
                 <Select
                   options={SEASON_OPTIONS}
                   value={season}
@@ -490,7 +490,7 @@ export default function AnalyticsPage() {
             )}
             <TimePill label="Month" active={period === "month"} onClick={() => setPeriod("month")} />
             {period === "month" && monthOptions.length > 0 && (
-              <div style={{ width: "140px", marginLeft: "4px" }}>
+              <div className="max-sm:w-full" style={{ width: "140px", marginLeft: "4px" }}>
                 <Select
                   options={monthOptions}
                   value={selectedMonth}
