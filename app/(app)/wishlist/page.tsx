@@ -2,14 +2,13 @@
 
 import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Plus, Heart, SearchX } from "lucide-react";
+import { Heart, SearchX } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { Button } from "@/components/ui/button";
 import { FragSearch } from "@/components/ui/frag-search";
 import { PageFilterBar } from "@/components/ui/page-filter-bar";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FragranceCell } from "@/components/ui/fragrance-cell";
 import { FragForm } from "@/components/ui/frag-form";
@@ -40,6 +39,12 @@ const SORT_FIELD_OPTIONS = [
 ];
 
 const PRIORITY_ORDER: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+
+const cellStyle = {
+  fontSize: "var(--text-xs)",
+  letterSpacing: "var(--tracking-md)",
+  color: "var(--color-navy)",
+} as const;
 
 /* component-internal: wishlist desktop grid */
 const WISHLIST_GRID_COLS = "minmax(240px,1fr) 100px 110px 200px 240px 260px";
@@ -138,7 +143,7 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
         </div>
       ) : (
         <Button variant="secondary" size="sm" onClick={onAdd} style={{ width: "100%" }}>
-          + WISHLIST
+          WISHLIST
         </Button>
       )}
     </div>
@@ -181,30 +186,30 @@ function DiscoverRow({ title, children }: { title: string; children: React.React
 // ── Priority badge ────────────────────────────────────────
 
 function PriorityBadge({ priority }: { priority: WishlistPriority | null }) {
-  if (!priority) return <span style={{ color: "var(--color-meta-text)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>—</span>;
+  if (!priority) return <span className="font-sans uppercase" style={cellStyle}>—</span>;
   const { label } = WISHLIST_PRIORITY_LABELS[priority];
-  const variant = priority === "HIGH" ? "want" : priority === "MEDIUM" ? "neutral" : "neutral";
-  return <Badge variant={variant}>{label}</Badge>;
+  return <span className="font-sans uppercase" style={cellStyle}>{label}</span>;
 }
 
 // ── Notes cell ────────────────────────────────────────────
 
 function NotesCell({ cf }: { cf: CommunityFrag | null }) {
-  if (!cf) return <span style={{ color: "var(--color-meta-text)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>—</span>;
+  const noteStyle = { fontSize: "var(--text-xxs)", color: "rgba(30,45,69,0.7)" } as const;
+  if (!cf) return <span className="font-sans" style={noteStyle}>—</span>;
   const rows = [
     { label: "TOP", notes: cf.topNotes },
     { label: "HEART", notes: cf.middleNotes },
     { label: "BASE", notes: cf.baseNotes },
   ].filter((r) => r.notes?.length);
-  if (!rows.length) return <span style={{ color: "var(--color-meta-text)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>—</span>;
+  if (!rows.length) return <span className="font-sans" style={noteStyle}>—</span>;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
       {rows.map(({ label, notes }) => (
         <div key={label} style={{ display: "flex", gap: "var(--space-2)", alignItems: "baseline" }}>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xxs)", fontWeight: "var(--font-weight-medium)", letterSpacing: "var(--tracking-md)", color: "var(--color-meta-text)", textTransform: "uppercase", flexShrink: 0, width: "36px" }}>
+          <span className="font-sans uppercase" style={{ fontSize: "var(--text-xxs)", fontWeight: "var(--font-weight-medium)", letterSpacing: "var(--tracking-md)", color: "var(--color-meta-text)", flexShrink: 0, width: "36px" }}>
             {label}
           </span>
-          <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-sm)", color: "var(--color-navy)", lineHeight: 1.4 }}>
+          <span className="font-sans" style={{ ...noteStyle, lineHeight: 1.4 }}>
             {notes!.join(", ")}
           </span>
         </div>
@@ -293,22 +298,10 @@ function RowActions({
   onMoveToCollection: (f: UserFragrance) => void;
   onRemove: (f: UserFragrance) => void;
 }) {
-  const [confirm, setConfirm] = useState(false);
-
-  if (confirm) {
-    return (
-      <div style={{ display: "flex", gap: "var(--space-1)", alignItems: "center" }} onClick={(e) => e.stopPropagation()}>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>Remove?</span>
-        <Button variant="destructive" size="sm" onClick={() => onRemove(frag)}>Yes</Button>
-        <Button variant="ghost" size="sm" onClick={() => setConfirm(false)}>Cancel</Button>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ display: "flex", gap: "var(--space-1)", alignItems: "center" }} onClick={(e) => e.stopPropagation()}>
-      <Button variant="ghost" size="sm" onClick={() => onMoveToCollection(frag)}>MOVE TO COLLECTION</Button>
-      <Button variant="destructive" size="sm" onClick={() => setConfirm(true)}>REMOVE</Button>
+    <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", justifyContent: "flex-end" }} onClick={(e) => e.stopPropagation()}>
+      <Button variant="ghost" size="sm" onClick={() => onMoveToCollection(frag)}>Move to Collection</Button>
+      <Button variant="ghost" size="sm" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
     </div>
   );
 }
@@ -352,22 +345,18 @@ function WishlistMobileCard({
           </div>
         )}
         {accords.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)", marginTop: "var(--space-2)" }}>
-            {accords.map((a) => (
-              <span key={a} style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "var(--radius-full)", background: "var(--color-sand-light)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>
-                {a}
-              </span>
-            ))}
+          <div style={{ marginTop: "var(--space-2)" }}>
+            <span className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-navy)", lineHeight: "var(--leading-relaxed)" }}>
+              {accords.join(", ")}
+            </span>
           </div>
         )}
       </Button>
       <div style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
         <Button variant="primary" size="sm" onClick={() => onMoveToCollection(frag)} style={{ flex: 1 }}>
-          Add to Collection
+          Move to Collection
         </Button>
-        <Button variant="secondary" size="sm" onClick={() => onRemove(frag)}>
-          Remove
-        </Button>
+        <Button variant="ghost" size="sm" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
       </div>
     </div>
   );
@@ -575,7 +564,7 @@ function WishlistInner() {
           search={search}
           onSearch={setSearch}
           searchPlaceholder="Search your wishlist..."
-          action={<Button variant="primary" onClick={() => setAddOpen(true)}><Plus size={15} />Add to Wishlist</Button>}
+          action={<Button variant="primary" onClick={() => setAddOpen(true)}>Add to Wishlist</Button>}
           sortField={sortField}
           sortDir={sortDir}
           sortOptions={SORT_FIELD_OPTIONS}
@@ -584,7 +573,7 @@ function WishlistInner() {
           perPage={pageSize}
           onPerPage={(v) => { setPageSize(v); setPage(1); }}
           count={isLoaded ? filtered.length : undefined}
-          countLabel="Item"
+          countLabel="Fragrance"
           isLoaded={isLoaded}
         />
 
@@ -600,7 +589,6 @@ function WishlistInner() {
             description="Save fragrances you want to explore."
             action={
               <Button variant="primary" onClick={() => setAddOpen(true)}>
-                <Plus size={15} />
                 Add to Wishlist
               </Button>
             }
@@ -648,21 +636,12 @@ function WishlistInner() {
                       <PriorityBadge priority={frag.wishlistPriority} />
                     </div>
                     <div style={{ padding: "0 var(--space-4)" }}>
-                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-ui)", color: "var(--color-navy)" }}>{added || "—"}</span>
+                      <span className="font-sans uppercase" style={{ ...cellStyle, whiteSpace: "nowrap" }}>{added || "—"}</span>
                     </div>
                     <div style={{ padding: "0 var(--space-4)" }}>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "3px" }}>
-                        {accords.map((a) => (
-                          <span key={a} style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "var(--radius-full)", background: "var(--color-sand-light)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", whiteSpace: "nowrap" }}>
-                            {a}
-                          </span>
-                        ))}
-                        {extra > 0 && (
-                          <span style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "var(--radius-full)", background: "var(--color-sand-light)", color: "var(--color-meta-text)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>
-                            +{extra} more
-                          </span>
-                        )}
-                      </div>
+                      <span className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-navy)", lineHeight: "var(--leading-relaxed)" }}>
+                        {accords.length ? accords.join(", ") + (extra > 0 ? `, +${extra} more` : "") : "—"}
+                      </span>
                     </div>
                     <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                       <NotesCell cf={cf} />

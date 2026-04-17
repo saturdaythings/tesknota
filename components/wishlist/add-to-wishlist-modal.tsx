@@ -143,25 +143,13 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
             <FieldLabel>Fragrance Name</FieldLabel>
             <div style={{ position: "relative" }}>
               <div style={{ position: "relative" }}>
-                <input
+                <Input
                   type="text"
                   value={query}
                   onChange={(e) => handleQueryChange(e.target.value)}
                   placeholder="Search by name or brand..."
                   autoFocus
-                  style={{
-                    width: "100%",
-                    height: "40px",
-                    padding: "0 36px 0 12px",
-                    background: "var(--color-cream)",
-                    border: "1.5px solid var(--color-cream-dark)",
-                    borderRadius: "3px",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "var(--text-base)",
-                    color: "var(--color-navy)",
-                    outline: "none",
-                  }}
-                  className="focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
+                  className={selected ? "pr-9" : ""}
                 />
                 {selected && (
                   <span
