@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 const USERS = [
   { name: 'Kiana', email: process.env.NEXT_PUBLIC_USER_KIANA_EMAIL ?? '' },
@@ -167,6 +168,21 @@ export default function LoginPage() {
           >
             BACK
           </button>
+
+          {/* Register link */}
+          <div
+            className="font-sans text-center"
+            style={{ fontSize: '13px', color: 'rgba(245,240,232,0.5)' }}
+          >
+            New to t&#281;sknota?{' '}
+            <Link
+              href="/register"
+              className="underline transition-opacity hover:opacity-100"
+              style={{ color: 'var(--color-sand)', opacity: 0.7 }}
+            >
+              Create account
+            </Link>
+          </div>
         </form>
       )}
     </div>
