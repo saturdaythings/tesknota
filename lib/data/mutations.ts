@@ -263,6 +263,18 @@ export async function deleteFollow(id: string): Promise<void> {
 
 // ── Notification mutations ────────────────────────────────────
 
+export async function createNotification(
+  userId: string,
+  type: string,
+  title: string | null,
+  body: string | null,
+  actionUrl: string | null = null,
+): Promise<void> {
+  await supabase
+    .from("notifications")
+    .insert({ user_id: userId, type, title, body, action_url: actionUrl, read: false });
+}
+
 export async function markNotificationRead(id: string): Promise<void> {
   const { error } = await supabase.from("notifications").update({ read: true }).eq("id", id);
   if (error) throw new Error(error.message);

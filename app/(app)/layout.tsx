@@ -10,7 +10,7 @@ import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { FragranceDetailModal } from '@/components/collection/fragrance-detail-modal';
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
 import { AddToWishlistModal } from '@/components/wishlist/add-to-wishlist-modal';
-import { useUser, getFriend } from '@/lib/user-context';
+import { useUser } from '@/lib/user-context';
 import { DataProvider, useData } from '@/lib/data-context';
 import { ToastProvider } from '@/components/ui/toast';
 import { MobileNavProvider } from '@/lib/mobile-nav-context';
@@ -63,7 +63,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
   const [editCompOpen, setEditCompOpen] = useState(false);
   const [openFlagCount, setOpenFlagCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
-  const friend = getFriend(user, profiles);
+  const [pendingFollowCount, setPendingFollowCount] = useState(0);
 
   const refreshFlagCount = useCallback(async () => {
     if (!user.isAdmin) return;
@@ -83,8 +83,18 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     setPendingCount(count ?? 0);
   }, [user.isAdmin]);
 
+  const refreshFollowCount = useCallback(async () => {
+    const { count } = await supabase
+      .from("follows")
+      .select("id", { count: "exact", head: true })
+      .eq("following_id", user.id)
+      .eq("status", "pending");
+    setPendingFollowCount(count ?? 0);
+  }, [user.id]);
+
   useEffect(() => { refreshFlagCount(); }, [refreshFlagCount]);
   useEffect(() => { refreshPendingCount(); }, [refreshPendingCount]);
+  useEffect(() => { refreshFollowCount(); }, [refreshFollowCount]);
 
   const collectionCount = fragrances.filter((f) => f.status === 'CURRENT').length;
   const wishlistCount = fragrances.filter((f) => f.status === 'WANT_TO_BUY' || f.status === 'WANT_TO_SMELL').length;
@@ -109,7 +119,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
     {
       label: 'Social',
       items: [
-        { href: '/friend', label: friend?.name ?? 'Friend' },
+        { href: '/social', label: 'Social', pendingDot: pendingFollowCount > 0 },
       ],
     },
     {

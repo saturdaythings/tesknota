@@ -204,6 +204,18 @@ export async function fetchProfileByUsername(username: string): Promise<Profile 
   return data ? dbRowToProfile(data as Record<string, unknown>) : null;
 }
 
+export async function searchProfiles(query: string, excludeId: string): Promise<Profile[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .or(`username.ilike.%${q}%,first_name.ilike.%${q}%,last_name.ilike.%${q}%`)
+    .neq("id", excludeId)
+    .limit(10);
+  return (data ?? []).map((r) => dbRowToProfile(r as Record<string, unknown>));
+}
+
 // ── Follows queries ───────────────────────────────────────────
 
 export async function fetchFollows(userId: string): Promise<Follow[]> {
