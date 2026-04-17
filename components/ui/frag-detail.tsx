@@ -8,6 +8,9 @@ import { getCommunityData } from "@/lib/data";
 import { submitCommunityFlag } from "@/lib/data/mutations";
 import { useUser } from "@/lib/user-context";
 import { useToast } from "@/components/ui/toast";
+import { TabPill } from "@/components/ui/tab-pill";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 
 const FLAG_FIELDS = [
@@ -99,12 +102,12 @@ export function FragDetail({
         fieldFlagged: flagField,
         userNote: flagNote,
       });
-      toast("Flag submitted. Thanks!");
+      toast("Flag submitted. Thanks!", { variant: "success" });
       setFlagOpen(false);
       setFlagNote("");
       setFlagField(FLAG_FIELDS[0]);
     } catch {
-      toast("Failed to submit flag.");
+      toast("Failed to submit flag.", { variant: "error" });
     } finally {
       setFlagging(false);
     }
@@ -183,12 +186,9 @@ export function FragDetail({
               <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-navy)]">
                 Community
               </div>
-              <button
-                onClick={() => setFlagOpen((v) => !v)}
-                className="font-[var(--font-sans)] text-xs tracking-[0.08em] text-[var(--color-navy)] hover:text-[var(--color-destructive)] transition-colors border-none bg-none cursor-pointer p-0"
-              >
+              <Button variant="ghost" size="sm" onClick={() => setFlagOpen((v) => !v)}>
                 {flagOpen ? "Cancel flag" : "Flag incorrect data"}
-              </button>
+              </Button>
             </div>
 
             {flagOpen && (
@@ -196,29 +196,29 @@ export function FragDetail({
                 <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] mb-1">Which field is incorrect?</div>
                 <div className="flex flex-wrap gap-1.5 mb-1">
                   {FLAG_FIELDS.map((f) => (
-                    <button
+                    <TabPill
                       key={f}
+                      label={f}
+                      active={flagField === f}
                       onClick={() => setFlagField(f)}
-                      className={`font-[var(--font-sans)] text-xs px-2 py-1 border transition-colors cursor-pointer ${flagField === f ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white" : "border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"}`}
-                    >
-                      {f}
-                    </button>
+                    />
                   ))}
                 </div>
-                <textarea
+                <Textarea
                   value={flagNote}
                   onChange={(e) => setFlagNote(e.target.value)}
                   placeholder="What's wrong? (optional)"
                   rows={2}
-                  className="w-full px-2 py-1.5 border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-sm text-[var(--color-navy)] placeholder:text-[var(--color-cream-dark)] focus:outline-none focus:border-[var(--color-accent)] resize-none"
                 />
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={submitFlag}
                   disabled={flagging}
-                  className="self-start px-4 py-1.5 font-[var(--font-sans)] text-xs tracking-[0.08em] uppercase bg-[var(--color-accent)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  style={{ alignSelf: "flex-start" }}
                 >
                   {flagging ? "Submitting..." : "Submit flag"}
-                </button>
+                </Button>
               </div>
             )}
 
@@ -261,46 +261,31 @@ export function FragDetail({
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             {!readOnly && onDelete && !confirmDelete && (
-              <button
-                onClick={handleDelete}
-                className="font-[var(--font-sans)] text-xs text-[var(--color-destructive)] border border-[var(--color-destructive)] px-3 py-[5px] hover:bg-[var(--color-destructive)] hover:text-white transition-colors"
-              >
+              <Button variant="destructive" size="sm" onClick={handleDelete}>
                 Delete
-              </button>
+              </Button>
             )}
             {!readOnly && onDelete && confirmDelete && (
               <>
                 <span className="font-[var(--font-sans)] text-xs text-[var(--color-destructive)]">Remove permanently?</span>
-                <button
-                  onClick={handleDelete}
-                  className="font-[var(--font-sans)] text-xs bg-[var(--color-destructive)] text-white px-3 py-[5px] hover:opacity-90"
-                >
+                <Button variant="destructive" size="sm" onClick={handleDelete}>
                   Confirm
-                </button>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="font-[var(--font-sans)] text-xs border border-[var(--color-cream-dark)] text-[var(--color-navy)] px-3 py-[5px] hover:border-[var(--color-navy)]"
-                >
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
                   Cancel
-                </button>
+                </Button>
               </>
             )}
           </div>
           <div className="flex items-center gap-2">
             {!readOnly && onEdit && (
-              <button
-                onClick={() => { handleClose(); onEdit(frag!); }}
-                className="px-4 py-[7px] font-[var(--font-sans)] text-xs border border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
-              >
+              <Button variant="secondary" size="sm" onClick={() => { handleClose(); onEdit(frag!); }}>
                 Edit
-              </button>
+              </Button>
             )}
-            <button
-              onClick={handleClose}
-              className="px-5 py-[7px] font-[var(--font-sans)] text-xs bg-[var(--color-accent)] text-white hover:opacity-90"
-            >
+            <Button variant="primary" size="sm" onClick={handleClose}>
               Close
-            </button>
+            </Button>
           </div>
         </div>
       </ModalFooter>
