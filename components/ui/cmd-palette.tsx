@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { TabPill } from "@/components/ui/tab-pill";
 import { MONTHS } from "@/lib/frag-utils";
-import type { UserFragrance, UserCompliment, FragranceStatus, FragranceType, BottleSize, Relation, ComplimenterGender } from "@/types";
+import type { UserFragrance, UserCompliment, FragranceStatus, FragranceType, BottleSize, Relation, ComplimenterGender, WishlistPriority } from "@/types";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,6 +67,12 @@ const TYPE_OPTIONS: SelectOption[] = [
   "Cologne", "Perfume Concentré", "Body Spray", "Perfume Oil", "Other"
 ].map((v) => ({ v, l: v }));
 
+const PRIORITY_OPTIONS: SelectOption[] = [
+  { v: "HIGH", l: "High" },
+  { v: "MEDIUM", l: "Medium" },
+  { v: "LOW", l: "Low" },
+];
+
 const RELATION_OPTIONS: SelectOption[] = [
   "Stranger", "Friend", "Colleague / Client", "Family", "Significant Other", "Other"
 ].map((v) => ({ v, l: v }));
@@ -70,6 +80,10 @@ const RELATION_OPTIONS: SelectOption[] = [
 const GENDER_OPTIONS: SelectOption[] = [
   { v: "Female", l: "Female" }, { v: "Male", l: "Male" },
 ];
+
+const MONTH_OPTIONS = MONTHS.map((m, i) => ({ v: String(i + 1).padStart(2, "0"), l: m }));
+const YEAR_OPTIONS = Array.from({ length: 6 }, (_, i) => String(new Date().getFullYear() - i)).map((y) => ({ v: y, l: y }));
+const PURCHASE_YEAR_OPTIONS = Array.from({ length: 10 }, (_, i) => String(new Date().getFullYear() - i)).map((y) => ({ v: y, l: y }));
 
 function isWishlist(answers: Record<string, unknown>): boolean {
   const s = answers.status as string;
@@ -83,6 +97,9 @@ const FRAG_ADD_STEPS: FlowStep[] = [
   { id: "statusRating", type: "select", label: "How do you feel about it?", options: STATUS_RATING_OPTIONS, skipIf: isWishlist, optional: true },
   { id: "sizes", type: "multiselect", label: "Size owned", multiOptions: SIZE_OPTIONS, skipIf: isWishlist, optional: true },
   { id: "type", type: "select", label: "Type / concentration?", options: TYPE_OPTIONS, optional: true },
+  { id: "wishlistPriority", type: "select", label: "Priority?", options: PRIORITY_OPTIONS, skipIf: (a) => !isWishlist(a), optional: true },
+  { id: "purchaseMonth", type: "select", label: "Purchase month?", options: MONTH_OPTIONS, skipIf: isWishlist, optional: true },
+  { id: "purchaseYear", type: "select", label: "Purchase year?", options: PURCHASE_YEAR_OPTIONS, skipIf: isWishlist, optional: true },
   { id: "personalNotes", type: "textarea", label: "Personal notes?", hint: "Your impressions, context, memories...", optional: true },
   { id: "confirm", type: "confirm", label: "Save fragrance?" },
 ];
@@ -94,8 +111,8 @@ const FRAG_EDIT_STEPS: FlowStep[] = [
 
 const COMP_ADD_STEPS: FlowStep[] = [
   { id: "pick", type: "pick", label: "Which fragrance were you wearing?" },
-  { id: "month", type: "select", label: "Month?", options: MONTHS.map((m, i) => ({ v: String(i + 1).padStart(2, "0"), l: m })) },
-  { id: "year", type: "select", label: "Year?", options: Array.from({ length: 6 }, (_, i) => String(new Date().getFullYear() - i)).map((y) => ({ v: y, l: y })) },
+  { id: "month", type: "select", label: "Month?", options: MONTH_OPTIONS },
+  { id: "year", type: "select", label: "Year?", options: YEAR_OPTIONS },
   { id: "relation", type: "select", label: "Who gave the compliment?", options: RELATION_OPTIONS },
   { id: "gender", type: "select", label: "Their gender?", options: GENDER_OPTIONS, optional: true },
   { id: "location", type: "text", label: "Where?", hint: "Venue or occasion", optional: true },
@@ -124,6 +141,8 @@ const MENU_ITEMS: { key: FlowKey; label: string; hint: string }[] = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+const FIELD_ID = "cmd-pal-field";
+
 function genFragId(): string {
   return "f" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
@@ -150,14 +169,15 @@ export function CmdPalette() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMulti, setSelectedMulti] = useState<string[]>([]);
   const [textValue, setTextValue] = useState("");
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
   const myFrags = fragrances.filter((f) => f.userId === (user?.id ?? "u1"));
   const myComps = compliments.filter((c) => c.userId === (user?.id ?? "u1"));
 
   // Auto-focus input on step change
   useEffect(() => {
-    if (pal.open) setTimeout(() => inputRef.current?.focus(), 60);
+    if (pal.open) {
+      setTimeout(() => (document.getElementById(FIELD_ID) as HTMLElement)?.focus(), 60);
+    }
   }, [pal.step, pal.flow, pal.open]);
 
   // Cmd+K shortcut
@@ -177,11 +197,6 @@ export function CmdPalette() {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
-
-  function openPal() {
-    setPal({ open: true, flow: null, step: 0, answers: {}, editTarget: null });
-    setSearchQuery(""); setSelectedMulti([]); setTextValue("");
-  }
 
   function closePal() {
     setPal((p) => ({ ...p, open: false }));
@@ -222,6 +237,7 @@ export function CmdPalette() {
     const a = pal.answers;
     try {
       if (pal.flow === "frag-add") {
+        const wishlist = isWishlist(a);
         const frag: UserFragrance = {
           id: genFragId(),
           fragranceId: (a.fragranceId as string) || genFragId(),
@@ -234,18 +250,20 @@ export function CmdPalette() {
           personalRating: a.personalRating ? parseInt(a.personalRating as string) : null,
           statusRating: null,
           whereBought: null,
-          purchaseDate: null,
-          purchaseMonth: null,
-          purchaseYear: null,
+          purchaseDate: !wishlist && a.purchaseMonth && a.purchaseYear
+            ? `${a.purchaseMonth} ${a.purchaseYear}`
+            : null,
+          purchaseMonth: !wishlist ? ((a.purchaseMonth as string) || null) : null,
+          purchaseYear: !wishlist ? ((a.purchaseYear as string) || null) : null,
           purchasePrice: null,
           isDupe: false,
           dupeFor: "",
           personalNotes: (a.personalNotes as string) || "",
           createdAt: new Date().toISOString(),
-          wishlistPriority: null,
+          wishlistPriority: wishlist ? ((a.wishlistPriority as WishlistPriority) || null) : null,
         };
         await addFrag(frag);
-        toast((a.name as string) + " added");
+        toast((a.name as string) + " added", "success");
       } else if (pal.flow === "frag-edit" && pal.editTarget) {
         const orig = pal.editTarget as UserFragrance;
         const updated: UserFragrance = {
@@ -257,11 +275,11 @@ export function CmdPalette() {
           personalNotes: (a.personalNotes as string) ?? orig.personalNotes,
         };
         await editFrag(updated);
-        toast(orig.name + " updated");
+        toast(orig.name + " updated", "success");
       } else if (pal.flow === "comp-add") {
         const fragName = (a.fragName as string) || (a.name as string) || "";
         const fragId = (a.fragId as string) || "";
-        if (!fragId || !fragName) { toast("Select a fragrance first."); return; }
+        if (!fragId || !fragName) { toast("Select a fragrance first.", "error"); return; }
         const comp: UserCompliment = {
           id: genCompId(),
           userId: user.id,
@@ -276,12 +294,12 @@ export function CmdPalette() {
           location: (a.location as string) || null,
           city: null,
           state: null,
-          country: "",
+          country: "US",
           notes: (a.notes as string) || null,
           createdAt: new Date().toISOString(),
         };
         await addComp(comp);
-        toast("Compliment logged");
+        toast("Compliment logged", "success");
       } else if (pal.flow === "comp-edit" && pal.editTarget) {
         const orig = pal.editTarget as UserCompliment;
         const updated: UserCompliment = {
@@ -294,10 +312,10 @@ export function CmdPalette() {
           notes: (a.notes as string) ?? orig.notes,
         };
         await editComp(updated);
-        toast("Compliment updated");
+        toast("Compliment updated", "success");
       }
     } catch (e: unknown) {
-      toast("Save failed: " + (e instanceof Error ? e.message : "unknown"));
+      toast("Save failed: " + (e instanceof Error ? e.message : "unknown"), "error");
     }
     closePal();
   }
@@ -306,22 +324,19 @@ export function CmdPalette() {
   function submitSelect(v: string) {
     const step = getCurrentStep();
     if (!step) return;
-    const answers = { ...pal.answers, [step.id]: v };
-    advanceStep(answers);
+    advanceStep({ ...pal.answers, [step.id]: v });
   }
 
   function submitText() {
     const step = getCurrentStep();
     if (!step) return;
-    const answers = { ...pal.answers, [step.id]: textValue };
-    advanceStep(answers);
+    advanceStep({ ...pal.answers, [step.id]: textValue });
   }
 
   function submitMultiSelect() {
     const step = getCurrentStep();
     if (!step) return;
-    const answers = { ...pal.answers, [step.id]: selectedMulti };
-    advanceStep(answers);
+    advanceStep({ ...pal.answers, [step.id]: selectedMulti });
   }
 
   function skipStep() {
@@ -341,15 +356,13 @@ export function CmdPalette() {
   function selectFragFromSearch(f: { fragranceId: string; fragranceName: string; fragranceHouse: string }) {
     const step = getCurrentStep();
     if (!step) return;
-    const answers = { ...pal.answers, [step.id]: f.fragranceName, fragranceId: f.fragranceId, name: f.fragranceName, house: f.fragranceHouse };
-    advanceStep(answers);
+    advanceStep({ ...pal.answers, [step.id]: f.fragranceName, fragranceId: f.fragranceId, name: f.fragranceName, house: f.fragranceHouse });
   }
 
   function selectFragFromSearchFreetext() {
     const step = getCurrentStep();
     if (!step) return;
-    const answers = { ...pal.answers, [step.id]: searchQuery, name: searchQuery, house: "", fragranceId: genFragId() };
-    advanceStep(answers);
+    advanceStep({ ...pal.answers, [step.id]: searchQuery, name: searchQuery, house: "", fragranceId: genFragId() });
   }
 
   // ── Pick step: list of user's frags or comps ──────────────────────────────
@@ -387,33 +400,60 @@ export function CmdPalette() {
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-[rgba(var(--near-black-ch),0.55)] z-[600]" onClick={closePal} />
+      <div
+        className="fixed inset-0 z-[600]"
+        style={{ background: 'var(--color-navy-backdrop)' }}
+        onClick={closePal}
+      />
 
       {/* Palette modal */}
       <div
-        className="fixed left-1/2 top-[15vh] -translate-x-1/2 w-full max-w-[520px] bg-[var(--off)] border border-[var(--b3)] z-[601] shadow-[0_20px_60px_rgba(var(--blue3-ch),0.22)]"
+        className="fixed left-1/2 top-[15vh] -translate-x-1/2 w-full max-w-[520px] bg-[var(--color-cream)] border border-[var(--color-sand-light)] z-[601]"
+        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }}
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--b2)]">
+        <div
+          className="flex items-center justify-between px-5 py-3.5"
+          style={{ borderBottom: '1px solid var(--color-cream-dark)' }}
+        >
           {pal.flow ? (
             <div className="flex items-center gap-3">
-              <button onClick={goBack} className="font-[var(--mono)] text-xs tracking-[0.08em] text-[var(--ink3)] hover:text-[var(--ink)] bg-none border-none cursor-pointer p-0">
+              <Button variant="ghost" size="sm" onClick={goBack}>
                 ← Back
-              </button>
-              <span className="font-[var(--mono)] text-xs text-[var(--ink4)] tracking-[0.08em]">
+              </Button>
+              <span
+                className="font-sans"
+                style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-sm)' }}
+              >
                 {stepNum} / {totalSteps}
               </span>
             </div>
           ) : (
-            <div className="font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)]">Quick add</div>
+            <div
+              className="font-sans uppercase"
+              style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}
+            >
+              Quick add
+            </div>
           )}
           <div className="flex items-center gap-3">
-            <kbd className="font-[var(--mono)] text-xs text-[var(--ink4)] bg-[var(--off2)] border border-[var(--b2)] px-1.5 py-0.5">⌘K</kbd>
-            <button onClick={closePal} className="text-lg text-[var(--ink3)] hover:text-[var(--ink)] bg-none border-none cursor-pointer px-1" aria-label="Close">×</button>
+            <kbd
+              className="font-sans"
+              style={{
+                fontSize: 'var(--text-xs)',
+                color: 'var(--color-meta-text)',
+                background: 'var(--color-cream-dark)',
+                border: '1px solid var(--color-cream-dark)',
+                padding: '2px 6px',
+              }}
+            >
+              ⌘K
+            </kbd>
+            <Button variant="icon" size="sm" onClick={closePal} aria-label="Close">×</Button>
           </div>
         </div>
 
@@ -421,17 +461,28 @@ export function CmdPalette() {
         {!pal.flow && (
           <div className="py-1">
             {MENU_ITEMS.map((item) => (
-              <button
+              <Button
                 key={item.key}
+                variant="ghost"
+                className="w-full justify-between px-5 py-3.5 h-auto min-h-0 rounded-none"
                 onClick={() => selectFlow(item.key)}
-                className="w-full text-left px-5 py-3.5 flex items-center justify-between hover:bg-[var(--off2)] group transition-colors border-none bg-none cursor-pointer"
               >
-                <div>
-                  <div className="font-[var(--body)] text-sm text-[var(--ink)] group-hover:text-[var(--blue)]">{item.label}</div>
-                  <div className="font-[var(--mono)] text-xs text-[var(--ink4)] mt-0.5">{item.hint}</div>
+                <div className="text-left">
+                  <div
+                    className="font-sans"
+                    style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}
+                  >
+                    {item.label}
+                  </div>
+                  <div
+                    className="font-sans mt-0.5"
+                    style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}
+                  >
+                    {item.hint}
+                  </div>
                 </div>
-                <span className="text-[var(--ink4)] group-hover:text-[var(--blue)] font-[var(--mono)] text-[12px]">→</span>
-              </button>
+                <span style={{ color: 'var(--color-meta-text)', fontSize: 'var(--text-xs)' }}>→</span>
+              </Button>
             ))}
           </div>
         )}
@@ -439,33 +490,45 @@ export function CmdPalette() {
         {/* Step content */}
         {pal.flow && step && (
           <div className="px-5 py-5">
-            <div className="font-[var(--serif)] text-lg italic text-[var(--ink)] mb-4">{step.label}</div>
+            <div
+              className="font-serif italic mb-4"
+              style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)' }}
+            >
+              {step.label}
+            </div>
 
             {/* Search step */}
             {step.type === "search" && (
               <>
-                <input
-                  ref={inputRef as React.RefObject<HTMLInputElement>}
+                <Input
+                  id={FIELD_ID}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && searchQuery) selectFragFromSearchFreetext(); }}
                   placeholder={step.hint || "Search..."}
-                  className="w-full px-3 py-2.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] mb-2"
+                  className="mb-2"
                 />
                 {fragResults.map((f) => (
-                  <button
+                  <Button
                     key={f.fragranceId}
+                    variant="ghost"
+                    className="w-full justify-between px-3 py-2.5 h-auto min-h-0 rounded-none"
+                    style={{ borderBottom: '1px solid var(--color-row-divider)' }}
                     onClick={() => selectFragFromSearch(f)}
-                    className="w-full text-left px-3 py-2.5 border-b border-[var(--b1)] hover:bg-[var(--off2)] cursor-pointer flex justify-between items-center bg-none border-x-0 border-t-0"
                   >
-                    <span className="font-[var(--body)] text-sm text-[var(--ink)]">{f.fragranceName}</span>
-                    <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{f.fragranceHouse}</span>
-                  </button>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>{f.fragranceName}</span>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{f.fragranceHouse}</span>
+                  </Button>
                 ))}
                 {searchQuery && fragResults.length === 0 && (
-                  <button onClick={selectFragFromSearchFreetext} className="w-full text-left px-3 py-2.5 hover:bg-[var(--off2)] cursor-pointer font-[var(--body)] text-sm text-[var(--ink3)] italic bg-none border-none">
-                    Add "{searchQuery}" as new entry
-                  </button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start h-auto min-h-0 px-3 py-2.5 italic font-sans"
+                    style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy-mid)' }}
+                    onClick={selectFragFromSearchFreetext}
+                  >
+                    Add &quot;{searchQuery}&quot; as new entry
+                  </Button>
                 )}
               </>
             )}
@@ -473,22 +536,24 @@ export function CmdPalette() {
             {/* Pick frag step */}
             {step.type === "pick" && (pal.flow === "frag-edit" || pal.flow === "comp-add") && (
               <>
-                <input
-                  ref={inputRef as React.RefObject<HTMLInputElement>}
+                <Input
+                  id={FIELD_ID}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search..."
-                  className="w-full px-3 py-2.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] mb-2"
+                  className="mb-2"
                 />
                 {pickFragResults.map((f) => (
-                  <button
+                  <Button
                     key={f.id}
+                    variant="ghost"
+                    className="w-full justify-between px-3 py-2.5 h-auto min-h-0 rounded-none"
+                    style={{ borderBottom: '1px solid var(--color-row-divider)' }}
                     onClick={() => selectFragFromPick(f)}
-                    className="w-full text-left px-3 py-2.5 border-b border-[var(--b1)] hover:bg-[var(--off2)] cursor-pointer flex justify-between items-center bg-none border-x-0 border-t-0"
                   >
-                    <span className="font-[var(--body)] text-sm text-[var(--ink)]">{f.name}</span>
-                    <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{f.house}</span>
-                  </button>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>{f.name}</span>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{f.house}</span>
+                  </Button>
                 ))}
               </>
             )}
@@ -496,22 +561,24 @@ export function CmdPalette() {
             {/* Pick comp step */}
             {step.type === "pick" && pal.flow === "comp-edit" && (
               <>
-                <input
-                  ref={inputRef as React.RefObject<HTMLInputElement>}
+                <Input
+                  id={FIELD_ID}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search compliments..."
-                  className="w-full px-3 py-2.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] mb-2"
+                  className="mb-2"
                 />
                 {pickCompResults.map((c) => (
-                  <button
+                  <Button
                     key={c.id}
+                    variant="ghost"
+                    className="w-full justify-between px-3 py-2.5 h-auto min-h-0 rounded-none"
+                    style={{ borderBottom: '1px solid var(--color-row-divider)' }}
                     onClick={() => selectCompFromPick(c)}
-                    className="w-full text-left px-3 py-2.5 border-b border-[var(--b1)] hover:bg-[var(--off2)] cursor-pointer flex justify-between items-center bg-none border-x-0 border-t-0"
                   >
-                    <span className="font-[var(--body)] text-sm text-[var(--ink)]">{c.primaryFrag}</span>
-                    <span className="font-[var(--mono)] text-xs text-[var(--ink4)]">{MONTHS[parseInt(c.month) - 1]} {c.year}</span>
-                  </button>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>{c.primaryFrag}</span>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{MONTHS[parseInt(c.month) - 1]} {c.year}</span>
+                  </Button>
                 ))}
               </>
             )}
@@ -520,13 +587,15 @@ export function CmdPalette() {
             {step.type === "select" && step.options && (
               <div className="flex flex-col gap-1">
                 {step.options.map((opt) => (
-                  <button
+                  <Button
                     key={opt.v}
+                    variant="ghost"
+                    className="w-full justify-start px-4 py-3 h-auto min-h-0 rounded-none border border-[var(--color-cream-dark)] hover:border-[var(--color-accent)]"
+                    style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}
                     onClick={() => submitSelect(opt.v)}
-                    className="w-full text-left px-4 py-3 border border-[var(--b2)] bg-[var(--off)] hover:bg-[var(--off2)] hover:border-[var(--blue)] font-[var(--body)] text-sm text-[var(--ink)] cursor-pointer transition-all"
                   >
                     {opt.l}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -535,76 +604,72 @@ export function CmdPalette() {
             {step.type === "multiselect" && step.multiOptions && (
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {step.multiOptions.map((opt) => {
-                    const selected = selectedMulti.includes(opt);
-                    return (
-                      <button
-                        key={opt}
-                        onClick={() => setSelectedMulti((prev) => selected ? prev.filter((v) => v !== opt) : [...prev, opt])}
-                        className={`px-4 py-2 border font-[var(--body)] text-sm cursor-pointer transition-all ${selected ? "bg-[var(--blue)] border-[var(--blue)] text-white" : "bg-[var(--off)] border-[var(--b2)] text-[var(--ink)] hover:border-[var(--blue)]"}`}
-                      >
-                        {opt}
-                      </button>
-                    );
-                  })}
+                  {step.multiOptions.map((opt) => (
+                    <TabPill
+                      key={opt}
+                      label={opt}
+                      active={selectedMulti.includes(opt)}
+                      onClick={() => setSelectedMulti((prev) =>
+                        prev.includes(opt) ? prev.filter((v) => v !== opt) : [...prev, opt]
+                      )}
+                    />
+                  ))}
                 </div>
-                <button onClick={submitMultiSelect} className="self-start px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
+                <Button variant="primary" size="sm" onClick={submitMultiSelect} style={{ alignSelf: 'flex-start' }}>
                   Continue
-                </button>
+                </Button>
               </div>
             )}
 
             {/* Text step */}
             {step.type === "text" && (
               <>
-                <input
-                  ref={inputRef as React.RefObject<HTMLInputElement>}
+                <Input
+                  id={FIELD_ID}
                   value={textValue}
                   onChange={(e) => setTextValue(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") submitText(); }}
                   placeholder={step.hint}
-                  className="w-full px-3 py-2.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] mb-3"
+                  className="mb-3"
                 />
-                <button onClick={submitText} className="px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
-                  Continue
-                </button>
+                <Button variant="primary" size="sm" onClick={submitText}>Continue</Button>
               </>
             )}
 
             {/* Textarea step */}
             {step.type === "textarea" && (
               <>
-                <textarea
-                  ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+                <Textarea
+                  id={FIELD_ID}
                   value={textValue}
                   onChange={(e) => setTextValue(e.target.value)}
                   placeholder={step.hint}
                   rows={4}
-                  className="w-full px-3 py-2.5 border border-[var(--b3)] bg-[var(--off)] font-[var(--body)] text-sm text-[var(--ink)] placeholder:text-[var(--ink4)] focus:outline-none focus:border-[var(--blue)] resize-none mb-3"
+                  className="mb-3"
                 />
-                <button onClick={submitText} className="px-5 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.08em] uppercase hover:bg-[var(--blue2)] transition-colors">
-                  Continue
-                </button>
+                <Button variant="primary" size="sm" onClick={submitText}>Continue</Button>
               </>
             )}
 
             {/* Confirm step */}
             {step.type === "confirm" && (
               <div className="flex gap-3">
-                <button onClick={handleSave} className="px-6 py-2.5 bg-[var(--blue)] text-white font-[var(--mono)] text-xs tracking-[0.1em] uppercase hover:bg-[var(--blue2)] transition-colors">
-                  Save
-                </button>
-                <button onClick={closePal} className="px-6 py-2.5 border border-[var(--b3)] font-[var(--mono)] text-xs tracking-[0.1em] uppercase text-[var(--ink3)] hover:border-[var(--ink3)] transition-colors">
-                  Cancel
-                </button>
+                <Button variant="primary" onClick={handleSave}>Save</Button>
+                <Button variant="ghost" onClick={closePal}>Cancel</Button>
               </div>
             )}
 
             {/* Skip for optional steps */}
             {step.optional && step.type !== "confirm" && step.type !== "pick" && step.type !== "search" && (
-              <button onClick={skipStep} className="block mt-3 font-[var(--mono)] text-xs text-[var(--ink4)] hover:text-[var(--ink3)] bg-none border-none cursor-pointer p-0 tracking-[0.06em]">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={skipStep}
+                className="mt-3"
+                style={{ color: 'var(--color-meta-text)' }}
+              >
                 Skip →
-              </button>
+              </Button>
             )}
           </div>
         )}
