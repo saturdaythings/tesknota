@@ -441,7 +441,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
           )}
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="secondary" onClick={onClose} disabled={saving}>
+          <Button variant="ghost" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
           <Button variant="primary" onClick={save} disabled={saving || confirmDelete}>

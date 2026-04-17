@@ -598,7 +598,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
         )}
         <div style={{ flex: 1 }} />
         {step > 1 && (
-          <Button variant="secondary" onClick={onClose} disabled={saving}>
+          <Button variant="ghost" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
         )}

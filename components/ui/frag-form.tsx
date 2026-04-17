@@ -466,7 +466,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
           <div className="font-[var(--font-sans)] text-xs text-[var(--color-destructive)]">{err}</div>
           <div className="flex gap-2">
             {step === 2 && !isEdit && (
-              <Button variant="secondary" onClick={() => setStep(1)}>
+              <Button variant="ghost" onClick={() => setStep(1)}>
                 Back
               </Button>
             )}

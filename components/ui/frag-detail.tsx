@@ -283,7 +283,7 @@ export function FragDetail({
                 Edit
               </Button>
             )}
-            <Button variant="primary" size="sm" onClick={handleClose}>
+            <Button variant="ghost" size="sm" onClick={handleClose}>
               Close
             </Button>
           </div>

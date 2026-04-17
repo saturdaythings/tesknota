@@ -443,7 +443,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
             )}
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="secondary" onClick={handleClose} disabled={saving}>
+            <Button variant="ghost" onClick={handleClose} disabled={saving}>
               Cancel
             </Button>
             <Button variant="primary" onClick={save} disabled={saving || confirmDelete}>

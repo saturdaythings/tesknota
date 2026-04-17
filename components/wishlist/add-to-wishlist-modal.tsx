@@ -534,7 +534,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
       </div>
 
       <ModalFooter className="justify-between">
-        <Button variant="secondary" onClick={onClose} disabled={saving}>
+        <Button variant="ghost" onClick={onClose} disabled={saving}>
           Cancel
         </Button>
         <Button variant="primary" onClick={handleSave} disabled={!canSave || saving}>
