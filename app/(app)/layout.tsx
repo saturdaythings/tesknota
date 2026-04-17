@@ -109,10 +109,10 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
         />
       }
     >
-      <AddFragranceModal open={addFragOpen} onClose={() => setAddFragOpen(false)} />
-      <LogComplimentModal open={addCompOpen} onClose={() => setAddCompOpen(false)} />
-      <AddToWishlistModal open={addWishOpen} onClose={() => setAddWishOpen(false)} />
       <ToastProvider>
+        <AddFragranceModal open={addFragOpen} onClose={() => setAddFragOpen(false)} />
+        <LogComplimentModal open={addCompOpen} onClose={() => setAddCompOpen(false)} />
+        <AddToWishlistModal open={addWishOpen} onClose={() => setAddWishOpen(false)} />
         <DataErrorBanner />
         {children}
         <BotDrawer />
