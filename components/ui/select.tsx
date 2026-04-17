@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 interface SelectOption {
   value: string;
   label: string;
+  divider?: boolean;
 }
 
 interface SelectProps {
@@ -207,6 +208,15 @@ export function Select({
           }}
         >
           {options.map((option, i) => {
+            if (option.divider) {
+              return (
+                <div
+                  key={`divider-${i}`}
+                  aria-hidden="true"
+                  style={{ height: '1px', background: 'var(--color-row-divider)', margin: 'var(--space-1) 0' }}
+                />
+              );
+            }
             const isSelected = option.value === value;
             const isFocused = i === focusedIndex;
             return (

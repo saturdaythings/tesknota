@@ -26,8 +26,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { TrendingUp, MessageCircle, PieChart as PieIcon, Star, Award, Leaf, Sun, Wind, Snowflake } from "lucide-react";
-import { loadAllData } from "@/lib/data/index";
-import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
+import { loadAllData, fetchFollows, fetchProfile } from "@/lib/data/index";
+import type { UserFragrance, UserCompliment, CommunityFrag, Follow, Profile } from "@/types";
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -505,10 +505,15 @@ function SeasonSection({ title, sub, children }: { title: string; sub?: string; 
   );
 }
 
+function profileDisplayName(p: Profile): string {
+  const full = [p.firstName, p.lastName].filter(Boolean).join(" ");
+  return full || p.username || p.id;
+}
+
 // ── Page ──────────────────────────────────────────────────
 
 export default function AnalyticsPage() {
-  const { user, profiles } = useUser();
+  const { user } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded } = useData();
 
   const [period, setPeriod] = useState<TimePeriod>("all");
@@ -517,19 +522,31 @@ export default function AnalyticsPage() {
     const n = new Date();
     return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
   });
-  const [showFriend, setShowFriend] = useState(false);
-  const [friendData, setFriendData] = useState<{ fragrances: UserFragrance[]; compliments: UserCompliment[] } | null>(null);
-
-  const friend = user ? (profiles.find((p) => p.id !== user.id) ?? null) : null;
+  const [compareWithId, setCompareWithId] = useState<string | null>(null);
+  const [compareData, setCompareData] = useState<{ fragrances: UserFragrance[]; compliments: UserCompliment[] } | null>(null);
+  const [follows, setFollows] = useState<Follow[]>([]);
+  const [followProfiles, setFollowProfiles] = useState<Record<string, Profile>>({});
 
   useEffect(() => {
-    if (!showFriend || !friend || friendData) return;
-    console.log("[analytics] loading friend data for userId:", friend.id, "name:", friend.name);
-    loadAllData(friend.id).then(({ data }) => {
-      console.log("[analytics] friend fragrances:", data.fragrances.length, "compliments:", data.compliments.length);
-      setFriendData({ fragrances: data.fragrances, compliments: data.compliments });
+    if (!user) return;
+    fetchFollows(user.id).then((all) => {
+      const accepted = all.filter((f) => f.followerId === user.id && f.status === "accepted");
+      setFollows(accepted);
+      const ids = accepted.map((f) => f.followingId);
+      Promise.all(ids.map((id) => fetchProfile(id))).then((ps) => {
+        const map: Record<string, Profile> = {};
+        ps.forEach((p, i) => { if (p) map[ids[i]] = p; });
+        setFollowProfiles(map);
+      });
     });
-  }, [showFriend, friend?.id]);
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!compareWithId) { setCompareData(null); return; }
+    loadAllData(compareWithId).then(({ data }) => {
+      setCompareData({ fragrances: data.fragrances, compliments: data.compliments });
+    });
+  }, [compareWithId]);
 
   if (!user) return null;
   const curYear = new Date().getFullYear();
@@ -537,8 +554,9 @@ export default function AnalyticsPage() {
 
   const MF = fragrances.filter((f) => f.userId === user.id);
   const MC = compliments.filter((c) => c.userId === user.id);
-  const FF = friendData?.fragrances ?? [];
-  const FC = friendData?.compliments ?? [];
+  const FF = compareData?.fragrances ?? [];
+  const FC = compareData?.compliments ?? [];
+  const showFriend = compareWithId !== null;
 
   const baseFrags = showFriend ? FF : MF;
   const baseComps = showFriend ? FC : MC;
@@ -711,20 +729,30 @@ export default function AnalyticsPage() {
               </div>
             )}
           </div>
-          {friend && (
-            <Button
-              variant="secondary"
-              onClick={() => setShowFriend((v) => !v)}
-              className="ml-auto"
-              style={showFriend ? { border: "1px solid var(--color-accent)", background: "var(--color-accent)", color: "var(--color-cream)" } : undefined}
-            >
-              {showFriend ? `Comparing with ${friend.name}` : `Compare with ${friend.name}`}
-            </Button>
-          )}
+          {follows.length > 0 && (() => {
+            const starred = follows.filter((f) => f.starred);
+            const unstarred = follows.filter((f) => !f.starred);
+            const friendOptions = [
+              ...starred.map((f) => ({ value: f.followingId, label: followProfiles[f.followingId] ? profileDisplayName(followProfiles[f.followingId]) : f.followingId })),
+              ...(starred.length > 0 && unstarred.length > 0 ? [{ value: "__divider__", label: "", divider: true as const }] : []),
+              ...unstarred.map((f) => ({ value: f.followingId, label: followProfiles[f.followingId] ? profileDisplayName(followProfiles[f.followingId]) : f.followingId })),
+            ];
+            return (
+              <div className="ml-auto" style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+                <Button variant="secondary" disabled style={{ cursor: "default" }}>Compare with</Button>
+                <Select
+                  size="auto"
+                  options={[{ value: "", label: "No one" }, ...friendOptions]}
+                  value={compareWithId ?? ""}
+                  onChange={(v) => setCompareWithId(v || null)}
+                />
+              </div>
+            );
+          })()}
         </div>
 
         {/* Comparative view */}
-        {showFriend && friend && (
+        {showFriend && compareWithId && (
           <div style={{ marginBottom: "var(--space-8)" }}>
             <CompareView
               myFrags={MF}
@@ -732,7 +760,7 @@ export default function AnalyticsPage() {
               friendFrags={FF}
               friendComps={FC}
               myName={user.name ?? "Me"}
-              friendName={friend.name ?? "Friend"}
+              friendName={followProfiles[compareWithId] ? profileDisplayName(followProfiles[compareWithId]) : "Friend"}
             />
           </div>
         )}
