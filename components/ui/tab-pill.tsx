@@ -81,10 +81,10 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
         fontWeight: 400,
         letterSpacing: '0.08em',
         padding: '6px 12px',
-        borderRadius: '2px',
+        borderRadius: 'var(--radius-md)',
         background: active ? 'var(--color-navy)' : 'transparent',
         color: active ? 'var(--color-cream)' : 'var(--color-navy)',
-        border: active ? '1px solid var(--color-navy)' : '1px solid rgba(30,45,69,0.8)',
+        border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-row-divider)',
       }}
     >
       {label}

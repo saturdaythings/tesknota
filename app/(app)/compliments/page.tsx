@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
 import { FragranceCell } from '@/components/ui/fragrance-cell';
 import { TabPill } from '@/components/ui/tab-pill';
-import { MultiSelect } from '@/components/ui/multi-select';
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
 import { ComplimentsList, type ComplimentColumnDef, type FragInfo } from '@/components/compliments/compliments-list';
 import { EmptyCompliments } from '@/components/compliments/empty-compliments';
@@ -83,8 +81,8 @@ function ComplimentsInner() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [perPage, setPerPage] = useState(25);
   const [page, setPage] = useState(1);
-  const [accordFilter, setAccordFilter] = useState<string[]>([]);
-  const [houseFilter, setHouseFilter] = useState<string[]>([]);
+  const [accordFilter, setAccordFilter] = useState('any');
+  const [houseFilter, setHouseFilter] = useState('any');
 
   const myComps = useMemo(
     () => (user ? compliments.filter((c) => c.userId === user.id) : []),
@@ -103,7 +101,7 @@ function ComplimentsInner() {
       const f = fragById.get(c.primaryFragId ?? '');
       if (f) getAccords(f, communityFrags).forEach((a) => s.add(a));
     });
-    return Array.from(s).sort().map((a) => ({ value: a, label: a }));
+    return [{ value: 'any', label: 'Any accord' }, ...Array.from(s).sort().map((a) => ({ value: a, label: a }))];
   }, [myComps, fragById, communityFrags]);
 
   const houseOptions = useMemo(() => {
@@ -112,7 +110,7 @@ function ComplimentsInner() {
       const f = fragById.get(c.primaryFragId ?? '');
       if (f?.house) s.add(f.house);
     });
-    return Array.from(s).sort().map((h) => ({ value: h, label: h }));
+    return [{ value: 'any', label: 'Any house' }, ...Array.from(s).sort().map((h) => ({ value: h, label: h }))];
   }, [myComps, fragById]);
 
   const tabCounts = useMemo(() => {
@@ -130,16 +128,16 @@ function ComplimentsInner() {
         (c.notes ?? '').toLowerCase().includes(q),
       );
     }
-    if (accordFilter.length > 0) {
+    if (accordFilter !== 'any') {
       base = base.filter((c) => {
         const f = fragById.get(c.primaryFragId ?? '');
-        return f ? accordFilter.some((a) => getAccords(f, communityFrags).includes(a)) : false;
+        return f ? getAccords(f, communityFrags).includes(accordFilter) : false;
       });
     }
-    if (houseFilter.length > 0) {
+    if (houseFilter !== 'any') {
       base = base.filter((c) => {
         const f = fragById.get(c.primaryFragId ?? '');
-        return f ? houseFilter.includes(f.house) : false;
+        return f ? f.house === houseFilter : false;
       });
     }
     return [...base].sort((a, b) => {
@@ -150,11 +148,11 @@ function ComplimentsInner() {
     });
   }, [myComps, relationTab, sortField, sortDir, search, accordFilter, houseFilter, fragById, communityFrags]);
 
-  const filtersActive = accordFilter.length > 0 || houseFilter.length > 0;
+  const filtersActive = accordFilter !== 'any' || houseFilter !== 'any';
 
   function clearFilters() {
-    setAccordFilter([]);
-    setHouseFilter([]);
+    setAccordFilter('any');
+    setHouseFilter('any');
   }
 
   useEffect(() => { setPage(1); }, [relationTab, sortField, sortDir, perPage, search, accordFilter, houseFilter]);
@@ -188,16 +186,10 @@ function ComplimentsInner() {
           onSortField={setSortField}
           sortDir={sortDir}
           onSortDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-          filterPanel={
-            <>
-              <div style={{ width: '160px' }}>
-                <MultiSelect options={accordOptions} value={accordFilter} onChange={setAccordFilter} placeholder="Accords" />
-              </div>
-              <div style={{ width: '160px' }}>
-                <MultiSelect options={houseOptions} value={houseFilter} onChange={setHouseFilter} placeholder="Houses" />
-              </div>
-            </>
-          }
+          filters={[
+            { value: accordFilter, onChange: setAccordFilter, options: accordOptions },
+            { value: houseFilter, onChange: setHouseFilter, options: houseOptions },
+          ]}
           filtersActive={filtersActive}
           onClearFilters={clearFilters}
           perPage={perPage}

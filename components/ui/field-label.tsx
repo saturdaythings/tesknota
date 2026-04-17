@@ -11,7 +11,7 @@ export function FieldLabel({ children, className }: FieldLabelProps) {
   return (
     <div
       className={`mb-1 font-sans font-normal uppercase ${className ?? ''}`}
-      style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', letterSpacing: '0.08em' }}
+      style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: '0.08em' }}
     >
       {children}
     </div>

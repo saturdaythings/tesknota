@@ -4,10 +4,10 @@ import { useId, TextareaHTMLAttributes, InputHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 const inputBase =
-  'w-full font-sans font-normal text-[15px] text-[var(--color-navy)] ' +
-  'bg-[var(--color-cream)] border border-[var(--color-cream-dark)] rounded-[3px] ' +
+  'w-full font-sans font-normal text-[length:var(--text-sm)] text-[var(--color-navy)] ' +
+  'bg-[var(--color-cream-dark)] border border-[var(--color-row-divider)] rounded-[3px] ' +
   'placeholder:text-[var(--color-navy-mid)] outline-none transition-[border-color] duration-150 ' +
-  'focus:border-[var(--color-accent)] ' +
+  'focus:border-[var(--color-navy)] ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -34,7 +34,7 @@ export function Input({ label, error, className, id: idProp, required, ...props 
         id={id}
         required={required}
         aria-invalid={!!error}
-        className={cn(inputBase, 'h-10 px-3', error && 'border-[var(--color-destructive)]', className)}
+        className={cn(inputBase, 'h-9 px-3', error && 'border-[var(--color-destructive)]', className)}
         {...props}
       />
       {error && (

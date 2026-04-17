@@ -10,10 +10,11 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 }
 
 const textareaBase =
-  "w-full min-h-24 px-3 py-[10px] bg-[var(--color-surface)] border border-[1.5px] border-[var(--color-border)] rounded-[var(--radius-sm)] font-sans text-[length:var(--text-base)] text-[var(--color-text-primary)] placeholder:text-[var(--color-navy-mid)] outline-none resize-y transition-[border-color,box-shadow] focus:border-[var(--color-accent)] focus:shadow-[0_0_0_3px_var(--color-accent-subtle)] disabled:bg-[var(--color-surface-raised)] disabled:opacity-60 disabled:cursor-not-allowed";
-
-const textareaError =
-  "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:shadow-[0_0_0_3px_var(--color-danger-subtle)]";
+  'w-full min-h-[80px] font-sans font-normal text-[length:var(--text-sm)] text-[var(--color-navy)] ' +
+  'bg-[var(--color-cream-dark)] border border-[var(--color-row-divider)] rounded-[var(--radius-sm)] ' +
+  'placeholder:text-[var(--color-navy-mid)] outline-none resize-y transition-[border-color] duration-150 ' +
+  'focus:border-[var(--color-navy)] ' +
+  'disabled:opacity-60 disabled:cursor-not-allowed';
 
 export function Textarea({
   label,
@@ -30,9 +31,13 @@ export function Textarea({
   return (
     <div className="flex flex-col w-full">
       {label && (
-        <label htmlFor={id} className="text-label mb-[var(--space-1)]">
+        <label
+          htmlFor={id}
+          className="mb-[var(--space-1)] font-sans font-normal uppercase text-[length:var(--text-xs)] text-[var(--color-meta-text)]"
+          style={{ letterSpacing: 'var(--tracking-wide)' }}
+        >
           {label}
-          {required && <span className="text-[var(--color-danger)] ml-0.5">*</span>}
+          {required && <span className="text-[var(--color-destructive)] ml-0.5">*</span>}
         </label>
       )}
       <textarea
@@ -40,20 +45,20 @@ export function Textarea({
         required={required}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
-        className={cn(textareaBase, error && textareaError, className)}
+        className={cn(textareaBase, 'p-[var(--space-3)]', error && 'border-[var(--color-destructive)]', className)}
         {...props}
       />
       {error && (
         <p
           id={`${id}-error`}
           role="alert"
-          className="mt-[var(--space-1)] text-[length:var(--text-xs)] text-[var(--color-danger)]"
+          className="mt-[var(--space-1)] font-sans text-[length:var(--text-xs)] text-[var(--color-destructive)]"
         >
           {error}
         </p>
       )}
       {hint && !error && (
-        <p id={`${id}-hint`} className="text-meta mt-[var(--space-1)]">
+        <p id={`${id}-hint`} className="mt-[var(--space-1)] font-sans text-[length:var(--text-xs)] text-[var(--color-meta-text)]">
           {hint}
         </p>
       )}

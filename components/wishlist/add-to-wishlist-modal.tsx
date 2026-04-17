@@ -74,13 +74,15 @@ function Divider() {
 
 const sectionLabelStyle: React.CSSProperties = {
   fontFamily: "var(--font-sans)",
-  fontSize: "var(--text-sm)",
+  fontSize: "var(--text-xs)",
   color: "var(--color-meta-text)",
+  textTransform: "uppercase",
+  letterSpacing: "var(--tracking-wide)",
   marginBottom: "var(--space-2)",
 };
 
 const sectionPad: React.CSSProperties = {
-  padding: "var(--space-6) var(--space-8)",
+  padding: "var(--space-6)",
 };
 
 // ── Main component ─────────────────────────────────────────
