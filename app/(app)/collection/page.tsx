@@ -358,7 +358,7 @@ function CollectionSkeleton() {
         <div
           key={i}
           style={{
-            height: 'var(--space-16)',
+            height: 'var(--size-row-min)',
             borderBottom: '1px solid var(--color-row-divider)',
             background: 'var(--color-row-hover)',
             borderRadius: 'var(--radius-md)',
