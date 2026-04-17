@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { TabPill } from "@/components/ui/tab-pill";
-import { MONTHS } from "@/lib/frag-utils";
+import { MONTHS, shortFragType } from "@/lib/frag-utils";
 import type { UserFragrance, UserCompliment, FragranceStatus, FragranceType, BottleSize, Relation, ComplimenterGender, WishlistPriority } from "@/types";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -552,8 +552,20 @@ export function CmdPalette() {
                     style={{ borderBottom: '1px solid var(--color-row-divider)' }}
                     onClick={() => selectFragFromPick(f)}
                   >
-                    <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>{f.name}</span>
-                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{f.house}</span>
+                    <span className="flex items-center gap-1.5 min-w-0 flex-1">
+                      <span className="min-w-0 truncate font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>{f.name}</span>
+                      {f.type && shortFragType(f.type) && (
+                        <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-row-divider)', borderRadius: 'var(--radius-full)', padding: '2px var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                          {shortFragType(f.type)}
+                        </span>
+                      )}
+                      {f.isDupe && (
+                        <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-navy)', borderRadius: 'var(--radius-full)', padding: '2px var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-navy)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                          Dupe
+                        </span>
+                      )}
+                    </span>
+                    <span className="font-sans flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{f.house}</span>
                   </Button>
                 ))}
               </>

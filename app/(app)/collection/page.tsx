@@ -45,25 +45,7 @@ const COLUMNS: CollectionColumnDef[] = [
     label: 'Fragrance',
     width: 'minmax(240px,1fr)',
     render: (frag) => (
-      <div className="flex items-start gap-2">
-        <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} />
-        {frag.isDupe && (
-          <span
-            className="font-sans uppercase flex-shrink-0"
-            style={{
-              background: 'var(--color-sand-light)',
-              color: 'var(--color-navy)',
-              fontSize: 'var(--text-xs)',
-              fontWeight: 'var(--font-weight-medium)',
-              padding: 'var(--space-half) 6px', /* component-internal: 6px — no token between --space-1 (4px) and --space-2 (8px) */
-              borderRadius: 'var(--radius-sm)',
-              marginTop: '3px', /* component-internal: 3px — no spacing token for 3px */
-            }}
-          >
-            Dupe
-          </span>
-        )}
-      </div>
+      <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} isDupe={frag.isDupe} />
     ),
   },
   {

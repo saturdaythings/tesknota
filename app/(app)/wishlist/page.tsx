@@ -18,7 +18,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
-import { getAccords, MONTHS } from "@/lib/frag-utils";
+import { getAccords, MONTHS, shortFragType } from "@/lib/frag-utils";
 import { WISHLIST_PRIORITY_LABELS, type WishlistPriority } from "@/types";
 import type { UserFragrance, CommunityFrag, FragranceStatus } from "@/types";
 
@@ -353,9 +353,21 @@ function WishlistMobileCard({
         style={{ display: "block", width: "100%", textAlign: "left", padding: 0, minHeight: 0, height: "auto" }}
       >
         <div style={{ marginBottom: "2px" }}>
-          <span style={{ display: "block", fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", fontWeight: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {frag.name}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+            <span style={{ flex: 1, minWidth: 0, fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", fontWeight: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {frag.name}
+            </span>
+            {frag.type && shortFragType(frag.type) && (
+              <span style={{ background: "var(--color-cream-dark)", border: "1px solid var(--color-row-divider)", borderRadius: "var(--radius-full)", padding: "2px var(--space-2)", fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-meta-text)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", flexShrink: 0, whiteSpace: "nowrap" }}>
+                {shortFragType(frag.type)}
+              </span>
+            )}
+            {frag.isDupe && (
+              <span style={{ background: "var(--color-cream-dark)", border: "1px solid var(--color-navy)", borderRadius: "var(--radius-full)", padding: "2px var(--space-2)", fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-navy)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", flexShrink: 0, whiteSpace: "nowrap" }}>
+                Dupe
+              </span>
+            )}
+          </div>
           <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", fontWeight: 400 }}>
             {frag.house}
           </span>

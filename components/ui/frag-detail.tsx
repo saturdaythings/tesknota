@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
-import { starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
+import { starsStr, parseRating, getAccords, getCompCount, shortFragType } from "@/lib/frag-utils";
 import { StatusBadge } from "@/components/ui/frag-row";
 import { getCommunityData } from "@/lib/data";
 import { submitCommunityFlag } from "@/lib/data/mutations";
@@ -134,9 +134,14 @@ export function FragDetail({
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-2">
             <StatusBadge status={frag.status} />
-            {frag.isDupe && frag.dupeFor && (
+            {frag.isDupe && (
+              <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-navy)', borderRadius: 'var(--radius-full)', padding: '2px var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-navy)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                Dupe
+              </span>
+            )}
+            {frag.dupeFor && (
               <span className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-                Dupe for {frag.dupeFor}
+                for {frag.dupeFor}
               </span>
             )}
           </div>
@@ -159,7 +164,14 @@ export function FragDetail({
                 <span className="font-[var(--font-sans)] text-xs text-[var(--color-accent)] tracking-[1px]">{starsDisplay}</span>
               </div>
             ) : null}
-            <DetailRow label="Type" value={frag.type} />
+            {frag.type && shortFragType(frag.type) && (
+              <div className="flex gap-3 py-[5px] border-b border-[var(--color-cream-dark)] items-center">
+                <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)]">Type</span>
+                <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-row-divider)', borderRadius: 'var(--radius-full)', padding: '2px var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  {shortFragType(frag.type)}
+                </span>
+              </div>
+            )}
             <DetailRow label="Sizes" value={(frag.sizes ?? []).join(", ") || null} />
             <DetailRow label="Bought from" value={frag.whereBought} />
             <DetailRow label="Purchase date" value={purchaseStr} />
