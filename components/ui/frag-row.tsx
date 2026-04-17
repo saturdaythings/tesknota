@@ -79,17 +79,7 @@ export function FragRow({
       onClick={() => onClick?.(frag)}
     >
       <div style={cellStyle}>
-        <div>
-          <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
-          {frag.isDupe && (
-            <span
-              className="font-[var(--font-sans)] uppercase"
-              style={{ fontSize: "var(--text-xs)", letterSpacing: "var(--tracking-md)", color: "var(--color-notes-text)" }}
-            >
-              dupe
-            </span>
-          )}
-        </div>
+        <FragranceCell name={frag.name} house={frag.house} type={frag.type} isDupe={frag.isDupe} />
       </div>
       <div style={cellStyle}>
         {(frag.sizes ?? []).join(", ") || "\u2014"}

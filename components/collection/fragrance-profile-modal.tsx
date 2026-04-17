@@ -292,11 +292,14 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                     className="font-sans uppercase"
                     style={{
                       fontSize: 'var(--text-label)',
-                      letterSpacing: '0.06em',
-                      color: 'var(--color-navy)',
-                      background: 'rgba(30,45,69,0.07)',
-                      borderRadius: '2px',
-                      padding: '2px 10px',
+                      letterSpacing: 'var(--tracking-wide)',
+                      color: 'var(--color-meta-text)',
+                      background: 'var(--color-cream-dark)',
+                      border: '1px solid var(--color-row-divider)',
+                      borderRadius: 'var(--radius-full)',
+                      padding: '2px var(--space-2)',
+                      flexShrink: 0,
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {shortFragType(frag.fragranceType)}

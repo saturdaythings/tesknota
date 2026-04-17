@@ -8,25 +8,42 @@ interface FragranceCellProps {
   house?: string;
   type?: FragranceType | null;
   secondary?: string;
+  isDupe?: boolean;
   className?: string;
 }
 
-export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
+const concPillStyle: React.CSSProperties = {
+  background: 'var(--color-cream-dark)',
+  border: '1px solid var(--color-row-divider)',
+  borderRadius: 'var(--radius-full)',
+  padding: '2px var(--space-2)',
+  fontSize: 'var(--text-label)',
+  color: 'var(--color-meta-text)',
+  letterSpacing: 'var(--tracking-wide)',
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+  textTransform: 'uppercase',
+};
+
+const dupePillStyle: React.CSSProperties = {
+  ...concPillStyle,
+  border: '1px solid var(--color-navy)',
+  color: 'var(--color-navy)',
+};
+
+export function FragranceCell({ name, house, type, secondary, isDupe, className }: FragranceCellProps) {
+  const concLabel = type ? shortFragType(type) : null;
   return (
     <div className={`min-w-0${className ? ` ${className}` : ''}`}>
-      <div className="mb-1 min-w-0">
-        <span className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
-          {name}
+      <div className="flex items-center gap-1.5 mb-1 min-w-0">
+        <span className="font-serif italic flex-1 min-w-0 truncate" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+          {name}{secondary && <span className="ml-1.5"> + {secondary}</span>}
         </span>
-        {type && shortFragType(type) && (
-          <span className="font-sans ml-1.5" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>
-            {shortFragType(type)}
-          </span>
+        {concLabel && (
+          <span className="font-sans" style={concPillStyle}>{concLabel}</span>
         )}
-        {secondary && (
-          <span className="font-serif italic ml-1.5" style={{ fontSize: 'var(--text-note)', color: 'var(--color-navy)' }}>
-            + {secondary}
-          </span>
+        {isDupe && (
+          <span className="font-sans" style={dupePillStyle}>Dupe</span>
         )}
       </div>
       {house && (

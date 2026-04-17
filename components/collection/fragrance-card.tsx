@@ -49,7 +49,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
       }}
     >
       {/* Line 1: name + concentration badge */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "2px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
         <span
           style={{
             fontFamily: "var(--font-serif)",
@@ -59,6 +59,9 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
             fontWeight: 400,
             flex: 1,
             minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
         >
           {frag.name}
@@ -66,17 +69,17 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         {concLabel && (
           <span
             style={{
-              border: "1px solid var(--color-navy)",
-              color: "var(--color-navy)",
+              background: "var(--color-cream-dark)",
+              border: "1px solid var(--color-row-divider)",
+              borderRadius: "var(--radius-full)",
+              padding: "2px var(--space-2)",
               fontFamily: "var(--font-sans)",
               fontSize: "var(--text-label)",
-              fontWeight: 500,
-              padding: "2px 6px",
-              borderRadius: "var(--radius-sm)",
+              color: "var(--color-meta-text)",
+              letterSpacing: "var(--tracking-wide)",
               textTransform: "uppercase",
               flexShrink: 0,
-              alignSelf: "flex-start",
-              marginTop: "2px",
+              whiteSpace: "nowrap",
             }}
           >
             {concLabel}
@@ -85,20 +88,20 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         {frag.isDupe && (
           <span
             style={{
-              background: "var(--color-sand-light)",
-              color: "var(--color-navy)",
+              background: "var(--color-cream-dark)",
+              border: "1px solid var(--color-navy)",
+              borderRadius: "var(--radius-full)",
+              padding: "2px var(--space-2)",
               fontFamily: "var(--font-sans)",
-              fontSize: "var(--text-xs)",
-              fontWeight: 500,
-              padding: "2px 6px",
-              borderRadius: "var(--radius-sm)",
+              fontSize: "var(--text-label)",
+              color: "var(--color-navy)",
+              letterSpacing: "var(--tracking-wide)",
               textTransform: "uppercase",
               flexShrink: 0,
-              alignSelf: "flex-start",
-              marginTop: "2px",
+              whiteSpace: "nowrap",
             }}
           >
-            DUPE
+            Dupe
           </span>
         )}
       </div>
