@@ -563,13 +563,14 @@ export default function SocialPage() {
                           fontSize: "var(--text-sm)",
                           padding: "var(--space-1) var(--space-3)",
                           borderRadius: "var(--radius-full)",
-                          background: isSelected ? "var(--color-navy)" : "var(--color-cream-dark)",
-                          color: isSelected ? "var(--color-cream)" : "var(--color-navy)",
-                          border: "none",
+                          background: isSelected ? "var(--color-cream-dark)" : "transparent",
+                          color: "var(--color-navy)",
+                          border: isSelected ? "1px solid var(--color-navy)" : "1px solid var(--color-row-divider)",
                           whiteSpace: "nowrap",
+                          outline: "none",
                         }}
                       >
-                        {f.starred && <span style={{ fontSize: "var(--text-xs)", color: isSelected ? "var(--color-cream)" : "var(--color-accent)" }}>★</span>}
+                        {f.starred && <span style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)" }}>★</span>}
                         {name}
                       </button>
                       <button

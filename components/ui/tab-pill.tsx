@@ -24,6 +24,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
           color: 'var(--color-navy)',
           border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-row-divider)',
           whiteSpace: 'nowrap',
+          outline: 'none',
         }}
       >
         {label}
@@ -44,6 +45,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
           background: active ? "var(--color-cream-dark)" : "transparent",
           borderBottom: active ? "2px solid var(--color-navy)" : "2px solid transparent",
           cursor: "pointer",
+          outline: "none",
           transition: "background 150ms, border-color 150ms",
         }}
       >
@@ -85,6 +87,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
         background: active ? 'var(--color-cream-dark)' : 'transparent',
         color: 'var(--color-navy)',
         border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-row-divider)',
+        outline: 'none',
       }}
     >
       {label}
