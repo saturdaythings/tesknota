@@ -201,10 +201,10 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
     try {
       if (isEdit) {
         await editFrag(frag);
-        toast("Fragrance updated.");
+        toast("Fragrance updated.", "success");
       } else {
         await addFrag(frag);
-        toast("Fragrance added.");
+        toast("Fragrance added.", "success");
       }
       onClose();
     } catch (e) {

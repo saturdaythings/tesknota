@@ -543,9 +543,9 @@ function WishlistInner() {
         createdAt: new Date().toISOString(),
         wishlistPriority: null,
       });
-      toast("Added to wishlist");
+      toast("Added to wishlist", "success");
     } catch {
-      toast("Failed to add");
+      toast("Failed to add", "error");
     }
   }
 
@@ -556,7 +556,7 @@ function WishlistInner() {
 
   async function handleRemove(frag: UserFragrance) {
     await removeFrag(frag.id);
-    toast("Removed from wishlist");
+    toast("Removed from wishlist", "success");
   }
 
   const wKeys = wishlistKeySet();

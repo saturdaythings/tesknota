@@ -261,7 +261,7 @@ function CollectionInner() {
   async function handleDelete(frag: UserFragrance) {
     await removeFrag(frag.id);
     setDetailFrag(null);
-    toast('Fragrance removed.');
+    toast('Fragrance removed.', 'success');
   }
 
   async function handleRatingUpdate(frag: UserFragrance, rating: number) {
