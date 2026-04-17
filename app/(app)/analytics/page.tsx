@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { FragSearch } from "@/components/ui/frag-search";
@@ -26,6 +26,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { TrendingUp, MessageCircle, PieChart as PieIcon, Star, Award, Leaf, Sun, Wind, Snowflake } from "lucide-react";
+import { loadAllData } from "@/lib/data/index";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
 
 // ── Constants ──────────────────────────────────────────────
@@ -434,14 +435,26 @@ function ChartCard({ title, sub, children, wide }: {
 
 // ── Stat card ─────────────────────────────────────────────
 
-function StatCard({ label, value, delta }: { label: string; value: string | number; delta?: string }) {
+function StatCard({ label, value, delta, friendValue }: { label: string; value: string | number; delta?: string; friendValue?: string | number }) {
   return (
     <div style={{ background: "var(--color-cream)", border: "1px solid var(--color-cream-dark)", borderRadius: "var(--radius-lg)", padding: "var(--space-6) var(--space-6) var(--space-5)" }}>
       <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "var(--text-xs)", color: "var(--color-navy)", textTransform: "uppercase", letterSpacing: "var(--tracking-lg)", marginBottom: "var(--space-2)" }}>
         {label}
       </div>
-      <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "var(--text-hero)", lineHeight: 1, color: "var(--color-navy)", marginBottom: "var(--space-2)" }}>
-        {value}
+      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--space-5)", marginBottom: "var(--space-2)" }}>
+        <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "var(--text-hero)", lineHeight: 1, color: "var(--color-navy)" }}>
+          {value}
+        </div>
+        {friendValue != null && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+            <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "var(--text-hero)", lineHeight: 1, color: "var(--color-accent)" }}>
+              {friendValue}
+            </div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", color: "var(--color-accent)", textTransform: "uppercase" }}>
+              S
+            </div>
+          </div>
+        )}
       </div>
       <div style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "var(--text-sm)", color: "var(--color-meta-text)", minHeight: "var(--space-5)" }}>
         {delta ?? ""}
@@ -505,17 +518,27 @@ export default function AnalyticsPage() {
     return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
   });
   const [showFriend, setShowFriend] = useState(false);
+  const [friendData, setFriendData] = useState<{ fragrances: UserFragrance[]; compliments: UserCompliment[] } | null>(null);
+
+  const friend = user ? (profiles.find((p) => p.id !== user.id) ?? null) : null;
+
+  useEffect(() => {
+    if (!showFriend || !friend || friendData) return;
+    console.log("[analytics] loading friend data for userId:", friend.id, "name:", friend.name);
+    loadAllData(friend.id).then(({ data }) => {
+      console.log("[analytics] friend fragrances:", data.fragrances.length, "compliments:", data.compliments.length);
+      setFriendData({ fragrances: data.fragrances, compliments: data.compliments });
+    });
+  }, [showFriend, friend?.id]);
 
   if (!user) return null;
-
-  const friend = profiles.find((p) => p.id !== user.id) ?? null;
   const curYear = new Date().getFullYear();
   const now = new Date();
 
   const MF = fragrances.filter((f) => f.userId === user.id);
   const MC = compliments.filter((c) => c.userId === user.id);
-  const FF = friend ? fragrances.filter((f) => f.userId === friend.id) : [];
-  const FC = friend ? compliments.filter((c) => c.userId === friend.id) : [];
+  const FF = friendData?.fragrances ?? [];
+  const FC = friendData?.compliments ?? [];
 
   const baseFrags = showFriend ? FF : MF;
   const baseComps = showFriend ? FC : MC;
@@ -557,16 +580,31 @@ export default function AnalyticsPage() {
   const activeFrags = filterFragsByTime(baseFrags);
   const activeComps = filterCompsByTime(baseComps);
 
-  const totalComps = activeComps.length;
-  const compDelta = activeComps.filter((c) => {
+  // Stat cards always show user's own values
+  const myActiveFrags = filterFragsByTime(MF);
+  const myActiveComps = filterCompsByTime(MC);
+
+  const totalComps = myActiveComps.length;
+  const compDelta = myActiveComps.filter((c) => {
     const mo = parseInt(c.month);
     return !isNaN(mo) && mo === now.getMonth() + 1 && c.year === String(now.getFullYear());
   }).length;
-  const inCollection = activeFrags.length;
-  const ratedCount = activeFrags.filter((f) => f.personalRating).length;
-  const strangerCount = activeComps.filter((c) => c.relation === "Stranger").length;
+  const inCollection = myActiveFrags.length;
+  const ratedCount = myActiveFrags.filter((f) => f.personalRating).length;
+  const strangerCount = myActiveComps.filter((c) => c.relation === "Stranger").length;
   const strangerPct = totalComps > 0 ? Math.round((strangerCount / totalComps) * 100) : 0;
-  const avgRat = avgRatingStr(activeFrags);
+  const avgRat = avgRatingStr(myActiveFrags);
+
+  // Friend stat values (only when compare mode active and data loaded)
+  const friendActiveFrags = showFriend ? filterFragsByTime(FF) : [];
+  const friendActiveComps = showFriend ? filterCompsByTime(FC) : [];
+  const friendTotalComps = showFriend ? friendActiveComps.length : undefined;
+  const friendInCollection = showFriend ? friendActiveFrags.length : undefined;
+  const friendStrangerCount = showFriend ? friendActiveComps.filter((c) => c.relation === "Stranger").length : undefined;
+  const friendStrangerPct = (showFriend && friendTotalComps != null && friendTotalComps > 0)
+    ? Math.round((friendStrangerCount! / friendTotalComps) * 100)
+    : undefined;
+  const friendAvgRat = showFriend ? avgRatingStr(friendActiveFrags) : undefined;
 
   const growthData = useMemo(() => buildGrowthData(activeFrags), [activeFrags]);
   const complimentsMonthly = useMemo(() => buildMonthlyBars(activeComps, baseFrags), [activeComps, baseFrags]);
@@ -649,10 +687,10 @@ export default function AnalyticsPage() {
 
         {/* Stat cards */}
         <div className="dash-stat-grid mb-6">
-          <StatCard label="Total Compliments" value={totalComps} delta={compDelta > 0 ? `+${compDelta} this month` : undefined} />
-          <StatCard label="In Collection" value={inCollection} delta={ratedCount > 0 ? `${ratedCount} rated` : undefined} />
-          <StatCard label="From Strangers" value={totalComps > 0 ? `${strangerPct}%` : "—"} delta={totalComps > 0 ? `${strangerCount} of ${totalComps}` : undefined} />
-          <StatCard label="Avg Rating" value={avgRat} delta={ratedCount > 0 ? `${ratedCount} rated` : undefined} />
+          <StatCard label="Total Compliments" value={totalComps} delta={compDelta > 0 ? `+${compDelta} this month` : undefined} friendValue={friendTotalComps} />
+          <StatCard label="In Collection" value={inCollection} delta={ratedCount > 0 ? `${ratedCount} rated` : undefined} friendValue={friendInCollection} />
+          <StatCard label="From Strangers" value={totalComps > 0 ? `${strangerPct}%` : "—"} delta={totalComps > 0 ? `${strangerCount} of ${totalComps}` : undefined} friendValue={friendStrangerPct != null ? `${friendStrangerPct}%` : undefined} />
+          <StatCard label="Avg Rating" value={avgRat} delta={ratedCount > 0 ? `${ratedCount} rated` : undefined} friendValue={friendAvgRat} />
         </div>
 
         {/* Filter row */}
