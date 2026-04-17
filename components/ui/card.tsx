@@ -13,14 +13,14 @@ export function Card({ children, className, padding, style, onClick }: CardProps
     <div
       onClick={onClick}
       className={cn(
-        'rounded-[6px] min-w-0',
+        'rounded-[var(--radius-lg)] min-w-0',
         'border border-[var(--color-cream-dark)]',
         !padding && 'p-6',
         onClick && 'cursor-pointer',
         className,
       )}
       style={{
-        background: 'rgba(237, 232, 223, 0.3)',
+        background: 'var(--color-row-hover)',
         padding: padding ?? undefined,
         ...style,
       }}
@@ -40,7 +40,7 @@ export function CardHeader({ children, className }: { children: React.ReactNode;
 
 export function CardTitle({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <h3 className={cn('font-serif italic text-[20px] leading-tight text-[var(--color-navy)]', className)}>
+    <h3 className={cn('font-serif italic text-[var(--text-lg)] leading-tight text-[var(--color-navy)]', className)}>
       {children}
     </h3>
   );

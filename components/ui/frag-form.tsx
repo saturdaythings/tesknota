@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/modal";
+import { Select } from "@/components/ui/select";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { MONTHS } from "@/lib/frag-utils";
@@ -447,27 +448,21 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                   <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
                     Month
                   </label>
-                  <select
+                  <Select
+                    options={[{ value: "", label: "—" }, ...MONTHS.map((m) => ({ value: m, label: m }))]}
                     value={purchaseMonth}
-                    onChange={(e) => setPurchaseMonth(e.target.value)}
-                    className="w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-xs text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
-                  >
-                    <option value="">—</option>
-                    {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
-                  </select>
+                    onChange={setPurchaseMonth}
+                  />
                 </div>
                 <div>
                   <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">
                     Year
                   </label>
-                  <select
+                  <Select
+                    options={[{ value: "", label: "—" }, ...YEARS.map((y) => ({ value: y, label: y }))]}
                     value={purchaseYear}
-                    onChange={(e) => setPurchaseYear(e.target.value)}
-                    className="w-full px-3 py-[9px] border border-[var(--color-cream-dark)] bg-[var(--color-cream)] font-[var(--font-sans)] text-xs text-[var(--color-navy)] focus:outline-none focus:border-[var(--color-accent)] cursor-pointer"
-                  >
-                    <option value="">—</option>
-                    {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
-                  </select>
+                    onChange={setPurchaseYear}
+                  />
                 </div>
                 <div>
                   <label className="block font-[var(--font-sans)] text-xs text-[var(--color-navy)] tracking-[0.1em] uppercase mb-2">

@@ -30,14 +30,16 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
         {icon}
       </span>
       <h3
-        className="text-subheading"
-        style={{ color: "var(--color-text-primary)", marginBottom: "var(--space-2)" }}
+        className="font-serif italic"
+        style={{ fontSize: "var(--text-empty-title)", fontWeight: "var(--font-weight-normal)", lineHeight: "var(--leading-tight)", color: "var(--color-text-primary)", marginBottom: "var(--space-2)" }}
       >
         {title}
       </h3>
       <p
-        className="text-secondary"
+        className="font-sans"
         style={{
+          fontSize: "var(--text-ui)",
+          color: "var(--color-sand)",
           maxWidth: "36ch",
           textAlign: "center",
           marginBottom: action ? "var(--space-6)" : 0,

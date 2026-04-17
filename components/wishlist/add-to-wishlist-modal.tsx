@@ -157,7 +157,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                     border: "1.5px solid var(--color-cream-dark)",
                     borderRadius: "3px",
                     fontFamily: "var(--font-sans)",
-                    fontSize: "15px",
+                    fontSize: "var(--text-base)",
                     color: "var(--color-navy)",
                     outline: "none",
                   }}
@@ -216,7 +216,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                       <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-ui)", fontWeight: "var(--font-weight-medium)", color: "var(--color-navy)" }}>
                         {f.fragranceName}
                       </div>
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "rgba(30,45,69,0.8)" }}>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
                         {f.fragranceHouse}
                       </div>
                     </div>
@@ -255,7 +255,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                     <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", fontWeight: "var(--font-weight-medium)", color: "var(--color-navy)" }}>
                       {label}
                     </span>
-                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "rgba(30,45,69,0.8)", marginTop: "2px" }}>
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", marginTop: "2px" }}>
                       {subtitle}
                     </span>
                   </button>

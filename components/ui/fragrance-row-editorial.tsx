@@ -33,11 +33,11 @@ export function FragranceRowEditorial({
       onClick={onClick}
       className="flex gap-6 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
       style={{
-        minHeight: '80px',
-        padding: '16px 0',
-        borderBottom: '1px solid rgba(30,45,69,0.15)',
+        minHeight: 'var(--size-row-min)',
+        padding: 'var(--space-4) 0',
+        borderBottom: '1px solid var(--color-row-divider)',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {/* Column 1: fragrance identity */}
@@ -49,7 +49,7 @@ export function FragranceRowEditorial({
           {meta && (
             <div
               className="font-sans mb-1"
-              style={{ fontSize: '12px', color: 'rgba(30,45,69,0.8)' }}
+              style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}
             >
               {meta}
             </div>
@@ -57,7 +57,7 @@ export function FragranceRowEditorial({
           {notes && (
             <div
               className="font-serif italic"
-              style={{ fontSize: '16px', color: 'rgba(30,45,69,0.7)', lineHeight: 1.6 }}
+              style={{ fontSize: 'var(--text-note)', color: 'var(--color-notes-text)', lineHeight: 'var(--leading-relaxed)' }}
             >
               {notes}
             </div>
@@ -70,7 +70,7 @@ export function FragranceRowEditorial({
         {date && (
           <div
             className="font-sans flex-shrink-0 text-right"
-            style={{ fontSize: '12px', color: 'var(--color-navy)', minWidth: '72px' }}
+            style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '72px' }}
           >
             {date}
           </div>

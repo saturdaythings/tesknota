@@ -1,21 +1,22 @@
 "use client";
 
-import { MONTHS, starsStr, parseRating, getAccords, getCompCount, shortFragType } from "@/lib/frag-utils";
+import { MONTHS, starsStr, parseRating, getAccords, getCompCount } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
+import { FragranceCell } from "@/components/ui/fragrance-cell";
 import type { UserFragrance, UserCompliment, CommunityFrag, FragranceStatus } from "@/types";
 
 const STATUS_STYLE: Record<string, { color: string }> = {
   CURRENT:          { color: "var(--color-navy)" },
-  PREVIOUSLY_OWNED: { color: "rgba(30,45,69,0.7)" },
-  WANT_TO_BUY:      { color: "#8B6F4E" },
-  WANT_TO_SMELL:    { color: "#8B6F4E" },
+  PREVIOUSLY_OWNED: { color: "var(--color-notes-text)" },
+  WANT_TO_BUY:      { color: "var(--color-status-want)" },
+  WANT_TO_SMELL:    { color: "var(--color-status-want)" },
   DONT_LIKE:        { color: "var(--color-destructive)" },
   WANT_TO_IDENTIFY: { color: "var(--color-accent-light)" },
-  FINISHED:         { color: "#6B7280" },
+  FINISHED:         { color: "var(--color-status-finished)" },
 };
 
 export function StatusBadge({ status }: { status: FragranceStatus }) {
-  const style = STATUS_STYLE[status] ?? { color: "rgba(30,45,69,0.7)" };
+  const style = STATUS_STYLE[status] ?? { color: "var(--color-notes-text)" };
   return (
     <span
       className="font-[var(--font-sans)] text-xs tracking-[0.04em] px-2 py-[2px] whitespace-nowrap border"
@@ -57,20 +58,12 @@ export function FragRow({
       onClick={() => onClick?.(frag)}
     >
       <td className="px-4 py-3">
-        <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">
-          {frag.name}
-          {frag.isDupe && (
-            <span className="ml-2 font-[var(--font-sans)] text-[12px] tracking-[0.06em] text-[rgba(30,45,69,0.7)] uppercase align-middle">
-              dupe
-            </span>
-          )}
-        </div>
-        <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-          {frag.house}
-          {frag.type && shortFragType(frag.type) && (
-            <span className="ml-[6px] text-[11px]">· {shortFragType(frag.type)}</span>
-          )}
-        </div>
+        <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
+        {frag.isDupe && (
+          <span className="font-[var(--font-sans)] uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.06em', color: 'var(--color-notes-text)' }}>
+            dupe
+          </span>
+        )}
       </td>
       <td className="px-4 py-3 font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
         {(frag.sizes ?? []).join(", ") || "\u2014"}

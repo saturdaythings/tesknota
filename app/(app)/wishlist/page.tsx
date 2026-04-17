@@ -96,7 +96,7 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
         gap: "var(--space-2)",
       }}
     >
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)", letterSpacing: "var(--tracking-md)", textTransform: "uppercase", color: "rgba(30,45,69,0.8)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)", letterSpacing: "var(--tracking-md)", textTransform: "uppercase", color: "var(--color-meta-text)" }}>
         {house}
       </div>
       <div
@@ -115,12 +115,12 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
       >
         {name}
       </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "rgba(30,45,69,0.8)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)" }}>
         {ratingNum ? `${ratingNum.toFixed(1)} ★` : ""}
         {ratingNum && priceRange ? " · " : ""}
         {priceRange ?? ""}
       </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", fontStyle: "italic", color: "rgba(30,45,69,0.8)", flex: 1 }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", fontStyle: "italic", color: "var(--color-meta-text)", flex: 1 }}>
         {matchNote}
       </div>
       {onWishlist ? (
@@ -157,7 +157,7 @@ function DiscoverRow({ title, children }: { title: string; children: React.React
           fontWeight: "var(--font-weight-medium)",
           letterSpacing: "var(--tracking-md)",
           textTransform: "uppercase",
-          color: "rgba(30,45,69,0.8)",
+          color: "var(--color-meta-text)",
           marginBottom: "var(--space-3)",
         }}
       >
@@ -201,7 +201,7 @@ function NotesCell({ cf }: { cf: CommunityFrag | null }) {
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
       {rows.map(({ label, notes }) => (
         <div key={label} style={{ display: "flex", gap: "var(--space-2)", alignItems: "baseline" }}>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xxs)", fontWeight: "var(--font-weight-medium)", letterSpacing: "var(--tracking-md)", color: "rgba(30,45,69,0.8)", textTransform: "uppercase", flexShrink: 0, width: "36px" }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xxs)", fontWeight: "var(--font-weight-medium)", letterSpacing: "var(--tracking-md)", color: "var(--color-meta-text)", textTransform: "uppercase", flexShrink: 0, width: "36px" }}>
             {label}
           </span>
           <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-sm)", color: "var(--color-navy)", lineHeight: 1.4 }}>
@@ -298,7 +298,7 @@ function RowActions({
   if (confirm) {
     return (
       <div style={{ display: "flex", gap: "var(--space-1)", alignItems: "center" }} onClick={(e) => e.stopPropagation()}>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "rgba(30,45,69,0.8)" }}>Remove?</span>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>Remove?</span>
         <Button variant="destructive" size="sm" onClick={() => onRemove(frag)}>Yes</Button>
         <Button variant="ghost" size="sm" onClick={() => setConfirm(false)}>Cancel</Button>
       </div>
@@ -354,7 +354,7 @@ function WishlistMobileCard({
         {accords.length > 0 && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)", marginTop: "var(--space-2)" }}>
             {accords.map((a) => (
-              <span key={a} style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>
+              <span key={a} style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "var(--radius-full)", background: "var(--color-sand-light)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>
                 {a}
               </span>
             ))}
@@ -653,12 +653,12 @@ function WishlistInner() {
                     <div style={{ padding: "0 var(--space-4)" }}>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "3px" }}>
                         {accords.map((a) => (
-                          <span key={a} style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", whiteSpace: "nowrap" }}>
+                          <span key={a} style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "var(--radius-full)", background: "var(--color-sand-light)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", whiteSpace: "nowrap" }}>
                             {a}
                           </span>
                         ))}
                         {extra > 0 && (
-                          <span style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "rgba(30,45,69,0.8)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>
+                          <span style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "var(--radius-full)", background: "var(--color-sand-light)", color: "var(--color-meta-text)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>
                             +{extra} more
                           </span>
                         )}

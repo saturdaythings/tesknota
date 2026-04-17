@@ -719,7 +719,7 @@ const INPUT_STYLE: React.CSSProperties = {
   maxWidth: 460,
   padding: "9px 12px",
   border: "1px solid var(--color-sand-light)",
-  background: "#FFFFFF",
+  background: "var(--color-cream)",
   fontFamily: "var(--font-sans)",
   fontSize: "14px",
   color: "var(--color-navy)",
@@ -784,7 +784,7 @@ function SearchTab({ userId }: { userId: string }) {
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "12px 16px",
-                borderBottom: "1px solid rgba(217,206,188,0.5)",
+                borderBottom: "1px solid var(--color-sand-light)",
               }}
               className="hover:bg-[var(--color-cream)]"
             >

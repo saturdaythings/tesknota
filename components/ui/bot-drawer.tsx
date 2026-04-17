@@ -227,7 +227,7 @@ export function BotDrawer() {
 
       {open && (
         <div
-          style={{ position: "fixed", inset: 0, background: "rgba(30,45,69,0.5)", zIndex: 500 }}
+          style={{ position: "fixed", inset: 0, background: "var(--color-navy-backdrop)", zIndex: 500 }}
           onClick={closeDrawer}
         />
       )}
@@ -261,12 +261,12 @@ export function BotDrawer() {
           borderBottom: "1px solid var(--color-cream-dark)",
           flexShrink: 0,
         }}>
-          <div style={{ fontFamily: "var(--font-serif)", fontSize: "16px", fontStyle: "italic", color: "var(--color-navy)" }}>
+          <div style={{ fontFamily: "var(--font-serif)", fontSize: "var(--text-note)", fontStyle: "italic", color: "var(--color-navy)" }}>
             assistant
           </div>
           <button
             onClick={closeDrawer}
-            style={{ fontSize: "20px", color: "rgba(30,45,69,0.8)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", lineHeight: 1 }}
+            style={{ fontSize: "var(--text-lg)", color: "var(--color-meta-text)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", lineHeight: 1 }}
             aria-label="Close"
           >
             ×
@@ -282,8 +282,8 @@ export function BotDrawer() {
                 maxWidth: "85%",
                 padding: "10px 14px",
                 fontFamily: "var(--font-sans)",
-                fontSize: "13px",
-                lineHeight: 1.6,
+                fontSize: "var(--text-sm)",
+                lineHeight: "var(--leading-relaxed)",
                 alignSelf: m.role === "bot" ? "flex-start" : "flex-end",
                 background: m.role === "bot" ? "var(--color-cream-dark)" : "var(--color-navy)",
                 color: m.role === "bot" ? "var(--color-navy)" : "var(--color-cream)",
@@ -301,13 +301,13 @@ export function BotDrawer() {
                   onClick={b.action}
                   style={{
                     background: "var(--color-cream-dark)",
-                    border: "1px solid rgba(30,45,69,0.8)",
+                    border: "1px solid var(--color-meta-text)",
                     color: "var(--color-navy)",
                     fontFamily: "var(--font-sans)",
-                    fontSize: "12px",
+                    fontSize: "var(--text-xs)",
                     padding: "6px 14px",
                     cursor: "pointer",
-                    borderRadius: "100px",
+                    borderRadius: "var(--radius-full)",
                     transition: "all 150ms",
                   }}
                 >
@@ -331,11 +331,11 @@ export function BotDrawer() {
                   border: "1px solid var(--color-cream-dark)",
                   color: "var(--color-navy)",
                   fontFamily: "var(--font-sans)",
-                  fontSize: "12px",
-                  letterSpacing: "0.04em",
+                  fontSize: "var(--text-xs)",
+                  letterSpacing: "var(--tracking-xs)",
                   padding: "6px 14px",
                   cursor: "pointer",
-                  borderRadius: "100px",
+                  borderRadius: "var(--radius-full)",
                   transition: "all 150ms",
                 }}
               >
@@ -366,10 +366,10 @@ export function BotDrawer() {
               border: "1px solid var(--color-cream-dark)",
               background: "var(--color-cream)",
               fontFamily: "var(--font-sans)",
-              fontSize: "14px",
+              fontSize: "var(--text-ui)",
               color: "var(--color-navy)",
               outline: "none",
-              borderRadius: "3px",
+              borderRadius: "var(--radius-md)",
             }}
           />
           <button
@@ -380,12 +380,12 @@ export function BotDrawer() {
               background: "var(--color-navy)",
               color: "var(--color-cream)",
               fontFamily: "var(--font-sans)",
-              fontSize: "12px",
-              letterSpacing: "0.08em",
+              fontSize: "var(--text-xs)",
+              letterSpacing: "var(--tracking-sm)",
               textTransform: "uppercase",
               border: "none",
               cursor: "pointer",
-              borderRadius: "3px",
+              borderRadius: "var(--radius-md)",
               opacity: (!input.trim() || loading) ? 0.4 : 1,
               transition: "opacity 150ms",
             }}

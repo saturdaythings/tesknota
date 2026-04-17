@@ -114,7 +114,7 @@ export function FloatingActionButton({
             >
               <span
                 className="font-sans font-medium uppercase"
-                style={{ fontSize: '11px', color: 'rgba(30,45,69,0.8)', letterSpacing: '0.12em' }}
+                style={{ fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-lg)' }}
               >
                 Actions
               </span>
@@ -143,7 +143,7 @@ export function FloatingActionButton({
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full h-9 pl-9 pr-3 rounded-[3px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)]"
                   style={{
-                    fontSize: '14px',
+                    fontSize: 'var(--text-ui)',
                     background: 'var(--color-cream)',
                     border: '1px solid var(--color-cream-dark)',
                     color: 'var(--color-navy)',
@@ -161,7 +161,7 @@ export function FloatingActionButton({
                   )}
                   <div
                     className="px-6 pt-4 pb-1 font-sans font-medium uppercase"
-                    style={{ fontSize: '11px', color: 'rgba(30,45,69,0.8)', letterSpacing: '0.12em' }}
+                    style={{ fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-lg)' }}
                   >
                     {section.label}
                   </div>
@@ -172,7 +172,7 @@ export function FloatingActionButton({
                       className="w-full flex items-center px-6 text-left font-sans bg-transparent border-none cursor-pointer transition-colors hover:bg-[var(--color-sand-light)]"
                       style={{
                         height: '44px',
-                        fontSize: '15px',
+                        fontSize: 'var(--text-base)',
                         color: 'var(--color-navy)',
                         borderBottom:
                           ii < section.items.length - 1

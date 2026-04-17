@@ -117,7 +117,7 @@ function FragSearch({
         <Search
           size={15}
           className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-          style={{ color: 'rgba(30,45,69,0.8)' }}
+          style={{ color: 'var(--color-meta-text)' }}
         />
         <input
           value={query}
@@ -137,8 +137,8 @@ function FragSearch({
             fontWeight: 400,
             letterSpacing: '0.08em',
             background: 'var(--color-cream)',
-            border: error ? '1px solid var(--color-destructive)' : '1px solid rgba(30,45,69,0.8)',
-            color: value ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)',
+            border: error ? '1px solid var(--color-destructive)' : '1px solid var(--color-meta-text)',
+            color: value ? 'var(--color-navy)' : 'var(--color-meta-text)',
           }}
         />
       </div>
@@ -148,9 +148,9 @@ function FragSearch({
           style={{
             top: 'calc(100% + 4px)',
             background: 'var(--color-cream)',
-            border: '1px solid rgba(30,45,69,0.8)',
-            borderRadius: '3px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+            border: '1px solid var(--color-meta-text)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-md)',
             maxHeight: '220px',
           }}
         >
@@ -159,14 +159,14 @@ function FragSearch({
               key={f.id}
               onMouseDown={() => { onSelect(f); setOpen(false); }}
               className="flex flex-col justify-center cursor-pointer transition-colors"
-              style={{ height: '48px', padding: '0 12px', borderBottom: '1px solid rgba(30,45,69,0.1)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232,224,208,0.3)')}
+              style={{ height: '48px', padding: '0 12px', borderBottom: '1px solid var(--color-row-divider)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+              <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 'var(--leading-tight)' }}>
                 {f.name}
               </div>
-              <div className="font-sans uppercase" style={{ fontSize: '12px', color: 'var(--color-navy)', letterSpacing: '0.1em' }}>
+              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', letterSpacing: '0.1em' }}>
                 {f.house}
               </div>
             </div>
@@ -331,12 +331,12 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
     'w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 ' +
     'focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]';
   const inputStyle: React.CSSProperties = {
-    fontSize: '13px',
+    fontSize: 'var(--text-sm)',
     fontWeight: 400,
-    letterSpacing: '0.08em',
+    letterSpacing: 'var(--tracking-sm)',
     background: 'var(--color-cream)',
-    border: '1px solid rgba(30,45,69,0.8)',
-    color: 'rgba(30,45,69,0.8)',
+    border: '1px solid var(--color-meta-text)',
+    color: 'var(--color-meta-text)',
   };
 
   return (
@@ -399,7 +399,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Work, friend's house, coffee shop, gym..."
               className={inputCls}
-              style={{ ...inputStyle, color: location ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)' }}
+              style={{ ...inputStyle, color: location ? 'var(--color-navy)' : 'var(--color-meta-text)' }}
             />
             <div className="grid grid-cols-2 gap-3">
               <input
@@ -407,14 +407,14 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="City"
                 className={inputCls}
-                style={{ ...inputStyle, color: city ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)' }}
+                style={{ ...inputStyle, color: city ? 'var(--color-navy)' : 'var(--color-meta-text)' }}
               />
               <input
                 value={state}
                 onChange={(e) => setState(e.target.value)}
                 placeholder="State / Country"
                 className={inputCls}
-                style={{ ...inputStyle, color: state ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)' }}
+                style={{ ...inputStyle, color: state ? 'var(--color-navy)' : 'var(--color-meta-text)' }}
               />
             </div>
           </div>
@@ -430,13 +430,13 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
               maxLength={160}
               className="w-full p-3 rounded-[2px] font-sans outline-none transition-[border-color] focus:border-[var(--color-accent)] resize-none placeholder:text-[var(--color-navy-mid)]"
               style={{
-                fontSize: '13px',
+                fontSize: 'var(--text-sm)',
                 fontWeight: 400,
-                letterSpacing: '0.08em',
+                letterSpacing: 'var(--tracking-sm)',
                 minHeight: '72px',
                 background: 'var(--color-cream)',
-                border: '1px solid rgba(30,45,69,0.8)',
-                color: notes ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)',
+                border: '1px solid var(--color-meta-text)',
+                color: notes ? 'var(--color-navy)' : 'var(--color-meta-text)',
               }}
             />
           </div>

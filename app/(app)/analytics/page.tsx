@@ -57,11 +57,11 @@ const STATUS_LABELS: Record<string, string> = {
 const STATUS_COLORS: Record<string, string> = {
   CURRENT: "var(--color-navy)",
   WANT_TO_BUY: "var(--color-accent-light)",
-  PREVIOUSLY_OWNED: "rgba(30,45,69,0.8)",
-  WANT_TO_SMELL: "#6B8FAA",
+  PREVIOUSLY_OWNED: "var(--color-meta-text)",
+  WANT_TO_SMELL: "var(--color-accent-light)",
   DONT_LIKE: "var(--color-destructive)",
-  FINISHED: "#6B7280",
-  WANT_TO_IDENTIFY: "#8B6F4E",
+  FINISHED: "var(--color-status-finished)",
+  WANT_TO_IDENTIFY: "var(--color-status-want)",
 };
 
 // ── Helpers ────────────────────────────────────────────────
@@ -127,10 +127,10 @@ function buildMonthOptions(frags: UserFragrance[], comps: UserCompliment[]): { v
 const tooltipStyle: React.CSSProperties = {
   background: "var(--color-cream)",
   border: "1px solid var(--color-cream-dark)",
-  borderRadius: "3px",
-  boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+  borderRadius: "var(--radius-md)",
+  boxShadow: "var(--shadow-md)",
   fontFamily: "var(--font-sans)",
-  fontSize: "12px",
+  fontSize: "var(--text-xs)",
   padding: "6px 10px",
   color: "var(--color-navy)",
 };
@@ -222,23 +222,23 @@ function RankedRow({ rank, name, sub, count, maxCount, unit }: {
   const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
   return (
     <div style={{ display: "flex", alignItems: "center", height: 44 }}>
-      <span style={{ width: 24, flexShrink: 0, fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)", fontWeight: 500 }}>
+      <span style={{ width: 24, flexShrink: 0, fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)", fontWeight: 500 }}>
         {rank}
       </span>
       <div style={{ display: "flex", flexDirection: "column", width: 140, flexShrink: 0, minWidth: 0, overflow: "hidden" }}>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "14px", fontWeight: 500, color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-ui)", fontWeight: 500, color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {name}
         </span>
         {sub && (
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {sub}
           </span>
         )}
       </div>
-      <div style={{ flex: 1, height: 4, background: "var(--color-cream-dark)", borderRadius: "9999px", margin: "0 16px", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${pct}%`, background: "var(--color-accent)", borderRadius: "9999px" }} />
+      <div style={{ flex: 1, height: 4, background: "var(--color-cream-dark)", borderRadius: "var(--radius-full)", margin: "0 16px", overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct}%`, background: "var(--color-accent)", borderRadius: "var(--radius-full)" }} />
       </div>
-      <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)" }}>
+      <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>
         {count} {unit}
       </span>
     </div>
@@ -256,10 +256,10 @@ function ChartCard({ title, sub, children, wide }: {
   return (
     <div
       style={{
-        background: "#FFFFFF",
+        background: "var(--color-cream)",
         border: "1px solid var(--color-cream-dark)",
-        borderRadius: "6px",
-        padding: "24px",
+        borderRadius: "var(--radius-lg)",
+        padding: "var(--space-6)",
         gridColumn: wide ? "1 / -1" : undefined,
       }}
     >
@@ -268,7 +268,7 @@ function ChartCard({ title, sub, children, wide }: {
           {title}
         </div>
         {sub && (
-          <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "var(--color-navy)" }}>
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>
             {sub}
           </div>
         )}
@@ -282,14 +282,14 @@ function ChartCard({ title, sub, children, wide }: {
 
 function StatCard({ label, value, delta }: { label: string; value: string | number; delta?: string }) {
   return (
-    <div style={{ background: "#FFFFFF", border: "1px solid var(--color-cream-dark)", borderRadius: "6px", padding: "24px 24px 20px" }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "12px", color: "var(--color-navy)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "8px" }}>
+    <div style={{ background: "var(--color-cream)", border: "1px solid var(--color-cream-dark)", borderRadius: "var(--radius-lg)", padding: "var(--space-6) var(--space-6) var(--space-5)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "var(--text-xs)", color: "var(--color-navy)", textTransform: "uppercase", letterSpacing: "var(--tracking-lg)", marginBottom: "8px" }}>
         {label}
       </div>
       <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "48px", lineHeight: 1, color: "var(--color-navy)", marginBottom: "8px" }}>
         {value}
       </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "13px", color: "var(--color-navy)", minHeight: "20px" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "var(--text-sm)", color: "var(--color-navy)", minHeight: "20px" }}>
         {delta ?? ""}
       </div>
     </div>
@@ -305,11 +305,11 @@ function TimePill({ label, active, onClick }: { label: string; active: boolean; 
       style={{
         fontFamily: "var(--font-sans)",
         fontWeight: 500,
-        fontSize: "12px",
+        fontSize: "var(--text-xs)",
         textTransform: "uppercase",
-        letterSpacing: "0.08em",
+        letterSpacing: "var(--tracking-sm)",
         padding: "6px 14px",
-        borderRadius: "2px",
+        borderRadius: "var(--radius-sm)",
         border: active ? "1px solid var(--color-navy)" : "1px solid var(--color-cream-dark)",
         background: active ? "var(--color-navy)" : "transparent",
         color: active ? "var(--color-cream)" : "var(--color-navy)",
@@ -397,7 +397,7 @@ export default function AnalyticsPage() {
         status,
         name: STATUS_LABELS[status] ?? status,
         value,
-        color: STATUS_COLORS[status] ?? "rgba(30,45,69,0.8)",
+        color: STATUS_COLORS[status] ?? "var(--color-meta-text)",
       }));
   }, [activeFrags]);
 
@@ -507,11 +507,11 @@ export default function AnalyticsPage() {
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: 500,
-                fontSize: "12px",
+                fontSize: "var(--text-xs)",
                 textTransform: "uppercase",
-                letterSpacing: "0.08em",
+                letterSpacing: "var(--tracking-sm)",
                 padding: "6px 14px",
-                borderRadius: "2px",
+                borderRadius: "var(--radius-sm)",
                 border: showFriend ? "1px solid var(--color-accent)" : "1px solid var(--color-cream-dark)",
                 background: showFriend ? "var(--color-accent)" : "transparent",
                 color: showFriend ? "var(--color-cream)" : "var(--color-navy)",
@@ -592,7 +592,7 @@ export default function AnalyticsPage() {
                   {statusData.map((d) => (
                     <div key={d.status} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color, flexShrink: 0 }} />
-                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>{d.name}</span>
+                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{d.name}</span>
                     </div>
                   ))}
                 </div>

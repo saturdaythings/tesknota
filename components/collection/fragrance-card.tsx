@@ -42,9 +42,9 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         textAlign: "left",
         background: "var(--color-cream)",
         border: "1px solid var(--color-cream-dark)",
-        borderRadius: "6px",
-        padding: "16px",
-        marginBottom: "8px",
+        borderRadius: "var(--radius-lg)",
+        padding: "var(--space-4)",
+        marginBottom: "var(--space-2)",
         cursor: "pointer",
       }}
     >
@@ -69,10 +69,10 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
               border: "1px solid var(--color-navy)",
               color: "var(--color-navy)",
               fontFamily: "var(--font-sans)",
-              fontSize: "11px",
+              fontSize: "var(--text-label)",
               fontWeight: 500,
               padding: "2px 6px",
-              borderRadius: "2px",
+              borderRadius: "var(--radius-sm)",
               textTransform: "uppercase",
               flexShrink: 0,
               alignSelf: "flex-start",
@@ -88,10 +88,10 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
               background: "var(--color-sand-light)",
               color: "var(--color-navy)",
               fontFamily: "var(--font-sans)",
-              fontSize: "12px",
+              fontSize: "var(--text-xs)",
               fontWeight: 500,
               padding: "2px 6px",
-              borderRadius: "2px",
+              borderRadius: "var(--radius-sm)",
               textTransform: "uppercase",
               flexShrink: 0,
               alignSelf: "flex-start",
@@ -107,11 +107,11 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
       <div
         style={{
           fontFamily: "var(--font-sans)",
-          fontSize: "12px",
+          fontSize: "var(--text-xs)",
           fontWeight: 400,
           color: "var(--color-navy)",
           textTransform: "uppercase",
-          letterSpacing: "0.08em",
+          letterSpacing: "var(--tracking-sm)",
           marginBottom: "10px",
         }}
       >
@@ -120,16 +120,16 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
 
       {/* Row: size · stars · added */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px", flexWrap: "wrap" }}>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-navy)" }}>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>
           {sizeDisplay}
         </span>
-        <span style={{ color: "var(--color-cream-dark)", fontSize: "12px" }}>·</span>
+        <span style={{ color: "var(--color-cream-dark)", fontSize: "var(--text-xs)" }}>·</span>
         <div style={{ display: "flex", gap: "1px" }}>
           {[1, 2, 3, 4, 5].map((s) => (
             <span
               key={s}
               style={{
-                fontSize: "14px",
+                fontSize: "var(--text-ui)",
                 color: ratingFilled >= s ? "var(--color-accent)" : "var(--color-cream-dark)",
               }}
             >
@@ -139,8 +139,8 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         </div>
         {addedDate && (
           <>
-            <span style={{ color: "var(--color-cream-dark)", fontSize: "12px" }}>·</span>
-            <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: "var(--color-navy)" }}>
+            <span style={{ color: "var(--color-cream-dark)", fontSize: "var(--text-xs)" }}>·</span>
+            <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>
               {addedDate}
             </span>
           </>
@@ -157,11 +157,11 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
                 display: "inline-flex",
                 alignItems: "center",
                 padding: "2px 7px",
-                borderRadius: "100px",
+                borderRadius: "var(--radius-full)",
                 background: "var(--color-sand-light)",
                 color: "var(--color-navy)",
                 fontFamily: "var(--font-sans)",
-                fontSize: "12px",
+                fontSize: "var(--text-xs)",
                 fontWeight: 400,
               }}
             >
@@ -174,11 +174,11 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
                 display: "inline-flex",
                 alignItems: "center",
                 padding: "2px 7px",
-                borderRadius: "100px",
+                borderRadius: "var(--radius-full)",
                 background: "var(--color-sand-light)",
                 color: "var(--color-navy)",
                 fontFamily: "var(--font-sans)",
-                fontSize: "12px",
+                fontSize: "var(--text-xs)",
               }}
             >
               +{extraAccords} more
@@ -192,7 +192,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         <Badge variant={statusVariant(frag.status)}>
           {STATUS_LABELS[frag.status]}
         </Badge>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "13px", color: compCount > 0 ? "var(--color-navy)" : "var(--color-cream-dark)" }}>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: compCount > 0 ? "var(--color-navy)" : "var(--color-cream-dark)" }}>
           {compCount > 0 ? compCount : "—"}
         </span>
       </div>

@@ -41,16 +41,16 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
         <div
           className="font-sans font-medium uppercase leading-none"
           style={{
-            fontSize: '10px',
+            fontSize: 'var(--text-xxs)',
             color: 'var(--color-navy)',
-            letterSpacing: '0.12em',
+            letterSpacing: 'var(--tracking-lg)',
           }}
         >
           T&#280;SKNOTA
         </div>
         <div
           className="font-serif italic truncate"
-          style={{ fontSize: '22px', color: 'var(--color-navy)', lineHeight: 1.2 }}
+          style={{ fontSize: 'var(--text-empty-title)', color: 'var(--color-navy)', lineHeight: 'var(--leading-tight)' }}
         >
           {pageTitle}
         </div>
@@ -65,7 +65,7 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
             onClick={() => setSearchExpanded((v) => !v)}
             aria-label="Search"
             className="md:hidden p-2 bg-transparent border-none cursor-pointer transition-colors"
-            style={{ color: '#C8B89A' }}
+            style={{ color: 'var(--color-sand)' }}
           >
             <Search size={18} />
           </button>
@@ -81,7 +81,7 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
             <Search
               size={15}
               className="absolute left-3 pointer-events-none"
-              style={{ color: 'rgba(30,45,69,0.8)' }}
+              style={{ color: 'var(--color-meta-text)' }}
             />
             <input
               type="search"
@@ -93,13 +93,13 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
               }}
               className="h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
               style={{
-                fontSize: '12px',
+                fontSize: 'var(--text-xs)',
                 fontWeight: 400,
-                letterSpacing: '0.08em',
+                letterSpacing: 'var(--tracking-sm)',
                 width: '220px',
                 background: 'var(--color-cream)',
-                border: '1px solid rgba(30,45,69,0.8)',
-                color: 'rgba(30,45,69,0.8)',
+                border: '1px solid var(--color-meta-text)',
+                color: 'var(--color-meta-text)',
               }}
             />
           </div>
@@ -109,8 +109,8 @@ export function Header({ pageTitle, synced = true, onSearch, className }: Header
         <div className="flex items-center gap-1.5" title={synced ? 'Live' : 'Offline'}>
           <Circle
             size={8}
-            fill={synced ? '#22c55e' : '#C8B89A'}
-            style={{ color: synced ? '#22c55e' : '#C8B89A' }}
+            fill={synced ? 'var(--color-live)' : 'var(--color-sand)'}
+            style={{ color: synced ? 'var(--color-live)' : 'var(--color-sand)' }}
           />
         </div>
       </div>
