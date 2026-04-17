@@ -9,6 +9,9 @@ import { FragDetail } from "@/components/ui/frag-detail";
 import { FragForm } from "@/components/ui/frag-form";
 import { LogComplimentModal } from "@/components/compliments/log-compliment-modal";
 import { StatusBadge } from "@/components/ui/frag-row";
+import { Button } from "@/components/ui/button";
+import { FragranceCell } from "@/components/ui/fragrance-cell";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import type { UserFragrance, UserCompliment, CommunityFrag } from "@/types";
@@ -27,6 +30,9 @@ import { FragSearch } from "@/components/ui/frag-search";
 
 const COLLECTION_STATUSES = new Set(["CURRENT", "PREVIOUSLY_OWNED", "FINISHED"]);
 const WISHLIST_STATUSES = new Set(["WANT_TO_BUY", "WANT_TO_SMELL", "WANT_TO_IDENTIFY"]);
+
+/* component-internal: skeleton row height */
+const SKELETON_ROW_HEIGHT = 'var(--size-row-min)';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -85,20 +91,11 @@ export default function DashboardPage() {
       />
       <Topbar title="Dashboard" actions={<FragSearch />} />
       <PageContent>
-        {!isLoaded && (
-          <div
-            className="text-xs tracking-[0.12em] py-6"
-            style={{ fontFamily: "var(--font-sans)", color: "var(--color-navy)" }}
-          >
-            Loading...
-          </div>
-        )}
-
-        {isLoaded && !hasCollection && (
+        {!isLoaded ? (
+          <DashboardSkeleton />
+        ) : !hasCollection ? (
           <Onboarding onAddFrag={() => { setEditingFrag(null); setFragFormOpen(true); }} />
-        )}
-
-        {isLoaded && hasCollection && (
+        ) : (
           <>
             {/* ── Stat Cards ─────────────────────────── */}
             <div className="dash-stat-grid mb-5">
@@ -136,8 +133,6 @@ export default function DashboardPage() {
               <ScentSignature frags={MF} communityFrags={communityFrags} />
             </div>
 
-
-
             {/* ── Friend's Recent Activity ─────────────── */}
             <FriendActivity
               fragrances={fragrances}
@@ -167,57 +162,56 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
   return (
     <div
       style={{
-        background: "#FFFFFF",
+        background: "#FFFFFF", /* component-internal: no white token — nearest is var(--color-cream) but intentionally white for contrast */
         border: "1px solid var(--color-cream-dark)",
-        borderRadius: "6px",
-        padding: "24px 24px 20px",
+        borderRadius: "var(--radius-lg)",
+        padding: "var(--space-6) var(--space-6) var(--space-5)",
       }}
     >
       <div
+        className="font-sans uppercase"
         style={{
-          fontFamily: "var(--font-sans)",
           fontWeight: 500,
-          fontSize: "12px",
+          fontSize: "var(--text-xs)",
           color: "var(--color-navy)",
-          textTransform: "uppercase",
-          letterSpacing: "0.12em",
-          marginBottom: "8px",
+          letterSpacing: "var(--tracking-lg)",
+          marginBottom: "var(--space-2)",
         }}
       >
         {label}
       </div>
       <div
+        className="font-serif italic"
         style={{
-          fontFamily: "var(--font-serif)",
           fontWeight: 400,
-          fontStyle: "italic",
-          fontSize: "48px",
+          fontSize: "48px", /* component-internal: no token between --text-page-title (24px) and --text-hero (56px) */
           lineHeight: 1,
           color: "var(--color-navy)",
-          marginBottom: "8px",
+          marginBottom: "var(--space-2)",
         }}
       >
         {value}
       </div>
       {delta ? (
         <div
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontWeight: 400,
-            fontSize: "13px",
-            color: "var(--color-navy)",
-          }}
+          className="font-sans"
+          style={{ fontWeight: 400, fontSize: "var(--text-sm)", color: "var(--color-navy)" }}
         >
           {delta}
         </div>
       ) : (
-        <div style={{ height: "20px" }} />
+        <div style={{ height: "var(--space-5)" }} />
       )}
     </div>
   );
 }
 
 // ── Quick Actions ──────────────────────────────────────────
+
+const linkGhostClass =
+  "inline-flex items-center gap-2 font-sans font-medium cursor-pointer transition-colors duration-150 " +
+  "select-none no-underline px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] min-h-8 " +
+  "bg-transparent text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]";
 
 function QuickActions({
   onAddFrag,
@@ -228,60 +222,23 @@ function QuickActions({
 }) {
   return (
     <div className="dash-quick-actions mb-8">
-      <ActionBtn icon={<Plus size={16} />} label="Add Fragrance" onClick={onAddFrag} />
-      <ActionBtn icon={<MessageCircle size={16} />} label="Log Compliment" onClick={onLogCompliment} />
-      <ActionBtn icon={<Upload size={16} />} label="Import File" href="/import" />
-      <ActionBtn
-        icon={<Flag size={16} />}
-        label="Review Collection"
-        href="/collection?filter=missing"
-      />
-    </div>
-  );
-}
-
-function ActionBtn({
-  icon,
-  label,
-  onClick,
-  href,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-  href?: string;
-}) {
-  const style: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
-    fontFamily: "var(--font-sans)",
-    fontWeight: 500,
-    fontSize: "13px",
-    color: "var(--color-navy)",
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    padding: "6px 10px",
-    borderRadius: "4px",
-    textDecoration: "none",
-    transition: "background 0.15s",
-  };
-
-  if (href) {
-    return (
-      <Link href={href} style={style} className="hover:bg-[var(--color-cream-dark)]">
-        {icon}
-        {label}
+      <Button variant="ghost" size="sm" onClick={onAddFrag}>
+        <Plus size={16} />
+        Add Fragrance
+      </Button>
+      <Button variant="ghost" size="sm" onClick={onLogCompliment}>
+        <MessageCircle size={16} />
+        Log Compliment
+      </Button>
+      <Link href="/import" className={linkGhostClass}>
+        <Upload size={16} />
+        Import File
       </Link>
-    );
-  }
-
-  return (
-    <button style={style} onClick={onClick} className="hover:bg-[var(--color-cream-dark)]">
-      {icon}
-      {label}
-    </button>
+      <Link href="/collection?filter=missing" className={linkGhostClass}>
+        <Flag size={16} />
+        Review Collection
+      </Link>
+    </div>
   );
 }
 
@@ -333,13 +290,8 @@ function SignatureSpotlight({
   return (
     <div>
       <div
-        style={{
-          fontFamily: "var(--font-serif)",
-          fontStyle: "italic",
-          fontSize: "20px",
-          color: "var(--color-navy)",
-          marginBottom: "12px",
-        }}
+        className="font-serif italic"
+        style={{ fontSize: "var(--text-lg)", color: "var(--color-navy)", marginBottom: "var(--space-3)" }}
       >
         Signature spotlight
       </div>
@@ -347,36 +299,34 @@ function SignatureSpotlight({
         <div
           style={{
             background: "var(--color-navy)",
-            borderRadius: "6px",
-            padding: "28px",
+            borderRadius: "var(--radius-lg)",
+            padding: "28px", /* component-internal: no token between --space-6 (24px) and --space-8 (32px) */
           }}
         >
           <div
+            className="font-serif italic"
             style={{
-              fontFamily: "var(--font-serif)",
-              fontStyle: "italic",
-              fontSize: "28px",
+              fontSize: "var(--text-logo)",
               color: "var(--color-cream)",
               lineHeight: 1.15,
-              marginBottom: "4px",
+              marginBottom: "var(--space-1)",
             }}
           >
             {spotlight.name}
           </div>
           <div
+            className="font-sans uppercase"
             style={{
-              fontFamily: "var(--font-sans)",
               fontWeight: 500,
-              fontSize: "12px",
-              color: "rgba(200,184,154,0.8)",
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              marginBottom: "20px",
+              fontSize: "var(--text-xs)",
+              color: "var(--color-sand-muted)",
+              letterSpacing: "var(--tracking-md)",
+              marginBottom: "var(--space-5)",
             }}
           >
             {spotlight.house}
           </div>
-          <div style={{ display: "flex", gap: "28px" }}>
+          <div style={{ display: "flex", gap: "28px" /* component-internal: no token near 28px */ }}>
             <SpotStat value={compCount} label="Compliments" />
             <SpotStat value={`${pct}%`} label="of total" />
             <SpotStat value={<StarRow rating={rating} />} label="Your rating" />
@@ -386,11 +336,11 @@ function SignatureSpotlight({
         <div
           style={{
             background: "var(--color-navy)",
-            borderRadius: "6px",
+            borderRadius: "var(--radius-lg)",
             padding: "28px",
-            color: "rgba(245,240,232,0.4)",
+            color: "rgba(245,240,232,0.4)", /* component-internal: no token for this opacity */
             fontFamily: "var(--font-sans)",
-            fontSize: "13px",
+            fontSize: "var(--text-sm)",
           }}
         >
           Add fragrances to see your spotlight.
@@ -404,25 +354,24 @@ function SpotStat({ value, label }: { value: React.ReactNode; label: string }) {
   return (
     <div>
       <div
+        className="font-sans"
         style={{
-          fontFamily: "var(--font-sans)",
           fontWeight: 600,
-          fontSize: "16px",
+          fontSize: "var(--text-note)",
           color: "var(--color-cream)",
           lineHeight: 1,
-          marginBottom: "4px",
+          marginBottom: "var(--space-1)",
         }}
       >
         {value}
       </div>
       <div
+        className="font-sans uppercase"
         style={{
-          fontFamily: "var(--font-sans)",
           fontWeight: 400,
-          fontSize: "12px",
-          color: "rgba(200,184,154,0.7)",
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
+          fontSize: "var(--text-xs)",
+          color: "rgba(200,184,154,0.7)", /* component-internal: between --color-sand-label (0.60) and --color-sand-muted (0.80) */
+          letterSpacing: "var(--tracking-sm)",
         }}
       >
         {label}
@@ -437,7 +386,11 @@ function StarRow({ rating }: { rating: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <span
           key={i}
-          style={{ color: i < rating ? "rgba(245,240,232,0.7)" : "rgba(245,240,232,0.25)" }}
+          style={{
+            color: i < rating
+              ? "var(--color-cream-muted)"
+              : "rgba(245,240,232,0.25)", /* component-internal: no token for this opacity */
+          }}
         >
           ★
         </span>
@@ -473,27 +426,22 @@ function ScentSignature({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "baseline",
-          marginBottom: "12px",
+          marginBottom: "var(--space-3)",
         }}
       >
         <div
-          style={{
-            fontFamily: "var(--font-serif)",
-            fontStyle: "italic",
-            fontSize: "20px",
-            color: "var(--color-navy)",
-          }}
+          className="font-serif italic"
+          style={{ fontSize: "var(--text-lg)", color: "var(--color-navy)" }}
         >
           Scent signature
         </div>
         <div
+          className="font-sans uppercase"
           style={{
-            fontFamily: "var(--font-sans)",
             fontWeight: 500,
-            fontSize: "12px",
+            fontSize: "var(--text-xs)",
             color: "var(--color-navy)",
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
+            letterSpacing: "var(--tracking-md)",
           }}
         >
           Top accords in your collection
@@ -501,17 +449,13 @@ function ScentSignature({
       </div>
       {top.length === 0 ? (
         <div
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "13px",
-            color: "var(--color-navy)",
-            paddingTop: "8px",
-          }}
+          className="font-sans"
+          style={{ fontSize: "var(--text-sm)", color: "var(--color-navy)", paddingTop: "var(--space-2)" }}
         >
           No accords data yet.
         </div>
       ) : (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
           {top.map(([accord], i) => (
             <Link
               key={accord}
@@ -519,12 +463,12 @@ function ScentSignature({
               style={{
                 fontFamily: "var(--font-sans)",
                 fontWeight: 500,
-                fontSize: "12px",
+                fontSize: "var(--text-xs)",
                 textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                padding: "4px 12px",
-                borderRadius: "2px",
-                border: "1px solid var(--color-cream-dark)",
+                letterSpacing: "var(--tracking-sm)",
+                padding: "var(--space-1) var(--space-3)",
+                borderRadius: "var(--radius-sm)",
+                border: "1px solid var(--color-sand-light)",
                 textDecoration: "none",
                 background: i === 0 ? "var(--color-navy)" : "var(--color-cream-dark)",
                 color: i === 0 ? "var(--color-cream)" : "var(--color-navy)",
@@ -593,15 +537,10 @@ function FriendActivity({
       : "";
 
     sections.push(
-      <div key={friend.id} style={{ marginBottom: "24px" }}>
+      <div key={friend.id} style={{ marginBottom: "var(--space-6)" }}>
         <div
-          style={{
-            fontFamily: "var(--font-serif)",
-            fontStyle: "italic",
-            fontSize: "20px",
-            color: "var(--color-navy)",
-            marginBottom: "12px",
-          }}
+          className="font-serif italic"
+          style={{ fontSize: "var(--text-lg)", color: "var(--color-navy)", marginBottom: "var(--space-3)" }}
         >
           <Link
             href="/friend"
@@ -652,43 +591,38 @@ function ActivityCard({
       onClick={onClick}
       style={{
         border: "1px solid var(--color-cream-dark)",
-        borderRadius: "6px",
-        padding: "20px 24px",
+        borderRadius: "var(--radius-lg)",
+        padding: "var(--space-5) var(--space-6)",
         cursor: onClick ? "pointer" : "default",
       }}
-      className={onClick ? "hover:bg-[var(--color-cream-dark)] transition-colors" : ""}
+      onMouseEnter={(e) => { if (onClick) e.currentTarget.style.background = "var(--color-row-hover)"; }}
+      onMouseLeave={(e) => { if (onClick) e.currentTarget.style.background = "transparent"; }}
     >
       <div
+        className="font-sans uppercase"
         style={{
-          fontFamily: "var(--font-sans)",
           fontWeight: 500,
-          fontSize: "12px",
+          fontSize: "var(--text-xs)",
           color: "var(--color-navy)",
-          textTransform: "uppercase",
-          letterSpacing: "0.12em",
-          marginBottom: "8px",
+          letterSpacing: "var(--tracking-lg)",
+          marginBottom: "var(--space-2)",
         }}
       >
         {label}
       </div>
       <div
+        className="font-serif italic"
         style={{
-          fontFamily: "var(--font-serif)",
-          fontStyle: "italic",
-          fontSize: "20px",
+          fontSize: "var(--text-lg)",
           color: "var(--color-navy)",
-          marginBottom: "2px",
+          marginBottom: "var(--space-half)",
         }}
       >
         {name}
       </div>
       <div
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontWeight: 400,
-          fontSize: "13px",
-          color: "var(--color-navy)",
-        }}
+        className="font-sans"
+        style={{ fontWeight: 400, fontSize: "var(--text-sm)", color: "var(--color-navy)" }}
       >
         {sub}
       </div>
@@ -697,6 +631,9 @@ function ActivityCard({
 }
 
 // ── Recent Purchases Table ─────────────────────────────────
+
+const PURCHASE_COLS = ["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"];
+const PURCHASE_GRID = "minmax(200px,1fr) max-content max-content max-content 180px max-content max-content";
 
 function RecentPurchases({
   frags,
@@ -717,8 +654,6 @@ function RecentPurchases({
     .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
     .slice(0, 5);
 
-  const COLS = ["Fragrance", "Size", "Rating", "Added", "Accords", "Compliments", "Status"];
-
   return (
     <div>
       <div
@@ -726,31 +661,25 @@ function RecentPurchases({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: "12px",
+          marginBottom: "var(--space-3)",
         }}
       >
         <div
-          style={{
-            fontFamily: "var(--font-serif)",
-            fontStyle: "italic",
-            fontSize: "20px",
-            color: "var(--color-navy)",
-          }}
+          className="font-serif italic"
+          style={{ fontSize: "var(--text-lg)", color: "var(--color-navy)" }}
         >
           Recent Purchases
         </div>
         <Link
           href="/collection?sort=added-desc"
+          className="font-sans uppercase hover:opacity-70 transition-opacity"
           style={{
-            fontFamily: "var(--font-sans)",
             fontWeight: 500,
-            fontSize: "12px",
+            fontSize: "var(--text-xs)",
             color: "var(--color-navy)",
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
+            letterSpacing: "var(--tracking-md)",
             textDecoration: "none",
           }}
-          className="hover:text-[var(--color-navy)] transition-colors"
         >
           View All
         </Link>
@@ -758,60 +687,90 @@ function RecentPurchases({
 
       {sorted.length === 0 ? (
         <div
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "13px",
-            color: "var(--color-navy)",
-            paddingTop: "8px",
-          }}
+          className="font-sans"
+          style={{ fontSize: "var(--text-sm)", color: "var(--color-navy)", paddingTop: "var(--space-2)" }}
         >
           No fragrances added yet.
         </div>
       ) : (
         <div
           style={{
-            border: "1px solid var(--color-cream-dark)",
-            borderRadius: "6px",
+            border: "1px solid var(--color-sand-light)",
+            borderRadius: "var(--radius-lg)",
             overflow: "hidden",
           }}
         >
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", minWidth: "640px", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid var(--color-cream-dark)" }}>
-                  {COLS.map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: "10px 16px",
-                        textAlign: "left",
-                        fontFamily: "var(--font-sans)",
-                        fontWeight: 500,
-                        fontSize: "12px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                        color: "var(--color-navy)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((f) => (
-                  <PurchaseRow
-                    key={f.id}
-                    frag={f}
-                    compliments={compliments}
-                    communityFrags={communityFrags}
-                    userId={userId}
-                    onClick={onFragClick}
-                  />
+            <div
+              className="hidden md:grid"
+              style={{ gridTemplateColumns: PURCHASE_GRID, columnGap: "var(--space-10)", minWidth: "640px" }}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "subgrid",
+                  gridColumn: "1 / -1",
+                  background: "var(--color-cream-dark)",
+                  borderBottom: "1px solid var(--color-row-divider)",
+                  height: "var(--space-10)",
+                  alignItems: "center",
+                }}
+              >
+                {PURCHASE_COLS.map((h) => (
+                  <div
+                    key={h}
+                    className="font-sans uppercase"
+                    style={{
+                      padding: "0 var(--space-4)",
+                      fontWeight: 500,
+                      fontSize: "var(--text-xxs)",
+                      letterSpacing: "var(--tracking-md)",
+                      color: "var(--color-navy)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {h}
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              {/* Rows */}
+              {sorted.map((f) => (
+                <PurchaseRow
+                  key={f.id}
+                  frag={f}
+                  compliments={compliments}
+                  communityFrags={communityFrags}
+                  userId={userId}
+                  onClick={onFragClick}
+                />
+              ))}
+            </div>
+
+            {/* Mobile fallback */}
+            <div className="md:hidden">
+              {sorted.map((f) => {
+                const compCount = getCompCount(f.fragranceId || f.id, compliments, userId);
+                return (
+                  <div
+                    key={f.id}
+                    onClick={() => onFragClick(f)}
+                    className="cursor-pointer"
+                    style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--color-row-divider)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-row-hover)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+                    {compCount > 0 && (
+                      <div className="font-sans uppercase mt-1" style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)", letterSpacing: "var(--tracking-md)" }}>
+                        {compCount} compliment{compCount !== 1 ? "s" : ""}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -840,91 +799,60 @@ function PurchaseRow({
       : "");
 
   return (
-    <tr
+    <div
       onClick={() => onClick(f)}
-      style={{ borderBottom: "1px solid var(--color-cream-dark)", cursor: "pointer" }}
-      className="hover:bg-[var(--color-cream-dark)] transition-colors last:border-0"
+      className="cursor-pointer transition-colors duration-100"
+      style={{
+        display: "grid",
+        gridTemplateColumns: "subgrid",
+        gridColumn: "1 / -1",
+        alignItems: "center",
+        minHeight: "var(--space-16)",
+        borderBottom: "1px solid var(--color-row-divider)",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-row-hover)")}
+      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
-      <td style={{ padding: "12px 16px" }}>
-        <div
+      <div style={{ padding: "0 var(--space-4)", minWidth: 0 }}>
+        <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+      </div>
+      <div style={{ padding: "0 var(--space-4)" }}>
+        <span className="font-sans uppercase" style={{ fontSize: "var(--text-xs)", letterSpacing: "var(--tracking-md)", color: "var(--color-navy)", whiteSpace: "nowrap" }}>
+          {(f.sizes ?? []).join(", ") || "\u2014"}
+        </span>
+      </div>
+      <div style={{ padding: "0 var(--space-4)" }}>
+        <span className="font-sans uppercase" style={{ fontSize: "var(--text-xs)", letterSpacing: "var(--tracking-md)", color: "var(--color-navy)", whiteSpace: "nowrap" }}>
+          {starsStr(parseRating(f.personalRating))}
+        </span>
+      </div>
+      <div style={{ padding: "0 var(--space-4)" }}>
+        <span className="font-sans uppercase" style={{ fontSize: "var(--text-xs)", letterSpacing: "var(--tracking-md)", color: "var(--color-navy)", whiteSpace: "nowrap" }}>
+          {addedStr || "\u2014"}
+        </span>
+      </div>
+      <div style={{ padding: "0 var(--space-4)", minWidth: 0 }}>
+        <span className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>
+          {accords}
+        </span>
+      </div>
+      <div style={{ padding: "0 var(--space-4)" }}>
+        <span
+          className="font-sans uppercase"
           style={{
-            fontFamily: "var(--font-serif)",
-            fontStyle: "italic",
-            fontSize: "15px",
-            color: "var(--color-navy)",
+            fontSize: "var(--text-xs)",
+            letterSpacing: "var(--tracking-md)",
+            color: compCount > 0 ? "var(--color-navy)" : "var(--color-meta-text)",
+            whiteSpace: "nowrap",
           }}
         >
-          {f.name}
-        </div>
-        <div
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "12px",
-            color: "var(--color-navy)",
-            marginTop: "1px",
-          }}
-        >
-          {f.house}
-        </div>
-      </td>
-      <td
-        style={{
-          padding: "12px 16px",
-          fontFamily: "var(--font-sans)",
-          fontSize: "12px",
-          color: "var(--color-navy)",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {(f.sizes ?? []).join(", ") || "\u2014"}
-      </td>
-      <td
-        style={{
-          padding: "12px 16px",
-          fontFamily: "var(--font-sans)",
-          fontSize: "13px",
-          color: "var(--color-navy)",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {starsStr(parseRating(f.personalRating))}
-      </td>
-      <td
-        style={{
-          padding: "12px 16px",
-          fontFamily: "var(--font-sans)",
-          fontSize: "12px",
-          color: "var(--color-navy)",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {addedStr || "\u2014"}
-      </td>
-      <td
-        style={{
-          padding: "12px 16px",
-          fontFamily: "var(--font-sans)",
-          fontSize: "12px",
-          color: "var(--color-navy)",
-        }}
-      >
-        {accords}
-      </td>
-      <td
-        style={{
-          padding: "12px 16px",
-          fontFamily: "var(--font-sans)",
-          fontSize: "12px",
-          color: compCount > 0 ? "var(--color-navy)" : "var(--color-cream-dark)",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {compCount > 0 ? compCount : "\u2014"}
-      </td>
-      <td style={{ padding: "12px 16px" }}>
+          {compCount > 0 ? compCount : "\u2014"}
+        </span>
+      </div>
+      <div style={{ padding: "0 var(--space-4)" }}>
         <StatusBadge status={f.status} />
-      </td>
-    </tr>
+      </div>
+    </div>
   );
 }
 
@@ -932,39 +860,35 @@ function PurchaseRow({
 
 function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
   return (
-    <div style={{ maxWidth: "440px", marginTop: "32px" }}>
+    <div style={{ maxWidth: "440px", marginTop: "var(--space-8)" }}>
       <div
-        style={{
-          fontFamily: "var(--font-serif)",
-          fontSize: "26px",
-          color: "var(--color-navy)",
-          marginBottom: "4px",
-        }}
+        className="font-serif italic"
+        style={{ fontSize: "var(--text-xl)", color: "var(--color-navy)", marginBottom: "var(--space-1)" }}
       >
         Welcome to t&#x0119;sknota
       </div>
       <div
+        className="font-sans"
         style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: "13px",
-          color: "rgba(30,45,69,0.8)",
-          letterSpacing: "0.06em",
-          marginBottom: "24px",
+          fontSize: "var(--text-sm)",
+          color: "var(--color-meta-text)",
+          letterSpacing: "0.06em", /* component-internal: no token between --tracking-xs (0.04em) and --tracking-sm (0.08em) */
+          marginBottom: "var(--space-6)",
         }}
       >
         Your fragrance journey starts here
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
         <button
           onClick={onAddFrag}
           style={{
             display: "flex",
             alignItems: "flex-start",
-            gap: "16px",
-            padding: "16px",
+            gap: "var(--space-4)",
+            padding: "var(--space-4)",
             background: "var(--color-cream-dark)",
-            border: "1px solid var(--color-cream-dark)",
-            borderRadius: "4px",
+            border: "1px solid var(--color-sand-light)",
+            borderRadius: "4px", /* component-internal: no token between --radius-md (3px) and --radius-lg (6px) */
             textAlign: "left",
             width: "100%",
             cursor: "pointer",
@@ -979,7 +903,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
               background: "var(--color-navy)",
               color: "var(--color-cream)",
               fontFamily: "var(--font-sans)",
-              fontSize: "12px",
+              fontSize: "var(--text-xs)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -988,10 +912,16 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
             1
           </div>
           <div>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)", marginBottom: "2px" }}>
+            <div
+              className="font-sans"
+              style={{ fontSize: "var(--text-ui)", color: "var(--color-navy)", marginBottom: "var(--space-half)" }}
+            >
               Add your first fragrance
             </div>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>
+            <div
+              className="font-sans"
+              style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}
+            >
               Search by name or import from a spreadsheet
             </div>
           </div>
@@ -1000,10 +930,10 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
           style={{
             display: "flex",
             alignItems: "flex-start",
-            gap: "16px",
-            padding: "16px",
+            gap: "var(--space-4)",
+            padding: "var(--space-4)",
             background: "var(--color-cream-dark)",
-            border: "1px solid var(--color-cream-dark)",
+            border: "1px solid var(--color-sand-light)",
             borderRadius: "4px",
             opacity: 0.5,
           }}
@@ -1017,7 +947,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
               background: "var(--color-sand)",
               color: "var(--color-cream)",
               fontFamily: "var(--font-sans)",
-              fontSize: "12px",
+              fontSize: "var(--text-xs)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1026,15 +956,42 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
             2
           </div>
           <div>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "14px", color: "var(--color-navy)", marginBottom: "2px" }}>
+            <div
+              className="font-sans"
+              style={{ fontSize: "var(--text-ui)", color: "var(--color-navy)", marginBottom: "var(--space-half)" }}
+            >
               Log your first compliment
             </div>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "12px", color: "rgba(30,45,69,0.8)" }}>
+            <div
+              className="font-sans"
+              style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}
+            >
               Record who complimented you, when, and what you were wearing
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Dashboard Skeleton ─────────────────────────────────────
+
+function DashboardSkeleton() {
+  return (
+    <div>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            height: SKELETON_ROW_HEIGHT,
+            borderBottom: "1px solid var(--color-row-divider)",
+            background: "var(--color-row-hover)",
+            borderRadius: "var(--radius-md)",
+            marginBottom: "var(--space-1)",
+          }}
+        />
+      ))}
     </div>
   );
 }
