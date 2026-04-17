@@ -14,9 +14,9 @@ interface FragranceCellProps {
 
 export function FragranceCell({ name, house, type, secondary, className }: FragranceCellProps) {
   return (
-    <div className={className ?? ''}>
-      <div className="flex items-center gap-2 mb-1">
-        <span className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+    <div className={`min-w-0${className ? ` ${className}` : ''}`}>
+      <div className="flex items-center gap-2 mb-1 min-w-0">
+        <span className="font-serif italic flex-1 min-w-0 truncate" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}
         </span>
         {type && shortFragType(type) && (

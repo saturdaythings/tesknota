@@ -1,6 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useMobileNav } from "@/lib/mobile-nav-context";
+import { Menu } from "@/components/ui/Icons";
 
 interface TopbarProps {
     title: string;
@@ -10,6 +12,8 @@ interface TopbarProps {
 }
 
 export function Topbar({ title, search, actions, className }: TopbarProps) {
+  const { toggle } = useMobileNav();
+
   return (
     <header
       className={cn(
@@ -19,6 +23,23 @@ export function Topbar({ title, search, actions, className }: TopbarProps) {
       )}
       style={{ background: "var(--color-cream)" }}
     >
+      <button
+        onClick={toggle}
+        className="md:hidden flex-shrink-0 flex items-center justify-center"
+        style={{
+          width: 'var(--space-8)',
+          height: 'var(--space-8)',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          color: 'var(--color-navy)',
+          padding: 0,
+        }}
+        aria-label="Open navigation"
+      >
+        <Menu size={20} />
+      </button>
+
       <div
         className="flex-1 min-w-0 flex flex-col justify-center"
         style={{ gap: 'var(--space-half)' }}
