@@ -8,6 +8,8 @@ import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { addedThisMonth, avgRatingStr, parseRating, MONTHS } from "@/lib/frag-utils";
 import { Select } from "@/components/ui/select";
+import { TabPill } from "@/components/ui/tab-pill";
+import { Button } from "@/components/ui/button";
 import {
   AreaChart,
   Area,
@@ -296,33 +298,6 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
   );
 }
 
-// ── Time filter pills ─────────────────────────────────────
-
-function TimePill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        fontFamily: "var(--font-sans)",
-        fontWeight: 500,
-        fontSize: "var(--text-xs)",
-        textTransform: "uppercase",
-        letterSpacing: "var(--tracking-sm)",
-        padding: "6px 14px",
-        borderRadius: "var(--radius-sm)",
-        border: active ? "1px solid var(--color-navy)" : "1px solid var(--color-cream-dark)",
-        background: active ? "var(--color-navy)" : "transparent",
-        color: active ? "var(--color-cream)" : "var(--color-navy)",
-        cursor: "pointer",
-        transition: "all 120ms",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
 // ── Page ──────────────────────────────────────────────────
 
 export default function AnalyticsPage() {
@@ -476,9 +451,9 @@ export default function AnalyticsPage() {
         <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", marginBottom: "32px" }}>
           {/* Time pills */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-            <TimePill label="All Time" active={period === "all"} onClick={() => setPeriod("all")} />
-            <TimePill label="Year" active={period === "year"} onClick={() => setPeriod("year")} />
-            <TimePill label="Season" active={period === "season"} onClick={() => setPeriod("season")} />
+            <TabPill label="All Time" active={period === "all"} onClick={() => setPeriod("all")} />
+            <TabPill label="Year" active={period === "year"} onClick={() => setPeriod("year")} />
+            <TabPill label="Season" active={period === "season"} onClick={() => setPeriod("season")} />
             {period === "season" && (
               <div className="max-sm:w-full" style={{ width: "130px", marginLeft: "4px" }}>
                 <Select
@@ -488,7 +463,7 @@ export default function AnalyticsPage() {
                 />
               </div>
             )}
-            <TimePill label="Month" active={period === "month"} onClick={() => setPeriod("month")} />
+            <TabPill label="Month" active={period === "month"} onClick={() => setPeriod("month")} />
             {period === "month" && monthOptions.length > 0 && (
               <div className="max-sm:w-full" style={{ width: "140px", marginLeft: "4px" }}>
                 <Select
@@ -502,26 +477,18 @@ export default function AnalyticsPage() {
 
           {/* Friend toggle */}
           {friend && (
-            <button
+            <Button
+              variant="secondary"
               onClick={() => setShowFriend((v) => !v)}
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontWeight: 500,
-                fontSize: "var(--text-xs)",
-                textTransform: "uppercase",
-                letterSpacing: "var(--tracking-sm)",
-                padding: "6px 14px",
-                borderRadius: "var(--radius-sm)",
-                border: showFriend ? "1px solid var(--color-accent)" : "1px solid var(--color-cream-dark)",
-                background: showFriend ? "var(--color-accent)" : "transparent",
-                color: showFriend ? "var(--color-cream)" : "var(--color-navy)",
-                cursor: "pointer",
-                transition: "all 120ms",
-                marginLeft: "auto",
-              }}
+              className="ml-auto"
+              style={showFriend ? {
+                border: "1px solid var(--color-accent)",
+                background: "var(--color-accent)",
+                color: "var(--color-cream)",
+              } : undefined}
             >
               {friend.name}
-            </button>
+            </Button>
           )}
         </div>
 

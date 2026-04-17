@@ -879,19 +879,21 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
         Your fragrance journey starts here
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
-        <button
+        <Button
+          variant="primary"
           onClick={onAddFrag}
           style={{
             display: "flex",
             alignItems: "flex-start",
+            justifyContent: "flex-start",
             gap: "var(--space-4)",
             padding: "var(--space-4)",
             background: "var(--color-cream-dark)",
             border: "1px solid var(--color-sand-light)",
-            borderRadius: "4px", /* component-internal: no token between --radius-md (3px) and --radius-lg (6px) */ /* component-internal: no token between --radius-md (3px) and --radius-lg (6px) */
-            textAlign: "left",
+            borderRadius: "4px", /* component-internal: no token between --radius-md (3px) and --radius-lg (6px) */
             width: "100%",
-            cursor: "pointer",
+            minHeight: "unset",
+            color: "var(--color-navy)",
           }}
         >
           <div
@@ -924,7 +926,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
               Search by name or import from a spreadsheet
             </div>
           </div>
-        </button>
+        </Button>
         <div
           style={{
             display: "flex",

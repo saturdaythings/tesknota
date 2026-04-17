@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
+import { Button } from "@/components/ui/button";
+import { TabPill } from "@/components/ui/tab-pill";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -668,12 +670,7 @@ function AuditTab() {
   return (
     <div>
       <div className="mb-6">
-        <button
-          onClick={run}
-          className="font-[var(--adm-mono)] text-[11px] tracking-[0.1em] uppercase px-5 py-2.5 bg-[var(--adm-fg)] text-[var(--adm-bg)] hover:bg-[var(--adm-fg2)] transition-colors"
-        >
-          Run Audit
-        </button>
+        <Button variant="secondary" onClick={run}>Run Audit</Button>
         {results && (
           <span className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] ml-4">
             {pass} passed, {fail} failed
@@ -728,12 +725,9 @@ function FlagsTab({ flags, users, onResolve }: { flags: CommunityFlag[]; users: 
 
       <div className="mb-4 flex items-center gap-4">
         <SecHead title={showResolved ? "All flags" : "Open flags"} />
-        <button
-          onClick={() => setShowResolved((v) => !v)}
-          className="font-[var(--adm-mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--adm-fg4)] hover:text-[var(--adm-fg)] transition-colors border-none bg-none cursor-pointer p-0 mb-4"
-        >
+        <Button variant="secondary" size="sm" onClick={() => setShowResolved((v) => !v)}>
           {showResolved ? "Hide resolved" : "Show resolved"}
-        </button>
+        </Button>
       </div>
 
       {displayed.length === 0 ? (
@@ -758,12 +752,7 @@ function FlagsTab({ flags, users, onResolve }: { flags: CommunityFlag[]; users: 
                 </div>
               </div>
               {!f.resolved && (
-                <button
-                  onClick={() => onResolve(f.id)}
-                  className="font-[var(--adm-mono)] text-[10px] tracking-[0.08em] uppercase text-[var(--adm-green)] border border-[var(--adm-green)] px-2.5 py-1 hover:bg-[var(--adm-green)] hover:text-[var(--adm-bg)] transition-colors shrink-0"
-                >
-                  Resolve
-                </button>
+                <Button variant="secondary" size="sm" onClick={() => onResolve(f.id)}>Resolve</Button>
               )}
               {f.resolved && (
                 <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-green)] shrink-0">Resolved</span>
@@ -802,12 +791,9 @@ function UsersTab({ users, currentUserId, onToggleAdmin }: {
                 <span className="font-[var(--adm-mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--adm-green)] border border-[var(--adm-green)] px-2 py-0.5">Admin</span>
               )}
               {u.id !== currentUserId && (
-                <button
-                  onClick={() => onToggleAdmin(u.id!, u.isAdmin ?? false)}
-                  className="font-[var(--adm-mono)] text-[10px] tracking-[0.08em] uppercase text-[var(--adm-fg4)] border border-[var(--adm-border)] px-2.5 py-1 hover:border-[var(--adm-fg)] hover:text-[var(--adm-fg)] transition-colors"
-                >
+                <Button variant="secondary" size="sm" onClick={() => onToggleAdmin(u.id!, u.isAdmin ?? false)}>
                   {u.isAdmin ? "Revoke admin" : "Grant admin"}
-                </button>
+                </Button>
               )}
               {u.id === currentUserId && (
                 <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] italic">you</span>
@@ -839,15 +825,14 @@ function DataQualityTab({ frags }: { frags: DQFrag[] }) {
         { val: String(missingBoth.length), label: "Missing both" },
       ]} />
 
-      <div className="flex items-center gap-1 mb-5">
+      <div className="flex flex-wrap gap-2 mb-5">
         {(["accords", "notes", "both"] as const).map((f) => (
-          <button
+          <TabPill
             key={f}
+            label={`Missing ${f}`}
+            active={filter === f}
             onClick={() => setFilter(f)}
-            className={`font-[var(--adm-mono)] text-[10px] tracking-[0.1em] uppercase px-3 py-1 border transition-colors ${filter === f ? "border-[var(--adm-fg)] bg-[var(--adm-fg)] text-[var(--adm-bg)]" : "border-[var(--adm-border)] text-[var(--adm-fg4)] hover:text-[var(--adm-fg)]"}`}
-          >
-            Missing {f}
-          </button>
+          />
         ))}
       </div>
 
@@ -1003,12 +988,7 @@ export default function AdminPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)]">{user?.name}</span>
-          <button
-            onClick={load}
-            className="font-[var(--adm-mono)] text-[11px] font-medium tracking-[0.1em] uppercase bg-[var(--adm-fg)] text-[var(--adm-bg)] px-4 py-1.5 hover:opacity-80 transition-opacity"
-          >
-            Sync Now
-          </button>
+          <Button variant="secondary" size="sm" onClick={load}>Sync Now</Button>
         </div>
       </div>
 
@@ -1021,15 +1001,14 @@ export default function AdminPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-[var(--adm-border)] shrink-0 px-8">
+      <div className="flex flex-wrap gap-2 border-b border-[var(--adm-border)] shrink-0 px-8 py-2">
         {TABS.map((t) => (
-          <button
+          <TabPill
             key={t}
+            label={t}
+            active={tab === t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 text-[10px] tracking-[0.14em] uppercase border-b-2 transition-all ${tab === t ? "border-[var(--adm-fg)] text-[var(--adm-fg)]" : "border-transparent text-[var(--adm-fg4)] hover:text-[var(--adm-fg)]"}`}
-          >
-            {t}
-          </button>
+          />
         ))}
       </div>
 

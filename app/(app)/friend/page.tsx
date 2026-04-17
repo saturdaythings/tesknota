@@ -7,6 +7,8 @@ import { FragSearch } from "@/components/ui/frag-search";
 import { FragranceCell } from "@/components/ui/fragrance-cell";
 import { StatBox, StatsGrid } from "@/components/ui/stat-box";
 import { TabPill } from "@/components/ui/tab-pill";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FlaskConical, MessageCircle, Star, Users } from "lucide-react";
 import { FragDetail } from "@/components/ui/frag-detail";
 import { AccordCloud } from "@/components/ui/accord-cloud";
 import { Pagination } from "@/components/ui/pagination";
@@ -211,11 +213,7 @@ function FriendCollectionTab({
   const gridCols = 'minmax(200px,1fr) max-content max-content 180px max-content';
 
   if (sorted.length === 0) {
-    return (
-      <div className="font-sans uppercase" style={{ ...metaStyle, padding: 'var(--space-8) 0' }}>
-        No fragrances.
-      </div>
-    );
+    return <EmptyState icon={<FlaskConical size={48} />} title="No fragrances" />;
   }
 
   return (
@@ -327,11 +325,7 @@ function FriendComplimentsTab({
   const gridCols = 'minmax(180px,1fr) max-content max-content max-content';
 
   if (sorted.length === 0) {
-    return (
-      <div className="font-sans uppercase" style={{ ...metaStyle, padding: 'var(--space-8) 0' }}>
-        No compliments.
-      </div>
-    );
+    return <EmptyState icon={<MessageCircle size={48} />} title="No compliments yet" />;
   }
 
   return (
@@ -392,11 +386,7 @@ function FriendWishlistTab({
   const gridCols = 'minmax(200px,1fr) max-content 180px';
 
   if (sorted.length === 0) {
-    return (
-      <div className="font-sans uppercase" style={{ ...metaStyle, padding: 'var(--space-8) 0' }}>
-        No wishlist items.
-      </div>
-    );
+    return <EmptyState icon={<Star size={48} />} title="No wishlist items" />;
   }
 
   return (
@@ -465,11 +455,7 @@ function InCommonTab({
   const gridCols = 'minmax(200px,1fr) 180px max-content';
 
   if (sorted.length === 0) {
-    return (
-      <div className="font-sans uppercase" style={{ ...metaStyle, padding: 'var(--space-8) 0' }}>
-        No fragrances in common yet.
-      </div>
-    );
+    return <EmptyState icon={<Users size={48} />} title="No fragrances in common yet" />;
   }
 
   return (

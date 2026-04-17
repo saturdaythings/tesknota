@@ -10,6 +10,8 @@ import { FragSearch } from "@/components/ui/frag-search";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { TabPill } from "@/components/ui/tab-pill";
+import { Input } from "@/components/ui/input";
 import { FragForm } from "@/components/ui/frag-form";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
@@ -714,19 +716,6 @@ function ErrorCard({ onReset }: { onReset: () => void }) {
 
 // ── Search tab ────────────────────────────────────────────
 
-const INPUT_STYLE: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 460,
-  padding: "9px 12px",
-  border: "1px solid var(--color-sand-light)",
-  background: "var(--color-cream)",
-  fontFamily: "var(--font-sans)",
-  fontSize: "14px",
-  color: "var(--color-navy)",
-  outline: "none",
-  borderRadius: 0,
-};
-
 function SearchTab({ userId }: { userId: string }) {
   const { communityFrags } = useData();
   const [search, setSearch] = useState("");
@@ -757,13 +746,11 @@ function SearchTab({ userId }: { userId: string }) {
       {formOpen && editing && (
         <FragForm open onClose={() => setFormOpen(false)} editing={editing} forceStatus={formStatus} />
       )}
-      <input
+      <Input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search by name or house..."
-        style={INPUT_STYLE}
-        onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; }}
-        onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; }}
+        style={{ maxWidth: 460 }}
       />
       {search.trim().length >= 2 && results.length === 0 && (
         <p className="text-secondary" style={{ marginTop: "var(--space-3)" }}>No matches.</p>
@@ -797,32 +784,20 @@ function SearchTab({ userId }: { userId: string }) {
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => { setPrefillFrag(cf); setFormStatus("WANT_TO_BUY"); setFormOpen(true); }}
-                  style={{
-                    fontFamily: "var(--font-sans)", fontSize: 12, padding: "5px 12px",
-                    border: "1px solid var(--color-sand-light)", background: "transparent",
-                    color: "var(--color-navy-mid)", cursor: "pointer", borderRadius: 2,
-                    whiteSpace: "nowrap", transition: "border-color 120ms, color 120ms",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.color = "var(--color-accent)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; e.currentTarget.style.color = "var(--color-navy-mid)"; }}
                 >
                   Wishlist
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => { setPrefillFrag(cf); setFormStatus("CURRENT"); setFormOpen(true); }}
-                  style={{
-                    fontFamily: "var(--font-sans)", fontSize: 12, padding: "5px 12px",
-                    border: "1px solid var(--color-accent)", background: "transparent",
-                    color: "var(--color-accent)", cursor: "pointer", borderRadius: 2,
-                    whiteSpace: "nowrap", transition: "background 120ms",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-accent-subtle)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 >
                   Add to Collection
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -891,29 +866,14 @@ function LinkTab({ userId }: { userId: string }) {
         <FragForm open onClose={() => setFormOpen(false)} editing={editing} forceStatus={formStatus} />
       )}
       <div style={{ display: "flex", gap: 8, maxWidth: 520, marginBottom: "var(--space-4)" }}>
-        <input
+        <Input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleFetch()}
           placeholder="https://www.fragrantica.com/perfume/..."
-          style={{ ...INPUT_STYLE, maxWidth: "none", flex: 1 }}
-          onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; }}
-          onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; }}
+          className="flex-1"
         />
-        <button
-          onClick={handleFetch}
-          style={{
-            fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 500,
-            padding: "9px 16px", border: "1px solid var(--color-sand-light)",
-            background: "transparent", color: "var(--color-navy-mid)", cursor: "pointer",
-            borderRadius: 2, whiteSpace: "nowrap", transition: "border-color 120ms, color 120ms",
-            letterSpacing: "0.06em",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.color = "var(--color-accent)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; e.currentTarget.style.color = "var(--color-navy-mid)"; }}
-        >
-          Fetch
-        </button>
+        <Button variant="secondary" onClick={handleFetch}>Fetch</Button>
       </div>
 
       {result === "not-found" && (
@@ -938,32 +898,20 @@ function LinkTab({ userId }: { userId: string }) {
             {[result.communityRating ? result.communityRating + "/10" : "", result.avgPrice ? result.avgPrice.replace(/~/g, "") : ""].filter(Boolean).join(" · ")}
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => { setPrefillFrag(result as CommunityFrag); setFormStatus("WANT_TO_BUY"); setFormOpen(true); }}
-              style={{
-                fontFamily: "var(--font-sans)", fontSize: 12, padding: "5px 12px",
-                border: "1px solid var(--color-sand-light)", background: "transparent",
-                color: "var(--color-navy-mid)", cursor: "pointer", borderRadius: 2,
-                transition: "border-color 120ms, color 120ms",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.color = "var(--color-accent)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--color-sand-light)"; e.currentTarget.style.color = "var(--color-navy-mid)"; }}
             >
               Wishlist
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => { setPrefillFrag(result as CommunityFrag); setFormStatus("CURRENT"); setFormOpen(true); }}
-              style={{
-                fontFamily: "var(--font-sans)", fontSize: 12, padding: "5px 12px",
-                border: "1px solid var(--color-accent)", background: "transparent",
-                color: "var(--color-accent)", cursor: "pointer", borderRadius: 2,
-                transition: "background 120ms",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-accent-subtle)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
               Add to Collection
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -1053,37 +1001,14 @@ export default function ImportPage() {
       <Topbar title="Import" actions={<FragSearch />} />
       <PageContent maxWidth="820px">
           {/* Tabs */}
-          <div
-            style={{
-              display: "flex",
-              borderBottom: "1px solid var(--color-sand-light)",
-              marginBottom: "var(--space-6)",
-              overflowX: "auto",
-            }}
-          >
+          <div className="flex flex-wrap gap-2" style={{ marginBottom: "var(--space-6)" }}>
             {TAB_ITEMS.map((t) => (
-              <button
+              <TabPill
                 key={t.id}
+                label={t.label}
+                active={activeTab === t.id}
                 onClick={() => { setActiveTab(t.id); if (t.id !== "file") setState("idle"); }}
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: 12,
-                  fontWeight: 500,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  padding: "10px 18px",
-                  background: "transparent",
-                  border: "none",
-                  borderBottom: activeTab === t.id ? "2px solid var(--color-accent)" : "2px solid transparent",
-                  color: activeTab === t.id ? "var(--color-accent)" : "var(--color-navy-mid)",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  marginBottom: -1,
-                  transition: "color 120ms, border-color 120ms",
-                }}
-              >
-                {t.label}
-              </button>
+              />
             ))}
           </div>
 
@@ -1104,16 +1029,9 @@ export default function ImportPage() {
                 <>
                   <p className="text-secondary" style={{ marginBottom: "var(--space-6)" }}>
                     Need a template?{" "}
-                    <button
-                      onClick={downloadXLSXTemplate}
-                      style={{
-                        background: "none", border: "none", padding: 0,
-                        color: "var(--color-accent)", cursor: "pointer",
-                        textDecoration: "underline", fontSize: "inherit", fontFamily: "inherit",
-                      }}
-                    >
+                    <Button variant="ghost" size="sm" onClick={downloadXLSXTemplate}>
                       Download .xlsx template
-                    </button>
+                    </Button>
                   </p>
                   <UploadZone onFile={handleFile} />
                 </>
