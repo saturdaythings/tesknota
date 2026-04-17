@@ -41,6 +41,10 @@ const SORT_FIELD_OPTIONS = [
 
 const PRIORITY_ORDER: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
 
+/* component-internal: wishlist desktop grid */
+const WISHLIST_GRID_COLS = "minmax(240px,1fr) 100px 110px 200px 240px 260px";
+const WISHLIST_HEADERS = ["Fragrance", "Priority", "Date Added", "Accords", "Notes", ""];
+
 // ── Helpers ───────────────────────────────────────────────
 
 function addedStr(createdAt: string | null): string {
@@ -214,19 +218,67 @@ function NotesCell({ cf }: { cf: CommunityFrag | null }) {
 /* component-internal: skeleton row height */
 const SKELETON_ROW_HEIGHT = "var(--size-row-min)";
 
+function WishlistGridShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="hidden md:grid"
+      style={{ gridTemplateColumns: WISHLIST_GRID_COLS, columnGap: "var(--space-10)" }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "subgrid",
+          gridColumn: "1 / -1",
+          background: "var(--color-cream-dark)",
+          borderBottom: "1px solid var(--color-row-divider)",
+          height: "var(--space-10)",
+          alignItems: "center",
+        }}
+      >
+        {WISHLIST_HEADERS.map((h, i) => (
+          <div
+            key={i}
+            className="font-sans uppercase"
+            style={{
+              padding: "0 var(--space-4)",
+              fontSize: "var(--text-xxs)",
+              fontWeight: "var(--font-weight-medium)",
+              letterSpacing: "var(--tracking-md)",
+              color: "var(--color-navy)",
+            }}
+          >
+            {h}
+          </div>
+        ))}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function RowSkeleton() {
   return (
-    <tr>
-      <td style={{ padding: "0 var(--space-4)", height: SKELETON_ROW_HEIGHT }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "subgrid",
+        gridColumn: "1 / -1",
+        alignItems: "center",
+        minHeight: SKELETON_ROW_HEIGHT,
+        borderBottom: "1px solid var(--color-row-divider)",
+        background: "var(--color-row-hover)",
+      }}
+    >
+      <div style={{ padding: "0 var(--space-4)" }}>
         <Skeleton className="h-4 w-36 mb-1" />
         <Skeleton className="h-3 w-20" />
-      </td>
-      <td style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-4 w-14" /></td>
-      <td style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-4 w-16" /></td>
-      <td style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-4 w-28" /></td>
-      <td style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-10 w-32" /></td>
-      <td style={{ padding: "0 var(--space-4)", width: "180px" }} />
-    </tr>
+      </div>
+      <div style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-4 w-14" /></div>
+      <div style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-4 w-16" /></div>
+      <div style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-4 w-28" /></div>
+      <div style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-10 w-32" /></div>
+      <div />
+    </div>
   );
 }
 
@@ -538,20 +590,9 @@ function WishlistInner() {
 
         {/* Content */}
         {!isLoaded ? (
-          <div className="hidden md:block">
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: "var(--color-cream-dark)", height: "40px" }}>
-                  {["FRAGRANCE", "PRIORITY", "DATE ADDED", "ACCORDS", "NOTES", ""].map((h) => (
-                    <th key={h} style={{ padding: "0 var(--space-4)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xxs)", fontWeight: "var(--font-weight-medium)", color: "var(--color-navy)", letterSpacing: "var(--tracking-md)", textTransform: "uppercase", textAlign: "left" }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>{Array.from({ length: 5 }).map((_, i) => <RowSkeleton key={i} />)}</tbody>
-            </table>
-          </div>
+          <WishlistGridShell>
+            {Array.from({ length: 5 }).map((_, i) => <RowSkeleton key={i} />)}
+          </WishlistGridShell>
         ) : wishlist.length === 0 ? (
           <EmptyState
             icon={<Heart size={48} />}
@@ -577,107 +618,64 @@ function WishlistInner() {
           />
         ) : (
           <>
-            {/* Desktop table */}
-            <div className="hidden md:block">
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "var(--color-cream-dark)", height: "40px", borderBottom: "1px solid var(--color-row-divider)" }}>
-                    {[
-                      { label: "FRAGRANCE", flex: true },
-                      { label: "PRIORITY", w: 100 },
-                      { label: "DATE ADDED", w: 110 },
-                      { label: "ACCORDS", w: 200 },
-                      { label: "NOTES", w: 240 },
-                      { label: "", w: 260 },
-                    ].map(({ label, flex, w }) => (
-                      <th
-                        key={label}
-                        style={{
-                          padding: "0 var(--space-4)",
-                          fontFamily: "var(--font-sans)",
-                          fontSize: "var(--text-xxs)",
-                          fontWeight: "var(--font-weight-medium)",
-                          color: "var(--color-navy)",
-                          letterSpacing: "var(--tracking-md)",
-                          textTransform: "uppercase",
-                          textAlign: "left",
-                          width: flex ? undefined : `${w}px`,
-                          minWidth: flex ? "240px" : undefined,
-                        }}
-                      >
-                        {label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginated.map((frag) => {
-                    const cf = cfMap.get(frag.id) ?? null;
-                    const accords = cf?.fragranceAccords?.slice(0, 4) ?? [];
-                    const extra = (cf?.fragranceAccords?.length ?? 0) > 4 ? (cf!.fragranceAccords.length - 4) : 0;
-                    const added = addedStr(frag.createdAt);
-
-                    return (
-                      <tr
-                        key={frag.id}
-                        onClick={() => setDetailFrag(frag)}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = "var(--color-row-hover)"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = "transparent"; }}
-                        style={{
-                          minHeight: "var(--size-row-min)",
-                          background: "transparent",
-                          borderBottom: "1px solid var(--color-row-divider)",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {/* FRAGRANCE */}
-                        <td style={{ padding: "var(--space-3) var(--space-4)", minWidth: "240px" }}>
-                          <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
-                        </td>
-
-                        {/* PRIORITY */}
-                        <td style={{ padding: "0 var(--space-4)", width: "100px" }}>
-                          <PriorityBadge priority={frag.wishlistPriority} />
-                        </td>
-
-                        {/* DATE ADDED */}
-                        <td style={{ padding: "0 var(--space-4)", width: "110px" }}>
-                          <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-ui)", color: "var(--color-navy)" }}>{added || "—"}</span>
-                        </td>
-
-                        {/* ACCORDS */}
-                        <td style={{ padding: "0 var(--space-4)", width: "200px" }}>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "3px" }}>
-                            {accords.map((a) => (
-                              <span key={a} style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", whiteSpace: "nowrap" }}>
-                                {a}
-                              </span>
-                            ))}
-                            {extra > 0 && (
-                              <span style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "rgba(30,45,69,0.8)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>
-                                +{extra} more
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* NOTES */}
-                        <td style={{ padding: "var(--space-3) var(--space-4)", width: "240px" }}>
-                          <NotesCell cf={cf} />
-                        </td>
-
-                        {/* ACTIONS */}
-                        <td style={{ padding: "0 var(--space-2)", width: "260px" }}>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ display: "flex", justifyContent: "flex-end" }}>
-                            <RowActions frag={frag} onMoveToCollection={openMoveToCollection} onRemove={handleRemove} />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {/* Desktop grid */}
+            <WishlistGridShell>
+              {paginated.map((frag) => {
+                const cf = cfMap.get(frag.id) ?? null;
+                const accords = cf?.fragranceAccords?.slice(0, 4) ?? [];
+                const extra = (cf?.fragranceAccords?.length ?? 0) > 4 ? (cf!.fragranceAccords.length - 4) : 0;
+                const added = addedStr(frag.createdAt);
+                return (
+                  <div
+                    key={frag.id}
+                    onClick={() => setDetailFrag(frag)}
+                    className="cursor-pointer transition-colors duration-100"
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "subgrid",
+                      gridColumn: "1 / -1",
+                      alignItems: "center",
+                      minHeight: "var(--size-row-min)",
+                      borderBottom: "1px solid var(--color-row-divider)",
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "var(--color-row-hover)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+                  >
+                    <div style={{ padding: "var(--space-3) var(--space-4)", minWidth: 0 }}>
+                      <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
+                    </div>
+                    <div style={{ padding: "0 var(--space-4)" }}>
+                      <PriorityBadge priority={frag.wishlistPriority} />
+                    </div>
+                    <div style={{ padding: "0 var(--space-4)" }}>
+                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-ui)", color: "var(--color-navy)" }}>{added || "—"}</span>
+                    </div>
+                    <div style={{ padding: "0 var(--space-4)" }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "3px" }}>
+                        {accords.map((a) => (
+                          <span key={a} style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "var(--color-navy)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", whiteSpace: "nowrap" }}>
+                            {a}
+                          </span>
+                        ))}
+                        {extra > 0 && (
+                          <span style={{ display: "inline-flex", alignItems: "center", padding: "2px 7px", borderRadius: "100px", background: "var(--color-sand-light)", color: "rgba(30,45,69,0.8)", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)" }}>
+                            +{extra} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ padding: "var(--space-3) var(--space-4)" }}>
+                      <NotesCell cf={cf} />
+                    </div>
+                    <div style={{ padding: "0 var(--space-2)" }} onClick={(e) => e.stopPropagation()}>
+                      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                        <RowActions frag={frag} onMoveToCollection={openMoveToCollection} onRemove={handleRemove} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </WishlistGridShell>
 
             {/* Pagination */}
             <Pagination
