@@ -107,50 +107,53 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto pb-2">
           {navSections.map((section) => (
-            <div key={section.label} className="mt-6">
+            <div key={section.label} style={{ marginTop: 'var(--space-5)' }}>
               <div
-                className="px-5 mb-1 font-sans font-medium uppercase"
+                className="px-5 font-sans font-medium uppercase"
                 style={{
                   fontSize: 'var(--text-xs)',
                   color: 'var(--color-sand-label)',
                   letterSpacing: 'var(--tracking-sm)',
                   lineHeight: 'var(--leading-none)',
+                  marginBottom: 'var(--space-2)',
                 }}
               >
                 {section.label}
               </div>
-              {section.items.map((item) => {
-                const isActive = item.exact
-                  ? pathname === item.href
-                  : pathname === item.href || pathname.startsWith(item.href + '/');
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={close}
-                    className="flex items-center transition-colors duration-100"
-                    style={{
-                      height: 'var(--space-10)',
-                      paddingLeft: 'var(--space-5)',
-                      paddingRight: 'var(--space-5)',
-                      borderLeft: isActive
-                        ? '3px solid var(--color-cream)'
-                        : '3px solid transparent',
-                      background: isActive ? 'var(--color-white-subtle)' : 'transparent',
-                      color: isActive
-                        ? 'var(--color-cream)'
-                        : 'var(--color-sand-muted)',
-                      fontSize: 'var(--text-xs)',
-                      letterSpacing: 'var(--tracking-xs)',
-                      fontFamily: 'var(--font-sans)',
-                    }}
-                  >
-                    <span className="flex-1 truncate">{item.label}</span>
-                    {item.hasNewActivity && <LiveDot />}
-                    {item.count !== undefined && <CountBadge count={item.count} active={isActive} />}
-                  </Link>
-                );
-              })}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+                {section.items.map((item) => {
+                  const isActive = item.exact
+                    ? pathname === item.href
+                    : pathname === item.href || pathname.startsWith(item.href + '/');
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={close}
+                      className="flex items-center transition-colors duration-100"
+                      style={{
+                        height: 'var(--space-8)',
+                        paddingLeft: 'var(--space-5)',
+                        paddingRight: 'var(--space-5)',
+                        borderLeft: isActive
+                          ? '3px solid var(--color-cream)'
+                          : '3px solid transparent',
+                        background: isActive ? 'var(--color-white-subtle)' : 'transparent',
+                        color: isActive
+                          ? 'var(--color-cream)'
+                          : 'var(--color-sand-muted)',
+                        fontSize: 'var(--text-xs)',
+                        letterSpacing: 'var(--tracking-xs)',
+                        fontFamily: 'var(--font-sans)',
+                      }}
+                    >
+                      <span className="flex-1 truncate">{item.label}</span>
+                      {item.hasNewActivity && <LiveDot />}
+                      {item.count !== undefined && <CountBadge count={item.count} active={isActive} />}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </nav>
