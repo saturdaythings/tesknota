@@ -85,6 +85,7 @@
   /* --- Tracking (letter-spacing) --- */
   --tracking-xs: 0.04em;
      --tracking-sm: 0.08em;
+     --tracking-wide: 0.08em;
      --tracking-md: 0.10em;
      --tracking-lg: 0.12em;
      --tracking-xl: 0.22em;

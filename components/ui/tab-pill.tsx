@@ -2,12 +2,55 @@
 
 interface TabPillProps {
   label: string;
+  sublabel?: string;
   count?: number;
   active: boolean;
   onClick: () => void;
+  variant?: "default" | "underline";
 }
 
-export function TabPill({ label, count, active, onClick }: TabPillProps) {
+export function TabPill({ label, sublabel, count, active, onClick, variant = "default" }: TabPillProps) {
+  if (variant === "underline") {
+    return (
+      <button
+        onClick={onClick}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: "var(--space-1)",
+          padding: "var(--space-3) var(--space-4) var(--space-3)",
+          background: active ? "var(--color-cream-dark)" : "transparent",
+          borderBottom: active ? "2px solid var(--color-navy)" : "2px solid transparent",
+          cursor: "pointer",
+          transition: "background 150ms, border-color 150ms",
+        }}
+      >
+        <span style={{
+          fontFamily: "var(--font-serif)",
+          fontStyle: "italic",
+          fontSize: "var(--text-note)",
+          color: "var(--color-navy)",
+          lineHeight: 1.2,
+        }}>
+          {label}
+        </span>
+        {sublabel && (
+          <span style={{
+            fontFamily: "var(--font-sans)",
+            fontStyle: "normal",
+            fontSize: "var(--text-label)",
+            letterSpacing: "var(--tracking-wide)",
+            color: "var(--color-meta-text)",
+            textTransform: "uppercase",
+          }}>
+            {sublabel}
+          </span>
+        )}
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={onClick}
