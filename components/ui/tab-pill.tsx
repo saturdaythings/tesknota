@@ -20,9 +20,9 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
           fontWeight: 400,
           padding: 'var(--space-2) var(--space-4)',
           borderRadius: 'var(--radius-sm)',
-          background: active ? 'var(--color-navy)' : 'var(--color-cream-dark)',
-          color: active ? 'var(--color-cream)' : 'var(--color-navy)',
-          border: 'none',
+          background: active ? 'var(--color-cream-dark)' : 'transparent',
+          color: 'var(--color-navy)',
+          border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-row-divider)',
           whiteSpace: 'nowrap',
         }}
       >
@@ -82,8 +82,8 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
         letterSpacing: '0.08em',
         padding: '6px 12px',
         borderRadius: 'var(--radius-md)',
-        background: active ? 'var(--color-navy)' : 'transparent',
-        color: active ? 'var(--color-cream)' : 'var(--color-navy)',
+        background: active ? 'var(--color-cream-dark)' : 'transparent',
+        color: 'var(--color-navy)',
         border: active ? '1px solid var(--color-navy)' : '1px solid var(--color-row-divider)',
       }}
     >
