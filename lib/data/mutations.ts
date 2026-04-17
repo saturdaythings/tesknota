@@ -54,6 +54,7 @@ function fragToDb(f: UserFragrance, resolvedFragId: string | null): Record<strin
     sizes: f.sizes,
     type: f.type ?? null,
     where_bought: f.whereBought ?? null,
+    purchase_date: f.purchaseDate ?? null,
     purchase_month: f.purchaseMonth ?? null,
     purchase_year: f.purchaseYear ?? null,
     purchase_price: f.purchasePrice ?? null,
