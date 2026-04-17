@@ -156,7 +156,7 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
           ✓ On Wishlist
         </div>
       ) : (
-        <Button variant="secondary" size="sm" onClick={onAdd} style={{ width: "100%" }}>
+        <Button variant="primary" size="sm" onClick={onAdd} style={{ width: "100%" }}>
           WISHLIST
         </Button>
       )}
@@ -314,8 +314,8 @@ function RowActions({
 }) {
   return (
     <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", justifyContent: "flex-end" }} onClick={(e) => e.stopPropagation()}>
-      <Button variant="ghost" size="sm" onClick={() => onMoveToCollection(frag)}>Move to Collection</Button>
-      <Button variant="ghost" size="sm" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
+      <Button variant="secondary" size="sm" onClick={() => onMoveToCollection(frag)}>Move to Collection</Button>
+      <Button variant="destructive" size="sm" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
     </div>
   );
 }
@@ -370,7 +370,7 @@ function WishlistMobileCard({
         <Button variant="primary" size="sm" onClick={() => onMoveToCollection(frag)} style={{ flex: 1 }}>
           Move to Collection
         </Button>
-        <Button variant="ghost" size="sm" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
+        <Button variant="destructive" size="sm" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
       </div>
     </div>
   );
