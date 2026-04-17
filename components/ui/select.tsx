@@ -23,6 +23,8 @@ interface SelectProps {
    * "auto"  — sizes to the longest option label; never wraps regardless of option text length
    */
   size?: 'full' | 'auto';
+  /** Replace the default chevron with a custom icon node. The node is rendered as-is (no rotation on open). */
+  icon?: React.ReactNode;
 }
 
 const triggerBase =
@@ -42,6 +44,7 @@ export function Select({
   className,
   id: idProp,
   size = 'full',
+  icon,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -161,21 +164,23 @@ export function Select({
           <span style={{ color: selectedOption ? 'var(--color-navy)' : 'var(--color-navy-mid)', whiteSpace: 'nowrap' }}>
             {selectedOption?.label ?? placeholder}
           </span>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-            style={{
-              color: 'var(--color-meta-text)',
-              transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 150ms',
-              flexShrink: 0,
-            }}
-          >
-            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          {icon ?? (
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+              style={{
+                color: 'var(--color-meta-text)',
+                transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 150ms',
+                flexShrink: 0,
+              }}
+            >
+              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
         </button>
       </div>
 

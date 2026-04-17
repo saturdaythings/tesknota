@@ -16,6 +16,15 @@ interface SortControlProps {
   onToggleDirection: () => void;
 }
 
+function SortSelectIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ color: 'var(--color-meta-text)', flexShrink: 0 }}>
+      <line x1="8" y1="2" x2="8" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M5 8L8 13L11 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function SortArrowAsc() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -37,7 +46,7 @@ function SortArrowDesc() {
 export function SortControl({ field, direction, options, onField, onToggleDirection }: SortControlProps) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-1)" }}>
-      <Select options={options} value={field} onChange={onField} size="auto" />
+      <Select options={options} value={field} onChange={onField} size="auto" icon={<SortSelectIcon />} />
       <Button
         variant="icon"
         size="sm"
