@@ -80,7 +80,7 @@
      --text-xl: 26px;
      --text-logo: 28px;
      --text-2xl: 36px;
-     --text-hero: 56px;
+     --text-hero: 48px;
 
   /* --- Tracking (letter-spacing) --- */
   --tracking-xs: 0.04em;
@@ -134,6 +134,7 @@
      --color-navy-backdrop: rgba(30, 45, 69, 0.50);
 
   /* --- Row / list tokens --- */
+  --color-navy-tint: rgba(45, 74, 107, 0.08);
   --color-row-divider: rgba(30, 45, 69, 0.15);
      --color-row-hover: rgba(232, 224, 208, 0.30);
      --color-meta-text: rgba(30, 45, 69, 0.80);

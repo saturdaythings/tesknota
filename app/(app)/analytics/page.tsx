@@ -286,7 +286,7 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
       <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "var(--text-xs)", color: "var(--color-navy)", textTransform: "uppercase", letterSpacing: "var(--tracking-lg)", marginBottom: "8px" }}>
         {label}
       </div>
-      <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "48px", lineHeight: 1, color: "var(--color-navy)", marginBottom: "8px" }}>
+      <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "var(--text-hero)", lineHeight: 1, color: "var(--color-navy)", marginBottom: "8px" }}>
         {value}
       </div>
       <div style={{ fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: "var(--text-sm)", color: "var(--color-navy)", minHeight: "20px" }}>
@@ -547,7 +547,7 @@ export default function AnalyticsPage() {
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "var(--color-navy)" }} axisLine={false} tickLine={false} width={28} />
                   <Tooltip content={<GrowthTooltip />} />
-                  <Area type="monotone" dataKey="count" fill="rgba(45,74,107,0.08)" stroke="var(--color-accent)" strokeWidth={2} dot={{ r: 3, fill: "var(--color-accent)" }} />
+                  <Area type="monotone" dataKey="count" fill="var(--color-navy-tint)" stroke="var(--color-accent)" strokeWidth={2} dot={{ r: 3, fill: "var(--color-accent)" }} />
                 </AreaChart>
               </ResponsiveContainer>
             )}

@@ -184,7 +184,7 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
         className="font-serif italic"
         style={{
           fontWeight: 400,
-          fontSize: "48px", /* component-internal: no token between --text-page-title (24px) and --text-hero (56px) */
+          fontSize: "var(--text-hero)",
           lineHeight: 1,
           color: "var(--color-navy)",
           marginBottom: "var(--space-2)",

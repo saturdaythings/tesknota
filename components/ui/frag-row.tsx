@@ -19,7 +19,7 @@ export function StatusBadge({ status }: { status: FragranceStatus }) {
   const style = STATUS_STYLE[status] ?? { color: "var(--color-notes-text)" };
   return (
     <span
-      className="font-[var(--font-sans)] text-xs tracking-[0.04em] px-2 py-[2px] whitespace-nowrap border"
+      className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-sm)] px-2 py-[2px] whitespace-nowrap border"
       style={{ color: style.color, borderColor: style.color }}
     >
       {STATUS_LABELS[status] ?? status}
@@ -60,7 +60,7 @@ export function FragRow({
       <td className="px-4 py-3">
         <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
         {frag.isDupe && (
-          <span className="font-[var(--font-sans)] uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.06em', color: 'var(--color-notes-text)' }}>
+          <span className="font-[var(--font-sans)] uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-notes-text)' }}>
             dupe
           </span>
         )}
