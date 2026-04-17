@@ -146,6 +146,7 @@ function CollectionInner() {
 
   const rawSort = searchParams.get('sort');
   const { field: sortField, dir: sortDir } = parseSortKey(rawSort);
+  const filterParam = searchParams.get('filter');
 
   const [search, setSearch] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -205,6 +206,9 @@ function CollectionInner() {
 
   const filtered = useMemo(() => {
     let list = myFrags;
+    if (filterParam === 'missing') {
+      list = list.filter((f) => !f.personalRating || !f.house || !f.type);
+    }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
@@ -226,7 +230,7 @@ function CollectionInner() {
     }
     if (houseFilter.length > 0) list = list.filter((f) => houseFilter.includes(f.house));
     return applySort(list, sortField, sortDir, compMap);
-  }, [myFrags, search, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, compMap, communityFrags]);
+  }, [myFrags, search, filterParam, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, compMap, communityFrags]);
 
   const filtersActive =
     accordFilter.length > 0 ||
