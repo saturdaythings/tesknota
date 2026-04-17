@@ -5,6 +5,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { FragSearch } from "@/components/ui/frag-search";
 import { SectionHeader } from "@/components/ui/section-header";
+import { Button } from "@/components/ui/button";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { STATUS_LABELS } from "@/types";
@@ -59,70 +60,57 @@ export default function SettingsPage() {
 
         <SectionHeader title="Account" />
         {user && (
-          <div className="border border-[var(--b2)] bg-[var(--off)] mb-4">
-            <div className="px-5 py-4 border-b border-[var(--b1)]">
-              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-1">
+          <div className="border border-[var(--color-sand-light)] bg-[var(--color-cream-dark)] mb-4">
+            <div className="px-5 py-4 border-b border-[var(--color-cream-dark)]">
+              <div className="font-mono text-xs text-[var(--color-meta-text)] tracking-[0.1em] uppercase mb-1">
                 Name
               </div>
-              <div className="font-[var(--serif)] text-lg text-[var(--ink)]">
+              <div className="font-serif italic text-lg text-[var(--color-navy)]">
                 {user.name}
               </div>
             </div>
             <div className="px-5 py-4">
-              <div className="font-[var(--mono)] text-xs text-[var(--ink3)] tracking-[0.1em] uppercase mb-1">
+              <div className="font-mono text-xs text-[var(--color-meta-text)] tracking-[0.1em] uppercase mb-1">
                 User ID
               </div>
-              <div className="font-[var(--mono)] text-xs text-[var(--ink4)] break-all">
+              <div className="font-mono text-xs text-[var(--color-notes-text)] break-all">
                 {user.id}
               </div>
             </div>
           </div>
         )}
 
-        <button
-          onClick={handleSignOut}
-          className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--rose-tk)] hover:text-[var(--rose-tk)] transition-colors mb-10"
-        >
+        <Button variant="destructive" onClick={handleSignOut} className="mb-10">
           Sign out
-        </button>
+        </Button>
 
         <SectionHeader title="Data" />
-        <div className="border border-[var(--b2)] bg-[var(--off)] mb-6">
-          <div className="px-5 py-4 border-b border-[var(--b1)]">
-            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">
+        <div className="border border-[var(--color-sand-light)] bg-[var(--color-cream-dark)] mb-6">
+          <div className="px-5 py-4 border-b border-[var(--color-cream-dark)]">
+            <div className="font-sans text-sm text-[var(--color-navy)] mb-1">
               Export your data
             </div>
-            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+            <div className="font-mono text-xs text-[var(--color-meta-text)]">
               Downloads your fragrances and compliment history as a CSV file.
             </div>
           </div>
           <div className="px-5 py-4">
-            <button
-              onClick={exportCSV}
-              className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-            >
-              Export CSV
-            </button>
+            <Button variant="secondary" onClick={exportCSV}>Export CSV</Button>
           </div>
         </div>
 
         <SectionHeader title="Admin" />
-        <div className="border border-[var(--b2)] bg-[var(--off)]">
-          <div className="px-5 py-4 border-b border-[var(--b1)]">
-            <div className="font-[var(--body)] text-sm text-[var(--ink)] mb-1">
+        <div className="border border-[var(--color-sand-light)] bg-[var(--color-cream-dark)]">
+          <div className="px-5 py-4 border-b border-[var(--color-cream-dark)]">
+            <div className="font-sans text-sm text-[var(--color-navy)] mb-1">
               System dashboard
             </div>
-            <div className="font-[var(--mono)] text-xs text-[var(--ink3)]">
+            <div className="font-mono text-xs text-[var(--color-meta-text)]">
               API spend, usage analytics, error logs, and data audit.
             </div>
           </div>
           <div className="px-5 py-4">
-            <button
-              onClick={() => router.push("/admin")}
-              className="font-[var(--mono)] text-xs tracking-[0.08em] px-4 py-[9px] border border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)] transition-colors"
-            >
-              Open Admin
-            </button>
+            <Button variant="secondary" onClick={() => router.push("/admin")}>Open Admin</Button>
           </div>
         </div>
 
