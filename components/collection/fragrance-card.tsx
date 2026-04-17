@@ -53,7 +53,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         <span
           style={{
             fontFamily: "var(--font-serif)",
-            fontSize: "18px",
+            fontSize: "var(--text-note)",
             fontStyle: "italic",
             color: "var(--color-navy)",
             fontWeight: 400,
@@ -107,11 +107,11 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
       <div
         style={{
           fontFamily: "var(--font-sans)",
-          fontSize: "var(--text-xs)",
+          fontSize: "var(--text-label)",
           fontWeight: 400,
-          color: "var(--color-navy)",
+          color: "var(--color-meta-text)",
           textTransform: "uppercase",
-          letterSpacing: "var(--tracking-sm)",
+          letterSpacing: "var(--tracking-wide)",
           marginBottom: "10px",
         }}
       >
