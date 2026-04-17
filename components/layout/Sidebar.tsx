@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useMobileNav } from '@/lib/mobile-nav-context';
 import { LogOut } from '@/components/ui/Icons';
@@ -72,7 +72,15 @@ function PendingDot() {
 
 export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { open, close } = useMobileNav();
+
+  const initials = userName
+    .split(' ')
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase() || '?';
 
   return (
     <>
@@ -185,12 +193,33 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           className="flex-shrink-0 px-5 py-5 border-t"
           style={{ borderColor: 'var(--color-white-subtle)' }}
         >
-          <div
-            className="font-sans mb-1 truncate"
-            style={{ fontSize: 'var(--text-ui)', color: 'var(--color-cream)' }}
+          <button
+            onClick={() => { close(); router.push('/profile'); }}
+            className="flex items-center gap-3 w-full bg-transparent border-none cursor-pointer p-0 mb-3 text-left transition-opacity hover:opacity-80"
           >
-            {userName}
-          </div>
+            <div
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--color-white-subtle)',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <span className="font-serif italic" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-cream)' }}>
+                {initials}
+              </span>
+            </div>
+            <span
+              className="font-sans truncate"
+              style={{ fontSize: 'var(--text-ui)', color: 'var(--color-cream)' }}
+            >
+              {userName}
+            </span>
+          </button>
           <button
             onClick={onSignOut}
             className="flex items-center gap-1.5 font-sans font-medium uppercase transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
