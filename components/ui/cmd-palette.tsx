@@ -25,6 +25,7 @@ interface FlowStep {
   optional?: boolean;
   options?: SelectOption[];
   multiOptions?: string[];
+  asPills?: boolean;
   skipIf?: (answers: Record<string, unknown>) => boolean;
 }
 
@@ -94,7 +95,7 @@ const FRAG_ADD_STEPS: FlowStep[] = [
   { id: "search", type: "search", label: "Which fragrance?", hint: "Search by name or house" },
   { id: "status", type: "select", label: "Status?", options: STATUS_OPTIONS },
   { id: "personalRating", type: "select", label: "Your personal rating?", options: RATING_OPTIONS, skipIf: isWishlist, optional: true },
-  { id: "statusRating", type: "select", label: "How do you feel about it?", options: STATUS_RATING_OPTIONS, skipIf: isWishlist, optional: true },
+  { id: "statusRating", type: "select", label: "How do you feel about it?", options: STATUS_RATING_OPTIONS, asPills: true, skipIf: isWishlist, optional: true },
   { id: "sizes", type: "multiselect", label: "Size owned", multiOptions: SIZE_OPTIONS, skipIf: isWishlist, optional: true },
   { id: "type", type: "select", label: "Type / concentration?", options: TYPE_OPTIONS, optional: true },
   { id: "wishlistPriority", type: "select", label: "Priority?", options: PRIORITY_OPTIONS, skipIf: (a) => !isWishlist(a), optional: true },
@@ -584,7 +585,7 @@ export function CmdPalette() {
             )}
 
             {/* Select step */}
-            {step.type === "select" && step.options && (
+            {step.type === "select" && step.options && !step.asPills && (
               <div className="flex flex-col gap-1">
                 {step.options.map((opt) => (
                   <Button
@@ -596,6 +597,21 @@ export function CmdPalette() {
                   >
                     {opt.l}
                   </Button>
+                ))}
+              </div>
+            )}
+
+            {/* Select step — pill variant */}
+            {step.type === "select" && step.options && step.asPills && (
+              <div className="flex flex-wrap gap-2">
+                {step.options.map((opt) => (
+                  <TabPill
+                    key={opt.v}
+                    label={opt.l}
+                    variant="selector"
+                    active={pal.answers[step.id] === opt.v}
+                    onClick={() => submitSelect(opt.v)}
+                  />
                 ))}
               </div>
             )}

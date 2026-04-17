@@ -6,10 +6,31 @@ interface TabPillProps {
   count?: number;
   active: boolean;
   onClick: () => void;
-  variant?: "default" | "underline";
+  variant?: "default" | "underline" | "selector";
 }
 
 export function TabPill({ label, sublabel, count, active, onClick, variant = "default" }: TabPillProps) {
+  if (variant === "selector") {
+    return (
+      <button
+        onClick={onClick}
+        className="font-sans cursor-pointer transition-colors duration-100 flex-shrink-0"
+        style={{
+          fontSize: 'var(--text-sm)',
+          fontWeight: 400,
+          padding: 'var(--space-2) var(--space-4)',
+          borderRadius: 'var(--radius-sm)',
+          background: active ? 'var(--color-navy)' : 'var(--color-cream-dark)',
+          color: active ? 'var(--color-cream)' : 'var(--color-navy)',
+          border: 'none',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {label}
+      </button>
+    );
+  }
+
   if (variant === "underline") {
     return (
       <button
