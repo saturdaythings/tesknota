@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
@@ -64,6 +64,25 @@ const LAYOUT_TOKENS = [
   { token: '--topbar-px-mobile', label: 'Topbar PX Mobile', usage: 'Topbar horizontal padding (mobile)' },
   { token: '--page-margin',      label: 'Page Margin',      usage: 'PageContent horizontal padding (left + right); right edge of Topbar actions' },
 ];
+
+// ── Section manifest (drives anchor nav) ──────────────────
+
+const DESIGN_SECTIONS = [
+  { id: 'brand-colors',    label: 'Brand Colors'  },
+  { id: 'opacity',         label: 'Opacity'        },
+  { id: 'row-tokens',      label: 'Row Tokens'     },
+  { id: 'type-scale',      label: 'Type Scale'     },
+  { id: 'spacing',         label: 'Spacing'        },
+  { id: 'layout',          label: 'Layout'         },
+  { id: 'frag-cell',       label: 'Frag Cell'      },
+  { id: 'buttons',         label: 'Buttons'        },
+  { id: 'filter-pills',    label: 'Filter Pills'   },
+  { id: 'select',          label: 'Select'         },
+  { id: 'row-list',        label: 'Row List'       },
+  { id: 'sidebar',         label: 'Sidebar'        },
+  { id: 'topbar',          label: 'Topbar'         },
+  { id: 'login',           label: 'Login'          },
+] as const;
 
 // ── Mode context ──────────────────────────────────────────
 
@@ -457,9 +476,9 @@ function ExpandableToken({ token, defaultValue, expanded, onToggle, onDraftChang
 
 // ── Layout helpers ─────────────────────────────────────────
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-10">
+    <div id={id} className="mb-10" style={{ scrollMarginTop: 'var(--space-12)' }}>
       <div className="font-sans font-normal uppercase mb-4" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.08em', color: 'var(--color-navy-mid)', borderBottom: '1px solid var(--color-row-divider)', paddingBottom: 'var(--space-2)' }}>
         {title}
       </div>
@@ -518,6 +537,26 @@ export default function DesignSystemPage() {
   const [mode, setMode] = useState<'reference' | 'edit'>('reference');
   const [expandedToken, setExpandedToken] = useState<string | null>(null);
   const [liveColorValues, setLiveColorValues] = useState<Record<string, string>>({});
+  const [activeSection, setActiveSection] = useState<string>(DESIGN_SECTIONS[0].id);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length > 0) setActiveSection(visible[0].target.id);
+      },
+      { rootMargin: '-10% 0px -80% 0px', threshold: 0 },
+    );
+    DESIGN_SECTIONS.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToSection = useCallback((id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   function colorValue(token: string) {
     return liveColorValues[token] ?? computed[token] ?? '';
@@ -536,7 +575,7 @@ export default function DesignSystemPage() {
       <Topbar title="Design System" actions={<FragSearch />} />
       <PageContent maxWidth="920px">
         <DesignModeContext.Provider value={mode}>
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-6">
           <div className="flex gap-2">
             <TabPill label="Reference" active={mode === 'reference'} onClick={() => { setMode('reference'); setExpandedToken(null); }} />
             <TabPill label="Edit" active={mode === 'edit'} onClick={() => setMode('edit')} />
@@ -547,9 +586,40 @@ export default function DesignSystemPage() {
             </span>
           )}
         </div>
+
+        {/* Sticky section anchor nav */}
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
+            background: 'var(--color-cream)',
+            borderBottom: '1px solid var(--color-row-divider)',
+            marginLeft: 'calc(-1 * var(--page-margin))',
+            marginRight: 'calc(-1 * var(--page-margin))',
+            paddingLeft: 'var(--page-margin)',
+            paddingRight: 'var(--page-margin)',
+            paddingTop: 'var(--space-3)',
+            paddingBottom: 'var(--space-3)',
+            marginBottom: 'var(--space-6)',
+            overflowX: 'auto',
+          }}
+        >
+          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'nowrap' }}>
+            {DESIGN_SECTIONS.map(({ id, label }) => (
+              <TabPill
+                key={id}
+                label={label}
+                active={activeSection === id}
+                onClick={() => scrollToSection(id)}
+              />
+            ))}
+          </div>
+        </div>
+
         <HardcodeChecker>
 
-          <Section title="Brand Colors">
+          <Section id="brand-colors" title="Brand Colors">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {BRAND_COLORS.map((c) => (
                 <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)} onDraftChange={trackColor(c.token)}>
@@ -559,7 +629,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Opacity Variants">
+          <Section id="opacity" title="Opacity Variants">
             <Note>Used on navy backgrounds — sidebar, login page, topbar search.</Note>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {OPACITY_COLORS.map((c) => (
@@ -570,7 +640,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Row / List Tokens">
+          <Section id="row-tokens" title="Row / List Tokens">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
               {ROW_COLORS.map((c) => (
                 <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)} onDraftChange={trackColor(c.token)}>
@@ -580,7 +650,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Type Scale">
+          <Section id="type-scale" title="Type Scale">
             <Note>Cormorant Garamond (serif, always italic) · Inter (sans, always upright). Never swap.</Note>
             <div style={{ marginTop: 'var(--space-4)' }}>
               {TYPE_TOKENS.map(({ token, label, role, font, italic }) => (
@@ -603,7 +673,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Spacing (4px grid)">
+          <Section id="spacing" title="Spacing (4px grid)">
             <div className="flex flex-col" style={{ gap: 'var(--space-2)' }}>
               {SPACE_TOKENS.map((token) => {
                 const val = computed[token] ?? '';
@@ -621,7 +691,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Layout Tokens">
+          <Section id="layout" title="Layout Tokens">
             <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
               {LAYOUT_TOKENS.map(({ token, label, usage }) => (
                 <ExpandableToken key={token} token={token} defaultValue={computed[token] ?? ''} expanded={expandedToken === token} onToggle={() => toggle(token)}>
@@ -635,7 +705,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Fragrance Cell — fragrance-cell.tsx">
+          <Section id="frag-cell" title="Fragrance Cell — fragrance-cell.tsx">
             <Note>Col 1 on every compliment row. Name = --text-lg serif italic · House = --text-xs sans uppercase.</Note>
             <div style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-4) 0' }}>
               <FragranceCell name="Replica — Coffee Breeze" house="Maison Margiela" type="Eau de Parfum" secondary="Baccarat Rouge 540" />
@@ -645,7 +715,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Buttons — button.tsx">
+          <Section id="buttons" title="Buttons — button.tsx">
             <Note>Never use bare button with inline styles.</Note>
             <Row label="variant=primary">
               <div className="flex items-center gap-3 flex-wrap">
@@ -661,7 +731,7 @@ export default function DesignSystemPage() {
             </Row>
           </Section>
 
-          <Section title="Filter Pills — tab-pill.tsx">
+          <Section id="filter-pills" title="Filter Pills — tab-pill.tsx">
             <Note>Relation tabs on compliments page. Active = navy bg + cream text. Inactive = cream-dark bg + navy-mid text.</Note>
             <div className="flex flex-wrap gap-2">
               <TabPill label="All" count={12} active={true} onClick={() => {}} />
@@ -671,7 +741,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Select / Dropdown — select.tsx">
+          <Section id="select" title="Select / Dropdown — select.tsx">
             <Note>Never use native select. size="auto" for sort/filter (auto-sizes to longest option). size="full" for form fields.</Note>
             <Row label='size="auto" (sort)'>
               <Select
@@ -700,7 +770,7 @@ export default function DesignSystemPage() {
             </Row>
           </Section>
 
-          <Section title="Row List — Compliments page">
+          <Section id="row-list" title="Row List — Compliments page">
             <Note>CSS grid: max-content minmax(0,1fr) auto · col-gap --space-6 · each row subgrid · click to edit.</Note>
             <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr) auto', columnGap: 'var(--space-6)' }}>
               {[
@@ -726,7 +796,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Sidebar — Sidebar.tsx">
+          <Section id="sidebar" title="Sidebar — Sidebar.tsx">
             <Note>var(--sidebar-width) · navy bg · fixed on mobile with backdrop overlay, relative on desktop.</Note>
             <div className="rounded-[3px] overflow-hidden" style={{ maxWidth: 'var(--sidebar-width)', background: 'var(--color-navy)' }}>
               <div style={{ padding: 'var(--space-8) var(--space-5) var(--space-6)' }}>
@@ -760,7 +830,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Topbar — Topbar.tsx">
+          <Section id="topbar" title="Topbar — Topbar.tsx">
             <Note>Required on every page. h = --header-height · px = --topbar-px (mobile: --topbar-px-mobile) · cream bg · sand-light border.</Note>
             <div className="rounded-[3px] overflow-hidden" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
               <div className="flex items-center gap-3" style={{ height: 'var(--header-height)', paddingLeft: 'var(--topbar-px)', paddingRight: 'var(--topbar-px)' }}>
@@ -776,7 +846,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          <Section title="Login Page — app/page.tsx">
+          <Section id="login" title="Login Page — app/page.tsx">
             <Note>Full-screen navy bg · logo = --text-logo · tagline = --text-xxs · IPA = --text-md · user buttons = --color-white-subtle bg + --color-white-dim border.</Note>
             <div className="rounded-[3px] overflow-hidden flex flex-col items-center justify-center py-12" style={{ background: 'var(--color-navy)' }}>
               <div className="text-center mb-8">
