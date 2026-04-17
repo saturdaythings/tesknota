@@ -46,9 +46,9 @@ const COLUMNS: CollectionColumnDef[] = [
               color: 'var(--color-navy)',
               fontSize: 'var(--text-xs)',
               fontWeight: 'var(--font-weight-medium)',
-              padding: '2px 6px',
-              borderRadius: '2px',
-              marginTop: '3px',
+              padding: 'var(--space-half) 6px', /* component-internal: 6px — no token between --space-1 (4px) and --space-2 (8px) */
+              borderRadius: 'var(--radius-sm)',
+              marginTop: '3px', /* component-internal: 3px — no spacing token for 3px */
             }}
           >
             Dupe

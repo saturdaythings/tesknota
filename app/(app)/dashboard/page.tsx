@@ -337,7 +337,7 @@ function SignatureSpotlight({
           style={{
             background: "var(--color-navy)",
             borderRadius: "var(--radius-lg)",
-            padding: "28px",
+            padding: "28px", /* component-internal: no token between --space-6 (24px) and --space-8 (32px) */
             color: "rgba(245,240,232,0.4)", /* component-internal: no token for this opacity */
             fontFamily: "var(--font-sans)",
             fontSize: "var(--text-sm)",
@@ -703,7 +703,7 @@ function RecentPurchases({
           <div style={{ overflowX: "auto" }}>
             <div
               className="hidden md:grid"
-              style={{ gridTemplateColumns: PURCHASE_GRID, columnGap: "var(--space-10)", minWidth: "640px" }}
+              style={{ gridTemplateColumns: PURCHASE_GRID, columnGap: "var(--space-10)", minWidth: "640px" /* component-internal: scroll floor for 7-col table */ }}
             >
               {/* Header */}
               <div
@@ -860,7 +860,7 @@ function PurchaseRow({
 
 function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
   return (
-    <div style={{ maxWidth: "440px", marginTop: "var(--space-8)" }}>
+    <div style={{ maxWidth: "440px" /* component-internal: onboarding card width constraint */, marginTop: "var(--space-8)" }}>
       <div
         className="font-serif italic"
         style={{ fontSize: "var(--text-xl)", color: "var(--color-navy)", marginBottom: "var(--space-1)" }}
@@ -888,7 +888,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
             padding: "var(--space-4)",
             background: "var(--color-cream-dark)",
             border: "1px solid var(--color-sand-light)",
-            borderRadius: "4px", /* component-internal: no token between --radius-md (3px) and --radius-lg (6px) */
+            borderRadius: "4px", /* component-internal: no token between --radius-md (3px) and --radius-lg (6px) */ /* component-internal: no token between --radius-md (3px) and --radius-lg (6px) */
             textAlign: "left",
             width: "100%",
             cursor: "pointer",
@@ -896,8 +896,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
         >
           <div
             style={{
-              width: "24px",
-              height: "24px",
+              width: "24px", height: "24px", /* component-internal: step circle size, no spacing token */
               flexShrink: 0,
               borderRadius: "50%",
               background: "var(--color-navy)",
@@ -934,14 +933,13 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
             padding: "var(--space-4)",
             background: "var(--color-cream-dark)",
             border: "1px solid var(--color-sand-light)",
-            borderRadius: "4px",
+            borderRadius: "4px", /* component-internal: no token between --radius-md (3px) and --radius-lg (6px) */
             opacity: 0.5,
           }}
         >
           <div
             style={{
-              width: "24px",
-              height: "24px",
+              width: "24px", height: "24px", /* component-internal: step circle size, no spacing token */
               flexShrink: 0,
               borderRadius: "50%",
               background: "var(--color-sand)",
