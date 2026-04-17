@@ -102,12 +102,12 @@ export function FragDetail({
         fieldFlagged: flagField,
         userNote: flagNote,
       });
-      toast("Flag submitted. Thanks!", { variant: "success" });
+      toast("Flag submitted. Thanks!", "success");
       setFlagOpen(false);
       setFlagNote("");
       setFlagField(FLAG_FIELDS[0]);
     } catch {
-      toast("Failed to submit flag.", { variant: "error" });
+      toast("Failed to submit flag.", "error");
     } finally {
       setFlagging(false);
     }

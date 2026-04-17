@@ -12,6 +12,7 @@ import { shortFragType } from '@/lib/frag-utils';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { useToast } from '@/components/ui/toast';
+import { WISHLIST_PRIORITY_LABELS, type WishlistPriority } from '@/types';
 import type { CommunityFrag, UserFragrance, FragranceStatus, FragranceType } from '@/types';
 
 // ── Constants ──────────────────────────────────────────────
@@ -48,6 +49,7 @@ const STATUS_LABELS: Record<FragranceStatus, string> = {
 
 const ELIGIBLE_STATUSES = new Set<FragranceStatus>(['CURRENT', 'PREVIOUSLY_OWNED', 'FINISHED']);
 const WISHLIST_STATUSES = new Set<FragranceStatus>(['WANT_TO_BUY', 'WANT_TO_SMELL']);
+const PRIORITY_KEYS: WishlistPriority[] = ['HIGH', 'MEDIUM', 'LOW'];
 
 function genId(): string {
   return 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -163,6 +165,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
   const [fragType, setFragType] = useState<FragranceType | ''>('');
   const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState('');
+  const [wishlistPriority, setWishlistPriority] = useState<WishlistPriority | null>(null);
 
   // confirm-log sub-type
   const [confirmLogType, setConfirmLogType] = useState<'wishlist' | 'unowned'>('unowned');
@@ -181,11 +184,11 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
     setView('profile');
     setPendingLog(false);
     setSaving(false);
-    setStatus(frag.fragranceType ? (frag.fragranceType as FragranceStatus) : 'CURRENT');
     setStatus('CURRENT');
     setFragType(frag.fragranceType as FragranceType | '');
     setRating(0);
     setNotes('');
+    setWishlistPriority(null);
     setLogOpen(false);
     setLogPrefillId(undefined);
   }, [frag?.fragranceId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -208,33 +211,9 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
   }
 
   function handleAddToWishlist() {
-    if (!user || !frag) return;
-    const wishFrag: UserFragrance = {
-      id: genId(),
-      fragranceId: frag.fragranceId,
-      userId: user.id,
-      name: frag.fragranceName,
-      house: frag.fragranceHouse,
-      status: 'WANT_TO_BUY',
-      sizes: [],
-      type: (frag.fragranceType as FragranceType) || null,
-      personalRating: null,
-      statusRating: null,
-      whereBought: null,
-      purchaseDate: null,
-      purchaseMonth: null,
-      purchaseYear: null,
-      purchasePrice: null,
-      isDupe: false,
-      dupeFor: '',
-      personalNotes: '',
-      createdAt: new Date().toISOString(),
-      wishlistPriority: null,
-    };
-    addFrag(wishFrag).then(() => {
-      toast(frag.fragranceName + ' added to wishlist', 'success');
-      onClose();
-    });
+    setStatus('WANT_TO_BUY');
+    setWishlistPriority(null);
+    setView('add-collection');
   }
 
   async function handleSaveCollection() {
@@ -261,7 +240,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
         dupeFor: '',
         personalNotes: notes.trim(),
         createdAt: new Date().toISOString(),
-        wishlistPriority: null,
+        wishlistPriority: WISHLIST_STATUSES.has(status) ? wishlistPriority : null,
       };
       await addFrag(newFrag);
       toast(frag.fragranceName + ' added to your collection', 'success');
@@ -536,10 +515,28 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                     style={{
                       fontSize: '13px',
                       letterSpacing: '0.08em',
-                      color: notes ? 'var(--color-navy)' : 'rgba(30,45,69,0.8)',
+                      color: 'var(--color-navy)',
                     }}
                   />
                 </div>
+
+                {WISHLIST_STATUSES.has(status) && (
+                  <div>
+                    <FieldLabel>
+                      Priority <OptionalTag />
+                    </FieldLabel>
+                    <div className="flex flex-wrap gap-2">
+                      {PRIORITY_KEYS.map((p) => (
+                        <TabPill
+                          key={p}
+                          label={WISHLIST_PRIORITY_LABELS[p].label}
+                          active={wishlistPriority === p}
+                          onClick={() => setWishlistPriority(wishlistPriority === p ? null : p)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </ModalBody>
             <ModalFooter>
@@ -548,7 +545,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
               </Button>
               <div style={{ flex: 1 }} />
               <Button variant="primary" onClick={handleSaveCollection} disabled={saving}>
-                {saving ? 'Saving...' : pendingLog ? 'Save & Log Compliment' : 'Save to Collection'}
+                {saving ? 'Saving...' : WISHLIST_STATUSES.has(status) ? 'Save to Wishlist' : pendingLog ? 'Save & Log Compliment' : 'Save to Collection'}
               </Button>
             </ModalFooter>
           </>
