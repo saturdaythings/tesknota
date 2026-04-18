@@ -40,7 +40,7 @@ export function Pagination({ page, onPage, totalPages: totalPagesProp, total, pa
       )}
 
       {showNav && (
-        <div className="flex items-center" style={{ gap: 'var(--space-2)' }}>
+        <div className="flex items-center max-sm:gap-3" style={{ gap: 'var(--space-2)' }}>
           <PagBtn onClick={() => onPage(1)} disabled={atFirst} title="First page">
             <ChevronsLeft size={13} />
           </PagBtn>
@@ -49,7 +49,7 @@ export function Pagination({ page, onPage, totalPages: totalPagesProp, total, pa
           </PagBtn>
 
           <span
-            className="font-sans select-none"
+            className="font-sans select-none max-sm:text-xs"
             style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-sm)', color: 'var(--color-navy)', padding: '0 var(--space-3)' }}
           >
             {page} of {totalPages}
@@ -79,7 +79,7 @@ function PagBtn({ onClick, disabled, children, title }: {
       title={title}
       aria-label={title}
       className={cn(
-        'flex items-center justify-center transition-colors',
+        'flex items-center justify-center transition-colors max-sm:w-11 max-sm:h-11',
         disabled ? 'opacity-30 cursor-default' : 'cursor-pointer hover:bg-[var(--color-row-hover)]',
       )}
       style={{
