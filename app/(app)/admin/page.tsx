@@ -799,22 +799,22 @@ function FlagsTab({
                 <div style={{ display: "flex", gap: "var(--space-6)", flexWrap: "wrap" }}>
                   {f.currentValue !== null && (
                     <div>
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "2px" }}>Current</div>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "var(--space-half)" }}>Current</div>
                       <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>{f.currentValue || "—"}</div>
                     </div>
                   )}
                   {f.suggestedValue && (
                     <div>
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "2px" }}>Suggested</div>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "var(--space-half)" }}>Suggested</div>
                       <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>{f.suggestedValue}</div>
                     </div>
                   )}
                   <div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "2px" }}>Submitted by</div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "var(--space-half)" }}>Submitted by</div>
                     <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{userLabel(f.userId, users)}</div>
                   </div>
                   <div>
-                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "2px" }}>Date</div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "var(--space-half)" }}>Date</div>
                     <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{fmtDate(f.createdAt)}</div>
                   </div>
                 </div>
@@ -901,7 +901,7 @@ function UsersTab({ users, currentUserId, onToggleAdmin }: {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", flexShrink: 0 }}>
               {u.isAdmin && (
-                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-navy)", border: "1px solid var(--color-navy)", borderRadius: "var(--radius-full)", padding: "2px var(--space-2)" }}>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-navy)", border: "1px solid var(--color-navy)", borderRadius: "var(--radius-full)", padding: "var(--space-half) var(--space-2)" }}>
                   Admin
                 </span>
               )}
