@@ -33,7 +33,6 @@ const INTERNAL_COMPONENTS = new Set([
   'token-preview-listener',
   'accord-cloud',
   'card',
-  'divider',
   'stat-card',
 ]);
 
