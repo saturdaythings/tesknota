@@ -195,14 +195,27 @@ function Spinner() {
 
 // ── Main component ─────────────────────────────────────────
 
+export interface ComplimentPrefill {
+  fragName?: string;
+  relation?: string;
+  gender?: string;
+  location?: string;
+  city?: string;
+  country?: string;
+  notes?: string;
+  month?: string;
+  year?: string;
+}
+
 export interface ComplimentModalProps {
   open: boolean;
   onClose: () => void;
   editing?: UserCompliment | null;
   prefillFragId?: string;
+  prefill?: ComplimentPrefill;
 }
 
-export function LogComplimentModal({ open, onClose, editing, prefillFragId }: ComplimentModalProps) {
+export function LogComplimentModal({ open, onClose, editing, prefillFragId, prefill }: ComplimentModalProps) {
   const { user } = useUser();
   const { fragrances, addComp, editComp, removeComp } = useData();
   const { toast } = useToast();
@@ -256,22 +269,25 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId }: Co
       setState(editing.state ?? editing.country ?? '');
       setNotes(editing.notes ?? '');
     } else {
+      const fragNameLc = prefill?.fragName?.toLowerCase();
       const pre = prefillFragId
         ? eligible.find((f) => f.id === prefillFragId || f.fragranceId === prefillFragId) ?? null
+        : fragNameLc
+        ? eligible.find((f) => f.name.toLowerCase() === fragNameLc) ?? null
         : null;
       setPrimaryFrag(pre);
       setSecondaryFrag(null);
-      setRelation('');
-      setGender('');
-      setMonth(String(now.getMonth() + 1).padStart(2, '0'));
-      setYear(String(now.getFullYear()));
-      setLocation('');
-      setCity('');
-      setState('');
-      setNotes('');
+      setRelation((prefill?.relation as Relation | '') ?? '');
+      setGender((prefill?.gender as ComplimenterGender | '') ?? '');
+      setMonth(prefill?.month ?? String(now.getMonth() + 1).padStart(2, '0'));
+      setYear(prefill?.year ?? String(now.getFullYear()));
+      setLocation(prefill?.location ?? '');
+      setCity(prefill?.city ?? '');
+      setState(prefill?.country ?? '');
+      setNotes(prefill?.notes ?? '');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, editing, prefillFragId]);
+  }, [open, editing, prefillFragId, prefill]);
 
   async function save() {
     if (!user) return;

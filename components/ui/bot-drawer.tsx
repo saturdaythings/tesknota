@@ -3,8 +3,15 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
+import { useToast } from "@/components/ui/toast";
+import { createPendingTask, createPendingEntry, createNotification } from "@/lib/data/mutations";
+import { LogComplimentModal } from "@/components/compliments/log-compliment-modal";
+import { AddFragranceModal } from "@/components/collection/add-fragrance-modal";
+import type { ComplimentPrefill } from "@/components/compliments/log-compliment-modal";
 
 const AI_WORKER_URL = process.env.NEXT_PUBLIC_AI_WORKER_URL ?? "";
+
+// ── Types ────────────────────────────────────────────────────
 
 interface BotMessage { role: "bot" | "user"; text: string }
 interface BotButton { label: string; action: () => void }
@@ -18,17 +25,189 @@ interface PendingEntry {
   created_at: string;
 }
 
+interface ParsedVoice {
+  type: "compliment" | "collection";
+  fragName: string | null;
+  house: string | null;
+  relation?: string;
+  gender?: string;
+  location?: string;
+  city?: string;
+  country?: string;
+  notes?: string;
+  month?: string;
+  year?: string;
+  fragInDb: boolean;
+}
+
+// ── Voice parsing ────────────────────────────────────────────
+
+const COLLECTION_TRIGGERS = /\b(bought|purchase[d]?|acqui[a-z]+|got|picked up|ordered|received|gifted myself|my new)\b/i;
+const RELATION_MAP: Record<string, string> = {
+  stranger: "Stranger",
+  strangers: "Stranger",
+  friend: "Friend",
+  friends: "Friend",
+  colleague: "Colleague / Client",
+  coworker: "Colleague / Client",
+  client: "Colleague / Client",
+  family: "Family",
+  mom: "Family",
+  dad: "Family",
+  sister: "Family",
+  brother: "Family",
+  partner: "Significant Other",
+  "significant other": "Significant Other",
+  husband: "Significant Other",
+  wife: "Significant Other",
+  boyfriend: "Significant Other",
+  girlfriend: "Significant Other",
+};
+const GENDER_TRIGGERS = {
+  male: /\b(guy|man|he|him|male|dude)\b/i,
+  female: /\b(woman|girl|she|her|female|lady)\b/i,
+};
+
+function parseVoice(text: string): ParsedVoice {
+  const isCollection = COLLECTION_TRIGGERS.test(text);
+
+  // Extract frag name — heuristic: after "wearing", "bought", "got", etc.
+  const fragMatch =
+    text.match(/(?:wearing|had on|sprayed|bought|got|picked up|acquired|received)\s+(?:my\s+)?(.+?)(?:\s+(?:today|when|and|while|the|a\s+compliment|compliment)|\.|,|$)/i) ??
+    text.match(/(?:^|\.\s*)(.+?)\s+(?:got|earned|received)\s+(?:a\s+)?compliment/i);
+  const fragName = fragMatch?.[1]?.trim() ?? null;
+
+  // Relation
+  let relation: string | undefined;
+  const lcText = text.toLowerCase();
+  for (const [key, val] of Object.entries(RELATION_MAP)) {
+    if (lcText.includes(key)) { relation = val; break; }
+  }
+
+  // Gender
+  let gender: string | undefined;
+  if (GENDER_TRIGGERS.male.test(text)) gender = "Male";
+  else if (GENDER_TRIGGERS.female.test(text)) gender = "Female";
+
+  // Location / city
+  const locMatch = text.match(/(?:at|in|from)\s+((?:[A-Z][a-z]+\s?){1,3})/);
+  const location = locMatch?.[1]?.trim();
+
+  // Month/year
+  const now = new Date();
+  const month = String(now.getMonth() + 1);
+  const year = String(now.getFullYear());
+
+  return {
+    type: isCollection ? "collection" : "compliment",
+    fragName,
+    house: null,
+    relation,
+    gender,
+    location,
+    city: location,
+    country: undefined,
+    notes: text,
+    month,
+    year,
+    fragInDb: true, // will be checked async
+  };
+}
+
+// ── Confirmation card ────────────────────────────────────────
+
+function ConfirmCard({
+  parsed,
+  onAddDetails,
+  onSaveLater,
+}: {
+  parsed: ParsedVoice;
+  onAddDetails: () => void;
+  onSaveLater: () => void;
+}) {
+  const rows: Array<{ label: string; value: string }> = [];
+  if (parsed.type === "compliment") {
+    if (parsed.fragName) rows.push({ label: "Fragrance", value: parsed.fragName });
+    if (parsed.relation) rows.push({ label: "From", value: parsed.relation });
+    if (parsed.gender) rows.push({ label: "Gender", value: parsed.gender });
+    if (parsed.location) rows.push({ label: "Location", value: parsed.location });
+    rows.push({ label: "Date", value: `${parsed.month}/${parsed.year}` });
+  } else {
+    if (parsed.fragName) rows.push({ label: "Fragrance", value: parsed.fragName });
+    if (parsed.house) rows.push({ label: "House", value: parsed.house });
+  }
+
+  return (
+    <div style={{
+      background: "var(--color-cream-dark)",
+      border: "1px solid var(--color-row-divider)",
+      borderRadius: "var(--radius-lg)",
+      padding: "var(--space-4)",
+      maxWidth: "85%",
+      alignSelf: "flex-start",
+      display: "flex",
+      flexDirection: "column",
+      gap: "var(--space-3)",
+    }}>
+      <div style={{
+        fontFamily: "var(--font-sans)",
+        fontSize: "var(--text-xs)",
+        color: "var(--color-meta-text)",
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+      }}>
+        {parsed.type === "compliment" ? "Compliment detected" : "Collection add detected"}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
+        {rows.map((r) => (
+          <div key={r.label} style={{ display: "flex", gap: "var(--space-3)", alignItems: "baseline" }}>
+            <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", minWidth: 72 }}>
+              {r.label}
+            </span>
+            <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>
+              {r.value}
+            </span>
+          </div>
+        ))}
+      </div>
+      {!parsed.fragInDb && (
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", fontStyle: "italic" }}>
+          This fragrance isn&apos;t in our database yet — we will look it up and add it.
+        </div>
+      )}
+      <div style={{ display: "flex", gap: "var(--space-2)" }}>
+        <Button variant="primary" onClick={onAddDetails}>Add details now</Button>
+        <Button variant="secondary" onClick={onSaveLater}>Save for later</Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────
+
 export function BotDrawer() {
   const { user } = useUser();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<BotMessage[]>([]);
   const [buttons, setButtons] = useState<BotButton[] | null>(null);
+  const [pendingVoice, setPendingVoice] = useState<ParsedVoice | null>(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [listening, setListening] = useState(false);
   const [pending, setPending] = useState<PendingEntry[]>([]);
+
+  // Modals
+  const [complimentOpen, setComplimentOpen] = useState(false);
+  const [complimentPrefill, setComplimentPrefill] = useState<ComplimentPrefill | undefined>();
+  const [fragOpen, setFragOpen] = useState(false);
+  const [fragInitialName, setFragInitialName] = useState<string | undefined>();
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
 
   const addMsg = useCallback((text: string, role: "bot" | "user") => {
     setMessages((prev) => [...prev, { role, text }]);
@@ -38,7 +217,7 @@ export function BotDrawer() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, pendingVoice]);
 
   const loadPending = useCallback(async () => {
     if (!user) return;
@@ -86,6 +265,104 @@ export function BotDrawer() {
       ". Missing: " + (missing.join(", ") || "unknown") + ". Please ask for the first missing field."
     );
   }
+
+  // ── Voice input ──────────────────────────────────────────
+
+  function startListening() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any;
+    const SR = typeof window !== "undefined" && (w.SpeechRecognition || w.webkitSpeechRecognition);
+    if (!SR) {
+      addMsg("Voice input isn't supported in this browser.", "bot");
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+    const rec = new SR();
+    recognitionRef.current = rec;
+    rec.lang = "en-US";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    setListening(true);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rec.onresult = (e: any) => {
+      const transcript: string = e.results[0][0].transcript;
+      setListening(false);
+      addMsg(transcript, "user");
+      handleVoice(transcript);
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+    rec.start();
+  }
+
+  async function handleVoice(transcript: string) {
+    const parsed = parseVoice(transcript);
+
+    // Check if frag is in community DB
+    if (parsed.fragName) {
+      const { data } = await supabase
+        .from("fragrances")
+        .select("id")
+        .ilike("name", `%${parsed.fragName}%`)
+        .limit(1);
+      parsed.fragInDb = !!(data && data.length > 0);
+
+      if (!parsed.fragInDb && user) {
+        await createPendingEntry(parsed.fragName, parsed.house, user.id);
+      }
+    }
+
+    setPendingVoice(parsed);
+  }
+
+  async function handleAddDetails() {
+    if (!pendingVoice) return;
+    setPendingVoice(null);
+    if (pendingVoice.type === "collection") {
+      setFragInitialName(pendingVoice.fragName ?? undefined);
+      setFragOpen(true);
+    } else {
+      setComplimentPrefill({
+        fragName: pendingVoice.fragName ?? undefined,
+        relation: pendingVoice.relation,
+        gender: pendingVoice.gender,
+        location: pendingVoice.location,
+        city: pendingVoice.city,
+        country: pendingVoice.country,
+        notes: pendingVoice.notes,
+        month: pendingVoice.month,
+        year: pendingVoice.year,
+      });
+      setComplimentOpen(true);
+    }
+  }
+
+  async function handleSaveLater() {
+    if (!pendingVoice || !user) return;
+    setPendingVoice(null);
+    const taskType = pendingVoice.type === "collection" ? "voice_add" : "fill_compliment";
+    const dueAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+    try {
+      const { id } = await createPendingTask(user.id, taskType, JSON.stringify(pendingVoice), dueAt);
+      await createNotification(
+        user.id,
+        "pending_task",
+        "Finish your " + (pendingVoice.type === "collection" ? "fragrance add" : "compliment"),
+        pendingVoice.fragName ? `Don't forget to add details for ${pendingVoice.fragName}.` : "You have an unfinished entry.",
+        null,
+      );
+      toast("Saved — we will remind you in 48 hours.", "success");
+      void id;
+    } catch {
+      toast("Failed to save — try again.", "error");
+    }
+  }
+
+  // ── Text chat ─────────────────────────────────────────────
 
   async function handleMessage(text: string) {
     if (!AI_WORKER_URL) {
@@ -158,6 +435,7 @@ export function BotDrawer() {
 
   return (
     <>
+      {/* Pending banner */}
       {hasPending && !open && (
         <div
           onClick={openDrawer}
@@ -180,7 +458,7 @@ export function BotDrawer() {
         </div>
       )}
 
-      {/* Trigger button — sits INSIDE the FAB stack via portal or is called externally */}
+      {/* FAB trigger */}
       <button
         onClick={openDrawer}
         aria-label="Open assistant"
@@ -226,6 +504,7 @@ export function BotDrawer() {
         )}
       </button>
 
+      {/* Backdrop */}
       {open && (
         <div
           style={{ position: "fixed", inset: 0, background: "var(--color-navy-backdrop)", zIndex: 500 }}
@@ -233,6 +512,7 @@ export function BotDrawer() {
         />
       )}
 
+      {/* Drawer */}
       <div
         role="dialog"
         aria-modal="true"
@@ -294,6 +574,13 @@ export function BotDrawer() {
               {m.text}
             </div>
           ))}
+          {pendingVoice && (
+            <ConfirmCard
+              parsed={pendingVoice}
+              onAddDetails={handleAddDetails}
+              onSaveLater={handleSaveLater}
+            />
+          )}
           {buttons && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignSelf: "flex-start" }}>
               {buttons.map((b, i) => (
@@ -321,7 +608,7 @@ export function BotDrawer() {
         </div>
 
         {/* Quick chips */}
-        {messages.length === 0 && (
+        {messages.length === 0 && !pendingVoice && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", padding: "0 20px 12px" }}>
             {QUICK_CHIPS.map((chip) => (
               <button
@@ -346,7 +633,7 @@ export function BotDrawer() {
           </div>
         )}
 
-        {/* Input */}
+        {/* Input row */}
         <div style={{
           padding: "8px 20px",
           paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
@@ -354,13 +641,38 @@ export function BotDrawer() {
           flexShrink: 0,
           display: "flex",
           gap: "8px",
+          alignItems: "center",
         }}>
+          {/* Mic button */}
+          <button
+            onClick={startListening}
+            aria-label={listening ? "Stop listening" : "Start voice input"}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              border: "1px solid var(--color-meta-text)",
+              background: listening ? "var(--color-navy)" : "var(--color-cream)",
+              color: listening ? "var(--color-cream)" : "var(--color-navy)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              transition: "background 150ms, color 150ms",
+            }}
+          >
+            <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor">
+              <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.93V22h-2v-2.07A8 8 0 0 1 4 12a1 1 0 1 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/>
+            </svg>
+          </button>
+
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-            placeholder="Ask anything about your fragrances..."
+            placeholder={listening ? "Listening..." : "Ask anything about your fragrances..."}
             className="flex-1 h-9 placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)] outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
             style={{
               padding: "0 var(--space-3)",
@@ -381,6 +693,18 @@ export function BotDrawer() {
           </Button>
         </div>
       </div>
+
+      {/* Modals opened from voice confirm */}
+      <LogComplimentModal
+        open={complimentOpen}
+        onClose={() => { setComplimentOpen(false); setComplimentPrefill(undefined); }}
+        prefill={complimentPrefill}
+      />
+      <AddFragranceModal
+        open={fragOpen}
+        onClose={() => { setFragOpen(false); setFragInitialName(undefined); }}
+        initialName={fragInitialName}
+      />
     </>
   );
 }

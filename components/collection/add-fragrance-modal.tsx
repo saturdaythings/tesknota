@@ -142,9 +142,10 @@ interface Props {
   open: boolean;
   onClose: () => void;
   defaultStatus?: FragranceStatus;
+  initialName?: string;
 }
 
-export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
+export function AddFragranceModal({ open, onClose, defaultStatus, initialName }: Props) {
   const { user } = useUser();
   const { communityFrags, addFrag } = useData();
   const { toast } = useToast();
@@ -184,8 +185,8 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
   useEffect(() => {
     if (!open) return;
     setStep(1);
-    setQuery("");
-    setDebouncedQuery("");
+    setQuery(initialName ?? "");
+    setDebouncedQuery(initialName ?? "");
     setResults([]);
     setSelected(null);
     setIdentifyLater(false);
@@ -200,7 +201,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus }: Props) {
     setNotes("");
     setSaving(false);
     setSearchKey((k) => k + 1);
-  }, [open, defaultStatus]);
+  }, [open, defaultStatus, initialName]);
 
   // Debounce query
   useEffect(() => {

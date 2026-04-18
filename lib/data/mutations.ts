@@ -1,6 +1,6 @@
 import type {
   UserFragrance, UserCompliment,
-  Profile, DiscountCode, Follow, FollowStatus, PendingTaskStatus,
+  Profile, DiscountCode, Follow, FollowStatus, PendingTaskStatus, PendingTaskType,
 } from "@/types";
 import { supabase } from "@/lib/supabase";
 
@@ -294,6 +294,30 @@ export async function markAllNotificationsRead(userId: string): Promise<void> {
 export async function updatePendingTaskStatus(id: string, status: PendingTaskStatus): Promise<void> {
   const { error } = await supabase.from("pending_tasks").update({ status }).eq("id", id);
   if (error) throw new Error(error.message);
+}
+
+export async function createPendingTask(
+  userId: string,
+  type: PendingTaskType,
+  prompt: string,
+  dueAt?: string,
+): Promise<{ id: string }> {
+  const { data, error } = await supabase
+    .from("pending_tasks")
+    .insert({ user_id: userId, type, status: "open", prompt, due_at: dueAt ?? null })
+    .select("id")
+    .single();
+  if (error) throw new Error(error.message);
+  return { id: (data as { id: string }).id };
+}
+
+export async function createPendingEntry(fragranceName: string, house: string | null, userId: string): Promise<void> {
+  await supabase.from("pending_entries").insert({
+    fragrance_name: fragranceName,
+    house: house ?? null,
+    requested_by: userId,
+    status: "pending",
+  });
 }
 
 // ── Community flagging ────────────────────────────────────────
