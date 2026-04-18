@@ -1107,7 +1107,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
     id: 'input',
     name: 'Input',
     path: 'components/ui/input.tsx',
-    pages: ['Add / Edit modal', 'Settings'],
+    pages: ['Add Fragrance modal', 'Log Compliment modal', 'Fragrance Detail', 'Add to Wishlist modal', 'Register', 'Profile', 'Social', 'Admin', 'Import'],
     tokens: ['--text-sm', '--color-cream', '--color-navy', '--color-meta-text', '--color-accent', '--radius-sm'],
   },
   {
