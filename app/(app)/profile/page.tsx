@@ -377,7 +377,7 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              <Button variant="secondary" className="w-full" onClick={() => setTab("Personal Info")}>
+              <Button variant="primary" className="w-full" onClick={() => setTab("Personal Info")}>
                 Edit Profile
               </Button>
             </div>
@@ -477,7 +477,7 @@ export default function ProfilePage() {
 
                   {/* Change password */}
                   <div>
-                    <Button variant="secondary" size="sm" onClick={() => setShowPwFields((v) => !v)}>
+                    <Button variant="primary" size="sm" onClick={() => setShowPwFields((v) => !v)}>
                       Change Password
                     </Button>
                     {showPwFields && (
@@ -574,7 +574,7 @@ export default function ProfilePage() {
                       placeholder="Notes"
                       className="flex-1 min-w-[100px]"
                     />
-                    <Button variant="secondary" onClick={handleAddCode} disabled={!newCode.trim()}>
+                    <Button variant="primary" onClick={handleAddCode} disabled={!newCode.trim()}>
                       Add Code
                     </Button>
                   </div>
@@ -618,7 +618,7 @@ export default function ProfilePage() {
             {tab === "Data" && (
               <div style={cardStyle}>
                 <div className="flex flex-col gap-[var(--space-4)]">
-                  <Button variant="secondary" className="w-full" onClick={exportCSV}>
+                  <Button variant="primary" className="w-full" onClick={exportCSV}>
                     Export my data as CSV
                   </Button>
                   <p className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>

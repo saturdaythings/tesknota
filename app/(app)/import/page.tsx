@@ -371,7 +371,7 @@ function ResultCard({ cf, userId, onAdded }: { cf: CommunityFrag; userId: string
         </div>
       )}
       <div style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-2)" }}>
-        <Button variant="secondary" onClick={() => handleAdd("WANT_TO_BUY")} disabled={busy}>Add to Wishlist</Button>
+        <Button variant="primary" onClick={() => handleAdd("WANT_TO_BUY")} disabled={busy}>Add to Wishlist</Button>
         <Button variant="primary" onClick={() => handleAdd("CURRENT")} disabled={busy}>Add to Collection</Button>
       </div>
     </div>
@@ -482,7 +482,7 @@ function PasteLinkTab({ userId, prefillName }: { userId: string; prefillName?: s
               placeholder="Type fragrance name to queue for import..."
             />
           </div>
-          <Button variant="secondary" onClick={addToQueue} disabled={!queueInput.trim()}>Add to Queue</Button>
+          <Button variant="primary" onClick={addToQueue} disabled={!queueInput.trim()}>Add to Queue</Button>
         </div>
         {queue.map((name) => (
           <div key={name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: "var(--size-row-min)", borderBottom: "1px solid var(--color-row-divider)", paddingLeft: "var(--space-4)", paddingRight: "var(--space-4)" }}>
@@ -576,7 +576,7 @@ function ScanTab({ userId }: { userId: string }) {
         <div style={colCardStyle}>
           <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)" }}>Open Webcam</div>
           <div style={sublabelStyle}>POINT AT BOTTLE LABEL</div>
-          <Button variant="secondary" style={{ width: "100%" }} onClick={stream ? stopCamera : openCamera}>
+          <Button variant="primary" style={{ width: "100%" }} onClick={stream ? stopCamera : openCamera}>
             {stream ? "Stop Camera" : "OPEN CAMERA"}
           </Button>
           {stream && (
@@ -597,7 +597,7 @@ function ScanTab({ userId }: { userId: string }) {
           <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)" }}>Upload Photo</div>
           <div style={sublabelStyle}>FROM CAMERA ROLL</div>
           <input ref={photoRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => handlePhotoSelect(e.target.files)} />
-          <Button variant="secondary" style={{ width: "100%" }} onClick={() => photoRef.current?.click()}>CHOOSE PHOTO</Button>
+          <Button variant="primary" style={{ width: "100%" }} onClick={() => photoRef.current?.click()}>CHOOSE PHOTO</Button>
           {photoUrl && (
             <>
               <img src={photoUrl} alt="Selected" style={{ width: "100%", borderRadius: "var(--radius-md)", objectFit: "cover", maxHeight: "var(--space-16)" }} />
@@ -696,7 +696,7 @@ function CsvTab({ userId }: { userId: string }) {
       {/* Schema + template download */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--space-4)" }}>
         <span style={sublabelStyle}>NAME · BRAND · STATUS · RATING · NOTES</span>
-        <Button variant="secondary" onClick={downloadXLSXTemplate}>DOWNLOAD TEMPLATE</Button>
+        <Button variant="primary" onClick={downloadXLSXTemplate}>DOWNLOAD TEMPLATE</Button>
       </div>
 
       {/* Preview rows */}

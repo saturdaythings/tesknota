@@ -233,7 +233,7 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
           Remove from Wishlist
         </Button>
         <div style={{ display: "flex", gap: "var(--space-2)" }}>
-          <Button variant="secondary" onClick={() => frag && onAddToCollection(frag)} disabled={saving}>
+          <Button variant="primary" onClick={() => frag && onAddToCollection(frag)} disabled={saving}>
             Move to Collection
           </Button>
           <Button variant="primary" onClick={handleSave} disabled={saving}>

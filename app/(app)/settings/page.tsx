@@ -95,7 +95,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="px-5 py-4">
-            <Button variant="secondary" onClick={exportCSV}>Export CSV</Button>
+            <Button variant="primary" onClick={exportCSV}>Export CSV</Button>
           </div>
         </div>
 
@@ -110,7 +110,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="px-5 py-4">
-            <Button variant="secondary" onClick={() => router.push("/admin")}>Open Admin</Button>
+            <Button variant="primary" onClick={() => router.push("/admin")}>Open Admin</Button>
           </div>
         </div>
 

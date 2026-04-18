@@ -426,12 +426,12 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
               </Button>
               <div style={{ flex: 1 }} />
               {!existingEntry && (
-                <Button variant="secondary" onClick={handleAddToWishlist}>
+                <Button variant="primary" onClick={handleAddToWishlist}>
                   Add to Wishlist
                 </Button>
               )}
               {!isInCollection && (
-                <Button variant="secondary" onClick={() => setView('add-collection')}>
+                <Button variant="primary" onClick={() => setView('add-collection')}>
                   {existingEntry ? 'Edit in Collection' : 'Add to Collection'}
                 </Button>
               )}
@@ -591,7 +591,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
               </Button>
               <div style={{ flex: 1 }} />
               <Button
-                variant="secondary"
+                variant="primary"
                 onClick={() => {
                   setStatus('CURRENT');
                   setView('add-collection');

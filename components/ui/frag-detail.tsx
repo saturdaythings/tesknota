@@ -291,7 +291,7 @@ export function FragDetail({
           </div>
           <div className="flex items-center gap-2">
             {!readOnly && onEdit && (
-              <Button variant="secondary" size="sm" onClick={() => { handleClose(); onEdit(frag!); }}>
+              <Button variant="primary" size="sm" onClick={() => { handleClose(); onEdit(frag!); }}>
                 Edit
               </Button>
             )}

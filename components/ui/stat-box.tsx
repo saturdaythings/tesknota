@@ -1,27 +1,38 @@
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatBoxProps {
   value: string | number;
   label: string;
   delta?: string;
   className?: string;
+  isLoading?: boolean;
 }
 
-export function StatBox({ value, label, delta, className }: StatBoxProps) {
+export function StatBox({ value, label, delta, className, isLoading }: StatBoxProps) {
   return (
     <div className={cn("px-5 py-[14px]", className)} style={{ background: 'var(--color-cream-dark)' }}>
-      {/* component-internal: text-[34px] — no token between --text-note (16px) and --text-empty-title (22px) */}
-      <div className="font-serif italic leading-none text-[34px]" style={{ color: 'var(--color-navy)' }}>
-        {value}
-      </div>
-      {/* component-internal: tracking-[0.16em] — no token between --tracking-lg and --tracking-xl; mt-[5px] — no space token */}
-      <div className="font-sans text-xs uppercase tracking-[0.16em] mt-[5px]" style={{ color: 'var(--color-meta-text)' }}>
-        {label}
-      </div>
-      {delta && (
-        <div className="font-sans text-xs mt-[2px]" style={{ color: 'var(--color-accent)' }}>
-          {delta}
-        </div>
+      {isLoading ? (
+        <>
+          <Skeleton className="h-8 w-12 mb-[5px]" />
+          <Skeleton className="h-3 w-16" />
+        </>
+      ) : (
+        <>
+          {/* component-internal: text-[34px] — no token between --text-note (16px) and --text-empty-title (22px) */}
+          <div className="font-serif italic leading-none text-[34px]" style={{ color: 'var(--color-navy)' }}>
+            {value}
+          </div>
+          {/* component-internal: tracking-[0.16em] — no token between --tracking-lg and --tracking-xl; mt-[5px] — no space token */}
+          <div className="font-sans text-xs uppercase tracking-[0.16em] mt-[5px]" style={{ color: 'var(--color-meta-text)' }}>
+            {label}
+          </div>
+          {delta && (
+            <div className="font-sans text-xs mt-[2px]" style={{ color: 'var(--color-accent)' }}>
+              {delta}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

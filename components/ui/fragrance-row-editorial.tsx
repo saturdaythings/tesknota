@@ -78,7 +78,7 @@ export function FragranceRowEditorial({
         )}
         {onAction && (
           <Button
-            variant="secondary"
+            variant="primary"
             onClick={(e) => { e.stopPropagation(); onAction(); }}
             className="whitespace-nowrap flex-shrink-0"
           >

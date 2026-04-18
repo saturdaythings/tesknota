@@ -5,7 +5,8 @@ import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { FragranceCell } from "@/components/ui/fragrance-cell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { SearchInput } from "@/components/ui/search-input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TabPill } from "@/components/ui/tab-pill";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageFilterBar } from "@/components/ui/page-filter-bar";
@@ -418,30 +419,16 @@ export default function SocialPage() {
         {/* ── Profile search ───────────────────────────────── */}
         <div style={{ marginBottom: "var(--space-6)" }}>
           <div ref={searchRowRef} className="flex items-center" style={{ gap: "var(--space-2)" }}>
-            <div className="flex-1" style={{ position: "relative" }}>
-              <Input
+            <div className="flex-1">
+              <SearchInput
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={setSearchQuery}
                 placeholder="Search by username or name..."
+                loading={searchLoading}
               />
-              {searchLoading && (
-                <div
-                  className="font-sans"
-                  style={{
-                    position: "absolute",
-                    right: "var(--space-3)",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--color-meta-text)",
-                  }}
-                >
-                  Searching...
-                </div>
-              )}
             </div>
             <Button
-              variant="secondary"
+              variant="primary"
               onClick={() => searchRowRef.current?.querySelector('input')?.focus()}
             >
               + Add Friend
@@ -485,7 +472,7 @@ export default function SocialPage() {
                     )}
                     {status === "none" && (
                       <Button
-                        variant="secondary"
+                        variant="primary"
                         disabled={sendingFollow}
                         onClick={() => handleSendFollow(p.id)}
                       >
@@ -581,18 +568,9 @@ export default function SocialPage() {
                 </div>
 
                 {friendLoading ? (
-                  <div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          height: "var(--size-row-min)",
-                          borderBottom: "1px solid var(--color-row-divider)",
-                          background: "var(--color-row-hover)",
-                          borderRadius: "var(--radius-md)",
-                          marginBottom: "var(--space-1)",
-                        }}
-                      />
+                      <Skeleton key={i} className="h-[var(--size-row-min)] w-full" />
                     ))}
                   </div>
                 ) : !selectedFriendProfile.showCollection && friendTab === "collection" ? (
@@ -607,10 +585,10 @@ export default function SocialPage() {
                 ) : (
                   <>
                     <StatsGrid className="mb-6">
-                      <StatBox value={FFOwned.length} label="Collection" />
-                      <StatBox value={FC.length} label="Compliments" />
-                      <StatBox value={FFWish.length} label="Wishlist" />
-                      <StatBox value={inCommon.length} label="In Common" />
+                      <StatBox value={FFOwned.length} label="Collection" isLoading={friendLoading} />
+                      <StatBox value={FC.length} label="Compliments" isLoading={friendLoading} />
+                      <StatBox value={FFWish.length} label="Wishlist" isLoading={friendLoading} />
+                      <StatBox value={inCommon.length} label="In Common" isLoading={friendLoading} />
                     </StatsGrid>
 
                     {friendAccordCounts.length > 0 && (

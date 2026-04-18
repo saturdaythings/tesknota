@@ -27,6 +27,7 @@ const INTERNAL_COMPONENTS = new Set([
   'fragrance-row-editorial',
   'form',
   'page-filter-bar',
+  'page-header',
   'sort-control',
   'toast',
   'token-preview-listener',

@@ -7,10 +7,8 @@ import { FragranceCell } from '@/components/ui/fragrance-cell';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StarRating } from '@/components/ui/StarRating';
-import { Topbar } from '@/components/layout/Topbar';
 import { PageContent } from '@/components/layout/PageContent';
-import { FragSearch } from '@/components/ui/frag-search';
-import { PageFilterBar } from '@/components/ui/page-filter-bar';
+import { PageHeader } from '@/components/ui/page-header';
 import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { FragranceDetailModal } from '@/components/collection/fragrance-detail-modal';
 import { CollectionList, type CollectionColumnDef, type CollectionRowContext } from '@/components/collection/collection-list';
@@ -261,10 +259,8 @@ function CollectionInner() {
       />
       <AddFragranceModal open={addOpen} onClose={() => setAddOpen(false)} />
 
-      <Topbar title="My Collection" actions={<FragSearch />} />
-
       <PageContent>
-        <PageFilterBar
+        <PageHeader
           searchValue={search}
           onSearch={setSearch}
           searchPlaceholder="Search your collection..."

@@ -365,7 +365,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               >
                 {fragCompliments.length > 0 ? `${fragCompliments.length} logged` : "None logged yet"}
               </p>
-              <Button variant="secondary" size="sm" onClick={() => setCompFormOpen(true)}>
+              <Button variant="primary" size="sm" onClick={() => setCompFormOpen(true)}>
                 Log Compliment
               </Button>
             </div>

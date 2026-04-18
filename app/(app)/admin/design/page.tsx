@@ -1269,6 +1269,20 @@ function StarRatingEmpty() {
   return <StarRating value={rating} onChange={setRating} />;
 }
 
+function StateRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 'var(--space-4)' }}>
+      <div
+        className="font-sans uppercase"
+        style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-wide)', marginBottom: 'var(--space-2)' }}
+      >
+        {label}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────
 
 
@@ -1436,72 +1450,260 @@ export default function DesignSystemPage() {
 // ── Component preview ──────────────────────────────────────
 
 function ComponentPreview({ item }: { item: GalleryItem }) {
-  const mode = useContext(DesignModeContext) ?? 'reference';
-  
-  // Render examples for each component
   switch (item.id) {
     case 'button':
       return (
-        <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
-          <Button variant="primary">Primary</Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="ghost">Ghost</Button>
-          <Button variant="destructive">Destructive</Button>
-        </div>
+        <>
+          <StateRow label="Normal">
+            <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+              <Button variant="primary">Primary</Button>
+              <Button variant="ghost">Ghost</Button>
+              <Button variant="tab-action">Tab Action</Button>
+              <Button variant="icon" aria-label="icon">✦</Button>
+            </div>
+          </StateRow>
+          <StateRow label="Error / Destructive">
+            <Button variant="destructive">Delete</Button>
+          </StateRow>
+          <StateRow label="Disabled">
+            <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+              <Button variant="primary" disabled>Primary</Button>
+              <Button variant="ghost" disabled>Ghost</Button>
+            </div>
+          </StateRow>
+        </>
       );
     case 'input':
-      return <Input placeholder="Text input..." />;
+      return (
+        <>
+          <StateRow label="Empty (placeholder)">
+            <Input placeholder="Fragrance name..." />
+          </StateRow>
+          <StateRow label="Filled">
+            <Input defaultValue="Oud Wood" />
+          </StateRow>
+          <StateRow label="Disabled">
+            <Input value="Read-only value" disabled onChange={() => {}} />
+          </StateRow>
+        </>
+      );
     case 'textarea':
-      return <Textarea placeholder="Textarea..." rows={3} />;
+      return (
+        <>
+          <StateRow label="Empty (placeholder)">
+            <Textarea placeholder="Personal notes..." rows={3} />
+          </StateRow>
+          <StateRow label="Filled">
+            <Textarea defaultValue="A deeply woody, smoky fragrance. Compliments: airport, first date." rows={3} />
+          </StateRow>
+        </>
+      );
     case 'select':
       return (
-        <Select
-          options={[
-            { value: 'a', label: 'Option A' },
-            { value: 'b', label: 'Option B' },
-          ]}
-          value="a"
-          onChange={() => {}}
-          placeholder="Select..."
-        />
+        <>
+          <StateRow label="Normal">
+            <Select
+              options={[{ value: 'a', label: 'Option A' }, { value: 'b', label: 'Option B' }]}
+              value="a"
+              onChange={() => {}}
+              placeholder="Select..."
+            />
+          </StateRow>
+          <StateRow label="Empty (no selection)">
+            <Select
+              options={[{ value: 'a', label: 'Option A' }, { value: 'b', label: 'Option B' }]}
+              value=""
+              onChange={() => {}}
+              placeholder="Select one..."
+            />
+          </StateRow>
+        </>
       );
     case 'tab-pill':
       return (
-        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-          <TabPill label="Active" active={true} onClick={() => {}} />
-          <TabPill label="Inactive" active={false} onClick={() => {}} />
-        </div>
+        <>
+          <StateRow label="Default (filter pills, uppercase xs)">
+            <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+              <TabPill label="All" active={true} onClick={() => {}} />
+              <TabPill label="Strangers" active={false} onClick={() => {}} />
+              <TabPill label="Friends" active={false} onClick={() => {}} />
+            </div>
+          </StateRow>
+          <StateRow label="Underline (section nav, serif + sublabel)">
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--color-row-divider)' }}>
+              <TabPill label="CSV" sublabel="spreadsheet" active={true} onClick={() => {}} variant="underline" />
+              <TabPill label="Manual" sublabel="one by one" active={false} onClick={() => {}} variant="underline" />
+            </div>
+          </StateRow>
+          <StateRow label="Selector (content tabs, sm mixed-case)">
+            <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+              <TabPill label="Collection" active={true} onClick={() => {}} variant="selector" />
+              <TabPill label="Wishlist" active={false} onClick={() => {}} variant="selector" />
+              <TabPill label="Analytics" active={false} onClick={() => {}} variant="selector" />
+            </div>
+          </StateRow>
+        </>
       );
     case 'badge':
       return (
-        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-          <Badge variant="neutral">Badge 1</Badge>
-          <Badge variant="neutral">Badge 2</Badge>
-        </div>
+        <StateRow label="All variants">
+          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            <Badge variant="current">Current</Badge>
+            <Badge variant="want">Want</Badge>
+            <Badge variant="finished">Finished</Badge>
+            <Badge variant="sample">Sample</Badge>
+            <Badge variant="dupe">Dupe</Badge>
+            <Badge variant="neutral">Neutral</Badge>
+          </div>
+        </StateRow>
       );
     case 'pagination':
-      return <Pagination page={2} onPage={() => {}} total={100} pageSize={10} />;
+      return (
+        <>
+          <StateRow label="Normal (mid-page)">
+            <Pagination page={3} onPage={() => {}} total={100} pageSize={10} />
+          </StateRow>
+          <StateRow label="First page (prev disabled)">
+            <Pagination page={1} onPage={() => {}} total={100} pageSize={10} />
+          </StateRow>
+          <StateRow label="Last page (next disabled)">
+            <Pagination page={10} onPage={() => {}} total={100} pageSize={10} />
+          </StateRow>
+          <StateRow label="Empty (no pages — hidden)">
+            <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', fontStyle: 'italic' }}>
+              Renders nothing when total = 0
+            </span>
+          </StateRow>
+        </>
+      );
     case 'star-rating':
-      return <StarRating value={3} max={5} />;
+      return (
+        <>
+          <StateRow label="Normal (rated)">
+            <StarRatingDemo />
+          </StateRow>
+          <StateRow label="Empty (unrated)">
+            <StarRatingEmpty />
+          </StateRow>
+          <StateRow label="Read-only">
+            <StarRating value={4} max={5} readOnly />
+          </StateRow>
+        </>
+      );
     case 'search-input':
-      return <SearchInput value="" onChange={() => {}} />;
+      return (
+        <>
+          <StateRow label="Normal (empty)">
+            <SearchInputDemo />
+          </StateRow>
+          <StateRow label="Filled (clear button visible)">
+            <SearchInputWithValue />
+          </StateRow>
+          <StateRow label="Loading (spinner)">
+            <SearchInput value="oud" onChange={() => {}} loading />
+          </StateRow>
+        </>
+      );
     case 'empty-state':
-      return <EmptyState icon="✦" title="No items" description="Add one to get started" />;
+      return (
+        <>
+          <StateRow label="With description">
+            <EmptyState icon="✦" title="No fragrances yet" description="Add your first fragrance to start tracking compliments." />
+          </StateRow>
+          <StateRow label="Title only">
+            <EmptyState icon="✦" title="Nothing here" />
+          </StateRow>
+        </>
+      );
     case 'skeleton':
       return (
-        <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
-          <Skeleton className="w-[60px] h-[40px]" />
-          <Skeleton className="w-[200px] h-[40px]" />
-        </div>
+        <>
+          <StateRow label="Row skeletons (loading list)">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+              <Skeleton className="w-full h-[var(--size-row-min)]" />
+              <Skeleton className="w-full h-[var(--size-row-min)]" />
+              <Skeleton className="w-full h-[var(--size-row-min)]" />
+            </div>
+          </StateRow>
+          <StateRow label="Inline shapes (loading text blocks)">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+              <Skeleton className="w-48 h-5" />
+              <Skeleton className="w-32 h-3" />
+            </div>
+          </StateRow>
+        </>
       );
     case 'field-label':
-      return <div style={{ display: "flex", gap: "var(--space-2)" }}><FieldLabel>Field Label</FieldLabel><RequiredMark /></div>;
+      return (
+        <>
+          <StateRow label="Optional field">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <FieldLabel>Purchase Price</FieldLabel>
+              <OptionalTag />
+            </div>
+          </StateRow>
+          <StateRow label="Required field">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <FieldLabel>Fragrance Name</FieldLabel>
+              <RequiredMark />
+            </div>
+          </StateRow>
+        </>
+      );
     case 'fragrance-cell':
-      return <FragranceCell name="Sample Fragrance" house="Sample House" type="Eau de Parfum" />;
+      return (
+        <>
+          <StateRow label="Normal (name + house + type)">
+            <FragranceCell name="Oud Wood" house="Tom Ford" type="Eau de Parfum" />
+          </StateRow>
+          <StateRow label="With secondary fragrance">
+            <FragranceCell name="Oud Wood" house="Tom Ford" type="Eau de Parfum" secondary="Black Orchid" />
+          </StateRow>
+          <StateRow label="Dupe">
+            <FragranceCell name="Al Haramain Amber Oud" house="Al Haramain" isDupe dupeFor="Tom Ford Oud Wood" />
+          </StateRow>
+          <StateRow label="Name only (no house)">
+            <FragranceCell name="Unknown Fragrance" />
+          </StateRow>
+        </>
+      );
     case 'section-header':
-      return <SectionHeader title="Section Title" />;
+      return (
+        <>
+          <StateRow label="Normal">
+            <SectionHeader title="Section Title" />
+          </StateRow>
+          <StateRow label="With right content">
+            <SectionHeader title="Section Title" right={<Button variant="ghost" size="sm">Edit</Button>} />
+          </StateRow>
+        </>
+      );
     case 'stat-box':
-      return <StatBox label="Stat" value="42" />;
+      return (
+        <>
+          <StateRow label="Normal">
+            <StatsGrid className="max-w-xs">
+              <StatBox value={42} label="Collection" delta="+3 this mo" />
+              <StatBox value={18} label="Compliments" />
+              <StatBox value={7} label="Wishlist" />
+            </StatsGrid>
+          </StateRow>
+          <StateRow label="Loading (isLoading)">
+            <StatsGrid className="max-w-xs">
+              <StatBox value={0} label="Collection" isLoading />
+              <StatBox value={0} label="Compliments" isLoading />
+              <StatBox value={0} label="Wishlist" isLoading />
+            </StatsGrid>
+          </StateRow>
+          <StateRow label="Empty (zero values)">
+            <StatsGrid className="max-w-xs">
+              <StatBox value={0} label="Collection" />
+              <StatBox value={0} label="Compliments" />
+              <StatBox value={0} label="Wishlist" />
+            </StatsGrid>
+          </StateRow>
+        </>
+      );
     case 'modal':
       return (
         <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy-mid)' }}>
@@ -1510,17 +1712,29 @@ function ComponentPreview({ item }: { item: GalleryItem }) {
       );
     case 'multi-select':
       return (
-        <MultiSelect
-          options={[
-            { value: 'opt1', label: 'Option 1' },
-            { value: 'opt2', label: 'Option 2' },
-          ]}
-          value={[]}
-          onChange={() => {}}
-        />
+        <>
+          <StateRow label="Empty (no selection)">
+            <MultiSelect
+              options={[{ value: 'opt1', label: 'Option 1' }, { value: 'opt2', label: 'Option 2' }]}
+              value={[]}
+              onChange={() => {}}
+            />
+          </StateRow>
+          <StateRow label="With selections">
+            <MultiSelect
+              options={[{ value: 'opt1', label: 'Option 1' }, { value: 'opt2', label: 'Option 2' }]}
+              value={['opt1']}
+              onChange={() => {}}
+            />
+          </StateRow>
+        </>
       );
     case 'per-page-control':
-      return <PerPageControl value={25} onChange={() => {}} />;
+      return (
+        <StateRow label="Normal">
+          <PerPageControl value={25} onChange={() => {}} />
+        </StateRow>
+      );
     default:
       return null;
   }

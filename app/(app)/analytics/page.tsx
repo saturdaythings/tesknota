@@ -739,7 +739,7 @@ export default function AnalyticsPage() {
             ];
             return (
               <div className="ml-auto" style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-                <Button variant="secondary" disabled style={{ cursor: "default" }}>Compare with</Button>
+                <Button variant="primary" disabled style={{ cursor: "default" }}>Compare with</Button>
                 <Select
                   size="auto"
                   options={[{ value: "", label: "No one" }, ...friendOptions]}

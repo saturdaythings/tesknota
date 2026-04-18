@@ -178,7 +178,7 @@ function ConfirmCard({
       )}
       <div style={{ display: "flex", gap: "var(--space-2)" }}>
         <Button variant="primary" onClick={onAddDetails}>Add details now</Button>
-        <Button variant="secondary" onClick={onSaveLater}>Save for later</Button>
+        <Button variant="primary" onClick={onSaveLater}>Save for later</Button>
       </div>
     </div>
   );

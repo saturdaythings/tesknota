@@ -3,7 +3,7 @@
 import { forwardRef, ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'icon' | 'tab-action';
+export type ButtonVariant = 'primary' | 'ghost' | 'destructive' | 'icon' | 'tab-action';
 type ButtonSize = 'md' | 'sm';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -24,10 +24,6 @@ const variants: Record<ButtonVariant, string> = {
     'h-8 px-[var(--space-3)] bg-transparent border border-[var(--color-navy)] rounded-[var(--radius-md)] ' +
     'text-[length:var(--text-sm)] text-[var(--color-navy)] leading-none ' +
     'hover:bg-[var(--color-cream-dark)] active:bg-[var(--color-row-hover)]',
-  secondary:
-    'h-8 px-[var(--space-3)] bg-transparent border border-[var(--color-row-divider)] rounded-[var(--radius-md)] ' +
-    'text-[length:var(--text-sm)] text-[var(--color-navy)] leading-none ' +
-    'hover:border-[var(--color-navy)]',
   ghost:
     'h-8 px-[var(--space-2)] bg-transparent border-none rounded-[var(--radius-md)] ' +
     'text-[length:var(--text-sm)] text-[var(--color-meta-text)] leading-none ' +

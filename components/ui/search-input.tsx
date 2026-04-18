@@ -8,9 +8,10 @@ interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  loading?: boolean;
 }
 
-export function SearchInput({ value, onChange, placeholder = "Search...", className, ...props }: SearchInputProps) {
+export function SearchInput({ value, onChange, placeholder = "Search...", className, loading, ...props }: SearchInputProps) {
   return (
     <div className={cn("relative flex items-center w-full", className)}>
       <svg
@@ -36,7 +37,15 @@ export function SearchInput({ value, onChange, placeholder = "Search...", classN
         {...props}
       />
 
-      {value && (
+      {loading ? (
+        <svg
+          className="animate-spin"
+          width="14" height="14" viewBox="0 0 14 14" fill="none" aria-label="Loading"
+          style={{ position: "absolute", right: "10px", color: "var(--color-meta-text)", pointerEvents: "none" }}
+        >
+          <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="20 10" />
+        </svg>
+      ) : value && (
         <Button
           variant="icon"
           aria-label="Clear search"

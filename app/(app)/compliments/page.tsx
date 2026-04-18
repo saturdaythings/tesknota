@@ -6,9 +6,7 @@ import { TabPill } from '@/components/ui/tab-pill';
 import { LogComplimentModal } from '@/components/compliments/log-compliment-modal';
 import { ComplimentsList, type ComplimentColumnDef, type FragInfo } from '@/components/compliments/compliments-list';
 import { EmptyCompliments } from '@/components/compliments/empty-compliments';
-import { FragSearch } from '@/components/ui/frag-search';
-import { PageFilterBar } from '@/components/ui/page-filter-bar';
-import { Topbar } from '@/components/layout/Topbar';
+import { PageHeader } from '@/components/ui/page-header';
 import { PageContent } from '@/components/layout/PageContent';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
@@ -172,10 +170,8 @@ function ComplimentsInner() {
     <>
       <LogComplimentModal open={logOpen} onClose={() => setLogOpen(false)} />
       <LogComplimentModal open={!!editingComp} onClose={() => setEditingComp(null)} editing={editingComp} />
-      <Topbar title="Compliments" actions={<FragSearch />} />
-
       <PageContent>
-        <PageFilterBar
+        <PageHeader
           searchValue={search}
           onSearch={setSearch}
           searchPlaceholder="Search your compliments..."

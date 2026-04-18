@@ -31,8 +31,6 @@ import { FragSearch } from "@/components/ui/frag-search";
 const COLLECTION_STATUSES = new Set(["CURRENT", "PREVIOUSLY_OWNED", "FINISHED"]);
 const WISHLIST_STATUSES = new Set(["WANT_TO_BUY", "WANT_TO_SMELL", "WANT_TO_IDENTIFY"]);
 
-const SKELETON_ROW_HEIGHT = 'var(--size-row-min)';
-
 export default function DashboardPage() {
   const router = useRouter();
   const { user, profiles } = useUser();
@@ -979,18 +977,9 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
 
 function DashboardSkeleton() {
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-1)" }}>
       {Array.from({ length: 8 }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            height: SKELETON_ROW_HEIGHT,
-            borderBottom: "1px solid var(--color-row-divider)",
-            background: "var(--color-row-hover)",
-            borderRadius: "var(--radius-md)",
-            marginBottom: "var(--space-1)",
-          }}
-        />
+        <Skeleton key={i} className="w-full h-[var(--size-row-min)]" />
       ))}
     </div>
   );

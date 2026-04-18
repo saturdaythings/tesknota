@@ -710,7 +710,7 @@ function AuditTab() {
   return (
     <div>
       <div className="mb-6">
-        <Button variant="secondary" onClick={run}>Run Audit</Button>
+        <Button variant="primary" onClick={run}>Run Audit</Button>
         {results && (
           <span className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] ml-4">
             {pass} passed, {fail} failed
@@ -837,7 +837,7 @@ function FlagsTab({
               {editId !== f.id && (
                 <div style={{ display: "flex", gap: "var(--space-2)", flexShrink: 0 }}>
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     onClick={() => {
                       setEditId(f.id);
                       setEditValue(f.suggestedValue ?? "");
@@ -1054,7 +1054,7 @@ function PendingEntriesTab({
               </div>
               <div style={{ display: "flex", gap: "var(--space-2)", flexShrink: 0 }}>
                 <Link href={`/import?name=${encodeURIComponent(e.fragranceName)}`}>
-                  <Button variant="secondary">Import</Button>
+                  <Button variant="primary">Import</Button>
                 </Link>
                 <Button variant="ghost" onClick={() => onDismiss(e.id)}>Dismiss</Button>
               </div>
@@ -1379,7 +1379,7 @@ export default function AdminPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)]">{user?.name}</span>
-          <Button variant="secondary" size="sm" onClick={load}>Sync Now</Button>
+          <Button variant="primary" size="sm" onClick={load}>Sync Now</Button>
         </div>
       </div>
 

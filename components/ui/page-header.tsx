@@ -15,38 +15,33 @@ export interface FilterBarFilter {
   options: { value: string; label: string }[];
 }
 
-interface PageFilterBarProps {
+export interface PageHeaderProps {
+  // ROW 1: Search and Add
   searchValue: string;
   onSearch: (v: string) => void;
-  searchPlaceholder?: string;
+  searchPlaceholder: string;
+  addLabel: string;
+  onAdd: () => void;
 
-  addLabel?: string;
-  onAdd?: () => void;
-
+  // ROW 2: Filters and Pagination (Left side)
   sortFields: FilterBarSortOption[];
   sortField: string;
   onSortField: (v: string) => void;
   sortDir: "asc" | "desc";
   onSortDir: () => void;
-
   filters?: FilterBarFilter[];
-  filterPanel?: React.ReactNode;
   filtersActive: boolean;
   onClearFilters?: () => void;
 
+  // ROW 2: Pagination (Right side)
   perPage: number;
   onPerPage: (v: number) => void;
 
+  // ROW 3: Count label
   count?: number;
-  countLabel?: string;
+  countLabel: string;
   isLoaded?: boolean;
 }
-
-const PER_PAGE_OPTIONS = [
-  { value: "25", label: "25" },
-  { value: "50", label: "50" },
-  { value: "100", label: "100" },
-];
 
 function SortDirButton({ dir, onClick }: { dir: "asc" | "desc"; onClick: () => void }) {
   return (
@@ -73,52 +68,85 @@ function SortDirButton({ dir, onClick }: { dir: "asc" | "desc"; onClick: () => v
   );
 }
 
-export function PageFilterBar({
-  searchValue, onSearch, searchPlaceholder = "Search...",
-  addLabel, onAdd,
-  sortFields, sortField, onSortField, sortDir, onSortDir,
-  filters, filterPanel, filtersActive, onClearFilters,
-  perPage, onPerPage,
-  count, countLabel = "Item", isLoaded,
-}: PageFilterBarProps) {
+export function PageHeader({
+  searchValue,
+  onSearch,
+  searchPlaceholder,
+  addLabel,
+  onAdd,
+  sortFields,
+  sortField,
+  onSortField,
+  sortDir,
+  onSortDir,
+  filters,
+  filtersActive,
+  onClearFilters,
+  perPage,
+  onPerPage,
+  count,
+  countLabel,
+  isLoaded,
+}: PageHeaderProps) {
+  const PER_PAGE_OPTIONS = [
+    { value: "25", label: "25" },
+    { value: "50", label: "50" },
+    { value: "0", label: "All" },
+  ];
+
   return (
     <div>
+      {/* ROW 1: Search (right) + Add button (right) */}
       <div
-        className="flex items-center justify-between flex-wrap"
         style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
           gap: "var(--space-2)",
           paddingBottom: "var(--space-3)",
           borderBottom: "1px solid var(--color-row-divider)",
         }}
       >
-        <div className="flex items-center flex-wrap" style={{ gap: "var(--space-2)" }}>
-          <SearchInput
-            value={searchValue}
-            onChange={onSearch}
-            placeholder={searchPlaceholder}
-            className="w-[200px]"
-          />
+        <SearchInput value={searchValue} onChange={onSearch} placeholder={searchPlaceholder} className="w-[200px]" />
+        <Button variant="primary" onClick={onAdd}>
+          {addLabel}
+        </Button>
+      </div>
+
+      {/* ROW 2: Sort/Filters (left) | Per-page (right) */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "var(--space-2)",
+          paddingTop: "var(--space-3)",
+          paddingBottom: "var(--space-3)",
+          borderBottom: "1px solid var(--color-row-divider)",
+        }}
+      >
+        {/* Left side: Sort + Direction + Filters */}
+        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
+          <Select options={sortFields} value={sortField} onChange={onSortField} size="auto" />
+          <SortDirButton dir={sortDir} onClick={onSortDir} />
+          <Button variant="ghost" className="h-9" onClick={onClearFilters} disabled={!filtersActive}>
+            Filters
+          </Button>
           {filters?.map((f, i) => (
             <Select key={i} options={f.options} value={f.value} onChange={f.onChange} size="auto" />
           ))}
-          {filterPanel}
-          {filtersActive && onClearFilters && (
-            <Button variant="ghost" className="h-9" onClick={onClearFilters}>
-              Clear
-            </Button>
-          )}
-          <Select options={sortFields} value={sortField} onChange={onSortField} size="auto" />
-          <SortDirButton dir={sortDir} onClick={onSortDir} />
-          <Select
-            options={PER_PAGE_OPTIONS}
-            value={String(perPage)}
-            onChange={(v) => onPerPage(Number(v))}
-            size="auto"
-          />
         </div>
-        {addLabel && onAdd && <Button variant="primary" onClick={onAdd}>{addLabel}</Button>}
+
+        {/* Right side: Per-page selector */}
+        <Select
+          options={PER_PAGE_OPTIONS}
+          value={String(perPage)}
+          onChange={(v) => onPerPage(Number(v))}
+          size="auto"
+        />
       </div>
 
+      {/* ROW 3: Count label (left-aligned) */}
       {isLoaded && count !== undefined && (
         <div
           className="font-sans uppercase"

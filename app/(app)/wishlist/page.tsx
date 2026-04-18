@@ -3,11 +3,9 @@
 import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Heart, SearchX } from "lucide-react";
-import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { Button } from "@/components/ui/button";
-import { FragSearch } from "@/components/ui/frag-search";
-import { PageFilterBar } from "@/components/ui/page-filter-bar";
+import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FragranceCell } from "@/components/ui/fragrance-cell";
@@ -564,10 +562,8 @@ function WishlistInner() {
         />
       )}
 
-      <Topbar title="Wishlist" actions={<FragSearch />} />
-
       <PageContent>
-        <PageFilterBar
+        <PageHeader
           searchValue={search}
           onSearch={setSearch}
           searchPlaceholder="Search your wishlist..."
