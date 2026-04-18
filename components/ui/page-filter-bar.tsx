@@ -20,8 +20,8 @@ interface PageFilterBarProps {
   onSearch: (v: string) => void;
   searchPlaceholder?: string;
 
-  addLabel: string;
-  onAdd: () => void;
+  addLabel?: string;
+  onAdd?: () => void;
 
   sortFields: FilterBarSortOption[];
   sortField: string;
@@ -82,6 +82,7 @@ export function PageFilterBar({
   perPage, onPerPage,
   count, countLabel = "Item", isLoaded,
 }: PageFilterBarProps) {
+  const showAdd = addLabel != null && onAdd != null;
   return (
     <div>
       <div
@@ -117,7 +118,7 @@ export function PageFilterBar({
             size="auto"
           />
         </div>
-        <Button variant="primary" onClick={onAdd}>{addLabel}</Button>
+        {showAdd && <Button variant="primary" onClick={onAdd!}>{addLabel}</Button>}
       </div>
 
       {isLoaded && count !== undefined && (
