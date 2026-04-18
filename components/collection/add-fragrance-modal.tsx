@@ -280,16 +280,29 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                     Size Owned
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-2)" }}>
-                    {SIZE_OPTIONS.map((s) => (
-                      <Button
-                        key={s.value}
-                        variant={sizes.includes(s.value) ? "primary" : "ghost"}
-                        onClick={() => setSizes(sizes.includes(s.value) ? sizes.filter((x) => x !== s.value) : [...sizes, s.value])}
-                        style={{ fontSize: "var(--text-sm)" }}
-                      >
-                        {s.label}
-                      </Button>
-                    ))}
+                    {SIZE_OPTIONS.map((s) => {
+                      const isActive = sizes.includes(s.value);
+                      return (
+                        <button
+                          key={s.value}
+                          onClick={() => setSizes(isActive ? sizes.filter((x) => x !== s.value) : [...sizes, s.value])}
+                          style={{
+                            padding: "var(--space-2) var(--space-3)",
+                            borderRadius: "var(--radius-md)",
+                            fontFamily: "var(--font-sans)",
+                            fontSize: "var(--text-sm)",
+                            cursor: "pointer",
+                            transition: "all 150ms",
+                            border: "1px solid var(--color-navy)",
+                            background: isActive ? "var(--color-navy)" : "var(--color-cream)",
+                            color: isActive ? "var(--color-cream)" : "var(--color-navy)",
+                            outline: "none",
+                          }}
+                        >
+                          {s.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -426,20 +439,40 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                   Dupe Tracking
                 </div>
                 <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-                  <Button
-                    variant={isDupe ? "primary" : "ghost"}
+                  <button
                     onClick={() => setIsDupe(true)}
-                    style={{ fontSize: "var(--text-sm)" }}
+                    style={{
+                      padding: "var(--space-2) var(--space-3)",
+                      borderRadius: "var(--radius-md)",
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "var(--text-sm)",
+                      cursor: "pointer",
+                      transition: "all 150ms",
+                      border: "1px solid var(--color-navy)",
+                      background: isDupe ? "var(--color-navy)" : "var(--color-cream)",
+                      color: isDupe ? "var(--color-cream)" : "var(--color-navy)",
+                      outline: "none",
+                    }}
                   >
                     Dupe For
-                  </Button>
-                  <Button
-                    variant={!isDupe ? "primary" : "ghost"}
+                  </button>
+                  <button
                     onClick={() => setIsDupe(false)}
-                    style={{ fontSize: "var(--text-sm)" }}
+                    style={{
+                      padding: "var(--space-2) var(--space-3)",
+                      borderRadius: "var(--radius-md)",
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "var(--text-sm)",
+                      cursor: "pointer",
+                      transition: "all 150ms",
+                      border: "1px solid var(--color-navy)",
+                      background: !isDupe ? "var(--color-navy)" : "var(--color-cream)",
+                      color: !isDupe ? "var(--color-cream)" : "var(--color-navy)",
+                      outline: "none",
+                    }}
                   >
                     Not a Dupe
-                  </Button>
+                  </button>
                   {isDupe && (
                     <input
                       type="text"
@@ -448,9 +481,11 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                       placeholder="Search collection..."
                       style={{
                         flex: 1,
-                        padding: "var(--space-1) var(--space-2)",
-                        border: "1px solid var(--color-meta-text)",
-                        borderRadius: "var(--radius-sm)",
+                        padding: "var(--space-1) 0",
+                        borderBottom: "1px solid var(--color-meta-text)",
+                        border: "none",
+                        borderBottomStyle: "solid",
+                        background: "transparent",
                         fontFamily: "var(--font-sans)",
                         fontSize: "var(--text-sm)",
                         color: "var(--color-navy)",
