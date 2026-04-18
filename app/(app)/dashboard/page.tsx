@@ -219,11 +219,11 @@ function QuickActions({
 }) {
   return (
     <div className="dash-quick-actions mb-8">
-      <Button variant="ghost" size="sm" onClick={onAddFrag}>
+      <Button variant="ghost" onClick={onAddFrag}>
         <Plus size={16} />
         Add Fragrance
       </Button>
-      <Button variant="ghost" size="sm" onClick={onLogCompliment}>
+      <Button variant="ghost" onClick={onLogCompliment}>
         <MessageCircle size={16} />
         Log Compliment
       </Button>

@@ -228,7 +228,7 @@ export default function RegisterPage() {
           style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}
         >
           Already have an account?
-          <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
+          <Button variant="ghost" onClick={() => router.push("/")}>
             Sign in
           </Button>
         </div>

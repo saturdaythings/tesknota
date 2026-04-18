@@ -1379,7 +1379,7 @@ export default function AdminPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)]">{user?.name}</span>
-          <Button variant="primary" size="sm" onClick={load}>Sync Now</Button>
+          <Button variant="primary" onClick={load}>Sync Now</Button>
         </div>
       </div>
 

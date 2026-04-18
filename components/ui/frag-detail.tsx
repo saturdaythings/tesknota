@@ -198,7 +198,7 @@ export function FragDetail({
               <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-lg)] uppercase text-[var(--color-navy)]">
                 Community
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setFlagOpen((v) => !v)}>
+              <Button variant="ghost" onClick={() => setFlagOpen((v) => !v)}>
                 {flagOpen ? "Cancel flag" : "Flag incorrect data"}
               </Button>
             </div>
@@ -224,7 +224,7 @@ export function FragDetail({
                 />
                 <Button
                   variant="primary"
-                  size="sm"
+                 
                   onClick={submitFlag}
                   disabled={flagging}
                   style={{ alignSelf: "flex-start" }}
@@ -273,17 +273,17 @@ export function FragDetail({
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
             {!readOnly && onDelete && !confirmDelete && (
-              <Button variant="destructive" size="sm" onClick={handleDelete}>
+              <Button variant="destructive" onClick={handleDelete}>
                 Delete
               </Button>
             )}
             {!readOnly && onDelete && confirmDelete && (
               <>
                 <span className="font-[var(--font-sans)] text-xs text-[var(--color-destructive)]">Remove permanently?</span>
-                <Button variant="destructive" size="sm" onClick={handleDelete}>
+                <Button variant="destructive" onClick={handleDelete}>
                   Confirm
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
+                <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
                   Cancel
                 </Button>
               </>
@@ -291,11 +291,11 @@ export function FragDetail({
           </div>
           <div className="flex items-center gap-2">
             {!readOnly && onEdit && (
-              <Button variant="primary" size="sm" onClick={() => { handleClose(); onEdit(frag!); }}>
+              <Button variant="primary" onClick={() => { handleClose(); onEdit(frag!); }}>
                 Edit
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={handleClose}>
+            <Button variant="ghost" onClick={handleClose}>
               Close
             </Button>
           </div>

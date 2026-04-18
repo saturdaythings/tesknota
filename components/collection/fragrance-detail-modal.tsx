@@ -354,7 +354,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               >
                 {fragCompliments.length > 0 ? `${fragCompliments.length} logged` : "None logged yet"}
               </p>
-              <Button variant="primary" size="sm" onClick={() => setCompFormOpen(true)}>
+              <Button variant="primary" onClick={() => setCompFormOpen(true)}>
                 Log Compliment
               </Button>
             </div>
@@ -381,7 +381,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
         >
           <div className="flex items-center gap-3">
             {!confirmDelete ? (
-              <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(true)}>
+              <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
                 Remove
               </Button>
             ) : (
@@ -389,10 +389,10 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
                 <span className="font-sans" style={{ fontSize: "var(--text-sm)", color: "var(--color-destructive)" }}>
                   Are you sure? This cannot be undone.
                 </span>
-                <Button variant="destructive" size="sm" onClick={() => frag && onDelete(frag)}>
+                <Button variant="destructive" onClick={() => frag && onDelete(frag)}>
                   Yes, Remove
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
+                <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
                   Cancel
                 </Button>
               </>

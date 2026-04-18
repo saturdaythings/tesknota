@@ -4,11 +4,9 @@ import { forwardRef, ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 export type ButtonVariant = 'primary' | 'ghost' | 'destructive' | 'icon' | 'tab-action' | 'toggle';
-type ButtonSize = 'md' | 'sm';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
-  size?: ButtonSize;
   active?: boolean;
   selected?: boolean;
 }
@@ -44,7 +42,7 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size: _size, active, selected, className, children, ...props }, ref) => {
+  ({ variant = 'primary', active, selected, className, children, ...props }, ref) => {
     const isActive = active || selected;
     const tabActionActive =
       variant === 'tab-action' && isActive

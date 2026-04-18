@@ -1682,7 +1682,7 @@ function ComponentPreview({ item }: { item: GalleryItem }) {
             <SectionHeader title="Section Title" />
           </StateRow>
           <StateRow label="With right content">
-            <SectionHeader title="Section Title" right={<Button variant="ghost" size="sm">Edit</Button>} />
+            <SectionHeader title="Section Title" right={<Button variant="ghost">Edit</Button>} />
           </StateRow>
         </>
       );

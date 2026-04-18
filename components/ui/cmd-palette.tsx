@@ -423,7 +423,7 @@ export function CmdPalette() {
         >
           {pal.flow ? (
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={goBack}>
+              <Button variant="ghost" onClick={goBack}>
                 ← Back
               </Button>
               <span
@@ -454,7 +454,7 @@ export function CmdPalette() {
             >
               ⌘K
             </kbd>
-            <Button variant="icon" size="sm" onClick={closePal} aria-label="Close">×</Button>
+            <Button variant="icon" onClick={closePal} aria-label="Close">×</Button>
           </div>
         </div>
 
@@ -643,7 +643,7 @@ export function CmdPalette() {
                     />
                   ))}
                 </div>
-                <Button variant="primary" size="sm" onClick={submitMultiSelect} style={{ alignSelf: 'flex-start' }}>
+                <Button variant="primary" onClick={submitMultiSelect} style={{ alignSelf: 'flex-start' }}>
                   Continue
                 </Button>
               </div>
@@ -660,7 +660,7 @@ export function CmdPalette() {
                   placeholder={step.hint}
                   className="mb-3"
                 />
-                <Button variant="primary" size="sm" onClick={submitText}>Continue</Button>
+                <Button variant="primary" onClick={submitText}>Continue</Button>
               </>
             )}
 
@@ -675,7 +675,7 @@ export function CmdPalette() {
                   rows={4}
                   className="mb-3"
                 />
-                <Button variant="primary" size="sm" onClick={submitText}>Continue</Button>
+                <Button variant="primary" onClick={submitText}>Continue</Button>
               </>
             )}
 
@@ -691,7 +691,7 @@ export function CmdPalette() {
             {step.optional && step.type !== "confirm" && step.type !== "pick" && step.type !== "search" && (
               <Button
                 variant="ghost"
-                size="sm"
+               
                 onClick={skipStep}
                 className="mt-3"
                 style={{ color: 'var(--color-meta-text)' }}

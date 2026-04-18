@@ -155,7 +155,7 @@ function DiscoverCard({ name, house, rating, priceRange, matchNote, onWishlist, 
           ✓ On Wishlist
         </div>
       ) : (
-        <Button variant="primary" size="sm" onClick={onAdd} style={{ width: "100%" }}>
+        <Button variant="primary" onClick={onAdd} style={{ width: "100%" }}>
           WISHLIST
         </Button>
       )}
@@ -349,10 +349,10 @@ function WishlistMobileCard({
         )}
       </Button>
       <div style={{ display: "flex", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
-        <Button variant="primary" size="sm" onClick={() => onMoveToCollection(frag)} style={{ flex: 1 }}>
+        <Button variant="primary" onClick={() => onMoveToCollection(frag)} style={{ flex: 1 }}>
           Move to Collection
         </Button>
-        <Button variant="destructive" size="sm" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
+        <Button variant="destructive" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
       </div>
     </div>
   );

@@ -128,7 +128,7 @@ function ComplimentMobileCard({ comp, frag, onEdit }: ComplimentMobileCardProps)
           {comp.notes}
         </div>
       )}
-      <Button variant="primary" size="sm" onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ width: '100%' }}>
+      <Button variant="primary" onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ width: '100%' }}>
         Edit
       </Button>
     </Button>

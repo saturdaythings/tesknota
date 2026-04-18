@@ -366,13 +366,13 @@ export default function ProfilePage() {
               {(profile?.instagramHandle || profile?.tiktokHandle || profile?.youtubeHandle) && (
                 <div className="flex flex-wrap gap-1 mb-[var(--space-3)]">
                   {profile.instagramHandle && (
-                    <Button variant="ghost" size="sm">@{profile.instagramHandle}</Button>
+                    <Button variant="ghost">@{profile.instagramHandle}</Button>
                   )}
                   {profile.tiktokHandle && (
-                    <Button variant="ghost" size="sm">@{profile.tiktokHandle}</Button>
+                    <Button variant="ghost">@{profile.tiktokHandle}</Button>
                   )}
                   {profile.youtubeHandle && (
-                    <Button variant="ghost" size="sm">@{profile.youtubeHandle}</Button>
+                    <Button variant="ghost">@{profile.youtubeHandle}</Button>
                   )}
                 </div>
               )}
@@ -431,7 +431,7 @@ export default function ProfilePage() {
                 <span className="font-sans" style={{ fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>
                   Welcome to t&#281;sknota — fill in your profile to get started.
                 </span>
-                <Button variant="ghost" size="sm" onClick={() => setShowOnboarding(false)}>✕</Button>
+                <Button variant="ghost" onClick={() => setShowOnboarding(false)}>✕</Button>
               </div>
             )}
 
@@ -477,7 +477,7 @@ export default function ProfilePage() {
 
                   {/* Change password */}
                   <div>
-                    <Button variant="primary" size="sm" onClick={() => setShowPwFields((v) => !v)}>
+                    <Button variant="primary" onClick={() => setShowPwFields((v) => !v)}>
                       Change Password
                     </Button>
                     {showPwFields && (
@@ -548,7 +548,7 @@ export default function ProfilePage() {
                           <span className="font-sans flex-1 truncate" style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
                             {c.notes || ""}
                           </span>
-                          <Button variant="ghost" size="sm" onClick={() => handleRemoveCode(c.id)}>Remove</Button>
+                          <Button variant="ghost" onClick={() => handleRemoveCode(c.id)}>Remove</Button>
                         </div>
                       ))}
                     </div>

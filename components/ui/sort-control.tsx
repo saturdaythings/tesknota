@@ -29,7 +29,7 @@ export function SortControl({ field, direction, options, onField, onToggleDirect
       />
       <Button
         variant="icon"
-        size="sm"
+       
         onClick={onToggleDirection}
         title={direction === "asc" ? "Sort ascending" : "Sort descending"}
         aria-label={direction === "asc" ? "Sort ascending" : "Sort descending"}
