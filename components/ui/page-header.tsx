@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUp, ArrowDown, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Select } from "@/components/ui/select";
@@ -16,14 +17,12 @@ export interface FilterBarFilter {
 }
 
 export interface PageHeaderProps {
-  // ROW 1: Search and Add
   searchValue: string;
   onSearch: (v: string) => void;
   searchPlaceholder: string;
   addLabel: string;
   onAdd: () => void;
 
-  // ROW 2: Filters and Pagination (Left side)
   sortFields: FilterBarSortOption[];
   sortField: string;
   onSortField: (v: string) => void;
@@ -33,40 +32,15 @@ export interface PageHeaderProps {
   filtersActive: boolean;
   onClearFilters?: () => void;
 
-  // ROW 2: Pagination (Right side)
   perPage: number;
   onPerPage: (v: number) => void;
 
-  // ROW 3: Count label
   count?: number;
   countLabel: string;
   isLoaded?: boolean;
 }
 
-function SortDirButton({ dir, onClick }: { dir: "asc" | "desc"; onClick: () => void }) {
-  return (
-    <Button
-      variant="ghost"
-      className="h-9 w-9 flex-shrink-0 p-0"
-      aria-label={dir === "desc" ? "Sorted descending" : "Sorted ascending"}
-      onClick={onClick}
-    >
-      {dir === "desc" ? (
-        <svg width="16" height="18" viewBox="0 0 16 18" fill="none" aria-hidden="true">
-          <line x1="8" y1="2" x2="8" y2="9" stroke="var(--color-navy)" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="4" y1="9" x2="12" y2="9" stroke="var(--color-navy)" strokeWidth="1.5" strokeLinecap="round" />
-          <polyline points="5,11 8,15 11,11" stroke="var(--color-navy)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </svg>
-      ) : (
-        <svg width="16" height="18" viewBox="0 0 16 18" fill="none" aria-hidden="true">
-          <polyline points="5,7 8,3 11,7" stroke="var(--color-navy)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          <line x1="4" y1="9" x2="12" y2="9" stroke="var(--color-navy)" strokeWidth="1.5" strokeLinecap="round" />
-          <line x1="8" y1="9" x2="8" y2="16" stroke="var(--color-navy)" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      )}
-    </Button>
-  );
-}
+const PER_PAGE_VALUES: number[] = [25, 50, 0];
 
 export function PageHeader({
   searchValue,
@@ -79,7 +53,6 @@ export function PageHeader({
   onSortField,
   sortDir,
   onSortDir,
-  filters,
   filtersActive,
   onClearFilters,
   perPage,
@@ -88,75 +61,141 @@ export function PageHeader({
   countLabel,
   isLoaded,
 }: PageHeaderProps) {
-  const PER_PAGE_OPTIONS = [
-    { value: "25", label: "25" },
-    { value: "50", label: "50" },
-    { value: "0", label: "All" },
-  ];
-
   return (
     <div>
-      {/* ROW 1: Search (left) + Add button (right) */}
+      {/* ROW 1: Search + Add (right-aligned) */}
       <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--space-2)",
-          paddingBottom: "var(--space-3)",
-          borderBottom: "1px solid var(--color-row-divider)",
-        }}
+        className="flex items-center justify-end gap-3"
+        style={{ marginBottom: "var(--space-8)" }}
       >
-        <SearchInput value={searchValue} onChange={onSearch} placeholder={searchPlaceholder} className="w-[200px]" />
-        <Button variant="primary" onClick={onAdd}>
+        <SearchInput
+          value={searchValue}
+          onChange={onSearch}
+          placeholder={searchPlaceholder}
+          className="w-[220px]"
+        />
+        <Button
+          variant="primary"
+          className="px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-[var(--color-navy)] text-[var(--color-cream)] hover:bg-[var(--color-accent)] min-h-10 h-auto border-0"
+          onClick={onAdd}
+        >
           {addLabel}
         </Button>
       </div>
 
-      {/* ROW 2: Sort/Filters (left) | Per-page (right) */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--space-2)",
-          paddingTop: "var(--space-3)",
-          paddingBottom: "var(--space-3)",
-          borderBottom: "1px solid var(--color-row-divider)",
-        }}
-      >
-        {/* Left side: Sort + Direction + Filter dropdowns + Clear */}
-        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", flexWrap: "wrap" }}>
-          <Select options={sortFields} value={sortField} onChange={onSortField} size="auto" />
-          <SortDirButton dir={sortDir} onClick={onSortDir} />
-          {filters?.map((f, i) => (
-            <Select key={i} options={f.options} value={f.value} onChange={f.onChange} size="auto" />
-          ))}
-          {filtersActive && onClearFilters && (
-            <Button variant="ghost" className="h-9" onClick={onClearFilters}>
-              Clear
+      {/* ROW 2: Sort + Filters (left) | Per-page toggle (right) */}
+      <div style={{ marginBottom: "var(--space-6)" }}>
+        <div
+          className="flex items-center justify-between flex-wrap"
+          style={{ gap: "var(--space-3)" }}
+        >
+          <div
+            className="flex items-center flex-wrap"
+            style={{ gap: "var(--space-2)" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--space-1)",
+              }}
+            >
+              <Select
+                options={sortFields}
+                value={sortField}
+                onChange={onSortField}
+                size="auto"
+              />
+              <Button
+                variant="ghost"
+                className="p-0 rounded-[3px] bg-transparent text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] hover:text-[var(--color-navy)]"
+                style={{ width: "36px", height: "36px" }}
+                title={sortDir === "asc" ? "Sort ascending" : "Sort descending"}
+                aria-label={sortDir === "asc" ? "Sort ascending" : "Sort descending"}
+                onClick={onSortDir}
+              >
+                {sortDir === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
+              </Button>
+            </div>
+            <Button
+              variant="primary"
+              className="px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-transparent border border-[var(--color-navy)] text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] min-h-8 h-auto"
+              style={{ height: "36px" }}
+              onClick={onClearFilters}
+              disabled={!filtersActive}
+            >
+              <SlidersHorizontal size={13} />
+              Filters
             </Button>
-          )}
-        </div>
+          </div>
 
-        {/* Right side: Per-page selector */}
-        <Select
-          options={PER_PAGE_OPTIONS}
-          value={String(perPage)}
-          onChange={(v) => onPerPage(Number(v))}
-          size="auto"
-        />
+          <div className="flex items-center" style={{ gap: "var(--space-1)" }}>
+            <span
+              className="font-sans"
+              style={{
+                fontSize: "var(--text-xs)",
+                color: "var(--color-navy)",
+                letterSpacing: "var(--tracking-sm)",
+                marginRight: "var(--space-1)",
+              }}
+            >
+              Per page:
+            </span>
+            {PER_PAGE_VALUES.map((n, i) => {
+              const active = perPage === n;
+              return (
+                <span
+                  key={n}
+                  className="flex items-center"
+                  style={{ gap: "var(--space-1)" }}
+                >
+                  {i > 0 && (
+                    <span
+                      className="font-sans select-none"
+                      style={{
+                        fontSize: "var(--text-xs)",
+                        color: "var(--color-navy)",
+                        opacity: 0.35,
+                      }}
+                    >
+                      |
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="font-sans"
+                    style={{
+                      fontSize: "var(--text-xs)",
+                      color: "var(--color-navy)",
+                      fontWeight: active
+                        ? "var(--font-weight-semibold)"
+                        : "var(--font-weight-normal)",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: "0 var(--space-1)",
+                      letterSpacing: "var(--tracking-sm)",
+                    }}
+                    onClick={() => onPerPage(n)}
+                  >
+                    {n === 0 ? "All" : n}
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* ROW 3: Count label (left-aligned) */}
+      {/* ROW 3: Count label */}
       {isLoaded && count !== undefined && (
         <div
           className="font-sans uppercase"
           style={{
-            fontSize: "var(--text-sm)",
+            fontSize: "var(--text-xs)",
+            fontWeight: "var(--font-weight-medium)",
             letterSpacing: "var(--tracking-md)",
-            color: "var(--color-meta-text)",
-            marginTop: "var(--space-3)",
+            color: "var(--color-navy)",
             marginBottom: "var(--space-4)",
           }}
         >

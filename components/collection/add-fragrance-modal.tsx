@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { useUser } from "@/lib/user-context";
@@ -110,7 +112,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
   const [price, setPrice] = useState("");
   const [whereBought, setWhereBought] = useState("");
   const [rating, setRating] = useState(0);
-  const [showLessDetails, setShowLessDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [purchaseMonth, setPurchaseMonth] = useState("");
   const [purchaseYear, setPurchaseYear] = useState("");
   const [isDupe, setIsDupe] = useState(false);
@@ -133,7 +135,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
     setPrice("");
     setWhereBought("");
     setRating(0);
-    setShowLessDetails(false);
+    setShowDetails(false);
     setPurchaseMonth("");
     setPurchaseYear("");
     setIsDupe(false);
@@ -259,27 +261,14 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                   Search Fragrance Name
                 </div>
                 <div style={{ position: "relative" }}>
-                  <input
-                    type="text"
+                  <Input
+                    variant="underline"
                     value={query}
                     onChange={(e) => {
                       setQuery(e.target.value);
                       if (selected) setSelected(null);
                     }}
                     placeholder="e.g. Baccarat Rouge 540"
-                    style={{
-                      width: "100%",
-                      padding: "var(--space-2) 0",
-                      borderBottom: "1px solid var(--color-meta-text)",
-                      border: "none",
-                      borderBottomStyle: "solid",
-                      background: "transparent",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "var(--text-base)",
-                      color: "var(--color-navy)",
-                      outline: "none",
-                    }}
-                    onFocus={() => {}}
                   />
                   {showResults && (
                     <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, marginTop: "var(--space-2)" }}>
@@ -348,24 +337,14 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                     {SIZE_OPTIONS.map((s) => {
                       const isActive = sizes.includes(s.value);
                       return (
-                        <button
+                        <Button
                           key={s.value}
+                          variant="toggle"
+                          active={isActive}
                           onClick={() => setSizes(isActive ? sizes.filter((x) => x !== s.value) : [...sizes, s.value])}
-                          style={{
-                            padding: "var(--space-2) var(--space-3)",
-                            borderRadius: "var(--radius-md)",
-                            fontFamily: "var(--font-sans)",
-                            fontSize: "var(--text-sm)",
-                            cursor: "pointer",
-                            transition: "all 150ms",
-                            border: "1px solid var(--color-navy)",
-                            background: isActive ? "var(--color-navy)" : "var(--color-cream)",
-                            color: isActive ? "var(--color-cream)" : "var(--color-navy)",
-                            outline: "none",
-                          }}
                         >
                           {s.label}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -393,23 +372,12 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                   <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
                     Purchase Price ($)
                   </div>
-                  <input
-                    type="text"
+                  <Input
+                    variant="underline"
+                    inputMode="decimal"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     placeholder="e.g. 136.34"
-                    style={{
-                      width: "100%",
-                      padding: "var(--space-2) 0",
-                      borderBottom: "1px solid var(--color-meta-text)",
-                      border: "none",
-                      borderBottomStyle: "solid",
-                      background: "transparent",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "var(--text-base)",
-                      color: "var(--color-navy)",
-                      outline: "none",
-                    }}
                   />
                 </div>
 
@@ -442,21 +410,10 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                     {whereBoughtOpen && (
                       <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, marginTop: "var(--space-2)", background: "var(--color-cream)", border: "1px solid var(--color-meta-text)", borderRadius: "var(--radius-sm)", boxShadow: "var(--shadow-md)" }}>
                         <div style={{ padding: "var(--space-2)" }}>
-                          <input
-                            type="text"
+                          <Input
                             value={whereBoughtSearch}
                             onChange={(e) => setWhereBoughtSearch(e.target.value)}
                             placeholder="Search..."
-                            style={{
-                              width: "100%",
-                              padding: "var(--space-1) var(--space-2)",
-                              border: "1px solid var(--color-meta-text)",
-                              borderRadius: "var(--radius-sm)",
-                              fontFamily: "var(--font-sans)",
-                              fontSize: "var(--text-sm)",
-                              color: "var(--color-navy)",
-                              outline: "none",
-                            }}
                             autoFocus
                           />
                         </div>
@@ -561,26 +518,17 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                 )}
               </div>
 
-              {/* Less Details toggle */}
+              {/* More Details toggle */}
               <div>
-                <button
-                  onClick={() => setShowLessDetails(!showLessDetails)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--color-meta-text)",
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--tracking-wide)",
-                    cursor: "pointer",
-                    padding: 0,
-                  }}
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowDetails(!showDetails)}
+                  className="h-auto p-0 uppercase text-[length:var(--text-xs)] [letter-spacing:var(--tracking-wide)]"
                 >
-                  {showLessDetails ? "— More Details" : "— Less Details"}
-                </button>
+                  {showDetails ? "— Less Details" : "— More Details"}
+                </Button>
 
-                {showLessDetails && (
+                {showDetails && (
                   <div style={{ marginTop: "var(--space-3)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" }}>
                     <div style={{ gridColumn: "1 / 2" }}>
                       <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-2)" }}>
@@ -613,59 +561,21 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                   Dupe Tracking
                 </div>
                 <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-                  <button
-                    onClick={() => setIsDupe(true)}
-                    style={{
-                      padding: "var(--space-2) var(--space-3)",
-                      borderRadius: "var(--radius-md)",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "var(--text-sm)",
-                      cursor: "pointer",
-                      transition: "all 150ms",
-                      border: "1px solid var(--color-navy)",
-                      background: isDupe ? "var(--color-navy)" : "var(--color-cream)",
-                      color: isDupe ? "var(--color-cream)" : "var(--color-navy)",
-                      outline: "none",
-                    }}
-                  >
+                  <Button variant="toggle" active={isDupe} onClick={() => setIsDupe(true)}>
                     Dupe For
-                  </button>
-                  <button
-                    onClick={() => setIsDupe(false)}
-                    style={{
-                      padding: "var(--space-2) var(--space-3)",
-                      borderRadius: "var(--radius-md)",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "var(--text-sm)",
-                      cursor: "pointer",
-                      transition: "all 150ms",
-                      border: "1px solid var(--color-navy)",
-                      background: !isDupe ? "var(--color-navy)" : "var(--color-cream)",
-                      color: !isDupe ? "var(--color-cream)" : "var(--color-navy)",
-                      outline: "none",
-                    }}
-                  >
+                  </Button>
+                  <Button variant="toggle" active={!isDupe} onClick={() => setIsDupe(false)}>
                     Not a Dupe
-                  </button>
+                  </Button>
                   {isDupe && (
-                    <input
-                      type="text"
-                      value={dupeFor}
-                      onChange={(e) => setDupeFor(e.target.value)}
-                      placeholder="Search collection..."
-                      style={{
-                        flex: 1,
-                        padding: "var(--space-1) 0",
-                        borderBottom: "1px solid var(--color-meta-text)",
-                        border: "none",
-                        borderBottomStyle: "solid",
-                        background: "transparent",
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "var(--text-sm)",
-                        color: "var(--color-navy)",
-                        outline: "none",
-                      }}
-                    />
+                    <div style={{ flex: 1 }}>
+                      <Input
+                        variant="underline"
+                        value={dupeFor}
+                        onChange={(e) => setDupeFor(e.target.value)}
+                        placeholder="Search collection..."
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -675,22 +585,12 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                 <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
                   Personal Notes
                 </div>
-                <textarea
+                <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="How does it smell on your skin? When do you wear it? Any context worth remembering?"
                   rows={4}
-                  style={{
-                    width: "100%",
-                    padding: "var(--space-2) var(--space-3)",
-                    border: "1px solid var(--color-meta-text)",
-                    borderRadius: "var(--radius-sm)",
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "var(--text-sm)",
-                    color: "var(--color-navy)",
-                    outline: "none",
-                    resize: "none",
-                  }}
+                  className="resize-none"
                 />
               </div>
             </div>

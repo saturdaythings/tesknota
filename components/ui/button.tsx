@@ -3,7 +3,7 @@
 import { forwardRef, ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-export type ButtonVariant = 'primary' | 'ghost' | 'destructive' | 'icon' | 'tab-action';
+export type ButtonVariant = 'primary' | 'ghost' | 'destructive' | 'icon' | 'tab-action' | 'toggle';
 type ButtonSize = 'md' | 'sm';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -38,6 +38,9 @@ const variants: Record<ButtonVariant, string> = {
   'tab-action':
     'h-8 px-[var(--space-3)] bg-transparent border border-[var(--color-row-divider)] rounded-[var(--radius-md)] ' +
     'text-[length:var(--text-sm)] text-[var(--color-navy)] leading-none',
+  toggle:
+    'h-9 px-[var(--space-3)] border border-[var(--color-navy)] rounded-[var(--radius-md)] ' +
+    'text-[length:var(--text-sm)] leading-none',
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -47,11 +50,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant === 'tab-action' && isActive
         ? 'border-[var(--color-navy)] bg-[var(--color-cream-dark)]'
         : '';
+    const toggleState =
+      variant === 'toggle'
+        ? isActive
+          ? 'bg-[var(--color-navy)] text-[var(--color-cream)]'
+          : 'bg-[var(--color-cream)] text-[var(--color-navy)] hover:bg-[var(--color-cream-dark)]'
+        : '';
 
     return (
       <button
         ref={ref}
-        className={cn(base, variants[variant], tabActionActive, className)}
+        className={cn(base, variants[variant], tabActionActive, toggleState, className)}
         {...props}
       >
         {children}
