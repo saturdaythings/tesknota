@@ -410,7 +410,7 @@ export function CmdPalette() {
       {/* Palette modal */}
       <div
         className="fixed left-1/2 top-[15vh] -translate-x-1/2 w-full max-w-[520px] bg-[var(--color-cream)] border border-[var(--color-sand-light)] z-[601]"
-        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }}
+        style={{ boxShadow: 'var(--shadow-lg)' }}
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
