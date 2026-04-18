@@ -754,7 +754,7 @@ function InCommonTab({
         Both own {sorted.length} {sorted.length === 1 ? 'fragrance' : 'fragrances'}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
+      <div className="hidden md:grid" style={{ gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
         <div style={headerRowStyle}>
           {['Fragrance', 'Accords', 'Compliments'].map((label) => (
             <div key={label} className="font-sans uppercase" style={headerCellStyle}>{label}</div>
@@ -787,6 +787,44 @@ function InCommonTab({
                 <span className="font-sans uppercase" style={{ ...cellStyle, color: (myComps > 0 || friendComps > 0) ? 'var(--color-accent)' : 'var(--color-meta-text)' }}>
                   {compDisplay}
                 </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="md:hidden">
+        {pageFrags.map((f) => {
+          const myFrag = myFrags.find((mf) => mf.name.toLowerCase() === f.name.toLowerCase());
+          const accords = getAccords(f, communityFrags).slice(0, 3).join(', ');
+          const myComps = compliments.filter(
+            (c) => c.userId === userId && c.primaryFragId === (myFrag?.fragranceId || myFrag?.id)
+          ).length;
+          const friendComps = compliments.filter(
+            (c) => c.userId === friendId && c.primaryFragId === (f.fragranceId || f.id)
+          ).length;
+          const compParts: string[] = [];
+          if (myComps > 0) compParts.push(`You: ${myComps}`);
+          if (friendComps > 0) compParts.push(`${friendName}: ${friendComps}`);
+          const compDisplay = compParts.join(' · ');
+          return (
+            <div
+              key={f.id}
+              style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--color-row-divider)' }}
+            >
+              <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
+              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                {accords && (
+                  <>
+                    <span className="font-sans max-sm:text-sm" style={metaStyle}>{accords}</span>
+                    {compDisplay && <span style={{ color: 'var(--color-cream-dark)', fontSize: 'var(--text-xs)' }}>·</span>}
+                  </>
+                )}
+                {compDisplay && (
+                  <span className="font-sans uppercase max-sm:text-sm" style={{ ...metaStyle, color: (myComps > 0 || friendComps > 0) ? 'var(--color-accent)' : 'var(--color-meta-text)' }}>
+                    {compDisplay}
+                  </span>
+                )}
               </div>
             </div>
           );

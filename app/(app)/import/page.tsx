@@ -701,29 +701,61 @@ function CsvTab({ userId }: { userId: string }) {
 
       {/* Preview rows */}
       {rows.length > 0 && (
-        <div>
-          {rows.map((row, i) => (
-            <div
-              key={i}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(160px,2fr) minmax(100px,1fr) 120px 60px minmax(100px,1fr)",
-                minHeight: "var(--size-row-min)",
-                borderBottom: "1px solid var(--color-row-divider)",
-                alignItems: "center",
-                paddingLeft: "var(--space-4)",
-                paddingRight: "var(--space-4)",
-                background: row.rowError ? "color-mix(in srgb, var(--color-destructive) 7%, transparent)" : "transparent",
-              }}
-            >
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.name || "—"}</span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.house || "—"}</span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>{row.status}</span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>{row.personalRating ?? "—"}</span>
-              <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.personalNotes || "—"}</span>
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="hidden md:block">
+            {rows.map((row, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(160px,2fr) minmax(100px,1fr) 120px 60px minmax(100px,1fr)",
+                  minHeight: "var(--size-row-min)",
+                  borderBottom: "1px solid var(--color-row-divider)",
+                  alignItems: "center",
+                  paddingLeft: "var(--space-4)",
+                  paddingRight: "var(--space-4)",
+                  background: row.rowError ? "color-mix(in srgb, var(--color-destructive) 7%, transparent)" : "transparent",
+                }}
+              >
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.name || "—"}</span>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.house || "—"}</span>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>{row.status}</span>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>{row.personalRating ?? "—"}</span>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.personalNotes || "—"}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="md:hidden">
+            {rows.map((row, i) => (
+              <div
+                key={i}
+                style={{
+                  borderBottom: "1px solid var(--color-row-divider)",
+                  paddingLeft: "var(--space-4)",
+                  paddingRight: "var(--space-4)",
+                  paddingTop: "var(--space-3)",
+                  paddingBottom: "var(--space-3)",
+                  background: row.rowError ? "color-mix(in srgb, var(--color-destructive) 7%, transparent)" : "transparent",
+                }}
+              >
+                <div style={{ fontFamily: "var(--font-serif)", fontSize: "var(--text-note)", fontStyle: "italic", color: "var(--color-navy)", marginBottom: "var(--space-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.name || "—"}</div>
+                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", letterSpacing: "var(--tracking-md)", textTransform: "uppercase", marginBottom: "var(--space-2)" }}>{row.house || "—"}</div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>{row.status}</span>
+                  <span style={{ color: "var(--color-cream-dark)", fontSize: "var(--text-xs)" }}>·</span>
+                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>{row.personalRating ?? "—"}</span>
+                  {row.personalNotes && (
+                    <>
+                      <span style={{ color: "var(--color-cream-dark)", fontSize: "var(--text-xs)" }}>·</span>
+                      <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.personalNotes}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Import button */}
