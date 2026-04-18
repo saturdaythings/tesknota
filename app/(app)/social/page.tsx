@@ -168,6 +168,8 @@ export default function SocialPage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const searchRowRef = useRef<HTMLDivElement>(null);
+
   const [followingOpenId, setFollowingOpenId] = useState<string | null>(null);
   const [followMessage, setFollowMessage] = useState("");
   const [sendingFollow, setSendingFollow] = useState(false);
@@ -414,27 +416,35 @@ export default function SocialPage() {
 
         {/* ── Profile search ───────────────────────────────── */}
         <div style={{ marginBottom: "var(--space-6)" }}>
-          <div style={{ position: "relative" }}>
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name or username..."
-            />
-            {searchLoading && (
-              <div
-                className="font-sans"
-                style={{
-                  position: "absolute",
-                  right: "var(--space-3)",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-meta-text)",
-                }}
-              >
-                Searching...
-              </div>
-            )}
+          <div ref={searchRowRef} className="flex items-center" style={{ gap: "var(--space-2)" }}>
+            <div className="flex-1" style={{ position: "relative" }}>
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by username or name..."
+              />
+              {searchLoading && (
+                <div
+                  className="font-sans"
+                  style={{
+                    position: "absolute",
+                    right: "var(--space-3)",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-meta-text)",
+                  }}
+                >
+                  Searching...
+                </div>
+              )}
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => searchRowRef.current?.querySelector('input')?.focus()}
+            >
+              + Add Friend
+            </Button>
           </div>
 
           {searchResults.length > 0 && (
@@ -557,38 +567,23 @@ export default function SocialPage() {
                       {divider && (
                         <div style={{ width: "1px", height: "20px", background: "var(--color-row-divider)", margin: "0 var(--space-1)" }} />
                       )}
-                      <button
+                      <Button
+                        variant="tab-action"
+                        active={isSelected}
                         onClick={() => setSelectedFollowId(f.id)}
-                        className="font-sans cursor-pointer transition-colors duration-100 flex items-center gap-1"
-                        style={{
-                          fontSize: "var(--text-sm)",
-                          padding: "var(--space-1) var(--space-3)",
-                          borderRadius: "var(--radius-full)",
-                          background: isSelected ? "var(--color-cream-dark)" : "transparent",
-                          color: "var(--color-navy)",
-                          border: isSelected ? "1px solid var(--color-navy)" : "1px solid var(--color-row-divider)",
-                          whiteSpace: "nowrap",
-                          outline: "none",
-                        }}
+                        style={{ borderRadius: "var(--radius-full)", whiteSpace: "nowrap" }}
                       >
                         {f.starred && <span style={{ fontSize: "var(--text-xs)", color: "var(--color-accent)" }}>★</span>}
                         {name}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="icon"
                         onClick={() => handleStar(f)}
                         title={f.starred ? "Unstar" : "Star"}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "2px",
-                          fontSize: "var(--text-xs)",
-                          color: f.starred ? "var(--color-accent)" : "var(--color-meta-text)",
-                          lineHeight: 1,
-                        }}
+                        style={{ color: f.starred ? "var(--color-accent)" : "var(--color-meta-text)" }}
                       >
                         {f.starred ? "★" : "☆"}
-                      </button>
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={() => handleUnfollow(f)}>
                         Unfollow
                       </Button>
