@@ -9,7 +9,6 @@ interface FragranceCellProps {
   type?: FragranceType | null;
   secondary?: string;
   isDupe?: boolean;
-  dupeFor?: string;
   className?: string;
 }
 
@@ -32,11 +31,11 @@ const dupePillStyle: React.CSSProperties = {
   color: 'var(--color-navy)',
 };
 
-export function FragranceCell({ name, house, type, secondary, isDupe, dupeFor, className }: FragranceCellProps) {
+export function FragranceCell({ name, house, type, secondary, isDupe, className }: FragranceCellProps) {
   const concLabel = type ? shortFragType(type) : null;
   return (
     <div className={`min-w-0${className ? ` ${className}` : ''}`}>
-      <div className="flex items-center mb-1 min-w-0" style={{ gap: 'var(--space-1)' }}>
+      <div className="flex items-center gap-1.5 mb-1 min-w-0">
         <span className="flex-1 min-w-0 truncate" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'var(--text-note)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}{secondary && <span className="ml-1.5"> + {secondary}</span>}
         </span>
@@ -50,11 +49,6 @@ export function FragranceCell({ name, house, type, secondary, isDupe, dupeFor, c
       {house && (
         <div className="font-sans uppercase" style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-wide)', color: 'var(--color-meta-text)' }}>
           {house}
-        </div>
-      )}
-      {isDupe && dupeFor && (
-        <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', fontStyle: 'italic' }}>
-          dupe of {dupeFor}
         </div>
       )}
     </div>

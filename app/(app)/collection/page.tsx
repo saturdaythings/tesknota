@@ -29,8 +29,7 @@ const STATUS_OPTIONS = [
   ...STATUS_FILTER_OPTIONS.filter((o) => o.value !== 'all'),
 ];
 import { FlaskConical } from '@/components/ui/Icons';
-import { StatusBadge } from '@/components/ui/frag-row';
-import type { UserFragrance } from '@/types';
+import { STATUS_LABELS, type UserFragrance } from '@/types';
 
 const cellStyle = {
   fontSize: 'var(--text-xs)',
@@ -46,7 +45,7 @@ const COLUMNS: CollectionColumnDef[] = [
     label: 'Fragrance',
     width: 'minmax(240px,1fr)',
     render: (frag) => (
-      <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} isDupe={frag.isDupe} dupeFor={frag.dupeFor || undefined} />
+      <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} isDupe={frag.isDupe} />
     ),
   },
   {
@@ -113,7 +112,11 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'status',
     label: 'Status',
     width: 'max-content',
-    render: (frag) => <StatusBadge status={frag.status} />,
+    render: (frag) => (
+      <span className="font-sans uppercase" style={cellStyle}>
+        {STATUS_LABELS[frag.status]}
+      </span>
+    ),
   },
 ];
 
