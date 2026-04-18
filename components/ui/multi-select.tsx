@@ -65,7 +65,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
           justifyContent: "space-between",
           width: "100%",
           height: "36px",
-          padding: "0 12px",
+          padding: "0 var(--space-3)",
           background: "var(--color-cream-dark)",
           border: open ? "1px solid var(--color-accent)" : "1px solid var(--color-row-divider)",
           borderRadius: "var(--radius-md)",
