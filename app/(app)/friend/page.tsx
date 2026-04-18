@@ -17,7 +17,8 @@ import { useUser, getFriend } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { loadAllData } from "@/lib/data";
 import { MONTHS, getAccords, monthNum } from "@/lib/frag-utils";
-import { STATUS_LABELS } from "@/types";
+import type { FragranceStatus } from "@/types";
+import { StatusBadge } from "@/components/ui/frag-row";
 import { CompareView } from "@/components/analytics/comparative-view";
 import {
   applySort,
@@ -376,9 +377,7 @@ function FriendCollectionTab({
                 </span>
               </div>
               <div style={{ padding: '0 var(--space-4)' }}>
-                <span className="font-sans uppercase" style={cellStyle}>
-                  {STATUS_LABELS[f.status as keyof typeof STATUS_LABELS] ?? f.status}
-                </span>
+                <StatusBadge status={f.status as FragranceStatus} />
               </div>
               <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
                 <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', lineHeight: 'var(--leading-relaxed)' }}>
@@ -413,9 +412,7 @@ function FriendCollectionTab({
                 {f.personalRating ? (
                   <span className="font-sans uppercase" style={metaStyle}>{'★'.repeat(f.personalRating)}</span>
                 ) : null}
-                <span className="font-sans uppercase" style={metaStyle}>
-                  {STATUS_LABELS[f.status as keyof typeof STATUS_LABELS] ?? f.status}
-                </span>
+                <StatusBadge status={f.status as FragranceStatus} />
                 {comps > 0 ? (
                   <span className="font-sans uppercase" style={{ ...metaStyle, color: 'var(--color-accent)' }}>
                     {comps} comp{comps !== 1 ? 's' : ''}
