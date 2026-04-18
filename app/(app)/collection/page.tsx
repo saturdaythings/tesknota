@@ -8,6 +8,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { StarRating } from '@/components/ui/StarRating';
 import { PageContent } from '@/components/layout/PageContent';
+import { Topbar } from '@/components/layout/Topbar';
+import { FragSearch } from '@/components/ui/frag-search';
 import { PageHeader } from '@/components/ui/page-header';
 import { AddFragranceModal } from '@/components/collection/add-fragrance-modal';
 import { FragranceDetailModal } from '@/components/collection/fragrance-detail-modal';
@@ -259,6 +261,7 @@ function CollectionInner() {
       />
       <AddFragranceModal open={addOpen} onClose={() => setAddOpen(false)} />
 
+      <Topbar title="My Collection" actions={<FragSearch />} />
       <PageContent>
         <PageHeader
           searchValue={search}

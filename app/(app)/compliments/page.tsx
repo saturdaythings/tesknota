@@ -8,6 +8,8 @@ import { ComplimentsList, type ComplimentColumnDef, type FragInfo } from '@/comp
 import { EmptyCompliments } from '@/components/compliments/empty-compliments';
 import { PageHeader } from '@/components/ui/page-header';
 import { PageContent } from '@/components/layout/PageContent';
+import { Topbar } from '@/components/layout/Topbar';
+import { FragSearch } from '@/components/ui/frag-search';
 import { useUser } from '@/lib/user-context';
 import { useData } from '@/lib/data-context';
 import { getAccords } from '@/lib/frag-utils';
@@ -170,6 +172,7 @@ function ComplimentsInner() {
     <>
       <LogComplimentModal open={logOpen} onClose={() => setLogOpen(false)} />
       <LogComplimentModal open={!!editingComp} onClose={() => setEditingComp(null)} editing={editingComp} />
+      <Topbar title="Compliments" actions={<FragSearch />} />
       <PageContent>
         <PageHeader
           searchValue={search}
