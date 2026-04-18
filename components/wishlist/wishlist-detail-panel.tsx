@@ -66,7 +66,7 @@ interface Props {
   onRemove: (frag: UserFragrance) => void;
 }
 
-export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onRemove }: Props) {
+export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAddToCollection, onRemove }: Props) {
   const { editFrag } = useData();
   const { toast } = useToast();
 
@@ -232,9 +232,14 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onRem
         <Button variant="destructive" onClick={handleRemove} disabled={saving}>
           Remove from Wishlist
         </Button>
-        <Button variant="primary" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save"}
-        </Button>
+        <div style={{ display: "flex", gap: "var(--space-2)" }}>
+          <Button variant="secondary" onClick={() => frag && onAddToCollection(frag)} disabled={saving}>
+            Move to Collection
+          </Button>
+          <Button variant="primary" onClick={handleSave} disabled={saving}>
+            {saving ? "Saving..." : "Save"}
+          </Button>
+        </div>
       </ModalFooter>
     </Modal>
   );

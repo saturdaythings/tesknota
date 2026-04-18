@@ -61,8 +61,8 @@ const cellStyle = {
 } as const;
 
 /* component-internal: wishlist desktop grid */
-const WISHLIST_GRID_COLS = "minmax(240px,1fr) 100px 110px 200px 240px 260px";
-const WISHLIST_HEADERS = ["Fragrance", "Priority", "Date Added", "Accords", "Notes", ""];
+const WISHLIST_GRID_COLS = "minmax(240px,1fr) 100px 110px 200px 240px";
+const WISHLIST_HEADERS = ["Fragrance", "Priority", "Date Added", "Accords", "Notes"];
 
 // ── Helpers ───────────────────────────────────────────────
 
@@ -302,23 +302,6 @@ function RowSkeleton() {
 }
 
 // ── Row actions ───────────────────────────────────────────
-
-function RowActions({
-  frag,
-  onMoveToCollection,
-  onRemove,
-}: {
-  frag: UserFragrance;
-  onMoveToCollection: (f: UserFragrance) => void;
-  onRemove: (f: UserFragrance) => void;
-}) {
-  return (
-    <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", justifyContent: "flex-end" }} onClick={(e) => e.stopPropagation()}>
-      <Button variant="secondary" size="sm" onClick={() => onMoveToCollection(frag)}>Move to Collection</Button>
-      <Button variant="destructive" size="sm" aria-label="Remove from wishlist" onClick={() => onRemove(frag)}>×</Button>
-    </div>
-  );
-}
 
 // ── Mobile card ───────────────────────────────────────────
 
@@ -696,11 +679,6 @@ function WishlistInner() {
                     </div>
                     <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                       <NotesCell cf={cf} />
-                    </div>
-                    <div style={{ padding: "0 var(--space-2)" }} onClick={(e) => e.stopPropagation()}>
-                      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                        <RowActions frag={frag} onMoveToCollection={openMoveToCollection} onRemove={handleRemove} />
-                      </div>
                     </div>
                   </div>
                 );

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
 
@@ -371,26 +372,13 @@ export function BotDrawer() {
               borderRadius: "var(--radius-sm)",
             }}
           />
-          <button
+          <Button
+            variant="primary"
             onClick={send}
             disabled={!input.trim() || loading}
-            style={{
-              padding: "10px 16px",
-              background: "var(--color-navy)",
-              color: "var(--color-cream)",
-              fontFamily: "var(--font-sans)",
-              fontSize: "var(--text-xs)",
-              letterSpacing: "var(--tracking-sm)",
-              textTransform: "uppercase",
-              border: "none",
-              cursor: "pointer",
-              borderRadius: "var(--radius-md)",
-              opacity: (!input.trim() || loading) ? 0.4 : 1,
-              transition: "opacity 150ms",
-            }}
           >
             Send
-          </button>
+          </Button>
         </div>
       </div>
     </>
