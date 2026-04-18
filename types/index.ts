@@ -217,3 +217,13 @@ export const STATUS_LABELS: Record<FragranceStatus, string> = {
   WANT_TO_IDENTIFY: "Identify Later",
   FINISHED: "Finished",
 };
+
+export const MOBILE_STATUS_LABELS: Record<FragranceStatus, string> = {
+  CURRENT: "Current",
+  PREVIOUSLY_OWNED: "Prev. Owned",
+  WANT_TO_BUY: "Want to Buy",
+  WANT_TO_SMELL: "Smell",
+  DONT_LIKE: "Don't Like",
+  WANT_TO_IDENTIFY: "Identify",
+  FINISHED: "Finished",
+};

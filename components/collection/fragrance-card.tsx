@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { shortFragType } from "@/lib/frag-utils";
-import { STATUS_LABELS } from "@/types";
+import { STATUS_LABELS, MOBILE_STATUS_LABELS } from "@/types";
 import type { UserFragrance, FragranceStatus } from "@/types";
 
 function statusVariant(status: FragranceStatus): React.ComponentProps<typeof Badge>["variant"] {
@@ -201,7 +201,12 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
       {/* Bottom row: status badge + compliment count */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Badge variant={statusVariant(frag.status)}>
-          {STATUS_LABELS[frag.status]}
+          <span className="hidden max-sm:inline">
+            {MOBILE_STATUS_LABELS[frag.status]}
+          </span>
+          <span className="max-sm:hidden">
+            {STATUS_LABELS[frag.status]}
+          </span>
         </Badge>
         <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: compCount > 0 ? "var(--color-navy)" : "var(--color-cream-dark)" }}>
           {compCount > 0 ? compCount : "—"}
