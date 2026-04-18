@@ -55,7 +55,7 @@ export default function LoginPage() {
       <div className="text-center mb-12">
         <div
           className="font-serif italic leading-none"
-          style={{ fontSize: '72px', color: 'var(--color-cream)' }}
+          style={{ fontSize: 'var(--text-display)', color: 'var(--color-cream)' }}
         >
           t&#281;sknota
         </div>

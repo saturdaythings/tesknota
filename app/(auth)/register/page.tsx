@@ -105,7 +105,7 @@ export default function RegisterPage() {
       <div className="text-center mb-10">
         <div
           className="font-serif italic leading-none"
-          style={{ fontSize: "72px", color: "var(--color-navy)" }}
+          style={{ fontSize: "var(--text-display)", color: "var(--color-navy)" }}
         >
           t&#281;sknota
         </div>

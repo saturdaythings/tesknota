@@ -100,6 +100,7 @@
      --text-logo: 28px;
      --text-2xl: 36px;
      --text-hero: 48px;
+     --text-display: 72px;
 
   /* --- Tracking (letter-spacing) --- */
   --tracking-xs: 0.04em;
