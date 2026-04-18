@@ -52,8 +52,7 @@ function SortDirButton({ dir, onClick }: { dir: "asc" | "desc"; onClick: () => v
   return (
     <Button
       variant="secondary"
-      size="sm"
-      style={{ height: "36px", width: "36px", padding: 0, flexShrink: 0 }}
+      className="h-9 w-9 flex-shrink-0 p-0"
       aria-label={dir === "desc" ? "Sorted descending" : "Sorted ascending"}
       onClick={onClick}
     >
@@ -105,7 +104,7 @@ export function PageFilterBar({
           ))}
           {filterPanel}
           {filtersActive && onClearFilters && (
-            <Button variant="ghost" size="sm" style={{ height: "36px" }} onClick={onClearFilters}>
+            <Button variant="ghost" className="h-9" onClick={onClearFilters}>
               Clear
             </Button>
           )}

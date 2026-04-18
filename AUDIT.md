@@ -26,8 +26,8 @@ All P1/P2 bugs fixed in pair review session (2026-04-18). See "Fixed" section be
 | `wishlist/page.tsx` | `FragranceCell` call missing both `isDupe` and `dupeFor` — dupe info never visible in wishlist rows | Added `isDupe={frag.isDupe} dupeFor={frag.dupeFor \|\| undefined}` |
 | `frag-row.tsx` | `FragRow` component was dead code — never imported by any file. Carried 6 unused imports, 3 dead constants, and a bare `<button>` design system violation | Deleted `FragRow` and all code only used by it; kept only `StatusBadge` (used by 4 files) |
 
-**Tech debt noted (not blocking):**
-- `page-filter-bar.tsx`: `SortDirButton` uses `style={{ height: "36px" }}` overriding Button's `h-8`. Both it and the `Clear` button have this inline px override. Component-internal, low risk, but inconsistent with design token rule.
+**Tech debt fixed:**
+- `page-filter-bar.tsx`: `SortDirButton` and `Clear` button used `style={{ height: "36px" }}` to override Button's `h-8`. Replaced with Tailwind `className="h-9 w-9 flex-shrink-0 p-0"` / `className="h-9"` — `tailwind-merge` resolves the conflict correctly. All filter bar controls now consistently at 36px via Tailwind only.
 
 ---
 
