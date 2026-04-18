@@ -64,7 +64,6 @@ const COMP_SORT_OPTIONS = [
   { value: "fragrance", label: "Fragrance" },
 ];
 
-/* component-internal: skeleton row height */
 const SKELETON_ROW_HEIGHT = 'var(--size-row-min)';
 
 const cellStyle = {
@@ -148,14 +147,14 @@ export default function FriendPage() {
     (f) => f.status === "WANT_TO_BUY" || f.status === "WANT_TO_SMELL"
   );
 
-  const myCurrentNames = new Set(
-    MF.filter((f) => f.status === "CURRENT").map((f) => f.name.toLowerCase())
-  );
-  const inCommon = FF.filter(
-    (f) => f.status === "CURRENT" && myCurrentNames.has(f.name.toLowerCase())
-  );
+  const inCommon = useMemo(() => {
+    const myCurrentNames = new Set(
+      MF.filter((f) => f.status === "CURRENT").map((f) => f.name.toLowerCase())
+    );
+    return FF.filter((f) => f.status === "CURRENT" && myCurrentNames.has(f.name.toLowerCase()));
+  }, [FF, MF]);
 
-  const friendAccordCounts: [string, number][] = (() => {
+  const friendAccordCounts = useMemo<[string, number][]>(() => {
     const counts: Record<string, number> = {};
     FFOwned.forEach((f) => {
       getAccords(f, communityFrags).forEach((a) => {
@@ -163,7 +162,7 @@ export default function FriendPage() {
       });
     });
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12);
-  })();
+  }, [FFOwned, communityFrags]);
 
   return (
     <>
@@ -269,7 +268,7 @@ function FriendCollectionTab({
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [accordFilter, setAccordFilter] = useState("any");
   const [ratingFilter, setRatingFilter] = useState("any");
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState("any");
 
   const compMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -305,13 +304,13 @@ function FriendCollectionTab({
         return true;
       });
     }
-    if (statusFilter.length > 0) {
-      list = list.filter((f) => statusFilter.includes(f.status));
+    if (statusFilter !== "any") {
+      list = list.filter((f) => f.status === statusFilter);
     }
     return applySort(list, sortField, sortDir, compMap);
   }, [frags, search, accordFilter, ratingFilter, statusFilter, sortField, sortDir, compMap, communityFrags]);
 
-  const filtersActive = accordFilter !== "any" || ratingFilter !== "any" || statusFilter.length > 0;
+  const filtersActive = accordFilter !== "any" || ratingFilter !== "any" || statusFilter !== "any";
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const pageFrags = filtered.slice((page - 1) * perPage, page * perPage);
   const gridCols = 'minmax(200px,1fr) max-content max-content 180px max-content';
@@ -319,7 +318,7 @@ function FriendCollectionTab({
   function clearFilters() {
     setAccordFilter("any");
     setRatingFilter("any");
-    setStatusFilter([]);
+    setStatusFilter("any");
   }
 
   if (frags.length === 0) {
@@ -340,6 +339,7 @@ function FriendCollectionTab({
         filters={[
           { value: accordFilter, onChange: (v) => { setAccordFilter(v); setPage(1); }, options: accordOptions },
           { value: ratingFilter, onChange: (v) => { setRatingFilter(v); setPage(1); }, options: RATING_FILTER_OPTIONS },
+          { value: statusFilter, onChange: (v) => { setStatusFilter(v); setPage(1); }, options: COLLECTION_STATUS_OPTIONS },
         ]}
         filtersActive={filtersActive}
         onClearFilters={clearFilters}
@@ -369,7 +369,7 @@ function FriendCollectionTab({
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
-                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               </div>
               <div style={{ padding: '0 var(--space-4)' }}>
                 <span className="font-sans uppercase" style={cellStyle}>
@@ -407,7 +407,7 @@ function FriendCollectionTab({
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
-              <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+              <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
                 {f.personalRating ? (
                   <span className="font-sans uppercase" style={metaStyle}>{'★'.repeat(f.personalRating)}</span>
@@ -536,6 +536,14 @@ function FriendComplimentsTab({
   );
 }
 
+const WISHLIST_SORT_OPTIONS = [
+  { value: "fragrance", label: "Fragrance" },
+  { value: "date_added", label: "Date Added" },
+  { value: "priority", label: "Priority" },
+];
+
+const PRIORITY_ORDER: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+
 function FriendWishlistTab({
   frags,
   communityFrags,
@@ -551,8 +559,6 @@ function FriendWishlistTab({
   const [priorityFilter, setPriorityFilter] = useState("any");
   const [wishlistStatusFilter, setWishlistStatusFilter] = useState("any");
 
-  const PRIORITY_ORDER: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-
   const filtered = useMemo(() => {
     let list = frags;
     if (search.trim()) {
@@ -560,7 +566,7 @@ function FriendWishlistTab({
       list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
     }
     if (priorityFilter !== "any") {
-      list = list.filter((f) => (f as UserFragrance & { priority?: string }).priority === priorityFilter);
+      list = list.filter((f) => f.wishlistPriority === priorityFilter);
     }
     if (wishlistStatusFilter !== "any") {
       list = list.filter((f) => f.status === wishlistStatusFilter);
@@ -572,8 +578,8 @@ function FriendWishlistTab({
       } else if (sortField === "date_added") {
         cmp = (a.createdAt ?? "").localeCompare(b.createdAt ?? "");
       } else if (sortField === "priority") {
-        const ap = PRIORITY_ORDER[(a as UserFragrance & { priority?: string }).priority ?? ""] ?? 0;
-        const bp = PRIORITY_ORDER[(b as UserFragrance & { priority?: string }).priority ?? ""] ?? 0;
+        const ap = PRIORITY_ORDER[a.wishlistPriority ?? ""] ?? 0;
+        const bp = PRIORITY_ORDER[b.wishlistPriority ?? ""] ?? 0;
         cmp = ap - bp;
       }
       return sortDir === "desc" ? -cmp : cmp;
@@ -584,12 +590,6 @@ function FriendWishlistTab({
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const pageFrags = filtered.slice((page - 1) * perPage, page * perPage);
   const gridCols = 'minmax(200px,1fr) max-content 180px';
-
-  const WISHLIST_SORT_OPTIONS = [
-    { value: "fragrance", label: "Fragrance" },
-    { value: "date_added", label: "Date Added" },
-    { value: "priority", label: "Priority" },
-  ];
 
   function clearFilters() {
     setPriorityFilter("any");
@@ -640,7 +640,7 @@ function FriendWishlistTab({
           return (
             <div key={f.id} style={dataRowStyle}>
               <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
-                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               </div>
               <div style={{ padding: '0 var(--space-4)' }}>
                 <span className="font-sans uppercase" style={cellStyle}>{price}</span>
@@ -715,7 +715,7 @@ function InCommonTab({
           return (
             <div key={f.id} style={dataRowStyle}>
               <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
-                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               </div>
               <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
                 <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', lineHeight: 'var(--leading-relaxed)' }}>
