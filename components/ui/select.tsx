@@ -33,6 +33,7 @@ const triggerBase =
   'bg-[var(--color-cream)] rounded-[var(--radius-sm)] ' +
   '[letter-spacing:var(--tracking-sm)] ' +
   'font-sans outline-none transition-[border-color] duration-150 cursor-pointer ' +
+  'focus:outline-2 focus:outline-offset-2 focus:outline-[var(--color-accent)] ' +
   'disabled:opacity-60 disabled:cursor-not-allowed';
 
 export function Select({

@@ -16,6 +16,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const base =
   'inline-flex items-center justify-center gap-2 cursor-pointer transition-colors duration-150 ' +
   'font-sans font-medium select-none disabled:opacity-50 disabled:pointer-events-none ' +
+  'focus:outline-2 focus:outline-offset-2 focus:outline-[var(--color-accent)] ' +
   '[&_svg]:pointer-events-none [&_svg]:shrink-0';
 
 const variants: Record<ButtonVariant, string> = {

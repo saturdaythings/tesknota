@@ -102,6 +102,9 @@ export function FloatingActionButton({
           />
           {/* Panel */}
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Actions menu"
             className={cn(
               'fixed z-[220] bg-[var(--color-cream)] rounded-[var(--radius-lg)] overflow-hidden',
               // Desktop: centered

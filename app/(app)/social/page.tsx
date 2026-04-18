@@ -550,6 +550,7 @@ export default function SocialPage() {
                       <Button
                         variant="icon"
                         onClick={() => handleStar(f)}
+                        aria-label={f.starred ? "Unstar" : "Star"}
                         title={f.starred ? "Unstar" : "Star"}
                         style={{ color: f.starred ? "var(--color-accent)" : "var(--color-meta-text)" }}
                       >

@@ -94,7 +94,7 @@ function ComplimentRow({ comp, frag, columns, onEdit }: ComplimentRowProps) {
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {columns.map((col) => (
-        <div key={col.id} style={{ minWidth: 0, textAlign: col.align ?? 'left' }}>
+        <div key={col.id} style={{ textAlign: col.align ?? 'left' }}>
           {col.render(comp, frag)}
         </div>
       ))}

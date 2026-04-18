@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { shortFragType } from "@/lib/frag-utils";
+import { FragranceCell } from "@/components/ui/fragrance-cell";
 import { STATUS_LABELS, MOBILE_STATUS_LABELS } from "@/types";
 import type { UserFragrance, FragranceStatus } from "@/types";
 
@@ -28,7 +28,6 @@ interface FragranceCardProps {
 }
 
 export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: FragranceCardProps) {
-  const concLabel = shortFragType(frag.type ?? null);
   const ratingFilled = frag.personalRating ?? 0;
   const sizeDisplay = frag.sizes?.length ? frag.sizes.join(", ") : "—";
   const visibleAccords = accords.slice(0, 4);
@@ -47,78 +46,10 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
         marginBottom: "var(--space-2)",
       }}
     >
-      {/* Line 1: name + concentration badge */}
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-half)", flexWrap: "wrap" }}>
-        <span
-          style={{
-            fontFamily: "var(--font-serif)",
-            fontSize: "var(--text-note)",
-            fontStyle: "italic",
-            color: "var(--color-navy)",
-            fontWeight: 400,
-          }}
-        >
-          {frag.name}
-        </span>
-        {concLabel && (
-          <span
-            style={{
-              background: "var(--color-cream-dark)",
-              border: "1px solid var(--color-row-divider)",
-              borderRadius: "var(--radius-full)",
-              padding: "var(--space-half) var(--space-2)",
-              fontFamily: "var(--font-sans)",
-              fontSize: "var(--text-label)",
-              color: "var(--color-meta-text)",
-              letterSpacing: "var(--tracking-wide)",
-              textTransform: "uppercase",
-              flexShrink: 0,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {concLabel}
-          </span>
-        )}
-        {frag.isDupe && (
-          <span
-            style={{
-              background: "var(--color-cream-dark)",
-              border: "1px solid var(--color-navy)",
-              borderRadius: "var(--radius-full)",
-              padding: "var(--space-half) var(--space-2)",
-              fontFamily: "var(--font-sans)",
-              fontSize: "var(--text-label)",
-              color: "var(--color-navy)",
-              letterSpacing: "var(--tracking-wide)",
-              textTransform: "uppercase",
-              flexShrink: 0,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Dupe
-          </span>
-        )}
+      {/* Fragrance identity */}
+      <div style={{ marginBottom: "var(--space-3)" }}>
+        <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} isDupe={frag.isDupe} dupeFor={frag.dupeFor || undefined} />
       </div>
-
-      {/* Line 2: house */}
-      <div
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: "var(--text-label)",
-          fontWeight: 400,
-          color: "var(--color-meta-text)",
-          textTransform: "uppercase",
-          letterSpacing: "var(--tracking-wide)",
-          marginBottom: frag.isDupe && frag.dupeFor ? "var(--space-half)" : "var(--space-3)",
-        }}
-      >
-        {frag.house}
-      </div>
-      {frag.isDupe && frag.dupeFor && (
-        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", fontStyle: "italic", marginBottom: "var(--space-3)" }}>
-          dupe of {frag.dupeFor}
-        </div>
-      )}
 
       {/* Row: size · stars · added */}
       <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)", flexWrap: "wrap" }}>

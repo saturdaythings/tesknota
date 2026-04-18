@@ -17,9 +17,9 @@ interface FragranceCellProps {
 const concPillStyle: React.CSSProperties = {
   background: 'var(--color-cream-dark)',
   border: '1px solid var(--color-row-divider)',
-  borderRadius: 'var(--radius-full)',
+  borderRadius: 'var(--radius-sm)',
   padding: 'var(--space-half) var(--space-2)',
-  fontSize: 'var(--text-label)',
+  fontSize: 'var(--text-xs)',
   color: 'var(--color-meta-text)',
   letterSpacing: 'var(--tracking-wide)',
   flexShrink: 0,

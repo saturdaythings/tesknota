@@ -14,7 +14,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
     return (
       <button
         onClick={onClick}
-        className="font-sans cursor-pointer transition-colors duration-100 flex-shrink-0"
+        className="font-sans cursor-pointer transition-colors duration-100 flex-shrink-0 focus:outline-2 focus:outline-offset-2 focus:outline-[var(--color-accent)]"
         style={{
           fontSize: 'var(--text-sm)',
           fontWeight: 400,
@@ -36,6 +36,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
     return (
       <button
         onClick={onClick}
+        className="focus:outline-2 focus:outline-offset-2 focus:outline-[var(--color-accent)]"
         style={{
           display: "flex",
           flexDirection: "column",
