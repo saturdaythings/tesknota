@@ -136,7 +136,7 @@ export function CompareView({
             <div style={{ display: "flex", gap: "var(--space-5)", alignItems: "flex-end" }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--space-half)" }}>
                 <span
-                  className="font-serif"
+                  className="font-serif italic"
                   style={{ fontSize: "var(--text-lg)", color: "var(--color-navy)", lineHeight: 1 }}
                 >
                   {s.myVal}

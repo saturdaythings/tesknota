@@ -387,7 +387,7 @@ function RankedRow({ rank, name, sub, count, maxCount, unit, tooltipLines, toolt
           </span>
         )}
       </div>
-      <div style={{ flex: 1, height: 4, background: "var(--color-cream-dark)", borderRadius: "var(--radius-full)", margin: "0 var(--space-4)", overflow: "hidden" }}>
+      <div style={{ flex: 1, height: "var(--space-1)", background: "var(--color-cream-dark)", borderRadius: "var(--radius-full)", margin: "0 var(--space-4)", overflow: "hidden" }}>
         <div style={{ height: "100%", width: `${pct}%`, background: "var(--color-accent)", borderRadius: "var(--radius-full)" }} />
       </div>
       <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>
@@ -824,7 +824,7 @@ export default function AnalyticsPage() {
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
                   {statusData.map((d) => (
                     <div key={d.status} style={{ display: "flex", alignItems: "center", gap: "var(--space-1)" }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "var(--radius-full)", background: d.color, flexShrink: 0 }} />
+                      <div style={{ width: "var(--space-2)", height: "var(--space-2)", borderRadius: "var(--radius-full)", background: d.color, flexShrink: 0 }} />
                       <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{d.name}</span>
                     </div>
                   ))}
