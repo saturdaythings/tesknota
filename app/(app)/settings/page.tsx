@@ -70,7 +70,7 @@ export default function SettingsPage() {
               </div>
             </div>
             <div className="px-5 py-4">
-              <div className="font-mono text-xs text-[var(--color-meta-text)] tracking-[0.1em] uppercase mb-1">
+              <div className="font-mono text-xs text-[var(--color-meta-text)] tracking-[var(--tracking-md)] uppercase mb-1">
                 User ID
               </div>
               <div className="font-mono text-xs text-[var(--color-notes-text)] break-all">
@@ -87,7 +87,7 @@ export default function SettingsPage() {
         <SectionHeader title="Data" />
         <div className="border border-[var(--color-sand-light)] bg-[var(--color-cream-dark)] mb-6">
           <div className="px-5 py-4 border-b border-[var(--color-cream-dark)]">
-            <div className="font-sans text-sm text-[var(--color-navy)] mb-1">
+            <div className="font-sans text-[length:var(--text-sm)] text-[var(--color-navy)] mb-1">
               Export your data
             </div>
             <div className="font-mono text-xs text-[var(--color-meta-text)]">
@@ -102,7 +102,7 @@ export default function SettingsPage() {
         <SectionHeader title="Admin" />
         <div className="border border-[var(--color-sand-light)] bg-[var(--color-cream-dark)]">
           <div className="px-5 py-4 border-b border-[var(--color-cream-dark)]">
-            <div className="font-sans text-sm text-[var(--color-navy)] mb-1">
+            <div className="font-sans text-[length:var(--text-sm)] text-[var(--color-navy)] mb-1">
               System dashboard
             </div>
             <div className="font-mono text-xs text-[var(--color-meta-text)]">

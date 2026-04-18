@@ -137,7 +137,7 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
     <div ref={wrapperRef}>
       <div
         data-hardcode-banner
-        style={{ marginBottom: 'var(--space-6)', border: `1px solid ${clean ? 'var(--color-sand-light)' : 'var(--color-meta-text)'}`, borderRadius: '3px', overflow: 'hidden' }}
+        style={{ marginBottom: 'var(--space-6)', border: `1px solid ${clean ? 'var(--color-sand-light)' : 'var(--color-meta-text)'}`, borderRadius: 'var(--radius-md)', overflow: 'hidden' }}
       >
         <button
           onClick={() => violations.length > 0 && setExpanded((v) => !v)}
@@ -261,9 +261,9 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
   }
 
   return (
-    <div className="rounded-[2px]" style={{ background: 'var(--color-navy)', padding: 'var(--space-4)', marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>
+    <div className="rounded-[var(--radius-sm)]" style={{ background: 'var(--color-navy)', padding: 'var(--space-4)', marginTop: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>
       <div className="flex items-center justify-between mb-2">
-        <div className="font-mono tracking-[0.04em]" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>{tokenName}</div>
+        <div className="font-mono tracking-[var(--tracking-xs)]" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand)' }}>{tokenName}</div>
         <button
           onClick={onClose}
           className="font-sans bg-transparent border-0 cursor-pointer p-0 leading-none select-none"
@@ -279,7 +279,7 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
           onChange={(e) => { setDraft(e.target.value); if (status !== 'idle') { setStatus('idle'); setErrorMsg(''); } }}
           spellCheck={false}
           onKeyDown={(e) => { if (e.key === 'Enter') publish(); if (e.key === 'Escape') onClose(); }}
-          className="font-mono flex-1 min-w-0 rounded-[2px] outline-none"
+          className="font-mono flex-1 min-w-0 rounded-[var(--radius-sm)] outline-none"
           style={{ background: 'var(--color-white-subtle)', border: '1px solid var(--color-white-dim)', color: 'var(--color-cream)', fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-3)' }}
         />
         {!isAtDefault && (
@@ -296,7 +296,7 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
           <button
             onClick={() => setPreviewOpen(true)}
             disabled={status === 'publishing'}
-            className="font-sans flex-shrink-0 rounded-[2px] cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            className="font-sans flex-shrink-0 rounded-[var(--radius-sm)] cursor-pointer disabled:opacity-50 disabled:cursor-default"
             style={{ fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-4)', background: 'transparent', border: '1px solid var(--color-white-dim)', color: 'var(--color-sand-muted)' }}
           >
             Preview
@@ -305,7 +305,7 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
         <button
           onClick={publish}
           disabled={!isDirty || status === 'publishing'}
-          className={'font-sans font-medium flex-shrink-0 rounded-[2px] border-0 tracking-[0.08em] disabled:opacity-50 ' + (isDirty ? 'cursor-pointer' : 'cursor-default')}
+          className={'font-sans font-medium flex-shrink-0 rounded-[var(--radius-sm)] border-0 tracking-[var(--tracking-wide)] disabled:opacity-50 ' + (isDirty ? 'cursor-pointer' : 'cursor-default')}
           style={{ fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-4)', background: isDirty ? 'var(--color-cream)' : 'var(--color-white-subtle)', color: isDirty ? 'var(--color-navy)' : 'var(--color-sand-muted)' }}
         >
           {activeAction === 'publish' ? 'Publishing\u2026' : 'Publish'}
@@ -399,7 +399,7 @@ function PreviewOverlay({ tokenName, draft, onBack, callWorker, onPublishSuccess
                 fontWeight: 400,
                 letterSpacing: 'var(--tracking-wide)',
                 padding: 'var(--space-2) var(--space-4)',
-                borderRadius: '2px',
+                borderRadius: 'var(--radius-sm)',
                 background: route === r.path ? 'var(--color-cream)' : 'transparent',
                 color: route === r.path ? 'var(--color-navy)' : 'var(--color-sand-muted)',
                 border: route === r.path ? '1px solid var(--color-cream)' : '1px solid var(--color-white-dim)',
@@ -419,7 +419,7 @@ function PreviewOverlay({ tokenName, draft, onBack, callWorker, onPublishSuccess
           <button
             onClick={handlePublish}
             disabled={status === 'publishing' || status === 'success'}
-            className="font-sans font-medium rounded-[2px] border-0 tracking-[0.08em] cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            className="font-sans font-medium rounded-[var(--radius-sm)] border-0 tracking-[var(--tracking-wide)] cursor-pointer disabled:opacity-50 disabled:cursor-default"
             style={{ fontSize: 'var(--text-xs)', padding: 'var(--space-2) var(--space-4)', background: 'var(--color-cream)', color: 'var(--color-navy)' }}
           >
             {status === 'publishing' ? 'Publishing\u2026' : 'Publish'}
@@ -510,7 +510,7 @@ function Note({ children }: { children: React.ReactNode }) {
 function ColorSwatch({ token, label, usage, computed }: { token: string; label: string; usage: string; computed: string }) {
   return (
     <div className="flex items-center gap-3 mb-3">
-      <div className="flex-shrink-0 rounded-[2px] border border-[var(--color-sand-light)]" style={{ width: 'var(--space-8)', height: 'var(--space-8)', background: `var(${token})` }} />
+      <div className="flex-shrink-0 rounded-[var(--radius-sm)] border border-[var(--color-sand-light)]" style={{ width: 'var(--space-8)', height: 'var(--space-8)', background: `var(${token})` }} />
       <div className="min-w-0">
         <div className="flex items-baseline gap-2 flex-wrap">
           <span className="font-sans font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>{label}</span>
@@ -684,7 +684,7 @@ export default function DesignSystemPage() {
                     <div className="flex items-center gap-4">
                       <code className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '80px' }}>{token}</code>
                       <span className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '40px' }}>{val}</span>
-                      <div className="rounded-[2px] flex-shrink-0" style={{ width: `${px}px`, height: 'var(--space-3)', background: 'var(--color-navy)', opacity: 0.3 }} />
+                      <div className="rounded-[var(--radius-sm)] flex-shrink-0" style={{ width: `${px}px`, height: 'var(--space-3)', background: 'var(--color-navy)', opacity: 0.3 }} />
                     </div>
                   </ExpandableToken>
                 );
@@ -799,7 +799,7 @@ export default function DesignSystemPage() {
 
           <Section id="sidebar" title="Sidebar — Sidebar.tsx">
             <Note>var(--sidebar-width) · navy bg · fixed on mobile with backdrop overlay, relative on desktop.</Note>
-            <div className="rounded-[3px] overflow-hidden" style={{ maxWidth: 'var(--sidebar-width)', background: 'var(--color-navy)' }}>
+            <div className="rounded-[var(--radius-md)] overflow-hidden" style={{ maxWidth: 'var(--sidebar-width)', background: 'var(--color-navy)' }}>
               <div style={{ padding: 'var(--space-8) var(--space-5) var(--space-6)' }}>
                 <div className="font-serif italic" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)', lineHeight: 1 }}>tęsknota</div>
                 <div className="font-sans font-medium uppercase mt-1" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: 'var(--tracking-xl)' }}>Fragrance Tracker</div>
@@ -833,7 +833,7 @@ export default function DesignSystemPage() {
 
           <Section id="topbar" title="Topbar — Topbar.tsx">
             <Note>Required on every page. h = --header-height · px = --topbar-px (mobile: --topbar-px-mobile) · cream bg · sand-light border.</Note>
-            <div className="rounded-[3px] overflow-hidden" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
+            <div className="rounded-[var(--radius-md)] overflow-hidden" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
               <div className="flex items-center gap-3" style={{ height: 'var(--header-height)', paddingLeft: 'var(--topbar-px)', paddingRight: 'var(--topbar-px)' }}>
                 <div className="flex-1">
                   <div className="font-sans font-medium uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-lg)', color: 'var(--color-navy-mid)' }}>TĘSKNOTA</div>
@@ -848,7 +848,7 @@ export default function DesignSystemPage() {
 
           <Section id="login" title="Login Page — app/page.tsx">
             <Note>Full-screen navy bg · logo = --text-logo · tagline = --text-xxs · IPA = --text-md · user buttons = --color-white-subtle bg + --color-white-dim border.</Note>
-            <div className="rounded-[3px] overflow-hidden flex flex-col items-center justify-center py-12" style={{ background: 'var(--color-navy)' }}>
+            <div className="rounded-[var(--radius-md)] overflow-hidden flex flex-col items-center justify-center py-12" style={{ background: 'var(--color-navy)' }}>
               <div className="text-center mb-8">
                 <div className="font-serif italic leading-none" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)' }}>tęsknota</div>
                 <div className="font-sans font-medium uppercase mt-2" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: 'var(--tracking-xl)' }}>Fragrance Tracker</div>
@@ -859,7 +859,7 @@ export default function DesignSystemPage() {
                 {['Kiana', 'Sylvia'].map((name) => (
                   <button
                     key={name}
-                    className="font-serif italic rounded-[3px] cursor-pointer"
+                    className="font-serif italic rounded-[var(--radius-md)] cursor-pointer"
                     style={{ width: '160px', height: 'var(--space-12)', fontSize: 'var(--text-page-title)', color: 'var(--color-cream)', background: 'var(--color-white-subtle)', border: '1px solid var(--color-white-dim)' }}
                   >
                     {name}

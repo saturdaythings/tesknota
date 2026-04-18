@@ -121,7 +121,7 @@ export default function RegisterPage() {
         </div>
         <div
           className="font-serif italic mt-3"
-          style={{ fontSize: "20px", color: "var(--color-navy)", opacity: 0.6, lineHeight: 1.5 }}
+          style={{ fontSize: "var(--text-lg)", color: "var(--color-navy)", opacity: 0.6, lineHeight: 1.5 }}
         >
           [ t&#603;sk-&#712;n&#596;-ta ] &nbsp;&middot;&nbsp; a deep longing for what is absent or past
         </div>
