@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
@@ -1070,7 +1070,126 @@ function PendingEntriesTab({
 
 // ── Admin page ───────────────────────────────────────────────────────────────
 
-const TABS = ["Spend", "Usage", "Errors", "Audit", "Community Flags", "Users & Permissions", "Data Quality", "Pending Entries"] as const;
+// ── Dev Bot tab ───────────────────────────────────────────────────────────────
+
+interface ChatMessage { role: "bot" | "user"; text: string }
+interface HistoryEntry { role: "user" | "assistant"; content: string }
+
+function DevBotTab({ userId }: { userId: string }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  async function send() {
+    const text = input.trim();
+    if (!text || loading) return;
+    setInput("");
+    setMessages((prev) => [...prev, { role: "user", text }]);
+    const outHistory: HistoryEntry[] = [...history, { role: "user", content: text }];
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/dev-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ message: text, history, userId }),
+      });
+      const data = await res.json();
+      const reply: string = data.reply ?? (data.error ? `Error: ${data.error}` : "No reply");
+      setMessages((prev) => [...prev, { role: "bot", text: reply }]);
+      setHistory([...outHistory, { role: "assistant", content: reply }]);
+    } catch (e) {
+      setMessages((prev) => [...prev, { role: "bot", text: "Error: " + (e instanceof Error ? e.message : "unknown") }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "640px" }}>
+      {/* Header */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "14px 0",
+        borderBottom: "1px solid var(--color-cream-dark)",
+        flexShrink: 0,
+        marginBottom: "0",
+      }}>
+        <div style={{ fontFamily: "var(--font-serif)", fontSize: "var(--text-note)", fontStyle: "italic", color: "var(--color-navy)" }}>
+          dev assistant
+        </div>
+        {loading && (
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
+            thinking...
+          </span>
+        )}
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px 0", display: "flex", flexDirection: "column", gap: "10px" }}>
+        {messages.length === 0 && (
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)", padding: "var(--space-4) 0" }}>
+            Ask me to read a file, propose a code change, or push a commit. I'll always show you the diff first.
+          </div>
+        )}
+        {messages.map((m, i) => (
+          <div
+            key={i}
+            style={{
+              maxWidth: "85%",
+              padding: "10px 14px",
+              fontFamily: "var(--font-sans)",
+              fontSize: "var(--text-sm)",
+              lineHeight: "1.5",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              alignSelf: m.role === "bot" ? "flex-start" : "flex-end",
+              background: m.role === "bot" ? "var(--color-cream-dark)" : "var(--color-navy)",
+              color: m.role === "bot" ? "var(--color-navy)" : "var(--color-cream)",
+              borderRadius: m.role === "bot" ? "2px 12px 12px 2px" : "12px 2px 2px 12px",
+            }}
+          >
+            {m.text}
+          </div>
+        ))}
+        <div ref={endRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{
+        padding: "8px 0 0",
+        borderTop: "1px solid var(--color-cream-dark)",
+        flexShrink: 0,
+        display: "flex",
+        gap: "8px",
+      }}>
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+          placeholder="Ask anything about the codebase..."
+          disabled={loading}
+        />
+        <Button variant="primary" onClick={send} disabled={!input.trim() || loading}>
+          Send
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Admin page ───────────────────────────────────────────────────────────────
+
+const TABS = ["Spend", "Usage", "Errors", "Audit", "Community Flags", "Users & Permissions", "Data Quality", "Pending Entries", "Dev Bot"] as const;
 type TabId = typeof TABS[number];
 
 interface AdminData {
@@ -1310,6 +1429,7 @@ export default function AdminPage() {
               {tab === "Pending Entries" && (
                 <PendingEntriesTab entries={data.pendingEntries} users={data.users} onDismiss={dismissPendingEntry} />
               )}
+              {tab === "Dev Bot" && <DevBotTab userId={user.id} />}
             </>
           )}
         </div>
