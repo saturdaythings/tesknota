@@ -494,10 +494,10 @@ export function BotDrawer() {
         {hasPending && (
           <span style={{
             position: "absolute",
-            top: "2px",
-            right: "2px",
-            width: "8px",
-            height: "8px",
+            top: "var(--space-half)",
+            right: "var(--space-half)",
+            width: "var(--space-2)",
+            height: "var(--space-2)",
             background: "var(--color-destructive)",
             borderRadius: "50%",
           }} className="animate-pulse" />

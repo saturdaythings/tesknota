@@ -363,7 +363,7 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                     aria-label="Selected"
                     style={{
                       position: "absolute",
-                      right: "40px",
+                      right: "var(--space-10)",
                       display: "flex",
                       alignItems: "center",
                       color: "var(--color-success)",
