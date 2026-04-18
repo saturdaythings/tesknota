@@ -48,7 +48,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
       }}
     >
       {/* Line 1: name + concentration badge */}
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-half)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-half)", flexWrap: "wrap" }}>
         <span
           style={{
             fontFamily: "var(--font-serif)",
@@ -56,11 +56,6 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
             fontStyle: "italic",
             color: "var(--color-navy)",
             fontWeight: 400,
-            flex: 1,
-            minWidth: 0,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
           }}
         >
           {frag.name}

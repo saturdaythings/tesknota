@@ -332,25 +332,8 @@ function WishlistMobileCard({
         onClick={onClick}
         style={{ display: "block", width: "100%", textAlign: "left", padding: 0, minHeight: 0, height: "auto" }}
       >
-        <div style={{ marginBottom: "var(--space-half)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-half)" }}>
-            <span style={{ flex: 1, minWidth: 0, fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", fontWeight: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {frag.name}
-            </span>
-            {frag.type && shortFragType(frag.type) && (
-              <span style={{ background: "var(--color-cream-dark)", border: "1px solid var(--color-row-divider)", borderRadius: "var(--radius-full)", padding: "var(--space-half) var(--space-2)", fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-meta-text)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", flexShrink: 0, whiteSpace: "nowrap" }}>
-                {shortFragType(frag.type)}
-              </span>
-            )}
-            {frag.isDupe && (
-              <span style={{ background: "var(--color-cream-dark)", border: "1px solid var(--color-navy)", borderRadius: "var(--radius-full)", padding: "var(--space-half) var(--space-2)", fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-navy)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", flexShrink: 0, whiteSpace: "nowrap" }}>
-                Dupe
-              </span>
-            )}
-          </div>
-          <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", fontWeight: 400 }}>
-            {frag.house}
-          </span>
+        <div style={{ marginBottom: "var(--space-2)" }}>
+          <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} isDupe={frag.isDupe} dupeFor={frag.dupeFor || undefined} />
         </div>
         {frag.wishlistPriority && (
           <div style={{ marginTop: "var(--space-2)" }}>
