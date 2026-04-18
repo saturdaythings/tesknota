@@ -165,7 +165,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
   if (!open) return null;
 
   const inputCls =
-    "w-full h-9 px-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 " +
+    "w-full h-9 px-3 rounded-[var(--radius-sm)] font-sans outline-none transition-[border-color] duration-150 " +
     "focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]";
   const inputStyle: React.CSSProperties = {
     fontSize: "var(--text-sm)",
@@ -220,7 +220,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
           className="sm:hidden"
           style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", flexShrink: 0 }}
         >
-          <div style={{ width: "36px", height: "4px", borderRadius: "2px", background: "var(--color-cream-dark)" }} />
+          <div style={{ width: "36px", height: "4px", borderRadius: "var(--radius-sm)", background: "var(--color-cream-dark)" }} />
         </div>
 
         {/* Header */}
@@ -384,7 +384,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               <FieldLabel>Compliments</FieldLabel>
               <p
                 className="font-sans"
-                style={{ fontSize: "13px", color: "rgba(30,45,69,0.8)", marginBottom: "var(--space-2)" }}
+                style={{ fontSize: "var(--text-sm)", color: "rgba(30,45,69,0.8)", marginBottom: "var(--space-2)" }}
               >
                 {fragCompliments.length > 0 ? `${fragCompliments.length} logged` : "None logged yet"}
               </p>
@@ -394,7 +394,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
             </div>
 
             {err && (
-              <p className="font-sans" style={{ fontSize: "13px", color: "var(--color-destructive)" }}>
+              <p className="font-sans" style={{ fontSize: "var(--text-sm)", color: "var(--color-destructive)" }}>
                 {err}
               </p>
             )}
@@ -420,7 +420,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               </Button>
             ) : (
               <>
-                <span className="font-sans" style={{ fontSize: "13px", color: "var(--color-destructive)" }}>
+                <span className="font-sans" style={{ fontSize: "var(--text-sm)", color: "var(--color-destructive)" }}>
                   Are you sure? This cannot be undone.
                 </span>
                 <Button variant="destructive" size="sm" onClick={() => frag && onDelete(frag)}>

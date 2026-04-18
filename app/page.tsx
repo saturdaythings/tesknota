@@ -116,7 +116,7 @@ export default function LoginPage() {
             placeholder="Password"
             autoFocus
             required
-            className="w-full h-10 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 placeholder:text-[var(--color-cream)]"
+            className="w-full h-10 px-3 rounded-[var(--radius-md)] font-sans outline-none transition-[border-color] duration-150 placeholder:text-[var(--color-cream)]"
             style={{
               fontSize: 'var(--text-base)',
               background: 'rgba(255,255,255,0.12)',
@@ -140,7 +140,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-[3px] font-sans font-medium tracking-[var(--tracking-wide)] transition-opacity disabled:opacity-60 hover:opacity-90"
+            className="flex items-center justify-center gap-2 rounded-[var(--radius-md)] font-sans font-medium tracking-[var(--tracking-wide)] transition-opacity disabled:opacity-60 hover:opacity-90"
             style={{
               width: '320px',
               height: '40px',
