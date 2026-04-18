@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { FragranceCell } from "@/components/ui/fragrance-cell";
-import { TabPill } from "@/components/ui/tab-pill";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -17,6 +16,7 @@ import { CompareView } from "@/components/analytics/comparative-view";
 import { FlaskConical, MessageCircle, Star, Users } from "lucide-react";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
+import { useToast } from "@/components/ui/toast";
 import { searchProfiles, fetchFollows, fetchProfile } from "@/lib/data/index";
 import { loadAllData } from "@/lib/data";
 import {
@@ -136,7 +136,8 @@ function Avatar({ profile, size = 32 }: { profile: Profile; size?: number }) {
         width: size,
         height: size,
         borderRadius: "var(--radius-full)",
-        background: "var(--color-navy)",
+        background: "var(--color-cream-dark)",
+        border: "1px solid var(--color-row-divider)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -144,8 +145,8 @@ function Avatar({ profile, size = 32 }: { profile: Profile; size?: number }) {
       }}
     >
       <span
-        className="font-serif italic"
-        style={{ fontSize: "var(--text-xs)", color: "var(--color-cream)" }}
+        className="font-sans"
+        style={{ fontSize: "var(--text-xs)", color: "var(--color-navy)" }}
       >
         {initials(profile)}
       </span>
@@ -162,6 +163,7 @@ function profileDisplayName(p: Profile): string {
 export default function SocialPage() {
   const { user } = useUser();
   const { fragrances, compliments, communityFrags, isLoaded } = useData();
+  const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
@@ -170,8 +172,6 @@ export default function SocialPage() {
 
   const searchRowRef = useRef<HTMLDivElement>(null);
 
-  const [followingOpenId, setFollowingOpenId] = useState<string | null>(null);
-  const [followMessage, setFollowMessage] = useState("");
   const [sendingFollow, setSendingFollow] = useState(false);
 
   const [follows, setFollows] = useState<Follow[]>([]);
@@ -262,7 +262,7 @@ export default function SocialPage() {
     if (!user) return;
     setSendingFollow(true);
     try {
-      const { id } = await sendFollowRequest(user.id, targetId, followMessage.trim() || undefined);
+      await sendFollowRequest(user.id, targetId);
       await createNotification(
         targetId,
         "follow_request",
@@ -270,11 +270,10 @@ export default function SocialPage() {
         `${user.name ?? "Someone"} wants to follow you.`,
         "/social"
       );
-      setFollowingOpenId(null);
-      setFollowMessage("");
       setSearchQuery("");
       setSearchResults([]);
       await loadFollows();
+      toast("Follow request sent.", "success");
     } finally {
       setSendingFollow(false);
     }
@@ -406,8 +405,8 @@ export default function SocialPage() {
                       </p>
                     )}
                   </div>
-                  <Button variant="primary" size="sm" onClick={() => handleAccept(f)}>Accept</Button>
-                  <Button variant="secondary" size="sm" onClick={() => handleDecline(f)}>Decline</Button>
+                  <Button variant="primary" onClick={() => handleAccept(f)}>Accept</Button>
+                  <Button variant="ghost" onClick={() => handleDecline(f)}>Decline</Button>
                 </div>
               );
             })}
@@ -451,85 +450,55 @@ export default function SocialPage() {
             <div
               style={{
                 background: "var(--color-cream)",
-                border: "1px solid var(--color-meta-text)",
-                borderRadius: "var(--radius-sm)",
-                boxShadow: "var(--shadow-md)",
+                border: "1px solid var(--color-row-divider)",
                 marginTop: "var(--space-1)",
               }}
             >
               {searchResults.map((p) => {
                 const status = followStatus(p.id);
-                const isOpen = followingOpenId === p.id;
                 return (
-                  <div key={p.id}>
-                    <div
-                      className="flex items-center gap-3"
-                      style={{
-                        minHeight: "var(--size-row-min)",
-                        borderBottom: "1px solid var(--color-row-divider)",
-                        padding: "0 var(--space-3)",
-                      }}
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-3"
+                    style={{
+                      minHeight: "var(--size-row-min)",
+                      borderBottom: "1px solid var(--color-row-divider)",
+                      padding: "0 var(--space-3)",
+                    }}
+                  >
+                    <Avatar profile={p} size={32} />
+                    <span
+                      className="font-serif italic flex-1 min-w-0 truncate"
+                      style={{ fontSize: "var(--text-note)", color: "var(--color-navy)" }}
                     >
-                      <Avatar profile={p} size={32} />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-serif italic" style={{ fontSize: "var(--text-note)", color: "var(--color-navy)" }}>
-                          {profileDisplayName(p)}
-                        </div>
-                        {p.username && (
-                          <div className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
-                            @{p.username}
-                          </div>
-                        )}
-                      </div>
-                      {status === "none" && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => setFollowingOpenId(isOpen ? null : p.id)}
-                        >
-                          Follow
-                        </Button>
-                      )}
-                      {status === "pending" && (
-                        <span className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
-                          Requested
-                        </span>
-                      )}
-                      {status === "accepted" && (
-                        <span className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
-                          Following
-                        </span>
-                      )}
-                    </div>
-                    {isOpen && (
-                      <div
-                        className="flex gap-2 items-end"
-                        style={{ padding: "var(--space-3)", borderBottom: "1px solid var(--color-row-divider)", background: "var(--color-cream-dark)" }}
+                      {profileDisplayName(p)}
+                    </span>
+                    {p.username && (
+                      <span
+                        className="font-sans"
+                        style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)", flexShrink: 0 }}
                       >
-                        <textarea
-                          value={followMessage}
-                          onChange={(e) => setFollowMessage(e.target.value)}
-                          placeholder="Add a message (optional)"
-                          rows={2}
-                          className="flex-1 font-sans outline-none resize-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)]"
-                          style={{
-                            fontSize: "var(--text-sm)",
-                            background: "var(--color-cream)",
-                            border: "1px solid var(--color-meta-text)",
-                            borderRadius: "var(--radius-sm)",
-                            padding: "var(--space-2) var(--space-3)",
-                            color: "var(--color-navy)",
-                          }}
-                        />
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          disabled={sendingFollow}
-                          onClick={() => handleSendFollow(p.id)}
-                        >
-                          Send Request
-                        </Button>
-                      </div>
+                        @{p.username}
+                      </span>
+                    )}
+                    {status === "none" && (
+                      <Button
+                        variant="secondary"
+                        disabled={sendingFollow}
+                        onClick={() => handleSendFollow(p.id)}
+                      >
+                        Follow
+                      </Button>
+                    )}
+                    {status === "pending" && (
+                      <span className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)", flexShrink: 0 }}>
+                        Requested
+                      </span>
+                    )}
+                    {status === "accepted" && (
+                      <span className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-meta-text)", flexShrink: 0 }}>
+                        Following
+                      </span>
                     )}
                   </div>
                 );
@@ -584,7 +553,7 @@ export default function SocialPage() {
                       >
                         {f.starred ? "★" : "☆"}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleUnfollow(f)}>
+                      <Button variant="destructive" onClick={() => handleUnfollow(f)}>
                         Unfollow
                       </Button>
                     </div>
@@ -627,7 +596,7 @@ export default function SocialPage() {
                   <>
                     <div className="flex flex-wrap gap-2" style={{ marginBottom: "var(--space-6)" }}>
                       {FRIEND_TABS.map((t) => (
-                        <TabPill key={t.value} label={t.label} active={friendTab === t.value} onClick={() => setFriendTab(t.value)} />
+                        <Button key={t.value} variant="tab-action" active={friendTab === t.value} onClick={() => setFriendTab(t.value)}>{t.label}</Button>
                       ))}
                     </div>
                     <EmptyState icon={<FlaskConical size={48} />} title="This collection is private" />
@@ -652,7 +621,7 @@ export default function SocialPage() {
 
                     <div className="flex flex-wrap gap-2" style={{ marginBottom: "var(--space-6)" }}>
                       {FRIEND_TABS.map((t) => (
-                        <TabPill key={t.value} label={t.label} active={friendTab === t.value} onClick={() => setFriendTab(t.value)} />
+                        <Button key={t.value} variant="tab-action" active={friendTab === t.value} onClick={() => setFriendTab(t.value)}>{t.label}</Button>
                       ))}
                     </div>
 
