@@ -1379,13 +1379,24 @@ export default function DesignSystemPage() {
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'button')!}>
               <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
                 <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state</div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — normal state</div>
                   <div className="flex flex-wrap gap-3">
                     <Button variant="primary">Log Compliment</Button>
                     <Button variant="secondary">Find Fragrances</Button>
                     <Button variant="ghost">Cancel</Button>
                     <Button variant="destructive">Delete</Button>
                     <Button variant="primary" size="sm">Add</Button>
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — normal state</div>
+                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%', overflow: 'hidden' }}>
+                    <div className="flex flex-wrap gap-3">
+                      <Button variant="primary">Log Compliment</Button>
+                      <Button variant="secondary">Find Fragrances</Button>
+                      <Button variant="ghost">Cancel</Button>
+                      <Button variant="destructive">Delete</Button>
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -1408,18 +1419,30 @@ export default function DesignSystemPage() {
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'input')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-4)', maxWidth: '320px' }}>
+              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
                 <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state</div>
-                  <Input label="FRAGRANCE NAME" placeholder="e.g. Replica Coffee Breeze" required />
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — normal state</div>
+                  <div style={{ maxWidth: '320px' }}>
+                    <Input label="FRAGRANCE NAME" placeholder="e.g. Replica Coffee Breeze" required />
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — normal state</div>
+                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%' }}>
+                    <Input label="FRAGRANCE NAME" placeholder="e.g. Replica Coffee Breeze" required />
+                  </div>
                 </div>
                 <div>
                   <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>error state</div>
-                  <Input label="HOUSE" placeholder="e.g. Maison Margiela" error="House is required" />
+                  <div style={{ maxWidth: '320px' }}>
+                    <Input label="HOUSE" placeholder="e.g. Maison Margiela" error="House is required" />
+                  </div>
                 </div>
                 <div>
                   <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
-                  <Input label="NOTES" placeholder="Loading..." disabled />
+                  <div style={{ maxWidth: '320px' }}>
+                    <Input label="NOTES" placeholder="Loading..." disabled />
+                  </div>
                 </div>
               </div>
             </GalleryEntry>
@@ -1440,7 +1463,7 @@ export default function DesignSystemPage() {
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'select')!}>
               <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
                 <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state</div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — normal state</div>
                   <div className="flex flex-wrap items-center gap-4">
                     <Select
                       options={[
@@ -1464,6 +1487,19 @@ export default function DesignSystemPage() {
                   </div>
                 </div>
                 <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — normal state (full width)</div>
+                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%' }}>
+                    <Select
+                      options={[
+                        { value: 'newest', label: 'Date \u2014 Newest first' },
+                        { value: 'oldest', label: 'Date \u2014 Oldest first' },
+                      ]}
+                      value="newest"
+                      onChange={() => {}}
+                    />
+                  </div>
+                </div>
+                <div>
                   <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
                   <Select
                     options={[
@@ -1482,11 +1518,21 @@ export default function DesignSystemPage() {
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'tab-pill')!}>
               <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
                 <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>default — filter pills</div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — default filter pills</div>
                   <div className="flex flex-wrap gap-2">
                     <TabPill label="All" count={12} active={true} onClick={() => {}} />
                     <TabPill label="Strangers" count={4} active={false} onClick={() => {}} />
                     <TabPill label="Friends" count={3} active={false} onClick={() => {}} />
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — default filter pills (wraps to 2 rows)</div>
+                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%' }}>
+                    <div className="flex flex-wrap gap-2">
+                      <TabPill label="All" count={12} active={true} onClick={() => {}} />
+                      <TabPill label="Strangers" count={4} active={false} onClick={() => {}} />
+                      <TabPill label="Friends" count={3} active={false} onClick={() => {}} />
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -1554,14 +1600,24 @@ export default function DesignSystemPage() {
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'search-input')!}>
-              <div style={{ maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                 <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>empty state</div>
-                  <SearchInputDemo />
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — empty state</div>
+                  <div style={{ maxWidth: '300px' }}>
+                    <SearchInputDemo />
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — empty state</div>
+                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%' }}>
+                    <SearchInputDemo />
+                  </div>
                 </div>
                 <div>
                   <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>filled state (with clear button)</div>
-                  <SearchInputWithValue />
+                  <div style={{ maxWidth: '300px' }}>
+                    <SearchInputWithValue />
+                  </div>
                 </div>
               </div>
             </GalleryEntry>
@@ -1569,15 +1625,15 @@ export default function DesignSystemPage() {
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'pagination')!}>
               <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
                 <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state (page 2 of 5)</div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop & mobile — page 2 of 5 (buttons: 44px touch target)</div>
                   <Pagination page={2} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
                 </div>
                 <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>boundary state (page 1 — prev disabled)</div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>page 1 (prev disabled)</div>
                   <Pagination page={1} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
                 </div>
                 <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>boundary state (page 5 — next disabled)</div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>page 5 (next disabled)</div>
                   <Pagination page={5} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
                 </div>
               </div>
