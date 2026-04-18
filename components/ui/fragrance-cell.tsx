@@ -36,7 +36,7 @@ export function FragranceCell({ name, house, type, secondary, isDupe, dupeFor, c
   const concLabel = type ? shortFragType(type) : null;
   return (
     <div className={`min-w-0${className ? ` ${className}` : ''}`}>
-      <div className="flex items-center gap-1.5 mb-1 min-w-0">
+      <div className="flex items-center mb-1 min-w-0" style={{ gap: 'var(--space-1)' }}>
         <span className="flex-1 min-w-0 truncate" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'var(--text-note)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}{secondary && <span className="ml-1.5"> + {secondary}</span>}
         </span>
