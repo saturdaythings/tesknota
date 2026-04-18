@@ -1242,8 +1242,18 @@ function SearchInputDemo() {
   return <SearchInput value={val} onChange={setVal} placeholder="Search fragrances..." />;
 }
 
+function SearchInputWithValue() {
+  const [val, setVal] = useState('Oud Wood');
+  return <SearchInput value={val} onChange={setVal} placeholder="Search fragrances..." />;
+}
+
 function StarRatingDemo() {
   const [rating, setRating] = useState(3);
+  return <StarRating value={rating} onChange={setRating} />;
+}
+
+function StarRatingEmpty() {
+  const [rating, setRating] = useState(0);
   return <StarRating value={rating} onChange={setRating} />;
 }
 
@@ -1368,53 +1378,102 @@ export default function DesignSystemPage() {
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'button')!}>
               <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
-                <div className="flex flex-wrap gap-3">
-                  <Button variant="primary">Log Compliment</Button>
-                  <Button variant="secondary">Find Fragrances</Button>
-                  <Button variant="ghost">Cancel</Button>
-                  <Button variant="destructive">Delete</Button>
-                  <Button variant="primary" size="sm">Add</Button>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state</div>
+                  <div className="flex flex-wrap gap-3">
+                    <Button variant="primary">Log Compliment</Button>
+                    <Button variant="secondary">Find Fragrances</Button>
+                    <Button variant="ghost">Cancel</Button>
+                    <Button variant="destructive">Delete</Button>
+                    <Button variant="primary" size="sm">Add</Button>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="tab-action">Collection</Button>
-                  <Button variant="tab-action" active>Compliments</Button>
-                  <Button variant="tab-action">Wishlist</Button>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>loading / disabled state</div>
+                  <div className="flex flex-wrap gap-3">
+                    <Button variant="primary" disabled>Saving...</Button>
+                    <Button variant="secondary" disabled>Loading...</Button>
+                    <Button variant="ghost" disabled>Cancel</Button>
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>tab variants</div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="tab-action">Collection</Button>
+                    <Button variant="tab-action" active>Compliments</Button>
+                    <Button variant="tab-action">Wishlist</Button>
+                  </div>
                 </div>
               </div>
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'input')!}>
               <div className="flex flex-col" style={{ gap: 'var(--space-4)', maxWidth: '320px' }}>
-                <Input label="FRAGRANCE NAME" placeholder="e.g. Replica Coffee Breeze" required />
-                <Input label="HOUSE" placeholder="e.g. Maison Margiela" error="House is required" />
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state</div>
+                  <Input label="FRAGRANCE NAME" placeholder="e.g. Replica Coffee Breeze" required />
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>error state</div>
+                  <Input label="HOUSE" placeholder="e.g. Maison Margiela" error="House is required" />
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
+                  <Input label="NOTES" placeholder="Loading..." disabled />
+                </div>
               </div>
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'textarea')!}>
-              <div style={{ maxWidth: '320px' }}>
-                <Textarea label="NOTES" placeholder="Any notes about this compliment\u2026" hint="Optional" rows={3} />
+              <div style={{ maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state</div>
+                  <Textarea label="NOTES" placeholder="Any notes about this compliment\u2026" hint="Optional" rows={3} />
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
+                  <Textarea label="NOTES" placeholder="Loading..." disabled rows={3} />
+                </div>
               </div>
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'select')!}>
-              <div className="flex flex-wrap items-center gap-4">
-                <Select
-                  options={[
-                    { value: 'newest', label: 'Date \u2014 Newest first' },
-                    { value: 'oldest', label: 'Date \u2014 Oldest first' },
-                  ]}
-                  value="newest"
-                  onChange={() => {}}
-                  size="auto"
-                />
-                <div style={{ maxWidth: '220px', width: '100%' }}>
+              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state</div>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <Select
+                      options={[
+                        { value: 'newest', label: 'Date \u2014 Newest first' },
+                        { value: 'oldest', label: 'Date \u2014 Oldest first' },
+                      ]}
+                      value="newest"
+                      onChange={() => {}}
+                      size="auto"
+                    />
+                    <div style={{ maxWidth: '220px', width: '100%' }}>
+                      <Select
+                        options={[
+                          { value: 'edp', label: 'Eau de Parfum' },
+                          { value: 'edt', label: 'Eau de Toilette' },
+                        ]}
+                        value="edp"
+                        onChange={() => {}}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
                   <Select
                     options={[
-                      { value: 'edp', label: 'Eau de Parfum' },
-                      { value: 'edt', label: 'Eau de Toilette' },
+                      { value: 'newest', label: 'Date \u2014 Newest first' },
+                      { value: 'oldest', label: 'Date \u2014 Oldest first' },
                     ]}
-                    value="edp"
+                    value="newest"
                     onChange={() => {}}
+                    disabled
+                    size="auto"
                   />
                 </div>
               </div>
@@ -1495,17 +1554,46 @@ export default function DesignSystemPage() {
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'search-input')!}>
-              <div style={{ maxWidth: '300px' }}>
-                <SearchInputDemo />
+              <div style={{ maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>empty state</div>
+                  <SearchInputDemo />
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>filled state (with clear button)</div>
+                  <SearchInputWithValue />
+                </div>
               </div>
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'pagination')!}>
-              <Pagination page={2} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
+              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state (page 2 of 5)</div>
+                  <Pagination page={2} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>boundary state (page 1 — prev disabled)</div>
+                  <Pagination page={1} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>boundary state (page 5 — next disabled)</div>
+                  <Pagination page={5} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
+                </div>
+              </div>
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'star-rating')!}>
-              <StarRatingDemo />
+              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>empty state</div>
+                  <StarRatingEmpty />
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>filled state (3 stars)</div>
+                  <StarRatingDemo />
+                </div>
+              </div>
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'stat-box')!}>
