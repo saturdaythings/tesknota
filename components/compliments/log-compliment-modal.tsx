@@ -135,9 +135,9 @@ function FragSearch({
           placeholder="Search your collection..."
           className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-navy-mid)]"
           style={{
-            fontSize: '13px',
+            fontSize: 'var(--text-sm)',
             fontWeight: 400,
-            letterSpacing: '0.08em',
+            letterSpacing: 'var(--tracking-wide)',
             background: 'var(--color-cream)',
             border: error ? '1px solid var(--color-destructive)' : '1px solid var(--color-meta-text)',
             color: value ? 'var(--color-navy)' : 'var(--color-meta-text)',
@@ -168,7 +168,7 @@ function FragSearch({
               <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 'var(--leading-tight)' }}>
                 {f.name}
               </div>
-              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', letterSpacing: '0.1em' }}>
+              <div className="font-sans uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', letterSpacing: 'var(--tracking-md)' }}>
                 {f.house}
               </div>
             </div>

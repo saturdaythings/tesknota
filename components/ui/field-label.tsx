@@ -4,14 +4,14 @@ interface FieldLabelProps {
 }
 
 /**
- * Form field label — var(--text-xs) sans uppercase tracking-0.08em navy 400.
+ * Form field label — var(--text-xs) sans uppercase var(--tracking-wide) navy 400.
  * Use above every form input across all modals and forms.
  */
 export function FieldLabel({ children, className }: FieldLabelProps) {
   return (
     <div
       className={`mb-1 font-sans font-normal uppercase ${className ?? ''}`}
-      style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: '0.08em' }}
+      style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-wide)' }}
     >
       {children}
     </div>

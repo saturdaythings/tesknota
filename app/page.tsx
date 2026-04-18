@@ -63,8 +63,8 @@ export default function LoginPage() {
           className="font-sans font-medium uppercase mt-3"
           style={{
             fontSize: 'var(--text-xs)',
-            color: 'rgba(245,240,232,0.6)',
-            letterSpacing: '0.22em',
+            color: 'var(--color-cream-muted)',
+            letterSpacing: 'var(--tracking-xl)',
           }}
         >
           Fragrance Tracker

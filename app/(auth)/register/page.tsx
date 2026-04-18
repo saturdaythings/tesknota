@@ -114,7 +114,7 @@ export default function RegisterPage() {
           style={{
             fontSize: "var(--text-xs)",
             color: "var(--color-meta-text)",
-            letterSpacing: "0.22em",
+            letterSpacing: "var(--tracking-xl)",
           }}
         >
           Fragrance Tracker

@@ -43,16 +43,17 @@ const ROW_COLORS = [
 ];
 
 const TYPE_TOKENS = [
-  { token: '--text-xxs',        label: 'XXS',         role: 'Sidebar "Fragrance Tracker" tagline',              font: 'sans',  italic: false },
-  { token: '--text-xs',         label: 'XS',          role: 'Field labels, topbar app label, sidebar nav, meta, date', font: 'sans', italic: false },
-  { token: '--text-sm',         label: 'SM',          role: 'Dropdowns, find-fragrance search input',           font: 'sans',  italic: false },
-  { token: '--text-ui',         label: 'UI',          role: 'Sidebar username, empty-state description',        font: 'sans',  italic: false },
-  { token: '--text-note',       label: 'Note',        role: 'Compliment notes / quotes',                        font: 'serif', italic: true  },
-  { token: '--text-md',         label: 'MD',          role: 'Sidebar IPA phonetic tagline',                     font: 'serif', italic: true  },
-  { token: '--text-lg',         label: 'LG',          role: 'Fragrance name in FragranceCell and search results', font: 'serif', italic: true },
-  { token: '--text-empty-title',label: 'Empty Title', role: 'Empty-state title ("No compliments yet")',         font: 'serif', italic: true  },
-  { token: '--text-page-title', label: 'Page Title',  role: 'Topbar page title',                                font: 'serif', italic: true  },
-  { token: '--text-logo',       label: 'Logo',        role: 'Sidebar tęsknota logotype',                        font: 'serif', italic: true  },
+  { token: '--text-xxs',        label: 'XXS',         role: 'Sidebar "Fragrance Tracker" tagline',                       font: 'sans',  italic: false },
+  { token: '--text-xs',         label: 'XS',          role: 'Field labels, topbar app label, sidebar nav, meta, date',   font: 'sans',  italic: false },
+  { token: '--text-sm',         label: 'SM',          role: 'Dropdowns, find-fragrance search input',                    font: 'sans',  italic: false },
+  { token: '--text-label',      label: 'Label',       role: 'Form field labels, section sub-labels',                     font: 'sans',  italic: false },
+  { token: '--text-ui',         label: 'UI',          role: 'Sidebar username, empty-state description',                 font: 'sans',  italic: false },
+  { token: '--text-note',       label: 'Note',        role: 'Fragrance name in list rows, compliment notes',             font: 'serif', italic: true  },
+  { token: '--text-md',         label: 'MD',          role: 'Sidebar IPA phonetic tagline',                              font: 'serif', italic: true  },
+  { token: '--text-lg',         label: 'LG',          role: 'Search result names, section headings, modal fragrance names', font: 'serif', italic: true },
+  { token: '--text-empty-title',label: 'Empty Title', role: 'Empty-state title ("No compliments yet")',                  font: 'serif', italic: true  },
+  { token: '--text-page-title', label: 'Page Title',  role: 'Topbar page title',                                         font: 'serif', italic: true  },
+  { token: '--text-logo',       label: 'Logo',        role: 'Sidebar tęsknota logotype',                                 font: 'serif', italic: true  },
 ];
 
 const SPACE_TOKENS = ['--space-1', '--space-4', '--space-5', '--space-6', '--space-8', '--space-10'];
@@ -141,7 +142,7 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
         <button
           onClick={() => violations.length > 0 && setExpanded((v) => !v)}
           className="w-full flex items-center justify-between font-sans font-normal uppercase text-left"
-          style={{ padding: 'var(--space-3) var(--space-4)', fontSize: 'var(--text-xs)', letterSpacing: '0.08em', background: clean ? 'var(--color-cream)' : 'var(--color-navy)', color: clean ? 'var(--color-navy)' : 'var(--color-cream)', border: 'none', cursor: violations.length > 0 ? 'pointer' : 'default' }}
+          style={{ padding: 'var(--space-3) var(--space-4)', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-wide)', background: clean ? 'var(--color-cream)' : 'var(--color-navy)', color: clean ? 'var(--color-navy)' : 'var(--color-cream)', border: 'none', cursor: violations.length > 0 ? 'pointer' : 'default' }}
         >
           <span>
             {clean
@@ -152,7 +153,7 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
         </button>
         {!clean && expanded && (
           <div style={{ padding: 'var(--space-3) var(--space-4)', background: 'var(--color-cream)' }}>
-            <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: '0.04em' }}>
+            <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-xs)' }}>
               Replace each with the appropriate <code className="font-mono">var(--*)</code> token.
             </div>
             <div className="flex flex-col" style={{ gap: 'var(--space-1)' }}>
@@ -383,7 +384,7 @@ function PreviewOverlay({ tokenName, draft, onBack, callWorker, onPublishSuccess
         <button
           onClick={onBack}
           className="font-sans flex-shrink-0"
-          style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, letterSpacing: '0.04em' }}
+          style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-muted)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, letterSpacing: 'var(--tracking-xs)' }}
         >
           Back
         </button>
@@ -396,7 +397,7 @@ function PreviewOverlay({ tokenName, draft, onBack, callWorker, onPublishSuccess
               style={{
                 fontSize: 'var(--text-xs)',
                 fontWeight: 400,
-                letterSpacing: '0.08em',
+                letterSpacing: 'var(--tracking-wide)',
                 padding: 'var(--space-2) var(--space-4)',
                 borderRadius: '2px',
                 background: route === r.path ? 'var(--color-cream)' : 'transparent',
@@ -479,7 +480,7 @@ function ExpandableToken({ token, defaultValue, expanded, onToggle, onDraftChang
 function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
     <div id={id} className="mb-10" style={{ scrollMarginTop: 'var(--space-12)' }}>
-      <div className="font-sans font-normal uppercase mb-4" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.08em', color: 'var(--color-navy-mid)', borderBottom: '1px solid var(--color-row-divider)', paddingBottom: 'var(--space-2)' }}>
+      <div className="font-sans font-normal uppercase mb-4" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-wide)', color: 'var(--color-navy-mid)', borderBottom: '1px solid var(--color-row-divider)', paddingBottom: 'var(--space-2)' }}>
         {title}
       </div>
       {children}
@@ -490,7 +491,7 @@ function Section({ id, title, children }: { id?: string; title: string; children
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-6 mb-3">
-      <div className="font-sans flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', minWidth: '180px', paddingTop: 'var(--space-1)', letterSpacing: '0.04em' }}>
+      <div className="font-sans flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', minWidth: '180px', paddingTop: 'var(--space-1)', letterSpacing: 'var(--tracking-xs)' }}>
         {label}
       </div>
       <div className="flex-1 min-w-0">{children}</div>
@@ -500,7 +501,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 function Note({ children }: { children: React.ReactNode }) {
   return (
-    <div className="font-sans mt-1 mb-3" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: '0.04em' }}>
+    <div className="font-sans mt-1 mb-3" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-xs)' }}>
       {children}
     </div>
   );
@@ -581,7 +582,7 @@ export default function DesignSystemPage() {
             <TabPill label="Edit" active={mode === 'edit'} onClick={() => setMode('edit')} />
           </div>
           {mode === 'edit' && (
-            <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: '0.04em' }}>
+            <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-xs)' }}>
               Changes publish directly to the live site.
             </span>
           )}
@@ -787,10 +788,10 @@ export default function DesignSystemPage() {
                     <FragranceCell name={row.frag} house={row.house} type="Eau de Parfum" />
                   </div>
                   <div>
-                    <div className="font-sans uppercase mb-1" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)', fontWeight: 400 }}>{row.meta}</div>
+                    <div className="font-sans uppercase mb-1" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy)', fontWeight: 400 }}>{row.meta}</div>
                     {row.notes && <div className="font-serif italic" style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 1.6 }}>{row.notes}</div>}
                   </div>
-                  <div className="font-sans uppercase text-right" style={{ whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy)' }}>{row.date}</div>
+                  <div className="font-sans uppercase text-right" style={{ whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy)' }}>{row.date}</div>
                 </div>
               ))}
             </div>
@@ -801,11 +802,11 @@ export default function DesignSystemPage() {
             <div className="rounded-[3px] overflow-hidden" style={{ maxWidth: 'var(--sidebar-width)', background: 'var(--color-navy)' }}>
               <div style={{ padding: 'var(--space-8) var(--space-5) var(--space-6)' }}>
                 <div className="font-serif italic" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)', lineHeight: 1 }}>tęsknota</div>
-                <div className="font-sans font-medium uppercase mt-1" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: '0.22em' }}>Fragrance Tracker</div>
+                <div className="font-sans font-medium uppercase mt-1" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: 'var(--tracking-xl)' }}>Fragrance Tracker</div>
                 <div className="font-serif italic mt-2" style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}>[tɛsk-ˈnɔ-ta] · a deep longing</div>
               </div>
               <div>
-                <div className="px-5 mb-1 font-sans font-normal uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-label)', letterSpacing: '0.08em' }}>MY SPACE</div>
+                <div className="px-5 mb-1 font-sans font-normal uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-label)', letterSpacing: 'var(--tracking-wide)' }}>MY SPACE</div>
                 {[
                   { label: 'Dashboard', active: false },
                   { label: 'My Collection', active: true },
@@ -814,7 +815,7 @@ export default function DesignSystemPage() {
                   <div
                     key={item.label}
                     className="flex items-center font-sans"
-                    style={{ height: 'var(--space-10)', paddingLeft: 'var(--space-5)', paddingRight: 'var(--space-5)', borderLeft: item.active ? '3px solid var(--color-cream)' : '3px solid transparent', background: item.active ? 'var(--color-white-subtle)' : 'transparent', color: item.active ? 'var(--color-cream)' : 'var(--color-sand-muted)', fontSize: 'var(--text-xs)', letterSpacing: '0.04em' }}
+                    style={{ height: 'var(--space-10)', paddingLeft: 'var(--space-5)', paddingRight: 'var(--space-5)', borderLeft: item.active ? '3px solid var(--color-cream)' : '3px solid transparent', background: item.active ? 'var(--color-white-subtle)' : 'transparent', color: item.active ? 'var(--color-cream)' : 'var(--color-sand-muted)', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-xs)' }}
                   >
                     <span className="flex-1 truncate">{item.label}</span>
                     {'count' in item && item.count !== undefined && (
@@ -825,7 +826,7 @@ export default function DesignSystemPage() {
               </div>
               <div className="px-5 border-t" style={{ borderColor: 'var(--color-white-subtle)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)' }}>
                 <div className="font-sans mb-1" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-cream)' }}>Kiana</div>
-                <div className="font-sans font-normal uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.08em', color: 'var(--color-sand-muted)' }}>Sign Out</div>
+                <div className="font-sans font-normal uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-wide)', color: 'var(--color-sand-muted)' }}>Sign Out</div>
               </div>
             </div>
           </Section>
@@ -835,12 +836,11 @@ export default function DesignSystemPage() {
             <div className="rounded-[3px] overflow-hidden" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
               <div className="flex items-center gap-3" style={{ height: 'var(--header-height)', paddingLeft: 'var(--topbar-px)', paddingRight: 'var(--topbar-px)' }}>
                 <div className="flex-1">
-                  <div className="font-sans font-medium uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.12em', color: 'var(--color-navy-mid)' }}>TĘSKNOTA</div>
-                  <div className="font-serif italic" style={{ fontSize: 'var(--text-page-title)', color: 'var(--color-navy)', lineHeight: 1.2 }}>Compliments</div>
+                  <div className="font-sans font-medium uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-lg)', color: 'var(--color-navy-mid)' }}>TĘSKNOTA</div>
+                  <div className="font-serif italic" style={{ fontSize: 'var(--text-page-title)', color: 'var(--color-navy)', lineHeight: 1.2 }}>Collection</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="secondary" size="sm">Find Fragrances</Button>
-                  <Button variant="primary" size="sm">Log Compliment</Button>
+                  <Button variant="secondary" size="sm">Add to Collection</Button>
                 </div>
               </div>
             </div>
@@ -851,7 +851,7 @@ export default function DesignSystemPage() {
             <div className="rounded-[3px] overflow-hidden flex flex-col items-center justify-center py-12" style={{ background: 'var(--color-navy)' }}>
               <div className="text-center mb-8">
                 <div className="font-serif italic leading-none" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)' }}>tęsknota</div>
-                <div className="font-sans font-medium uppercase mt-2" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: '0.22em' }}>Fragrance Tracker</div>
+                <div className="font-sans font-medium uppercase mt-2" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: 'var(--tracking-xl)' }}>Fragrance Tracker</div>
                 <div className="font-serif italic mt-2" style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}>[tɛsk-ˈnɔ-ta] · a deep longing for what is absent or past</div>
               </div>
               <div className="font-sans text-center mb-4" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-sand)' }}>Who are you?</div>

@@ -62,10 +62,10 @@ export default function SettingsPage() {
         {user && (
           <div className="border border-[var(--color-sand-light)] bg-[var(--color-cream-dark)] mb-4">
             <div className="px-5 py-4 border-b border-[var(--color-cream-dark)]">
-              <div className="font-mono text-xs text-[var(--color-meta-text)] tracking-[0.1em] uppercase mb-1">
+              <div className="font-mono uppercase mb-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-md)' }}>
                 Name
               </div>
-              <div className="font-serif italic text-lg text-[var(--color-navy)]">
+              <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)' }}>
                 {user.name}
               </div>
             </div>

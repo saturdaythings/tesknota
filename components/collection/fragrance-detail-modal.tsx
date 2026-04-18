@@ -251,7 +251,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
                   fontFamily: "var(--font-sans)",
                   fontSize: "var(--text-xs)",
                   fontWeight: 500,
-                  letterSpacing: "0.08em",
+                  letterSpacing: "var(--tracking-wide)",
                   textTransform: "uppercase",
                   color: "rgba(30,45,69,0.8)",
                 }}

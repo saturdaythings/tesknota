@@ -81,7 +81,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
       style={{
         fontSize: 'var(--text-xs)',
         fontWeight: 400,
-        letterSpacing: '0.08em',
+        letterSpacing: 'var(--tracking-wide)',
         padding: '6px 12px',
         borderRadius: 'var(--radius-md)',
         background: active ? 'var(--color-cream-dark)' : 'transparent',

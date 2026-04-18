@@ -127,7 +127,7 @@ function MetaRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-baseline gap-3">
       <span
         className="font-sans uppercase flex-shrink-0"
-        style={{ fontSize: 'var(--text-label)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)', minWidth: '80px' }}
+        style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)', minWidth: '80px' }}
       >
         {label}
       </span>
@@ -283,7 +283,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
               <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
                 <div
                   className="font-sans uppercase"
-                  style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)' }}
+                  style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}
                 >
                   {frag.fragranceHouse}
                 </div>
@@ -322,7 +322,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                     <div>
                       <div
                         className="font-sans uppercase mb-1"
-                        style={{ fontSize: 'var(--text-label)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)' }}
+                        style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}
                       >
                         Top Notes
                       </div>
@@ -333,7 +333,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                     <div>
                       <div
                         className="font-sans uppercase mb-1"
-                        style={{ fontSize: 'var(--text-label)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)' }}
+                        style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}
                       >
                         Heart Notes
                       </div>
@@ -344,7 +344,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                     <div>
                       <div
                         className="font-sans uppercase mb-1"
-                        style={{ fontSize: 'var(--text-label)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)' }}
+                        style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}
                       >
                         Base Notes
                       </div>
@@ -359,7 +359,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                 <div className="mb-6">
                   <div
                     className="font-sans uppercase mb-2"
-                    style={{ fontSize: 'var(--text-label)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)' }}
+                    style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}
                   >
                     Accords
                   </div>
@@ -382,7 +382,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                 >
                   <div
                     className="font-sans uppercase mb-4"
-                    style={{ fontSize: 'var(--text-label)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)' }}
+                    style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}
                   >
                     Your Collection
                   </div>
@@ -393,7 +393,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                       <div className="flex items-baseline gap-3">
                         <span
                           className="font-sans uppercase flex-shrink-0"
-                          style={{ fontSize: 'var(--text-label)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)', minWidth: '80px' }}
+                          style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)', minWidth: '80px' }}
                         >
                           My Rating
                         </span>
@@ -404,7 +404,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                       <div>
                         <div
                           className="font-sans uppercase mb-1"
-                          style={{ fontSize: 'var(--text-label)', letterSpacing: '0.1em', color: 'var(--color-navy-mid)' }}
+                          style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy-mid)' }}
                         >
                           My Notes
                         </div>
@@ -471,7 +471,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                 <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
                   {frag.fragranceName}
                 </div>
-                <div className="font-sans uppercase mt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: '0.1em' }}>
+                <div className="font-sans uppercase mt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-md)' }}>
                   {frag.fragranceHouse}
                 </div>
               </div>
@@ -517,7 +517,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                     rows={3}
                     style={{
                       fontSize: '13px',
-                      letterSpacing: '0.08em',
+                      letterSpacing: 'var(--tracking-wide)',
                       color: 'var(--color-navy)',
                     }}
                   />
@@ -570,7 +570,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
               </div>
               <div
                 className="font-sans uppercase mb-5"
-                style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: '0.1em' }}
+                style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-md)' }}
               >
                 {frag.fragranceHouse}
               </div>
