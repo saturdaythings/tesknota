@@ -11,6 +11,9 @@ import { Select } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { FragSearch } from '@/components/ui/frag-search';
 import { Input } from '@/components/ui/input';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { PerPageControl } from '@/components/ui/per-page-control';
+import { Modal } from '@/components/ui/modal';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { FieldLabel, OptionalTag, RequiredMark } from '@/components/ui/field-label';
@@ -1205,6 +1208,30 @@ const GALLERY_ITEMS: GalleryItem[] = [
     tokens: [],
     note: 'Uses legacy tokens --b2, --serif, --ink \u2014 not part of the current design system. Needs migration.',
   },
+  {
+    id: 'modal',
+    name: 'Modal',
+    path: 'components/ui/modal.tsx',
+    pages: ['Modals', 'Dialogs'],
+    tokens: ['--color-cream', '--shadow-lg', '--color-navy-backdrop'],
+    note: 'Dialog with backdrop, close button, and keyboard support (Escape). Requires onClose handler.',
+  },
+  {
+    id: 'multi-select',
+    name: 'MultiSelect',
+    path: 'components/ui/multi-select.tsx',
+    pages: ['Forms'],
+    tokens: ['--color-cream', '--color-cream-dark', '--color-navy', '--color-meta-text', '--color-row-hover', '--color-row-divider'],
+    note: 'Dropdown with multi-selection checkboxes. Search within dropdown. Accepts options array with value/label pairs.',
+  },
+  {
+    id: 'per-page-control',
+    name: 'PerPageControl',
+    path: 'components/ui/per-page-control.tsx',
+    pages: ['Pagination'],
+    tokens: ['--color-navy', '--font-weight-semibold'],
+    note: 'Inline button group to select pagination size. Shows "25", "50", "All" options.',
+  },
 ];
 
 function GalleryEntry({ item, children }: { item: GalleryItem; children: React.ReactNode }) {
@@ -1681,6 +1708,31 @@ export default function DesignSystemPage() {
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'section-header')!}>
               <SectionHeader title="Log a Compliment" />
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'modal')!}>
+              <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', textAlign: 'center' }}>
+                  Modal component renders with backdrop and close button. Use onClose prop for close handler.
+                </span>
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'multi-select')!}>
+              <MultiSelect
+                options={[
+                  { value: 'opt1', label: 'Option 1' },
+                  { value: 'opt2', label: 'Option 2' },
+                  { value: 'opt3', label: 'Option 3' },
+                ]}
+                value={[]}
+                onChange={() => {}}
+                placeholder="Select options..."
+              />
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'per-page-control')!}>
+              <PerPageControl value={25} onChange={() => {}} />
             </GalleryEntry>
 
           </Section>
