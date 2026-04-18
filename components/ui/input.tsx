@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, TextareaHTMLAttributes, InputHTMLAttributes } from 'react';
+import { useId, forwardRef, TextareaHTMLAttributes, InputHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 const inputBase =
@@ -16,36 +16,41 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export function Input({ label, error, className, id: idProp, required, ...props }: InputProps) {
-  const generated = useId();
-  const id = idProp ?? generated;
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ label, error, className, id: idProp, required, ...props }, ref) => {
+    const generated = useId();
+    const id = idProp ?? generated;
 
-  return (
-    <div className="flex flex-col w-full">
-      {label && (
-        <label
-          htmlFor={id}
-          className="mb-1 text-[13px] font-medium font-sans text-[var(--color-navy)]"
-        >
-          {label}
-          {required && <span className="text-[var(--color-destructive)] ml-0.5">*</span>}
-        </label>
-      )}
-      <input
-        id={id}
-        required={required}
-        aria-invalid={!!error}
-        className={cn(inputBase, 'h-9 px-3', error && 'border-[var(--color-destructive)]', className)}
-        {...props}
-      />
-      {error && (
-        <p role="alert" className="mt-1 text-[13px] text-[var(--color-destructive)]">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
+    return (
+      <div className="flex flex-col w-full">
+        {label && (
+          <label
+            htmlFor={id}
+            className="mb-1 text-[13px] font-medium font-sans text-[var(--color-navy)]"
+          >
+            {label}
+            {required && <span className="text-[var(--color-destructive)] ml-0.5">*</span>}
+          </label>
+        )}
+        <input
+          ref={ref}
+          id={id}
+          required={required}
+          aria-invalid={!!error}
+          className={cn(inputBase, 'h-9 px-3', error && 'border-[var(--color-destructive)]', className)}
+          {...props}
+        />
+        {error && (
+          <p role="alert" className="mt-1 text-[13px] text-[var(--color-destructive)]">
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  },
+);
+
+Input.displayName = 'Input';
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;

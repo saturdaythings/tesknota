@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
 import { useToast } from "@/components/ui/toast";
@@ -451,7 +452,7 @@ export function BotDrawer() {
             fontFamily: "var(--font-sans)",
             fontSize: "var(--text-xs)",
             color: "var(--color-navy)",
-            letterSpacing: "0.04em",
+            letterSpacing: "var(--tracking-xs)",
           }}
         >
           <span>You have {pending.length} unfinished entr{pending.length === 1 ? "y" : "ies"} — tap to finish</span>
@@ -459,7 +460,8 @@ export function BotDrawer() {
       )}
 
       {/* FAB trigger */}
-      <button
+      <Button
+        variant="ghost"
         onClick={openDrawer}
         aria-label="Open assistant"
         style={{
@@ -470,13 +472,11 @@ export function BotDrawer() {
           height: "44px",
           borderRadius: "50%",
           background: "var(--color-sand-light)",
-          border: "none",
-          cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           zIndex: 200,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+          boxShadow: "var(--shadow-sm)",
           transition: "opacity 150ms",
           color: "var(--color-navy)",
         }}
@@ -502,7 +502,7 @@ export function BotDrawer() {
             borderRadius: "50%",
           }} className="animate-pulse" />
         )}
-      </button>
+      </Button>
 
       {/* Backdrop */}
       {open && (
@@ -545,13 +545,15 @@ export function BotDrawer() {
           <div style={{ fontFamily: "var(--font-serif)", fontSize: "var(--text-note)", fontStyle: "italic", color: "var(--color-navy)" }}>
             assistant
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={closeDrawer}
-            style={{ fontSize: "var(--text-lg)", color: "var(--color-meta-text)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", lineHeight: 1 }}
             aria-label="Close"
+            className="h-auto"
+            style={{ fontSize: "var(--text-lg)", color: "var(--color-meta-text)", padding: "4px 8px", lineHeight: 1 }}
           >
             ×
-          </button>
+          </Button>
         </div>
 
         {/* Messages */}
@@ -584,23 +586,23 @@ export function BotDrawer() {
           {buttons && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignSelf: "flex-start" }}>
               {buttons.map((b, i) => (
-                <button
+                <Button
                   key={i}
+                  variant="ghost"
                   onClick={b.action}
+                  className="h-auto"
                   style={{
                     background: "var(--color-cream-dark)",
                     border: "1px solid var(--color-meta-text)",
                     color: "var(--color-navy)",
-                    fontFamily: "var(--font-sans)",
                     fontSize: "var(--text-xs)",
                     padding: "6px 14px",
-                    cursor: "pointer",
                     borderRadius: "var(--radius-full)",
                     transition: "all 150ms",
                   }}
                 >
                   {b.label}
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -611,24 +613,24 @@ export function BotDrawer() {
         {messages.length === 0 && !pendingVoice && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", padding: "0 20px 12px" }}>
             {QUICK_CHIPS.map((chip) => (
-              <button
+              <Button
                 key={chip}
+                variant="ghost"
                 onClick={() => { clearButtons(); addMsg(chip, "user"); handleMessage(chip); }}
+                className="h-auto"
                 style={{
                   background: "var(--color-cream-dark)",
                   border: "1px solid var(--color-cream-dark)",
                   color: "var(--color-navy)",
-                  fontFamily: "var(--font-sans)",
                   fontSize: "var(--text-xs)",
                   letterSpacing: "var(--tracking-xs)",
                   padding: "6px 14px",
-                  cursor: "pointer",
                   borderRadius: "var(--radius-full)",
                   transition: "all 150ms",
                 }}
               >
                 {chip}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -644,7 +646,8 @@ export function BotDrawer() {
           alignItems: "center",
         }}>
           {/* Mic button */}
-          <button
+          <Button
+            variant="ghost"
             onClick={startListening}
             aria-label={listening ? "Stop listening" : "Start voice input"}
             style={{
@@ -654,7 +657,6 @@ export function BotDrawer() {
               border: "1px solid var(--color-meta-text)",
               background: listening ? "var(--color-navy)" : "var(--color-cream)",
               color: listening ? "var(--color-cream)" : "var(--color-navy)",
-              cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -665,24 +667,15 @@ export function BotDrawer() {
             <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor">
               <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.93V22h-2v-2.07A8 8 0 0 1 4 12a1 1 0 1 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/>
             </svg>
-          </button>
+          </Button>
 
-          <input
+          <Input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
             placeholder={listening ? "Listening..." : "Ask anything about your fragrances..."}
-            className="flex-1 h-9 placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)] outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)]"
-            style={{
-              padding: "0 var(--space-3)",
-              border: "1px solid var(--color-meta-text)",
-              background: "var(--color-cream)",
-              fontFamily: "var(--font-sans)",
-              fontSize: "var(--text-sm)",
-              color: "var(--color-navy)",
-              borderRadius: "var(--radius-sm)",
-            }}
+            className="flex-1"
           />
           <Button
             variant="primary"
