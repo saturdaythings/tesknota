@@ -71,7 +71,7 @@ export default function LoginPage() {
         </div>
         <div
           className="font-serif italic mt-3"
-          style={{ fontSize: '20px', color: 'var(--color-sand)', lineHeight: 1.5 }}
+          style={{ fontSize: 'var(--text-lg)', color: 'var(--color-sand)', lineHeight: 1.5 }}
         >
           [ t&#603;sk-&#712;n&#596;-ta ] &nbsp;&middot;&nbsp; a deep longing for what is absent or past
         </div>
@@ -82,7 +82,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center w-full">
           <div
             className="font-sans text-center mb-4"
-            style={{ fontSize: '14px', color: 'var(--color-sand)' }}
+            style={{ fontSize: 'var(--text-ui)', color: 'var(--color-sand)' }}
           >
             Who are you?
           </div>
@@ -103,7 +103,7 @@ export default function LoginPage() {
         >
           <div
             className="font-serif italic text-center"
-            style={{ fontSize: '22px', color: 'var(--color-cream)', marginBottom: '4px' }}
+            style={{ fontSize: 'var(--text-empty-title)', color: 'var(--color-cream)', marginBottom: 'var(--space-1)' }}
           >
             {selected.name}
           </div>
@@ -118,7 +118,7 @@ export default function LoginPage() {
             required
             className="w-full h-10 px-3 rounded-[3px] font-sans outline-none transition-[border-color] duration-150 placeholder:text-[var(--color-cream)]"
             style={{
-              fontSize: '15px',
+              fontSize: 'var(--text-base)',
               background: 'rgba(255,255,255,0.12)',
               border: '1px solid rgba(255,255,255,0.25)',
               color: 'var(--color-cream)',
@@ -130,7 +130,7 @@ export default function LoginPage() {
           {error && (
             <div
               className="font-sans text-center"
-              style={{ fontSize: '13px', color: 'var(--color-sand)' }}
+              style={{ fontSize: 'var(--text-sm)', color: 'var(--color-sand)' }}
             >
               {error}
             </div>
@@ -140,11 +140,11 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-[3px] font-sans font-medium tracking-[0.08em] transition-opacity disabled:opacity-60 hover:opacity-90"
+            className="flex items-center justify-center gap-2 rounded-[3px] font-sans font-medium tracking-[var(--tracking-wide)] transition-opacity disabled:opacity-60 hover:opacity-90"
             style={{
               width: '320px',
               height: '40px',
-              fontSize: '13px',
+              fontSize: 'var(--text-sm)',
               background: 'var(--color-cream)',
               color: 'var(--color-navy)',
             }}
@@ -164,7 +164,7 @@ export default function LoginPage() {
             type="button"
             onClick={back}
             className="font-sans bg-transparent border-none cursor-pointer transition-opacity hover:opacity-100"
-            style={{ fontSize: '13px', color: 'var(--color-sand)', opacity: 0.7 }}
+            style={{ fontSize: 'var(--text-sm)', color: 'var(--color-sand)', opacity: 0.7 }}
           >
             BACK
           </button>
@@ -172,7 +172,7 @@ export default function LoginPage() {
           {/* Register link */}
           <div
             className="font-sans text-center"
-            style={{ fontSize: '13px', color: 'rgba(245,240,232,0.5)' }}
+            style={{ fontSize: 'var(--text-sm)', color: 'var(--color-cream-faint)' }}
           >
             New to t&#281;sknota?{' '}
             <Link
@@ -197,7 +197,7 @@ function UserButton({ name, onClick }: { name: string; onClick: () => void }) {
       style={{
         width: '180px',
         height: '56px',
-        fontSize: '24px',
+        fontSize: 'var(--text-page-title)',
         color: 'var(--color-cream)',
         background: 'rgba(255,255,255,0.1)',
         border: '1px solid rgba(255,255,255,0.2)',

@@ -190,7 +190,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(30, 45, 69, 0.4)",
+          background: "var(--color-navy-backdrop)",
           zIndex: 250,
         }}
         aria-hidden="true"
@@ -236,12 +236,12 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               <h2
                 style={{
                   fontFamily: "var(--font-serif)",
-                  fontSize: "22px",
+                  fontSize: "var(--text-empty-title)",
                   fontStyle: "italic",
                   color: "var(--color-navy)",
                   fontWeight: 400,
                   lineHeight: 1.2,
-                  marginBottom: "2px",
+                  marginBottom: "var(--space-half)",
                 }}
               >
                 {frag?.name}
@@ -259,20 +259,14 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
                 {frag?.house}
               </div>
             </div>
-            <button
+            <Button
+              variant="icon"
               onClick={handleClose}
               aria-label="Close panel"
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                color: "rgba(30,45,69,0.8)",
-                padding: "2px",
-                flexShrink: 0,
-              }}
+              style={{ flexShrink: 0, color: "rgba(30,45,69,0.8)" }}
             >
               <X size={18} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -293,18 +287,15 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
             {/* Rating */}
             <div>
               <FieldLabel>Personal Rating <OptionalTag /></FieldLabel>
-              <div style={{ display: "flex", gap: "4px" }}>
+              <div style={{ display: "flex", gap: "var(--space-1)" }}>
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <button
+                  <Button
                     key={n}
-                    type="button"
+                    variant="ghost"
                     onClick={() => setRating(rating === n ? 0 : n)}
+                    className="h-auto p-0"
                     style={{
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 0,
-                      fontSize: "22px",
+                      fontSize: "var(--text-empty-title)",
                       lineHeight: 1,
                       color: n <= rating ? "var(--color-accent)" : "var(--color-cream-dark)",
                       transition: "color 120ms",
@@ -312,7 +303,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
                     aria-label={`${n} star${n !== 1 ? "s" : ""}`}
                   >
                     {n <= rating ? "\u2605" : "\u2606"}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
