@@ -482,12 +482,12 @@ export function BotDrawer() {
         }}
       >
         {loading ? (
-          <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "var(--color-navy)" }} className="animate-spin">
+          <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "var(--color-navy)" }} className="animate-spin" aria-hidden="true">
             <path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2zm0 2a8 8 0 1 0 0 16A8 8 0 0 0 12 4zm0 2a6 6 0 0 1 0 12A6 6 0 0 1 12 6z" opacity=".3"/>
             <path d="M12 4a8 8 0 0 1 8 8h-2a6 6 0 0 0-6-6V4z"/>
           </svg>
         ) : (
-          <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "var(--color-navy)" }}>
+          <svg viewBox="0 0 24 24" style={{ width: 20, height: 20, fill: "var(--color-navy)" }} aria-hidden="true">
             <path d="M12 2C6.48 2 2 5.92 2 10.75c0 2.61 1.35 4.94 3.47 6.52L4 20l4.13-1.65A10.7 10.7 0 0 0 12 19.5c5.52 0 10-3.92 10-8.75C22 5.92 17.52 2 12 2z"/>
           </svg>
         )}
@@ -664,7 +664,7 @@ export function BotDrawer() {
               transition: "background 150ms, color 150ms",
             }}
           >
-            <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor">
+            <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" aria-hidden="true">
               <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm7 8a1 1 0 0 1 1 1 8 8 0 0 1-7 7.93V22h-2v-2.07A8 8 0 0 1 4 12a1 1 0 1 1 2 0 6 6 0 0 0 12 0 1 1 0 0 1 1-1z"/>
             </svg>
           </Button>

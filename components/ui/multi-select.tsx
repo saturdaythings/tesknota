@@ -174,7 +174,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
                     }}
                   >
                     {checked && (
-                      <svg width="8" height="6" viewBox="0 0 9 7" fill="none">
+                      <svg width="8" height="6" viewBox="0 0 9 7" fill="none" aria-hidden="true">
                         <path d="M1 3l2.5 2.5L8 1" stroke="var(--color-cream)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     )}
