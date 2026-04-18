@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, forwardRef, TextareaHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
+import { useId, forwardRef, InputHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 const inputBase =
@@ -27,7 +27,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="mb-1 text-[13px] font-medium font-sans text-[var(--color-navy)]"
+            className="mb-1 text-[length:var(--text-sm)] font-medium font-sans text-[var(--color-navy)]"
           >
             {label}
             {required && <span className="text-[var(--color-destructive)] ml-0.5">*</span>}
@@ -49,7 +49,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
         {error && (
-          <p role="alert" className="mt-1 text-[13px] text-[var(--color-destructive)]">
+          <p role="alert" className="mt-1 text-[length:var(--text-sm)] text-[var(--color-destructive)]">
             {error}
           </p>
         )}
@@ -59,44 +59,3 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 );
 
 Input.displayName = 'Input';
-
-interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
-  error?: string;
-}
-
-export function Textarea({ label, error, className, id: idProp, required, ...props }: TextareaProps) {
-  const generated = useId();
-  const id = idProp ?? generated;
-
-  return (
-    <div className="flex flex-col w-full">
-      {label && (
-        <label
-          htmlFor={id}
-          className="mb-1 text-[13px] font-medium font-sans text-[var(--color-navy)]"
-        >
-          {label}
-          {required && <span className="text-[var(--color-destructive)] ml-0.5">*</span>}
-        </label>
-      )}
-      <textarea
-        id={id}
-        required={required}
-        aria-invalid={!!error}
-        className={cn(
-          inputBase,
-          'min-h-[80px] p-3 resize-y',
-          error && 'border-[var(--color-destructive)]',
-          className,
-        )}
-        {...props}
-      />
-      {error && (
-        <p role="alert" className="mt-1 text-[13px] text-[var(--color-destructive)]">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}

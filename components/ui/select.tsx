@@ -108,7 +108,7 @@ export function Select({
       {label && (
         <label
           id={`${id}-label`}
-          className="mb-1 font-sans font-medium text-[var(--text-sm)] text-[var(--color-navy)]"
+          className="mb-1 font-sans font-medium text-[length:var(--text-sm)] text-[var(--color-navy)]"
         >
           {label}
         </label>
@@ -252,7 +252,7 @@ export function Select({
       )}
 
       {error && (
-        <p role="alert" className="mt-1 text-[var(--text-sm)] text-[var(--color-destructive)]">
+        <p role="alert" className="mt-1 text-[length:var(--text-sm)] text-[var(--color-destructive)]">
           {error}
         </p>
       )}

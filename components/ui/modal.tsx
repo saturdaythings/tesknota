@@ -71,7 +71,7 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
         aria-hidden="true"
         onClick={onClose}
         className="fixed inset-0 z-40"
-        style={{ background: 'rgba(30, 45, 69, 0.4)' }}
+        style={{ background: 'var(--color-navy-backdrop)' }}
       />
 
       {/* Panel */}

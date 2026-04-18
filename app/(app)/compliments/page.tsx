@@ -235,7 +235,6 @@ function ComplimentsInner() {
   );
 }
 
-/* component-internal: compliment row min-height */
 const SKELETON_ROW_HEIGHT = '80px';
 
 function ComplimentsSkeleton() {
