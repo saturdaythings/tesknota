@@ -11,50 +11,363 @@ import { Select } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { FragSearch } from '@/components/ui/frag-search';
 
-// ── Token manifests ────────────────────────────────────────
-// Covers: Compliments page · Topbar · Sidebar · Login page.
-// Add a token here → it appears. Remove → it disappears.
-// Do not list tokens not used on these four surfaces.
+// ── Typography tokens ──────────────────────────────────────
+// specimen: text rendered at actual size/font/case as it appears in the app
+// usages: every surface where this token is applied
 
-const BRAND_COLORS = [
-  { token: '--color-navy',       label: 'Navy',       usage: 'Sidebar bg, login bg, primary text, empty-state icon' },
-  { token: '--color-navy-mid',   label: 'Navy Mid',   usage: 'Topbar app label, find-fragrance search placeholder' },
-  { token: '--color-cream',      label: 'Cream',      usage: 'Topbar bg, page bg, search input bg, login button bg' },
-  { token: '--color-sand',       label: 'Sand',       usage: 'Sidebar IPA tagline, login "Who are you?" label' },
-  { token: '--color-sand-light', label: 'Sand Light', usage: 'Topbar bottom border' },
-  { token: '--color-live',       label: 'Live',       usage: 'New-activity dot on sidebar nav items' },
+type FontStack = 'serif' | 'sans';
+
+interface TypeUsage {
+  surface: string;
+  example: string;
+}
+
+interface TypeToken {
+  token: string;
+  label: string;
+  font: FontStack;
+  italic: boolean;
+  tracking: string | null;
+  uppercase: boolean;
+  specimen: string;
+  usages: TypeUsage[];
+}
+
+const TYPE_TOKENS: TypeToken[] = [
+  {
+    token: '--text-xxs',
+    label: 'XXS · 10px',
+    font: 'sans',
+    italic: false,
+    tracking: 'var(--tracking-xl)',
+    uppercase: true,
+    specimen: 'FRAGRANCE TRACKER',
+    usages: [
+      { surface: 'Sidebar', example: '"Fragrance Tracker" tagline below logotype — tracking-xl, cream-muted' },
+      { surface: 'Login', example: '"Fragrance Tracker" tagline below logotype — tracking-xl, cream-muted' },
+    ],
+  },
+  {
+    token: '--text-xs',
+    label: 'XS · 12px',
+    font: 'sans',
+    italic: false,
+    tracking: 'var(--tracking-xs)',
+    uppercase: false,
+    specimen: 'MAISON MARGIELA · APR 2025',
+    usages: [
+      { surface: 'Topbar', example: 'App label (TĘSKNOTA) — uppercase, tracking-lg, navy-mid' },
+      { surface: 'Sidebar', example: 'Section labels (MY SPACE), nav items, username, Sign Out' },
+      { surface: 'Compliments', example: 'Meta line (STRANGER · MALE · COFFEE SHOP), date column (APR 2025)' },
+      { surface: 'Collection', example: 'House name, date column, filter counts' },
+      { surface: 'Modal forms', example: 'FieldLabel above every input (FRAGRANCE NAME, NOTES)' },
+      { surface: 'Filter pills', example: 'Pill label text (ALL, STRANGERS, FRIENDS)' },
+      { surface: 'Buttons', example: 'All button labels (LOG COMPLIMENT, ADD TO COLLECTION)' },
+      { surface: 'Design System', example: 'Token names and computed values throughout' },
+    ],
+  },
+  {
+    token: '--text-sm',
+    label: 'SM · 13px',
+    font: 'sans',
+    italic: false,
+    tracking: 'var(--tracking-xs)',
+    uppercase: false,
+    specimen: 'Date — Newest first',
+    usages: [
+      { surface: 'Select', example: 'Dropdown trigger text and all option labels' },
+      { surface: 'FragSearch', example: 'Search input text and autocomplete result rows' },
+    ],
+  },
+  {
+    token: '--text-label',
+    label: 'Label · 11px',
+    font: 'sans',
+    italic: false,
+    tracking: 'var(--tracking-xs)',
+    uppercase: false,
+    specimen: 'FRAGRANCE NAME',
+    usages: [
+      { surface: 'Modal forms', example: 'FieldLabel component above every form field' },
+      { surface: 'Settings', example: 'Section sub-labels and field group headers' },
+    ],
+  },
+  {
+    token: '--text-ui',
+    label: 'UI · 14px',
+    font: 'sans',
+    italic: false,
+    tracking: 'var(--tracking-xs)',
+    uppercase: false,
+    specimen: 'Kiana',
+    usages: [
+      { surface: 'Sidebar', example: 'Username in footer (Kiana / Sylvia)' },
+      { surface: 'Login', example: '"Who are you?" prompt text' },
+      { surface: 'Empty state', example: 'Supporting description text below empty-state title' },
+    ],
+  },
+  {
+    token: '--text-note',
+    label: 'Note · 16px',
+    font: 'serif',
+    italic: true,
+    tracking: null,
+    uppercase: false,
+    specimen: 'stopped mid-sentence to ask what I was wearing',
+    usages: [
+      { surface: 'Compliments', example: 'Italic quote text in notes column — color: meta-text, lh 1.6' },
+      { surface: 'FragranceCell', example: 'Secondary (dupe-for) fragrance name when present' },
+    ],
+  },
+  {
+    token: '--text-md',
+    label: 'MD · 17px',
+    font: 'serif',
+    italic: true,
+    tracking: null,
+    uppercase: false,
+    specimen: '[tɛsk-ˈnɔ-ta] · a deep longing',
+    usages: [
+      { surface: 'Sidebar', example: 'IPA phonetic tagline below brand identity area — color: sand' },
+      { surface: 'Login', example: 'IPA tagline "[tɛsk-ˈnɔ-ta] · a deep longing for what is absent or past" — color: sand' },
+    ],
+  },
+  {
+    token: '--text-lg',
+    label: 'LG · 20px',
+    font: 'serif',
+    italic: true,
+    tracking: null,
+    uppercase: false,
+    specimen: 'Replica — Coffee Breeze',
+    usages: [
+      { surface: 'FragranceCell', example: 'Primary fragrance name in every Compliments and Collection row' },
+      { surface: 'FragSearch', example: 'Fragrance name in search autocomplete results' },
+      { surface: 'Modal', example: 'Fragrance name in log / edit modal heading area' },
+    ],
+  },
+  {
+    token: '--text-empty-title',
+    label: 'Empty Title · 22px',
+    font: 'serif',
+    italic: true,
+    tracking: null,
+    uppercase: false,
+    specimen: 'No compliments yet',
+    usages: [
+      { surface: 'Compliments', example: 'Empty-state headline when no records exist' },
+      { surface: 'Collection', example: 'Empty-state headline when collection is empty' },
+      { surface: 'Wishlist', example: 'Empty-state headline' },
+    ],
+  },
+  {
+    token: '--text-page-title',
+    label: 'Page Title · 24px',
+    font: 'serif',
+    italic: true,
+    tracking: null,
+    uppercase: false,
+    specimen: 'Collection',
+    usages: [
+      { surface: 'Topbar', example: 'Page title on every app page — color: navy, lh 1.2' },
+      { surface: 'Login', example: 'User name buttons (Kiana, Sylvia) — same size, serif italic, cream on white-subtle' },
+    ],
+  },
+  {
+    token: '--text-logo',
+    label: 'Logo · 28px',
+    font: 'serif',
+    italic: true,
+    tracking: null,
+    uppercase: false,
+    specimen: 'tęsknota',
+    usages: [
+      { surface: 'Sidebar', example: 'tęsknota logotype at top of sidebar nav — color: cream, lh 1' },
+      { surface: 'Login', example: 'tęsknota logotype centered on login screen — color: cream, lh none' },
+    ],
+  },
 ];
 
-const OPACITY_COLORS = [
-  { token: '--color-white-subtle',  label: 'White Subtle',  usage: 'Sidebar active nav bg; topbar search input bg' },
-  { token: '--color-white-dim',     label: 'White Dim',     usage: 'Topbar search border (default)' },
-  { token: '--color-white-mid',     label: 'White Mid',     usage: 'Topbar search border on focus' },
-  { token: '--color-cream-muted',   label: 'Cream Muted',   usage: 'Sidebar "Fragrance Tracker" tagline' },
-  { token: '--color-cream-faint',   label: 'Cream Faint',   usage: 'Topbar search placeholder text and icon' },
-  { token: '--color-sand-label',    label: 'Sand Label',    usage: 'Sidebar section header labels' },
-  { token: '--color-sand-muted',    label: 'Sand Muted',    usage: 'Sidebar inactive nav items, Sign Out button' },
-  { token: '--color-navy-backdrop', label: 'Navy Backdrop', usage: 'Mobile sidebar overlay scrim' },
+// ── Color grid tokens (column order — similar families adjacent) ───────────────
+
+const COLOR_COLS = [
+  '--color-navy', '--color-navy-mid', '--color-navy-backdrop',
+  '--color-cream', '--color-cream-muted', '--color-cream-faint',
+  '--color-sand', '--color-sand-light', '--color-sand-label', '--color-sand-muted',
+  '--color-white-subtle', '--color-white-dim', '--color-white-mid',
+  '--color-row-divider', '--color-row-hover', '--color-meta-text',
+  '--color-live',
+] as const;
+
+type ColorCol = typeof COLOR_COLS[number];
+
+const COLOR_COL_LABELS: Record<ColorCol, string> = {
+  '--color-navy': 'navy',
+  '--color-navy-mid': 'navy-mid',
+  '--color-navy-backdrop': 'backdrop',
+  '--color-cream': 'cream',
+  '--color-cream-muted': 'cream-m',
+  '--color-cream-faint': 'cream-f',
+  '--color-sand': 'sand',
+  '--color-sand-light': 'sand-l',
+  '--color-sand-label': 'sand-lb',
+  '--color-sand-muted': 'sand-m',
+  '--color-white-subtle': 'white-s',
+  '--color-white-dim': 'white-d',
+  '--color-white-mid': 'white-m',
+  '--color-row-divider': 'row-div',
+  '--color-row-hover': 'row-hov',
+  '--color-meta-text': 'meta',
+  '--color-live': 'live',
+};
+
+// Family groups drive column-header separators
+const COLOR_FAMILIES = [
+  { label: 'Navy', count: 3 },
+  { label: 'Cream', count: 3 },
+  { label: 'Sand', count: 4 },
+  { label: 'White overlays', count: 3 },
+  { label: 'Row / list', count: 3 },
+  { label: '↑', count: 1 },
+] as const;
+
+interface CellPreview {
+  bg: string;
+  text?: string;
+  textColor?: string;
+  outline?: string;
+  leftBorder?: string;
+  fontFamily?: FontStack;
+  uppercase?: boolean;
+  letterSpacing?: string;
+  type?: 'box' | 'text' | 'line' | 'dot';
+}
+
+interface ColorGridRowData {
+  id: string;
+  label: string;
+  cells: Partial<Record<ColorCol, CellPreview>>;
+}
+
+const COLOR_GRID: ColorGridRowData[] = [
+  {
+    id: 'sidebar-identity',
+    label: 'Sidebar — brand identity',
+    cells: {
+      '--color-navy': { bg: 'var(--color-navy)', type: 'box' },
+      '--color-cream': { bg: 'var(--color-navy)', text: 'tęsknota', textColor: 'var(--color-cream)', fontFamily: 'serif' },
+      '--color-cream-muted': { bg: 'var(--color-navy)', text: 'FRAGRANCE TRACKER', textColor: 'var(--color-cream-muted)', fontFamily: 'sans', uppercase: true, letterSpacing: 'var(--tracking-xl)' },
+      '--color-sand': { bg: 'var(--color-navy)', text: '[tɛsk-ˈnɔ-ta]', textColor: 'var(--color-sand)', fontFamily: 'serif' },
+    },
+  },
+  {
+    id: 'sidebar-nav-active',
+    label: 'Sidebar — active nav item',
+    cells: {
+      '--color-navy': { bg: 'var(--color-navy)', type: 'box' },
+      '--color-cream': { bg: 'var(--color-navy)', text: 'My Collection', textColor: 'var(--color-cream)', fontFamily: 'sans', leftBorder: '3px solid var(--color-cream)' },
+      '--color-white-subtle': { bg: 'var(--color-white-subtle)', text: 'My Collection', textColor: 'var(--color-cream)', fontFamily: 'sans', leftBorder: '3px solid var(--color-cream)' },
+    },
+  },
+  {
+    id: 'sidebar-nav-inactive',
+    label: 'Sidebar — section labels + inactive nav',
+    cells: {
+      '--color-navy': { bg: 'var(--color-navy)', type: 'box' },
+      '--color-sand-label': { bg: 'var(--color-navy)', text: 'MY SPACE', textColor: 'var(--color-sand-label)', fontFamily: 'sans', uppercase: true, letterSpacing: 'var(--tracking-wide)' },
+      '--color-sand-muted': { bg: 'var(--color-navy)', text: 'Dashboard', textColor: 'var(--color-sand-muted)', fontFamily: 'sans' },
+    },
+  },
+  {
+    id: 'sidebar-user',
+    label: 'Sidebar — user footer',
+    cells: {
+      '--color-navy': { bg: 'var(--color-navy)', type: 'box' },
+      '--color-cream': { bg: 'var(--color-navy)', text: 'Kiana', textColor: 'var(--color-cream)', fontFamily: 'sans' },
+      '--color-sand-muted': { bg: 'var(--color-navy)', text: 'SIGN OUT', textColor: 'var(--color-sand-muted)', fontFamily: 'sans', uppercase: true, letterSpacing: 'var(--tracking-wide)' },
+      '--color-white-subtle': { bg: 'var(--color-navy)', outline: '1px solid var(--color-white-subtle)', type: 'box' },
+    },
+  },
+  {
+    id: 'topbar',
+    label: 'Topbar',
+    cells: {
+      '--color-navy': { bg: 'var(--color-cream)', text: 'Collection', textColor: 'var(--color-navy)', fontFamily: 'serif' },
+      '--color-navy-mid': { bg: 'var(--color-cream)', text: 'TĘSKNOTA', textColor: 'var(--color-navy-mid)', fontFamily: 'sans', uppercase: true, letterSpacing: 'var(--tracking-lg)' },
+      '--color-cream': { bg: 'var(--color-cream)', type: 'box' },
+      '--color-sand-light': { bg: 'var(--color-cream)', outline: '1px solid var(--color-sand-light)', type: 'box' },
+    },
+  },
+  {
+    id: 'frag-search',
+    label: 'FragSearch — find fragrance',
+    cells: {
+      '--color-navy': { bg: 'var(--color-navy)', type: 'box' },
+      '--color-cream-faint': { bg: 'var(--color-navy)', text: 'Find fragrance…', textColor: 'var(--color-cream-faint)', fontFamily: 'sans' },
+      '--color-white-subtle': { bg: 'var(--color-white-subtle)', text: 'Chanel No. 5', textColor: 'var(--color-cream)', fontFamily: 'sans', outline: '1px solid var(--color-white-dim)' },
+      '--color-white-dim': { bg: 'var(--color-white-subtle)', text: 'Find fragrance…', textColor: 'var(--color-cream-faint)', fontFamily: 'sans', outline: '1px solid var(--color-white-dim)' },
+      '--color-white-mid': { bg: 'var(--color-white-subtle)', text: 'Chanel No. 5', textColor: 'var(--color-cream)', fontFamily: 'sans', outline: '1px solid var(--color-white-mid)' },
+    },
+  },
+  {
+    id: 'login',
+    label: 'Login page',
+    cells: {
+      '--color-navy': { bg: 'var(--color-navy)', type: 'box' },
+      '--color-cream': { bg: 'var(--color-navy)', text: 'tęsknota', textColor: 'var(--color-cream)', fontFamily: 'serif' },
+      '--color-cream-muted': { bg: 'var(--color-navy)', text: 'FRAGRANCE TRACKER', textColor: 'var(--color-cream-muted)', fontFamily: 'sans', uppercase: true },
+      '--color-sand': { bg: 'var(--color-navy)', text: '[tɛsk-ˈnɔ-ta]', textColor: 'var(--color-sand)', fontFamily: 'serif' },
+      '--color-white-subtle': { bg: 'var(--color-white-subtle)', text: 'Kiana', textColor: 'var(--color-cream)', fontFamily: 'serif', outline: '1px solid var(--color-white-dim)' },
+      '--color-white-dim': { bg: 'var(--color-white-subtle)', text: 'Kiana', textColor: 'var(--color-cream)', fontFamily: 'serif', outline: '1px solid var(--color-white-dim)' },
+    },
+  },
+  {
+    id: 'compliment-row',
+    label: 'Compliment / collection row',
+    cells: {
+      '--color-cream': { bg: 'var(--color-cream)', type: 'box' },
+      '--color-navy': { bg: 'var(--color-cream)', text: 'APR 2025', textColor: 'var(--color-navy)', fontFamily: 'sans', uppercase: true, letterSpacing: 'var(--tracking-md)' },
+      '--color-row-divider': { bg: 'var(--color-cream)', outline: '1px solid var(--color-row-divider)', type: 'line' },
+      '--color-row-hover': { bg: 'var(--color-row-hover)', type: 'box' },
+      '--color-meta-text': { bg: 'var(--color-cream)', text: 'stopped mid-sentence', textColor: 'var(--color-meta-text)', fontFamily: 'serif' },
+      '--color-live': { bg: 'var(--color-navy)', type: 'dot', textColor: 'var(--color-live)' },
+    },
+  },
+  {
+    id: 'button-primary',
+    label: 'Button — primary',
+    cells: {
+      '--color-navy': { bg: 'var(--color-navy)', text: 'LOG COMPLIMENT', textColor: 'var(--color-cream)', fontFamily: 'sans', uppercase: true, letterSpacing: 'var(--tracking-wide)' },
+      '--color-cream': { bg: 'var(--color-navy)', text: 'LOG COMPLIMENT', textColor: 'var(--color-cream)', fontFamily: 'sans', uppercase: true },
+    },
+  },
+  {
+    id: 'filter-pill-active',
+    label: 'Filter pill — active',
+    cells: {
+      '--color-navy': { bg: 'var(--color-navy)', text: 'ALL', textColor: 'var(--color-cream)', fontFamily: 'sans', uppercase: true, outline: '1px solid var(--color-navy)' },
+      '--color-cream': { bg: 'var(--color-navy)', text: 'ALL', textColor: 'var(--color-cream)', fontFamily: 'sans', uppercase: true },
+    },
+  },
+  {
+    id: 'filter-pill-inactive',
+    label: 'Filter pill — inactive',
+    cells: {
+      '--color-navy': { bg: 'var(--color-cream)', text: 'STRANGERS', textColor: 'var(--color-navy)', fontFamily: 'sans', uppercase: true },
+      '--color-cream': { bg: 'var(--color-cream)', type: 'box' },
+      '--color-meta-text': { bg: 'var(--color-cream)', text: 'STRANGERS', textColor: 'var(--color-navy)', fontFamily: 'sans', uppercase: true, outline: '1px solid var(--color-meta-text)' },
+    },
+  },
+  {
+    id: 'mobile-overlay',
+    label: 'Mobile sidebar overlay',
+    cells: {
+      '--color-navy-backdrop': { bg: 'var(--color-navy-backdrop)', type: 'box' },
+    },
+  },
 ];
 
-const ROW_COLORS = [
-  { token: '--color-row-divider', label: 'Row Divider', usage: 'border-bottom on every compliment row' },
-  { token: '--color-row-hover',   label: 'Row Hover',   usage: 'Row hover background, search result hover, skeleton' },
-  { token: '--color-meta-text',   label: 'Meta Text',   usage: 'Compliment notes; search icon/border; "No matches" text' },
-];
-
-const TYPE_TOKENS = [
-  { token: '--text-xxs',        label: 'XXS',         role: 'Sidebar "Fragrance Tracker" tagline',                       font: 'sans',  italic: false },
-  { token: '--text-xs',         label: 'XS',          role: 'Field labels, topbar app label, sidebar nav, meta, date',   font: 'sans',  italic: false },
-  { token: '--text-sm',         label: 'SM',          role: 'Dropdowns, find-fragrance search input',                    font: 'sans',  italic: false },
-  { token: '--text-label',      label: 'Label',       role: 'Form field labels, section sub-labels',                     font: 'sans',  italic: false },
-  { token: '--text-ui',         label: 'UI',          role: 'Sidebar username, empty-state description',                 font: 'sans',  italic: false },
-  { token: '--text-note',       label: 'Note',        role: 'Fragrance name in list rows, compliment notes',             font: 'serif', italic: true  },
-  { token: '--text-md',         label: 'MD',          role: 'Sidebar IPA phonetic tagline',                              font: 'serif', italic: true  },
-  { token: '--text-lg',         label: 'LG',          role: 'Search result names, section headings, modal fragrance names', font: 'serif', italic: true },
-  { token: '--text-empty-title',label: 'Empty Title', role: 'Empty-state title ("No compliments yet")',                  font: 'serif', italic: true  },
-  { token: '--text-page-title', label: 'Page Title',  role: 'Topbar page title',                                         font: 'serif', italic: true  },
-  { token: '--text-logo',       label: 'Logo',        role: 'Sidebar tęsknota logotype',                                 font: 'serif', italic: true  },
-];
+// ── Other token manifests (unchanged) ─────────────────────
 
 const SPACE_TOKENS = ['--space-1', '--space-4', '--space-5', '--space-6', '--space-8', '--space-10'];
 
@@ -69,20 +382,18 @@ const LAYOUT_TOKENS = [
 // ── Section manifest (drives anchor nav) ──────────────────
 
 const DESIGN_SECTIONS = [
-  { id: 'brand-colors',    label: 'Brand Colors'  },
-  { id: 'opacity',         label: 'Opacity'        },
-  { id: 'row-tokens',      label: 'Row Tokens'     },
-  { id: 'type-scale',      label: 'Type Scale'     },
-  { id: 'spacing',         label: 'Spacing'        },
-  { id: 'layout',          label: 'Layout'         },
-  { id: 'frag-cell',       label: 'Frag Cell'      },
-  { id: 'buttons',         label: 'Buttons'        },
-  { id: 'filter-pills',    label: 'Filter Pills'   },
-  { id: 'select',          label: 'Select'         },
-  { id: 'row-list',        label: 'Row List'       },
-  { id: 'sidebar',         label: 'Sidebar'        },
-  { id: 'topbar',          label: 'Topbar'         },
-  { id: 'login',           label: 'Login'          },
+  { id: 'type-scale',   label: 'Typography'   },
+  { id: 'colors',       label: 'Colors'       },
+  { id: 'spacing',      label: 'Spacing'      },
+  { id: 'layout',       label: 'Layout'       },
+  { id: 'frag-cell',    label: 'Frag Cell'    },
+  { id: 'buttons',      label: 'Buttons'      },
+  { id: 'filter-pills', label: 'Filter Pills' },
+  { id: 'select',       label: 'Select'       },
+  { id: 'row-list',     label: 'Row List'     },
+  { id: 'sidebar',      label: 'Sidebar'      },
+  { id: 'topbar',       label: 'Topbar'       },
+  { id: 'login',        label: 'Login'        },
 ] as const;
 
 // ── Mode context ──────────────────────────────────────────
@@ -176,7 +487,6 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
 function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { tokenName: string; defaultValue: string; onClose: () => void; onDraftChange?: (v: string) => void }) {
   const [committedValue] = useState(() => {
     const raw = getComputedStyle(document.documentElement).getPropertyValue(tokenName).trim();
-    // Strip accidental "tokenName: " prefix if a prior corrupted publish baked it into the inline style
     const colonPrefix = tokenName + ':';
     return raw.startsWith(colonPrefix) ? raw.slice(colonPrefix.length).trim() : raw;
   });
@@ -190,13 +500,11 @@ function TokenEditPanel({ tokenName, defaultValue, onClose, onDraftChange }: { t
   const [sha, setSha] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  // Apply draft as live preview and notify parent of current display value
   useEffect(() => {
     document.documentElement.style.setProperty(tokenName, draft);
     onDraftChange?.(draft);
   }, [draft, tokenName]);
 
-  // On unmount: keep published value if a commit landed, else revert to CSS file
   useEffect(() => {
     return () => {
       if (publishedRef.current !== committedRef.current) {
@@ -443,6 +751,8 @@ function PreviewOverlay({ tokenName, draft, onBack, callWorker, onPublishSuccess
   );
 }
 
+// ── ExpandableToken (used by spacing, layout sections) ─────
+
 function ExpandableToken({ token, defaultValue, expanded, onToggle, onDraftChange, children }: { token: string; defaultValue: string; expanded: boolean; onToggle: () => void; onDraftChange?: (v: string) => void; children: React.ReactNode }) {
   const mode = useContext(DesignModeContext);
   if (mode === 'reference') {
@@ -471,6 +781,260 @@ function ExpandableToken({ token, defaultValue, expanded, onToggle, onDraftChang
         </span>
       </div>
       {expanded && <TokenEditPanel tokenName={token} defaultValue={defaultValue} onClose={onToggle} onDraftChange={onDraftChange} />}
+    </div>
+  );
+}
+
+// ── Typography row ─────────────────────────────────────────
+
+function TypeRow({ token, label, font, italic, tracking, uppercase, specimen, usages, computed, expandedToken, toggle, mode }: TypeToken & { computed: string; expandedToken: string | null; toggle: (t: string) => void; mode: 'reference' | 'edit' }) {
+  const [showUsages, setShowUsages] = useState(false);
+  const specimenClass = font === 'serif' ? 'font-serif italic' : 'font-sans';
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--color-row-divider)' }}>
+      <div style={{ padding: 'var(--space-3) 0', display: 'grid', gridTemplateColumns: '1fr auto', gap: 'var(--space-4)', alignItems: 'start' }}>
+        <div>
+          <span
+            className={specimenClass}
+            style={{
+              fontSize: `var(${token})`,
+              color: 'var(--color-navy)',
+              lineHeight: 1.4,
+              letterSpacing: tracking ?? undefined,
+              textTransform: uppercase ? 'uppercase' : undefined,
+              display: 'block',
+              marginBottom: 'var(--space-1)',
+            }}
+          >
+            {specimen}
+          </span>
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <code className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>{token}</code>
+            <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{computed || '\u2026'}</span>
+            <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>
+              {label} \u00b7 {font === 'serif' ? 'serif italic' : 'sans upright'}
+            </span>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowUsages((v) => !v)}
+          className="font-sans flex-shrink-0"
+          style={{ fontSize: 'var(--text-xs)', color: showUsages ? 'var(--color-navy)' : 'var(--color-meta-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 'var(--space-1) 0', whiteSpace: 'nowrap', marginTop: 'var(--space-1)' }}
+        >
+          {showUsages ? '▲' : '▾'} {usages.length} {usages.length === 1 ? 'use' : 'uses'}
+        </button>
+      </div>
+
+      {showUsages && (
+        <div style={{ paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-4)', paddingTop: 'var(--space-1)' }}>
+          {usages.map((u, i) => (
+            <div key={i} className="flex gap-3" style={{ marginBottom: 'var(--space-2)' }}>
+              <span className="font-sans font-medium flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '90px' }}>{u.surface}</span>
+              <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{u.example}</span>
+            </div>
+          ))}
+          {mode === 'edit' && (
+            <div style={{ marginTop: 'var(--space-3)' }}>
+              <button
+                onClick={() => toggle(token)}
+                className="font-mono"
+                style={{ fontSize: 'var(--text-xs)', color: expandedToken === token ? 'var(--color-navy)' : 'var(--color-meta-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              >
+                {expandedToken === token ? '\u00d7 close editor' : '\u270e edit token'}
+              </button>
+              {expandedToken === token && (
+                <TokenEditPanel tokenName={token} defaultValue={computed} onClose={() => toggle(token)} />
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Color grid cell ────────────────────────────────────────
+
+const CELL_W = 58;
+const LABEL_W = 172;
+
+function GridCell({ cell }: { cell: CellPreview }) {
+  const base: React.CSSProperties = {
+    width: `${CELL_W - 8}px`,
+    height: '38px',
+    borderRadius: 'var(--radius-sm)',
+    background: cell.bg,
+    border: cell.outline,
+    borderLeft: cell.leftBorder,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    margin: '0 auto',
+    flexShrink: 0,
+  };
+
+  if (cell.type === 'dot') {
+    return (
+      <div style={base}>
+        <div style={{ width: '8px', height: '8px', borderRadius: '9999px', background: cell.textColor ?? 'var(--color-meta-text)' }} />
+      </div>
+    );
+  }
+
+  if (cell.type === 'line') {
+    return (
+      <div style={base}>
+        <div style={{ width: '100%', height: '1px', background: 'var(--color-row-divider)' }} />
+      </div>
+    );
+  }
+
+  if (!cell.text || cell.type === 'box') {
+    return <div style={base} />;
+  }
+
+  return (
+    <div style={base} title={cell.text}>
+      <span
+        className={cell.fontFamily === 'serif' ? 'font-serif italic' : 'font-sans'}
+        style={{
+          fontSize: 'var(--text-xs)',
+          color: cell.textColor,
+          textTransform: cell.uppercase ? 'uppercase' : undefined,
+          letterSpacing: cell.letterSpacing,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          maxWidth: `${CELL_W - 10}px`,
+          lineHeight: 1.3,
+          display: 'block',
+          padding: '0 var(--space-1)',
+        }}
+      >
+        {cell.text}
+      </span>
+    </div>
+  );
+}
+
+// ── Color grid ─────────────────────────────────────────────
+
+function ColorGrid({ grid, computed, expandedToken, toggle, mode }: { grid: ColorGridRowData[]; computed: Record<string, string>; expandedToken: string | null; toggle: (t: string) => void; mode: 'reference' | 'edit' }) {
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const totalW = LABEL_W + COLOR_COLS.length * CELL_W;
+
+  function toggleRow(id: string) {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const gridCols = `${LABEL_W}px repeat(${COLOR_COLS.length}, ${CELL_W}px)`;
+
+  return (
+    <div style={{ overflowX: 'auto', marginLeft: 'calc(-1 * var(--page-margin))', marginRight: 'calc(-1 * var(--page-margin))', paddingLeft: 'var(--page-margin)', paddingBottom: 'var(--space-2)' }}>
+      <div style={{ minWidth: `${totalW}px` }}>
+
+        {/* Family labels row */}
+        <div style={{ display: 'grid', gridTemplateColumns: gridCols, marginBottom: 0 }}>
+          <div />
+          {COLOR_FAMILIES.map((fam) => (
+            <div
+              key={fam.label}
+              className="font-sans"
+              style={{
+                gridColumn: `span ${fam.count}`,
+                fontSize: 'var(--text-xs)',
+                color: 'var(--color-meta-text)',
+                letterSpacing: 'var(--tracking-xs)',
+                paddingBottom: 'var(--space-1)',
+                borderBottom: '1px solid var(--color-row-divider)',
+                marginBottom: 'var(--space-1)',
+              }}
+            >
+              {fam.label}
+            </div>
+          ))}
+        </div>
+
+        {/* Token name headers */}
+        <div style={{ display: 'grid', gridTemplateColumns: gridCols, marginBottom: 'var(--space-2)' }}>
+          <div />
+          {COLOR_COLS.map((token) => (
+            <div
+              key={token}
+              className="font-mono"
+              style={{ fontSize: '9px', color: 'var(--color-meta-text)', textAlign: 'center', letterSpacing: '0.02em', lineHeight: 1.4, paddingBottom: 'var(--space-1)' }}
+            >
+              {COLOR_COL_LABELS[token]}
+            </div>
+          ))}
+        </div>
+
+        {/* Data rows */}
+        {grid.map((row) => {
+          const isExpanded = expandedRows.has(row.id);
+          const usedTokens = (Object.keys(row.cells) as ColorCol[]);
+
+          return (
+            <div key={row.id} style={{ borderBottom: '1px solid var(--color-row-divider)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: gridCols, alignItems: 'center', padding: 'var(--space-2) 0' }}>
+                <div className="flex items-center gap-1" style={{ paddingRight: 'var(--space-3)' }}>
+                  <button
+                    onClick={() => toggleRow(row.id)}
+                    className="font-sans text-left flex-1 min-w-0 bg-transparent border-0 cursor-pointer p-0"
+                    style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', letterSpacing: 'var(--tracking-xs)', lineHeight: 1.4 }}
+                  >
+                    {row.label}
+                  </button>
+                  <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', flexShrink: 0 }}>
+                    {isExpanded ? '▲' : '▾'}
+                  </span>
+                </div>
+                {COLOR_COLS.map((token) => {
+                  const cell = row.cells[token];
+                  if (!cell) return <div key={token} />;
+                  return <GridCell key={token} cell={cell} />;
+                })}
+              </div>
+
+              {isExpanded && (
+                <div style={{ paddingLeft: `${LABEL_W}px`, paddingBottom: 'var(--space-3)', paddingTop: 'var(--space-1)' }}>
+                  <div className="flex flex-wrap" style={{ gap: 'var(--space-3)' }}>
+                    {usedTokens.map((token) => (
+                      <div key={token}>
+                        {mode === 'edit' ? (
+                          <button
+                            onClick={() => toggle(token)}
+                            className="font-mono bg-transparent border-0 cursor-pointer p-0"
+                            style={{ fontSize: 'var(--text-xs)', color: expandedToken === token ? 'var(--color-navy)' : 'var(--color-navy-mid)' }}
+                          >
+                            {token} <span style={{ color: 'var(--color-meta-text)' }}>{computed[token] ?? '\u2026'}</span>
+                          </button>
+                        ) : (
+                          <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>
+                            {token} <span style={{ color: 'var(--color-meta-text)' }}>{computed[token] ?? '\u2026'}</span>
+                          </span>
+                        )}
+                        {mode === 'edit' && expandedToken === token && (
+                          <div style={{ marginTop: 'var(--space-1)' }}>
+                            <TokenEditPanel tokenName={token} defaultValue={computed[token] ?? ''} onClose={() => toggle(token)} />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -507,29 +1071,11 @@ function Note({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ColorSwatch({ token, label, usage, computed }: { token: string; label: string; usage: string; computed: string }) {
-  return (
-    <div className="flex items-center gap-3 mb-3">
-      <div className="flex-shrink-0 rounded-[var(--radius-sm)] border border-[var(--color-sand-light)]" style={{ width: 'var(--space-8)', height: 'var(--space-8)', background: `var(${token})` }} />
-      <div className="min-w-0">
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="font-sans font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>{label}</span>
-          <code className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{token}</code>
-          {computed && <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{computed}</span>}
-        </div>
-        <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', marginTop: 'var(--space-1)' }}>{usage}</div>
-      </div>
-    </div>
-  );
-}
-
 // ── Page ───────────────────────────────────────────────────
 
 export default function DesignSystemPage() {
   const allTokens = [
-    ...BRAND_COLORS.map((c) => c.token),
-    ...OPACITY_COLORS.map((c) => c.token),
-    ...ROW_COLORS.map((c) => c.token),
+    ...(COLOR_COLS as readonly string[]),
     ...TYPE_TOKENS.map((t) => t.token),
     ...SPACE_TOKENS,
     ...LAYOUT_TOKENS.map((t) => t.token),
@@ -537,7 +1083,6 @@ export default function DesignSystemPage() {
   const computed = useComputedTokens(allTokens);
   const [mode, setMode] = useState<'reference' | 'edit'>('reference');
   const [expandedToken, setExpandedToken] = useState<string | null>(null);
-  const [liveColorValues, setLiveColorValues] = useState<Record<string, string>>({});
   const [activeSection, setActiveSection] = useState<string>(DESIGN_SECTIONS[0].id);
 
   useEffect(() => {
@@ -558,14 +1103,6 @@ export default function DesignSystemPage() {
   const scrollToSection = useCallback((id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
-
-  function colorValue(token: string) {
-    return liveColorValues[token] ?? computed[token] ?? '';
-  }
-
-  function trackColor(token: string) {
-    return (v: string) => setLiveColorValues((prev) => ({ ...prev, [token]: v }));
-  }
 
   function toggle(token: string) {
     setExpandedToken((prev) => (prev === token ? null : token));
@@ -620,60 +1157,36 @@ export default function DesignSystemPage() {
 
         <HardcodeChecker>
 
-          <Section id="brand-colors" title="Brand Colors">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
-              {BRAND_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)} onDraftChange={trackColor(c.token)}>
-                  <ColorSwatch {...c} computed={colorValue(c.token)} />
-                </ExpandableToken>
-              ))}
-            </div>
-          </Section>
-
-          <Section id="opacity" title="Opacity Variants">
-            <Note>Used on navy backgrounds — sidebar, login page, topbar search.</Note>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
-              {OPACITY_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)} onDraftChange={trackColor(c.token)}>
-                  <ColorSwatch {...c} computed={colorValue(c.token)} />
-                </ExpandableToken>
-              ))}
-            </div>
-          </Section>
-
-          <Section id="row-tokens" title="Row / List Tokens">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10">
-              {ROW_COLORS.map((c) => (
-                <ExpandableToken key={c.token} token={c.token} defaultValue={computed[c.token] ?? ''} expanded={expandedToken === c.token} onToggle={() => toggle(c.token)} onDraftChange={trackColor(c.token)}>
-                  <ColorSwatch {...c} computed={colorValue(c.token)} />
-                </ExpandableToken>
-              ))}
-            </div>
-          </Section>
-
-          <Section id="type-scale" title="Type Scale">
-            <Note>Cormorant Garamond (serif, always italic) · Inter (sans, always upright). Never swap.</Note>
+          {/* ── Typography ── */}
+          <Section id="type-scale" title="Typography">
+            <Note>Cormorant Garamond (serif, always italic) · Inter (sans, always upright). Never swap. Click any row to see where each style is used.</Note>
             <div style={{ marginTop: 'var(--space-4)' }}>
-              {TYPE_TOKENS.map(({ token, label, role, font, italic }) => (
-                <ExpandableToken key={token} token={token} defaultValue={computed[token] ?? ''} expanded={expandedToken === token} onToggle={() => toggle(token)}>
-                  <div className="flex items-baseline gap-4 flex-wrap" style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-2) 0' }}>
-                    <span
-                      className={font === 'serif' ? 'font-serif italic' : 'font-sans'}
-                      style={{ fontSize: `var(${token})`, color: 'var(--color-navy)', lineHeight: 1.4, minWidth: '200px' }}
-                    >
-                      {font === 'serif' ? 'Tęsknota — longing' : 'MAISON MARGIELA · APR'}
-                    </span>
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      <code className="font-mono font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>{token}</code>
-                      <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{computed[token] ?? '…'}</span>
-                      <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{label} · {role}</span>
-                    </div>
-                  </div>
-                </ExpandableToken>
+              {TYPE_TOKENS.map((t) => (
+                <TypeRow
+                  key={t.token}
+                  {...t}
+                  computed={computed[t.token] ?? ''}
+                  expandedToken={expandedToken}
+                  toggle={toggle}
+                  mode={mode}
+                />
               ))}
             </div>
           </Section>
 
+          {/* ── Colors ── */}
+          <Section id="colors" title="Colors">
+            <Note>Columns are color tokens · rows are the components that use them · each cell shows the actual bg / text / border combination · click a row to expand token values.</Note>
+            <ColorGrid
+              grid={COLOR_GRID}
+              computed={computed}
+              expandedToken={expandedToken}
+              toggle={toggle}
+              mode={mode}
+            />
+          </Section>
+
+          {/* ── Spacing ── */}
           <Section id="spacing" title="Spacing (4px grid)">
             <div className="flex flex-col" style={{ gap: 'var(--space-2)' }}>
               {SPACE_TOKENS.map((token) => {
@@ -692,20 +1205,22 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
+          {/* ── Layout ── */}
           <Section id="layout" title="Layout Tokens">
             <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
               {LAYOUT_TOKENS.map(({ token, label, usage }) => (
                 <ExpandableToken key={token} token={token} defaultValue={computed[token] ?? ''} expanded={expandedToken === token} onToggle={() => toggle(token)}>
                   <div className="flex items-baseline gap-4 flex-wrap">
                     <code className="font-mono font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '180px' }}>{token}</code>
-                    <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '60px' }}>{computed[token] ?? '…'}</span>
-                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{label} · {usage}</span>
+                    <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '60px' }}>{computed[token] ?? '\u2026'}</span>
+                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{label} \u00b7 {usage}</span>
                   </div>
                 </ExpandableToken>
               ))}
             </div>
           </Section>
 
+          {/* ── Frag Cell ── */}
           <Section id="frag-cell" title="Fragrance Cell — fragrance-cell.tsx">
             <Note>Col 1 on every compliment row. Name = --text-lg serif italic · House = --text-xs sans uppercase.</Note>
             <div style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-4) 0' }}>
@@ -716,6 +1231,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
+          {/* ── Buttons ── */}
           <Section id="buttons" title="Buttons — button.tsx">
             <Note>Never use bare button with inline styles.</Note>
             <Row label="variant=primary">
@@ -732,6 +1248,7 @@ export default function DesignSystemPage() {
             </Row>
           </Section>
 
+          {/* ── Filter Pills ── */}
           <Section id="filter-pills" title="Filter Pills — tab-pill.tsx">
             <Note>Relation tabs on compliments page. Active = navy bg + cream text. Inactive = cream-dark bg + navy-mid text.</Note>
             <div className="flex flex-wrap gap-2">
@@ -742,6 +1259,7 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
+          {/* ── Select ── */}
           <Section id="select" title="Select / Dropdown — select.tsx">
             <Note>Never use native select. size="auto" for sort/filter (auto-sizes to longest option). size="full" for form fields.</Note>
             <Row label='size="auto" (sort)'>
@@ -749,7 +1267,7 @@ export default function DesignSystemPage() {
                 options={[
                   { value: 'a', label: 'Date — Newest first' },
                   { value: 'b', label: 'Date — Oldest first' },
-                  { value: 'c', label: 'Fragrance A–Z' },
+                  { value: 'c', label: 'Fragrance A\u2013Z' },
                 ]}
                 value="a"
                 onChange={() => {}}
@@ -771,6 +1289,7 @@ export default function DesignSystemPage() {
             </Row>
           </Section>
 
+          {/* ── Row List ── */}
           <Section id="row-list" title="Row List — Compliments page">
             <Note>CSS grid: max-content minmax(0,1fr) auto · col-gap --space-6 · each row subgrid · click to edit.</Note>
             <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr) auto', columnGap: 'var(--space-6)' }}>
@@ -797,13 +1316,14 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
+          {/* ── Sidebar ── */}
           <Section id="sidebar" title="Sidebar — Sidebar.tsx">
             <Note>var(--sidebar-width) · navy bg · fixed on mobile with backdrop overlay, relative on desktop.</Note>
             <div className="rounded-[var(--radius-md)] overflow-hidden" style={{ maxWidth: 'var(--sidebar-width)', background: 'var(--color-navy)' }}>
               <div style={{ padding: 'var(--space-8) var(--space-5) var(--space-6)' }}>
-                <div className="font-serif italic" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)', lineHeight: 1 }}>tęsknota</div>
+                <div className="font-serif italic" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)', lineHeight: 1 }}>t\u0119sknota</div>
                 <div className="font-sans font-medium uppercase mt-1" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: 'var(--tracking-xl)' }}>Fragrance Tracker</div>
-                <div className="font-serif italic mt-2" style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}>[tɛsk-ˈnɔ-ta] · a deep longing</div>
+                <div className="font-serif italic mt-2" style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}>[t\u025bsk-\u02c8n\u0254-ta] \u00b7 a deep longing</div>
               </div>
               <div>
                 <div className="px-5 mb-1 font-sans font-normal uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-label)', letterSpacing: 'var(--tracking-wide)' }}>MY SPACE</div>
@@ -831,12 +1351,13 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
+          {/* ── Topbar ── */}
           <Section id="topbar" title="Topbar — Topbar.tsx">
             <Note>Required on every page. h = --header-height · px = --topbar-px (mobile: --topbar-px-mobile) · cream bg · sand-light border.</Note>
             <div className="rounded-[var(--radius-md)] overflow-hidden" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
               <div className="flex items-center gap-3" style={{ height: 'var(--header-height)', paddingLeft: 'var(--topbar-px)', paddingRight: 'var(--topbar-px)' }}>
                 <div className="flex-1">
-                  <div className="font-sans font-medium uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-lg)', color: 'var(--color-navy-mid)' }}>TĘSKNOTA</div>
+                  <div className="font-sans font-medium uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-lg)', color: 'var(--color-navy-mid)' }}>T\u0118SKNOTA</div>
                   <div className="font-serif italic" style={{ fontSize: 'var(--text-page-title)', color: 'var(--color-navy)', lineHeight: 1.2 }}>Collection</div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -846,13 +1367,14 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
+          {/* ── Login ── */}
           <Section id="login" title="Login Page — app/page.tsx">
             <Note>Full-screen navy bg · logo = --text-logo · tagline = --text-xxs · IPA = --text-md · user buttons = --color-white-subtle bg + --color-white-dim border.</Note>
             <div className="rounded-[var(--radius-md)] overflow-hidden flex flex-col items-center justify-center py-12" style={{ background: 'var(--color-navy)' }}>
               <div className="text-center mb-8">
-                <div className="font-serif italic leading-none" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)' }}>tęsknota</div>
+                <div className="font-serif italic leading-none" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)' }}>t\u0119sknota</div>
                 <div className="font-sans font-medium uppercase mt-2" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: 'var(--tracking-xl)' }}>Fragrance Tracker</div>
-                <div className="font-serif italic mt-2" style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}>[tɛsk-ˈnɔ-ta] · a deep longing for what is absent or past</div>
+                <div className="font-serif italic mt-2" style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}>[t\u025bsk-\u02c8n\u0254-ta] \u00b7 a deep longing for what is absent or past</div>
               </div>
               <div className="font-sans text-center mb-4" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-sand)' }}>Who are you?</div>
               <div className="flex gap-3">
