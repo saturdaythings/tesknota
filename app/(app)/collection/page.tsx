@@ -274,11 +274,9 @@ function CollectionInner() {
           onSortField={(v) => handleSortField(v as SortField)}
           sortDir={sortDir}
           onSortDir={handleToggleSortDir}
-          filters={[
+          filterDropdowns={[
             { value: accordFilter, onChange: setAccordFilter, options: [{ value: 'any', label: 'Any accord' }, ...accordOptions] },
             { value: ratingFilter, onChange: setRatingFilter, options: RATING_FILTER_OPTIONS },
-            { value: statusFilter, onChange: setStatusFilter, options: STATUS_OPTIONS },
-            { value: houseFilter, onChange: setHouseFilter, options: [{ value: 'any', label: 'Any house' }, ...houseOptions] },
           ]}
           filtersActive={filtersActive}
           onClearFilters={clearFilters}

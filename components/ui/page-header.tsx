@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowUp, ArrowDown, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
@@ -28,7 +29,7 @@ export interface PageHeaderProps {
   onSortField: (v: string) => void;
   sortDir: "asc" | "desc";
   onSortDir: () => void;
-  filters?: FilterBarFilter[];
+  filterDropdowns?: FilterBarFilter[];
   filtersActive: boolean;
   onClearFilters?: () => void;
 
@@ -53,7 +54,7 @@ export function PageHeader({
   onSortField,
   sortDir,
   onSortDir,
-  filters,
+  filterDropdowns,
   filtersActive,
   onClearFilters,
   perPage,
@@ -62,6 +63,8 @@ export function PageHeader({
   countLabel,
   isLoaded,
 }: PageHeaderProps) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
   return (
     <div>
       {/* ROW 1: Search + Add (right-aligned) */}
@@ -84,14 +87,14 @@ export function PageHeader({
         </Button>
       </div>
 
-      {/* ROW 2: Sort + Filters (left) | Per-page toggle (right) */}
+      {/* ROW 2: Sort (left) | Filters button | Per-page toggle (right) */}
       <div style={{ marginBottom: "var(--space-6)" }}>
         <div
           className="flex items-center justify-between flex-wrap"
           style={{ gap: "var(--space-3)" }}
         >
           <div
-            className="flex items-center flex-wrap"
+            className="flex items-center flex-wrap relative"
             style={{ gap: "var(--space-2)" }}
           >
             <div
@@ -118,25 +121,68 @@ export function PageHeader({
                 {sortDir === "asc" ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
               </Button>
             </div>
-            <Button
-              variant="primary"
-              className="px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-transparent border border-[var(--color-navy)] text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] min-h-8 h-auto"
-              style={{ height: "36px" }}
-              onClick={onClearFilters}
-              disabled={!filtersActive}
-            >
-              <SlidersHorizontal size={13} />
-              Filters
-            </Button>
-            {filters?.map((f, i) => (
-              <Select
-                key={i}
-                options={f.options}
-                value={f.value}
-                onChange={f.onChange}
-                size="auto"
-              />
-            ))}
+
+            {/* Filters button + dropdown panel */}
+            <div style={{ position: "relative" }}>
+              <Button
+                variant="primary"
+                className="px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-transparent border border-[var(--color-navy)] text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] min-h-8 h-auto"
+                style={{ height: "36px" }}
+                onClick={() => setFiltersOpen(!filtersOpen)}
+              >
+                <SlidersHorizontal size={13} />
+                Filters
+              </Button>
+
+              {/* Filter dropdown panel */}
+              {filtersOpen && filterDropdowns && filterDropdowns.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    marginTop: "var(--space-1)",
+                    background: "var(--color-cream-dark)",
+                    border: "1px solid var(--color-row-divider)",
+                    borderRadius: "var(--radius-md)",
+                    padding: "var(--space-3)",
+                    zIndex: 10,
+                    minWidth: "200px",
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                  }}
+                >
+                  {filterDropdowns.map((f, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        marginBottom: i < filterDropdowns.length - 1 ? "var(--space-3)" : 0,
+                      }}
+                    >
+                      <Select
+                        options={f.options}
+                        value={f.value}
+                        onChange={(v) => {
+                          f.onChange(v);
+                        }}
+                        size="auto"
+                      />
+                    </div>
+                  ))}
+                  {filtersActive && onClearFilters && (
+                    <Button
+                      variant="ghost"
+                      className="mt-3 text-[11px] text-[var(--color-navy)]"
+                      onClick={() => {
+                        onClearFilters();
+                        setFiltersOpen(false);
+                      }}
+                    >
+                      Clear filters
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center" style={{ gap: "var(--space-1)" }}>
@@ -197,7 +243,7 @@ export function PageHeader({
         </div>
       </div>
 
-      {/* ROW 3: Count label */}
+      {/* ROW 3: Count label (with per-page on same line in future) */}
       {isLoaded && count !== undefined && (
         <div
           className="font-sans uppercase"

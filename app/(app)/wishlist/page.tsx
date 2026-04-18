@@ -577,7 +577,7 @@ function WishlistInner() {
           onSortField={handleSortField}
           sortDir={sortDir}
           onSortDir={handleToggleSortDir}
-          filters={[
+          filterDropdowns={[
             { value: priorityFilter, onChange: setPriorityFilter, options: PRIORITY_FILTER_OPTIONS },
             { value: wishlistStatusFilter, onChange: setWishlistStatusFilter, options: WISHLIST_STATUS_OPTIONS },
           ]}

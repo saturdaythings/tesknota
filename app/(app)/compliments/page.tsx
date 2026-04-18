@@ -185,7 +185,7 @@ function ComplimentsInner() {
           onSortField={setSortField}
           sortDir={sortDir}
           onSortDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-          filters={[
+          filterDropdowns={[
             { value: accordFilter, onChange: setAccordFilter, options: accordOptions },
             { value: houseFilter, onChange: setHouseFilter, options: houseOptions },
           ]}
