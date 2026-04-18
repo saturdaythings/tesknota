@@ -80,10 +80,8 @@ export function FragSearch() {
               <div
                 key={f.fragranceId}
                 onMouseDown={() => { setQuery(''); setOpen(false); setSelected(f); }}
-                className="flex flex-col justify-center cursor-pointer transition-colors"
-                style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', borderBottom: '1px solid var(--color-row-divider)', transitionDuration: 'var(--motion-base)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                className="flex flex-col justify-center cursor-pointer hover-row"
+                style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', borderBottom: '1px solid var(--color-row-divider)' }}
               >
                 <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 'var(--leading-tight)' }}>
                   {f.fragranceName}
@@ -104,10 +102,8 @@ export function FragSearch() {
             <div style={{ borderTop: '1px solid var(--color-row-divider)' }}>
               <div
                 onMouseDown={() => { setOpen(false); router.push('/import'); }}
-                className="flex flex-col justify-center cursor-pointer transition-colors"
-                style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', transitionDuration: 'var(--motion-base)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                className="flex flex-col justify-center cursor-pointer hover-row"
+                style={{ height: 'var(--space-12)', padding: '0 var(--space-3)' }}
               >
                 <div className="font-serif italic" style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 'var(--leading-tight)' }}>
                   Import new fragrance

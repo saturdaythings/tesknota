@@ -578,8 +578,8 @@ function WishlistInner() {
           sortDir={sortDir}
           onSortDir={handleToggleSortDir}
           filterDropdowns={[
-            { value: priorityFilter, onChange: setPriorityFilter, options: PRIORITY_FILTER_OPTIONS },
-            { value: wishlistStatusFilter, onChange: setWishlistStatusFilter, options: WISHLIST_STATUS_OPTIONS },
+            { value: priorityFilter, onChange: ((v: string | string[]) => setPriorityFilter(typeof v === 'string' ? v : 'any')) as (v: string | string[]) => void, options: PRIORITY_FILTER_OPTIONS },
+            { value: wishlistStatusFilter, onChange: ((v: string | string[]) => setWishlistStatusFilter(typeof v === 'string' ? v : 'any')) as (v: string | string[]) => void, options: WISHLIST_STATUS_OPTIONS },
           ]}
           filtersActive={filtersActive}
           onClearFilters={clearFilters}
@@ -630,7 +630,7 @@ function WishlistInner() {
                   <div
                     key={frag.id}
                     onClick={() => setDetailFrag(frag)}
-                    className="cursor-pointer transition-colors duration-100"
+                    className="cursor-pointer hover-row"
                     style={{
                       display: "grid",
                       gridTemplateColumns: "subgrid",
@@ -639,8 +639,6 @@ function WishlistInner() {
                       minHeight: "var(--size-row-min)",
                       borderBottom: "1px solid var(--color-row-divider)",
                     }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "var(--color-row-hover)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
                   >
                     <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                       <FragranceCell name={frag.name} house={frag.house} type={frag.type} isDupe={frag.isDupe} dupeFor={frag.dupeFor || undefined} />

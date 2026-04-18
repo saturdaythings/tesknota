@@ -322,7 +322,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                     role="option"
                     aria-selected={false}
                     onMouseDown={() => selectResult(f)}
-                    className="cursor-pointer transition-colors last:border-0"
+                    className="cursor-pointer hover-row last:border-0"
                     style={{
                       height: "var(--size-row-min)",
                       padding: "0 var(--space-4)",
@@ -330,10 +330,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                       flexDirection: "column",
                       justifyContent: "center",
                       borderBottom: "1px solid var(--color-row-divider)",
-                      transitionDuration: "var(--motion-base)",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-row-hover)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                   >
                     <div style={{ display: "flex", alignItems: "baseline", gap: "var(--space-2)" }}>
                       <span

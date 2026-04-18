@@ -363,10 +363,8 @@ function FriendCollectionTab({
             <div
               key={f.id}
               onClick={() => onFragClick(f)}
-              className="cursor-pointer transition-colors duration-100"
+              className="cursor-pointer hover-row"
               style={dataRowStyle}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <div style={{ padding: '0 var(--space-4)', minWidth: 0 }}>
                 <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
@@ -402,10 +400,8 @@ function FriendCollectionTab({
             <div
               key={f.id}
               onClick={() => onFragClick(f)}
-              className="cursor-pointer"
+              className="cursor-pointer hover-row"
               style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--color-row-divider)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">

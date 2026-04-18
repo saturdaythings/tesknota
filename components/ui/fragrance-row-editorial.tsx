@@ -32,14 +32,12 @@ export function FragranceRowEditorial({
   return (
     <div
       onClick={onClick}
-      className="flex gap-6 items-start cursor-pointer transition-colors duration-100 max-sm:flex-col max-sm:gap-2"
+      className="flex gap-6 items-start cursor-pointer hover-row max-sm:flex-col max-sm:gap-2"
       style={{
         minHeight: 'var(--size-row-min)',
         padding: 'var(--space-4) 0',
         borderBottom: '1px solid var(--color-row-divider)',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
-      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {/* Column 1: fragrance identity */}
       <FragranceCell name={name} house={house} type={type} secondary={secondary} />

@@ -145,6 +145,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
                   role="option"
                   aria-selected={checked}
                   onClick={() => toggle(opt.value)}
+                  className={checked ? undefined : "hover-row"}
                   style={{
                     height: "36px",
                     display: "flex",
@@ -159,8 +160,6 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
                     whiteSpace: "nowrap",
                     background: checked ? "var(--color-cream-dark)" : "transparent",
                   }}
-                  onMouseEnter={(e) => { if (!checked) (e.currentTarget as HTMLElement).style.background = "var(--color-row-hover)"; }}
-                  onMouseLeave={(e) => { if (!checked) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
                 >
                   <span
                     style={{

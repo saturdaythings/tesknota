@@ -298,6 +298,16 @@
      }
 }
 
+@layer utilities {
+     /* Row hover affordance — apply to rows/cards that are clickable. */
+     .hover-row {
+            transition: background var(--motion-fast) var(--ease-out);
+     }
+     .hover-row:hover {
+            background: var(--color-row-hover);
+     }
+}
+
 /* Typography utility classes (v1 compat) */
 .text-body {
      font-family: var(--font-sans);

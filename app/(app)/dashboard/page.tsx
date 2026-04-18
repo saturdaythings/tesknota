@@ -586,14 +586,13 @@ function ActivityCard({
   return (
     <div
       onClick={onClick}
+      className={onClick ? "hover-row" : undefined}
       style={{
         border: "1px solid var(--color-cream-dark)",
         borderRadius: "var(--radius-lg)",
         padding: "var(--space-5) var(--space-6)",
         cursor: onClick ? "pointer" : "default",
       }}
-      onMouseEnter={(e) => { if (onClick) e.currentTarget.style.background = "var(--color-row-hover)"; }}
-      onMouseLeave={(e) => { if (onClick) e.currentTarget.style.background = "transparent"; }}
     >
       <div
         className="font-sans uppercase"
@@ -754,10 +753,8 @@ function RecentPurchases({
                   <div
                     key={f.id}
                     onClick={() => onFragClick(f)}
-                    className="cursor-pointer"
+                    className="cursor-pointer hover-row"
                     style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--color-row-divider)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-row-hover)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                   >
                     <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
                     {compCount > 0 && (
@@ -799,7 +796,7 @@ function PurchaseRow({
   return (
     <div
       onClick={() => onClick(f)}
-      className="cursor-pointer transition-colors duration-100"
+      className="cursor-pointer hover-row"
       style={{
         display: "grid",
         gridTemplateColumns: "subgrid",
@@ -808,8 +805,6 @@ function PurchaseRow({
         minHeight: "var(--space-16)",
         borderBottom: "1px solid var(--color-row-divider)",
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-row-hover)")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
     >
       <div style={{ padding: "0 var(--space-4)", minWidth: 0 }}>
         <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />

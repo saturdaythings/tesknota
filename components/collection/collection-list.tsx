@@ -111,7 +111,7 @@ function CollectionRow({ frag, columns, ctx, onOpen }: CollectionRowProps) {
   return (
     <div
       onClick={onOpen}
-      className="cursor-pointer transition-colors duration-100"
+      className="cursor-pointer hover-row"
       style={{
         display: 'grid',
         gridTemplateColumns: 'subgrid',
@@ -119,10 +119,7 @@ function CollectionRow({ frag, columns, ctx, onOpen }: CollectionRowProps) {
         alignItems: 'center',
         minHeight: 'var(--space-16)',
         borderBottom: '1px solid var(--color-row-divider)',
-        background: 'transparent',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
-      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {columns.map((col) => (
         <div

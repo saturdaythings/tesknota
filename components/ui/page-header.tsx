@@ -5,6 +5,7 @@ import { ArrowUp, ArrowDown, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { Select } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 export interface FilterBarSortOption {
   value: string;
@@ -12,9 +13,10 @@ export interface FilterBarSortOption {
 }
 
 export interface FilterBarFilter {
-  value: string;
-  onChange: (v: string) => void;
+  value: string | string[];
+  onChange: (v: string | string[]) => void;
   options: { value: string; label: string }[];
+  multi?: boolean;
 }
 
 export interface PageHeaderProps {
@@ -203,13 +205,22 @@ export function PageHeader({
             }}
           >
             {filterDropdowns.map((f, i) => (
-              <Select
-                key={i}
-                options={f.options}
-                value={f.value}
-                onChange={f.onChange}
-                size="auto"
-              />
+              f.multi ? (
+                <MultiSelect
+                  key={i}
+                  options={f.options}
+                  value={Array.isArray(f.value) ? f.value : []}
+                  onChange={(v) => f.onChange(v)}
+                />
+              ) : (
+                <Select
+                  key={i}
+                  options={f.options}
+                  value={typeof f.value === 'string' ? f.value : ''}
+                  onChange={(v) => f.onChange(v)}
+                  size="auto"
+                />
+              )
             ))}
             {filtersActive && onClearFilters && (
               <Button

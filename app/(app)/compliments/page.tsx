@@ -81,8 +81,8 @@ function ComplimentsInner() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [perPage, setPerPage] = useState(25);
   const [page, setPage] = useState(1);
-  const [accordFilter, setAccordFilter] = useState('any');
-  const [houseFilter, setHouseFilter] = useState('any');
+  const [accordFilter, setAccordFilter] = useState<string[]>([]);
+  const [houseFilter, setHouseFilter] = useState<string[]>([]);
 
   const myComps = useMemo(
     () => (user ? compliments.filter((c) => c.userId === user.id) : []),
@@ -128,16 +128,18 @@ function ComplimentsInner() {
         (c.notes ?? '').toLowerCase().includes(q),
       );
     }
-    if (accordFilter !== 'any') {
+    if (accordFilter.length > 0) {
       base = base.filter((c) => {
         const f = fragById.get(c.primaryFragId ?? '');
-        return f ? getAccords(f, communityFrags).includes(accordFilter) : false;
+        if (!f) return false;
+        const frags = getAccords(f, communityFrags);
+        return accordFilter.some((a) => frags.includes(a));
       });
     }
-    if (houseFilter !== 'any') {
+    if (houseFilter.length > 0) {
       base = base.filter((c) => {
         const f = fragById.get(c.primaryFragId ?? '');
-        return f ? f.house === houseFilter : false;
+        return f ? houseFilter.includes(f.house) : false;
       });
     }
     return [...base].sort((a, b) => {
@@ -148,11 +150,11 @@ function ComplimentsInner() {
     });
   }, [myComps, relationTab, sortField, sortDir, search, accordFilter, houseFilter, fragById, communityFrags]);
 
-  const filtersActive = accordFilter !== 'any' || houseFilter !== 'any';
+  const filtersActive = accordFilter.length > 0 || houseFilter.length > 0;
 
   function clearFilters() {
-    setAccordFilter('any');
-    setHouseFilter('any');
+    setAccordFilter([]);
+    setHouseFilter([]);
   }
 
   useEffect(() => { setPage(1); }, [relationTab, sortField, sortDir, perPage, search, accordFilter, houseFilter]);
@@ -186,8 +188,8 @@ function ComplimentsInner() {
           sortDir={sortDir}
           onSortDir={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
           filterDropdowns={[
-            { value: accordFilter, onChange: setAccordFilter, options: accordOptions },
-            { value: houseFilter, onChange: setHouseFilter, options: houseOptions },
+            { value: accordFilter, onChange: ((v: string | string[]) => setAccordFilter(Array.isArray(v) ? v : [])) as (v: string | string[]) => void, options: accordOptions, multi: true },
+            { value: houseFilter, onChange: ((v: string | string[]) => setHouseFilter(Array.isArray(v) ? v : [])) as (v: string | string[]) => void, options: houseOptions, multi: true },
           ]}
           filtersActive={filtersActive}
           onClearFilters={clearFilters}

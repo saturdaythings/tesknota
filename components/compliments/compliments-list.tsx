@@ -80,7 +80,7 @@ function ComplimentRow({ comp, frag, columns, onEdit }: ComplimentRowProps) {
   return (
     <div
       onClick={onEdit}
-      className="cursor-pointer transition-colors duration-100"
+      className="cursor-pointer hover-row"
       style={{
         display: 'grid',
         gridTemplateColumns: 'subgrid',
@@ -90,8 +90,6 @@ function ComplimentRow({ comp, frag, columns, onEdit }: ComplimentRowProps) {
         padding: 'var(--space-4) 0',
         borderBottom: '1px solid var(--color-row-divider)',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
-      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {columns.map((col) => (
         <div key={col.id} style={{ textAlign: col.align ?? 'left' }}>

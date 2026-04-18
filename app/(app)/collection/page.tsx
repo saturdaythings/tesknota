@@ -130,10 +130,10 @@ function CollectionInner() {
   const filterParam = searchParams.get('filter');
 
   const [search, setSearch] = useState('');
-  const [accordFilter, setAccordFilter] = useState('any');
+  const [accordFilter, setAccordFilter] = useState<string[]>([]);
   const [ratingFilter, setRatingFilter] = useState('any');
-  const [statusFilter, setStatusFilter] = useState('any');
-  const [houseFilter, setHouseFilter] = useState('any');
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [houseFilter, setHouseFilter] = useState<string[]>([]);
   const [addOpen, setAddOpen] = useState(false);
   const [detailFrag, setDetailFrag] = useState<UserFragrance | null>(null);
   const [page, setPage] = useState(1);
@@ -197,7 +197,7 @@ function CollectionInner() {
       const q = search.trim().toLowerCase();
       list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
     }
-    if (statusFilter !== 'any') list = list.filter((f) => f.status === statusFilter);
+    if (statusFilter.length > 0) list = list.filter((f) => statusFilter.includes(f.status));
     if (ratingFilter !== 'any') {
       list = list.filter((f) => {
         const r = f.personalRating ?? 0;
@@ -209,18 +209,21 @@ function CollectionInner() {
         return true;
       });
     }
-    if (accordFilter !== 'any') {
-      list = list.filter((f) => getAccords(f, communityFrags).includes(accordFilter));
+    if (accordFilter.length > 0) {
+      list = list.filter((f) => {
+        const frags = getAccords(f, communityFrags);
+        return accordFilter.some((a) => frags.includes(a));
+      });
     }
-    if (houseFilter !== 'any') list = list.filter((f) => f.house === houseFilter);
+    if (houseFilter.length > 0) list = list.filter((f) => houseFilter.includes(f.house));
     return applySort(list, sortField, sortDir, compMap);
   }, [myFrags, search, filterParam, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, compMap, communityFrags]);
 
   const filtersActive =
-    accordFilter !== 'any' ||
+    accordFilter.length > 0 ||
     ratingFilter !== 'any' ||
-    statusFilter !== 'any' ||
-    houseFilter !== 'any';
+    statusFilter.length > 0 ||
+    houseFilter.length > 0;
 
   useEffect(() => { setPage(1); }, [search, sortField, sortDir, statusFilter, ratingFilter, accordFilter, houseFilter, perPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -231,10 +234,10 @@ function CollectionInner() {
   if (!user) return null;
 
   function clearFilters() {
-    setAccordFilter('any');
+    setAccordFilter([]);
     setRatingFilter('any');
-    setStatusFilter('any');
-    setHouseFilter('any');
+    setStatusFilter([]);
+    setHouseFilter([]);
   }
 
   async function handleDelete(frag: UserFragrance) {
@@ -275,10 +278,10 @@ function CollectionInner() {
           sortDir={sortDir}
           onSortDir={handleToggleSortDir}
           filterDropdowns={[
-            { value: accordFilter, onChange: setAccordFilter, options: [{ value: 'any', label: 'Any accord' }, ...accordOptions] },
-            { value: ratingFilter, onChange: setRatingFilter, options: RATING_FILTER_OPTIONS },
-            { value: statusFilter, onChange: setStatusFilter, options: STATUS_OPTIONS },
-            { value: houseFilter, onChange: setHouseFilter, options: [{ value: 'any', label: 'Any house' }, ...houseOptions] },
+            { value: accordFilter, onChange: ((v: string | string[]) => setAccordFilter(Array.isArray(v) ? v : [])) as (v: string | string[]) => void, options: accordOptions, multi: true },
+            { value: ratingFilter, onChange: ((v: string | string[]) => setRatingFilter(typeof v === 'string' ? v : 'any')) as (v: string | string[]) => void, options: RATING_FILTER_OPTIONS },
+            { value: statusFilter, onChange: ((v: string | string[]) => setStatusFilter(Array.isArray(v) ? v : [])) as (v: string | string[]) => void, options: STATUS_OPTIONS, multi: true },
+            { value: houseFilter, onChange: ((v: string | string[]) => setHouseFilter(Array.isArray(v) ? v : [])) as (v: string | string[]) => void, options: houseOptions, multi: true },
           ]}
           filtersActive={filtersActive}
           onClearFilters={clearFilters}
