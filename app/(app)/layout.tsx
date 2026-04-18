@@ -25,7 +25,7 @@ function DataErrorBanner() {
   if (!loadError) return null;
   return (
     <div
-      className="flex items-center justify-between px-5 py-2 font-sans text-[13px] flex-shrink-0"
+      className="flex items-center justify-between px-5 py-2 font-sans text-[length:var(--text-sm)] flex-shrink-0"
       style={{ background: 'var(--color-destructive)', color: 'var(--color-cream)' }}
     >
       <span>Failed to load data. Check your connection.</span>
