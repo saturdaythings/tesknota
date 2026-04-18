@@ -64,6 +64,7 @@
      --transition-base: 150ms ease;
      --transition-slow: 300ms ease;
      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+     --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.16);
 
   /* --- Type scale --- */
   --text-xxs: 10px;

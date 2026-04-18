@@ -29,13 +29,14 @@ function DataErrorBanner() {
       style={{ background: 'var(--color-destructive)', color: 'var(--color-cream)' }}
     >
       <span>Failed to load data. Check your connection.</span>
-      <button
-        onClick={reload}
-        className="underline ml-4 hover:no-underline bg-transparent border-none cursor-pointer"
+      <Button
+        variant="ghost"
+        className="underline ml-4 hover:no-underline p-0 h-auto"
         style={{ color: 'inherit' }}
+        onClick={reload}
       >
         Retry
-      </button>
+      </Button>
     </div>
   );
 }
@@ -201,7 +202,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
           >
             <div
               className="fixed left-1/2 top-[15vh] -translate-x-1/2 w-full max-w-[480px] bg-[var(--color-cream)] border border-[var(--color-sand-light)] z-[601]"
-              style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.16)' }}
+              style={{ boxShadow: 'var(--shadow-lg)' }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--color-cream-dark)' }}>
@@ -247,7 +248,7 @@ function AppLayoutInner({ children, user, profiles, signOut }: {
           >
             <div
               className="fixed left-1/2 top-[15vh] -translate-x-1/2 w-full max-w-[480px] bg-[var(--color-cream)] border border-[var(--color-sand-light)] z-[601]"
-              style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.16)' }}
+              style={{ boxShadow: 'var(--shadow-lg)' }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--color-cream-dark)' }}>
