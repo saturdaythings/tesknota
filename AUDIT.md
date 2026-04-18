@@ -33,6 +33,16 @@ All P1/P2 bugs fixed in pair review session (2026-04-18). See "Fixed" section be
 
 ---
 
+## Fixed (session regression — caught during pair 7 review)
+
+**Source:** `d250756` (Standardize status display to pill badge) upgraded `collection/page.tsx` status column to `<StatusBadge>`. Session commit `50aa96a` (import-order fix) accidentally reverted it back to `STATUS_LABELS` inline span.
+
+| File | Issue | Fix applied |
+|------|-------|-------------|
+| `collection/page.tsx` | Status column used `STATUS_LABELS` inline span — `<StatusBadge>` from `d250756` was lost in session import-order fix | Restored `StatusBadge` import + `render: (frag) => <StatusBadge status={frag.status} />` |
+
+---
+
 ## What Is Fully Working (verified against live source)
 
 ### Social system

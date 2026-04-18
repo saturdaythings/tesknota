@@ -24,7 +24,8 @@ import {
   type SortField, type SortDir,
 } from '@/lib/collection-utils';
 import { FlaskConical } from '@/components/ui/Icons';
-import { STATUS_LABELS, type UserFragrance } from '@/types';
+import { StatusBadge } from '@/components/ui/frag-row';
+import type { UserFragrance } from '@/types';
 
 const STATUS_OPTIONS = [
   { value: 'any', label: 'Any status' },
@@ -112,11 +113,7 @@ const COLUMNS: CollectionColumnDef[] = [
     id: 'status',
     label: 'Status',
     width: 'max-content',
-    render: (frag) => (
-      <span className="font-sans uppercase" style={cellStyle}>
-        {STATUS_LABELS[frag.status]}
-      </span>
-    ),
+    render: (frag) => <StatusBadge status={frag.status} />,
   },
 ];
 
