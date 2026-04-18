@@ -498,7 +498,7 @@ function FriendComplimentsTab({
         isLoaded
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
+      <div className="hidden md:grid" style={{ gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
         <div style={headerRowStyle}>
           {['Fragrance', 'Relation', 'When', 'Location'].map((label) => (
             <div key={label} className="font-sans uppercase" style={headerCellStyle}>{label}</div>
@@ -525,6 +525,37 @@ function FriendComplimentsTab({
               </div>
               <div style={{ padding: '0 var(--space-4)' }}>
                 <span className="font-sans uppercase" style={cellStyle}>{location}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="md:hidden">
+        {pageItems.map((c) => {
+          const frag = frags.find((f) => (f.fragranceId || f.id) === c.primaryFragId);
+          const fragName = frag?.name ?? c.primaryFrag ?? '—';
+          const fragHouse = frag?.house ?? '';
+          const mn = monthNum(c.month);
+          const mLabel = mn >= 1 && mn <= 12 ? MONTHS[mn - 1] : c.month;
+          const when = c.year ? `${mLabel} ${c.year}` : mLabel;
+          const location = [c.city, c.country].filter(Boolean).join(', ') || '—';
+          return (
+            <div
+              key={c.id}
+              style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--color-row-divider)' }}
+            >
+              <FragranceCell name={fragName} house={fragHouse || undefined} />
+              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                <span className="font-sans uppercase max-sm:text-sm" style={metaStyle}>{c.relation}</span>
+                <span style={{ color: 'var(--color-cream-dark)', fontSize: 'var(--text-xs)' }}>·</span>
+                <span className="font-sans uppercase max-sm:text-sm" style={metaStyle}>{when}</span>
+                {location !== '—' && (
+                  <>
+                    <span style={{ color: 'var(--color-cream-dark)', fontSize: 'var(--text-xs)' }}>·</span>
+                    <span className="font-sans uppercase max-sm:text-sm" style={metaStyle}>{location}</span>
+                  </>
+                )}
               </div>
             </div>
           );
@@ -624,7 +655,7 @@ function FriendWishlistTab({
         isLoaded
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
+      <div className="hidden md:grid" style={{ gridTemplateColumns: gridCols, columnGap: 'var(--space-10)' }}>
         <div style={headerRowStyle}>
           {['Fragrance', 'Avg Price', 'Accords'].map((label) => (
             <div key={label} className="font-sans uppercase" style={headerCellStyle}>{label}</div>
@@ -649,6 +680,36 @@ function FriendWishlistTab({
                 <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', lineHeight: 'var(--leading-relaxed)' }}>
                   {accords}
                 </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="md:hidden">
+        {pageFrags.map((f) => {
+          const accords = getAccords(f, communityFrags).slice(0, 3).join(', ');
+          const norm = (s: string) => (s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const cf = communityFrags.find(
+            (c) => norm(c.fragranceName) === norm(f.name) && norm(c.fragranceHouse) === norm(f.house)
+          );
+          const price = (cf?.avgPrice ?? '').replace(/~/g, '') || '—';
+          return (
+            <div
+              key={f.id}
+              style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--color-row-divider)' }}
+            >
+              <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
+              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                {price !== '—' && (
+                  <>
+                    <span className="font-sans uppercase max-sm:text-sm" style={metaStyle}>{price}</span>
+                    <span style={{ color: 'var(--color-cream-dark)', fontSize: 'var(--text-xs)' }}>·</span>
+                  </>
+                )}
+                {accords && (
+                  <span className="font-sans max-sm:text-sm" style={metaStyle}>{accords}</span>
+                )}
               </div>
             </div>
           );

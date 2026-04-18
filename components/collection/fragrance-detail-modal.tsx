@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { TabPill } from "@/components/ui/tab-pill";
 import { FieldLabel, OptionalTag, RequiredMark } from "@/components/ui/field-label";
@@ -163,18 +165,6 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
   }
 
   if (!open) return null;
-
-  const inputCls =
-    "w-full h-9 px-3 rounded-[var(--radius-sm)] font-sans outline-none transition-[border-color] duration-150 " +
-    "focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]";
-  const inputStyle: React.CSSProperties = {
-    fontSize: "var(--text-sm)",
-    fontWeight: 400,
-    letterSpacing: "var(--tracking-sm)",
-    background: "var(--color-cream)",
-    border: "1px solid var(--color-meta-text)",
-    color: "var(--color-meta-text)",
-  };
 
   return (
     <>
@@ -343,39 +333,26 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
             {/* Purchase Price + Where Bought */}
             <div className="flex flex-col gap-2">
               <FieldLabel>Purchase Details <OptionalTag /></FieldLabel>
-              <input
+              <Input
                 value={purchasePrice}
                 onChange={(e) => setPurchasePrice(e.target.value)}
                 placeholder="Price (e.g. $120)"
-                className={inputCls}
-                style={{ ...inputStyle, color: purchasePrice ? "var(--color-navy)" : "var(--color-meta-text)" }}
               />
-              <input
+              <Input
                 value={whereBought}
                 onChange={(e) => setWhereBought(e.target.value)}
                 placeholder="Where bought (Sephora, online, etc.)"
-                className={inputCls}
-                style={{ ...inputStyle, color: whereBought ? "var(--color-navy)" : "var(--color-meta-text)" }}
               />
             </div>
 
             {/* Personal Notes */}
             <div>
               <FieldLabel>Personal Notes <OptionalTag /></FieldLabel>
-              <textarea
+              <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Your impressions, context, memories..."
                 rows={3}
-                className="w-full p-[var(--space-3)] rounded-[var(--radius-sm)] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] resize-none placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)]"
-                style={{
-                  fontSize: "var(--text-sm)",
-                  fontWeight: 400,
-                  minHeight: "var(--size-row-min)",
-                  background: "var(--color-cream)",
-                  border: "1px solid var(--color-meta-text)",
-                  color: notes ? "var(--color-navy)" : "var(--color-meta-text)",
-                }}
               />
             </div>
 

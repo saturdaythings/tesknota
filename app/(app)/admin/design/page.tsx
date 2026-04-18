@@ -1099,8 +1099,9 @@ const GALLERY_ITEMS: GalleryItem[] = [
     id: 'button',
     name: 'Button',
     path: 'components/ui/button.tsx',
-    pages: ['Compliments', 'Collection', 'Wishlist', 'Modals', 'Admin'],
-    tokens: ['--color-navy', '--color-cream', '--text-xs', '--space-3', '--space-5', '--radius-sm', '--tracking-wide'],
+    pages: ['Compliments', 'Collection', 'Wishlist', 'Modals', 'Admin', 'Social (tab-action)'],
+    tokens: ['--color-navy', '--color-cream', '--color-row-divider', '--color-cream-dark', '--text-sm', '--space-3', '--radius-md'],
+    note: 'Variants: primary, secondary, ghost, destructive, icon, tab-action. tab-action = content-view tabs not filter pills \u2014 use TabPill for those.',
   },
   {
     id: 'input',
@@ -1127,8 +1128,9 @@ const GALLERY_ITEMS: GalleryItem[] = [
     id: 'tab-pill',
     name: 'TabPill',
     path: 'components/ui/tab-pill.tsx',
-    pages: ['Compliments (relation filter)', 'Collection (status filter)', 'Design System (nav)'],
-    tokens: ['--color-navy', '--color-cream', '--color-meta-text', '--text-xs', '--tracking-wide', '--radius-sm'],
+    pages: ['Compliments (filter)', 'Collection (filter)', 'Import (underline tabs)', 'Social (selector tabs)', 'Design System (nav)'],
+    tokens: ['--color-navy', '--color-cream-dark', '--color-row-divider', '--color-meta-text', '--text-xs', '--text-sm', '--text-note', '--tracking-wide', '--radius-sm', '--radius-md'],
+    note: '3 variants: default (filter pills, uppercase xs), underline (section nav, serif label + sans sublabel), selector (content tabs, sm mixed-case).',
   },
   {
     id: 'fragrance-cell',
@@ -1365,12 +1367,19 @@ export default function DesignSystemPage() {
             <Note>Every shared component rendered from its actual source file. The version here is the canonical locked version — any instance in the app that does not match it is a bug.</Note>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'button')!}>
-              <div className="flex flex-wrap gap-3">
-                <Button variant="primary">Log Compliment</Button>
-                <Button variant="secondary">Find Fragrances</Button>
-                <Button variant="ghost">Cancel</Button>
-                <Button variant="destructive">Delete</Button>
-                <Button variant="primary" size="sm">Add</Button>
+              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
+                <div className="flex flex-wrap gap-3">
+                  <Button variant="primary">Log Compliment</Button>
+                  <Button variant="secondary">Find Fragrances</Button>
+                  <Button variant="ghost">Cancel</Button>
+                  <Button variant="destructive">Delete</Button>
+                  <Button variant="primary" size="sm">Add</Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="tab-action">Collection</Button>
+                  <Button variant="tab-action" active>Compliments</Button>
+                  <Button variant="tab-action">Wishlist</Button>
+                </div>
               </div>
             </GalleryEntry>
 
@@ -1412,10 +1421,31 @@ export default function DesignSystemPage() {
             </GalleryEntry>
 
             <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'tab-pill')!}>
-              <div className="flex flex-wrap gap-2">
-                <TabPill label="All" count={12} active={true} onClick={() => {}} />
-                <TabPill label="Strangers" count={4} active={false} onClick={() => {}} />
-                <TabPill label="Friends" count={3} active={false} onClick={() => {}} />
+              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>default — filter pills</div>
+                  <div className="flex flex-wrap gap-2">
+                    <TabPill label="All" count={12} active={true} onClick={() => {}} />
+                    <TabPill label="Strangers" count={4} active={false} onClick={() => {}} />
+                    <TabPill label="Friends" count={3} active={false} onClick={() => {}} />
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>underline — section tabs (import page)</div>
+                  <div className="flex" style={{ borderBottom: '1px solid var(--color-row-divider)' }}>
+                    <TabPill label="Paste a Link" sublabel="FRAGRANTICA \u00b7 SEPHORA" active={true} onClick={() => {}} variant="underline" />
+                    <TabPill label="Scan a Bottle" sublabel="CAMERA \u00b7 LABEL" active={false} onClick={() => {}} variant="underline" />
+                    <TabPill label="CSV" sublabel=".CSV \u00b7 .XLSX" active={false} onClick={() => {}} variant="underline" />
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>selector — content view tabs (social page)</div>
+                  <div className="flex flex-wrap gap-2">
+                    <TabPill label="Collection" variant="selector" active={true} onClick={() => {}} />
+                    <TabPill label="Compliments" variant="selector" active={false} onClick={() => {}} />
+                    <TabPill label="Wishlist" variant="selector" active={false} onClick={() => {}} />
+                  </div>
+                </div>
               </div>
             </GalleryEntry>
 

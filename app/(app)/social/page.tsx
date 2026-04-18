@@ -6,6 +6,7 @@ import { PageContent } from "@/components/layout/PageContent";
 import { FragranceCell } from "@/components/ui/fragrance-cell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TabPill } from "@/components/ui/tab-pill";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageFilterBar } from "@/components/ui/page-filter-bar";
 import { Pagination } from "@/components/ui/pagination";
@@ -597,7 +598,7 @@ export default function SocialPage() {
                   <>
                     <div className="flex flex-wrap gap-2" style={{ marginBottom: "var(--space-6)" }}>
                       {FRIEND_TABS.map((t) => (
-                        <Button key={t.value} variant="tab-action" active={friendTab === t.value} onClick={() => setFriendTab(t.value)}>{t.label}</Button>
+                        <TabPill key={t.value} label={t.label} variant="selector" active={friendTab === t.value} onClick={() => setFriendTab(t.value)} />
                       ))}
                     </div>
                     <EmptyState icon={<FlaskConical size={48} />} title="This collection is private" />
@@ -622,7 +623,7 @@ export default function SocialPage() {
 
                     <div className="flex flex-wrap gap-2" style={{ marginBottom: "var(--space-6)" }}>
                       {FRIEND_TABS.map((t) => (
-                        <Button key={t.value} variant="tab-action" active={friendTab === t.value} onClick={() => setFriendTab(t.value)}>{t.label}</Button>
+                        <TabPill key={t.value} label={t.label} variant="selector" active={friendTab === t.value} onClick={() => setFriendTab(t.value)} />
                       ))}
                     </div>
 

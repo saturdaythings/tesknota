@@ -2,7 +2,8 @@
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, X } from '@/components/ui/Icons';
+import { Plus, X } from '@/components/ui/Icons';
+import { SearchInput } from '@/components/ui/search-input';
 
 interface ActionItem {
   label: string;
@@ -132,27 +133,12 @@ export function FloatingActionButton({
 
             {/* Search */}
             <div className="px-6 py-3" style={{ borderBottom: '1px solid var(--color-cream-dark)' }}>
-              <div className="relative flex items-center">
-                <Search
-                  size={14}
-                  className="absolute left-3 pointer-events-none"
-                  style={{ color: 'rgba(30,45,69,0.8)' }}
-                />
-                <input
-                  autoFocus
-                  type="search"
-                  placeholder="Search actions..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full h-9 pl-9 pr-3 rounded-[var(--radius-sm)] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)]"
-                  style={{
-                    fontSize: 'var(--text-sm)',
-                    background: 'var(--color-cream)',
-                    border: '1px solid var(--color-meta-text)',
-                    color: 'var(--color-navy)',
-                  }}
-                />
-              </div>
+              <SearchInput
+                autoFocus
+                placeholder="Search actions..."
+                value={search}
+                onChange={setSearch}
+              />
             </div>
 
             {/* Action list */}

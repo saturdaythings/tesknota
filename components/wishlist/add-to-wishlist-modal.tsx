@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { TabPill } from "@/components/ui/tab-pill";
-import { Search, Plus, Flag } from "@/components/ui/Icons";
+import { Plus, Flag } from "@/components/ui/Icons";
+import { SearchInput } from "@/components/ui/search-input";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -300,40 +301,14 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
         {/* Section 1 — Fragrance search */}
         <div style={sectionPad}>
           <div ref={searchRef} style={{ position: "relative" }}>
-            <div style={{ position: "relative" }}>
-              <Search
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ color: "var(--color-meta-text)" }}
-              />
-              <input
-                value={query}
-                readOnly={!!selected}
-                onChange={(e) => handleQueryChange(e.target.value)}
-                onBlur={() => setTimeout(() => setResults([]), 150)}
-                placeholder="Search your collection..."
-                autoFocus
-                className="w-full h-9 pl-9 pr-9 font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)] [letter-spacing:var(--tracking-sm)]"
-                style={{
-                  fontSize: "var(--text-sm)",
-                  background: "var(--color-cream)",
-                  border: "1px solid var(--color-meta-text)",
-                  borderRadius: "var(--radius-sm)",
-                  color: "var(--color-navy)",
-                }}
-              />
-              {selected && (
-                <Button
-                  variant="icon"
-                  onClick={clearSelection}
-                  aria-label="Clear selection"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 !p-1 leading-none"
-                  style={{ color: "var(--color-meta-text)", fontSize: "var(--text-lg)" }}
-                >
-                  ×
-                </Button>
-              )}
-            </div>
+            <SearchInput
+              value={query}
+              onChange={handleQueryChange}
+              placeholder="Search your collection..."
+              readOnly={!!selected}
+              onBlur={() => setTimeout(() => setResults([]), 150)}
+              autoFocus
+            />
 
             {/* Results dropdown */}
             {showResults && (

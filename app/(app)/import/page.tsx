@@ -8,6 +8,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { PageContent } from "@/components/layout/PageContent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TabPill } from "@/components/ui/tab-pill";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -765,33 +766,17 @@ function ImportPageInner() {
         </p>
 
         {/* Tab switcher */}
-        <div style={{ display: "flex", gap: "var(--space-4)", borderBottom: "1px solid var(--color-row-divider)", marginBottom: "var(--space-6)" }}>
-          {TABS.map((tab) => {
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  background: active ? "var(--color-cream-dark)" : "transparent",
-                  borderBottom: active ? "2px solid var(--color-navy)" : "2px solid transparent",
-                  borderTop: "none",
-                  borderLeft: "none",
-                  borderRight: "none",
-                  paddingTop: "var(--space-3)",
-                  paddingBottom: "var(--space-3)",
-                  paddingLeft: "var(--space-4)",
-                  paddingRight: "var(--space-4)",
-                  cursor: "pointer",
-                  marginBottom: "-1px",
-                  textAlign: "left",
-                }}
-              >
-                <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)" }}>{tab.label}</div>
-                <div style={sublabelStyle}>{tab.sublabel}</div>
-              </button>
-            );
-          })}
+        <div style={{ display: "flex", borderBottom: "1px solid var(--color-row-divider)", marginBottom: "var(--space-6)" }}>
+          {TABS.map((tab) => (
+            <TabPill
+              key={tab.id}
+              label={tab.label}
+              sublabel={tab.sublabel}
+              active={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              variant="underline"
+            />
+          ))}
         </div>
 
         {activeTab === "link" && <PasteLinkTab userId={user?.id ?? ""} prefillName={prefillName} />}
