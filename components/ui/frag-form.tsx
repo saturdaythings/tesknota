@@ -405,6 +405,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                       options={[{ value: "", label: "—" }, ...MONTHS.map((m) => ({ value: m, label: m }))]}
                       value={purchaseMonth}
                       onChange={setPurchaseMonth}
+                      size="auto"
                     />
                   </div>
                   <div>
@@ -413,6 +414,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                       options={[{ value: "", label: "—" }, ...YEARS.map((y) => ({ value: y, label: y }))]}
                       value={purchaseYear}
                       onChange={setPurchaseYear}
+                      size="auto"
                     />
                   </div>
                   <div>
