@@ -38,7 +38,7 @@ export function FragranceCell({ name, house, type, secondary, isDupe, dupeFor, c
   return (
     <div className={cn('', className)}>
       <div className="flex items-center mb-1" style={{ gap: 'var(--space-1)', flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'var(--text-note)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+        <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}{secondary && <span className="ml-1.5"> + {secondary}</span>}
         </span>
         {concLabel && (
