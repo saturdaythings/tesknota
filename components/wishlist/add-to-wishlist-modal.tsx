@@ -433,6 +433,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                   value={qaConcentration}
                   onChange={setQaConcentration}
                   placeholder="Concentration"
+                  size="auto"
                 />
                 <div style={{ display: "flex", gap: "var(--space-2)", justifyContent: "flex-end" }}>
                   <Button variant="ghost" onClick={() => setShowQuickAdd(false)} disabled={saving}>
@@ -479,6 +480,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
             value={concentration}
             onChange={setConcentration}
             placeholder="Select concentration"
+            size="auto"
           />
           {concentrationNotInDb && (
             <div

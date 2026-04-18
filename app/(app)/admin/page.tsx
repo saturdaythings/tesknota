@@ -968,7 +968,7 @@ function DataQualityTab({ frags }: { frags: DQUserFrag[] }) {
       ]} />
 
       <div style={{ marginBottom: "var(--space-5)", maxWidth: 260 }}>
-        <Select options={DQ_OPTIONS} value={filter} onChange={(v) => setFilter(v as DQFilter)} />
+        <Select options={DQ_OPTIONS} value={filter} onChange={(v) => setFilter(v as DQFilter)} size="auto" />
       </div>
 
       {displayed.length === 0 ? (

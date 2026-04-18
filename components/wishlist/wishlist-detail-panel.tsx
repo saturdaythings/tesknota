@@ -188,6 +188,7 @@ export function WishlistDetailPanel({ frag, open, onClose, communityFrags, onAdd
                 value={concentration}
                 onChange={setConcentration}
                 placeholder="Select concentration"
+                size="auto"
               />
             </div>
           </div>
