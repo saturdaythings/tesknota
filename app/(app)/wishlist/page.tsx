@@ -60,7 +60,7 @@ const cellStyle = {
   color: "var(--color-navy)",
 } as const;
 
-const WISHLIST_GRID_COLS = "minmax(240px,1fr) 100px 110px 200px 240px";
+const WISHLIST_GRID_COLS = "max-content 100px 110px 200px 240px";
 const WISHLIST_HEADERS = ["Fragrance", "Priority", "Date Added", "Accords", "Notes"];
 
 // ── Helpers ───────────────────────────────────────────────
@@ -643,7 +643,7 @@ function WishlistInner() {
                     onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "var(--color-row-hover)"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
                   >
-                    <div style={{ padding: "var(--space-3) var(--space-4)", minWidth: 0 }}>
+                    <div style={{ padding: "var(--space-3) var(--space-4)" }}>
                       <FragranceCell name={frag.name} house={frag.house} type={frag.type} isDupe={frag.isDupe} dupeFor={frag.dupeFor || undefined} />
                     </div>
                     <div style={{ padding: "0 var(--space-4)" }}>

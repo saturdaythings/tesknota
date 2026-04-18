@@ -44,7 +44,7 @@ const COLUMNS: CollectionColumnDef[] = [
   {
     id: 'fragrance',
     label: 'Fragrance',
-    width: 'minmax(240px,1fr)',
+    width: 'max-content',
     render: (frag) => (
       <FragranceCell name={frag.name} house={frag.house} type={frag.type ?? null} isDupe={frag.isDupe} dupeFor={frag.dupeFor || undefined} />
     ),

@@ -126,7 +126,7 @@ function CollectionRow({ frag, columns, ctx, onOpen }: CollectionRowProps) {
       {columns.map((col) => (
         <div
           key={col.id}
-          style={{ padding: '0 var(--space-4)', minWidth: 0, textAlign: col.align ?? 'left' }}
+          style={{ padding: '0 var(--space-4)', minWidth: col.id === 'fragrance' ? undefined : 0, textAlign: col.align ?? 'left' }}
         >
           {col.render(frag, ctx)}
         </div>
