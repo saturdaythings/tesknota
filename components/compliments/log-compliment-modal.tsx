@@ -115,13 +115,8 @@ function FragSearch({
 
   return (
     <div ref={containerRef} className="relative w-full">
-      <div className="relative">
-        <Search
-          size={15}
-          className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-          style={{ color: 'var(--color-meta-text)' }}
-        />
-        <input
+      <div>
+        <Input
           value={query}
           readOnly={locked}
           disabled={locked}
@@ -133,13 +128,10 @@ function FragSearch({
           onFocus={() => !locked && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder="Search your collection..."
-          className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] disabled:opacity-60 disabled:cursor-not-allowed placeholder:text-[var(--color-navy-mid)]"
+          leftIcon={<Search size={15} style={{ color: 'var(--color-meta-text)' }} />}
+          className={error ? 'border-[var(--color-destructive)]' : undefined}
           style={{
-            fontSize: 'var(--text-sm)',
-            fontWeight: 400,
             letterSpacing: 'var(--tracking-wide)',
-            background: 'var(--color-cream)',
-            border: error ? '1px solid var(--color-destructive)' : '1px solid var(--color-meta-text)',
             color: value ? 'var(--color-navy)' : 'var(--color-meta-text)',
           }}
         />
@@ -176,7 +168,7 @@ function FragSearch({
         </div>
       )}
       {error && (
-        <p className="mt-1 font-sans" style={{ fontSize: '13px', color: 'var(--color-destructive)' }}>
+        <p className="mt-1 font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-destructive)' }}>
           {error}
         </p>
       )}
@@ -432,7 +424,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId, pref
           </div>
 
           {err && (
-            <p className="font-sans" style={{ fontSize: '13px', color: 'var(--color-destructive)' }}>
+            <p className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-destructive)' }}>
               {err}
             </p>
           )}
@@ -448,7 +440,7 @@ export function LogComplimentModal({ open, onClose, editing, prefillFragId, pref
           )}
           {isEdit && confirmDelete && (
             <div className="flex items-center gap-3">
-              <span className="font-sans" style={{ fontSize: '13px', color: 'var(--color-destructive)' }}>
+              <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-destructive)' }}>
                 Are you sure? This cannot be undone.
               </span>
               <Button variant="destructive" onClick={handleDelete}>Delete</Button>

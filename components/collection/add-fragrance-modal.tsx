@@ -90,7 +90,7 @@ function StepDots({ step }: { step: number }) {
                 <Check
                   size={5}
                   strokeWidth={3}
-                  style={{ color: "white" }}
+                  style={{ color: "var(--color-cream)" }}
                   aria-hidden="true"
                 />
               )}

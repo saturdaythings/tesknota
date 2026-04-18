@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, forwardRef, TextareaHTMLAttributes, InputHTMLAttributes } from 'react';
+import { useId, forwardRef, TextareaHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 const inputBase =
@@ -14,10 +14,11 @@ const inputBase =
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  leftIcon?: ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className, id: idProp, required, ...props }, ref) => {
+  ({ label, error, className, id: idProp, required, leftIcon, ...props }, ref) => {
     const generated = useId();
     const id = idProp ?? generated;
 
@@ -32,14 +33,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {required && <span className="text-[var(--color-destructive)] ml-0.5">*</span>}
           </label>
         )}
-        <input
-          ref={ref}
-          id={id}
-          required={required}
-          aria-invalid={!!error}
-          className={cn(inputBase, 'h-9 px-3', error && 'border-[var(--color-destructive)]', className)}
-          {...props}
-        />
+        <div className={leftIcon ? 'relative' : undefined}>
+          {leftIcon && (
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              {leftIcon}
+            </span>
+          )}
+          <input
+            ref={ref}
+            id={id}
+            required={required}
+            aria-invalid={!!error}
+            className={cn(inputBase, 'h-9 px-3', leftIcon && 'pl-9', error && 'border-[var(--color-destructive)]', className)}
+            {...props}
+          />
+        </div>
         {error && (
           <p role="alert" className="mt-1 text-[13px] text-[var(--color-destructive)]">
             {error}
