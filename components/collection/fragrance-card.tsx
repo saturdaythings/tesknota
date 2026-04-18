@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { shortFragType } from "@/lib/frag-utils";
 import { STATUS_LABELS } from "@/types";
 import type { UserFragrance, FragranceStatus } from "@/types";
@@ -34,22 +35,20 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
   const extraAccords = accords.length > 4 ? accords.length - 4 : 0;
 
   return (
-    <button
+    <Button
+      variant="ghost"
       onClick={onClick}
+      className="!block w-full h-auto text-left"
       style={{
-        display: "block",
-        width: "100%",
-        textAlign: "left",
         background: "var(--color-cream)",
         border: "1px solid var(--color-cream-dark)",
         borderRadius: "var(--radius-lg)",
         padding: "var(--space-4)",
         marginBottom: "var(--space-2)",
-        cursor: "pointer",
       }}
     >
       {/* Line 1: name + concentration badge */}
-      <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-half)" }}>
         <span
           style={{
             fontFamily: "var(--font-serif)",
@@ -115,19 +114,19 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
           color: "var(--color-meta-text)",
           textTransform: "uppercase",
           letterSpacing: "var(--tracking-wide)",
-          marginBottom: frag.isDupe && frag.dupeFor ? "2px" : "10px",
+          marginBottom: frag.isDupe && frag.dupeFor ? "var(--space-half)" : "var(--space-3)",
         }}
       >
         {frag.house}
       </div>
       {frag.isDupe && frag.dupeFor && (
-        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", fontStyle: "italic", marginBottom: "10px" }}>
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", fontStyle: "italic", marginBottom: "var(--space-3)" }}>
           dupe of {frag.dupeFor}
         </div>
       )}
 
       {/* Row: size · stars · added */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)", flexWrap: "wrap" }}>
         <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-navy)" }}>
           {sizeDisplay}
         </span>
@@ -157,14 +156,14 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
 
       {/* Accords */}
       {visibleAccords.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "10px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)", marginBottom: "var(--space-3)" }}>
           {visibleAccords.map((a) => (
             <span
               key={a}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                padding: "2px 7px",
+                padding: "var(--space-half) var(--space-2)",
                 borderRadius: "var(--radius-full)",
                 background: "var(--color-sand-light)",
                 color: "var(--color-navy)",
@@ -181,7 +180,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                padding: "2px 7px",
+                padding: "var(--space-half) var(--space-2)",
                 borderRadius: "var(--radius-full)",
                 background: "var(--color-sand-light)",
                 color: "var(--color-navy)",
@@ -204,6 +203,6 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
           {compCount > 0 ? compCount : "—"}
         </span>
       </div>
-    </button>
+    </Button>
   );
 }

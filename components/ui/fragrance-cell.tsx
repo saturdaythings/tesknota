@@ -1,6 +1,7 @@
 "use client";
 
 import { shortFragType } from '@/lib/frag-utils';
+import { cn } from '@/lib/utils';
 import type { FragranceType } from '@/types';
 
 interface FragranceCellProps {
@@ -35,7 +36,7 @@ const dupePillStyle: React.CSSProperties = {
 export function FragranceCell({ name, house, type, secondary, isDupe, dupeFor, className }: FragranceCellProps) {
   const concLabel = type ? shortFragType(type) : null;
   return (
-    <div className={`min-w-0${className ? ` ${className}` : ''}`}>
+    <div className={cn('min-w-0', className)}>
       <div className="flex items-center mb-1 min-w-0" style={{ gap: 'var(--space-1)' }}>
         <span className="flex-1 min-w-0 truncate" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'var(--text-note)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
           {name}{secondary && <span className="ml-1.5"> + {secondary}</span>}

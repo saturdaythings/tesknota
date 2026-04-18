@@ -22,7 +22,7 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
   if (!value) return null;
   return (
     <div className="flex gap-3 py-[5px] border-b border-[var(--color-cream-dark)] last:border-0">
-      <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)]">
+      <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[var(--tracking-md)] uppercase text-[var(--color-navy)]">
         {label}
       </span>
       <span className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">{value}</span>
@@ -126,7 +126,7 @@ export function FragDetail({
       <ModalBody>
       <div className="space-y-5">
         {frag.house && (
-          <div className="font-[var(--font-sans)] text-xs tracking-[0.08em] uppercase text-[var(--color-navy)]">
+          <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-wide)] uppercase text-[var(--color-navy)]">
             {frag.house}
           </div>
         )}
@@ -154,19 +154,19 @@ export function FragDetail({
 
         {/* Personal section */}
         <div>
-          <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-navy)] mb-2">
+          <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-lg)] uppercase text-[var(--color-navy)] mb-2">
             Personal
           </div>
           <div className="border border-[var(--color-cream-dark)] px-3 py-1">
             {frag.personalRating ? (
               <div className="flex gap-3 py-[5px] border-b border-[var(--color-cream-dark)]">
-                <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)]">Rating</span>
+                <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[var(--tracking-md)] uppercase text-[var(--color-navy)]">Rating</span>
                 <span className="font-[var(--font-sans)] text-xs text-[var(--color-accent)] tracking-[1px]">{starsDisplay}</span>
               </div>
             ) : null}
             {frag.type && shortFragType(frag.type) && (
               <div className="flex gap-3 py-[5px] border-b border-[var(--color-cream-dark)] items-center">
-                <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)]">Type</span>
+                <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[var(--tracking-md)] uppercase text-[var(--color-navy)]">Type</span>
                 <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-row-divider)', borderRadius: 'var(--radius-full)', padding: '2px var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {shortFragType(frag.type)}
                 </span>
@@ -182,10 +182,10 @@ export function FragDetail({
         {/* Personal notes */}
         {frag.personalNotes && (
           <div>
-            <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-navy)] mb-2">
+            <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-lg)] uppercase text-[var(--color-navy)] mb-2">
               Notes
             </div>
-            <p className="font-[var(--font-sans)] text-sm text-[var(--color-navy)] leading-relaxed whitespace-pre-wrap">
+            <p className="font-[var(--font-sans)] text-[length:var(--text-sm)] text-[var(--color-navy)] leading-relaxed whitespace-pre-wrap">
               {frag.personalNotes}
             </p>
           </div>
@@ -195,7 +195,7 @@ export function FragDetail({
         {(cd || accords.length > 0) && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <div className="font-[var(--font-sans)] text-xs tracking-[0.12em] uppercase text-[var(--color-navy)]">
+              <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-lg)] uppercase text-[var(--color-navy)]">
                 Community
               </div>
               <Button variant="ghost" size="sm" onClick={() => setFlagOpen((v) => !v)}>
@@ -243,25 +243,25 @@ export function FragDetail({
             </div>
             {accords.length > 0 && (
               <div className="mt-3">
-                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)] mb-1">Accords</div>
+                <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-md)] uppercase text-[var(--color-navy)] mb-1">Accords</div>
                 <NoteChips raw={accords} />
               </div>
             )}
             {cd?.topNotes && cd.topNotes.length > 0 && (
               <div className="mt-3">
-                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)] mb-1">Top Notes</div>
+                <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-md)] uppercase text-[var(--color-navy)] mb-1">Top Notes</div>
                 <NoteChips raw={cd.topNotes} />
               </div>
             )}
             {cd?.middleNotes && cd.middleNotes.length > 0 && (
               <div className="mt-3">
-                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)] mb-1">Middle Notes</div>
+                <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-md)] uppercase text-[var(--color-navy)] mb-1">Middle Notes</div>
                 <NoteChips raw={cd.middleNotes} />
               </div>
             )}
             {cd?.baseNotes && cd.baseNotes.length > 0 && (
               <div className="mt-3">
-                <div className="font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase text-[var(--color-navy)] mb-1">Base Notes</div>
+                <div className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-md)] uppercase text-[var(--color-navy)] mb-1">Base Notes</div>
                 <NoteChips raw={cd.baseNotes} />
               </div>
             )}
