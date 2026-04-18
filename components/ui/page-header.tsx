@@ -46,7 +46,7 @@ export interface PageHeaderProps {
 function SortDirButton({ dir, onClick }: { dir: "asc" | "desc"; onClick: () => void }) {
   return (
     <Button
-      variant="primary"
+      variant="ghost"
       className="h-9 w-9 flex-shrink-0 p-0"
       aria-label={dir === "desc" ? "Sorted descending" : "Sorted ascending"}
       onClick={onClick}
