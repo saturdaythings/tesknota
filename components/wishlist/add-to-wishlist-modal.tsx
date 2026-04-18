@@ -338,6 +338,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                       flexDirection: "column",
                       justifyContent: "center",
                       borderBottom: "1px solid var(--color-row-divider)",
+                      transitionDuration: "var(--motion-base)",
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-row-hover)")}
                     onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}

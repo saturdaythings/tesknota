@@ -147,6 +147,7 @@ export default function LoginPage() {
               fontSize: 'var(--text-sm)',
               background: 'var(--color-cream)',
               color: 'var(--color-navy)',
+              transitionDuration: 'var(--motion-fast)',
             }}
           >
             {loading ? (
@@ -164,7 +165,7 @@ export default function LoginPage() {
             type="button"
             onClick={back}
             className="font-sans bg-transparent border-none cursor-pointer transition-opacity hover:opacity-100"
-            style={{ fontSize: 'var(--text-sm)', color: 'var(--color-sand)', opacity: 0.7 }}
+            style={{ fontSize: 'var(--text-sm)', color: 'var(--color-sand)', opacity: 0.7, transitionDuration: 'var(--motion-fast)' }}
           >
             BACK
           </button>
@@ -178,7 +179,7 @@ export default function LoginPage() {
             <Link
               href="/register"
               className="underline transition-opacity hover:opacity-100"
-              style={{ color: 'var(--color-sand)', opacity: 0.7 }}
+              style={{ color: 'var(--color-sand)', opacity: 0.7, transitionDuration: 'var(--motion-fast)' }}
             >
               Create account
             </Link>

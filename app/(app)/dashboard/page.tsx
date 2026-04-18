@@ -677,6 +677,7 @@ function RecentPurchases({
             fontSize: "var(--text-xs)",
             color: "var(--color-navy)",
             letterSpacing: "var(--tracking-md)",
+            transitionDuration: "var(--motion-fast)",
             textDecoration: "none",
           }}
         >

@@ -90,21 +90,27 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
         aria-hidden="true"
         onClick={close}
         className={cn(
-          'fixed inset-0 z-[299] md:hidden transition-opacity duration-200',
+          'fixed inset-0 z-[299] md:hidden transition-opacity',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
         )}
-        style={{ background: 'var(--color-navy-backdrop)' }}
+        style={{
+          background: 'var(--color-navy-backdrop)',
+          transitionDuration: 'var(--motion-slow)',
+        }}
       />
 
       <aside
         className={cn(
           'flex flex-col flex-shrink-0 z-[300] h-dvh overflow-hidden',
           'w-[var(--sidebar-width)]',
-          'fixed top-0 left-0 transition-transform duration-200',
+          'fixed top-0 left-0 transition-transform',
           'md:relative md:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
         )}
-        style={{ background: 'var(--color-navy)' }}
+        style={{
+          background: 'var(--color-navy)',
+          transitionDuration: 'var(--motion-slow)',
+        }}
       >
         {/* Logo area */}
         <div className="px-5 pt-8 pb-6 flex-shrink-0">
@@ -158,7 +164,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                       key={item.href}
                       href={item.href}
                       onClick={close}
-                      className="flex items-center transition-colors duration-100"
+                      className="flex items-center transition-colors"
                       style={{
                         height: 'var(--space-8)',
                         paddingLeft: 'var(--space-5)',
@@ -173,6 +179,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
                         fontSize: 'var(--text-xs)',
                         letterSpacing: 'var(--tracking-xs)',
                         fontFamily: 'var(--font-sans)',
+                        transitionDuration: 'var(--motion-fast)',
                       }}
                     >
                       <span className="flex-1 truncate" style={{ position: 'relative' }}>
@@ -198,6 +205,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
             variant="ghost"
             onClick={() => { close(); router.push('/profile'); }}
             className="flex items-center gap-3 w-full p-0 mb-3 text-left h-auto justify-start transition-opacity hover:opacity-80"
+            style={{ transitionDuration: 'var(--motion-fast)' }}
           >
             <div
               style={{
@@ -230,6 +238,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
               fontSize: 'var(--text-xs)',
               color: 'var(--color-sand-muted)',
               letterSpacing: 'var(--tracking-sm)',
+              transitionDuration: 'var(--motion-fast)',
             }}
           >
             <LogOut size={12} />

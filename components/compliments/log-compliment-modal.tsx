@@ -153,7 +153,7 @@ function FragSearch({
               key={f.id}
               onMouseDown={() => { onSelect(f); setOpen(false); }}
               className="flex flex-col justify-center cursor-pointer transition-colors"
-              style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', borderBottom: '1px solid var(--color-row-divider)' }}
+              style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', borderBottom: '1px solid var(--color-row-divider)', transitionDuration: 'var(--motion-base)' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >

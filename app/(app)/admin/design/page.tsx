@@ -1871,6 +1871,84 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
+          {/* ── Motion / Transitions ── */}
+          <Section id="motion" title="Motion — Transitions & Animations">
+            <Note>Canonical timing by component type. All transitions use CSS variables from globals.css. No hardcoded durations or arbitrary easing values.</Note>
+
+            <Row label="--motion-fast (100ms)">
+              <div className="flex items-center gap-4">
+                <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>Quick feedback: hover, focus, opacity changes</div>
+                <div
+                  className="w-12 h-12 rounded-[var(--radius-md)] transition-colors"
+                  style={{
+                    background: 'var(--color-accent)',
+                    transitionDuration: 'var(--motion-fast)',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-navy)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-accent)')}
+                />
+              </div>
+            </Row>
+
+            <Row label="--motion-base (150ms)">
+              <div className="flex items-center gap-4">
+                <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>Standard: color, opacity, border changes</div>
+                <div
+                  className="w-12 h-12 rounded-[var(--radius-md)] transition-colors"
+                  style={{
+                    background: 'var(--color-sand)',
+                    transitionDuration: 'var(--motion-base)',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-sand-light)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-sand)')}
+                />
+              </div>
+            </Row>
+
+            <Row label="--motion-slow (300ms)">
+              <div className="flex items-center gap-4">
+                <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>Complex: modal appear, dropdown open/close, sidebar slide</div>
+                <div
+                  className="w-12 h-12 rounded-[var(--radius-md)] transition-all"
+                  style={{
+                    background: 'var(--color-cream-dark)',
+                    transitionDuration: 'var(--motion-slow)',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                />
+              </div>
+            </Row>
+
+            <Row label="Easing curves">
+              <div className="font-sans text-xs" style={{ color: 'var(--color-navy-mid)' }}>
+                <div>--ease-in: cubic-bezier(0.4, 0, 1, 1)</div>
+                <div>--ease-out: cubic-bezier(0, 0, 0.2, 1)</div>
+                <div>--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1)</div>
+              </div>
+            </Row>
+
+            <Row label="Animations">
+              <div className="font-sans text-xs" style={{ color: 'var(--color-navy-mid)' }}>
+                <div>@keyframes fadeIn: opacity 0 → 1 over duration</div>
+                <div>@keyframes slideIn: scale(0.95) + translateY(-10px) → normal over duration</div>
+              </div>
+            </Row>
+
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', marginTop: 'var(--space-6)', padding: 'var(--space-4)', background: 'var(--color-cream-dark)', borderRadius: 'var(--radius-md)' }}>
+              <div className="font-sans font-medium mb-2">Rules</div>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Always use motion tokens. Never hardcode duration values.</li>
+                <li>Same component type = same motion timing everywhere in the app.</li>
+                <li>Inline style applied via transitionDuration prop when transition class used without duration.</li>
+                <li>Use @keyframes fadeIn/slideIn for entrance animations (modals, dropdowns).</li>
+              </ul>
+            </div>
+          </Section>
+
         </HardcodeChecker>
         </DesignModeContext.Provider>
       </PageContent>

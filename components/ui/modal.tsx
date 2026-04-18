@@ -70,8 +70,12 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
       <div
         aria-hidden="true"
         onClick={onClose}
-        className="fixed inset-0 z-40"
-        style={{ background: 'var(--color-navy-backdrop)' }}
+        className="fixed inset-0 z-40 transition-opacity"
+        style={{
+          background: 'var(--color-navy-backdrop)',
+          transitionDuration: 'var(--motion-slow)',
+          animation: 'fadeIn var(--motion-slow)',
+        }}
       />
 
       {/* Panel */}
@@ -80,7 +84,7 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
         role="dialog"
         aria-modal="true"
         className={cn(
-          'fixed z-50 bg-[var(--color-cream)] rounded-[var(--radius-lg)] overflow-y-auto',
+          'fixed z-50 bg-[var(--color-cream)] rounded-[var(--radius-lg)] overflow-y-auto transition-all',
           'border border-[var(--color-row-divider)]',
           // Desktop: centered, max 520px
           'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[520px] max-h-[80vh]',
@@ -88,7 +92,11 @@ export function Modal({ open, onClose, children, className }: ModalProps) {
           'max-sm:top-auto max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:w-full max-sm:max-w-full max-sm:rounded-b-none max-sm:max-h-[90dvh]',
           className,
         )}
-        style={{ boxShadow: 'var(--shadow-md)' }}
+        style={{
+          boxShadow: 'var(--shadow-md)',
+          transitionDuration: 'var(--motion-slow)',
+          animation: 'slideIn var(--motion-slow)',
+        }}
       >
         {children}
       </div>

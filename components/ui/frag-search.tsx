@@ -81,7 +81,7 @@ export function FragSearch() {
                 key={f.fragranceId}
                 onMouseDown={() => { setQuery(''); setOpen(false); setSelected(f); }}
                 className="flex flex-col justify-center cursor-pointer transition-colors"
-                style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', borderBottom: '1px solid var(--color-row-divider)' }}
+                style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', borderBottom: '1px solid var(--color-row-divider)', transitionDuration: 'var(--motion-base)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
@@ -105,7 +105,7 @@ export function FragSearch() {
               <div
                 onMouseDown={() => { setOpen(false); router.push('/import'); }}
                 className="flex flex-col justify-center cursor-pointer transition-colors"
-                style={{ height: 'var(--space-12)', padding: '0 var(--space-3)' }}
+                style={{ height: 'var(--space-12)', padding: '0 var(--space-3)', transitionDuration: 'var(--motion-base)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >

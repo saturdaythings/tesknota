@@ -83,6 +83,7 @@ export function FloatingActionButton({
             background: 'var(--color-navy)',
             color: 'var(--color-cream)',
             boxShadow: 'var(--shadow-md)',
+            transitionDuration: 'var(--motion-fast)',
           }}
         >
           <Plus size={22} />

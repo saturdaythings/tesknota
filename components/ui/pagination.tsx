@@ -90,6 +90,7 @@ function PagBtn({ onClick, disabled, children, title }: {
         background: 'transparent',
         color: 'var(--color-navy)',
         fontFamily: 'var(--font-sans)',
+        transitionDuration: 'var(--motion-base)',
       }}
     >
       {children}

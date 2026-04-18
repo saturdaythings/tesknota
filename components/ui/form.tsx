@@ -67,7 +67,7 @@ export function FieldOptions({
           type="button"
           onClick={() => onChange?.(opt.value)}
           className={cn(
-            "px-[11px] py-[5px] border font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase cursor-pointer select-none transition-all duration-[130ms]",
+            "px-[11px] py-[5px] border font-[var(--font-sans)] text-xs tracking-[0.1em] uppercase cursor-pointer select-none transition-all duration-150",
             value === opt.value
               ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-[var(--color-cream)]"
               : "border-[var(--color-cream-dark)] text-[var(--color-navy-mid)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]",
@@ -82,7 +82,7 @@ export function FieldOptions({
 
 // Base input/textarea field classes for use in FormGroup children
 export const fieldClass =
-  "border-0 border-b border-[var(--color-cream-dark)] bg-transparent py-[7px] text-[13px] font-[var(--font-sans)] text-[var(--color-navy)] outline-none transition-[border-color] duration-[140ms] w-full focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]";
+  "border-0 border-b border-[var(--color-cream-dark)] bg-transparent py-[7px] text-[13px] font-[var(--font-sans)] text-[var(--color-navy)] outline-none transition-[border-color] duration-150 w-full focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]";
 
 export const textareaClass =
-  "border border-[var(--color-cream-dark)] bg-transparent p-[8px_10px] text-[13px] font-[var(--font-sans)] text-[var(--color-navy)] outline-none transition-[border-color] duration-[140ms] w-full resize-y min-h-[60px] leading-[1.5] focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]";
+  "border border-[var(--color-cream-dark)] bg-transparent p-[8px_10px] text-[13px] font-[var(--font-sans)] text-[var(--color-navy)] outline-none transition-[border-color] duration-150 w-full resize-y min-h-[60px] leading-[1.5] focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]";

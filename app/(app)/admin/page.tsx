@@ -251,7 +251,7 @@ function SpendTab({ apiLogs, users }: { apiLogs: ApiLog[]; users: AdminUser[] })
               <div key={i} className="flex-1 flex flex-col items-center justify-end h-full relative group">
                 <div
                   className="w-full bg-[var(--adm-fg)] group-hover:bg-[var(--adm-red)] transition-colors cursor-crosshair relative"
-                  style={{ height: Math.max(pct, 1) + "%", minHeight: "1px" }}
+                  style={{ height: Math.max(pct, 1) + "%", minHeight: "1px", transitionDuration: "var(--motion-base)" }}
                 >
                   <div className="hidden group-hover:block absolute bottom-[calc(100%+4px)] left-1/2 -translate-x-1/2 bg-[var(--adm-fg)] text-[var(--adm-bg)] font-[var(--adm-mono)] text-[10px] px-2 py-1 whitespace-nowrap z-10">
                     {d.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}: ${d.cost.toFixed(3)}
@@ -598,7 +598,7 @@ function ErrorsTab({ apiLogs }: { apiLogs: ApiLog[] }) {
                 <div key={uid} className="flex items-center gap-3">
                   <span className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] w-32 shrink-0">{uid} today</span>
                   <div className="flex-1 h-2 bg-[var(--adm-bg2)] relative">
-                    <div className={`h-2 transition-all ${pct >= 80 ? "bg-[var(--adm-red)]" : "bg-[var(--adm-fg)]"}`} style={{ width: pct + "%" }} />
+                    <div className={`h-2 transition-all ${pct >= 80 ? "bg-[var(--adm-red)]" : "bg-[var(--adm-fg)]"}`} style={{ width: pct + "%", transitionDuration: "var(--motion-base)" }} />
                   </div>
                   <span className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg)] tabular-nums">{count} / {DAILY_LIMIT}</span>
                 </div>
