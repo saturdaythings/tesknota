@@ -242,7 +242,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                         onMouseDown={() => selectMatch(cf)}
                         className="px-3 py-[9px] cursor-pointer hover:bg-[var(--color-cream-dark)] border-b border-[var(--color-cream-dark)] last:border-0"
                       >
-                        <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{cf.fragranceName}</div>
+                        <div className="font-[var(--font-sans)] text-[length:var(--text-sm)] text-[var(--color-navy)]">{cf.fragranceName}</div>
                         <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">{cf.fragranceHouse}</div>
                       </div>
                     ))}
@@ -251,7 +251,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               </div>
               {selectedName && (
                 <div className="mt-2 px-3 py-3 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
-                  <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
+                  <div className="font-[var(--font-sans)] text-[length:var(--text-sm)] text-[var(--color-navy)]">{selectedName}</div>
                   {selectedHouse && (
                     <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[var(--tracking-wide)] mt-[var(--space-half)]">{selectedHouse}</div>
                   )}
@@ -313,7 +313,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
           <div className="flex flex-col gap-5">
             {selectedName && (
               <div className="px-3 py-2 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
-                <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
+                <div className="font-[var(--font-sans)] text-[length:var(--text-sm)] text-[var(--color-navy)]">{selectedName}</div>
                 {selectedHouse && (
                   <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[var(--tracking-wide)] mt-[var(--space-half)]">{selectedHouse}</div>
                 )}
