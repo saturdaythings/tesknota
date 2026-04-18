@@ -23,13 +23,13 @@ import {
   SORT_FIELD_OPTIONS, RATING_FILTER_OPTIONS, STATUS_FILTER_OPTIONS,
   type SortField, type SortDir,
 } from '@/lib/collection-utils';
+import { FlaskConical } from '@/components/ui/Icons';
+import { STATUS_LABELS, type UserFragrance } from '@/types';
 
 const STATUS_OPTIONS = [
   { value: 'any', label: 'Any status' },
   ...STATUS_FILTER_OPTIONS.filter((o) => o.value !== 'all'),
 ];
-import { FlaskConical } from '@/components/ui/Icons';
-import { STATUS_LABELS, type UserFragrance } from '@/types';
 
 const cellStyle = {
   fontSize: 'var(--text-xs)',

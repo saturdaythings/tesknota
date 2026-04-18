@@ -81,7 +81,6 @@ export function PageFilterBar({
   perPage, onPerPage,
   count, countLabel = "Item", isLoaded,
 }: PageFilterBarProps) {
-  const showAdd = addLabel != null && onAdd != null;
   return (
     <div>
       <div
@@ -117,7 +116,7 @@ export function PageFilterBar({
             size="auto"
           />
         </div>
-        {showAdd && <Button variant="primary" onClick={onAdd!}>{addLabel}</Button>}
+        {addLabel && onAdd && <Button variant="primary" onClick={onAdd}>{addLabel}</Button>}
       </div>
 
       {isLoaded && count !== undefined && (

@@ -1,7 +1,6 @@
 "use client";
 
-import { STATUS_LABELS } from "@/types";
-import type { FragranceStatus } from "@/types";
+import { STATUS_LABELS, type FragranceStatus } from "@/types";
 
 const STATUS_STYLE: Record<string, { color: string }> = {
   CURRENT:          { color: "var(--color-navy)" },

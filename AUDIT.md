@@ -27,7 +27,9 @@ All P1/P2 bugs fixed in pair review session (2026-04-18). See "Fixed" section be
 | `frag-row.tsx` | `FragRow` component was dead code — never imported by any file. Carried 6 unused imports, 3 dead constants, and a bare `<button>` design system violation | Deleted `FragRow` and all code only used by it; kept only `StatusBadge` (used by 4 files) |
 
 **Tech debt fixed:**
-- `page-filter-bar.tsx`: `SortDirButton` and `Clear` button used `style={{ height: "36px" }}` to override Button's `h-8`. Replaced with Tailwind `className="h-9 w-9 flex-shrink-0 p-0"` / `className="h-9"` — `tailwind-merge` resolves the conflict correctly. All filter bar controls now consistently at 36px via Tailwind only.
+- `page-filter-bar.tsx`: `SortDirButton` + `Clear` used `style={{ height: "36px" }}` to override Button's `h-8`. Replaced with `className="h-9 ..."` — `tailwind-merge` resolves correctly. Also removed `showAdd` intermediate variable; inlined as `{addLabel && onAdd && ...}` eliminating the `onAdd!` non-null assertion.
+- `frag-row.tsx`: Merged two `import from "@/types"` statements into one.
+- `collection/page.tsx`: Moved two `import` statements that appeared after a `const` declaration back to the top of the import block.
 
 ---
 
