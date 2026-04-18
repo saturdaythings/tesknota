@@ -35,6 +35,9 @@
      --adm-red-bg: rgba(192,48,48,0.07);
      --adm-green: #267326;
      --adm-green-bg: rgba(38,115,38,0.07);
+     --adm-heat-1: #AAAAAA;
+     --adm-heat-2: #666666;
+     --adm-heat-3: #333333;
 
   /* --- Status badge colors --- */
   --color-status-current: #1E2D45;

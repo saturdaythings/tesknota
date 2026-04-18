@@ -122,7 +122,7 @@ function BigNumGrid({ items }: { items: { val: string; label: string; sub?: stri
           <div className={`font-[var(--adm-mono)] text-[28px] font-medium leading-none mb-1 ${item.valClass ?? "text-[var(--adm-fg)]"}`}>
             {item.val}
           </div>
-          <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[0.08em] mt-1">
+          <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[var(--tracking-wide)] mt-1">
             {item.label}
           </div>
           {item.sub && (
@@ -139,7 +139,7 @@ function SecHead({ title, right }: { title: string; right?: string }) {
     <div className="flex justify-between items-baseline border-b border-[var(--adm-fg)] pb-1.5 mb-4">
       <div className="font-[var(--adm-serif)] text-base font-normal italic text-[var(--adm-fg)]">{title}</div>
       {right && (
-        <div className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] tracking-[0.1em] uppercase">{right}</div>
+        <div className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] tracking-[var(--tracking-md)] uppercase">{right}</div>
       )}
     </div>
   );
@@ -154,7 +154,7 @@ function DataTable({ headers, rows }: { headers: string[]; rows: (string | React
             {headers.map((h, i) => (
               <th
                 key={h}
-                className="font-[var(--adm-mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-left font-normal"
+                className="font-[var(--adm-mono)] text-[10px] tracking-[var(--tracking-lg)] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-left font-normal"
                 style={i === headers.length - 1 ? { textAlign: "right" } : {}}
               >
                 {h}
@@ -297,7 +297,7 @@ function SpendTab({ apiLogs, users }: { apiLogs: ApiLog[]; users: AdminUser[] })
               ];
               return (
                 <div key={uid} className="bg-[var(--adm-bg)] p-5">
-                  <div className="font-[var(--adm-mono)] text-[10px] tracking-[0.2em] uppercase text-[var(--adm-fg4)] mb-3 pb-1.5 border-b border-[var(--adm-border2)]">
+                  <div className="font-[var(--adm-mono)] text-[10px] tracking-[var(--tracking-xl)] uppercase text-[var(--adm-fg4)] mb-3 pb-1.5 border-b border-[var(--adm-border2)]">
                     {userLabel(uid, users)}
                   </div>
                   {stats.map((s) => (
@@ -382,7 +382,7 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
     userEvents[uid].push(d.getTime());
   }
 
-  const heatLevels = ["bg-[var(--adm-bg2)]", "bg-[var(--adm-bg3)]", "bg-[#AAAAAA]", "bg-[#666666]", "bg-[#333333]", "bg-[var(--adm-fg)]"];
+  const heatLevels = ["bg-[var(--adm-bg2)]", "bg-[var(--adm-bg3)]", "bg-[var(--adm-heat-1)]", "bg-[var(--adm-heat-2)]", "bg-[var(--adm-heat-3)]", "bg-[var(--adm-fg)]"];
   const CELL = 18;
   const LABEL_W = 40;
 
@@ -441,11 +441,11 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
             <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  <th className="font-[var(--adm-mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-left font-normal">Action</th>
+                  <th className="font-[var(--adm-mono)] text-[10px] tracking-[var(--tracking-lg)] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-left font-normal">Action</th>
                   {allUserIds.map((uid) => (
-                    <th key={uid} className="font-[var(--adm-mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-right font-normal">{userLabel(uid, users)}</th>
+                    <th key={uid} className="font-[var(--adm-mono)] text-[10px] tracking-[var(--tracking-lg)] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-right font-normal">{userLabel(uid, users)}</th>
                   ))}
-                  <th className="font-[var(--adm-mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-right font-normal">Total</th>
+                  <th className="font-[var(--adm-mono)] text-[10px] tracking-[var(--tracking-lg)] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-right font-normal">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -507,7 +507,7 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
               ];
               return (
                 <div key={uid} className="bg-[var(--adm-bg)] p-5">
-                  <div className="font-[var(--adm-mono)] text-[10px] tracking-[0.2em] uppercase text-[var(--adm-fg4)] mb-3 pb-1.5 border-b border-[var(--adm-border2)]">
+                  <div className="font-[var(--adm-mono)] text-[10px] tracking-[var(--tracking-xl)] uppercase text-[var(--adm-fg4)] mb-3 pb-1.5 border-b border-[var(--adm-border2)]">
                     {userLabel(uid, users)}
                   </div>
                   {stats.map((s) => (
@@ -748,7 +748,6 @@ function FlagsTab({
   users: AdminUser[];
   onResolve: (id: string, field: string, fragranceId: string | null, value: string) => Promise<void>;
   onDismiss: (id: string) => Promise<void>;
-  onUpdate?: never;
 }) {
   const [editId, setEditId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -1068,8 +1067,6 @@ function PendingEntriesTab({
   );
 }
 
-// ── Admin page ───────────────────────────────────────────────────────────────
-
 // ── Dev Bot tab ───────────────────────────────────────────────────────────────
 
 interface ChatMessage { role: "bot" | "user"; text: string }
@@ -1372,7 +1369,7 @@ export default function AdminPage() {
     <div className="flex flex-col h-full bg-[var(--adm-bg)] font-[var(--adm-mono)]">
       <div className="border-b-2 border-[var(--adm-fg)] px-8 py-5 flex justify-between items-start shrink-0">
         <div>
-          <div className="font-[var(--adm-mono)] text-[22px] font-bold tracking-[0.04em] text-[var(--adm-fg)] leading-none mb-1">
+          <div className="font-[var(--adm-mono)] text-[22px] font-bold tracking-[var(--tracking-xs)] text-[var(--adm-fg)] leading-none mb-1">
             Admin Dashboard
           </div>
           {lastSync && (
@@ -1435,7 +1432,7 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="border-t border-[var(--adm-border)] px-8 py-3 flex justify-between font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] tracking-[0.08em] shrink-0">
+      <div className="border-t border-[var(--adm-border)] px-8 py-3 flex justify-between font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] tracking-[var(--tracking-wide)] shrink-0">
         <span>tesknota / admin</span>
         <span>api_log · activity_log · community_flags · pending_entries</span>
       </div>
