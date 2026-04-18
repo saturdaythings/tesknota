@@ -37,7 +37,7 @@ const COLUMNS: ComplimentColumnDef[] = [
       <>
         {buildMeta(comp) && (
           <div
-            className="font-sans uppercase mb-1"
+            className="font-sans uppercase mb-1 max-sm:text-sm"
             style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy)', fontWeight: 'var(--font-weight-normal)' }}
           >
             {buildMeta(comp)}
@@ -60,7 +60,7 @@ const COLUMNS: ComplimentColumnDef[] = [
     align: 'right',
     render: (comp) => (
       <div
-        className="font-sans uppercase"
+        className="font-sans uppercase max-sm:text-sm"
         style={{ whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy)' }}
       >
         {formatDate(comp)}

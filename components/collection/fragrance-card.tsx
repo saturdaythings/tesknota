@@ -160,6 +160,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
           {visibleAccords.map((a) => (
             <span
               key={a}
+              className="max-sm:text-sm"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -170,6 +171,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
                 fontFamily: "var(--font-sans)",
                 fontSize: "var(--text-xs)",
                 fontWeight: 400,
+                lineHeight: "1.5",
               }}
             >
               {a}
@@ -177,6 +179,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
           ))}
           {extraAccords > 0 && (
             <span
+              className="max-sm:text-sm"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -186,6 +189,7 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
                 color: "var(--color-navy)",
                 fontFamily: "var(--font-sans)",
                 fontSize: "var(--text-xs)",
+                lineHeight: "1.5",
               }}
             >
               +{extraAccords} more

@@ -54,7 +54,7 @@ export function FragranceCell({ name, house, type, secondary, isDupe, dupeFor, c
         </div>
       )}
       {isDupe && dupeFor && (
-        <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', fontStyle: 'italic' }}>
+        <div className="font-sans max-sm:text-sm" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', fontStyle: 'italic' }}>
           dupe of {dupeFor}
         </div>
       )}

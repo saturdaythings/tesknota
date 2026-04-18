@@ -495,10 +495,10 @@ function SeasonSection({ title, sub, children }: { title: string; sub?: string; 
         <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-lg)", color: "var(--color-navy)" }}>
           {title}
         </div>
-        {sub && <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{sub}</div>}
+        {sub && <div className="max-sm:text-sm" style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{sub}</div>}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "var(--space-4)" }}
-        className="max-sm:grid-cols-2">
+        className="max-sm:grid-cols-1">
         {children}
       </div>
     </div>
