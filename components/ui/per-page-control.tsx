@@ -37,7 +37,7 @@ export function PerPageControl({ value, onChange }: PerPageControlProps) {
           )}
           <button
             onClick={() => onChange(size.value)}
-            className="font-sans"
+            className="font-sans focus:outline-2 focus:outline-offset-2 focus:outline-[var(--color-accent)]"
             style={{
               fontSize: 'var(--text-xs)',
               color: 'var(--color-navy)',
@@ -47,6 +47,7 @@ export function PerPageControl({ value, onChange }: PerPageControlProps) {
               cursor: 'pointer',
               padding: '0 var(--space-1)',
               letterSpacing: 'var(--tracking-sm)',
+              outline: 'none',
             }}
           >
             {size.label}

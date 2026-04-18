@@ -59,6 +59,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
         type="button"
         id={id}
         onClick={() => setOpen((o) => !o)}
+        className="focus:outline-2 focus:outline-offset-2 focus:outline-[var(--color-accent)]"
         style={{
           display: "flex",
           alignItems: "center",

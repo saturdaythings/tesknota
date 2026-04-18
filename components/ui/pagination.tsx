@@ -79,7 +79,7 @@ function PagBtn({ onClick, disabled, children, title }: {
       title={title}
       aria-label={title}
       className={cn(
-        'flex items-center justify-center transition-colors max-sm:w-11 max-sm:h-11',
+        'flex items-center justify-center transition-colors max-sm:w-11 max-sm:h-11 focus:outline-2 focus:outline-offset-2 focus:outline-[var(--color-accent)]',
         disabled ? 'opacity-30 cursor-default' : 'cursor-pointer hover:bg-[var(--color-row-hover)]',
       )}
       style={{
@@ -91,6 +91,7 @@ function PagBtn({ onClick, disabled, children, title }: {
         color: 'var(--color-navy)',
         fontFamily: 'var(--font-sans)',
         transitionDuration: 'var(--motion-base)',
+        outline: 'none',
       }}
     >
       {children}
