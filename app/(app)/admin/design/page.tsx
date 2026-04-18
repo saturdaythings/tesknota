@@ -395,21 +395,6 @@ const LAYOUT_TOKENS = [
 
 // ── Section manifest (drives anchor nav) ──────────────────
 
-const DESIGN_SECTIONS = [
-  { id: 'type-scale',   label: 'Typography'   },
-  { id: 'colors',             label: 'Colors'     },
-  { id: 'component-gallery', label: 'Components' },
-  { id: 'spacing',            label: 'Spacing'    },
-  { id: 'layout',       label: 'Layout'       },
-  { id: 'frag-cell',    label: 'Frag Cell'    },
-  { id: 'buttons',      label: 'Buttons'      },
-  { id: 'filter-pills', label: 'Filter Pills' },
-  { id: 'select',       label: 'Select'       },
-  { id: 'row-list',     label: 'Row List'     },
-  { id: 'sidebar',      label: 'Sidebar'      },
-  { id: 'topbar',       label: 'Topbar'       },
-  { id: 'login',        label: 'Login'        },
-] as const;
 
 // ── Mode context ──────────────────────────────────────────
 
@@ -1286,6 +1271,17 @@ function StarRatingEmpty() {
 
 // ── Page ───────────────────────────────────────────────────
 
+
+// Simplified to 3 core sections
+const DESIGN_SECTIONS = [
+  { id: 'type-scale', label: 'Typography' },
+  { id: 'colors', label: 'Color Usage Matrix' },
+  { id: 'component-gallery', label: 'Components' },
+] as const;
+
+
+// ── Main page component ────────────────────────────────────
+
 export default function DesignSystemPage() {
   const allTokens = [
     ...(COLOR_COLS as readonly string[]),
@@ -1324,23 +1320,22 @@ export default function DesignSystemPage() {
   return (
     <>
       <Topbar title="Design System" actions={<FragSearch />} />
-      <PageContent maxWidth="920px">
+      <PageContent maxWidth="1000px">
         <DesignModeContext.Provider value={mode}>
-        <div className="flex items-center gap-4 mb-6">
-          <div className="flex gap-2">
-            <TabPill label="Reference" active={mode === 'reference'} onClick={() => { setMode('reference'); setExpandedToken(null); }} />
-            <TabPill label="Edit" active={mode === 'edit'} onClick={() => setMode('edit')} />
+          <div className="flex items-center gap-4 mb-6">
+            <div className="flex gap-2">
+              <TabPill label="Reference" active={mode === 'reference'} onClick={() => { setMode('reference'); setExpandedToken(null); }} />
+              <TabPill label="Edit" active={mode === 'edit'} onClick={() => setMode('edit')} />
+            </div>
+            {mode === 'edit' && (
+              <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-xs)' }}>
+                Changes publish directly to the live site.
+              </span>
+            )}
           </div>
-          {mode === 'edit' && (
-            <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-xs)' }}>
-              Changes publish directly to the live site.
-            </span>
-          )}
-        </div>
 
-        {/* Sticky section anchor nav */}
-        <div
-          style={{
+          {/* Sticky section nav */}
+          <div style={{
             position: 'sticky',
             top: 0,
             zIndex: 10,
@@ -1352,28 +1347,40 @@ export default function DesignSystemPage() {
             paddingRight: 'var(--page-margin)',
             paddingTop: 'var(--space-3)',
             paddingBottom: 'var(--space-3)',
-            marginBottom: 'var(--space-6)',
-            overflowX: 'auto',
-          }}
-        >
-          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'nowrap' }}>
-            {DESIGN_SECTIONS.map(({ id, label }) => (
-              <TabPill
-                key={id}
-                label={label}
-                active={activeSection === id}
-                onClick={() => scrollToSection(id)}
-              />
-            ))}
+          }}>
+            <div style={{ display: 'flex', gap: 'var(--space-4)', overflowX: 'auto' }}>
+              {DESIGN_SECTIONS.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => scrollToSection(id)}
+                  style={{
+                    padding: 'var(--space-2) 0',
+                    borderBottom: activeSection === id ? '2px solid var(--color-navy)' : '2px solid transparent',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: 'var(--text-sm)',
+                    fontWeight: activeSection === id ? 'var(--font-weight-semibold)' : 'normal',
+                    color: activeSection === id ? 'var(--color-navy)' : 'var(--color-navy-mid)',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 150ms',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <HardcodeChecker>
-
-          {/* ── Typography ── */}
+          {/* SECTION 1: TYPOGRAPHY */}
           <Section id="type-scale" title="Typography">
-            <Note>Cormorant Garamond (serif, always italic) · Inter (sans, always upright). Never swap. Click any row to see where each style is used.</Note>
-            <div style={{ marginTop: 'var(--space-4)' }}>
+            <div style={{ marginBottom: 'var(--space-6)' }}>
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy-mid)', marginBottom: 'var(--space-4)' }}>
+                Each type style rendered exactly as it appears in the app. Click to expand and see where it is used.
+              </p>
+            </div>
+            <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
               {TYPE_TOKENS.map((t) => (
                 <TypeRow
                   key={t.token}
@@ -1387,9 +1394,13 @@ export default function DesignSystemPage() {
             </div>
           </Section>
 
-          {/* ── Colors ── */}
-          <Section id="colors" title="Colors">
-            <Note>Columns are color tokens · rows are the components that use them · each cell shows the actual bg / text / border combination · click a row to expand token values.</Note>
+          {/* SECTION 2: COLOR USAGE MATRIX */}
+          <Section id="colors" title="Color Usage Matrix">
+            <div style={{ marginBottom: 'var(--space-4)' }}>
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy-mid)', marginBottom: 'var(--space-4)' }}>
+                Grid showing how colors are actually used in components. Columns are color tokens. Rows are components and contexts. Each cell renders the actual combination (background, text, border) as it appears. Click rows to expand and see exact token values.
+              </p>
+            </div>
             <ColorGrid
               grid={COLOR_GRID}
               computed={computed}
@@ -1399,682 +1410,119 @@ export default function DesignSystemPage() {
             />
           </Section>
 
-          {/* ── Component Gallery ── */}
+          {/* SECTION 3: COMPONENT GALLERY */}
           <Section id="component-gallery" title="Components">
-            <Note>Every shared component rendered from its actual source file. The version here is the canonical locked version — any instance in the app that does not match it is a bug.</Note>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'button')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — normal state</div>
-                  <div className="flex flex-wrap gap-3">
-                    <Button variant="primary">Log Compliment</Button>
-                    <Button variant="secondary">Find Fragrances</Button>
-                    <Button variant="ghost">Cancel</Button>
-                    <Button variant="destructive">Delete</Button>
-                    <Button variant="primary" size="sm">Add</Button>
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — normal state</div>
-                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%', overflow: 'hidden' }}>
-                    <div className="flex flex-wrap gap-3">
-                      <Button variant="primary">Log Compliment</Button>
-                      <Button variant="secondary">Find Fragrances</Button>
-                      <Button variant="ghost">Cancel</Button>
-                      <Button variant="destructive">Delete</Button>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>loading / disabled state</div>
-                  <div className="flex flex-wrap gap-3">
-                    <Button variant="primary" disabled>Saving...</Button>
-                    <Button variant="secondary" disabled>Loading...</Button>
-                    <Button variant="ghost" disabled>Cancel</Button>
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>tab variants</div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="tab-action">Collection</Button>
-                    <Button variant="tab-action" active>Compliments</Button>
-                    <Button variant="tab-action">Wishlist</Button>
-                  </div>
-                </div>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'input')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — normal state</div>
-                  <div style={{ maxWidth: '320px' }}>
-                    <Input label="FRAGRANCE NAME" placeholder="e.g. Replica Coffee Breeze" required />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — normal state</div>
-                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%' }}>
-                    <Input label="FRAGRANCE NAME" placeholder="e.g. Replica Coffee Breeze" required />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>error state</div>
-                  <div style={{ maxWidth: '320px' }}>
-                    <Input label="HOUSE" placeholder="e.g. Maison Margiela" error="House is required" />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
-                  <div style={{ maxWidth: '320px' }}>
-                    <Input label="NOTES" placeholder="Loading..." disabled />
-                  </div>
-                </div>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'textarea')!}>
-              <div style={{ maxWidth: '320px', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>normal state</div>
-                  <Textarea label="NOTES" placeholder="Any notes about this compliment\u2026" hint="Optional" rows={3} />
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>error state</div>
-                  <Textarea label="NOTES" placeholder="Cannot be empty" error="Notes are required for this action" rows={3} />
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
-                  <Textarea label="NOTES" placeholder="Loading..." disabled rows={3} />
-                </div>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'select')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — normal state</div>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <Select
-                      options={[
-                        { value: 'newest', label: 'Date \u2014 Newest first' },
-                        { value: 'oldest', label: 'Date \u2014 Oldest first' },
-                      ]}
-                      value="newest"
-                      onChange={() => {}}
-                      size="auto"
-                    />
-                    <div style={{ maxWidth: '220px', width: '100%' }}>
-                      <Select
-                        options={[
-                          { value: 'edp', label: 'Eau de Parfum' },
-                          { value: 'edt', label: 'Eau de Toilette' },
-                        ]}
-                        value="edp"
-                        onChange={() => {}}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — normal state (full width)</div>
-                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%' }}>
-                    <Select
-                      options={[
-                        { value: 'newest', label: 'Date \u2014 Newest first' },
-                        { value: 'oldest', label: 'Date \u2014 Oldest first' },
-                      ]}
-                      value="newest"
-                      onChange={() => {}}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>error state</div>
-                  <div style={{ maxWidth: '220px' }}>
-                    <Select
-                      options={[
-                        { value: 'edp', label: 'Eau de Parfum' },
-                        { value: 'edt', label: 'Eau de Toilette' },
-                      ]}
-                      value=""
-                      onChange={() => {}}
-                      label="TYPE"
-                      error="Type is required"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
-                  <Select
-                    options={[
-                      { value: 'newest', label: 'Date \u2014 Newest first' },
-                      { value: 'oldest', label: 'Date \u2014 Oldest first' },
-                    ]}
-                    value="newest"
-                    onChange={() => {}}
-                    disabled
-                    size="auto"
-                  />
-                </div>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'tab-pill')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — default filter pills</div>
-                  <div className="flex flex-wrap gap-2">
-                    <TabPill label="All" count={12} active={true} onClick={() => {}} />
-                    <TabPill label="Strangers" count={4} active={false} onClick={() => {}} />
-                    <TabPill label="Friends" count={3} active={false} onClick={() => {}} />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — default filter pills (wraps to 2 rows)</div>
-                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%' }}>
-                    <div className="flex flex-wrap gap-2">
-                      <TabPill label="All" count={12} active={true} onClick={() => {}} />
-                      <TabPill label="Strangers" count={4} active={false} onClick={() => {}} />
-                      <TabPill label="Friends" count={3} active={false} onClick={() => {}} />
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>underline — section tabs (import page)</div>
-                  <div className="flex" style={{ borderBottom: '1px solid var(--color-row-divider)' }}>
-                    <TabPill label="Paste a Link" sublabel="FRAGRANTICA \u00b7 SEPHORA" active={true} onClick={() => {}} variant="underline" />
-                    <TabPill label="Scan a Bottle" sublabel="CAMERA \u00b7 LABEL" active={false} onClick={() => {}} variant="underline" />
-                    <TabPill label="CSV" sublabel=".CSV \u00b7 .XLSX" active={false} onClick={() => {}} variant="underline" />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>selector — content view tabs (social page)</div>
-                  <div className="flex flex-wrap gap-2">
-                    <TabPill label="Collection" variant="selector" active={true} onClick={() => {}} />
-                    <TabPill label="Compliments" variant="selector" active={false} onClick={() => {}} />
-                    <TabPill label="Wishlist" variant="selector" active={false} onClick={() => {}} />
-                  </div>
-                </div>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'fragrance-cell')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-2)' }}>
-                <FragranceCell name="Replica \u2014 Coffee Breeze" house="Maison Margiela" type="Eau de Parfum" secondary="Baccarat Rouge 540" />
-                <FragranceCell name="Oud Wood" house="Tom Ford" type="Eau de Parfum" />
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'badge')!}>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="current">current</Badge>
-                <Badge variant="want">want</Badge>
-                <Badge variant="finished">finished</Badge>
-                <Badge variant="sample">sample</Badge>
-                <Badge variant="dupe">dupe</Badge>
-                <Badge variant="neutral">neutral</Badge>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'field-label')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
-                <FieldLabel>FRAGRANCE NAME <RequiredMark /></FieldLabel>
-                <FieldLabel>NOTES <OptionalTag /></FieldLabel>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'empty-state')!}>
-              <EmptyState
-                icon={
-                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                }
-                title="No compliments yet"
-                description="Log your first compliment to get started."
-              />
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'skeleton')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
-                <Skeleton className="h-5 w-48" />
-                <Skeleton className="h-4 w-64" />
-                <Skeleton className="h-4 w-40" />
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'search-input')!}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop — empty state</div>
-                  <div style={{ maxWidth: '300px' }}>
-                    <SearchInputDemo />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>mobile (375px) — empty state</div>
-                  <div style={{ border: '1px dashed var(--color-sand-light)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', width: '375px', maxWidth: '100%' }}>
-                    <SearchInputDemo />
-                  </div>
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>filled state (with clear button)</div>
-                  <div style={{ maxWidth: '300px' }}>
-                    <SearchInputWithValue />
-                  </div>
-                </div>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'pagination')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>desktop & mobile — page 2 of 5 (buttons: 44px touch target)</div>
-                  <Pagination page={2} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>page 1 (prev disabled)</div>
-                  <Pagination page={1} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>page 5 (next disabled)</div>
-                  <Pagination page={5} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
-                </div>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'star-rating')!}>
-              <div className="flex flex-col" style={{ gap: 'var(--space-4)' }}>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>empty state</div>
-                  <StarRatingEmpty />
-                </div>
-                <div>
-                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>filled state (3 stars)</div>
-                  <StarRatingDemo />
-                </div>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'stat-box')!}>
-              <StatsGrid>
-                <StatBox value="127" label="Total compliments" delta="+12 this month" />
-                <StatBox value="34" label="Fragrances worn" />
-                <StatBox value="8" label="In collection" />
-              </StatsGrid>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'section-header')!}>
-              <SectionHeader title="Log a Compliment" />
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'modal')!}>
-              <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', textAlign: 'center' }}>
-                  Modal component renders with backdrop and close button. Use onClose prop for close handler.
-                </span>
-              </div>
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'multi-select')!}>
-              <MultiSelect
-                options={[
-                  { value: 'opt1', label: 'Option 1' },
-                  { value: 'opt2', label: 'Option 2' },
-                  { value: 'opt3', label: 'Option 3' },
-                ]}
-                value={[]}
-                onChange={() => {}}
-                placeholder="Select options..."
-              />
-            </GalleryEntry>
-
-            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'per-page-control')!}>
-              <PerPageControl value={25} onChange={() => {}} />
-            </GalleryEntry>
-
-          </Section>
-
-          {/* ── Spacing ── */}
-          <Section id="spacing" title="Spacing (4px grid)">
-            <div className="flex flex-col" style={{ gap: 'var(--space-2)' }}>
-              {SPACE_TOKENS.map((token) => {
-                const val = computed[token] ?? '';
-                const px = parseInt(val) || 0;
-                return (
-                  <ExpandableToken key={token} token={token} defaultValue={computed[token] ?? ''} expanded={expandedToken === token} onToggle={() => toggle(token)}>
-                    <div className="flex items-center gap-4">
-                      <code className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '80px' }}>{token}</code>
-                      <span className="font-mono flex-shrink-0" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '40px' }}>{val}</span>
-                      <div className="rounded-[var(--radius-sm)] flex-shrink-0" style={{ width: `${px}px`, height: 'var(--space-3)', background: 'var(--color-navy)', opacity: 0.3 }} />
-                    </div>
-                  </ExpandableToken>
-                );
-              })}
+            <div style={{ marginBottom: 'var(--space-4)' }}>
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy-mid)', marginBottom: 'var(--space-4)' }}>
+                Every shared component rendered live from its actual source file. Token values listed beside each. If the component in the app does not match what renders here, that is a bug.
+              </p>
             </div>
-          </Section>
 
-          {/* ── Layout ── */}
-          <Section id="layout" title="Layout Tokens">
-            <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
-              {LAYOUT_TOKENS.map(({ token, label, usage }) => (
-                <ExpandableToken key={token} token={token} defaultValue={computed[token] ?? ''} expanded={expandedToken === token} onToggle={() => toggle(token)}>
-                  <div className="flex items-baseline gap-4 flex-wrap">
-                    <code className="font-mono font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)', minWidth: '180px' }}>{token}</code>
-                    <span className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', minWidth: '60px' }}>{computed[token] ?? '\u2026'}</span>
-                    <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>{label} \u00b7 {usage}</span>
-                  </div>
-                </ExpandableToken>
+            <div className="flex flex-col" style={{ gap: 'var(--space-8)' }}>
+              {GALLERY_ITEMS.map((item) => (
+                <GalleryEntry key={item.id} item={item}>
+                  <ComponentPreview item={item} />
+                </GalleryEntry>
               ))}
             </div>
           </Section>
 
-          {/* ── Frag Cell ── */}
-          <Section id="frag-cell" title="Fragrance Cell — fragrance-cell.tsx">
-            <Note>Col 1 on every compliment row. Name = --text-lg serif italic · House = --text-xs sans uppercase.</Note>
-            <div style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-4) 0' }}>
-              <FragranceCell name="Replica — Coffee Breeze" house="Maison Margiela" type="Eau de Parfum" secondary="Baccarat Rouge 540" />
-            </div>
-            <div style={{ borderBottom: '1px solid var(--color-row-divider)', padding: 'var(--space-4) 0' }}>
-              <FragranceCell name="Oud Wood" house="Tom Ford" type="Eau de Parfum" />
-            </div>
-          </Section>
-
-          {/* ── Buttons ── */}
-          <Section id="buttons" title="Buttons — button.tsx">
-            <Note>Never use bare button with inline styles.</Note>
-            <Row label="variant=primary">
-              <div className="flex items-center gap-3 flex-wrap">
-                <Button variant="primary">Log Compliment</Button>
-                <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>navy bg · cream text · --text-sm · 0.08em tracking · 3px radius</span>
-              </div>
-            </Row>
-            <Row label="variant=secondary">
-              <div className="flex items-center gap-3 flex-wrap">
-                <Button variant="secondary">Find Fragrances</Button>
-                <span className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>cream-dark bg · navy text</span>
-              </div>
-            </Row>
-          </Section>
-
-          {/* ── Filter Pills ── */}
-          <Section id="filter-pills" title="Filter Pills — tab-pill.tsx">
-            <Note>Relation tabs on compliments page. Active = navy bg + cream text. Inactive = cream-dark bg + navy-mid text.</Note>
-            <div className="flex flex-wrap gap-2">
-              <TabPill label="All" count={12} active={true} onClick={() => {}} />
-              <TabPill label="Strangers" count={4} active={false} onClick={() => {}} />
-              <TabPill label="Friends" count={3} active={false} onClick={() => {}} />
-              <TabPill label="Colleagues" count={2} active={false} onClick={() => {}} />
-            </div>
-          </Section>
-
-          {/* ── Select ── */}
-          <Section id="select" title="Select / Dropdown — select.tsx">
-            <Note>Never use native select. size="auto" for sort/filter (auto-sizes to longest option). size="full" for form fields.</Note>
-            <Row label='size="auto" (sort)'>
-              <Select
-                options={[
-                  { value: 'a', label: 'Date — Newest first' },
-                  { value: 'b', label: 'Date — Oldest first' },
-                  { value: 'c', label: 'Fragrance A\u2013Z' },
-                ]}
-                value="a"
-                onChange={() => {}}
-                size="auto"
-              />
-            </Row>
-            <Row label='size="full" (form)'>
-              <div style={{ maxWidth: '220px' }}>
-                <Select
-                  options={[
-                    { value: 'a', label: 'Eau de Parfum' },
-                    { value: 'b', label: 'Eau de Toilette' },
-                    { value: 'c', label: 'Parfum' },
-                  ]}
-                  value="a"
-                  onChange={() => {}}
-                />
-              </div>
-            </Row>
-          </Section>
-
-          {/* ── Row List ── */}
-          <Section id="row-list" title="Row List — Compliments page">
-            <Note>CSS grid: max-content minmax(0,1fr) auto · col-gap --space-6 · each row subgrid · click to edit.</Note>
-            <div style={{ display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr) auto', columnGap: 'var(--space-6)' }}>
-              {[
-                { frag: 'Replica — Coffee Breeze', house: 'Maison Margiela', meta: 'STRANGER · FEMALE · COFFEE SHOP', notes: 'stopped mid-sentence to ask what I was wearing', date: 'APR 2025' },
-                { frag: 'Oud Wood', house: 'Tom Ford', meta: 'COLLEAGUE · MALE · OFFICE', notes: '', date: 'JAN 2025' },
-              ].map((row, i) => (
-                <div
-                  key={i}
-                  style={{ display: 'grid', gridTemplateColumns: 'subgrid', gridColumn: '1 / -1', padding: 'var(--space-4) 0', borderBottom: '1px solid var(--color-row-divider)', alignItems: 'start' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  <div style={{ whiteSpace: 'nowrap' }}>
-                    <FragranceCell name={row.frag} house={row.house} type="Eau de Parfum" />
-                  </div>
-                  <div>
-                    <div className="font-sans uppercase mb-1" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy)', fontWeight: 400 }}>{row.meta}</div>
-                    {row.notes && <div className="font-serif italic" style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 1.6 }}>{row.notes}</div>}
-                  </div>
-                  <div className="font-sans uppercase text-right" style={{ whiteSpace: 'nowrap', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-md)', color: 'var(--color-navy)' }}>{row.date}</div>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          {/* ── Sidebar ── */}
-          <Section id="sidebar" title="Sidebar — Sidebar.tsx">
-            <Note>var(--sidebar-width) · navy bg · fixed on mobile with backdrop overlay, relative on desktop.</Note>
-            <div className="rounded-[var(--radius-md)] overflow-hidden" style={{ maxWidth: 'var(--sidebar-width)', background: 'var(--color-navy)' }}>
-              <div style={{ padding: 'var(--space-8) var(--space-5) var(--space-6)' }}>
-                <div className="font-serif italic" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)', lineHeight: 1 }}>t\u0119sknota</div>
-                <div className="font-sans font-medium uppercase mt-1" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: 'var(--tracking-xl)' }}>Fragrance Tracker</div>
-                <div className="font-serif italic mt-2" style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}>[t\u025bsk-\u02c8n\u0254-ta] \u00b7 a deep longing</div>
-              </div>
-              <div>
-                <div className="px-5 mb-1 font-sans font-normal uppercase" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-sand-label)', letterSpacing: 'var(--tracking-wide)' }}>MY SPACE</div>
-                {[
-                  { label: 'Dashboard', active: false },
-                  { label: 'My Collection', active: true },
-                  { label: 'Compliments', active: false, count: 14 },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center font-sans"
-                    style={{ height: 'var(--space-10)', paddingLeft: 'var(--space-5)', paddingRight: 'var(--space-5)', borderLeft: item.active ? '3px solid var(--color-cream)' : '3px solid transparent', background: item.active ? 'var(--color-white-subtle)' : 'transparent', color: item.active ? 'var(--color-cream)' : 'var(--color-sand-muted)', fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-xs)' }}
-                  >
-                    <span className="flex-1 truncate">{item.label}</span>
-                    {'count' in item && item.count !== undefined && (
-                      <span className="font-sans tabular-nums ml-auto" style={{ fontSize: 'var(--text-xs)', color: item.active ? 'var(--color-cream)' : 'var(--color-sand-muted)' }}>{item.count}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="px-5 border-t" style={{ borderColor: 'var(--color-white-subtle)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)' }}>
-                <div className="font-sans mb-1" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-cream)' }}>Kiana</div>
-                <div className="font-sans font-normal uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-wide)', color: 'var(--color-sand-muted)' }}>Sign Out</div>
-              </div>
-            </div>
-          </Section>
-
-          {/* ── Topbar ── */}
-          <Section id="topbar" title="Topbar — Topbar.tsx">
-            <Note>Required on every page. h = --header-height · px = --topbar-px (mobile: --topbar-px-mobile) · cream bg · sand-light border.</Note>
-            <div className="rounded-[var(--radius-md)] overflow-hidden" style={{ background: 'var(--color-cream)', border: '1px solid var(--color-sand-light)' }}>
-              <div className="flex items-center gap-3" style={{ height: 'var(--header-height)', paddingLeft: 'var(--topbar-px)', paddingRight: 'var(--topbar-px)' }}>
-                <div className="flex-1">
-                  <div className="font-sans font-medium uppercase" style={{ fontSize: 'var(--text-xs)', letterSpacing: 'var(--tracking-lg)', color: 'var(--color-navy-mid)' }}>T\u0118SKNOTA</div>
-                  <div className="font-serif italic" style={{ fontSize: 'var(--text-page-title)', color: 'var(--color-navy)', lineHeight: 1.2 }}>Collection</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="secondary" size="sm">Add to Collection</Button>
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* ── Login ── */}
-          <Section id="login" title="Login Page — app/page.tsx">
-            <Note>Full-screen navy bg · logo = --text-logo · tagline = --text-xxs · IPA = --text-md · user buttons = --color-white-subtle bg + --color-white-dim border.</Note>
-            <div className="rounded-[var(--radius-md)] overflow-hidden flex flex-col items-center justify-center py-12" style={{ background: 'var(--color-navy)' }}>
-              <div className="text-center mb-8">
-                <div className="font-serif italic leading-none" style={{ fontSize: 'var(--text-logo)', color: 'var(--color-cream)' }}>t\u0119sknota</div>
-                <div className="font-sans font-medium uppercase mt-2" style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-cream-muted)', letterSpacing: 'var(--tracking-xl)' }}>Fragrance Tracker</div>
-                <div className="font-serif italic mt-2" style={{ fontSize: 'var(--text-md)', color: 'var(--color-sand)', lineHeight: 1.5 }}>[t\u025bsk-\u02c8n\u0254-ta] \u00b7 a deep longing for what is absent or past</div>
-              </div>
-              <div className="font-sans text-center mb-4" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-sand)' }}>Who are you?</div>
-              <div className="flex gap-3">
-                {['Kiana', 'Sylvia'].map((name) => (
-                  <button
-                    key={name}
-                    className="font-serif italic rounded-[var(--radius-md)] cursor-pointer"
-                    style={{ width: '160px', height: 'var(--space-12)', fontSize: 'var(--text-page-title)', color: 'var(--color-cream)', background: 'var(--color-white-subtle)', border: '1px solid var(--color-white-dim)' }}
-                  >
-                    {name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </Section>
-
-          {/* ── Error States ── */}
-          <Section id="error-states" title="Error States — Form Validation">
-            <Note>Canonical error state pattern: red border, error message below field. Applied consistently to all Input, Select, and Textarea components.</Note>
-
-            <Row label="Canonical error token">
-              <div className="font-sans text-xs" style={{ color: 'var(--color-navy-mid)' }}>
-                <div>Border color: var(--color-destructive) = #8B1A1A</div>
-                <div>Message color: var(--color-destructive)</div>
-                <div>Message size: --text-xs (12px) or --text-sm (13px)</div>
-                <div>Icon: None (red border is sufficient visual cue)</div>
-              </div>
-            </Row>
-
-            <Row label="Input error">
-              <div style={{ maxWidth: '320px' }}>
-                <Input label="HOUSE" placeholder="e.g. Maison Margiela" error="House is required" />
-              </div>
-            </Row>
-
-            <Row label="Select error">
-              <div style={{ maxWidth: '220px' }}>
-                <Select
-                  options={[
-                    { value: 'edp', label: 'Eau de Parfum' },
-                    { value: 'edt', label: 'Eau de Toilette' },
-                  ]}
-                  value=""
-                  onChange={() => {}}
-                  label="TYPE"
-                  error="Type is required"
-                />
-              </div>
-            </Row>
-
-            <Row label="Textarea error">
-              <div style={{ maxWidth: '320px' }}>
-                <Textarea label="NOTES" placeholder="Cannot be empty" error="Notes are required for this action" rows={3} />
-              </div>
-            </Row>
-
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', marginTop: 'var(--space-6)', padding: 'var(--space-4)', background: 'var(--color-cream-dark)', borderRadius: 'var(--radius-md)' }}>
-              <div className="font-sans font-medium mb-2">Error state rules</div>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Show error state immediately on validation failure.</li>
-                <li>Error message text: descriptive, specific (not generic "Error").</li>
-                <li>Red border persists until error is corrected by user input.</li>
-                <li>No error icons needed — red border is sufficient visual feedback.</li>
-                <li>Error message appears below field, above any hint text.</li>
-              </ul>
-            </div>
-          </Section>
-
-          {/* ── Motion / Transitions ── */}
-          <Section id="motion" title="Motion — Transitions & Animations">
-            <Note>Canonical timing by component type. All transitions use CSS variables from globals.css. No hardcoded durations or arbitrary easing values.</Note>
-
-            <Row label="--motion-fast (100ms)">
-              <div className="flex items-center gap-4">
-                <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>Quick feedback: hover, focus, opacity changes</div>
-                <div
-                  className="w-12 h-12 rounded-[var(--radius-md)] transition-colors"
-                  style={{
-                    background: 'var(--color-accent)',
-                    transitionDuration: 'var(--motion-fast)',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-navy)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-accent)')}
-                />
-              </div>
-            </Row>
-
-            <Row label="--motion-base (150ms)">
-              <div className="flex items-center gap-4">
-                <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>Standard: color, opacity, border changes</div>
-                <div
-                  className="w-12 h-12 rounded-[var(--radius-md)] transition-colors"
-                  style={{
-                    background: 'var(--color-sand)',
-                    transitionDuration: 'var(--motion-base)',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-sand-light)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--color-sand)')}
-                />
-              </div>
-            </Row>
-
-            <Row label="--motion-slow (300ms)">
-              <div className="flex items-center gap-4">
-                <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)' }}>Complex: modal appear, dropdown open/close, sidebar slide</div>
-                <div
-                  className="w-12 h-12 rounded-[var(--radius-md)] transition-all"
-                  style={{
-                    background: 'var(--color-cream-dark)',
-                    transitionDuration: 'var(--motion-slow)',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                />
-              </div>
-            </Row>
-
-            <Row label="Easing curves">
-              <div className="font-sans text-xs" style={{ color: 'var(--color-navy-mid)' }}>
-                <div>--ease-in: cubic-bezier(0.4, 0, 1, 1)</div>
-                <div>--ease-out: cubic-bezier(0, 0, 0.2, 1)</div>
-                <div>--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1)</div>
-              </div>
-            </Row>
-
-            <Row label="Animations">
-              <div className="font-sans text-xs" style={{ color: 'var(--color-navy-mid)' }}>
-                <div>@keyframes fadeIn: opacity 0 → 1 over duration</div>
-                <div>@keyframes slideIn: scale(0.95) + translateY(-10px) → normal over duration</div>
-              </div>
-            </Row>
-
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', marginTop: 'var(--space-6)', padding: 'var(--space-4)', background: 'var(--color-cream-dark)', borderRadius: 'var(--radius-md)' }}>
-              <div className="font-sans font-medium mb-2">Rules</div>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Always use motion tokens. Never hardcode duration values.</li>
-                <li>Same component type = same motion timing everywhere in the app.</li>
-                <li>Inline style applied via transitionDuration prop when transition class used without duration.</li>
-                <li>Use @keyframes fadeIn/slideIn for entrance animations (modals, dropdowns).</li>
-              </ul>
-            </div>
-          </Section>
-
-        </HardcodeChecker>
         </DesignModeContext.Provider>
       </PageContent>
     </>
   );
 }
+
+// ── Component preview ──────────────────────────────────────
+
+function ComponentPreview({ item }: { item: GalleryItem }) {
+  const mode = useContext(DesignModeContext) ?? 'reference';
+  
+  // Render examples for each component
+  switch (item.id) {
+    case 'button':
+      return (
+        <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+          <Button variant="primary">Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="destructive">Destructive</Button>
+        </div>
+      );
+    case 'input':
+      return <Input placeholder="Text input..." />;
+    case 'textarea':
+      return <Textarea placeholder="Textarea..." rows={3} />;
+    case 'select':
+      return (
+        <Select
+          options={[
+            { value: 'a', label: 'Option A' },
+            { value: 'b', label: 'Option B' },
+          ]}
+          value="a"
+          onChange={() => {}}
+          placeholder="Select..."
+        />
+      );
+    case 'tab-pill':
+      return (
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          <TabPill label="Active" active={true} onClick={() => {}} />
+          <TabPill label="Inactive" active={false} onClick={() => {}} />
+        </div>
+      );
+    case 'badge':
+      return (
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          <Badge variant="neutral">Badge 1</Badge>
+          <Badge variant="neutral">Badge 2</Badge>
+        </div>
+      );
+    case 'pagination':
+      return <Pagination page={2} onPage={() => {}} total={100} pageSize={10} />;
+    case 'star-rating':
+      return <StarRating value={3} max={5} />;
+    case 'search-input':
+      return <SearchInput value="" onChange={() => {}} />;
+    case 'empty-state':
+      return <EmptyState icon="✦" title="No items" description="Add one to get started" />;
+    case 'skeleton':
+      return (
+        <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+          <Skeleton className="w-[60px] h-[40px]" />
+          <Skeleton className="w-[200px] h-[40px]" />
+        </div>
+      );
+    case 'field-label':
+      return <div style={{ display: "flex", gap: "var(--space-2)" }}><FieldLabel>Field Label</FieldLabel><RequiredMark /></div>;
+    case 'fragrance-cell':
+      return <FragranceCell name="Sample Fragrance" house="Sample House" type="Eau de Parfum" />;
+    case 'section-header':
+      return <SectionHeader title="Section Title" />;
+    case 'stat-box':
+      return <StatBox label="Stat" value="42" />;
+    case 'modal':
+      return (
+        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy-mid)' }}>
+          Modal renders with backdrop, close button, and keyboard support (Escape key). Use onClose prop.
+        </div>
+      );
+    case 'multi-select':
+      return (
+        <MultiSelect
+          options={[
+            { value: 'opt1', label: 'Option 1' },
+            { value: 'opt2', label: 'Option 2' },
+          ]}
+          value={[]}
+          onChange={() => {}}
+        />
+      );
+    case 'per-page-control':
+      return <PerPageControl value={25} onChange={() => {}} />;
+    default:
+      return null;
+  }
+}
+
