@@ -664,7 +664,7 @@ function WishlistInner() {
                     onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
                   >
                     <div style={{ padding: "var(--space-3) var(--space-4)", minWidth: 0 }}>
-                      <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
+                      <FragranceCell name={frag.name} house={frag.house} type={frag.type} isDupe={frag.isDupe} dupeFor={frag.dupeFor || undefined} />
                     </div>
                     <div style={{ padding: "0 var(--space-4)" }}>
                       <PriorityBadge priority={frag.wishlistPriority} />
