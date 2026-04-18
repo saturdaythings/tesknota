@@ -108,10 +108,12 @@ interface ComplimentMobileCardProps {
 
 function ComplimentMobileCard({ comp, frag, onEdit }: ComplimentMobileCardProps) {
   return (
-    <Button
-      variant="ghost"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onEdit}
-      className="!block w-full h-auto text-left"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit(); } }}
+      className="hover-row cursor-pointer text-left"
       style={{
         background: 'var(--color-cream)',
         border: '1px solid var(--color-cream-dark)',
@@ -131,6 +133,6 @@ function ComplimentMobileCard({ comp, frag, onEdit }: ComplimentMobileCardProps)
       <Button variant="primary" onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ width: '100%' }}>
         Edit
       </Button>
-    </Button>
+    </div>
   );
 }

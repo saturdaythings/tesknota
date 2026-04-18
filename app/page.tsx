@@ -119,8 +119,8 @@ export default function LoginPage() {
             className="w-full h-10 px-3 rounded-[var(--radius-md)] font-sans outline-none transition-[border-color] duration-150 placeholder:text-[var(--color-cream)]"
             style={{
               fontSize: 'var(--text-base)',
-              background: 'rgba(255,255,255,0.12)',
-              border: '1px solid rgba(255,255,255,0.25)',
+              background: 'var(--color-glass-bg-input)',
+              border: '1px solid var(--color-glass-bg-active)',
               color: 'var(--color-cream)',
               width: '320px',
             }}
@@ -194,31 +194,12 @@ function UserButton({ name, onClick }: { name: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="font-serif italic transition-all duration-150 border-none cursor-pointer"
+      className="btn-glass font-serif italic cursor-pointer rounded-[var(--radius-md)]"
       style={{
         width: '180px',
         height: '56px',
         fontSize: 'var(--text-page-title)',
         color: 'var(--color-cream)',
-        background: 'rgba(255,255,255,0.1)',
-        border: '1px solid rgba(255,255,255,0.2)',
-        borderRadius: '4px',
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget;
-        el.style.background = 'rgba(255,255,255,0.18)';
-        el.style.borderColor = 'rgba(255,255,255,0.35)';
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget;
-        el.style.background = 'rgba(255,255,255,0.1)';
-        el.style.borderColor = 'rgba(255,255,255,0.2)';
-      }}
-      onMouseDown={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.25)';
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.18)';
       }}
     >
       {name}

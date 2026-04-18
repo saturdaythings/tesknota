@@ -84,6 +84,14 @@
      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.16);
      --shadow-panel-left: -4px 0 32px rgba(0, 0, 0, 0.15);
 
+     /* Glass-morphism overlays — used on dark backgrounds (landing, auth) */
+     --color-glass-bg: rgba(255, 255, 255, 0.10);
+     --color-glass-bg-hover: rgba(255, 255, 255, 0.18);
+     --color-glass-bg-active: rgba(255, 255, 255, 0.25);
+     --color-glass-bg-input: rgba(255, 255, 255, 0.12);
+     --color-glass-border: rgba(255, 255, 255, 0.20);
+     --color-glass-border-strong: rgba(255, 255, 255, 0.35);
+
   /* --- Type scale --- */
   --text-xxs: 10px;
      --text-label: 11px;
@@ -306,6 +314,22 @@
      }
      .hover-row:hover {
             background: var(--color-row-hover);
+     }
+
+     /* Glass-morphism button — for dark-background pages (landing, auth). */
+     .btn-glass {
+            background: var(--color-glass-bg);
+            border: 1px solid var(--color-glass-border);
+            transition:
+                   background var(--motion-fast) var(--ease-out),
+                   border-color var(--motion-fast) var(--ease-out);
+     }
+     .btn-glass:hover {
+            background: var(--color-glass-bg-hover);
+            border-color: var(--color-glass-border-strong);
+     }
+     .btn-glass:active {
+            background: var(--color-glass-bg-active);
      }
 }
 

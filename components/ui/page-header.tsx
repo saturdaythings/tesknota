@@ -82,7 +82,7 @@ export function PageHeader({
         />
         <Button
           variant="primary"
-          className="px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-[var(--color-navy)] text-[var(--color-cream)] hover:bg-[var(--color-accent)] min-h-10 h-auto border-0"
+          className="px-4 rounded-[var(--radius-md)] text-[length:var(--text-sm)] leading-none tracking-[var(--tracking-wide)] bg-[var(--color-navy)] text-[var(--color-cream)] hover:bg-[var(--color-accent)] min-h-10 h-auto border-0"
           onClick={onAdd}
         >
           {addLabel}
@@ -114,7 +114,7 @@ export function PageHeader({
               />
               <Button
                 variant="ghost"
-                className="p-0 rounded-[3px] bg-transparent text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] hover:text-[var(--color-navy)]"
+                className="p-0 rounded-[var(--radius-md)] bg-transparent text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] hover:text-[var(--color-navy)]"
                 style={{ width: "36px", height: "36px" }}
                 title={sortDir === "asc" ? "Sort ascending" : "Sort descending"}
                 aria-label={sortDir === "asc" ? "Sort ascending" : "Sort descending"}
@@ -127,7 +127,7 @@ export function PageHeader({
             {/* Filters button - toggles inline expansion */}
             <Button
               variant="primary"
-              className="px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] bg-transparent border border-[var(--color-navy)] text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] min-h-8 h-auto"
+              className="px-4 rounded-[var(--radius-md)] text-[length:var(--text-sm)] leading-none tracking-[var(--tracking-wide)] bg-transparent border border-[var(--color-navy)] text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] min-h-8 h-auto"
               style={{ height: "36px" }}
               onClick={() => setFiltersOpen(!filtersOpen)}
             >
@@ -225,7 +225,7 @@ export function PageHeader({
             {filtersActive && onClearFilters && (
               <Button
                 variant="ghost"
-                className="text-[11px] text-[var(--color-navy)]"
+                className="text-[length:var(--text-label)] text-[var(--color-navy)]"
                 onClick={() => {
                   onClearFilters();
                   setFiltersOpen(false);
