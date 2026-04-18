@@ -14,50 +14,67 @@ interface FragranceCellProps {
   className?: string;
 }
 
-const concPillStyle: React.CSSProperties = {
+const typeTagClass =
+  'inline-flex items-center px-2 rounded-[2px] font-medium font-sans uppercase leading-none flex-shrink-0 py-[2px]';
+
+const typeTagStyle: React.CSSProperties = {
   background: 'var(--color-cream-dark)',
-  border: '1px solid var(--color-row-divider)',
-  borderRadius: 'var(--radius-sm)',
-  padding: '2px 4px',
-  fontSize: 'var(--text-xxs)',
   color: 'var(--color-meta-text)',
-  letterSpacing: 'var(--tracking-wide)',
-  flexShrink: 0,
-  whiteSpace: 'nowrap',
-  textTransform: 'uppercase',
+  fontSize: 'var(--text-label)',
+  letterSpacing: 'var(--tracking-md)',
 };
 
-const dupePillStyle: React.CSSProperties = {
-  ...concPillStyle,
-  border: '1px solid var(--color-navy)',
+const dupeTagStyle: React.CSSProperties = {
+  ...typeTagStyle,
   color: 'var(--color-navy)',
+  border: '1px solid var(--color-navy)',
 };
 
 export function FragranceCell({ name, house, type, secondary, isDupe, dupeFor, className }: FragranceCellProps) {
   const concLabel = type ? shortFragType(type) : null;
   return (
-    <div className={cn('', className)}>
-      <div className="flex items-center mb-1" style={{ gap: 'var(--space-1)', flexWrap: 'wrap' }}>
-        <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
-          {name}{secondary && <span className="ml-1.5"> + {secondary}</span>}
-        </span>
-        {concLabel && (
-          <span className="font-sans" style={concPillStyle}>{concLabel}</span>
+    <div className={cn('flex items-start gap-2', className)}>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 mb-1 min-w-0">
+          <span
+            className="font-serif italic flex-1 min-w-0 truncate"
+            style={{ fontSize: 'var(--text-lg)', color: 'var(--color-navy)', lineHeight: 1.2 }}
+          >
+            {name}
+            {secondary && <span className="ml-1.5"> + {secondary}</span>}
+          </span>
+          {concLabel && (
+            <span className={typeTagClass} style={typeTagStyle}>
+              {concLabel}
+            </span>
+          )}
+          {isDupe && (
+            <span className={typeTagClass} style={dupeTagStyle}>
+              Dupe
+            </span>
+          )}
+        </div>
+        {house && (
+          <div
+            className="font-sans uppercase"
+            style={{
+              fontSize: 'var(--text-xs)',
+              letterSpacing: 'var(--tracking-md)',
+              color: 'var(--color-navy)',
+            }}
+          >
+            {house}
+          </div>
         )}
-        {isDupe && (
-          <span className="font-sans" style={dupePillStyle}>Dupe</span>
+        {isDupe && dupeFor && (
+          <div
+            className="font-sans max-sm:text-sm"
+            style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', fontStyle: 'italic' }}
+          >
+            dupe of {dupeFor}
+          </div>
         )}
       </div>
-      {house && (
-        <div className="font-sans uppercase" style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-wide)', color: 'var(--color-meta-text)' }}>
-          {house}
-        </div>
-      )}
-      {isDupe && dupeFor && (
-        <div className="font-sans max-sm:text-sm" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', fontStyle: 'italic' }}>
-          dupe of {dupeFor}
-        </div>
-      )}
     </div>
   );
 }

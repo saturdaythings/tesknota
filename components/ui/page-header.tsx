@@ -53,6 +53,7 @@ export function PageHeader({
   onSortField,
   sortDir,
   onSortDir,
+  filters,
   filtersActive,
   onClearFilters,
   perPage,
@@ -127,6 +128,15 @@ export function PageHeader({
               <SlidersHorizontal size={13} />
               Filters
             </Button>
+            {filters?.map((f, i) => (
+              <Select
+                key={i}
+                options={f.options}
+                value={f.value}
+                onChange={f.onChange}
+                size="auto"
+              />
+            ))}
           </div>
 
           <div className="flex items-center" style={{ gap: "var(--space-1)" }}>
