@@ -323,14 +323,15 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
                 }}
               />
               {selected && (
-                <button
+                <Button
+                  variant="icon"
                   onClick={clearSelection}
                   aria-label="Clear selection"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-1 leading-none"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 !p-1 leading-none"
                   style={{ color: "var(--color-meta-text)", fontSize: "var(--text-lg)" }}
                 >
                   ×
-                </button>
+                </Button>
               )}
             </div>
 

@@ -87,7 +87,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 150ms",
             flexShrink: 0,
-            marginLeft: "4px",
+            marginLeft: "var(--space-1)",
           }}
         >
           <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -105,7 +105,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
             zIndex: 100,
             background: "var(--color-cream)",
             border: "1px solid var(--color-meta-text)",
-            borderRadius: "3px",
+            borderRadius: "var(--radius-md)",
             boxShadow: "var(--shadow-md)",
           }}
         >
@@ -133,7 +133,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
           {/* Options */}
           <div style={{ maxHeight: "220px", overflowY: "auto", padding: "var(--space-1) 0" }}>
             {filtered.length === 0 ? (
-              <div style={{ padding: "0 12px", height: "36px", display: "flex", alignItems: "center", fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)" }}>
+              <div style={{ padding: "0 var(--space-3)", height: "36px", display: "flex", alignItems: "center", fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)" }}>
                 No results
               </div>
             ) : filtered.map((opt) => {
@@ -148,8 +148,8 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
                     height: "36px",
                     display: "flex",
                     alignItems: "center",
-                    gap: "8px",
-                    padding: "0 12px",
+                    gap: "var(--space-2)",
+                    padding: "0 var(--space-3)",
                     fontSize: "var(--text-sm)",
                     fontFamily: "var(--font-sans)",
                     cursor: "pointer",
@@ -165,7 +165,7 @@ export function MultiSelect({ options, value, onChange, placeholder = "Select...
                     style={{
                       width: "13px", height: "13px",
                       border: "1px solid var(--color-meta-text)",
-                      borderRadius: "2px",
+                      borderRadius: "var(--radius-sm)",
                       flexShrink: 0,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       background: checked ? "var(--color-navy)" : "transparent",

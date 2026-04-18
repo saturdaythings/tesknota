@@ -51,7 +51,7 @@ export function FragSearch() {
             onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
             placeholder="Find fragrances..."
-            className="w-full h-9 pl-9 pr-3 rounded-[2px] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
+            className="w-full h-9 pl-9 pr-3 rounded-[var(--radius-sm)] font-sans outline-none transition-[border-color] duration-150 focus:border-[var(--color-accent)] placeholder:text-[var(--color-navy-mid)]"
             style={{
               fontSize: 'var(--text-sm)',
               fontWeight: 'var(--font-weight-normal)',

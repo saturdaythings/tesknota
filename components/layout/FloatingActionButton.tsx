@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { Plus, Search, X } from '@/components/ui/Icons';
 
 interface ActionItem {
@@ -72,18 +73,19 @@ export function FloatingActionButton({
     <>
       {/* FAB — single + button, bottom-right */}
       <div className="fixed bottom-6 right-6 z-[200]">
-        <button
+        <Button
+          variant="icon"
           onClick={() => setMenuOpen(true)}
           aria-label="Open actions"
-          className="w-12 h-12 rounded-full flex items-center justify-center border-none cursor-pointer transition-opacity hover:opacity-90"
+          className="!w-12 !h-12 !rounded-full transition-opacity hover:opacity-90"
           style={{
             background: 'var(--color-navy)',
             color: 'var(--color-cream)',
-            boxShadow: '0 4px 16px rgba(30,45,69,0.4)',
+            boxShadow: 'var(--shadow-md)',
           }}
         >
           <Plus size={22} />
-        </button>
+        </Button>
       </div>
 
       {/* Actions modal */}
@@ -94,18 +96,18 @@ export function FloatingActionButton({
             aria-hidden="true"
             onClick={() => { setMenuOpen(false); setSearch(''); }}
             className="fixed inset-0 z-[210]"
-            style={{ background: 'rgba(30,45,69,0.6)' }}
+            style={{ background: 'var(--color-navy-backdrop)' }}
           />
           {/* Panel */}
           <div
             className={cn(
-              'fixed z-[220] bg-[var(--color-cream)] rounded-[6px] overflow-hidden',
+              'fixed z-[220] bg-[var(--color-cream)] rounded-[var(--radius-lg)] overflow-hidden',
               // Desktop: centered
               'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[480px] max-h-[80dvh]',
               // Mobile: bottom sheet
               'max-sm:top-auto max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:translate-x-0 max-sm:translate-y-0 max-sm:w-full max-sm:max-w-full max-sm:rounded-b-none',
             )}
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}
+            style={{ boxShadow: 'var(--shadow-lg)' }}
           >
             {/* Header */}
             <div
@@ -118,13 +120,14 @@ export function FloatingActionButton({
               >
                 Actions
               </span>
-              <button
+              <Button
+                variant="icon"
                 onClick={() => { setMenuOpen(false); setSearch(''); }}
                 aria-label="Close"
-                className="w-8 h-8 flex items-center justify-center rounded-[3px] bg-transparent border-none cursor-pointer text-[var(--color-navy)] hover:bg-[var(--color-sand-light)] transition-colors"
+                className="!w-8 !h-8 !rounded-[var(--radius-md)] text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]"
               >
                 <X size={16} />
-              </button>
+              </Button>
             </div>
 
             {/* Search */}
@@ -166,10 +169,11 @@ export function FloatingActionButton({
                     {section.label}
                   </div>
                   {section.items.map((item, ii) => (
-                    <button
+                    <Button
                       key={item.action}
+                      variant="ghost"
                       onClick={() => handleAction(item.action)}
-                      className="w-full flex items-center px-6 text-left font-sans bg-transparent border-none cursor-pointer transition-colors hover:bg-[var(--color-sand-light)]"
+                      className="!w-full !justify-start !px-6 !rounded-none font-sans hover:bg-[var(--color-sand-light)]"
                       style={{
                         height: '44px',
                         fontSize: 'var(--text-base)',
@@ -181,14 +185,14 @@ export function FloatingActionButton({
                       }}
                     >
                       {item.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               ))}
               {filteredSections.length === 0 && (
                 <div
                   className="px-6 py-8 text-center font-sans"
-                  style={{ fontSize: '14px', color: 'rgba(30,45,69,0.8)' }}
+                  style={{ fontSize: 'var(--text-sm)', color: 'rgba(30,45,69,0.8)' }}
                 >
                   No actions match &ldquo;{search}&rdquo;
                 </div>
