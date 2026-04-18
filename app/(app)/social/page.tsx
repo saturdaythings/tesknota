@@ -187,7 +187,7 @@ export default function SocialPage() {
     (f) => f.followerId === user?.id && f.status === "accepted"
   );
   const starredFollows = acceptedFollows.filter((f) => f.starred);
-  const unstared = acceptedFollows.filter((f) => !f.starred);
+  const unstarred = acceptedFollows.filter((f) => !f.starred);
 
   const [selectedFollowId, setSelectedFollowId] = useState<string | null>(null);
   const selectedFollow = acceptedFollows.find((f) => f.id === selectedFollowId) ?? null;
@@ -227,7 +227,7 @@ export default function SocialPage() {
   // Auto-select first friend
   useEffect(() => {
     if (selectedFollowId) return;
-    const first = starredFollows[0] ?? unstared[0] ?? null;
+    const first = starredFollows[0] ?? unstarred[0] ?? null;
     if (first) setSelectedFollowId(first.id);
   }, [follows]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -526,11 +526,11 @@ export default function SocialPage() {
                 Viewing
               </div>
               <div className="flex flex-wrap gap-2">
-                {[...starredFollows, ...unstared].map((f, i) => {
+                {[...starredFollows, ...unstarred].map((f, i) => {
                   const p = friendProfiles[f.followingId];
                   const name = p ? profileDisplayName(p) : f.followingId;
                   const isSelected = selectedFollowId === f.id;
-                  const divider = i === starredFollows.length && unstared.length > 0 && starredFollows.length > 0;
+                  const divider = i === starredFollows.length && unstarred.length > 0 && starredFollows.length > 0;
                   return (
                     <div key={f.id} className="flex items-center gap-1">
                       {divider && (
@@ -691,7 +691,7 @@ function CollectionTab({
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [accordFilter, setAccordFilter] = useState("any");
   const [ratingFilter, setRatingFilter] = useState("any");
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState("any");
 
   const compMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -725,11 +725,11 @@ function CollectionTab({
         return true;
       });
     }
-    if (statusFilter.length > 0) list = list.filter((f) => statusFilter.includes(f.status));
+    if (statusFilter !== "any") list = list.filter((f) => f.status === statusFilter);
     return applySort(list, sortField, sortDir, compMap);
   }, [frags, search, accordFilter, ratingFilter, statusFilter, sortField, sortDir, compMap, communityFrags]);
 
-  const filtersActive = accordFilter !== "any" || ratingFilter !== "any" || statusFilter.length > 0;
+  const filtersActive = accordFilter !== "any" || ratingFilter !== "any" || statusFilter !== "any";
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const pageFrags = filtered.slice((page - 1) * perPage, page * perPage);
   const gridCols = "minmax(200px,1fr) max-content max-content 180px max-content";
@@ -750,9 +750,10 @@ function CollectionTab({
         filters={[
           { value: accordFilter, onChange: (v) => { setAccordFilter(v); setPage(1); }, options: accordOptions },
           { value: ratingFilter, onChange: (v) => { setRatingFilter(v); setPage(1); }, options: RATING_FILTER_OPTIONS },
+          { value: statusFilter, onChange: (v) => { setStatusFilter(v); setPage(1); }, options: COLLECTION_STATUS_OPTIONS },
         ]}
         filtersActive={filtersActive}
-        onClearFilters={() => { setAccordFilter("any"); setRatingFilter("any"); setStatusFilter([]); }}
+        onClearFilters={() => { setAccordFilter("any"); setRatingFilter("any"); setStatusFilter("any"); }}
         perPage={perPage}
         onPerPage={(v) => { setPerPage(v); setPage(1); }}
         count={filtered.length}
@@ -945,6 +946,7 @@ function WishlistTab({ frags, communityFrags }: { frags: UserFragrance[]; commun
       list = list.filter((f) => f.name.toLowerCase().includes(q) || f.house.toLowerCase().includes(q));
     }
     if (statusFilter !== "any") list = list.filter((f) => f.status === statusFilter);
+    if (priorityFilter !== "any") list = list.filter((f) => f.wishlistPriority === priorityFilter);
     return list.slice().sort((a, b) => {
       let cmp = 0;
       if (sortField === "fragrance") cmp = a.name.localeCompare(b.name);
@@ -953,7 +955,7 @@ function WishlistTab({ frags, communityFrags }: { frags: UserFragrance[]; commun
     });
   }, [frags, search, priorityFilter, statusFilter, sortField, sortDir]);
 
-  const filtersActive = statusFilter !== "any";
+  const filtersActive = statusFilter !== "any" || priorityFilter !== "any";
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const pageFrags = filtered.slice((page - 1) * perPage, page * perPage);
   const gridCols = "minmax(200px,1fr) max-content 180px";
@@ -973,9 +975,10 @@ function WishlistTab({ frags, communityFrags }: { frags: UserFragrance[]; commun
         onSortDir={() => { setSortDir((d) => d === "asc" ? "desc" : "asc"); setPage(1); }}
         filters={[
           { value: statusFilter, onChange: (v) => { setStatusFilter(v); setPage(1); }, options: WISHLIST_STATUS_OPTIONS },
+          { value: priorityFilter, onChange: (v) => { setPriorityFilter(v); setPage(1); }, options: WISHLIST_PRIORITY_OPTIONS },
         ]}
         filtersActive={filtersActive}
-        onClearFilters={() => setStatusFilter("any")}
+        onClearFilters={() => { setStatusFilter("any"); setPriorityFilter("any"); }}
         perPage={perPage}
         onPerPage={(v) => { setPerPage(v); setPage(1); }}
         count={filtered.length}
