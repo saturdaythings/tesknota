@@ -153,7 +153,7 @@ function ConfirmCard({
         fontFamily: "var(--font-sans)",
         fontSize: "var(--text-xs)",
         color: "var(--color-meta-text)",
-        letterSpacing: "0.06em",
+        letterSpacing: "var(--tracking-base)",
         textTransform: "uppercase",
       }}>
         {parsed.type === "compliment" ? "Compliment detected" : "Collection add detected"}

@@ -872,7 +872,7 @@ function Onboarding({ onAddFrag }: { onAddFrag: () => void }) {
         style={{
           fontSize: "var(--text-sm)",
           color: "var(--color-meta-text)",
-          letterSpacing: "0.06em", /* component-internal: no token between --tracking-xs (0.04em) and --tracking-sm (0.08em) */
+          letterSpacing: "var(--tracking-base)",
           marginBottom: "var(--space-6)",
         }}
       >

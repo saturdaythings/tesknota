@@ -85,7 +85,7 @@ export function FilterPanel({
             setRatingDDOpen(false);
             setHouseDDOpen(false);
           }}
-          className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${
+          className={`font-[var(--mono)] text-xs tracking-[var(--tracking-base)] px-3 py-[6px] border transition-colors ${
             filters.accord
               ? "border-[var(--blue)] text-[var(--blue)]"
               : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"
@@ -142,7 +142,7 @@ export function FilterPanel({
             setAccordDDOpen(false);
             setHouseDDOpen(false);
           }}
-          className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${
+          className={`font-[var(--mono)] text-xs tracking-[var(--tracking-base)] px-3 py-[6px] border transition-colors ${
             filters.rating !== null
               ? "border-[var(--blue)] text-[var(--blue)]"
               : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"
@@ -184,7 +184,7 @@ export function FilterPanel({
             setAccordDDOpen(false);
             setRatingDDOpen(false);
           }}
-          className={`font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors ${
+          className={`font-[var(--mono)] text-xs tracking-[var(--tracking-base)] px-3 py-[6px] border transition-colors ${
             filters.house
               ? "border-[var(--blue)] text-[var(--blue)]"
               : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"

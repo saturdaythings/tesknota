@@ -107,7 +107,7 @@ function NotesPills({ notes }: { notes: string[] }) {
           className="font-sans"
           style={{
             fontSize: 'var(--text-label)',
-            letterSpacing: '0.06em',
+            letterSpacing: 'var(--tracking-base)',
             color: 'var(--color-navy)',
             background: 'rgba(30,45,69,0.07)',
             borderRadius: '2px',

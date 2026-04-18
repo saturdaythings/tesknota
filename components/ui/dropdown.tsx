@@ -44,7 +44,7 @@ export function Dropdown({
     <div className={cn("relative", className)} ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="font-[var(--mono)] text-xs tracking-[0.06em] px-3 py-[6px] border transition-colors border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"
+        className="font-[var(--mono)] text-xs tracking-[var(--tracking-base)] px-3 py-[6px] border transition-colors border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue)] hover:text-[var(--blue)]"
       >
         {selectedOption?.label || label || "Select"} &#9662;
       </button>

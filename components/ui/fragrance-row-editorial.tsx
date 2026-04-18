@@ -81,7 +81,7 @@ export function FragranceRowEditorial({
               e.stopPropagation();
               onAction();
             }}
-            className="font-sans text-xs tracking-[0.06em] px-3 py-[4px] border border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-navy)] transition-colors whitespace-nowrap flex-shrink-0"
+            className="font-sans text-xs tracking-[var(--tracking-base)] px-3 py-[4px] border border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-navy)] transition-colors whitespace-nowrap flex-shrink-0"
           >
             {actionLabel ?? 'Action'}
           </button>

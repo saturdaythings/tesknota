@@ -1376,7 +1376,7 @@ export default function AdminPage() {
             Admin Dashboard
           </div>
           {lastSync && (
-            <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[0.06em]">
+            <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[var(--tracking-base)]">
               Last sync: {lastSync}
             </div>
           )}
@@ -1388,7 +1388,7 @@ export default function AdminPage() {
       </div>
 
       {!loading && (
-        <div className={`px-8 py-3 flex items-center gap-3 text-[11px] tracking-[0.06em] ${errors24h > 0 ? "bg-[var(--adm-red-bg)] border-l-[3px] border-[var(--adm-red)] text-[var(--adm-red)]" : "bg-[var(--adm-green-bg)] border-l-[3px] border-[var(--adm-green)] text-[var(--adm-green)]"}`}>
+        <div className={`px-8 py-3 flex items-center gap-3 text-[11px] tracking-[var(--tracking-base)] ${errors24h > 0 ? "bg-[var(--adm-red-bg)] border-l-[3px] border-[var(--adm-red)] text-[var(--adm-red)]" : "bg-[var(--adm-green-bg)] border-l-[3px] border-[var(--adm-green)] text-[var(--adm-green)]"}`}>
           <div className={`w-2 h-2 rounded-full ${errors24h > 0 ? "bg-[var(--adm-red)]" : "bg-[var(--adm-green)]"}`} />
           {errors24h > 0 ? `${errors24h} error${errors24h !== 1 ? "s" : ""} in last 24h. Check Errors tab.` : "All systems operational. 0 errors in last 24h."}
         </div>
@@ -1403,7 +1403,7 @@ export default function AdminPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[1200px] mx-auto px-8 py-8">
           {loading && (
-            <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[0.06em]">Loading...</div>
+            <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[var(--tracking-base)]">Loading...</div>
           )}
           {error && (
             <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-red)] bg-[var(--adm-red-bg)] px-4 py-3 border-l-2 border-[var(--adm-red)]">{error}</div>

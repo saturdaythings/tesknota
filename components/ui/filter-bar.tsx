@@ -66,7 +66,7 @@ export function FamilyChip({
     <button
       onClick={onClick}
       className={cn(
-        "px-[10px] py-[3px] border rounded-xl font-[var(--mono)] text-xs tracking-[0.06em] cursor-pointer transition-all duration-[140ms]",
+        "px-[10px] py-[3px] border rounded-xl font-[var(--mono)] text-xs tracking-[var(--tracking-base)] cursor-pointer transition-all duration-[140ms]",
         active
           ? "border-[var(--blue1)] bg-[rgba(var(--blue1-ch),0.15)] text-[var(--blue1)]"
           : "border-[var(--b3)] text-[var(--ink3)] hover:border-[var(--blue1)] hover:text-[var(--blue1)]",
