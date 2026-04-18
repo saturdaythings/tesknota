@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useMobileNav } from '@/lib/mobile-nav-context';
+import { Button } from '@/components/ui/button';
 import { LogOut } from '@/components/ui/Icons';
 
 interface NavItem {
@@ -193,9 +194,10 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           className="flex-shrink-0 px-5 py-5 border-t"
           style={{ borderColor: 'var(--color-white-subtle)' }}
         >
-          <button
+          <Button
+            variant="ghost"
             onClick={() => { close(); router.push('/profile'); }}
-            className="flex items-center gap-3 w-full bg-transparent border-none cursor-pointer p-0 mb-3 text-left transition-opacity hover:opacity-80"
+            className="flex items-center gap-3 w-full p-0 mb-3 text-left h-auto justify-start transition-opacity hover:opacity-80"
           >
             <div
               style={{
@@ -219,10 +221,11 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
             >
               {userName}
             </span>
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
             onClick={onSignOut}
-            className="flex items-center gap-1.5 font-sans font-medium uppercase transition-opacity hover:opacity-100 bg-transparent border-none cursor-pointer p-0"
+            className="flex items-center gap-1.5 font-sans font-medium uppercase p-0 h-auto transition-opacity hover:opacity-100"
             style={{
               fontSize: 'var(--text-xs)',
               color: 'var(--color-sand-muted)',
@@ -231,7 +234,7 @@ export function Sidebar({ navSections, userName, onSignOut }: SidebarProps) {
           >
             <LogOut size={12} />
             Sign Out
-          </button>
+          </Button>
         </div>
       </aside>
     </>
