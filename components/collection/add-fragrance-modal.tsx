@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FieldLabel } from "@/components/ui/field-label";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
@@ -91,6 +93,73 @@ interface Props {
   initialName?: string;
 }
 
+function FragResultCard({
+  frag,
+  onClick,
+}: {
+  frag: CommunityFrag;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: "var(--color-cream-dark)",
+        padding: "var(--space-4)",
+        marginBottom: "var(--space-2)",
+        borderRadius: "var(--radius-md)",
+        cursor: "pointer",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontSize: "var(--text-lg)",
+          fontStyle: "italic",
+          color: "var(--color-navy)",
+          marginBottom: "var(--space-1)",
+        }}
+      >
+        {frag.fragranceName}
+      </div>
+      <FieldLabel className="mb-[var(--space-2)]">
+        {frag.fragranceHouse}
+      </FieldLabel>
+      <div
+        style={{
+          borderTop: "1px solid var(--color-row-divider)",
+          paddingTop: "var(--space-2)",
+          marginBottom: "var(--space-2)",
+        }}
+      />
+      <FieldLabel>Avg Price</FieldLabel>
+      <div
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontSize: "var(--text-base)",
+          color: "var(--color-navy)",
+          fontWeight: "bold",
+          marginBottom: "var(--space-2)",
+        }}
+      >
+        {frag.avgPrice ?? "N/A"}
+      </div>
+      {frag.fragranceAccords && frag.fragranceAccords.length > 0 && (
+        <div
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontSize: "var(--text-note)",
+            fontStyle: "italic",
+            color: "var(--color-navy)",
+          }}
+        >
+          {frag.fragranceAccords.join(", ")}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProgressBar({ step }: { step: number }) {
   const colors1 =
     step === 1
@@ -167,11 +236,9 @@ export function AddFragranceModal({
   const [isDupe, setIsDupe] = useState(false);
   const [dupeFor, setDupeFor] = useState("");
   const [notes, setNotes] = useState("");
-  const [whereBoughtSearch, setWhereBoughtSearch] = useState("");
   const [customWhereBoughtOptions, setCustomWhereBoughtOptions] = useState<
     string[]
   >([]);
-  const [whereBoughtOpen, setWhereBoughtOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -192,8 +259,6 @@ export function AddFragranceModal({
     setIsDupe(false);
     setDupeFor("");
     setNotes("");
-    setWhereBoughtSearch("");
-    setWhereBoughtOpen(false);
   }, [open, defaultStatus, initialName]);
 
   useEffect(() => {
@@ -216,18 +281,6 @@ export function AddFragranceModal({
       .slice(0, 8);
     setResults(matches);
   }, [debouncedQuery, communityFrags]);
-
-  useEffect(() => {
-    if (!whereBoughtOpen) return;
-    const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest("[data-where-bought-dropdown]")) {
-        setWhereBoughtOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [whereBoughtOpen]);
 
   function handleSelect(frag: CommunityFrag) {
     setSelected(frag);
@@ -344,18 +397,9 @@ export function AddFragranceModal({
           >
             {/* Search field */}
             <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-meta-text)",
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--tracking-wide)",
-                  marginBottom: "var(--space-3)",
-                }}
-              >
+              <FieldLabel className="mb-[var(--space-3)]">
                 Search Fragrance Name
-              </div>
+              </FieldLabel>
               <div style={{ position: "relative" }}>
                 <Input
                   variant="underline"
@@ -378,84 +422,11 @@ export function AddFragranceModal({
                     }}
                   >
                     {results.map((f) => (
-                      <div
+                      <FragResultCard
                         key={f.fragranceId}
+                        frag={f}
                         onClick={() => handleSelect(f)}
-                        style={{
-                          background: "var(--color-cream-dark)",
-                          padding: "var(--space-4)",
-                          marginBottom: "var(--space-2)",
-                          borderRadius: "var(--radius-md)",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: "var(--font-serif)",
-                            fontSize: "var(--text-lg)",
-                            fontStyle: "italic",
-                            color: "var(--color-navy)",
-                            marginBottom: "var(--space-1)",
-                          }}
-                        >
-                          {f.fragranceName}
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: "var(--font-sans)",
-                            fontSize: "var(--text-xs)",
-                            color: "var(--color-meta-text)",
-                            textTransform: "uppercase",
-                            letterSpacing: "var(--tracking-wide)",
-                            marginBottom: "var(--space-2)",
-                          }}
-                        >
-                          {f.fragranceHouse}
-                        </div>
-                        <div
-                          style={{
-                            borderTop: "1px solid var(--color-row-divider)",
-                            paddingTop: "var(--space-2)",
-                            marginBottom: "var(--space-2)",
-                          }}
-                        />
-                        <div
-                          style={{
-                            fontFamily: "var(--font-sans)",
-                            fontSize: "var(--text-xs)",
-                            color: "var(--color-meta-text)",
-                            textTransform: "uppercase",
-                            letterSpacing: "var(--tracking-wide)",
-                            marginBottom: "var(--space-1)",
-                          }}
-                        >
-                          Avg Price
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: "var(--font-sans)",
-                            fontSize: "var(--text-base)",
-                            color: "var(--color-navy)",
-                            fontWeight: "bold",
-                            marginBottom: "var(--space-2)",
-                          }}
-                        >
-                          {f.avgPrice ?? "N/A"}
-                        </div>
-                        {f.fragranceAccords &&
-                          f.fragranceAccords.length > 0 && (
-                            <div
-                              style={{
-                                fontFamily: "var(--font-serif)",
-                                fontSize: "var(--text-note)",
-                                fontStyle: "italic",
-                                color: "var(--color-navy)",
-                              }}
-                            >
-                              {f.fragranceAccords.join(", ")}
-                            </div>
-                          )}
-                      </div>
+                      />
                     ))}
                   </div>
                 )}
@@ -464,18 +435,7 @@ export function AddFragranceModal({
 
             {/* Status field */}
             <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-meta-text)",
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--tracking-wide)",
-                  marginBottom: "var(--space-3)",
-                }}
-              >
-                Status
-              </div>
+              <FieldLabel className="mb-[var(--space-3)]">Status</FieldLabel>
               <Select
                 options={STATUS_OPTIONS}
                 value={status}
@@ -504,18 +464,9 @@ export function AddFragranceModal({
             >
               {/* Size Owned */}
               <div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--color-meta-text)",
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--tracking-wide)",
-                    marginBottom: "var(--space-3)",
-                  }}
-                >
+                <FieldLabel className="mb-[var(--space-3)]">
                   Size Owned
-                </div>
+                </FieldLabel>
                 <div
                   style={{
                     display: "grid",
@@ -547,18 +498,7 @@ export function AddFragranceModal({
 
               {/* Type */}
               <div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--color-meta-text)",
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--tracking-wide)",
-                    marginBottom: "var(--space-3)",
-                  }}
-                >
-                  Type
-                </div>
+                <FieldLabel className="mb-[var(--space-3)]">Type</FieldLabel>
                 <Select
                   options={TYPE_OPTIONS}
                   value={fragType}
@@ -579,18 +519,9 @@ export function AddFragranceModal({
             >
               {/* Purchase Price */}
               <div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--color-meta-text)",
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--tracking-wide)",
-                    marginBottom: "var(--space-3)",
-                  }}
-                >
+                <FieldLabel className="mb-[var(--space-3)]">
                   Purchase Price ($)
-                </div>
+                </FieldLabel>
                 <Input
                   variant="underline"
                   inputMode="decimal"
@@ -602,205 +533,26 @@ export function AddFragranceModal({
 
               {/* Where Bought */}
               <div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--color-meta-text)",
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--tracking-wide)",
-                    marginBottom: "var(--space-3)",
-                  }}
-                >
+                <FieldLabel className="mb-[var(--space-3)]">
                   Where Bought
-                </div>
-                <div
-                  style={{ position: "relative" }}
-                  data-where-bought-dropdown
-                >
-                  <button
-                    type="button"
-                    onClick={() => setWhereBoughtOpen(!whereBoughtOpen)}
-                    style={{
-                      width: "100%",
-                      padding: "var(--space-2) 0",
-                      borderBottom: "1px solid var(--color-meta-text)",
-                      border: "none",
-                      borderBottomStyle: "solid",
-                      background: "transparent",
-                      fontFamily: "var(--font-sans)",
-                      fontSize: "var(--text-base)",
-                      color: whereBought
-                        ? "var(--color-navy)"
-                        : "var(--color-navy-mid)",
-                      outline: "none",
-                      textAlign: "left",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {whereBought || "Select retailer"}
-                  </button>
-                  {whereBoughtOpen && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "100%",
-                        left: 0,
-                        right: 0,
-                        zIndex: 10,
-                        marginTop: "var(--space-2)",
-                        background: "var(--color-cream)",
-                        border: "1px solid var(--color-meta-text)",
-                        borderRadius: "var(--radius-sm)",
-                        boxShadow: "var(--shadow-md)",
-                      }}
-                    >
-                      <div style={{ padding: "var(--space-2)" }}>
-                        <Input
-                          value={whereBoughtSearch}
-                          onChange={(e) => setWhereBoughtSearch(e.target.value)}
-                          placeholder="Search..."
-                          autoFocus
-                        />
-                      </div>
-                      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-                        {(() => {
-                          const allOptions = [
-                            ...WHERE_BOUGHT_OPTIONS,
-                            ...customWhereBoughtOptions.map((opt) => ({
-                              value: opt,
-                              label: opt,
-                            })),
-                          ];
-                          const searchLower = whereBoughtSearch.toLowerCase();
-                          const filtered = searchLower
-                            ? allOptions.filter((opt) =>
-                                opt.label.toLowerCase().includes(searchLower),
-                              )
-                            : allOptions;
-                          const hasExactMatch = filtered.some(
-                            (opt) => opt.value.toLowerCase() === searchLower,
-                          );
-                          const showAddOwn =
-                            whereBoughtSearch.trim().length > 0 &&
-                            !hasExactMatch;
-
-                          return (
-                            <>
-                              {filtered.map((opt) => (
-                                <div
-                                  key={opt.value}
-                                  onClick={() => {
-                                    setWhereBought(opt.value);
-                                    setWhereBoughtSearch("");
-                                    setWhereBoughtOpen(false);
-                                  }}
-                                  style={{
-                                    height: "36px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    padding: "0 var(--space-3)",
-                                    fontSize: "var(--text-sm)",
-                                    fontFamily: "var(--font-sans)",
-                                    cursor: "pointer",
-                                    color: "var(--color-navy)",
-                                    background:
-                                      opt.value === whereBought
-                                        ? "var(--color-cream-dark)"
-                                        : "transparent",
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    (e.target as HTMLElement).style.background =
-                                      opt.value === whereBought
-                                        ? "var(--color-cream-dark)"
-                                        : "var(--color-row-hover)";
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    (e.target as HTMLElement).style.background =
-                                      opt.value === whereBought
-                                        ? "var(--color-cream-dark)"
-                                        : "transparent";
-                                  }}
-                                >
-                                  {opt.label}
-                                </div>
-                              ))}
-                              {showAddOwn && (
-                                <>
-                                  <div
-                                    style={{
-                                      height: "1px",
-                                      background: "var(--color-row-divider)",
-                                      margin: "var(--space-1) 0",
-                                    }}
-                                  />
-                                  <div
-                                    onClick={() => {
-                                      if (
-                                        !customWhereBoughtOptions.includes(
-                                          whereBoughtSearch,
-                                        )
-                                      ) {
-                                        setCustomWhereBoughtOptions([
-                                          ...customWhereBoughtOptions,
-                                          whereBoughtSearch,
-                                        ]);
-                                      }
-                                      setWhereBought(whereBoughtSearch);
-                                      setWhereBoughtSearch("");
-                                      setWhereBoughtOpen(false);
-                                    }}
-                                    style={{
-                                      height: "36px",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      padding: "0 var(--space-3)",
-                                      fontSize: "var(--text-sm)",
-                                      fontFamily: "var(--font-sans)",
-                                      cursor: "pointer",
-                                      color: "var(--color-navy)",
-                                      fontStyle: "italic",
-                                    }}
-                                    onMouseEnter={(e) => {
-                                      (
-                                        e.target as HTMLElement
-                                      ).style.background =
-                                        "var(--color-row-hover)";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      (
-                                        e.target as HTMLElement
-                                      ).style.background = "transparent";
-                                    }}
-                                  >
-                                    + Add "{whereBoughtSearch}"
-                                  </div>
-                                </>
-                              )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                </FieldLabel>
+                <SearchableSelect
+                  options={WHERE_BOUGHT_OPTIONS}
+                  value={whereBought}
+                  onChange={setWhereBought}
+                  placeholder="Select retailer"
+                  allowCustom
+                  customOptions={customWhereBoughtOptions}
+                  onCustomAdd={(v) =>
+                    setCustomWhereBoughtOptions((prev) => [...prev, v])
+                  }
+                />
               </div>
             </div>
 
             {/* Rating */}
             <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-meta-text)",
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--tracking-wide)",
-                  marginBottom: "var(--space-2)",
-                }}
-              >
-                Rating
-              </div>
+              <FieldLabel className="mb-[var(--space-2)]">Rating</FieldLabel>
               <div
                 style={{
                   display: "flex",
@@ -856,18 +608,9 @@ export function AddFragranceModal({
                   }}
                 >
                   <div style={{ gridColumn: "1 / 2" }}>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "var(--text-xs)",
-                        color: "var(--color-meta-text)",
-                        textTransform: "uppercase",
-                        letterSpacing: "var(--tracking-wide)",
-                        marginBottom: "var(--space-2)",
-                      }}
-                    >
+                    <FieldLabel className="mb-[var(--space-2)]">
                       Purchase Date
-                    </div>
+                    </FieldLabel>
                     <div style={{ display: "flex", gap: "var(--space-2)" }}>
                       <Select
                         options={MONTH_OPTIONS}
@@ -891,18 +634,9 @@ export function AddFragranceModal({
 
             {/* Dupe Tracking */}
             <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-meta-text)",
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--tracking-wide)",
-                  marginBottom: "var(--space-2)",
-                }}
-              >
+              <FieldLabel className="mb-[var(--space-2)]">
                 Dupe Tracking
-              </div>
+              </FieldLabel>
               <div
                 style={{
                   display: "flex",
@@ -920,7 +654,10 @@ export function AddFragranceModal({
                 <Button
                   variant="toggle"
                   active={!isDupe}
-                  onClick={() => setIsDupe(false)}
+                  onClick={() => {
+                    setIsDupe(false);
+                    setDupeFor("");
+                  }}
                 >
                   Not a Dupe
                 </Button>
@@ -939,18 +676,9 @@ export function AddFragranceModal({
 
             {/* Personal Notes */}
             <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--color-meta-text)",
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--tracking-wide)",
-                  marginBottom: "var(--space-3)",
-                }}
-              >
+              <FieldLabel className="mb-[var(--space-3)]">
                 Personal Notes
-              </div>
+              </FieldLabel>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -988,11 +716,7 @@ export function AddFragranceModal({
         )}
         {step === 2 && (
           <>
-            <Button
-              variant="ghost"
-              onClick={handleBack}
-              style={{ border: "none" }}
-            >
+            <Button variant="ghost" onClick={handleBack}>
               Back
             </Button>
             <div style={{ flex: 1 }} />

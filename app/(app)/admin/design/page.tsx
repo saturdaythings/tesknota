@@ -1113,6 +1113,14 @@ const GALLERY_ITEMS: GalleryItem[] = [
     tokens: ['--text-sm', '--color-cream', '--color-navy', '--color-sand-light', '--radius-sm'],
   },
   {
+    id: 'searchable-select',
+    name: 'SearchableSelect',
+    path: 'components/ui/searchable-select.tsx',
+    pages: ['Add to Collection (Where Bought)'],
+    tokens: ['--text-sm', '--text-base', '--color-cream', '--color-navy', '--color-meta-text', '--color-row-hover', '--color-cream-dark', '--radius-sm'],
+    note: 'Extends Select with inline search, keyboard nav (arrow up/down/enter/escape), and optional custom-entry support via allowCustom + customOptions + onCustomAdd.',
+  },
+  {
     id: 'tab-pill',
     name: 'TabPill',
     path: 'components/ui/tab-pill.tsx',
