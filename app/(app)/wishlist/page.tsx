@@ -207,7 +207,7 @@ function PriorityBadge({ priority }: { priority: WishlistPriority | null }) {
 // ── Notes cell ────────────────────────────────────────────
 
 function NotesCell({ cf }: { cf: CommunityFrag | null }) {
-  const noteStyle = { fontSize: "var(--text-xxs)", color: "rgba(30,45,69,0.7)" } as const;
+  const noteStyle = { fontSize: "var(--text-xxs)", color: "var(--color-notes-text)" } as const;
   if (!cf) return <span className="font-sans" style={noteStyle}>—</span>;
   const rows = [
     { label: "TOP", notes: cf.topNotes },

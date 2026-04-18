@@ -323,7 +323,7 @@ export function AddFragranceModal({
         purchaseYear: purchaseYear || null,
         purchasePrice: price.trim() || null,
         isDupe,
-        dupeFor: dupeFor.trim(),
+        dupeFor: isDupe ? dupeFor.trim() : "",
         personalNotes: notes.trim(),
         createdAt: new Date().toISOString(),
         wishlistPriority: null,

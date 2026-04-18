@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Modal, ModalHeader, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { FieldLabel } from "@/components/ui/field-label";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,15 +73,6 @@ function Tooltip({ text, children }: { text: string; children: React.ReactNode }
 function Divider() {
   return <div style={{ borderTop: "1px solid var(--color-row-divider)" }} />;
 }
-
-const sectionLabelStyle: React.CSSProperties = {
-  fontFamily: "var(--font-sans)",
-  fontSize: "var(--text-xs)",
-  color: "var(--color-meta-text)",
-  textTransform: "uppercase",
-  letterSpacing: "var(--tracking-wide)",
-  marginBottom: "var(--space-2)",
-};
 
 const sectionPad: React.CSSProperties = {
   padding: "var(--space-6)",
@@ -456,7 +448,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
 
         {/* Section 2 — Priority */}
         <div style={sectionPad}>
-          <div style={sectionLabelStyle}>Priority</div>
+          <FieldLabel className="mb-[var(--space-2)]">Priority</FieldLabel>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)" }}>
             {PRIORITY_KEYS.map((p) => (
               <Tooltip key={p} text={PRIORITY_TOOLTIPS[p]}>
@@ -474,7 +466,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
 
         {/* Section 3 — Concentration */}
         <div style={sectionPad}>
-          <div style={sectionLabelStyle}>Concentration</div>
+          <FieldLabel className="mb-[var(--space-2)]">Concentration</FieldLabel>
           <Select
             options={filteredConcentrationOptions}
             value={concentration}
@@ -500,7 +492,7 @@ export function AddToWishlistModal({ open, onClose, prefill }: Props) {
 
         {/* Section 4 — Notes */}
         <div style={sectionPad}>
-          <div style={sectionLabelStyle}>Notes</div>
+          <FieldLabel className="mb-[var(--space-2)]">Notes</FieldLabel>
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}

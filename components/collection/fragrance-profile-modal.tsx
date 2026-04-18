@@ -63,7 +63,7 @@ function StarDisplay({ value }: { value: number }) {
       {[1, 2, 3, 4, 5].map((n) => (
         <span
           key={n}
-          style={{ fontSize: '18px', color: n <= value ? 'var(--color-accent)' : 'var(--color-sand)' }}
+          style={{ fontSize: 'var(--text-lg)', color: n <= value ? 'var(--color-accent)' : 'var(--color-sand)' }}
         >
           {n <= value ? '★' : '☆'}
         </span>
@@ -109,7 +109,7 @@ function NotesPills({ notes }: { notes: string[] }) {
             fontSize: 'var(--text-label)',
             letterSpacing: 'var(--tracking-base)',
             color: 'var(--color-navy)',
-            background: 'rgba(30,45,69,0.07)',
+            background: 'var(--color-cream-dark)',
             borderRadius: 'var(--radius-sm)',
             padding: 'var(--space-half) var(--space-2)',
           }}
@@ -463,12 +463,12 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
               <div
                 className="mb-5"
                 style={{
-                  background: 'rgba(30,45,69,0.04)',
+                  background: 'var(--color-cream-dark)',
                   borderRadius: 'var(--radius-md)',
                   padding: 'var(--space-3) var(--space-4)',
                 }}
               >
-                <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
+                <div className="font-serif italic" style={{ fontSize: 'var(--text-md)', color: 'var(--color-navy)', lineHeight: 1.2 }}>
                   {frag.fragranceName}
                 </div>
                 <div className="font-sans uppercase mt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-md)' }}>

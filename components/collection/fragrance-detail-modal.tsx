@@ -243,7 +243,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
                   fontWeight: 500,
                   letterSpacing: "var(--tracking-wide)",
                   textTransform: "uppercase",
-                  color: "rgba(30,45,69,0.8)",
+                  color: "var(--color-meta-text)",
                 }}
               >
                 {frag?.house}
@@ -253,7 +253,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               variant="icon"
               onClick={handleClose}
               aria-label="Close panel"
-              style={{ flexShrink: 0, color: "rgba(30,45,69,0.8)" }}
+              style={{ flexShrink: 0, color: "var(--color-meta-text)" }}
             >
               <X size={18} />
             </Button>
@@ -361,7 +361,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               <FieldLabel>Compliments</FieldLabel>
               <p
                 className="font-sans"
-                style={{ fontSize: "var(--text-sm)", color: "rgba(30,45,69,0.8)", marginBottom: "var(--space-2)" }}
+                style={{ fontSize: "var(--text-sm)", color: "var(--color-meta-text)", marginBottom: "var(--space-2)" }}
               >
                 {fragCompliments.length > 0 ? `${fragCompliments.length} logged` : "None logged yet"}
               </p>

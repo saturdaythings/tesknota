@@ -969,7 +969,7 @@ function ColorGrid({ grid, computed, expandedToken, toggle, mode }: { grid: Colo
             <div
               key={token}
               className="font-mono"
-              style={{ fontSize: '9px', color: 'var(--color-meta-text)', textAlign: 'center', letterSpacing: '0.02em', lineHeight: 1.4, paddingBottom: 'var(--space-1)' }}
+              style={{ fontSize: 'var(--text-xxs)', color: 'var(--color-meta-text)', textAlign: 'center', letterSpacing: 'var(--tracking-xs)', lineHeight: 1.4, paddingBottom: 'var(--space-1)' }}
             >
               {COLOR_COL_LABELS[token]}
             </div>
