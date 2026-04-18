@@ -31,7 +31,6 @@ import { FragSearch } from "@/components/ui/frag-search";
 const COLLECTION_STATUSES = new Set(["CURRENT", "PREVIOUSLY_OWNED", "FINISHED"]);
 const WISHLIST_STATUSES = new Set(["WANT_TO_BUY", "WANT_TO_SMELL", "WANT_TO_IDENTIFY"]);
 
-/* component-internal: skeleton row height */
 const SKELETON_ROW_HEIGHT = 'var(--size-row-min)';
 
 export default function DashboardPage() {
@@ -162,7 +161,7 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
   return (
     <div
       style={{
-        background: "#FFFFFF", /* component-internal: no white token — nearest is var(--color-cream) but intentionally white for contrast */
+        background: "var(--color-cream)",
         border: "1px solid var(--color-cream-dark)",
         borderRadius: "var(--radius-lg)",
         padding: "var(--space-6) var(--space-6) var(--space-5)",
@@ -210,7 +209,7 @@ function StatCard({ label, value, delta }: { label: string; value: string | numb
 
 const linkGhostClass =
   "inline-flex items-center gap-2 font-sans font-medium cursor-pointer transition-colors duration-150 " +
-  "select-none no-underline px-4 rounded-[3px] text-[13px] leading-none tracking-[0.08em] min-h-8 " +
+  "select-none no-underline px-4 rounded-[var(--radius-md)] text-[length:var(--text-sm)] leading-none tracking-[var(--tracking-wide)] min-h-8 " +
   "bg-transparent text-[var(--color-navy)] hover:bg-[var(--color-sand-light)]";
 
 function QuickActions({

@@ -59,7 +59,7 @@ function genId(): string {
 
 function StarDisplay({ value }: { value: number }) {
   return (
-    <div className="flex gap-[2px]">
+    <div className="flex gap-[var(--space-half)]">
       {[1, 2, 3, 4, 5].map((n) => (
         <span
           key={n}
@@ -75,7 +75,7 @@ function StarDisplay({ value }: { value: number }) {
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [hover, setHover] = useState(0);
   return (
-    <div className="flex gap-[2px]">
+    <div className="flex gap-[var(--space-half)]">
       {[1, 2, 3, 4, 5].map((n) => {
         const filled = n <= (hover || value);
         return (
@@ -87,7 +87,7 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
             onMouseEnter={() => setHover(n)}
             onMouseLeave={() => setHover(0)}
             className="bg-transparent border-none cursor-pointer p-0 leading-none"
-            style={{ fontSize: '22px', color: filled ? 'var(--color-accent)' : 'var(--color-sand)' }}
+            style={{ fontSize: 'var(--text-empty-title)', color: filled ? 'var(--color-accent)' : 'var(--color-sand)' }}
           >
             {filled ? '★' : '☆'}
           </button>
@@ -110,8 +110,8 @@ function NotesPills({ notes }: { notes: string[] }) {
             letterSpacing: 'var(--tracking-base)',
             color: 'var(--color-navy)',
             background: 'rgba(30,45,69,0.07)',
-            borderRadius: '2px',
-            padding: '2px 8px',
+            borderRadius: 'var(--radius-sm)',
+            padding: 'var(--space-half) var(--space-2)',
           }}
         >
           {n}
@@ -131,7 +131,7 @@ function MetaRow({ label, value }: { label: string; value: string }) {
       >
         {label}
       </span>
-      <span className="font-sans" style={{ fontSize: '13px', color: 'var(--color-navy)' }}>
+      <span className="font-sans" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-navy)' }}>
         {value}
       </span>
     </div>
@@ -410,7 +410,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                         </div>
                         <div
                           className="font-serif italic"
-                          style={{ fontSize: '15px', color: 'var(--color-navy)', lineHeight: 1.6 }}
+                          style={{ fontSize: 'var(--text-base)', color: 'var(--color-navy)', lineHeight: 1.6 }}
                         >
                           {existingEntry.personalNotes}
                         </div>
@@ -453,7 +453,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
               {pendingLog && (
                 <p
                   className="font-sans mb-5"
-                  style={{ fontSize: '14px', color: 'var(--color-navy-mid)', lineHeight: 1.6 }}
+                  style={{ fontSize: 'var(--text-ui)', color: 'var(--color-navy-mid)', lineHeight: 1.6 }}
                 >
                   Add {frag.fragranceName} to your collection before logging a compliment.
                 </p>
@@ -464,8 +464,8 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                 className="mb-5"
                 style={{
                   background: 'rgba(30,45,69,0.04)',
-                  borderRadius: '3px',
-                  padding: '12px 16px',
+                  borderRadius: 'var(--radius-md)',
+                  padding: 'var(--space-3) var(--space-4)',
                 }}
               >
                 <div className="font-serif italic" style={{ fontSize: '18px', color: 'var(--color-navy)', lineHeight: 1.2 }}>
@@ -516,7 +516,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
                     placeholder="Thoughts, occasions, memories..."
                     rows={3}
                     style={{
-                      fontSize: '13px',
+                      fontSize: 'var(--text-sm)',
                       letterSpacing: 'var(--tracking-wide)',
                       color: 'var(--color-navy)',
                     }}
@@ -564,7 +564,7 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
             <ModalBody>
               <div
                 className="font-serif italic mb-2"
-                style={{ fontSize: '22px', color: 'var(--color-navy)', lineHeight: 1.2 }}
+                style={{ fontSize: 'var(--text-empty-title)', color: 'var(--color-navy)', lineHeight: 1.2 }}
               >
                 {frag.fragranceName}
               </div>
@@ -576,11 +576,11 @@ export function FragranceProfileModal({ frag, onClose }: FragranceProfileModalPr
               </div>
 
               {confirmLogType === 'wishlist' ? (
-                <p className="font-sans" style={{ fontSize: '14px', color: 'var(--color-navy)', lineHeight: 1.7 }}>
+                <p className="font-sans" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-navy)', lineHeight: 1.7 }}>
                   This fragrance is in your wishlist. Move it to your collection first for a complete record, or log the compliment anyway.
                 </p>
               ) : (
-                <p className="font-sans" style={{ fontSize: '14px', color: 'var(--color-navy)', lineHeight: 1.7 }}>
+                <p className="font-sans" style={{ fontSize: 'var(--text-ui)', color: 'var(--color-navy)', lineHeight: 1.7 }}>
                   This fragrance isn&apos;t in your collection yet. Add it first for a complete record, or log the compliment anyway.
                 </p>
               )}

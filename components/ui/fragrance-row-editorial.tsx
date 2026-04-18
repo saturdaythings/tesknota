@@ -1,6 +1,7 @@
 "use client";
 
 import { FragranceCell } from '@/components/ui/fragrance-cell';
+import { Button } from '@/components/ui/button';
 import type { FragranceType } from '@/types';
 
 interface FragranceRowEditorialProps {
@@ -76,15 +77,13 @@ export function FragranceRowEditorial({
           </div>
         )}
         {onAction && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction();
-            }}
-            className="font-sans text-xs tracking-[var(--tracking-base)] px-3 py-[4px] border border-[var(--color-cream-dark)] text-[var(--color-navy)] hover:border-[var(--color-navy)] transition-colors whitespace-nowrap flex-shrink-0"
+          <Button
+            variant="secondary"
+            onClick={(e) => { e.stopPropagation(); onAction(); }}
+            className="whitespace-nowrap flex-shrink-0"
           >
             {actionLabel ?? 'Action'}
-          </button>
+          </Button>
         )}
       </div>
     </div>
