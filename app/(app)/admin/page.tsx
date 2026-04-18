@@ -742,7 +742,6 @@ function FlagsTab({
   users,
   onResolve,
   onDismiss,
-  onUpdate,
 }: {
   flags: CommunityFlag[];
   users: AdminUser[];

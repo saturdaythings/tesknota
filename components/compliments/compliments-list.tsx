@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from '@/components/ui/button';
+import { FragranceCell } from '@/components/ui/fragrance-cell';
 import type { UserCompliment, FragranceType } from '@/types';
 import { Pagination } from '@/components/ui/pagination';
 
@@ -37,7 +39,8 @@ export function ComplimentsList({
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns, columnGap: 'var(--space-10)' }}>
+      {/* Desktop grid */}
+      <div className="hidden md:grid" style={{ gridTemplateColumns, columnGap: 'var(--space-10)' }}>
         {items.map((comp) => (
           <ComplimentRow
             key={comp.id}
@@ -48,6 +51,19 @@ export function ComplimentsList({
           />
         ))}
       </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden">
+        {items.map((comp) => (
+          <ComplimentMobileCard
+            key={comp.id}
+            comp={comp}
+            frag={getFragInfo(comp)}
+            onEdit={() => onEdit(comp)}
+          />
+        ))}
+      </div>
+
       <Pagination page={page} totalPages={totalPages} onPage={onPage} />
     </>
   );
@@ -83,5 +99,40 @@ function ComplimentRow({ comp, frag, columns, onEdit }: ComplimentRowProps) {
         </div>
       ))}
     </div>
+  );
+}
+
+interface ComplimentMobileCardProps {
+  comp: UserCompliment;
+  frag: FragInfo;
+  onEdit: () => void;
+}
+
+function ComplimentMobileCard({ comp, frag, onEdit }: ComplimentMobileCardProps) {
+  return (
+    <Button
+      variant="ghost"
+      onClick={onEdit}
+      className="!block w-full h-auto text-left"
+      style={{
+        background: 'var(--color-cream)',
+        border: '1px solid var(--color-cream-dark)',
+        borderRadius: 'var(--radius-lg)',
+        padding: 'var(--space-4)',
+        marginBottom: 'var(--space-2)',
+      }}
+    >
+      <div style={{ marginBottom: 'var(--space-3)' }}>
+        <FragranceCell name={frag.name} house={frag.house} type={frag.type} />
+      </div>
+      {comp.notes && (
+        <div className="font-serif italic" style={{ fontSize: 'var(--text-note)', color: 'var(--color-meta-text)', lineHeight: 'var(--leading-relaxed)', marginBottom: 'var(--space-3)' }}>
+          {comp.notes}
+        </div>
+      )}
+      <Button variant="primary" size="sm" onClick={(e) => { e.stopPropagation(); onEdit(); }} style={{ width: '100%' }}>
+        Edit
+      </Button>
+    </Button>
   );
 }
