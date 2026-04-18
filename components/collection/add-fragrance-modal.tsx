@@ -4,12 +4,19 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
-import type { FragranceStatus, CommunityFrag, FragranceType, BottleSize, UserFragrance } from "@/types";
+import type {
+  FragranceStatus,
+  CommunityFrag,
+  FragranceType,
+  BottleSize,
+  UserFragrance,
+} from "@/types";
 import { MONTHS } from "@/lib/frag-utils";
 
 function genId(): string {
@@ -55,17 +62,27 @@ const WHERE_BOUGHT_OPTIONS = [
 
 const MONTH_OPTIONS = [
   { value: "", label: "—" },
-  ...MONTHS.map((m, i) => ({ value: String(i + 1).padStart(2, "0"), label: m })),
+  ...MONTHS.map((m, i) => ({
+    value: String(i + 1).padStart(2, "0"),
+    label: m,
+  })),
 ];
 
 const YEAR_OPTIONS = [
   { value: "", label: "—" },
   ...Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) =>
-    String(new Date().getFullYear() - i)
+    String(new Date().getFullYear() - i),
   ).map((y) => ({ value: y, label: y })),
 ];
 
-const RATING_LABELS = ["", "1 star", "2 stars", "3 stars", "4 stars", "5 stars"];
+const RATING_LABELS = [
+  "",
+  "1 star",
+  "2 stars",
+  "3 stars",
+  "4 stars",
+  "5 stars",
+];
 
 interface Props {
   open: boolean;
@@ -75,18 +92,43 @@ interface Props {
 }
 
 function ProgressBar({ step }: { step: number }) {
-  const colors1 = step === 1 ? ["var(--color-navy)", "var(--color-cream-dark)"] : ["var(--color-success)", "var(--color-navy)"];
-  const labels = ["STEP 1 OF 2 — SEARCH & IDENTIFY", "STEP 2 OF 2 — PERSONAL DETAILS"];
+  const colors1 =
+    step === 1
+      ? ["var(--color-navy)", "var(--color-cream-dark)"]
+      : ["var(--color-success)", "var(--color-navy)"];
+  const labels = [
+    "STEP 1 OF 2 — SEARCH & IDENTIFY",
+    "STEP 2 OF 2 — PERSONAL DETAILS",
+  ];
 
   return (
     <div>
       <div style={{ marginBottom: "var(--space-2)" }}>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "var(--text-xs)",
+            color: "var(--color-meta-text)",
+            textTransform: "uppercase",
+            letterSpacing: "var(--tracking-wide)",
+          }}
+        >
           {labels[step - 1]}
         </span>
       </div>
-      <div style={{ borderBottom: "1px solid var(--color-cream-dark)", marginBottom: "var(--space-3)" }} />
-      <div style={{ display: "flex", gap: 0, height: 4, marginBottom: "var(--space-4)" }}>
+      <div
+        style={{
+          borderBottom: "1px solid var(--color-cream-dark)",
+          marginBottom: "var(--space-3)",
+        }}
+      />
+      <div
+        style={{
+          display: "flex",
+          height: "var(--space-1)",
+          marginBottom: "var(--space-4)",
+        }}
+      >
         <div style={{ flex: 1, background: colors1[0] }} />
         <div style={{ flex: 1, background: colors1[1] }} />
       </div>
@@ -94,7 +136,12 @@ function ProgressBar({ step }: { step: number }) {
   );
 }
 
-export function AddFragranceModal({ open, onClose, defaultStatus, initialName }: Props) {
+export function AddFragranceModal({
+  open,
+  onClose,
+  defaultStatus,
+  initialName,
+}: Props) {
   const { user } = useUser();
   const { communityFrags, addFrag } = useData();
   const { toast } = useToast();
@@ -104,7 +151,9 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [results, setResults] = useState<CommunityFrag[]>([]);
   const [selected, setSelected] = useState<CommunityFrag | null>(null);
-  const [status, setStatus] = useState<FragranceStatus>(defaultStatus ?? "CURRENT");
+  const [status, setStatus] = useState<FragranceStatus>(
+    defaultStatus ?? "CURRENT",
+  );
 
   // Step 2 state
   const [sizes, setSizes] = useState<BottleSize[]>([]);
@@ -119,7 +168,9 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
   const [dupeFor, setDupeFor] = useState("");
   const [notes, setNotes] = useState("");
   const [whereBoughtSearch, setWhereBoughtSearch] = useState("");
-  const [customWhereBoughtOptions, setCustomWhereBoughtOptions] = useState<string[]>([]);
+  const [customWhereBoughtOptions, setCustomWhereBoughtOptions] = useState<
+    string[]
+  >([]);
   const [whereBoughtOpen, setWhereBoughtOpen] = useState(false);
 
   useEffect(() => {
@@ -157,7 +208,11 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
       return;
     }
     const matches = communityFrags
-      .filter((f) => f.fragranceName.toLowerCase().includes(q) || f.fragranceHouse.toLowerCase().includes(q))
+      .filter(
+        (f) =>
+          f.fragranceName.toLowerCase().includes(q) ||
+          f.fragranceHouse.toLowerCase().includes(q),
+      )
       .slice(0, 8);
     setResults(matches);
   }, [debouncedQuery, communityFrags]);
@@ -166,12 +221,12 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
     if (!whereBoughtOpen) return;
     const handler = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('[data-where-bought-dropdown]')) {
+      if (!target.closest("[data-where-bought-dropdown]")) {
         setWhereBoughtOpen(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [whereBoughtOpen]);
 
   function handleSelect(frag: CommunityFrag) {
@@ -230,210 +285,468 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
     }
   }
 
-  if (!open || !user) return null;
+  if (!user) return null;
 
   const showResults = results.length > 0 && !selected;
 
   return (
-    <div style={{ position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <div style={{ position: "fixed", inset: 0, background: "rgba(30, 45, 69, 0.4)" }} onClick={onClose} aria-hidden="true" />
-      <div style={{ position: "relative", width: "600px", maxHeight: "90vh", background: "var(--color-cream)", borderRadius: "var(--radius-lg)", display: "flex", flexDirection: "column", boxShadow: "var(--shadow-lg)" }}>
-        {/* Header */}
-        <div style={{ padding: "var(--space-6)", borderBottom: "1px solid var(--color-cream-dark)", flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "var(--space-3)" }}>
-            <div style={{ fontFamily: "var(--font-serif)", fontSize: "var(--text-empty-title)", fontStyle: "italic", color: "var(--color-navy)" }}>
-              Add Fragrance
-            </div>
-            <Button variant="icon" onClick={onClose} style={{ color: "var(--color-meta-text)" }}>
-              <X size={18} />
-            </Button>
+    <Modal
+      open={open}
+      onClose={onClose}
+      className="max-w-[600px] max-h-[90vh] flex flex-col overflow-hidden"
+    >
+      {/* Header */}
+      <div
+        style={{
+          padding: "var(--space-6)",
+          borderBottom: "1px solid var(--color-cream-dark)",
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            marginBottom: "var(--space-3)",
+          }}
+        >
+          <div
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "var(--text-empty-title)",
+              fontStyle: "italic",
+              color: "var(--color-navy)",
+            }}
+          >
+            Add Fragrance
           </div>
-          <ProgressBar step={step} />
+          <Button
+            variant="icon"
+            onClick={onClose}
+            style={{ color: "var(--color-meta-text)" }}
+          >
+            <X size={18} />
+          </Button>
         </div>
+        <ProgressBar step={step} />
+      </div>
 
-        {/* Body */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-6)" }}>
-          {step === 1 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
-              {/* Search field */}
-              <div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
-                  Search Fragrance Name
-                </div>
-                <div style={{ position: "relative" }}>
-                  <Input
-                    variant="underline"
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      if (selected) setSelected(null);
+      {/* Body */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-6)" }}>
+        {step === 1 && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-6)",
+            }}
+          >
+            {/* Search field */}
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--color-meta-text)",
+                  textTransform: "uppercase",
+                  letterSpacing: "var(--tracking-wide)",
+                  marginBottom: "var(--space-3)",
+                }}
+              >
+                Search Fragrance Name
+              </div>
+              <div style={{ position: "relative" }}>
+                <Input
+                  variant="underline"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    if (selected) setSelected(null);
+                  }}
+                  placeholder="e.g. Baccarat Rouge 540"
+                />
+                {showResults && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      right: 0,
+                      zIndex: 10,
+                      marginTop: "var(--space-2)",
                     }}
-                    placeholder="e.g. Baccarat Rouge 540"
-                  />
-                  {showResults && (
-                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, marginTop: "var(--space-2)" }}>
-                      {results.map((f) => (
+                  >
+                    {results.map((f) => (
+                      <div
+                        key={f.fragranceId}
+                        onClick={() => handleSelect(f)}
+                        style={{
+                          background: "var(--color-cream-dark)",
+                          padding: "var(--space-4)",
+                          marginBottom: "var(--space-2)",
+                          borderRadius: "var(--radius-md)",
+                          cursor: "pointer",
+                        }}
+                      >
                         <div
-                          key={f.fragranceId}
-                          onClick={() => handleSelect(f)}
                           style={{
-                            background: "var(--color-cream-dark)",
-                            padding: "var(--space-4)",
-                            marginBottom: "var(--space-2)",
-                            borderRadius: "var(--radius-md)",
-                            cursor: "pointer",
+                            fontFamily: "var(--font-serif)",
+                            fontSize: "var(--text-lg)",
+                            fontStyle: "italic",
+                            color: "var(--color-navy)",
+                            marginBottom: "var(--space-1)",
                           }}
                         >
-                          <div style={{ fontFamily: "var(--font-serif)", fontSize: "var(--text-lg)", fontStyle: "italic", color: "var(--color-navy)", marginBottom: "var(--space-1)" }}>
-                            {f.fragranceName}
-                          </div>
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-2)" }}>
-                            {f.fragranceHouse}
-                          </div>
-                          <div style={{ borderTop: "1px solid var(--color-row-divider)", paddingTop: "var(--space-2)", marginBottom: "var(--space-2)" }} />
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-1)" }}>
-                            Avg Price
-                          </div>
-                          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-base)", color: "var(--color-navy)", fontWeight: "bold", marginBottom: "var(--space-2)" }}>
-                            {f.avgPrice ?? "N/A"}
-                          </div>
-                          {f.fragranceAccords && f.fragranceAccords.length > 0 && (
-                            <div style={{ fontFamily: "var(--font-serif)", fontSize: "var(--text-note)", fontStyle: "italic", color: "var(--color-navy)" }}>
+                          {f.fragranceName}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-sans)",
+                            fontSize: "var(--text-xs)",
+                            color: "var(--color-meta-text)",
+                            textTransform: "uppercase",
+                            letterSpacing: "var(--tracking-wide)",
+                            marginBottom: "var(--space-2)",
+                          }}
+                        >
+                          {f.fragranceHouse}
+                        </div>
+                        <div
+                          style={{
+                            borderTop: "1px solid var(--color-row-divider)",
+                            paddingTop: "var(--space-2)",
+                            marginBottom: "var(--space-2)",
+                          }}
+                        />
+                        <div
+                          style={{
+                            fontFamily: "var(--font-sans)",
+                            fontSize: "var(--text-xs)",
+                            color: "var(--color-meta-text)",
+                            textTransform: "uppercase",
+                            letterSpacing: "var(--tracking-wide)",
+                            marginBottom: "var(--space-1)",
+                          }}
+                        >
+                          Avg Price
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "var(--font-sans)",
+                            fontSize: "var(--text-base)",
+                            color: "var(--color-navy)",
+                            fontWeight: "bold",
+                            marginBottom: "var(--space-2)",
+                          }}
+                        >
+                          {f.avgPrice ?? "N/A"}
+                        </div>
+                        {f.fragranceAccords &&
+                          f.fragranceAccords.length > 0 && (
+                            <div
+                              style={{
+                                fontFamily: "var(--font-serif)",
+                                fontSize: "var(--text-note)",
+                                fontStyle: "italic",
+                                color: "var(--color-navy)",
+                              }}
+                            >
                               {f.fragranceAccords.join(", ")}
                             </div>
                           )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Status field */}
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--color-meta-text)",
+                  textTransform: "uppercase",
+                  letterSpacing: "var(--tracking-wide)",
+                  marginBottom: "var(--space-3)",
+                }}
+              >
+                Status
+              </div>
+              <Select
+                options={STATUS_OPTIONS}
+                value={status}
+                onChange={(v) => setStatus(v as FragranceStatus)}
+                placeholder="Select status"
+                size="auto"
+              />
+            </div>
+          </div>
+        )}
+        {step === 2 && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-6)",
+            }}
+          >
+            {/* Two-column: SIZE OWNED + TYPE */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "var(--space-6)",
+              }}
+            >
+              {/* Size Owned */}
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-meta-text)",
+                    textTransform: "uppercase",
+                    letterSpacing: "var(--tracking-wide)",
+                    marginBottom: "var(--space-3)",
+                  }}
+                >
+                  Size Owned
+                </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "var(--space-2)",
+                  }}
+                >
+                  {SIZE_OPTIONS.map((s) => {
+                    const isActive = sizes.includes(s.value);
+                    return (
+                      <Button
+                        key={s.value}
+                        variant="toggle"
+                        active={isActive}
+                        onClick={() =>
+                          setSizes(
+                            isActive
+                              ? sizes.filter((x) => x !== s.value)
+                              : [...sizes, s.value],
+                          )
+                        }
+                      >
+                        {s.label}
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Status field */}
+              {/* Type */}
               <div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
-                  Status
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-meta-text)",
+                    textTransform: "uppercase",
+                    letterSpacing: "var(--tracking-wide)",
+                    marginBottom: "var(--space-3)",
+                  }}
+                >
+                  Type
                 </div>
                 <Select
-                  options={STATUS_OPTIONS}
-                  value={status}
-                  onChange={(v) => setStatus(v as FragranceStatus)}
-                  placeholder="Select status"
+                  options={TYPE_OPTIONS}
+                  value={fragType}
+                  onChange={(v) => setFragType(v as FragranceType | "")}
+                  placeholder="Select type"
                   size="auto"
                 />
               </div>
             </div>
-          )}
-          {step === 2 && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-6)" }}>
-              {/* Two-column: SIZE OWNED + TYPE */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)" }}>
-                {/* Size Owned */}
-                <div>
-                  <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
-                    Size Owned
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-2)" }}>
-                    {SIZE_OPTIONS.map((s) => {
-                      const isActive = sizes.includes(s.value);
-                      return (
-                        <Button
-                          key={s.value}
-                          variant="toggle"
-                          active={isActive}
-                          onClick={() => setSizes(isActive ? sizes.filter((x) => x !== s.value) : [...sizes, s.value])}
-                        >
-                          {s.label}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
 
-                {/* Type */}
-                <div>
-                  <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
-                    Type
-                  </div>
-                  <Select
-                    options={TYPE_OPTIONS}
-                    value={fragType}
-                    onChange={(v) => setFragType(v as FragranceType | "")}
-                    placeholder="Select type"
-                    size="auto"
-                  />
+            {/* Two-column: PURCHASE PRICE + WHERE BOUGHT */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "var(--space-6)",
+              }}
+            >
+              {/* Purchase Price */}
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-meta-text)",
+                    textTransform: "uppercase",
+                    letterSpacing: "var(--tracking-wide)",
+                    marginBottom: "var(--space-3)",
+                  }}
+                >
+                  Purchase Price ($)
                 </div>
+                <Input
+                  variant="underline"
+                  inputMode="decimal"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="e.g. 136.34"
+                />
               </div>
 
-              {/* Two-column: PURCHASE PRICE + WHERE BOUGHT */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-6)" }}>
-                {/* Purchase Price */}
-                <div>
-                  <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
-                    Purchase Price ($)
-                  </div>
-                  <Input
-                    variant="underline"
-                    inputMode="decimal"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="e.g. 136.34"
-                  />
+              {/* Where Bought */}
+              <div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-meta-text)",
+                    textTransform: "uppercase",
+                    letterSpacing: "var(--tracking-wide)",
+                    marginBottom: "var(--space-3)",
+                  }}
+                >
+                  Where Bought
                 </div>
-
-                {/* Where Bought */}
-                <div>
-                  <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
-                    Where Bought
-                  </div>
-                  <div style={{ position: "relative" }} data-where-bought-dropdown>
-                    <button
-                      type="button"
-                      onClick={() => setWhereBoughtOpen(!whereBoughtOpen)}
+                <div
+                  style={{ position: "relative" }}
+                  data-where-bought-dropdown
+                >
+                  <button
+                    type="button"
+                    onClick={() => setWhereBoughtOpen(!whereBoughtOpen)}
+                    style={{
+                      width: "100%",
+                      padding: "var(--space-2) 0",
+                      borderBottom: "1px solid var(--color-meta-text)",
+                      border: "none",
+                      borderBottomStyle: "solid",
+                      background: "transparent",
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "var(--text-base)",
+                      color: whereBought
+                        ? "var(--color-navy)"
+                        : "var(--color-navy-mid)",
+                      outline: "none",
+                      textAlign: "left",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {whereBought || "Select retailer"}
+                  </button>
+                  {whereBoughtOpen && (
+                    <div
                       style={{
-                        width: "100%",
-                        padding: "var(--space-2) 0",
-                        borderBottom: "1px solid var(--color-meta-text)",
-                        border: "none",
-                        borderBottomStyle: "solid",
-                        background: "transparent",
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "var(--text-base)",
-                        color: whereBought ? "var(--color-navy)" : "var(--color-navy-mid)",
-                        outline: "none",
-                        textAlign: "left",
-                        cursor: "pointer",
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        right: 0,
+                        zIndex: 10,
+                        marginTop: "var(--space-2)",
+                        background: "var(--color-cream)",
+                        border: "1px solid var(--color-meta-text)",
+                        borderRadius: "var(--radius-sm)",
+                        boxShadow: "var(--shadow-md)",
                       }}
                     >
-                      {whereBought || "Select retailer"}
-                    </button>
-                    {whereBoughtOpen && (
-                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, marginTop: "var(--space-2)", background: "var(--color-cream)", border: "1px solid var(--color-meta-text)", borderRadius: "var(--radius-sm)", boxShadow: "var(--shadow-md)" }}>
-                        <div style={{ padding: "var(--space-2)" }}>
-                          <Input
-                            value={whereBoughtSearch}
-                            onChange={(e) => setWhereBoughtSearch(e.target.value)}
-                            placeholder="Search..."
-                            autoFocus
-                          />
-                        </div>
-                        <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-                          {(() => {
-                            const allOptions = [...WHERE_BOUGHT_OPTIONS, ...customWhereBoughtOptions.map((opt) => ({ value: opt, label: opt }))];
-                            const searchLower = whereBoughtSearch.toLowerCase();
-                            const filtered = searchLower
-                              ? allOptions.filter((opt) => opt.label.toLowerCase().includes(searchLower))
-                              : allOptions;
-                            const hasExactMatch = filtered.some((opt) => opt.value.toLowerCase() === searchLower);
-                            const showAddOwn = whereBoughtSearch.trim().length > 0 && !hasExactMatch;
+                      <div style={{ padding: "var(--space-2)" }}>
+                        <Input
+                          value={whereBoughtSearch}
+                          onChange={(e) => setWhereBoughtSearch(e.target.value)}
+                          placeholder="Search..."
+                          autoFocus
+                        />
+                      </div>
+                      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                        {(() => {
+                          const allOptions = [
+                            ...WHERE_BOUGHT_OPTIONS,
+                            ...customWhereBoughtOptions.map((opt) => ({
+                              value: opt,
+                              label: opt,
+                            })),
+                          ];
+                          const searchLower = whereBoughtSearch.toLowerCase();
+                          const filtered = searchLower
+                            ? allOptions.filter((opt) =>
+                                opt.label.toLowerCase().includes(searchLower),
+                              )
+                            : allOptions;
+                          const hasExactMatch = filtered.some(
+                            (opt) => opt.value.toLowerCase() === searchLower,
+                          );
+                          const showAddOwn =
+                            whereBoughtSearch.trim().length > 0 &&
+                            !hasExactMatch;
 
-                            return (
-                              <>
-                                {filtered.map((opt) => (
+                          return (
+                            <>
+                              {filtered.map((opt) => (
+                                <div
+                                  key={opt.value}
+                                  onClick={() => {
+                                    setWhereBought(opt.value);
+                                    setWhereBoughtSearch("");
+                                    setWhereBoughtOpen(false);
+                                  }}
+                                  style={{
+                                    height: "36px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "0 var(--space-3)",
+                                    fontSize: "var(--text-sm)",
+                                    fontFamily: "var(--font-sans)",
+                                    cursor: "pointer",
+                                    color: "var(--color-navy)",
+                                    background:
+                                      opt.value === whereBought
+                                        ? "var(--color-cream-dark)"
+                                        : "transparent",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    (e.target as HTMLElement).style.background =
+                                      opt.value === whereBought
+                                        ? "var(--color-cream-dark)"
+                                        : "var(--color-row-hover)";
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    (e.target as HTMLElement).style.background =
+                                      opt.value === whereBought
+                                        ? "var(--color-cream-dark)"
+                                        : "transparent";
+                                  }}
+                                >
+                                  {opt.label}
+                                </div>
+                              ))}
+                              {showAddOwn && (
+                                <>
                                   <div
-                                    key={opt.value}
+                                    style={{
+                                      height: "1px",
+                                      background: "var(--color-row-divider)",
+                                      margin: "var(--space-1) 0",
+                                    }}
+                                  />
+                                  <div
                                     onClick={() => {
-                                      setWhereBought(opt.value);
+                                      if (
+                                        !customWhereBoughtOptions.includes(
+                                          whereBoughtSearch,
+                                        )
+                                      ) {
+                                        setCustomWhereBoughtOptions([
+                                          ...customWhereBoughtOptions,
+                                          whereBoughtSearch,
+                                        ]);
+                                      }
+                                      setWhereBought(whereBoughtSearch);
                                       setWhereBoughtSearch("");
                                       setWhereBoughtOpen(false);
                                     }}
@@ -446,178 +759,252 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                                       fontFamily: "var(--font-sans)",
                                       cursor: "pointer",
                                       color: "var(--color-navy)",
-                                      background: opt.value === whereBought ? "var(--color-cream-dark)" : "transparent",
+                                      fontStyle: "italic",
                                     }}
-                                    onMouseEnter={(e) => { (e.target as HTMLElement).style.background = opt.value === whereBought ? "var(--color-cream-dark)" : "var(--color-row-hover)"; }}
-                                    onMouseLeave={(e) => { (e.target as HTMLElement).style.background = opt.value === whereBought ? "var(--color-cream-dark)" : "transparent"; }}
+                                    onMouseEnter={(e) => {
+                                      (
+                                        e.target as HTMLElement
+                                      ).style.background =
+                                        "var(--color-row-hover)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      (
+                                        e.target as HTMLElement
+                                      ).style.background = "transparent";
+                                    }}
                                   >
-                                    {opt.label}
+                                    + Add "{whereBoughtSearch}"
                                   </div>
-                                ))}
-                                {showAddOwn && (
-                                  <>
-                                    <div style={{ height: "1px", background: "var(--color-row-divider)", margin: "var(--space-1) 0" }} />
-                                    <div
-                                      onClick={() => {
-                                        if (!customWhereBoughtOptions.includes(whereBoughtSearch)) {
-                                          setCustomWhereBoughtOptions([...customWhereBoughtOptions, whereBoughtSearch]);
-                                        }
-                                        setWhereBought(whereBoughtSearch);
-                                        setWhereBoughtSearch("");
-                                        setWhereBoughtOpen(false);
-                                      }}
-                                      style={{
-                                        height: "36px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        padding: "0 var(--space-3)",
-                                        fontSize: "var(--text-sm)",
-                                        fontFamily: "var(--font-sans)",
-                                        cursor: "pointer",
-                                        color: "var(--color-navy)",
-                                        fontStyle: "italic",
-                                      }}
-                                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "var(--color-row-hover)"; }}
-                                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
-                                    >
-                                      + Add "{whereBoughtSearch}"
-                                    </div>
-                                  </>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
+                                </>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Rating */}
-              <div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-2)" }}>
-                  Rating
-                </div>
-                <div style={{ display: "flex", gap: "var(--space-1)", marginBottom: "var(--space-1)" }}>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <Button
-                      key={n}
-                      variant="ghost"
-                      onClick={() => setRating(rating === n ? 0 : n)}
-                      style={{ fontSize: "var(--text-lg)", padding: "2px 4px", height: "auto" }}
-                    >
-                      {n <= rating ? "★" : "☆"}
-                    </Button>
-                  ))}
-                </div>
-                {rating > 0 && (
-                  <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
-                    {RATING_LABELS[rating]}
-                  </div>
-                )}
-              </div>
-
-              {/* More Details toggle */}
-              <div>
-                <Button
-                  variant="ghost"
-                  onClick={() => setShowDetails(!showDetails)}
-                  className="h-auto p-0 uppercase text-[length:var(--text-xs)] [letter-spacing:var(--tracking-wide)]"
-                >
-                  {showDetails ? "— Less Details" : "— More Details"}
-                </Button>
-
-                {showDetails && (
-                  <div style={{ marginTop: "var(--space-3)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-3)" }}>
-                    <div style={{ gridColumn: "1 / 2" }}>
-                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-2)" }}>
-                        Purchase Date
-                      </div>
-                      <div style={{ display: "flex", gap: "var(--space-2)" }}>
-                        <Select
-                          options={MONTH_OPTIONS}
-                          value={purchaseMonth}
-                          onChange={setPurchaseMonth}
-                          placeholder="Month"
-                          size="auto"
-                        />
-                        <Select
-                          options={YEAR_OPTIONS}
-                          value={purchaseYear}
-                          onChange={setPurchaseYear}
-                          placeholder="Year"
-                          size="auto"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Dupe Tracking */}
-              <div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-2)" }}>
-                  Dupe Tracking
-                </div>
-                <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
-                  <Button variant="toggle" active={isDupe} onClick={() => setIsDupe(true)}>
-                    Dupe For
-                  </Button>
-                  <Button variant="toggle" active={!isDupe} onClick={() => setIsDupe(false)}>
-                    Not a Dupe
-                  </Button>
-                  {isDupe && (
-                    <div style={{ flex: 1 }}>
-                      <Input
-                        variant="underline"
-                        value={dupeFor}
-                        onChange={(e) => setDupeFor(e.target.value)}
-                        placeholder="Search collection..."
-                      />
                     </div>
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Personal Notes */}
-              <div>
-                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
-                  Personal Notes
+            {/* Rating */}
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--color-meta-text)",
+                  textTransform: "uppercase",
+                  letterSpacing: "var(--tracking-wide)",
+                  marginBottom: "var(--space-2)",
+                }}
+              >
+                Rating
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "var(--space-1)",
+                  marginBottom: "var(--space-1)",
+                }}
+              >
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Button
+                    key={n}
+                    variant="ghost"
+                    onClick={() => setRating(rating === n ? 0 : n)}
+                    style={{
+                      fontSize: "var(--text-lg)",
+                      padding: "var(--space-half) var(--space-1)",
+                      height: "auto",
+                    }}
+                  >
+                    {n <= rating ? "★" : "☆"}
+                  </Button>
+                ))}
+              </div>
+              {rating > 0 && (
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "var(--text-xs)",
+                    color: "var(--color-meta-text)",
+                  }}
+                >
+                  {RATING_LABELS[rating]}
                 </div>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="How does it smell on your skin? When do you wear it? Any context worth remembering?"
-                  rows={4}
-                  className="resize-none"
-                />
+              )}
+            </div>
+
+            {/* More Details toggle */}
+            <div>
+              <Button
+                variant="ghost"
+                onClick={() => setShowDetails(!showDetails)}
+                className="h-auto p-0 uppercase text-[length:var(--text-xs)] [letter-spacing:var(--tracking-wide)]"
+              >
+                {showDetails ? "— Less Details" : "— More Details"}
+              </Button>
+
+              {showDetails && (
+                <div
+                  style={{
+                    marginTop: "var(--space-3)",
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "var(--space-3)",
+                  }}
+                >
+                  <div style={{ gridColumn: "1 / 2" }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "var(--text-xs)",
+                        color: "var(--color-meta-text)",
+                        textTransform: "uppercase",
+                        letterSpacing: "var(--tracking-wide)",
+                        marginBottom: "var(--space-2)",
+                      }}
+                    >
+                      Purchase Date
+                    </div>
+                    <div style={{ display: "flex", gap: "var(--space-2)" }}>
+                      <Select
+                        options={MONTH_OPTIONS}
+                        value={purchaseMonth}
+                        onChange={setPurchaseMonth}
+                        placeholder="Month"
+                        size="auto"
+                      />
+                      <Select
+                        options={YEAR_OPTIONS}
+                        value={purchaseYear}
+                        onChange={setPurchaseYear}
+                        placeholder="Year"
+                        size="auto"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Dupe Tracking */}
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--color-meta-text)",
+                  textTransform: "uppercase",
+                  letterSpacing: "var(--tracking-wide)",
+                  marginBottom: "var(--space-2)",
+                }}
+              >
+                Dupe Tracking
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "var(--space-2)",
+                  alignItems: "center",
+                }}
+              >
+                <Button
+                  variant="toggle"
+                  active={isDupe}
+                  onClick={() => setIsDupe(true)}
+                >
+                  Dupe For
+                </Button>
+                <Button
+                  variant="toggle"
+                  active={!isDupe}
+                  onClick={() => setIsDupe(false)}
+                >
+                  Not a Dupe
+                </Button>
+                {isDupe && (
+                  <div style={{ flex: 1 }}>
+                    <Input
+                      variant="underline"
+                      value={dupeFor}
+                      onChange={(e) => setDupeFor(e.target.value)}
+                      placeholder="Search collection..."
+                    />
+                  </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Footer */}
-        <div style={{ borderTop: "1px solid var(--color-cream-dark)", padding: "var(--space-4) var(--space-6)", flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center", gap: "var(--space-3)" }}>
-          {step === 1 && (
-            <>
-              <Button variant="ghost" onClick={onClose}>Cancel</Button>
-              <div style={{ flex: 1 }} />
-              <Button variant="primary" onClick={handleNext}>Next</Button>
-            </>
-          )}
-          {step === 2 && (
-            <>
-              <Button variant="ghost" onClick={handleBack} style={{ border: "none" }}>Back</Button>
-              <div style={{ flex: 1 }} />
-              <Button variant="ghost" onClick={onClose}>Cancel</Button>
-              <Button variant="primary" onClick={handleSave} disabled={saving}>
-                {saving ? "Saving..." : "Save Fragrance"}
-              </Button>
-            </>
-          )}
-        </div>
+            {/* Personal Notes */}
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--color-meta-text)",
+                  textTransform: "uppercase",
+                  letterSpacing: "var(--tracking-wide)",
+                  marginBottom: "var(--space-3)",
+                }}
+              >
+                Personal Notes
+              </div>
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="How does it smell on your skin? When do you wear it? Any context worth remembering?"
+                rows={4}
+                className="resize-none"
+              />
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          borderTop: "1px solid var(--color-cream-dark)",
+          padding: "var(--space-4) var(--space-6)",
+          flexShrink: 0,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "var(--space-3)",
+        }}
+      >
+        {step === 1 && (
+          <>
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <div style={{ flex: 1 }} />
+            <Button variant="primary" onClick={handleNext}>
+              Next
+            </Button>
+          </>
+        )}
+        {step === 2 && (
+          <>
+            <Button
+              variant="ghost"
+              onClick={handleBack}
+              style={{ border: "none" }}
+            >
+              Back
+            </Button>
+            <div style={{ flex: 1 }} />
+            <Button variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save Fragrance"}
+            </Button>
+          </>
+        )}
+      </div>
+    </Modal>
   );
 }
