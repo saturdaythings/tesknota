@@ -1454,6 +1454,10 @@ export default function DesignSystemPage() {
                   <Textarea label="NOTES" placeholder="Any notes about this compliment\u2026" hint="Optional" rows={3} />
                 </div>
                 <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>error state</div>
+                  <Textarea label="NOTES" placeholder="Cannot be empty" error="Notes are required for this action" rows={3} />
+                </div>
+                <div>
                   <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>disabled state</div>
                   <Textarea label="NOTES" placeholder="Loading..." disabled rows={3} />
                 </div>
@@ -1496,6 +1500,21 @@ export default function DesignSystemPage() {
                       ]}
                       value="newest"
                       onChange={() => {}}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="font-sans mb-2" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-xs)' }}>error state</div>
+                  <div style={{ maxWidth: '220px' }}>
+                    <Select
+                      options={[
+                        { value: 'edp', label: 'Eau de Parfum' },
+                        { value: 'edt', label: 'Eau de Toilette' },
+                      ]}
+                      value=""
+                      onChange={() => {}}
+                      label="TYPE"
+                      error="Type is required"
                     />
                   </div>
                 </div>
@@ -1868,6 +1887,58 @@ export default function DesignSystemPage() {
                   </button>
                 ))}
               </div>
+            </div>
+          </Section>
+
+          {/* ── Error States ── */}
+          <Section id="error-states" title="Error States — Form Validation">
+            <Note>Canonical error state pattern: red border, error message below field. Applied consistently to all Input, Select, and Textarea components.</Note>
+
+            <Row label="Canonical error token">
+              <div className="font-sans text-xs" style={{ color: 'var(--color-navy-mid)' }}>
+                <div>Border color: var(--color-destructive) = #8B1A1A</div>
+                <div>Message color: var(--color-destructive)</div>
+                <div>Message size: --text-xs (12px) or --text-sm (13px)</div>
+                <div>Icon: None (red border is sufficient visual cue)</div>
+              </div>
+            </Row>
+
+            <Row label="Input error">
+              <div style={{ maxWidth: '320px' }}>
+                <Input label="HOUSE" placeholder="e.g. Maison Margiela" error="House is required" />
+              </div>
+            </Row>
+
+            <Row label="Select error">
+              <div style={{ maxWidth: '220px' }}>
+                <Select
+                  options={[
+                    { value: 'edp', label: 'Eau de Parfum' },
+                    { value: 'edt', label: 'Eau de Toilette' },
+                  ]}
+                  value=""
+                  onChange={() => {}}
+                  label="TYPE"
+                  error="Type is required"
+                />
+              </div>
+            </Row>
+
+            <Row label="Textarea error">
+              <div style={{ maxWidth: '320px' }}>
+                <Textarea label="NOTES" placeholder="Cannot be empty" error="Notes are required for this action" rows={3} />
+              </div>
+            </Row>
+
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', marginTop: 'var(--space-6)', padding: 'var(--space-4)', background: 'var(--color-cream-dark)', borderRadius: 'var(--radius-md)' }}>
+              <div className="font-sans font-medium mb-2">Error state rules</div>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Show error state immediately on validation failure.</li>
+                <li>Error message text: descriptive, specific (not generic "Error").</li>
+                <li>Red border persists until error is corrected by user input.</li>
+                <li>No error icons needed — red border is sufficient visual feedback.</li>
+                <li>Error message appears below field, above any hint text.</li>
+              </ul>
             </div>
           </Section>
 
