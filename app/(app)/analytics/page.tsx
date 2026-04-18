@@ -347,7 +347,7 @@ function HoverTooltip({ children, lines, header }: {
 // ── Skeleton / Empty ──────────────────────────────────────
 
 function ChartSkeleton({ height }: { height: number }) {
-  return <div style={{ height, background: "var(--color-cream-dark)", borderRadius: "3px", opacity: 0.5 }} />;
+  return <div style={{ height, background: "var(--color-cream-dark)", borderRadius: "var(--radius-md)", opacity: 0.5 }} />;
 }
 
 function ChartEmpty({ icon, title, height }: { icon: React.ReactNode; title: string; height: number }) {
@@ -446,7 +446,7 @@ function StatCard({ label, value, delta, friendValue }: { label: string; value: 
           {value}
         </div>
         {friendValue != null && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--space-half)" }}>
             <div style={{ fontFamily: "var(--font-serif)", fontWeight: 400, fontStyle: "italic", fontSize: "var(--text-hero)", lineHeight: 1, color: "var(--color-accent)" }}>
               {friendValue}
             </div>

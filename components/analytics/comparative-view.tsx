@@ -134,7 +134,7 @@ export function CompareView({
               {s.label}
             </div>
             <div style={{ display: "flex", gap: "var(--space-5)", alignItems: "flex-end" }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--space-half)" }}>
                 <span
                   className="font-serif"
                   style={{ fontSize: "var(--text-lg)", color: "var(--color-navy)", lineHeight: 1 }}
@@ -145,7 +145,7 @@ export function CompareView({
                   {myInitial}
                 </span>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--space-half)" }}>
                 <span
                   className="font-serif"
                   style={{ fontSize: "var(--text-lg)", color: "var(--color-accent)", lineHeight: 1 }}

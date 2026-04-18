@@ -296,7 +296,6 @@ function RowSkeleton() {
       <div style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-4 w-16" /></div>
       <div style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-4 w-28" /></div>
       <div style={{ padding: "0 var(--space-4)" }}><Skeleton className="h-10 w-32" /></div>
-      <div />
     </div>
   );
 }
@@ -335,8 +334,8 @@ function WishlistMobileCard({
         onClick={onClick}
         style={{ display: "block", width: "100%", textAlign: "left", padding: 0, minHeight: 0, height: "auto" }}
       >
-        <div style={{ marginBottom: "2px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "2px" }}>
+        <div style={{ marginBottom: "var(--space-half)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-half)" }}>
             <span style={{ flex: 1, minWidth: 0, fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", fontWeight: 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {frag.name}
             </span>
