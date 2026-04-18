@@ -130,6 +130,11 @@ export function FragDetail({
             {frag.house}
           </div>
         )}
+        {frag.isDupe && frag.dupeFor && (
+          <div className="font-[var(--font-sans)]" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', fontStyle: 'italic' }}>
+            dupe of {frag.dupeFor}
+          </div>
+        )}
         {/* Status + accords header */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -137,11 +142,6 @@ export function FragDetail({
             {frag.isDupe && (
               <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-navy)', borderRadius: 'var(--radius-full)', padding: '2px var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-navy)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
                 Dupe
-              </span>
-            )}
-            {frag.dupeFor && (
-              <span className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-                for {frag.dupeFor}
               </span>
             )}
           </div>

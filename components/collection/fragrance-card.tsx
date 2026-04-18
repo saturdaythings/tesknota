@@ -115,11 +115,16 @@ export function FragranceCard({ frag, compCount, accords, addedDate, onClick }: 
           color: "var(--color-meta-text)",
           textTransform: "uppercase",
           letterSpacing: "var(--tracking-wide)",
-          marginBottom: "10px",
+          marginBottom: frag.isDupe && frag.dupeFor ? "2px" : "10px",
         }}
       >
         {frag.house}
       </div>
+      {frag.isDupe && frag.dupeFor && (
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", fontStyle: "italic", marginBottom: "10px" }}>
+          dupe of {frag.dupeFor}
+        </div>
+      )}
 
       {/* Row: size · stars · added */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px", flexWrap: "wrap" }}>

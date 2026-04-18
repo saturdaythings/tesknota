@@ -9,6 +9,7 @@ interface FragranceCellProps {
   type?: FragranceType | null;
   secondary?: string;
   isDupe?: boolean;
+  dupeFor?: string;
   className?: string;
 }
 
@@ -31,7 +32,7 @@ const dupePillStyle: React.CSSProperties = {
   color: 'var(--color-navy)',
 };
 
-export function FragranceCell({ name, house, type, secondary, isDupe, className }: FragranceCellProps) {
+export function FragranceCell({ name, house, type, secondary, isDupe, dupeFor, className }: FragranceCellProps) {
   const concLabel = type ? shortFragType(type) : null;
   return (
     <div className={`min-w-0${className ? ` ${className}` : ''}`}>
@@ -49,6 +50,11 @@ export function FragranceCell({ name, house, type, secondary, isDupe, className 
       {house && (
         <div className="font-sans uppercase" style={{ fontSize: 'var(--text-label)', letterSpacing: 'var(--tracking-wide)', color: 'var(--color-meta-text)' }}>
           {house}
+        </div>
+      )}
+      {isDupe && dupeFor && (
+        <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)', fontStyle: 'italic' }}>
+          dupe of {dupeFor}
         </div>
       )}
     </div>
