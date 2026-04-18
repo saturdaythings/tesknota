@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { TabPill } from "@/components/ui/tab-pill";
 import Link from "next/link";
 
@@ -31,20 +33,11 @@ interface ActivityLog {
 }
 
 interface AdminUser {
-  id?: string;
-  userId?: string;
-  name?: string;
-  displayName?: string;
-  email?: string;
-  isAdmin?: boolean;
-}
-
-interface DQFrag {
   id: string;
-  name: string;
-  house: string;
-  missingAccords: boolean;
-  missingNotes: boolean;
+  username: string | null;
+  name: string | null;
+  email: string | null;
+  isAdmin: boolean;
 }
 
 interface PendingEntry {
@@ -55,6 +48,29 @@ interface PendingEntry {
   requestedBy: string;
   createdAt: string;
   status: string;
+}
+
+interface CommunityFlag {
+  id: string;
+  userId: string;
+  fragranceId: string | null;
+  fragranceName: string;
+  fragranceHouse: string;
+  fieldFlagged: string;
+  suggestedValue: string | null;
+  currentValue: string | null;
+  resolved: boolean;
+  createdAt: string;
+}
+
+interface DQUserFrag {
+  id: string;
+  name: string;
+  house: string;
+  userId: string;
+  missingNotes: boolean;
+  missingRating: boolean;
+  missingConcentration: boolean;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -70,9 +86,9 @@ function computeCost(row: ApiLog): number {
   return (tokIn / 1_000_000) * COST_INPUT_PER_1M + (tokOut / 1_000_000) * COST_OUTPUT_PER_1M;
 }
 
-function userName(uid: string, users: AdminUser[]): string {
-  const u = users.find((u) => u.id === uid || u.userId === uid);
-  return u?.name ?? u?.displayName ?? uid;
+function userLabel(uid: string, users: AdminUser[]): string {
+  const u = users.find((u) => u.id === uid);
+  return u?.username ?? u?.name ?? uid;
 }
 
 function isError(l: ApiLog): boolean {
@@ -90,6 +106,10 @@ function percentile(arr: number[], p: number): number {
 function fmtLat(ms: number): string {
   if (ms >= 1000) return (ms / 1000).toFixed(1) + "s";
   return Math.round(ms) + "ms";
+}
+
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -197,7 +217,6 @@ function SpendTab({ apiLogs, users }: { apiLogs: ApiLog[]; users: AdminUser[] })
 
   const avgPerMsg = monthCalls > 0 ? monthCost / monthCalls : 0;
 
-  // Build last 30 days
   const days30 = Array.from({ length: 30 }, (_, i) => {
     const d = new Date(now);
     d.setDate(d.getDate() - (29 - i));
@@ -259,7 +278,7 @@ function SpendTab({ apiLogs, users }: { apiLogs: ApiLog[]; users: AdminUser[] })
       {Object.keys(userAgg).length > 0 && (
         <div className="mb-9">
           <SecHead title="Cost by user" right={monthLabel} />
-          <div className={`grid gap-px bg-[var(--adm-border)] border border-[var(--adm-border)]`} style={{ gridTemplateColumns: `repeat(${Math.min(Object.keys(userAgg).length, 4)}, 1fr)` }}>
+          <div className="grid gap-px bg-[var(--adm-border)] border border-[var(--adm-border)]" style={{ gridTemplateColumns: `repeat(${Math.min(Object.keys(userAgg).length, 4)}, 1fr)` }}>
             {Object.entries(userAgg).map(([uid, ua]) => {
               const avgU = ua.calls > 0 ? ua.cost / ua.calls : 0;
               let topFeat = "", topCount = 0;
@@ -279,7 +298,7 @@ function SpendTab({ apiLogs, users }: { apiLogs: ApiLog[]; users: AdminUser[] })
               return (
                 <div key={uid} className="bg-[var(--adm-bg)] p-5">
                   <div className="font-[var(--adm-mono)] text-[10px] tracking-[0.2em] uppercase text-[var(--adm-fg4)] mb-3 pb-1.5 border-b border-[var(--adm-border2)]">
-                    {userName(uid, users)}
+                    {userLabel(uid, users)}
                   </div>
                   {stats.map((s) => (
                     <div key={s.l} className="flex justify-between py-1.5 border-b border-[var(--adm-border2)] last:border-0">
@@ -322,7 +341,6 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
     if (new Date(ts) >= weekAgo) activeUsers[l.userId || "?"] = true;
   }
 
-  // Activity heatmap (last 4 weeks)
   const TIME_BUCKETS = [
     { label: "6 am", start: 6, end: 9 },
     { label: "9 am", start: 9, end: 12 },
@@ -347,7 +365,6 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
   const heatMax = Math.max(...Object.values(heatData), 1);
   const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
-  // Feature usage table
   const allActions: Record<string, boolean> = {};
   const allUserIds = Object.keys(userActionCounts).sort();
   for (const uid of allUserIds) {
@@ -355,7 +372,6 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
   }
   const actionList = Object.keys(allActions).sort();
 
-  // Session patterns
   const userEvents: Record<string, number[]> = {};
   for (const l of activityLogs) {
     if (!l.timestamp) continue;
@@ -367,6 +383,8 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
   }
 
   const heatLevels = ["bg-[var(--adm-bg2)]", "bg-[var(--adm-bg3)]", "bg-[#AAAAAA]", "bg-[#666666]", "bg-[#333333]", "bg-[var(--adm-fg)]"];
+  const CELL = 18;
+  const LABEL_W = 40;
 
   return (
     <div>
@@ -379,19 +397,30 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
 
       <div className="mb-9">
         <SecHead title="Activity heatmap" right="Messages per hour, last 4 weeks" />
-        <div className="grid" style={{ gridTemplateColumns: "64px repeat(7, 1fr)", gap: "2px" }}>
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: `${LABEL_W}px repeat(7, ${CELL}px)`,
+            gap: "2px",
+            width: "fit-content",
+          }}
+        >
           <div />
           {DAY_ORDER.map((d) => (
-            <div key={d} className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] text-center pb-1">{DAY_NAMES[d]}</div>
+            <div key={d} className="font-[var(--adm-mono)] text-[9px] text-[var(--adm-fg4)] text-center pb-1">{DAY_NAMES[d]}</div>
           ))}
           {TIME_BUCKETS.map((tb, bi) => (
             <>
-              <div key={tb.label} className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] flex items-center">{tb.label}</div>
+              <div key={tb.label} className="font-[var(--adm-mono)] text-[9px] text-[var(--adm-fg4)] flex items-center">{tb.label}</div>
               {DAY_ORDER.map((di) => {
                 const count = heatData[di + "-" + bi] || 0;
                 const level = count > 0 ? Math.min(5, Math.ceil((count / heatMax) * 5)) : 0;
                 return (
-                  <div key={di} className={`aspect-square min-h-3 cursor-pointer relative group ${heatLevels[level]}`}>
+                  <div
+                    key={di}
+                    className={`cursor-pointer relative group ${heatLevels[level]}`}
+                    style={{ width: CELL, height: CELL }}
+                  >
                     {count > 0 && (
                       <div className="hidden group-hover:block absolute bottom-[calc(100%+4px)] left-1/2 -translate-x-1/2 bg-[var(--adm-fg)] text-[var(--adm-bg)] font-[var(--adm-mono)] text-[10px] px-2 py-1 whitespace-nowrap z-10">
                         {DAY_NAMES[di]} {tb.label}: {count} msgs
@@ -414,7 +443,7 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
                 <tr>
                   <th className="font-[var(--adm-mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-left font-normal">Action</th>
                   {allUserIds.map((uid) => (
-                    <th key={uid} className="font-[var(--adm-mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-right font-normal">{userName(uid, users)}</th>
+                    <th key={uid} className="font-[var(--adm-mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-right font-normal">{userLabel(uid, users)}</th>
                   ))}
                   <th className="font-[var(--adm-mono)] text-[10px] tracking-[0.14em] uppercase text-[var(--adm-fg4)] px-3 py-2 border-b border-[var(--adm-fg)] text-right font-normal">Total</th>
                 </tr>
@@ -441,7 +470,7 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
       {Object.keys(userEvents).length > 0 && (
         <div className="mb-9">
           <SecHead title="Session patterns" />
-          <div className={`grid gap-px bg-[var(--adm-border)] border border-[var(--adm-border)]`} style={{ gridTemplateColumns: `repeat(${Math.min(Object.keys(userEvents).length, 4)}, 1fr)` }}>
+          <div className="grid gap-px bg-[var(--adm-border)] border border-[var(--adm-border)]" style={{ gridTemplateColumns: `repeat(${Math.min(Object.keys(userEvents).length, 4)}, 1fr)` }}>
             {Object.entries(userEvents).map(([uid, times]) => {
               const sorted = [...times].sort((a, b) => a - b);
               const sessions: { start: number; end: number; actions: number }[] = [];
@@ -479,7 +508,7 @@ function UsageTab({ apiLogs, activityLogs, users }: { apiLogs: ApiLog[]; activit
               return (
                 <div key={uid} className="bg-[var(--adm-bg)] p-5">
                   <div className="font-[var(--adm-mono)] text-[10px] tracking-[0.2em] uppercase text-[var(--adm-fg4)] mb-3 pb-1.5 border-b border-[var(--adm-border2)]">
-                    {userName(uid, users)}
+                    {userLabel(uid, users)}
                   </div>
                   {stats.map((s) => (
                     <div key={s.l} className="flex justify-between py-1.5 border-b border-[var(--adm-border2)] last:border-0">
@@ -706,67 +735,120 @@ function AuditTab() {
   );
 }
 
-// ── Flags tab ────────────────────────────────────────────────────────────────
+// ── Community Flags tab ────────────────────────────────────────────────────────
 
-interface CommunityFlag {
-  id: string;
-  userId: string;
-  fragranceName: string;
-  fragranceHouse: string;
-  fieldFlagged: string;
-  userNote: string | null;
-  resolved: boolean;
-  createdAt: string;
-}
+function FlagsTab({
+  flags,
+  users,
+  onResolve,
+  onDismiss,
+  onUpdate,
+}: {
+  flags: CommunityFlag[];
+  users: AdminUser[];
+  onResolve: (id: string, field: string, fragranceId: string | null, value: string) => Promise<void>;
+  onDismiss: (id: string) => Promise<void>;
+  onUpdate?: never;
+}) {
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [saving, setSaving] = useState(false);
 
-function FlagsTab({ flags, users, onResolve }: { flags: CommunityFlag[]; users: AdminUser[]; onResolve: (id: string) => void }) {
-  const open = flags.filter((f) => !f.resolved);
-  const resolved = flags.filter((f) => f.resolved);
-  const [showResolved, setShowResolved] = useState(false);
-  const displayed = showResolved ? flags : open;
+  async function handleConfirm(flag: CommunityFlag) {
+    setSaving(true);
+    await onResolve(flag.id, flag.fieldFlagged, flag.fragranceId, editValue);
+    setEditId(null);
+    setEditValue("");
+    setSaving(false);
+  }
+
+  const rowStyle: React.CSSProperties = {
+    minHeight: "var(--size-row-min)",
+    borderBottom: "1px solid var(--color-row-divider)",
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--space-4)",
+    padding: "var(--space-3) 0",
+  };
 
   return (
     <div>
       <BigNumGrid items={[
-        { val: String(open.length), label: "Open flags" },
-        { val: String(resolved.length), label: "Resolved" },
-        { val: String(flags.length), label: "Total" },
-        { val: flags.length > 0 ? open.length === 0 ? "Clean" : "Needs review" : "—", label: "Status", valClass: open.length === 0 ? "text-[var(--adm-green)]" : "text-[var(--adm-red)]" },
+        { val: String(flags.length), label: "Pending flags", valClass: flags.length > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
       ]} />
 
-      <div className="mb-4 flex items-center gap-4">
-        <SecHead title={showResolved ? "All flags" : "Open flags"} />
-        <Button variant="secondary" size="sm" onClick={() => setShowResolved((v) => !v)}>
-          {showResolved ? "Hide resolved" : "Show resolved"}
-        </Button>
-      </div>
-
-      {displayed.length === 0 ? (
-        <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] py-3">
-          {open.length === 0 ? "No open flags." : "No flags yet."}
+      {flags.length === 0 ? (
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)", padding: "var(--space-6) 0" }}>
+          No pending flags.
         </div>
       ) : (
-        <div className="flex flex-col">
-          {displayed.map((f) => (
-            <div key={f.id} className="flex items-start gap-3 px-3 py-3 border-b border-[var(--adm-border2)] hover:bg-[var(--adm-bg2)]">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="font-[var(--adm-mono)] text-xs text-[var(--adm-fg)] font-medium">{f.fragranceName}</span>
-                  <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)]">{f.fragranceHouse}</span>
-                  <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-1.5 py-0.5">{f.fieldFlagged}</span>
+        <div>
+          {flags.map((f) => (
+            <div key={f.id} style={rowStyle}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "var(--space-3)", flexWrap: "wrap", marginBottom: "var(--space-2)" }}>
+                  <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)" }}>
+                    {f.fragranceName}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
+                    {f.fragranceHouse}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", background: "var(--color-cream-dark)", padding: "2px var(--space-2)", borderRadius: "var(--radius-full)" }}>
+                    {f.fieldFlagged}
+                  </span>
                 </div>
-                {f.userNote && (
-                  <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg2)] mt-1">{f.userNote}</div>
+                <div style={{ display: "flex", gap: "var(--space-6)", flexWrap: "wrap" }}>
+                  {f.currentValue !== null && (
+                    <div>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "2px" }}>Current</div>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>{f.currentValue || "—"}</div>
+                    </div>
+                  )}
+                  {f.suggestedValue && (
+                    <div>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "2px" }}>Suggested</div>
+                      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-navy)" }}>{f.suggestedValue}</div>
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "2px" }}>Submitted by</div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{userLabel(f.userId, users)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-meta-text)", marginBottom: "2px" }}>Date</div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>{fmtDate(f.createdAt)}</div>
+                  </div>
+                </div>
+                {editId === f.id && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginTop: "var(--space-3)" }}>
+                    <Input
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      placeholder="New value..."
+                      style={{ maxWidth: 280 }}
+                    />
+                    <Button variant="primary" onClick={() => handleConfirm(f)} disabled={saving || !editValue.trim()}>
+                      Confirm
+                    </Button>
+                    <Button variant="ghost" onClick={() => { setEditId(null); setEditValue(""); }}>
+                      Cancel
+                    </Button>
+                  </div>
                 )}
-                <div className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] mt-1">
-                  {userName(f.userId, users)} &middot; {new Date(f.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                </div>
               </div>
-              {!f.resolved && (
-                <Button variant="secondary" size="sm" onClick={() => onResolve(f.id)}>Resolve</Button>
-              )}
-              {f.resolved && (
-                <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-green)] shrink-0">Resolved</span>
+              {editId !== f.id && (
+                <div style={{ display: "flex", gap: "var(--space-2)", flexShrink: 0 }}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setEditId(f.id);
+                      setEditValue(f.suggestedValue ?? "");
+                    }}
+                  >
+                    Update
+                  </Button>
+                  <Button variant="ghost" onClick={() => onDismiss(f.id)}>Dismiss</Button>
+                </div>
               )}
             </div>
           ))}
@@ -776,38 +858,64 @@ function FlagsTab({ flags, users, onResolve }: { flags: CommunityFlag[]; users: 
   );
 }
 
-// ── Users tab ─────────────────────────────────────────────────────────────────
+// ── Users & Permissions tab ───────────────────────────────────────────────────
 
 function UsersTab({ users, currentUserId, onToggleAdmin }: {
   users: AdminUser[];
   currentUserId: string;
   onToggleAdmin: (id: string, current: boolean) => void;
 }) {
+  const adminCount = users.filter((u) => u.isAdmin).length;
+
   return (
     <div>
       <BigNumGrid items={[
         { val: String(users.length), label: "Total users" },
-        { val: String(users.filter((u) => u.isAdmin).length), label: "Admins" },
+        { val: String(adminCount), label: "Admins" },
       ]} />
-      <SecHead title="User Access" />
-      <div className="flex flex-col">
+      <SecHead title="Users & Permissions" />
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {users.map((u) => (
-          <div key={u.id} className="flex items-center justify-between px-3 py-3 border-b border-[var(--adm-border2)] hover:bg-[var(--adm-bg2)]">
+          <div
+            key={u.id}
+            style={{
+              minHeight: "var(--size-row-min)",
+              borderBottom: "1px solid var(--color-row-divider)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "var(--space-3) 0",
+            }}
+          >
             <div>
-              <div className="font-[var(--adm-mono)] text-xs text-[var(--adm-fg)] font-medium">{u.name ?? u.displayName ?? u.id}</div>
-              <div className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] mt-0.5">{u.email}</div>
+              <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", marginBottom: "var(--space-1)" }}>
+                {[u.name].filter(Boolean).join(" ") || u.id}
+              </div>
+              {u.username && (
+                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
+                  @{u.username}
+                </div>
+              )}
+              <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)" }}>
+                {u.email}
+              </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", flexShrink: 0 }}>
               {u.isAdmin && (
-                <span className="font-[var(--adm-mono)] text-[10px] tracking-[0.1em] uppercase text-[var(--adm-green)] border border-[var(--adm-green)] px-2 py-0.5">Admin</span>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", color: "var(--color-navy)", border: "1px solid var(--color-navy)", borderRadius: "var(--radius-full)", padding: "2px var(--space-2)" }}>
+                  Admin
+                </span>
               )}
-              {u.id !== currentUserId && (
-                <Button variant="secondary" size="sm" onClick={() => onToggleAdmin(u.id!, u.isAdmin ?? false)}>
-                  {u.isAdmin ? "Revoke admin" : "Grant admin"}
+              {u.id === currentUserId ? (
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", fontStyle: "italic" }}>you</span>
+              ) : (
+                <Button
+                  variant="ghost"
+                  disabled={u.isAdmin && adminCount <= 1}
+                  onClick={() => onToggleAdmin(u.id, u.isAdmin)}
+                >
+                  {u.isAdmin ? "Revoke Admin" : "Grant Admin"}
                 </Button>
-              )}
-              {u.id === currentUserId && (
-                <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] italic">you</span>
               )}
             </div>
           </div>
@@ -819,46 +927,74 @@ function UsersTab({ users, currentUserId, onToggleAdmin }: {
 
 // ── Data Quality tab ──────────────────────────────────────────────────────────
 
-function DataQualityTab({ frags }: { frags: DQFrag[] }) {
-  const missingAccords = frags.filter((f) => f.missingAccords);
-  const missingNotes = frags.filter((f) => f.missingNotes);
-  const missingBoth = frags.filter((f) => f.missingAccords && f.missingNotes);
-  const [filter, setFilter] = useState<"accords" | "notes" | "both">("accords");
+type DQFilter = "notes" | "rating" | "concentration" | "both";
 
-  const displayed = filter === "accords" ? missingAccords : filter === "notes" ? missingNotes : missingBoth;
+const DQ_OPTIONS = [
+  { value: "notes", label: "Missing Notes" },
+  { value: "rating", label: "Missing Rating" },
+  { value: "concentration", label: "Missing Concentration" },
+  { value: "both", label: "Missing Rating & Concentration" },
+];
+
+function DataQualityTab({ frags }: { frags: DQUserFrag[] }) {
+  const [filter, setFilter] = useState<DQFilter>("rating");
+
+  const displayed = frags.filter((f) => {
+    if (filter === "notes") return f.missingNotes;
+    if (filter === "rating") return f.missingRating;
+    if (filter === "concentration") return f.missingConcentration;
+    return f.missingRating && f.missingConcentration;
+  });
+
+  const missingNotes = frags.filter((f) => f.missingNotes).length;
+  const missingRating = frags.filter((f) => f.missingRating).length;
+  const missingConc = frags.filter((f) => f.missingConcentration).length;
+  const missingBoth = frags.filter((f) => f.missingRating && f.missingConcentration).length;
+
+  const rowStyle: React.CSSProperties = {
+    minHeight: "var(--size-row-min)",
+    borderBottom: "1px solid var(--color-row-divider)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "var(--space-4)",
+  };
 
   return (
     <div>
       <BigNumGrid items={[
-        { val: String(frags.length), label: "Total in library" },
-        { val: String(missingAccords.length), label: "Missing accords", valClass: missingAccords.length > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
-        { val: String(missingNotes.length), label: "Missing notes", valClass: missingNotes.length > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
-        { val: String(missingBoth.length), label: "Missing both" },
+        { val: String(frags.length), label: "Total user frags" },
+        { val: String(missingRating), label: "Missing rating", valClass: missingRating > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
+        { val: String(missingConc), label: "Missing concentration", valClass: missingConc > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
+        { val: String(missingNotes), label: "Missing notes", valClass: missingNotes > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
       ]} />
 
-      <div className="flex flex-wrap gap-2 mb-5">
-        {(["accords", "notes", "both"] as const).map((f) => (
-          <TabPill
-            key={f}
-            label={`Missing ${f}`}
-            active={filter === f}
-            onClick={() => setFilter(f)}
-          />
-        ))}
+      <div style={{ marginBottom: "var(--space-5)", maxWidth: 260 }}>
+        <Select options={DQ_OPTIONS} value={filter} onChange={(v) => setFilter(v as DQFilter)} />
       </div>
 
       {displayed.length === 0 ? (
-        <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-green)] py-3">All fragrances have {filter} data.</div>
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)", padding: "var(--space-6) 0" }}>
+          No records match this filter.
+        </div>
       ) : (
-        <DataTable
-          headers={["Fragrance", "House", "Accords", "Notes"]}
-          rows={displayed.map((f) => [
-            f.name,
-            f.house,
-            f.missingAccords ? <span className="text-[var(--adm-red)]">missing</span> : <span className="text-[var(--adm-green)]">ok</span>,
-            f.missingNotes ? <span className="text-[var(--adm-red)]">missing</span> : <span className="text-[var(--adm-green)]">ok</span>,
-          ])}
-        />
+        <div>
+          {displayed.map((f) => (
+            <div key={f.id} style={rowStyle}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {f.name}
+                </div>
+                <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)" }}>
+                  {f.house}
+                </div>
+              </div>
+              <Link href={`/import?name=${encodeURIComponent(f.name)}`}>
+                <Button variant="ghost">Fix</Button>
+              </Link>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -873,41 +1009,56 @@ function PendingEntriesTab({
 }: {
   entries: PendingEntry[];
   users: AdminUser[];
-  onDismiss: (id: string) => void;
+  onDismiss: (id: string) => Promise<void>;
 }) {
-  const pending = entries.filter((e) => e.status === "pending");
+  const rowStyle: React.CSSProperties = {
+    minHeight: "var(--size-row-min)",
+    borderBottom: "1px solid var(--color-row-divider)",
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--space-4)",
+  };
 
   return (
     <div>
       <BigNumGrid items={[
-        { val: String(pending.length), label: "Pending requests", valClass: pending.length > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
-        { val: String(entries.filter((e) => e.status === "dismissed").length), label: "Dismissed" },
-        { val: String(entries.length), label: "Total" },
+        { val: String(entries.length), label: "Pending requests", valClass: entries.length > 0 ? "text-[var(--adm-red)]" : "text-[var(--adm-green)]" },
       ]} />
 
-      {pending.length === 0 ? (
-        <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-green)] py-3">No pending requests.</div>
+      {entries.length === 0 ? (
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)", padding: "var(--space-6) 0" }}>
+          No pending requests.
+        </div>
       ) : (
-        <div className="flex flex-col">
-          {pending.map((e) => (
-            <div key={e.id} className="flex items-start gap-3 px-3 py-3 border-b border-[var(--adm-border2)] hover:bg-[var(--adm-bg2)]">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="font-[var(--adm-mono)] text-xs text-[var(--adm-fg)] font-medium">{e.fragranceName}</span>
-                  {e.house && <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)]">{e.house}</span>}
-                  {e.concentration && (
-                    <span className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg3)] border border-[var(--adm-border)] px-1.5 py-0.5">{e.concentration}</span>
-                  )}
-                </div>
-                <div className="font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)]">
-                  {userName(e.requestedBy, users)} &middot; {new Date(e.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                </div>
+        <div>
+          {entries.map((e) => (
+            <div key={e.id} style={rowStyle}>
+              <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "var(--space-4)", flexWrap: "wrap" }}>
+                <span style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "var(--text-note)", color: "var(--color-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {e.fragranceName}
+                </span>
+                {e.house && (
+                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)", flexShrink: 0 }}>
+                    {e.house}
+                  </span>
+                )}
+                {e.concentration && (
+                  <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", flexShrink: 0 }}>
+                    {e.concentration}
+                  </span>
+                )}
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", flexShrink: 0 }}>
+                  {userLabel(e.requestedBy, users)}
+                </span>
+                <span style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", flexShrink: 0 }}>
+                  {fmtDate(e.createdAt)}
+                </span>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div style={{ display: "flex", gap: "var(--space-2)", flexShrink: 0 }}>
                 <Link href={`/import?name=${encodeURIComponent(e.fragranceName)}`}>
-                  <Button variant="secondary" size="sm">Import from Fragrantica</Button>
+                  <Button variant="secondary">Import</Button>
                 </Link>
-                <Button variant="ghost" size="sm" onClick={() => onDismiss(e.id)}>Dismiss</Button>
+                <Button variant="ghost" onClick={() => onDismiss(e.id)}>Dismiss</Button>
               </div>
             </div>
           ))}
@@ -919,7 +1070,7 @@ function PendingEntriesTab({
 
 // ── Admin page ───────────────────────────────────────────────────────────────
 
-const TABS = ["Spend", "Usage", "Errors", "Audit", "Flags", "Users", "Data Quality", "Pending"] as const;
+const TABS = ["Spend", "Usage", "Errors", "Audit", "Community Flags", "Users & Permissions", "Data Quality", "Pending Entries"] as const;
 type TabId = typeof TABS[number];
 
 interface AdminData {
@@ -927,7 +1078,7 @@ interface AdminData {
   activityLogs: ActivityLog[];
   users: AdminUser[];
   flags: CommunityFlag[];
-  dqFrags: DQFrag[];
+  dqFrags: DQUserFrag[];
   pendingEntries: PendingEntry[];
 }
 
@@ -948,14 +1099,15 @@ export default function AdminPage() {
     setLoading(true);
     setError(null);
     try {
-      const [apiRes, actRes, profilesRes, flagsRes, fragsRes, pendingRes] = await Promise.all([
+      const [apiRes, actRes, profilesRes, flagsRes, userFragsRes, pendingRes] = await Promise.all([
         supabase.from("api_log").select("*").order("created_at", { ascending: false }),
         supabase.from("activity_log").select("*").order("created_at", { ascending: false }),
-        supabase.from("user_profiles").select("id, name, email, created_at, is_admin"),
-        supabase.from("community_flags").select("*").order("created_at", { ascending: false }),
-        supabase.from("fragrances").select("id, name, house, accords, top_notes"),
-        supabase.from("pending_entries").select("*").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, first_name, last_name, username, email, is_admin"),
+        supabase.from("community_flags").select("*").eq("resolved", false).order("created_at", { ascending: false }),
+        supabase.from("user_fragrances").select("id, name, house, user_id, personal_notes, personal_rating, type").order("created_at", { ascending: false }),
+        supabase.from("pending_entries").select("*").eq("status", "pending").order("created_at", { ascending: false }),
       ]);
+
       const mapApiLog = (r: Record<string, unknown>): ApiLog => ({
         timestamp: (r.created_at as string) ?? "",
         feature: (r.feature as string) ?? "",
@@ -975,29 +1127,54 @@ export default function AdminPage() {
       });
       const mapProfile = (r: Record<string, unknown>): AdminUser => ({
         id: r.id as string,
-        userId: r.id as string,
-        name: r.name as string,
-        displayName: r.name as string,
-        email: r.email as string,
+        username: (r.username as string) ?? null,
+        name: [r.first_name, r.last_name].filter(Boolean).join(" ") || null,
+        email: (r.email as string) ?? null,
         isAdmin: (r.is_admin as boolean) ?? false,
       });
-      const mapDQFrag = (r: Record<string, unknown>): DQFrag => ({
-        id: r.id as string,
-        name: r.name as string,
-        house: r.house as string,
-        missingAccords: !r.accords || (r.accords as string[]).length === 0,
-        missingNotes: !r.top_notes || (r.top_notes as string[]).length === 0,
-      });
-      const mapFlag = (r: Record<string, unknown>): CommunityFlag => ({
+
+      const flags = (flagsRes.data ?? []).map((r): CommunityFlag => ({
         id: r.id as string,
         userId: r.user_id as string,
+        fragranceId: (r.fragrance_id as string) ?? null,
         fragranceName: r.fragrance_name as string,
-        fragranceHouse: r.fragrance_house as string,
+        fragranceHouse: (r.fragrance_house as string) ?? "",
         fieldFlagged: r.field_flagged as string,
-        userNote: (r.user_note as string) ?? null,
+        suggestedValue: (r.user_note as string) ?? null,
+        currentValue: null,
         resolved: (r.resolved as boolean) ?? false,
         createdAt: r.created_at as string,
-      });
+      }));
+
+      // Enrich flags with current field values from fragrances table
+      const fragranceIds = [...new Set(flags.map((f) => f.fragranceId).filter(Boolean) as string[])];
+      if (fragranceIds.length > 0) {
+        const { data: fragData } = await supabase
+          .from("fragrances")
+          .select("id, accords, top_notes, middle_notes, base_notes, type, description")
+          .in("id", fragranceIds);
+        const fragMap: Record<string, Record<string, unknown>> = {};
+        (fragData ?? []).forEach((f) => { fragMap[f.id as string] = f as Record<string, unknown>; });
+        flags.forEach((flag) => {
+          if (!flag.fragranceId || !fragMap[flag.fragranceId]) return;
+          const frag = fragMap[flag.fragranceId];
+          const raw = frag[flag.fieldFlagged as string];
+          if (Array.isArray(raw)) flag.currentValue = raw.join(", ");
+          else if (raw != null) flag.currentValue = String(raw);
+          else flag.currentValue = "";
+        });
+      }
+
+      const dqFrags = (userFragsRes.data ?? []).map((r): DQUserFrag => ({
+        id: r.id as string,
+        name: r.name as string,
+        house: (r.house as string) ?? "",
+        userId: r.user_id as string,
+        missingNotes: !r.personal_notes || (r.personal_notes as string).trim() === "",
+        missingRating: r.personal_rating == null,
+        missingConcentration: !r.type,
+      }));
+
       const mapPendingEntry = (r: Record<string, unknown>): PendingEntry => ({
         id: r.id as string,
         fragranceName: r.fragrance_name as string,
@@ -1007,16 +1184,16 @@ export default function AdminPage() {
         createdAt: r.created_at as string,
         status: (r.status as string) ?? "pending",
       });
-      const allDQFrags = (fragsRes.data ?? []).map(mapDQFrag);
+
       setData({
         apiLogs: (apiRes.data ?? []).map(mapApiLog),
         activityLogs: (actRes.data ?? []).map(mapActivityLog),
         users: (profilesRes.data ?? []).map(mapProfile),
-        flags: (flagsRes.data ?? []).map(mapFlag),
-        dqFrags: allDQFrags.filter((f) => f.missingAccords || f.missingNotes),
+        flags,
+        dqFrags,
         pendingEntries: (pendingRes.data ?? []).map(mapPendingEntry),
       });
-      setLastSync("Just now");
+      setLastSync(new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load admin data");
     } finally {
@@ -1026,16 +1203,32 @@ export default function AdminPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function resolveFlag(id: string) {
+  async function resolveFlag(id: string, field: string, fragranceId: string | null, value: string) {
+    if (fragranceId && field && value.trim()) {
+      const updatePayload: Record<string, unknown> = {};
+      const v = value.trim();
+      // Array fields: split by comma
+      const arrayFields = ["accords", "top_notes", "middle_notes", "base_notes"];
+      if (arrayFields.includes(field)) {
+        updatePayload[field] = v.split(",").map((s) => s.trim()).filter(Boolean);
+      } else {
+        updatePayload[field] = v;
+      }
+      await supabase.from("fragrances").update(updatePayload).eq("id", fragranceId);
+    }
     await supabase.from("community_flags").update({ resolved: true }).eq("id", id);
-    setData((prev) => ({
-      ...prev,
-      flags: prev.flags.map((f) => f.id === id ? { ...f, resolved: true } : f),
-    }));
+    setData((prev) => ({ ...prev, flags: prev.flags.filter((f) => f.id !== id) }));
+  }
+
+  async function dismissFlag(id: string) {
+    await supabase.from("community_flags").update({ resolved: true }).eq("id", id);
+    setData((prev) => ({ ...prev, flags: prev.flags.filter((f) => f.id !== id) }));
   }
 
   async function toggleAdmin(id: string, current: boolean) {
-    await supabase.from("user_profiles").update({ is_admin: !current }).eq("id", id);
+    const adminCount = data.users.filter((u) => u.isAdmin).length;
+    if (current && adminCount <= 1) return;
+    await supabase.from("profiles").update({ is_admin: !current }).eq("id", id);
     setData((prev) => ({
       ...prev,
       users: prev.users.map((u) => u.id === id ? { ...u, isAdmin: !current } : u),
@@ -1046,7 +1239,7 @@ export default function AdminPage() {
     await supabase.from("pending_entries").update({ status: "dismissed" }).eq("id", id);
     setData((prev) => ({
       ...prev,
-      pendingEntries: prev.pendingEntries.map((e) => e.id === id ? { ...e, status: "dismissed" } : e),
+      pendingEntries: prev.pendingEntries.filter((e) => e.id !== id),
     }));
   }
 
@@ -1058,7 +1251,6 @@ export default function AdminPage() {
 
   return (
     <div className="flex flex-col h-full bg-[var(--adm-bg)] font-[var(--adm-mono)]">
-      {/* Admin header */}
       <div className="border-b-2 border-[var(--adm-fg)] px-8 py-5 flex justify-between items-start shrink-0">
         <div>
           <div className="font-[var(--adm-mono)] text-[22px] font-bold tracking-[0.04em] text-[var(--adm-fg)] leading-none mb-1">
@@ -1076,7 +1268,6 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Status banner */}
       {!loading && (
         <div className={`px-8 py-3 flex items-center gap-3 text-[11px] tracking-[0.06em] ${errors24h > 0 ? "bg-[var(--adm-red-bg)] border-l-[3px] border-[var(--adm-red)] text-[var(--adm-red)]" : "bg-[var(--adm-green-bg)] border-l-[3px] border-[var(--adm-green)] text-[var(--adm-green)]"}`}>
           <div className={`w-2 h-2 rounded-full ${errors24h > 0 ? "bg-[var(--adm-red)]" : "bg-[var(--adm-green)]"}`} />
@@ -1084,19 +1275,12 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Tabs */}
       <div className="flex flex-wrap gap-2 border-b border-[var(--adm-border)] shrink-0 px-8 py-2">
         {TABS.map((t) => (
-          <TabPill
-            key={t}
-            label={t}
-            active={tab === t}
-            onClick={() => setTab(t)}
-          />
+          <TabPill key={t} label={t} active={tab === t} onClick={() => setTab(t)} />
         ))}
       </div>
 
-      {/* Body */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[1200px] mx-auto px-8 py-8">
           {loading && (
@@ -1111,19 +1295,29 @@ export default function AdminPage() {
               {tab === "Usage" && <UsageTab apiLogs={data.apiLogs} activityLogs={data.activityLogs} users={data.users} />}
               {tab === "Errors" && <ErrorsTab apiLogs={data.apiLogs} />}
               {tab === "Audit" && <AuditTab />}
-              {tab === "Flags" && <FlagsTab flags={data.flags} users={data.users} onResolve={resolveFlag} />}
-              {tab === "Users" && <UsersTab users={data.users} currentUserId={user.id} onToggleAdmin={toggleAdmin} />}
+              {tab === "Community Flags" && (
+                <FlagsTab
+                  flags={data.flags}
+                  users={data.users}
+                  onResolve={resolveFlag}
+                  onDismiss={dismissFlag}
+                />
+              )}
+              {tab === "Users & Permissions" && (
+                <UsersTab users={data.users} currentUserId={user.id} onToggleAdmin={toggleAdmin} />
+              )}
               {tab === "Data Quality" && <DataQualityTab frags={data.dqFrags} />}
-              {tab === "Pending" && <PendingEntriesTab entries={data.pendingEntries} users={data.users} onDismiss={dismissPendingEntry} />}
+              {tab === "Pending Entries" && (
+                <PendingEntriesTab entries={data.pendingEntries} users={data.users} onDismiss={dismissPendingEntry} />
+              )}
             </>
           )}
         </div>
       </div>
 
-      {/* Footer */}
       <div className="border-t border-[var(--adm-border)] px-8 py-3 flex justify-between font-[var(--adm-mono)] text-[10px] text-[var(--adm-fg4)] tracking-[0.08em] shrink-0">
         <span>tesknota / admin</span>
-        <span>api_log · activity_log · community_flags</span>
+        <span>api_log · activity_log · community_flags · pending_entries</span>
       </div>
     </div>
   );
