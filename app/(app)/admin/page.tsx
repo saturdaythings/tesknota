@@ -1132,7 +1132,7 @@ function DevBotTab({ userId }: { userId: string }) {
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px 0", display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-4) 0", display: "flex", flexDirection: "column", gap: "10px" }}>
         {messages.length === 0 && (
           <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-sm)", color: "var(--color-meta-text)", padding: "var(--space-4) 0" }}>
             Ask me to read a file, propose a code change, or push a commit. I'll always show you the diff first.
@@ -1163,11 +1163,11 @@ function DevBotTab({ userId }: { userId: string }) {
 
       {/* Input */}
       <div style={{
-        padding: "8px 0 0",
+        padding: "var(--space-2) 0 0",
         borderTop: "1px solid var(--color-cream-dark)",
         flexShrink: 0,
         display: "flex",
-        gap: "8px",
+        gap: "var(--space-2)",
       }}>
         <Input
           value={input}
@@ -1398,7 +1398,7 @@ export default function AdminPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[1200px] mx-auto px-8 py-8">
+        <div className="max-w-[1200px] mx-auto px-[var(--space-8)] py-[var(--space-8)]">
           {loading && (
             <div className="font-[var(--adm-mono)] text-[11px] text-[var(--adm-fg4)] tracking-[var(--tracking-base)]">Loading...</div>
           )}
