@@ -1171,8 +1171,8 @@ const GALLERY_ITEMS: GalleryItem[] = [
     id: 'search-input',
     name: 'SearchInput',
     path: 'components/ui/search-input.tsx',
-    pages: ['Collection (search bar)', 'Wishlist'],
-    tokens: ['--text-sm', '--color-cream', '--color-navy', '--color-meta-text', '--radius-sm', '--color-sand-light'],
+    pages: ['Collection (search bar)', 'Wishlist', 'Compliments', 'Friend', 'Add Fragrance modal', 'Add to Wishlist modal', 'FloatingActionButton'],
+    tokens: ['--text-sm', '--color-cream', '--color-navy', '--color-meta-text', '--radius-sm'],
   },
   {
     id: 'pagination',
