@@ -441,14 +441,14 @@ export function BotDrawer() {
         <div
           onClick={openDrawer}
           style={{
-            margin: "0 16px 12px",
+            margin: "0 var(--space-4) var(--space-3)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             cursor: "pointer",
             background: "var(--color-sand-light)",
             border: "1px solid var(--color-cream-dark)",
-            padding: "10px 16px",
+            padding: "10px var(--space-4)",
             fontFamily: "var(--font-sans)",
             fontSize: "var(--text-xs)",
             color: "var(--color-navy)",
@@ -538,7 +538,7 @@ export function BotDrawer() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "14px 20px",
+          padding: "14px var(--space-5)",
           borderBottom: "1px solid var(--color-cream-dark)",
           flexShrink: 0,
         }}>
@@ -550,14 +550,14 @@ export function BotDrawer() {
             onClick={closeDrawer}
             aria-label="Close"
             className="h-auto"
-            style={{ fontSize: "var(--text-lg)", color: "var(--color-meta-text)", padding: "4px 8px", lineHeight: 1 }}
+            style={{ fontSize: "var(--text-lg)", color: "var(--color-meta-text)", padding: "var(--space-1) var(--space-2)", lineHeight: 1 }}
           >
             ×
           </Button>
         </div>
 
         {/* Messages */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-4) var(--space-5)", display: "flex", flexDirection: "column", gap: "10px" }}>
           {messages.map((m, i) => (
             <div
               key={i}
@@ -584,7 +584,7 @@ export function BotDrawer() {
             />
           )}
           {buttons && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignSelf: "flex-start" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)", alignSelf: "flex-start" }}>
               {buttons.map((b, i) => (
                 <Button
                   key={i}
@@ -611,7 +611,7 @@ export function BotDrawer() {
 
         {/* Quick chips */}
         {messages.length === 0 && !pendingVoice && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", padding: "0 20px 12px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)", padding: "0 var(--space-5) var(--space-3)" }}>
             {QUICK_CHIPS.map((chip) => (
               <Button
                 key={chip}
@@ -637,12 +637,12 @@ export function BotDrawer() {
 
         {/* Input row */}
         <div style={{
-          padding: "8px 20px",
-          paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
+          padding: "var(--space-2) var(--space-5)",
+          paddingBottom: "calc(var(--space-4) + env(safe-area-inset-bottom, 0px))",
           borderTop: "1px solid var(--color-cream-dark)",
           flexShrink: 0,
           display: "flex",
-          gap: "8px",
+          gap: "var(--space-2)",
           alignItems: "center",
         }}>
           {/* Mic button */}
