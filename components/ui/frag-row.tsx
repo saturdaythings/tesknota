@@ -16,8 +16,13 @@ export function StatusBadge({ status }: { status: FragranceStatus }) {
   const style = STATUS_STYLE[status] ?? { color: "var(--color-notes-text)" };
   return (
     <span
-      className="font-[var(--font-sans)] text-xs tracking-[var(--tracking-sm)] px-2 py-[var(--space-half)] whitespace-nowrap border"
-      style={{ color: style.color, borderColor: style.color }}
+      className="font-sans uppercase"
+      style={{
+        fontSize: "var(--text-xs)",
+        letterSpacing: "var(--tracking-md)",
+        color: style.color,
+        whiteSpace: "nowrap",
+      }}
     >
       {STATUS_LABELS[status] ?? status}
     </span>

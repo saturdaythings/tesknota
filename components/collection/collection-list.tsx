@@ -119,6 +119,7 @@ function CollectionRow({ frag, columns, ctx, onOpen }: CollectionRowProps) {
         alignItems: 'center',
         minHeight: 'var(--space-16)',
         borderBottom: '1px solid var(--color-row-divider)',
+        background: 'transparent',
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-row-hover)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -126,7 +127,7 @@ function CollectionRow({ frag, columns, ctx, onOpen }: CollectionRowProps) {
       {columns.map((col) => (
         <div
           key={col.id}
-          style={{ padding: '0 var(--space-4)', minWidth: col.id === 'fragrance' ? undefined : 0, textAlign: col.align ?? 'left' }}
+          style={{ padding: '0 var(--space-4)', minWidth: 0, textAlign: col.align ?? 'left' }}
         >
           {col.render(frag, ctx)}
         </div>
