@@ -329,13 +329,14 @@ export default function SocialPage() {
   const FFWish = FF.filter(
     (f) => f.status === "WANT_TO_BUY" || f.status === "WANT_TO_SMELL"
   );
-  const myCurrentNames = new Set(
-    myFrags.filter((f) => f.status === "CURRENT").map((f) => f.name.toLowerCase())
-  );
-  const inCommon = FF.filter(
-    (f) => f.status === "CURRENT" && myCurrentNames.has(f.name.toLowerCase())
-  );
-  const friendAccordCounts: [string, number][] = (() => {
+  const inCommon = useMemo(() => {
+    const myCurrentNames = new Set(
+      myFrags.filter((f) => f.status === "CURRENT").map((f) => f.name.toLowerCase())
+    );
+    return FF.filter((f) => f.status === "CURRENT" && myCurrentNames.has(f.name.toLowerCase()));
+  }, [FF, myFrags]);
+
+  const friendAccordCounts = useMemo<[string, number][]>(() => {
     const counts: Record<string, number> = {};
     FFOwned.forEach((f) => {
       getAccords(f, communityFrags).forEach((a) => {
@@ -343,7 +344,7 @@ export default function SocialPage() {
       });
     });
     return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12);
-  })();
+  }, [FFOwned, communityFrags]);
 
   const friendName = selectedFriendProfile
     ? profileDisplayName(selectedFriendProfile)
@@ -779,7 +780,7 @@ function CollectionTab({
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <div style={{ padding: "0 var(--space-4)", minWidth: 0 }}>
-                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               </div>
               <div style={{ padding: "0 var(--space-4)" }}>
                 <span className="font-sans uppercase" style={cellStyle}>{f.personalRating ? "★".repeat(f.personalRating) : "—"}</span>
@@ -810,7 +811,7 @@ function CollectionTab({
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-row-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+              <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
                 {f.personalRating ? <span className="font-sans uppercase" style={metaStyle}>{"★".repeat(f.personalRating)}</span> : null}
                 <StatusBadge status={f.status as FragranceStatus} />
@@ -923,6 +924,11 @@ function ComplimentsTab({ compliments, frags }: { compliments: UserCompliment[];
 
 // ── Wishlist tab ───────────────────────────────────────────────
 
+const WISHLIST_SORT_OPTIONS = [
+  { value: "fragrance", label: "Fragrance" },
+  { value: "date_added", label: "Date Added" },
+];
+
 function WishlistTab({ frags, communityFrags }: { frags: UserFragrance[]; communityFrags: CommunityFrag[] }) {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(25);
@@ -931,13 +937,6 @@ function WishlistTab({ frags, communityFrags }: { frags: UserFragrance[]; commun
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [priorityFilter, setPriorityFilter] = useState("any");
   const [statusFilter, setStatusFilter] = useState("any");
-
-  const WISHLIST_SORT_OPTIONS = [
-    { value: "fragrance", label: "Fragrance" },
-    { value: "date_added", label: "Date Added" },
-  ];
-
-  const PRIORITY_ORDER: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
 
   const filtered = useMemo(() => {
     let list = frags;
@@ -999,7 +998,7 @@ function WishlistTab({ frags, communityFrags }: { frags: UserFragrance[]; commun
           return (
             <div key={f.id} style={dataRowStyle}>
               <div style={{ padding: "0 var(--space-4)", minWidth: 0 }}>
-                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               </div>
               <div style={{ padding: "0 var(--space-4)" }}>
                 <span className="font-sans uppercase" style={cellStyle}>{price}</span>
@@ -1059,7 +1058,7 @@ function InCommonTab({
           return (
             <div key={f.id} style={dataRowStyle}>
               <div style={{ padding: "0 var(--space-4)", minWidth: 0 }}>
-                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} />
+                <FragranceCell name={f.name} house={f.house} type={f.type ?? null} isDupe={f.isDupe} dupeFor={f.dupeFor || undefined} />
               </div>
               <div style={{ padding: "0 var(--space-4)", minWidth: 0 }}>
                 <span className="font-sans" style={{ fontSize: "var(--text-xs)", color: "var(--color-navy)", lineHeight: "var(--leading-relaxed)" }}>{accords}</span>
