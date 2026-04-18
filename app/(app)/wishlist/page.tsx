@@ -60,7 +60,6 @@ const cellStyle = {
   color: "var(--color-navy)",
 } as const;
 
-/* component-internal: wishlist desktop grid */
 const WISHLIST_GRID_COLS = "minmax(240px,1fr) 100px 110px 200px 240px";
 const WISHLIST_HEADERS = ["Fragrance", "Priority", "Date Added", "Accords", "Notes"];
 
@@ -234,7 +233,6 @@ function NotesCell({ cf }: { cf: CommunityFrag | null }) {
 
 // ── Table row skeleton ────────────────────────────────────
 
-/* component-internal: skeleton row height */
 const SKELETON_ROW_HEIGHT = "var(--size-row-min)";
 
 function WishlistGridShell({ children }: { children: React.ReactNode }) {
@@ -340,12 +338,12 @@ function WishlistMobileCard({
               {frag.name}
             </span>
             {frag.type && shortFragType(frag.type) && (
-              <span style={{ background: "var(--color-cream-dark)", border: "1px solid var(--color-row-divider)", borderRadius: "var(--radius-full)", padding: "2px var(--space-2)", fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-meta-text)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", flexShrink: 0, whiteSpace: "nowrap" }}>
+              <span style={{ background: "var(--color-cream-dark)", border: "1px solid var(--color-row-divider)", borderRadius: "var(--radius-full)", padding: "var(--space-half) var(--space-2)", fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-meta-text)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", flexShrink: 0, whiteSpace: "nowrap" }}>
                 {shortFragType(frag.type)}
               </span>
             )}
             {frag.isDupe && (
-              <span style={{ background: "var(--color-cream-dark)", border: "1px solid var(--color-navy)", borderRadius: "var(--radius-full)", padding: "2px var(--space-2)", fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-navy)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", flexShrink: 0, whiteSpace: "nowrap" }}>
+              <span style={{ background: "var(--color-cream-dark)", border: "1px solid var(--color-navy)", borderRadius: "var(--radius-full)", padding: "var(--space-half) var(--space-2)", fontFamily: "var(--font-sans)", fontSize: "var(--text-label)", color: "var(--color-navy)", letterSpacing: "var(--tracking-wide)", textTransform: "uppercase", flexShrink: 0, whiteSpace: "nowrap" }}>
                 Dupe
               </span>
             )}
