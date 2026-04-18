@@ -199,6 +199,7 @@ export function PageHeader({
               display: "flex",
               gap: "var(--space-3)",
               alignItems: "flex-start",
+              flexWrap: "wrap",
             }}
           >
             {filterDropdowns.map((f, i) => (
