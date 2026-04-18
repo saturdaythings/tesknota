@@ -10,6 +10,17 @@ import { FragranceCell } from '@/components/ui/fragrance-cell';
 import { Select } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { FragSearch } from '@/components/ui/frag-search';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { FieldLabel, OptionalTag, RequiredMark } from '@/components/ui/field-label';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SearchInput } from '@/components/ui/search-input';
+import { Pagination } from '@/components/ui/pagination';
+import { StarRating } from '@/components/ui/StarRating';
+import { StatBox, StatsGrid } from '@/components/ui/stat-box';
+import { SectionHeader } from '@/components/ui/section-header';
 
 // ── Typography tokens ──────────────────────────────────────
 // specimen: text rendered at actual size/font/case as it appears in the app
@@ -383,8 +394,9 @@ const LAYOUT_TOKENS = [
 
 const DESIGN_SECTIONS = [
   { id: 'type-scale',   label: 'Typography'   },
-  { id: 'colors',       label: 'Colors'       },
-  { id: 'spacing',      label: 'Spacing'      },
+  { id: 'colors',             label: 'Colors'     },
+  { id: 'component-gallery', label: 'Components' },
+  { id: 'spacing',            label: 'Spacing'    },
   { id: 'layout',       label: 'Layout'       },
   { id: 'frag-cell',    label: 'Frag Cell'    },
   { id: 'buttons',      label: 'Buttons'      },
@@ -428,7 +440,7 @@ function HardcodeChecker({ children }: { children: React.ReactNode }) {
     const id = requestAnimationFrame(() => {
       const found: Violation[] = [];
       root.querySelectorAll('[style]').forEach((el) => {
-        if (el.closest('[data-hardcode-banner]')) return;
+        if (el.closest('[data-hardcode-banner]') || el.closest('[data-gallery-entry]')) return;
         const style = el.getAttribute('style') ?? '';
         const tag = `<${el.tagName.toLowerCase()}>`;
         const hexes = style.match(/#[0-9a-fA-F]{3,8}/g);
@@ -1071,6 +1083,168 @@ function Note({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ── Component gallery ─────────────────────────────────────
+
+interface GalleryItem {
+  id: string;
+  name: string;
+  path: string;
+  pages: string[];
+  tokens: string[];
+  note?: string;
+}
+
+const GALLERY_ITEMS: GalleryItem[] = [
+  {
+    id: 'button',
+    name: 'Button',
+    path: 'components/ui/button.tsx',
+    pages: ['Compliments', 'Collection', 'Wishlist', 'Modals', 'Admin'],
+    tokens: ['--color-navy', '--color-cream', '--text-xs', '--space-3', '--space-5', '--radius-sm', '--tracking-wide'],
+  },
+  {
+    id: 'input',
+    name: 'Input',
+    path: 'components/ui/input.tsx',
+    pages: ['Add / Edit modal', 'Settings'],
+    tokens: ['--text-sm', '--color-cream', '--color-navy', '--color-meta-text', '--color-accent', '--radius-sm'],
+  },
+  {
+    id: 'textarea',
+    name: 'Textarea',
+    path: 'components/ui/textarea.tsx',
+    pages: ['Add / Edit modal (notes field)'],
+    tokens: ['--text-sm', '--color-cream', '--color-navy', '--color-meta-text', '--color-accent', '--radius-sm'],
+  },
+  {
+    id: 'select',
+    name: 'Select',
+    path: 'components/ui/select.tsx',
+    pages: ['Compliments (sort / relation)', 'Collection (sort / status)', 'Modals'],
+    tokens: ['--text-sm', '--color-cream', '--color-navy', '--color-sand-light', '--radius-sm'],
+  },
+  {
+    id: 'tab-pill',
+    name: 'TabPill',
+    path: 'components/ui/tab-pill.tsx',
+    pages: ['Compliments (relation filter)', 'Collection (status filter)', 'Design System (nav)'],
+    tokens: ['--color-navy', '--color-cream', '--color-meta-text', '--text-xs', '--tracking-wide', '--radius-sm'],
+  },
+  {
+    id: 'fragrance-cell',
+    name: 'FragranceCell',
+    path: 'components/ui/fragrance-cell.tsx',
+    pages: ['Compliments (col 1)', 'Collection (col 1)', 'Wishlist (col 1)'],
+    tokens: ['--text-note', '--text-xs', '--color-navy', '--color-meta-text'],
+  },
+  {
+    id: 'badge',
+    name: 'Badge',
+    path: 'components/ui/badge.tsx',
+    pages: ['Collection (status)', 'Compliments'],
+    tokens: ['--color-navy', '--color-cream', '--text-xs', '--radius-sm'],
+  },
+  {
+    id: 'field-label',
+    name: 'FieldLabel \u00b7 OptionalTag \u00b7 RequiredMark',
+    path: 'components/ui/field-label.tsx',
+    pages: ['All modals and forms'],
+    tokens: ['--text-label', '--color-navy', '--color-destructive'],
+  },
+  {
+    id: 'empty-state',
+    name: 'EmptyState',
+    path: 'components/ui/empty-state.tsx',
+    pages: ['Compliments (empty)', 'Collection (empty)', 'Wishlist (empty)'],
+    tokens: ['--text-empty-title', '--text-ui', '--color-navy', '--color-meta-text'],
+  },
+  {
+    id: 'skeleton',
+    name: 'Skeleton',
+    path: 'components/ui/skeleton.tsx',
+    pages: ['Compliments (loading)', 'Collection (loading)'],
+    tokens: ['--color-sand-light', '--radius-sm'],
+  },
+  {
+    id: 'search-input',
+    name: 'SearchInput',
+    path: 'components/ui/search-input.tsx',
+    pages: ['Collection (search bar)', 'Wishlist'],
+    tokens: ['--text-sm', '--color-cream', '--color-navy', '--color-meta-text', '--radius-sm', '--color-sand-light'],
+  },
+  {
+    id: 'pagination',
+    name: 'Pagination',
+    path: 'components/ui/pagination.tsx',
+    pages: ['Compliments', 'Collection', 'Wishlist'],
+    tokens: ['--text-xs', '--color-navy', '--color-cream', '--color-meta-text', '--radius-sm'],
+  },
+  {
+    id: 'star-rating',
+    name: 'StarRating',
+    path: 'components/ui/StarRating.tsx',
+    pages: ['Add / Edit modal (collection)'],
+    tokens: ['--color-navy', '--color-sand-light'],
+    note: 'size=16 is hardcoded internally — not a token. max=5, readOnly optional.',
+  },
+  {
+    id: 'stat-box',
+    name: 'StatBox \u00b7 StatsGrid',
+    path: 'components/ui/stat-box.tsx',
+    pages: ['Dashboard'],
+    tokens: ['--text-xs', '--color-navy', '--color-meta-text'],
+    note: '34px value font size is hardcoded internally — not a token.',
+  },
+  {
+    id: 'section-header',
+    name: 'SectionHeader',
+    path: 'components/ui/section-header.tsx',
+    pages: ['Modals', 'Detail panels'],
+    tokens: [],
+    note: 'Uses legacy tokens --b2, --serif, --ink \u2014 not part of the current design system. Needs migration.',
+  },
+];
+
+function GalleryEntry({ item, children }: { item: GalleryItem; children: React.ReactNode }) {
+  return (
+    <div id={`gallery-${item.id}`} style={{ borderBottom: '1px solid var(--color-row-divider)', paddingBottom: 'var(--space-6)', marginBottom: 'var(--space-6)' }}>
+      <div className="flex items-baseline gap-3 flex-wrap mb-3">
+        <span className="font-sans font-medium" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy)' }}>{item.name}</span>
+        <code className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>{item.path}</code>
+      </div>
+      <div
+        data-gallery-entry
+        style={{ border: '1px solid var(--color-sand-light)', borderRadius: 'var(--radius-md)', padding: 'var(--space-5)', background: 'var(--color-cream)', marginBottom: 'var(--space-3)' }}
+      >
+        {children}
+      </div>
+      {item.tokens.length > 0 && (
+        <div className="flex flex-wrap" style={{ gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+          {item.tokens.map((t) => (
+            <code key={t} className="font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', background: 'var(--color-cream-faint)', padding: '1px var(--space-2)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-sand-light)' }}>{t}</code>
+          ))}
+        </div>
+      )}
+      <div className="font-sans" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-meta-text)' }}>
+        Used on: {item.pages.join(' \u00b7 ')}
+      </div>
+      {item.note && (
+        <div className="font-sans mt-1" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-navy-mid)', letterSpacing: 'var(--tracking-xs)' }}>{item.note}</div>
+      )}
+    </div>
+  );
+}
+
+function SearchInputDemo() {
+  const [val, setVal] = useState('');
+  return <SearchInput value={val} onChange={setVal} placeholder="Search fragrances..." />;
+}
+
+function StarRatingDemo() {
+  const [rating, setRating] = useState(3);
+  return <StarRating value={rating} onChange={setRating} />;
+}
+
 // ── Page ───────────────────────────────────────────────────
 
 export default function DesignSystemPage() {
@@ -1184,6 +1358,138 @@ export default function DesignSystemPage() {
               toggle={toggle}
               mode={mode}
             />
+          </Section>
+
+          {/* ── Component Gallery ── */}
+          <Section id="component-gallery" title="Components">
+            <Note>Every shared component rendered from its actual source file. The version here is the canonical locked version — any instance in the app that does not match it is a bug.</Note>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'button')!}>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="primary">Log Compliment</Button>
+                <Button variant="secondary">Find Fragrances</Button>
+                <Button variant="ghost">Cancel</Button>
+                <Button variant="destructive">Delete</Button>
+                <Button variant="primary" size="sm">Add</Button>
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'input')!}>
+              <div className="flex flex-col" style={{ gap: 'var(--space-4)', maxWidth: '320px' }}>
+                <Input label="FRAGRANCE NAME" placeholder="e.g. Replica Coffee Breeze" required />
+                <Input label="HOUSE" placeholder="e.g. Maison Margiela" error="House is required" />
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'textarea')!}>
+              <div style={{ maxWidth: '320px' }}>
+                <Textarea label="NOTES" placeholder="Any notes about this compliment\u2026" hint="Optional" rows={3} />
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'select')!}>
+              <div className="flex flex-wrap items-center gap-4">
+                <Select
+                  options={[
+                    { value: 'newest', label: 'Date \u2014 Newest first' },
+                    { value: 'oldest', label: 'Date \u2014 Oldest first' },
+                  ]}
+                  value="newest"
+                  onChange={() => {}}
+                  size="auto"
+                />
+                <div style={{ maxWidth: '220px', width: '100%' }}>
+                  <Select
+                    options={[
+                      { value: 'edp', label: 'Eau de Parfum' },
+                      { value: 'edt', label: 'Eau de Toilette' },
+                    ]}
+                    value="edp"
+                    onChange={() => {}}
+                  />
+                </div>
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'tab-pill')!}>
+              <div className="flex flex-wrap gap-2">
+                <TabPill label="All" count={12} active={true} onClick={() => {}} />
+                <TabPill label="Strangers" count={4} active={false} onClick={() => {}} />
+                <TabPill label="Friends" count={3} active={false} onClick={() => {}} />
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'fragrance-cell')!}>
+              <div className="flex flex-col" style={{ gap: 'var(--space-2)' }}>
+                <FragranceCell name="Replica \u2014 Coffee Breeze" house="Maison Margiela" type="Eau de Parfum" secondary="Baccarat Rouge 540" />
+                <FragranceCell name="Oud Wood" house="Tom Ford" type="Eau de Parfum" />
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'badge')!}>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="current">current</Badge>
+                <Badge variant="want">want</Badge>
+                <Badge variant="finished">finished</Badge>
+                <Badge variant="sample">sample</Badge>
+                <Badge variant="dupe">dupe</Badge>
+                <Badge variant="neutral">neutral</Badge>
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'field-label')!}>
+              <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
+                <FieldLabel>FRAGRANCE NAME <RequiredMark /></FieldLabel>
+                <FieldLabel>NOTES <OptionalTag /></FieldLabel>
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'empty-state')!}>
+              <EmptyState
+                icon={
+                  <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                }
+                title="No compliments yet"
+                description="Log your first compliment to get started."
+              />
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'skeleton')!}>
+              <div className="flex flex-col" style={{ gap: 'var(--space-3)' }}>
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-64" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'search-input')!}>
+              <div style={{ maxWidth: '300px' }}>
+                <SearchInputDemo />
+              </div>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'pagination')!}>
+              <Pagination page={2} onPage={() => {}} totalPages={5} total={48} pageSize={10} onPageSize={() => {}} />
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'star-rating')!}>
+              <StarRatingDemo />
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'stat-box')!}>
+              <StatsGrid>
+                <StatBox value="127" label="Total compliments" delta="+12 this month" />
+                <StatBox value="34" label="Fragrances worn" />
+                <StatBox value="8" label="In collection" />
+              </StatsGrid>
+            </GalleryEntry>
+
+            <GalleryEntry item={GALLERY_ITEMS.find((i) => i.id === 'section-header')!}>
+              <SectionHeader title="Log a Compliment" />
+            </GalleryEntry>
+
           </Section>
 
           {/* ── Spacing ── */}
