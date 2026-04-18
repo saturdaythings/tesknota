@@ -10,11 +10,11 @@ export function SectionHeader({ title, right, className }: SectionHeaderProps) {
   return (
     <div
       className={cn(
-        "flex items-baseline justify-between border-b border-[var(--b2)] pb-[9px] mb-4",
+        "flex items-baseline justify-between border-b border-[var(--color-row-divider)] pb-[9px] mb-4",
         className,
       )}
     >
-      <h2 className="font-[var(--serif)] text-[19px] font-normal text-[var(--ink)]">
+      <h2 className="font-[var(--font-serif)] text-[19px] font-normal text-[var(--color-navy)]">
         {title}
       </h2>
       {right && <div className="flex items-center gap-2">{right}</div>}

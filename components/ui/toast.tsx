@@ -54,7 +54,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             position: "fixed",
             bottom: "20px",
             right: "20px",
-            zIndex: "var(--z-toast)",
+            zIndex: 9999,
             display: "flex",
             flexDirection: "column",
             gap: "8px",

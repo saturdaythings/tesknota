@@ -16,7 +16,7 @@ export function Skeleton({ className }: SkeletonProps) {
           background: linear-gradient(
             90deg,
             var(--color-surface-raised) 25%,
-            var(--color-surface-overlay) 50%,
+            var(--color-sand-light) 50%,
             var(--color-surface-raised) 75%
           );
           background-size: 200% 100%;
