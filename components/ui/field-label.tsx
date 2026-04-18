@@ -22,7 +22,7 @@ export function OptionalTag() {
   return (
     <span
       className="normal-case font-normal"
-      style={{ fontSize: '13px', letterSpacing: 0, color: 'var(--color-navy-mid)' }}
+      style={{ fontSize: 'var(--text-sm)', letterSpacing: 0, color: 'var(--color-navy-mid)' }}
     >
       (optional)
     </span>
@@ -33,7 +33,7 @@ export function RequiredMark() {
   return (
     <span
       className="font-normal"
-      style={{ fontSize: '13px', letterSpacing: 0, color: 'var(--color-destructive)' }}
+      style={{ fontSize: 'var(--text-sm)', letterSpacing: 0, color: 'var(--color-destructive)' }}
     >
       *
     </span>
