@@ -140,7 +140,7 @@ export function FragDetail({
           <div className="flex items-center gap-2">
             <StatusBadge status={frag.status} />
             {frag.isDupe && (
-              <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-navy)', borderRadius: 'var(--radius-full)', padding: '2px var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-navy)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
+              <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-navy)', borderRadius: 'var(--radius-full)', padding: 'var(--space-half) var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-navy)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
                 Dupe
               </span>
             )}
@@ -167,7 +167,7 @@ export function FragDetail({
             {frag.type && shortFragType(frag.type) && (
               <div className="flex gap-3 py-[5px] border-b border-[var(--color-cream-dark)] items-center">
                 <span className="w-[110px] shrink-0 font-[var(--font-sans)] text-xs tracking-[var(--tracking-md)] uppercase text-[var(--color-navy)]">Type</span>
-                <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-row-divider)', borderRadius: 'var(--radius-full)', padding: '2px var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                <span style={{ background: 'var(--color-cream-dark)', border: '1px solid var(--color-row-divider)', borderRadius: 'var(--radius-full)', padding: 'var(--space-half) var(--space-2)', fontFamily: 'var(--font-sans)', fontSize: 'var(--text-label)', color: 'var(--color-meta-text)', letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {shortFragType(frag.type)}
                 </span>
               </div>

@@ -82,7 +82,7 @@ export function TabPill({ label, sublabel, count, active, onClick, variant = "de
         fontSize: 'var(--text-xs)',
         fontWeight: 400,
         letterSpacing: 'var(--tracking-wide)',
-        padding: '6px 12px',
+        padding: 'var(--space-2) var(--space-3)',
         borderRadius: 'var(--radius-md)',
         background: active ? 'var(--color-cream-dark)' : 'transparent',
         color: 'var(--color-navy)',

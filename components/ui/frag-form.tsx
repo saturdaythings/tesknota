@@ -253,7 +253,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                 <div className="mt-2 px-3 py-3 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
                   <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
                   {selectedHouse && (
-                    <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                    <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[var(--tracking-wide)] mt-[var(--space-half)]">{selectedHouse}</div>
                   )}
                   {(cd?.avgPrice || cd?.communityRating) && (
                     <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] mt-[3px]">
@@ -271,19 +271,19 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
                     <div className="mt-3 space-y-[6px]">
                       {cd.topNotes.length > 0 && (
                         <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-                          <span className="tracking-[0.08em] uppercase mr-2">Top</span>
+                          <span className="tracking-[var(--tracking-wide)] uppercase mr-2">Top</span>
                           {cd.topNotes.join(", ")}
                         </div>
                       )}
                       {cd.middleNotes.length > 0 && (
                         <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-                          <span className="tracking-[0.08em] uppercase mr-2">Mid</span>
+                          <span className="tracking-[var(--tracking-wide)] uppercase mr-2">Mid</span>
                           {cd.middleNotes.join(", ")}
                         </div>
                       )}
                       {cd.baseNotes.length > 0 && (
                         <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)]">
-                          <span className="tracking-[0.08em] uppercase mr-2">Base</span>
+                          <span className="tracking-[var(--tracking-wide)] uppercase mr-2">Base</span>
                           {cd.baseNotes.join(", ")}
                         </div>
                       )}
@@ -315,7 +315,7 @@ export function FragForm({ open, onClose, editing, forceStatus }: Props) {
               <div className="px-3 py-2 bg-[var(--color-cream-dark)] border border-[var(--color-cream-dark)]">
                 <div className="font-[var(--font-sans)] text-sm text-[var(--color-navy)]">{selectedName}</div>
                 {selectedHouse && (
-                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[0.08em] mt-[2px]">{selectedHouse}</div>
+                  <div className="font-[var(--font-sans)] text-xs text-[var(--color-navy)] uppercase tracking-[var(--tracking-wide)] mt-[var(--space-half)]">{selectedHouse}</div>
                 )}
                 {!isEdit && (
                   <Button variant="ghost" onClick={() => setStep(1)}>
