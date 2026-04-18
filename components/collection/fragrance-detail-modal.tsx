@@ -201,16 +201,16 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
           right: 0,
           bottom: 0,
           width: "400px",
-          boxShadow: "-4px 0 32px rgba(0,0,0,0.15)",
+          boxShadow: "var(--shadow-panel-left)",
         }}
-        className="max-sm:w-full max-sm:top-auto max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:h-[90vh] max-sm:rounded-t-[12px]"
+        className="max-sm:w-full max-sm:top-auto max-sm:left-0 max-sm:right-0 max-sm:bottom-0 max-sm:h-[90vh] max-sm:rounded-t-[var(--radius-xl)]"
       >
         {/* Mobile drag handle */}
         <div
           className="sm:hidden"
-          style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", flexShrink: 0 }}
+          style={{ display: "flex", justifyContent: "center", padding: "var(--space-2) 0 var(--space-1)", flexShrink: 0 }}
         >
-          <div style={{ width: "36px", height: "4px", borderRadius: "var(--radius-sm)", background: "var(--color-cream-dark)" }} />
+          <div style={{ width: "36px", height: "var(--space-1)", borderRadius: "var(--radius-sm)", background: "var(--color-cream-dark)" }} />
         </div>
 
         {/* Header */}
@@ -236,18 +236,7 @@ export function FragranceDetailModal({ frag, open, onClose, compliments, onDelet
               >
                 {frag?.name}
               </h2>
-              <div
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "var(--text-xs)",
-                  fontWeight: 500,
-                  letterSpacing: "var(--tracking-wide)",
-                  textTransform: "uppercase",
-                  color: "var(--color-meta-text)",
-                }}
-              >
-                {frag?.house}
-              </div>
+              <FieldLabel>{frag?.house}</FieldLabel>
             </div>
             <Button
               variant="icon"
