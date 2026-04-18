@@ -110,6 +110,9 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
   const [isDupe, setIsDupe] = useState(false);
   const [dupeFor, setDupeFor] = useState("");
   const [notes, setNotes] = useState("");
+  const [whereBoughtSearch, setWhereBoughtSearch] = useState("");
+  const [customWhereBoughtOptions, setCustomWhereBoughtOptions] = useState<string[]>([]);
+  const [whereBoughtOpen, setWhereBoughtOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -130,6 +133,8 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
     setIsDupe(false);
     setDupeFor("");
     setNotes("");
+    setWhereBoughtSearch("");
+    setWhereBoughtOpen(false);
   }, [open, defaultStatus, initialName]);
 
   useEffect(() => {
@@ -148,6 +153,18 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
       .slice(0, 8);
     setResults(matches);
   }, [debouncedQuery, communityFrags]);
+
+  useEffect(() => {
+    if (!whereBoughtOpen) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-where-bought-dropdown]')) {
+        setWhereBoughtOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [whereBoughtOpen]);
 
   function handleSelect(frag: CommunityFrag) {
     setSelected(frag);
@@ -353,13 +370,122 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
                   <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-xs)", color: "var(--color-meta-text)", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", marginBottom: "var(--space-3)" }}>
                     Where Bought
                   </div>
-                  <Select
-                    options={WHERE_BOUGHT_OPTIONS}
-                    value={whereBought}
-                    onChange={setWhereBought}
-                    placeholder="Select retailer"
-                    size="auto"
-                  />
+                  <div style={{ position: "relative" }} data-where-bought-dropdown>
+                    <button
+                      type="button"
+                      onClick={() => setWhereBoughtOpen(!whereBoughtOpen)}
+                      style={{
+                        width: "100%",
+                        padding: "var(--space-2) 0",
+                        borderBottom: "1px solid var(--color-meta-text)",
+                        border: "none",
+                        borderBottomStyle: "solid",
+                        background: "transparent",
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "var(--text-base)",
+                        color: whereBought ? "var(--color-navy)" : "var(--color-navy-mid)",
+                        outline: "none",
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {whereBought || "Select retailer"}
+                    </button>
+                    {whereBoughtOpen && (
+                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, marginTop: "var(--space-2)", background: "var(--color-cream)", border: "1px solid var(--color-meta-text)", borderRadius: "var(--radius-sm)", boxShadow: "var(--shadow-md)" }}>
+                        <div style={{ padding: "var(--space-2)" }}>
+                          <input
+                            type="text"
+                            value={whereBoughtSearch}
+                            onChange={(e) => setWhereBoughtSearch(e.target.value)}
+                            placeholder="Search..."
+                            style={{
+                              width: "100%",
+                              padding: "var(--space-1) var(--space-2)",
+                              border: "1px solid var(--color-meta-text)",
+                              borderRadius: "var(--radius-sm)",
+                              fontFamily: "var(--font-sans)",
+                              fontSize: "var(--text-sm)",
+                              color: "var(--color-navy)",
+                              outline: "none",
+                            }}
+                            autoFocus
+                          />
+                        </div>
+                        <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                          {(() => {
+                            const allOptions = [...WHERE_BOUGHT_OPTIONS, ...customWhereBoughtOptions.map((opt) => ({ value: opt, label: opt }))];
+                            const searchLower = whereBoughtSearch.toLowerCase();
+                            const filtered = searchLower
+                              ? allOptions.filter((opt) => opt.label.toLowerCase().includes(searchLower))
+                              : allOptions;
+                            const hasExactMatch = filtered.some((opt) => opt.value.toLowerCase() === searchLower);
+                            const showAddOwn = whereBoughtSearch.trim().length > 0 && !hasExactMatch;
+
+                            return (
+                              <>
+                                {filtered.map((opt) => (
+                                  <div
+                                    key={opt.value}
+                                    onClick={() => {
+                                      setWhereBought(opt.value);
+                                      setWhereBoughtSearch("");
+                                      setWhereBoughtOpen(false);
+                                    }}
+                                    style={{
+                                      height: "36px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      padding: "0 var(--space-3)",
+                                      fontSize: "var(--text-sm)",
+                                      fontFamily: "var(--font-sans)",
+                                      cursor: "pointer",
+                                      color: "var(--color-navy)",
+                                      background: opt.value === whereBought ? "var(--color-cream-dark)" : "transparent",
+                                    }}
+                                    onMouseEnter={(e) => { (e.target as HTMLElement).style.background = opt.value === whereBought ? "var(--color-cream-dark)" : "var(--color-row-hover)"; }}
+                                    onMouseLeave={(e) => { (e.target as HTMLElement).style.background = opt.value === whereBought ? "var(--color-cream-dark)" : "transparent"; }}
+                                  >
+                                    {opt.label}
+                                  </div>
+                                ))}
+                                {showAddOwn && (
+                                  <>
+                                    <div style={{ height: "1px", background: "var(--color-row-divider)", margin: "var(--space-1) 0" }} />
+                                    <div
+                                      onClick={() => {
+                                        if (!customWhereBoughtOptions.includes(whereBoughtSearch)) {
+                                          setCustomWhereBoughtOptions([...customWhereBoughtOptions, whereBoughtSearch]);
+                                        }
+                                        setWhereBought(whereBoughtSearch);
+                                        setWhereBoughtSearch("");
+                                        setWhereBoughtOpen(false);
+                                      }}
+                                      style={{
+                                        height: "36px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "0 var(--space-3)",
+                                        fontSize: "var(--text-sm)",
+                                        fontFamily: "var(--font-sans)",
+                                        cursor: "pointer",
+                                        color: "var(--color-navy)",
+                                        fontStyle: "italic",
+                                      }}
+                                      onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "var(--color-row-hover)"; }}
+                                      onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+                                    >
+                                      + Add "{whereBoughtSearch}"
+                                    </div>
+                                  </>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
