@@ -2,13 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { Modal, ModalBody, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
 import { useUser } from "@/lib/user-context";
 import { useData } from "@/lib/data-context";
-import type { FragranceStatus, CommunityFrag, FragranceType, BottleSize } from "@/types";
+import type { FragranceStatus, CommunityFrag, FragranceType, BottleSize, UserFragrance } from "@/types";
 import { MONTHS } from "@/lib/frag-utils";
+
+function genId(): string {
+  return "f" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
 
 const STATUS_OPTIONS = [
   { value: "CURRENT", label: "Current Collection" },
@@ -90,7 +94,9 @@ function ProgressBar({ step }: { step: number }) {
 
 export function AddFragranceModal({ open, onClose, defaultStatus, initialName }: Props) {
   const { user } = useUser();
-  const { communityFrags } = useData();
+  const { communityFrags, addFrag } = useData();
+  const { toast } = useToast();
+  const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(1);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -178,6 +184,48 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
 
   function handleBack() {
     setStep(1);
+  }
+
+  async function handleSave() {
+    if (!user || saving) return;
+    const name = selected?.fragranceName ?? query.trim();
+    const house = selected?.fragranceHouse ?? "";
+    if (!name) {
+      toast("Enter a fragrance name first", "error");
+      return;
+    }
+    setSaving(true);
+    try {
+      const newFrag: UserFragrance = {
+        id: genId(),
+        fragranceId: selected?.fragranceId ?? null,
+        userId: user.id,
+        name,
+        house,
+        status,
+        sizes,
+        type: (fragType as FragranceType) || null,
+        personalRating: rating || null,
+        statusRating: null,
+        whereBought: whereBought || null,
+        purchaseDate: null,
+        purchaseMonth: purchaseMonth || null,
+        purchaseYear: purchaseYear || null,
+        purchasePrice: price.trim() || null,
+        isDupe,
+        dupeFor: dupeFor.trim(),
+        personalNotes: notes.trim(),
+        createdAt: new Date().toISOString(),
+        wishlistPriority: null,
+      };
+      await addFrag(newFrag);
+      toast(name + " added to your collection", "success");
+      onClose();
+    } catch {
+      toast("Failed to save. Check your connection.", "error");
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (!open || !user) return null;
@@ -663,7 +711,9 @@ export function AddFragranceModal({ open, onClose, defaultStatus, initialName }:
               <Button variant="ghost" onClick={handleBack} style={{ border: "none" }}>Back</Button>
               <div style={{ flex: 1 }} />
               <Button variant="ghost" onClick={onClose}>Cancel</Button>
-              <Button variant="primary" onClick={onClose}>Save Fragrance</Button>
+              <Button variant="primary" onClick={handleSave} disabled={saving}>
+                {saving ? "Saving..." : "Save Fragrance"}
+              </Button>
             </>
           )}
         </div>

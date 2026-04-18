@@ -125,13 +125,18 @@ export function PageHeader({
           borderBottom: "1px solid var(--color-row-divider)",
         }}
       >
-        {/* Left side: Sort + Direction + Filters button only */}
-        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center" }}>
+        {/* Left side: Sort + Direction + Filter dropdowns + Clear */}
+        <div style={{ display: "flex", gap: "var(--space-2)", alignItems: "center", flexWrap: "wrap" }}>
           <Select options={sortFields} value={sortField} onChange={onSortField} size="auto" />
           <SortDirButton dir={sortDir} onClick={onSortDir} />
-          <Button variant="ghost" className="h-9" onClick={onClearFilters} disabled={!filtersActive}>
-            Filters
-          </Button>
+          {filters?.map((f, i) => (
+            <Select key={i} options={f.options} value={f.value} onChange={f.onChange} size="auto" />
+          ))}
+          {filtersActive && onClearFilters && (
+            <Button variant="ghost" className="h-9" onClick={onClearFilters}>
+              Clear
+            </Button>
+          )}
         </div>
 
         {/* Right side: Per-page selector */}
